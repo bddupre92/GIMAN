@@ -1,0 +1,203 @@
+
+# **Epic: Implement a Standardized and Modular ML Project Repository**
+
+## **Strategic Context**
+
+For our research and development to be efficient, scalable, and reproducible, we must operate within a standardized project structure. An inconsistent or flat file layout leads to increased technical debt, difficult onboarding, and challenges in transitioning from experimental research to production-ready models. This epic establishes a robust, modular repository "wireframe" that enforces best practices in software engineering and MLOps from day one, ensuring our work is clean, maintainable, and collaborative.
+
+## **Epic Description**
+
+This epic defines and implements a comprehensive directory and file structure for our Python-based machine learning projects. The structure will be organized as an installable Python package, clearly separating concerns like data processing, model definition, training, and evaluation. It will also include dedicated locations for data, notebooks, tests, configurations, and documentation, aligning with modern software development and MLOps principles.
+
+## **Target Personas**
+
+* **Data Scientist/ML Engineer:** Will have a clear, logical structure to develop, test, and run experiments, promoting code reuse and reducing cognitive overhead.  
+* **New Team Member:** Can rapidly understand the project layout and begin contributing effectively with minimal guidance.  
+* **MLOps/DevOps Engineer:** Will be able to easily package, containerize (using Docker), and deploy the project's components due to its standardized, modular design.
+
+## **Business Value**
+
+* **Accelerate Development Velocity:** A logical structure reduces time spent searching for files and understanding code relationships.  
+* **Enhance Reproducibility & Reliability:** Ensures that experiments are repeatable and the path from data to model is clear and auditable.  
+* **Reduce Technical Debt:** Establishes a clean architecture that prevents the codebase from becoming monolithic and difficult to maintain.  
+* **Streamline Onboarding:** Drastically cuts down the time required for new team members to become productive.
+
+## **Success Metrics**
+
+* **Code Navigability:** A developer can locate any core component (e.g., a specific data transformation, model architecture) in under 30 seconds.  
+* **Onboarding Efficiency:** A new team member can successfully run the full data processing and training pipeline within their first day.  
+* **Package Installation:** The project can be installed as a package (pip install .) in a clean environment without errors.
+
+## **Dependencies & Constraints**
+
+* The team must agree on and adhere to the established structure.  
+* Requires adoption of specified tooling: Poetry or Rye for dependency management and packaging, and Ruff for code formatting.
+
+## **Epic-Level Acceptance Criteria**
+
+1. The repository's directory structure is created and committed to the main branch.  
+2. The core logic in the src directory is configured as an installable Python package.  
+3. Configuration files for key tools (pyproject.toml, ruff.toml) are created and populated with sensible defaults.  
+4. A template README.md is created, which includes a section explaining the repository structure to future contributors.  
+5. The structure clearly separates volatile exploratory code (notebooks) from stable, reusable source code (the src package).
+
+## **Technical Considerations**
+
+* The use of a src layout (src/project\_name) is preferred over a flat layout to avoid common Python import path issues.  
+* Data Version Control (DVC) should be considered for tracking large data files and ML pipelines, integrating seamlessly with this structure.  
+* Experiment configurations will be managed via YAML files (config/) and loaded using a library like Hydra, which aligns with this modular approach.
+
+## **Timeline & Priority**
+
+* **Priority:** Must-have  
+* **Target Release:** Sprint 1  
+* **Estimated Epic Size:** M (Medium)
+
+## **Constituent User Stories**
+
+* \[ \] Establish Root Directory and Core Configuration Files  
+* \[ \] Structure the Source Code as an Installable Python Package  
+* \[ \] Organize Data, Notebook, and Documentation Directories  
+* \[ \] Initialize the Testing Framework and CI Pipeline
+
+---
+
+# **User Story: Establish Root Directory and Core Configuration Files**
+
+## **Story**
+
+As an ML Engineer,  
+I want to create the top-level project directory and essential configuration files,  
+So that the project has a solid foundation for dependency management, code formatting, and version control.
+
+## **Acceptance Criteria**
+
+1. A root directory for the project is created.  
+2. A pyproject.toml file is initialized using poetry init or rye init.  
+3. A ruff.toml file is created with baseline formatting and linting rules.  
+4. A comprehensive .gitignore file is added to exclude common Python, OS, and IDE files.  
+5. A README.md file is created with standard sections (Project Title, Description, Setup, Usage).
+
+## **Technical Considerations**
+
+* The pyproject.toml should define the Python version (3.10+) and initial dependencies like pandas and pytest.  
+* The ruff.toml should set the line-length and enable relevant rule sets (e.g., flake8, isort).
+
+## **Definition of Done**
+
+* All specified files are created at the root of the repository.  
+* The configuration files are populated with initial settings.  
+* The changes are committed to Git.
+
+## **Dependencies**
+
+* None
+
+## **Effort Estimate**
+
+3 Story Points  
+---
+
+# **User Story: Structure the Source Code as an Installable Python Package**
+
+## **Story**
+
+As a Python Master,  
+I want to organize the project's source code into a modular and installable package,  
+So that code is reusable, maintainable, and follows the Single Responsibility Principle.
+
+## **Acceptance Criteria**
+
+1. A src directory is created at the project root.  
+2. Inside src, a project-named package directory is created (e.g., giman\_pipeline).  
+3. The package contains sub-modules for distinct responsibilities: data\_processing, models, training, and evaluation.  
+4. Each directory and sub-directory contains an \_\_init\_\_.py file, making them Python packages/modules.  
+5. A config directory is created at the root to hold YAML files for experiment parameters.
+
+## **Technical Considerations**
+
+* This structure, known as the "src layout," prevents many common import problems and is a best practice for packaging Python applications.  
+* The pyproject.toml file must be updated to correctly point to the package in the src directory.
+
+## **Definition of Done**
+
+* The src directory and its sub-modules are created.  
+* The project can be installed in editable mode (pip install \-e .).  
+* Imports from the package (e.g., from giman\_pipeline.data\_processing import ...) work correctly in scripts and notebooks.
+
+## **Dependencies**
+
+* User Story: Establish Root Directory and Core Configuration Files
+
+## **Effort Estimate**
+
+5 Story Points  
+---
+
+# **User Story: Organize Data, Notebook, and Documentation Directories**
+
+## **Story**
+
+As a Data Scientist,  
+I want dedicated directories for data, exploratory notebooks, and project documentation,  
+So that there is a clear separation between code, data assets, and explanatory materials.
+
+## **Acceptance Criteria**
+
+1. A data directory is created with sub-folders: 00\_raw, 01\_interim, 02\_processed.  
+2. A notebooks directory is created. A README.md inside explains that notebooks are for exploration only and should not contain code that is critical for production pipelines.  
+3. A docs directory is created to house project documentation.  
+4. Each of these directories has a .gitkeep file to ensure they are tracked by Git even when empty.
+
+## **Technical Considerations**
+
+* The data directory should be added to .gitignore, as raw data is typically not stored in Git. A tool like DVC is recommended for tracking data.
+
+## **Definition of Done**
+
+* The data, notebooks, and docs directories are created with the specified substructures and notes.  
+* The .gitignore file is updated to exclude the data/ directory.
+
+## **Dependencies**
+
+* User Story: Establish Root Directory and Core Configuration Files
+
+## **Effort Estimate**
+
+2 Story Points  
+---
+
+# **User Story: Initialize the Testing Framework and CI Pipeline**
+
+## **Story**
+
+As a World-Renowned ML Engineer,  
+I want to set up a testing directory and a basic continuous integration (CI) pipeline,  
+So that I can write unit tests for my code and ensure that all changes maintain code quality and correctness automatically.
+
+## **Acceptance Criteria**
+
+1. A tests directory is created at the project root.  
+2. A simple example test file (e.g., tests/test\_simple.py) is created to ensure pytest runs correctly.  
+3. The command poetry run pytest or rye run pytest successfully discovers and runs the example test.  
+4. A basic CI pipeline file is created (e.g., .github/workflows/main.yml) that installs dependencies and runs ruff and pytest on every push.
+
+## **Technical Considerations**
+
+* The CI pipeline should use a matrix strategy to test against multiple Python versions if necessary.  
+* Caching dependencies in the CI pipeline will significantly speed up run times.
+
+## **Definition of Done**
+
+* The tests directory is created and populated with a sample test.  
+* pytest runs successfully locally.  
+* A basic CI pipeline is configured and passes for the initial commit.
+
+## **Dependencies**
+
+* User Story: Establish Root Directory and Core Configuration Files  
+* User Story: Structure the Source Code as an Installable Python Package
+
+## **Effort Estimate**
+
+3 Story Points
