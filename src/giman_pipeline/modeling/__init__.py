@@ -9,3 +9,7 @@ Components:
 - giman_model.py: Stage III - Full GIMAN architecture integration
 - validation.py: Cross-validation framework for small cohort evaluation
 """
+
+from .patient_similarity import PatientSimilarityGraph
+
+__all__ = ["PatientSimilarityGraph"]
