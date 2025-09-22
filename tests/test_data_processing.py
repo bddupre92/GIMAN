@@ -47,7 +47,7 @@ class TestLoaders:
 
             # Check function has docstring
             assert load_ppmi_data.__doc__ is not None
-            assert "Load all PPMI CSV files" in load_ppmi_data.__doc__
+            assert "Load PPMI CSV files" in load_ppmi_data.__doc__
 
         except ImportError:
             pytest.skip("Dependencies not available")
