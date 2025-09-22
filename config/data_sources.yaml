@@ -1,0 +1,97 @@
+# PPMI Data Sources Configuration
+# This file maps logical dataset names to actual CSV filenames
+
+data_directory: "GIMAN/ppmi_data_csv/"
+
+# Core datasets for GIMAN preprocessing
+core_datasets:
+  demographics:
+    filename: "Demographics_18Sep2025.csv"
+    description: "Baseline demographic information"
+    key_columns: ["PATNO", "AGE", "GENDER", "EDUCYRS"]
+    
+  participant_status:
+    filename: "Participant_Status_18Sep2025.csv" 
+    description: "Enrollment categories and cohort definitions"
+    key_columns: ["PATNO", "EVENT_ID", "ENROLL_CAT", "ENROLL_DATE"]
+    
+  mds_updrs_i:
+    filename: "MDS-UPDRS_Part_I_18Sep2025.csv"
+    description: "MDS-UPDRS Part I - Non-motor experiences of daily living"
+    key_columns: ["PATNO", "EVENT_ID", "NP1*"]
+    
+  mds_updrs_iii:
+    filename: "MDS-UPDRS_Part_III_18Sep2025.csv"
+    description: "MDS-UPDRS Part III - Motor examination"
+    key_columns: ["PATNO", "EVENT_ID", "NP3*"]
+    
+  fs7_aparc_cth:
+    filename: "FS7_APARC_CTH_18Sep2025.csv"
+    description: "FreeSurfer 7 cortical thickness measures"
+    key_columns: ["PATNO", "EVENT_ID", "*_CTH"]
+    
+  xing_core_lab:
+    filename: "Xing_Core_Lab_-_Quant_SBR_18Sep2025.csv"
+    description: "DAT-SPECT striatal binding ratios"
+    key_columns: ["PATNO", "EVENT_ID", "*SBR*"]
+    
+  genetic_consensus:
+    filename: "iu_genetic_consensus_20250515_18Sep2025.csv"
+    description: "Consensus genetic markers"
+    key_columns: ["PATNO", "LRRK2*", "GBA*", "APOE*"]
+
+# Optional datasets for extended analysis
+optional_datasets:
+  moca:
+    filename: "Montreal_Cognitive_Assessment__MoCA__18Sep2025.csv"
+    description: "Montreal Cognitive Assessment scores"
+    
+  rbd_questionnaire:
+    filename: "REM_Sleep_Behavior_Disorder_Questionnaire_18Sep2025.csv"
+    description: "REM Sleep Behavior Disorder screening"
+    
+  upsit:
+    filename: "University_of_Pennsylvania_Smell_Identification_Test_UPSIT_18Sep2025.csv"
+    description: "Smell identification test results"
+    
+  scopa_aut:
+    filename: "SCOPA-AUT_18Sep2025.csv"
+    description: "Scale for Outcomes in Parkinson's disease - Autonomic"
+
+# Data validation rules
+validation:
+  required_columns: ["PATNO"]
+  merge_keys: ["PATNO", "EVENT_ID"]
+  patno_range: [3000, 7000]  # Typical PPMI patient ID range
+  event_id_range: ["BL", "V01", "V02", "V04", "V06", "V08", "V10", "V12"]  # Common visit codes
+
+# Quality assessment configuration
+quality_thresholds:
+  excellent: 0.95      # ≥95% completeness - no preprocessing needed
+  good: 0.80           # 80-95% completeness - simple imputation
+  fair: 0.60           # 60-80% completeness - advanced imputation  
+  poor: 0.40           # 40-60% completeness - consider exclusion
+  critical: 0.40       # <40% completeness - exclude from analysis
+
+# DICOM cohort identification
+dicom_cohort:
+  target_patients: 47                    # Expected DICOM patient count
+  identification_strategy: "imaging_manifest"  # How to identify DICOM patients
+  baseline_completeness_threshold: 0.80  # Minimum completeness for DICOM baseline
+  required_modalities: ["demographics", "participant_status", "fs7_aparc_cth"]
+  
+# NIfTI processing configuration  
+nifti_processing:
+  enabled: true
+  dicom_to_nifti_converter: "dcm2niix"
+  output_format: "nifti_gz"
+  spatial_normalization: "MNI152"
+  voxel_size: [2.0, 2.0, 2.0]  # mm
+  
+# Data quality monitoring
+monitoring:
+  track_completeness: true
+  track_patient_counts: true  
+  track_processing_time: true
+  generate_quality_reports: true
+  save_quality_metrics: true

@@ -1,0 +1,68 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "giman-pipeline"
+version = "0.1.0"
+description = "Graph-Informed Multimodal Attention Network (GIMAN) preprocessing pipeline for PPMI data"
+authors = [{name = "Blair Dupre", email = "dupre.blair92@gmail.com"}]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "pandas>=2.0.0,<3.0.0",
+    "numpy>=1.24.0,<2.0.0",
+    "scikit-learn>=1.3.0,<2.0.0",
+    "pyyaml>=6.0.0,<7.0.0",
+    "hydra-core>=1.3.0,<2.0.0",
+    "pydicom>=2.4.0,<3.0.0",
+    "nibabel>=5.1.0,<6.0.0",
+    "SimpleITK>=2.3.0,<3.0.0",
+]
+
+[project.scripts]
+giman-preprocess = "giman_pipeline.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "jupyter>=1.0.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+]
+
+[tool.poetry]
+packages = [{include = "giman_pipeline", from = "src"}]
+
+[tool.ruff]
+# Extend the shared ruff configuration
+extend = "ruff.toml"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=src/giman_pipeline",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

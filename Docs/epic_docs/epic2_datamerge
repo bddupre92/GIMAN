@@ -1,0 +1,185 @@
+### **Epic 2: Unified Data Loading and Merging**
+
+# **Epic: Ingest and Merge All Data Modalities into a Master DataFrame**
+
+## **Strategic Context**
+
+The core hypothesis of the GIMAN model relies on the integration of multimodal data. To facilitate this, we must first consolidate our disparate raw data files—spanning clinical, genetic, and imaging domains—into a single, cohesive dataset. This epic focuses on creating a unified "master DataFrame" that aligns all participant data by patient ID and visit, forming the bedrock for all future preprocessing and feature engineering.
+
+## **Epic Description**
+
+This epic outlines the process of loading all provided CSV files into pandas DataFrames and systematically merging them into one comprehensive master table. The merge strategy must correctly handle both static (e.g., genetics) and longitudinal (e.g., clinical visits) data by using the appropriate keys (PATNO and EVENT\_ID).
+
+## **Target Personas**
+
+* **Data Scientist/ML Researcher:** Will have a single, analysis-ready DataFrame, saving significant time and effort in data wrangling and alignment.
+
+## **Business Value**
+
+* **Creation of Primary Data Asset:** Produces the foundational dataset upon which the entire GIMAN project is built.  
+* **Drastic Reduction in Complexity:** Simplifies all subsequent analysis by eliminating the need to manage and join multiple tables repeatedly.  
+* **Enabling Exploratory Analysis:** A unified table allows for immediate exploratory data analysis (EDA) to uncover initial insights and data quality issues.
+
+## **Success Metrics**
+
+* **Merge Completion:** A single master\_df is successfully created containing columns from all source CSVs.  
+* **Data Integrity:** No patient records are unintentionally lost during the merge process. The number of unique patients in the final DataFrame matches the expected number from the core cohort files.
+
+## **Dependencies & Constraints**
+
+* Assumes all raw CSV files are present in the data/raw/ directory.  
+* The merge logic is highly dependent on the correctness and consistency of the PATNO and EVENT\_ID columns across files.
+
+## **Epic-Level Acceptance Criteria**
+
+1. All raw CSV files are loaded into uniquely named pandas DataFrames.  
+2. A logical, sequential merge process is executed to combine all DataFrames.  
+3. The final master\_df contains rows for each patient visit and columns representing every variable from the source files.  
+4. The merging logic correctly distinguishes between static (patient-level) and longitudinal (visit-level) data.
+
+## **Technical Considerations**
+
+* **Merge Strategy:** Using **left merges** is critical to ensure that the cohort defined by the initial demographic and status files is preserved.  
+* **Memory Management:** The resulting master\_df may be large; efficient pandas operations are necessary.
+
+## **Timeline & Priority**
+
+* **Priority:** Must-have  
+* **Target Release:** Sprint 1  
+* **Estimated Epic Size:** M (Medium)
+
+## **Constituent User Stories**
+
+* \[ \] Load Raw CSV Files into Individual DataFrames  
+* \[ \] Create Base Cohort by Merging Demographics and Status  
+* \[ \] Integrate Longitudinal Clinical and Imaging Data  
+* \[ \] Integrate Static Genetic Data into Master DataFrame
+
+---
+
+# **User Story: Load Raw CSV Files into Individual DataFrames**
+
+## **Story**
+
+As a Data Scientist,  
+I want to load all the raw CSV data files into separate, clearly named pandas DataFrames,  
+So that I can begin to inspect and manipulate them in my programming environment.
+
+## **Acceptance Criteria**
+
+1. A script or notebook cell successfully loads all specified CSVs from the data/raw folder.  
+2. Each DataFrame is assigned a descriptive name (e.g., df\_demographics, df\_updrs3, df\_genetics).  
+3. The .head() and .info() methods can be called on each loaded DataFrame to verify successful ingestion.
+
+## **Technical Considerations**
+
+* The file paths should be constructed in a way that is operating-system agnostic (e.g., using os.path.join).
+
+## **Definition of Done**
+
+* All DataFrames exist in memory.  
+* A quick inspection confirms the data appears to be loaded correctly.
+
+## **Dependencies**
+
+* User Story: Create Standard Project Directory Structure
+
+## **Effort Estimate**
+
+3 Story Points  
+---
+
+# **User Story: Create Base Cohort by Merging Demographics and Status**
+
+## **Story**
+
+As a Researcher,  
+I want to create a base cohort DataFrame by joining participant demographics with their enrollment status,  
+So that I have a foundational table containing all participants and their key static attributes.
+
+## **Acceptance Criteria**
+
+1. The df\_demographics and df\_status DataFrames are merged into a new df\_cohort DataFrame.  
+2. The merge is a **left merge** based on the df\_status DataFrame to ensure all enrolled participants are included.  
+3. The merge key is the PATNO column.  
+4. The resulting df\_cohort contains columns from both original DataFrames.
+
+## **Technical Considerations**
+
+* It's important to verify that PATNO is a consistent data type in both DataFrames before merging.
+
+## **Definition of Done**
+
+* The df\_cohort DataFrame is created and validated.
+
+## **Dependencies**
+
+* User Story: Load Raw CSV Files into Individual DataFrames
+
+## **Effort Estimate**
+
+3 Story Points  
+---
+
+# **User Story: Integrate Longitudinal Clinical and Imaging Data**
+
+## **Story**
+
+As a Data Scientist,  
+I want to merge all time-varying (longitudinal) data into my base cohort,  
+So that I can create a comprehensive record of each participant's status at every visit.
+
+## **Acceptance Criteria**
+
+1. The df\_updrs1, df\_updrs3, df\_smri, and df\_datscan DataFrames are sequentially merged into the df\_cohort.  
+2. All merges are **left merges** to preserve every record from the base cohort.  
+3. The merge keys are a combination of PATNO and EVENT\_ID.  
+4. The number of columns in df\_cohort increases after each successful merge.
+
+## **Technical Considerations**
+
+* Potential for duplicate column names (other than keys) should be checked. Pandas' merge function has suffixes to handle this automatically.  
+* The EVENT\_ID column may require some cleaning to ensure consistency across files before merging.
+
+## **Definition of Done**
+
+* All longitudinal data is successfully integrated into the df\_cohort DataFrame.
+
+## **Dependencies**
+
+* User Story: Create Base Cohort by Merging Demographics and Status
+
+## **Effort Estimate**
+
+5 Story Points  
+---
+
+# **User Story: Integrate Static Genetic Data into Master DataFrame**
+
+## **Story**
+
+As an ML Researcher,  
+I want to add the static genetic data to the merged longitudinal dataset,  
+So that each patient visit record is enriched with the corresponding participant's genetic information.
+
+## **Acceptance Criteria**
+
+1. The df\_genetics DataFrame is merged into the df\_cohort.  
+2. The merge is a **left merge** using only the PATNO column as the key.  
+3. The final, fully merged DataFrame is named master\_df.  
+4. The genetic information is correctly broadcast to all rows belonging to the same PATNO.
+
+## **Technical Considerations**
+
+* This merge will intentionally create redundant data (the same genetic info repeated for each visit), which is the desired structure for this stage.
+
+## **Definition of Done**
+
+* The master\_df is created.  
+* A spot check confirms that a single patient's genetic data is identical across all of their visit records.
+
+## **Dependencies**
+
+* User Story: Integrate Longitudinal Clinical and Imaging Data
+
+## **Effort Estimate**
