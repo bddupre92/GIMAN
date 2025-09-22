@@ -9,13 +9,72 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 
 
+def merge_on_patno_only(
+    left: pd.DataFrame,
+    right: pd.DataFrame, 
+    how: str = "left",
+    suffixes: Tuple[str, str] = ("", "_y")
+) -> pd.DataFrame:
+    """Merge two dataframes on PATNO only (patient-level merge).
+    
+    This solves the EVENT_ID mismatch issue by recognizing that different
+    datasets represent different study phases:
+    - Demographics (SC/TRANS): Screening phase
+    - Clinical (BL/V01/V04): Longitudinal follow-up phase  
+    - These should NOT be merged on EVENT_ID!
+    
+    Args:
+        left: Left DataFrame
+        right: Right DataFrame (EVENT_ID will be dropped if present)
+        how: Type of merge ("inner", "outer", "left", "right")
+        suffixes: Suffixes for overlapping columns
+        
+    Returns:
+        Merged DataFrame (patient-level)
+        
+    Raises:
+        ValueError: If PATNO is missing from either dataframe
+    """
+    merge_key = 'PATNO'
+    
+    # Check if merge key exists
+    if merge_key not in left.columns:
+        raise ValueError(f"Left DataFrame missing required key: {merge_key}")
+    if merge_key not in right.columns:
+        raise ValueError(f"Right DataFrame missing required key: {merge_key}")
+    
+    # Prepare right dataframe for patient-level merge
+    right_prepared = right.copy()
+    
+    # If right has EVENT_ID, consolidate to one record per patient
+    if 'EVENT_ID' in right_prepared.columns:
+        # Take the most recent/complete record per patient
+        right_prepared = right_prepared.groupby('PATNO').last().reset_index()
+        print(f"Consolidated {right.shape[0]} visit records to {right_prepared.shape[0]} patient records")
+    
+    # Perform the merge on PATNO only
+    merged = pd.merge(
+        left, 
+        right_prepared, 
+        on=merge_key, 
+        how=how, 
+        suffixes=suffixes
+    )
+    
+    print(f"Patient-level merge on {merge_key}: {merged.shape[0]} records")
+    return merged
+
+
 def merge_on_patno_event(
     left: pd.DataFrame,
     right: pd.DataFrame, 
     how: str = "outer",
     suffixes: Tuple[str, str] = ("", "_y")
 ) -> pd.DataFrame:
-    """Merge two dataframes on PATNO and EVENT_ID.
+    """Merge two dataframes on PATNO and EVENT_ID (visit-level merge).
+    
+    Use this ONLY when both datasets have compatible EVENT_ID values
+    (e.g., both clinical datasets with BL/V01/V04 visits).
     
     Args:
         left: Left DataFrame
@@ -24,7 +83,7 @@ def merge_on_patno_event(
         suffixes: Suffixes for overlapping columns
         
     Returns:
-        Merged DataFrame
+        Merged DataFrame (visit-level)
         
     Raises:
         ValueError: If required merge keys are missing
@@ -38,6 +97,17 @@ def merge_on_patno_event(
         if key not in right.columns:
             raise ValueError(f"Right DataFrame missing required key: {key}")
     
+    # Check for compatible EVENT_ID values
+    left_events = set(left['EVENT_ID'].dropna().unique())
+    right_events = set(right['EVENT_ID'].dropna().unique()) 
+    common_events = left_events.intersection(right_events)
+    
+    if len(common_events) == 0:
+        print(f"WARNING: No common EVENT_ID values found!")
+        print(f"Left events: {sorted(left_events)}")
+        print(f"Right events: {sorted(right_events)}")
+        print(f"Consider using merge_on_patno_only() instead")
+    
     # Perform the merge
     merged = pd.merge(
         left, 
@@ -47,46 +117,63 @@ def merge_on_patno_event(
         suffixes=suffixes
     )
     
-    print(f"Merged on {merge_keys}: {merged.shape[0]} records")
+    print(f"Visit-level merge on {merge_keys}: {merged.shape[0]} records")
     return merged
 
 
 def create_master_dataframe(
     data_dict: Dict[str, pd.DataFrame],
-    merge_order: Optional[List[str]] = None
+    merge_type: str = "patient_level"
 ) -> pd.DataFrame:
-    """Create master dataframe by merging multiple PPMI datasets.
+    """Create master dataframe using the appropriate merge strategy.
     
     Args:
         data_dict: Dictionary of dataset name -> DataFrame
-        merge_order: Order to merge datasets (default: predefined order)
+        merge_type: "patient_level" (PATNO only) or "visit_level" (PATNO+EVENT_ID)
         
     Returns:
         Master DataFrame with all datasets merged
         
     Example:
-        >>> master_df = create_master_dataframe({
-        ...     "demographics": demo_df,
-        ...     "participant_status": status_df,
-        ...     "mds_updrs_i": updrs_df
-        ... })
+        >>> # Patient registry (baseline features)
+        >>> patient_registry = create_master_dataframe(data_dict, "patient_level")
+        >>> 
+        >>> # Longitudinal clinical data  
+        >>> clinical_long = create_master_dataframe({
+        ...     "updrs_i": updrs_i_df,
+        ...     "updrs_iii": updrs_iii_df
+        ... }, "visit_level")
     """
     if not data_dict:
         raise ValueError("No datasets provided")
     
-    # Default merge order prioritizes core datasets first
-    if merge_order is None:
-        merge_order = [
-            "participant_status",  # Start with enrollment info
-            "demographics",        # Add baseline demographics  
-            "mds_updrs_i",        # Clinical assessments
-            "mds_updrs_iii",
-            "fs7_aparc_cth",      # Imaging features
-            "xing_core_lab",      # DAT-SPECT
-            "genetic_consensus",  # Genetic markers
-        ]
+    print(f"Creating {merge_type} master dataframe from {len(data_dict)} datasets")
     
-    # Filter merge_order to only include available datasets
+    # Define merge order based on merge type
+    if merge_type == "patient_level":
+        # Patient registry: static/baseline data first
+        merge_order = [
+            "participant_status",  # Base patient registry
+            "demographics",        # Demographics (screening phase)
+            "genetic_consensus",   # Genetics (patient-level)
+            "fs7_aparc_cth",      # Baseline imaging
+            "xing_core_lab",      # Baseline DAT-SPECT
+        ]
+        merge_func = merge_on_patno_only
+        
+    elif merge_type == "visit_level":
+        # Longitudinal data: clinical assessments
+        merge_order = [
+            "mds_updrs_i",        # Clinical assessments
+            "mds_updrs_iii", 
+            "xing_core_lab",      # Longitudinal imaging
+        ]
+        merge_func = merge_on_patno_event
+        
+    else:
+        raise ValueError(f"Unknown merge_type: {merge_type}")
+    
+    # Filter to available datasets
     available_datasets = [key for key in merge_order if key in data_dict]
     
     if not available_datasets:
@@ -104,21 +191,26 @@ def create_master_dataframe(
         if dataset_name in data_dict:
             print(f"Merging {dataset_name}: {data_dict[dataset_name].shape}")
             
-            master_df = merge_on_patno_event(
+            master_df = merge_func(
                 master_df,
                 data_dict[dataset_name],
-                how="outer",  # Use outer join to preserve all records
+                how="left",  # Use left join to preserve all base records
                 suffixes=("", f"_{dataset_name}")
             )
             
             print(f"After merge: {master_df.shape}")
     
-    # Sort by PATNO and EVENT_ID for consistency
-    if 'PATNO' in master_df.columns and 'EVENT_ID' in master_df.columns:
-        master_df = master_df.sort_values(['PATNO', 'EVENT_ID']).reset_index(drop=True)
+    # Sort appropriately
+    if merge_type == "patient_level":
+        if 'PATNO' in master_df.columns:
+            master_df = master_df.sort_values(['PATNO']).reset_index(drop=True)
+    else:
+        if 'PATNO' in master_df.columns and 'EVENT_ID' in master_df.columns:
+            master_df = master_df.sort_values(['PATNO', 'EVENT_ID']).reset_index(drop=True)
     
-    print(f"Final master dataframe: {master_df.shape}")
-    print(f"Unique patients: {master_df['PATNO'].nunique() if 'PATNO' in master_df.columns else 'Unknown'}")
+    print(f"Final {merge_type} dataframe: {master_df.shape}")
+    if 'PATNO' in master_df.columns:
+        print(f"Unique patients: {master_df['PATNO'].nunique()}")
     
     return master_df
 

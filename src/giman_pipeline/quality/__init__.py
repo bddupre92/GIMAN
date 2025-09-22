@@ -113,13 +113,131 @@ class DataQualityAssessment:
         """
         self.critical_columns = critical_columns or ['PATNO', 'EVENT_ID']
         self.quality_thresholds = {
+            # Tabular data thresholds
             'completeness_critical': 1.0,    # 100% for critical columns
             'completeness_overall': 0.95,    # 95% overall completeness
             'uniqueness_patno_event': 1.0,   # 100% unique PATNO+EVENT_ID combinations
             'data_type_consistency': 1.0,    # 100% correct data types
             'outlier_rate': 0.05,            # Max 5% outliers per column
+            
+            # Imaging data thresholds
+            'imaging_file_existence': 1.0,     # 100% of files must exist
+            'imaging_file_integrity': 0.95,    # 95% of files must be loadable
+            'imaging_metadata_completeness': 0.8,  # 80% metadata completeness
+            'conversion_success_rate': 0.95,   # 95% DICOM conversion success
+            'file_size_outlier_threshold': 0.95,  # 95% files within normal size range
         }
         
+    def assess_imaging_quality(self, df: pd.DataFrame, 
+                              nifti_path_column: str = 'nifti_path',
+                              step_name: str = "imaging_processing") -> ValidationReport:
+        """
+        Comprehensive imaging data quality assessment.
+        
+        Args:
+            df: DataFrame with imaging data and file paths
+            nifti_path_column: Column containing NIfTI file paths
+            step_name: Name of the processing step for reporting
+            
+        Returns:
+            ValidationReport with imaging-specific quality metrics
+        """
+        report = ValidationReport(step_name=step_name)
+        report.data_shape = df.shape
+        
+        # 1. File existence check
+        if nifti_path_column in df.columns:
+            missing_files = 0
+            corrupted_files = 0
+            total_files = len(df[df[nifti_path_column].notna()])
+            
+            for idx, file_path in df[nifti_path_column].dropna().items():
+                try:
+                    from pathlib import Path
+                    if not Path(file_path).exists():
+                        missing_files += 1
+                    else:
+                        # Quick file validation
+                        try:
+                            import nibabel as nib
+                            nib.load(file_path)
+                        except Exception:
+                            corrupted_files += 1
+                except Exception:
+                    corrupted_files += 1
+            
+            file_existence_rate = (total_files - missing_files) / total_files if total_files > 0 else 0
+            file_integrity_rate = (total_files - corrupted_files) / total_files if total_files > 0 else 0
+            
+            report.add_metric(QualityMetric(
+                name="imaging_file_existence",
+                value=file_existence_rate,
+                threshold=self.quality_thresholds.get('imaging_file_existence', 1.0),
+                message=f"File existence rate: {file_existence_rate:.2%} ({missing_files} missing out of {total_files})"
+            ))
+            
+            report.add_metric(QualityMetric(
+                name="imaging_file_integrity",
+                value=file_integrity_rate,
+                threshold=self.quality_thresholds.get('imaging_file_integrity', 0.95),
+                message=f"File integrity rate: {file_integrity_rate:.2%} ({corrupted_files} corrupted out of {total_files})"
+            ))
+        
+        # 2. Imaging metadata completeness
+        imaging_columns = ['modality', 'manufacturer', 'seriesDescription', 'fieldStrength']
+        for col in imaging_columns:
+            if col in df.columns:
+                completeness = 1 - (df[col].isnull().sum() / len(df))
+                report.add_metric(QualityMetric(
+                    name=f"imaging_{col}_completeness",
+                    value=completeness,
+                    threshold=self.quality_thresholds.get('imaging_metadata_completeness', 0.8),
+                    message=f"{col} completeness: {completeness:.2%}"
+                ))
+        
+        # 3. Conversion success rate
+        if 'conversion_success' in df.columns:
+            success_rate = df['conversion_success'].sum() / len(df)
+            report.add_metric(QualityMetric(
+                name="dicom_conversion_success",
+                value=success_rate,
+                threshold=self.quality_thresholds.get('conversion_success_rate', 0.95),
+                message=f"DICOM conversion success rate: {success_rate:.2%}"
+            ))
+        
+        # 4. Volume shape consistency
+        if 'volume_shape' in df.columns:
+            shape_values = df['volume_shape'].dropna().unique()
+            shape_consistency = len(shape_values) <= 3  # Allow up to 3 different shapes
+            report.add_metric(QualityMetric(
+                name="volume_shape_consistency",
+                value=1.0 if shape_consistency else 0.0,
+                threshold=1.0,
+                message=f"Volume shape consistency: {'PASS' if shape_consistency else 'FAIL'} ({len(shape_values)} unique shapes)"
+            ))
+        
+        # 5. File size validation
+        if 'file_size_mb' in df.columns:
+            file_sizes = df['file_size_mb'].dropna()
+            if len(file_sizes) > 0:
+                # Check for outliers in file size
+                q25, q75 = file_sizes.quantile([0.25, 0.75])
+                iqr = q75 - q25
+                lower_bound = q25 - 1.5 * iqr
+                upper_bound = q75 + 1.5 * iqr
+                
+                size_outliers = len(file_sizes[(file_sizes < lower_bound) | (file_sizes > upper_bound)])
+                size_outlier_rate = size_outliers / len(file_sizes)
+                
+                report.add_metric(QualityMetric(
+                    name="file_size_outliers",
+                    value=1 - size_outlier_rate,
+                    threshold=self.quality_thresholds.get('file_size_outlier_threshold', 0.95),
+                    message=f"File size outlier rate: {size_outlier_rate:.2%} ({size_outliers} outliers)"
+                ))
+        
+        return report
+
     def assess_baseline_quality(self, df: pd.DataFrame, step_name: str = "baseline") -> ValidationReport:
         """
         Comprehensive baseline quality assessment of a DataFrame.
