@@ -636,9 +636,11 @@ def create_patient_similarity_graph(
     )
 
     # Build complete similarity graph
-    graph, adjacency_matrix, metadata = (
-        similarity_constructor.build_complete_similarity_graph()
-    )
+    (
+        graph,
+        adjacency_matrix,
+        metadata,
+    ) = similarity_constructor.build_complete_similarity_graph()
 
     # Save results if requested
     if save_results:

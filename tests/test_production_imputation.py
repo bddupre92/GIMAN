@@ -102,9 +102,11 @@ def test_production_pipeline():
         print(f"     {biomarker}: {pct:.1f}% missing")
 
     # Categorize by missingness
-    low_missing, moderate_missing, high_missing = (
-        biomarker_imputer.categorize_by_missingness(missingness)
-    )
+    (
+        low_missing,
+        moderate_missing,
+        high_missing,
+    ) = biomarker_imputer.categorize_by_missingness(missingness)
 
     print("\n   Missingness Categories:")
     print(f"     Low (<20%): {low_missing}")

@@ -83,12 +83,14 @@ def test_giman_phase1():
         print(f"   - Layer embeddings: {len(output['layer_embeddings'])} layers")
 
         # Validate output shapes
-        assert output["logits"].shape == (1, 2), (
-            f"Wrong logits shape: {output['logits'].shape}"
-        )
-        assert output["node_embeddings"].shape == (557, 64), (
-            "Wrong node embedding shape"
-        )
+        assert output["logits"].shape == (
+            1,
+            2,
+        ), f"Wrong logits shape: {output['logits'].shape}"
+        assert output["node_embeddings"].shape == (
+            557,
+            64,
+        ), "Wrong node embedding shape"
         assert len(output["layer_embeddings"]) == 3, "Should have 3 layer embeddings"
 
     except Exception as e:

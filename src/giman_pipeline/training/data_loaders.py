@@ -15,7 +15,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch_geometric.data import Data
 
@@ -300,7 +300,7 @@ class GIMANDataLoader:
         )
 
         cv_splits = []
-        for fold, (train_idx, val_idx) in enumerate(skf.split(indices, labels)):
+        for _fold, (train_idx, val_idx) in enumerate(skf.split(indices, labels)):
             train_mask = torch.zeros(len(labels), dtype=torch.bool)
             val_mask = torch.zeros(len(labels), dtype=torch.bool)
 
@@ -404,7 +404,3 @@ def create_pyg_data(
     )
 
     return data
-
-
-# Import fix for sklearn
-from sklearn.model_selection import train_test_split

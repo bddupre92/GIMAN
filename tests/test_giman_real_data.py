@@ -71,8 +71,8 @@ def load_real_ppmi_data():
             df[feature].fillna(median_val, inplace=True)
             print(f"     * Filled {feature} NaNs with median: {median_val:.3f}")
 
-    pd_count = (df['COHORT_DEFINITION'] == "Parkinson's Disease").sum()
-    hc_count = (df['COHORT_DEFINITION'] == 'Healthy Control').sum()
+    pd_count = (df["COHORT_DEFINITION"] == "Parkinson's Disease").sum()
+    hc_count = (df["COHORT_DEFINITION"] == "Healthy Control").sum()
     print(f"   - PD cases: {pd_count}")
     print(f"   - Healthy controls: {hc_count}")
 
@@ -161,9 +161,7 @@ def test_real_data_integration():
     # Test 2: Create Similarity Graph
     print("\n2️⃣ Creating Patient Similarity Graph...")
     try:
-        _ = create_similarity_graph(
-            patient_data, similarity_threshold=0.3
-        )
+        _ = create_similarity_graph(patient_data, similarity_threshold=0.3)
         print("✅ Similarity graph created successfully!")
 
     except Exception as e:
@@ -257,9 +255,10 @@ def test_real_data_integration():
 
         # Validate outputs
         assert output["logits"].shape == (1, 2), "Wrong logits shape"
-        assert output["node_embeddings"].shape == (pyg_data.num_nodes, 64), (
-            "Wrong node embeddings shape"
-        )
+        assert output["node_embeddings"].shape == (
+            pyg_data.num_nodes,
+            64,
+        ), "Wrong node embeddings shape"
         assert len(output["layer_embeddings"]) == 3, "Wrong number of layer embeddings"
 
     except Exception as e:

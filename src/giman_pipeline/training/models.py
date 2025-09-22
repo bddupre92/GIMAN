@@ -13,9 +13,11 @@ Architecture Overview:
 - Binary classification (PD vs Healthy Control)
 """
 
+from typing import Any
+
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from torch.nn import functional as F
 from torch_geometric.data import Data
 from torch_geometric.nn import GraphConv, global_max_pool, global_mean_pool
 
@@ -45,7 +47,7 @@ class GIMANBackbone(nn.Module):
     def __init__(
         self,
         input_dim: int = 7,
-        hidden_dims: list[int] = [64, 128, 64],
+        hidden_dims: list[int] | None = None,
         output_dim: int = 2,
         dropout_rate: float = 0.3,
         pooling_method: str = "concat",
@@ -61,7 +63,10 @@ class GIMANBackbone(nn.Module):
             pooling_method: Graph pooling method ('mean', 'max', 'concat')
             use_residual: Whether to use residual connections
         """
-        super(GIMANBackbone, self).__init__()
+        super().__init__()
+
+        if hidden_dims is None:
+            hidden_dims = [64, 128, 64]
 
         self.input_dim = input_dim
         self.hidden_dims = hidden_dims
@@ -177,10 +182,7 @@ class GIMANBackbone(nn.Module):
 
         # Residual connection (Layer 1 → Layer 3)
         if self.use_residual:
-            if self.residual_proj is not None:
-                residual = self.residual_proj(h1)
-            else:
-                residual = h1
+            residual = self.residual_proj(h1) if self.residual_proj is not None else h1
             h3 = h3 + residual
 
         h3 = F.relu(h3)
@@ -281,7 +283,7 @@ class GIMANClassifier(nn.Module):
     def __init__(
         self,
         input_dim: int = 7,
-        hidden_dims: list[int] = [64, 128, 64],
+        hidden_dims: list[int] | None = None,
         output_dim: int = 2,
         dropout_rate: float = 0.3,
         pooling_method: str = "concat",
@@ -295,7 +297,10 @@ class GIMANClassifier(nn.Module):
             dropout_rate: Dropout probability
             pooling_method: Graph pooling method
         """
-        super(GIMANClassifier, self).__init__()
+        super().__init__()
+
+        if hidden_dims is None:
+            hidden_dims = [64, 128, 64]
 
         self.backbone = GIMANBackbone(
             input_dim=input_dim,
@@ -374,35 +379,67 @@ class GIMANClassifier(nn.Module):
 
 
 def create_giman_model(
+    model_type: str = "backbone",
     input_dim: int = 7,
-    hidden_dims: list[int] = [64, 128, 64],
+    hidden_dims: list[int] | None = None,
     output_dim: int = 2,
     dropout_rate: float = 0.3,
-    pooling_method: str = "concat",
-) -> GIMANClassifier:
-    """Factory function to create GIMAN model with standard configuration.
+    pooling_method: str = "max",
+    device: str | torch.device = "cpu",
+) -> tuple[torch.nn.Module, dict[str, Any]]:
+    """Create GIMAN model instance with specified configuration.
 
     Args:
-        input_dim: Number of input biomarker features
-        hidden_dims: Hidden layer dimensions
-        output_dim: Number of output classes
-        dropout_rate: Dropout probability
+        model_type: Type of model to create ('backbone' or 'classifier')
+        input_dim: Dimension of input features
+        hidden_dims: List of hidden layer dimensions
+        output_dim: Dimension of output (2 for binary classification)
+        dropout_rate: Dropout rate for regularization
         pooling_method: Graph pooling method
+        device: Device to place model on ('cpu' or 'cuda')
 
     Returns:
-        Initialized GIMAN classifier model
+        Tuple of (model, config_dict) where config_dict contains model metadata
     """
-    model = GIMANClassifier(
-        input_dim=input_dim,
-        hidden_dims=hidden_dims,
-        output_dim=output_dim,
-        dropout_rate=dropout_rate,
-        pooling_method=pooling_method,
-    )
+    if hidden_dims is None:
+        hidden_dims = [64, 128, 64]
 
-    print("🔧 Created GIMAN model:")
-    info = model.get_model_info()
-    for key, value in info.items():
-        print(f"   - {key}: {value}")
+    # Create model configuration
+    if model_type == "backbone":
+        model = GIMANBackbone(
+            input_dim=input_dim,
+            hidden_dims=hidden_dims,
+            dropout_rate=dropout_rate,
+        )
+        config = {
+            "model_type": "backbone",
+            "input_dim": input_dim,
+            "hidden_dims": hidden_dims,
+            "dropout_rate": dropout_rate,
+            "parameters": sum(p.numel() for p in model.parameters()),
+        }
+    else:
+        model = GIMANClassifier(
+            input_dim=input_dim,
+            hidden_dims=hidden_dims,
+            output_dim=output_dim,
+            dropout_rate=dropout_rate,
+            pooling_method=pooling_method,
+        )
+        config = {
+            "model_type": "classifier",
+            "input_dim": input_dim,
+            "hidden_dims": hidden_dims,
+            "output_dim": output_dim,
+            "dropout_rate": dropout_rate,
+            "pooling_method": pooling_method,
+            "parameters": sum(p.numel() for p in model.parameters()),
+        }
 
-    return model
+    model = model.to(device)
+
+    print(f"🔧 Created GIMAN {model_type} model:")
+    print(f"   - Parameters: {config['parameters']:,}")
+    print(f"   - Architecture: {input_dim} → {' → '.join(map(str, hidden_dims))} → {output_dim if model_type == 'classifier' else 'embeddings'}")
+
+    return model, config

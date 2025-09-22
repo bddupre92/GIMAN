@@ -112,12 +112,14 @@ def test_simplified_giman():
         print(f"   - Graph embedding: {output['graph_embedding'].shape}")
 
         # Validate shapes
-        assert output["logits"].shape == (1, 2), (
-            f"Wrong logits shape: {output['logits'].shape}"
-        )
-        assert output["node_embeddings"].shape == (num_patients, 64), (
-            "Wrong node embeddings shape"
-        )
+        assert output["logits"].shape == (
+            1,
+            2,
+        ), f"Wrong logits shape: {output['logits'].shape}"
+        assert output["node_embeddings"].shape == (
+            num_patients,
+            64,
+        ), "Wrong node embeddings shape"
         assert len(output["layer_embeddings"]) == 3, "Should have 3 layer embeddings"
 
     except Exception as e:
@@ -197,7 +199,7 @@ def test_simplified_giman():
 
             if not missing_cols:
                 print("✅ Real data has all required columns!")
-                pd_count = (df['COHORT_DEFINITION'] == "Parkinson's Disease").sum()
+                pd_count = (df["COHORT_DEFINITION"] == "Parkinson's Disease").sum()
                 print(f"   - PD cases: {pd_count}")
                 print(
                     f"   - Healthy controls: {(df['COHORT_DEFINITION'] == 'Healthy Control').sum()}"
