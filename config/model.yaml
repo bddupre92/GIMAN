@@ -1,0 +1,49 @@
+# GIMAN Model Configuration
+# Placeholder for future Graph-Informed Multimodal Attention Network settings
+
+model:
+  name: "GIMAN"
+  version: "0.1.0"
+  description: "Graph-Informed Multimodal Attention Network for Parkinson's Disease"
+  
+  # Model architecture (placeholder)
+  architecture:
+    input_dim: null  # Will be determined from preprocessed data
+    hidden_dim: 256
+    num_attention_heads: 8
+    num_layers: 3
+    dropout: 0.1
+    
+  # Graph settings (placeholder)
+  graph:
+    adjacency_type: "learned"  # "learned", "predefined", "distance"
+    edge_threshold: 0.5
+    
+  # Training settings (placeholder)
+  training:
+    batch_size: 32
+    learning_rate: 0.001
+    num_epochs: 100
+    early_stopping_patience: 10
+    
+  # Data splits
+  data_splits:
+    train: 0.7
+    validation: 0.15 
+    test: 0.15
+    
+# Experiment tracking
+experiment:
+  name: "giman_baseline"
+  tags: ["multimodal", "attention", "graph", "parkinson"]
+  
+# Hardware settings
+hardware:
+  device: "auto"  # "auto", "cpu", "cuda", "mps"
+  mixed_precision: false
+  
+# Output paths
+output:
+  model_dir: "models/"
+  checkpoint_dir: "checkpoints/"
+  results_dir: "results/"

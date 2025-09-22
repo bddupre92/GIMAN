@@ -1,0 +1,110 @@
+# GIMAN Pipeline Preprocessing Configuration
+
+# Data loading settings
+data_loading:
+  encoding: "utf-8"
+  low_memory: false
+  na_values: ["", "NA", "N/A", "NULL", "null", "-", ".", "NaN"]
+  
+# Cleaning parameters
+cleaning:
+  # Age validation
+  age_range: [18, 100]
+  
+  # UPDRS score validation  
+  updrs_part_i_max: 52  # Maximum possible UPDRS Part I score
+  updrs_part_iii_max: 132  # Maximum possible UPDRS Part III score
+  
+  # Imaging data validation
+  cortical_thickness_range: [1.0, 5.0]  # Reasonable cortical thickness (mm)
+  sbr_range: [0.1, 10.0]  # Reasonable striatal binding ratio range
+  
+  # Outlier detection
+  outlier_method: "iqr"  # "iqr", "zscore", or "percentile"
+  outlier_threshold: 3.0
+  
+# Merging settings
+merging:
+  merge_strategy: "outer"  # "inner", "outer", "left", "right"
+  handle_duplicates: "keep_first"  # "keep_first", "keep_last", "drop"
+  
+  # Merge order (determines priority for overlapping columns)
+  merge_order:
+    - "participant_status"  # Start with enrollment info
+    - "demographics"        # Add demographics
+    - "mds_updrs_i"
+    - "mds_updrs_iii" 
+    - "fs7_aparc_cth"
+    - "xing_core_lab"
+    - "genetic_consensus"
+    
+# Feature engineering
+feature_engineering:
+  create_age_groups: true
+  age_group_bins: [0, 50, 65, 80, 100]
+  age_group_labels: ["<50", "50-65", "65-80", "80+"]
+  
+  create_disease_duration: true  # If onset age available
+  
+  create_updrs_severity: true
+  updrs_severity_bins: [0, 20, 40, 60, 200] 
+  updrs_severity_labels: ["Mild", "Moderate", "Severe", "Very_Severe"]
+  
+  create_sbr_asymmetry: true  # Calculate L-R asymmetry
+  
+  create_genetic_risk_score: true
+  genetic_risk_variants: ["LRRK2", "GBA", "APOE4"]
+  
+# Missing value handling
+missing_values:
+  strategy: "mixed"  # "drop", "impute", "mixed"
+  
+  # Numeric imputation
+  numeric_strategy: "median"  # "mean", "median", "constant"
+  numeric_fill_value: 0  # Used if strategy is "constant"
+  
+  # Categorical imputation
+  categorical_strategy: "most_frequent"  # "most_frequent", "constant"
+  categorical_fill_value: "Unknown"  # Used if strategy is "constant"
+  
+  # Missingness thresholds
+  column_missing_threshold: 0.8  # Drop columns with >80% missing
+  row_missing_threshold: 0.5     # Drop rows with >50% missing
+  
+# Feature scaling
+scaling:
+  enabled: true
+  method: "standard"  # "standard", "minmax", "robust"
+  
+  # Features to exclude from scaling
+  exclude_columns:
+    - "PATNO"
+    - "EVENT_ID" 
+    - "ENROLL_CAT"
+    - "GENDER"
+    
+# Output settings
+output:
+  save_intermediate: true  # Save intermediate processing steps
+  output_directory: "data/02_processed/"
+  
+  # File formats
+  formats: ["csv", "parquet"]  # Save in multiple formats
+  
+  # Compression
+  compression: "gzip"  # For CSV files
+  
+# Quality control
+quality_control:
+  validate_merge_keys: true
+  check_duplicates: true
+  generate_summary_stats: true
+  create_data_report: true
+  
+# Logging
+logging:
+  level: "INFO"  # "DEBUG", "INFO", "WARNING", "ERROR"
+  log_file: "logs/preprocessing.log"
+  
+# Random seed for reproducibility  
+random_seed: 42
