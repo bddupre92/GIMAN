@@ -9,6 +9,8 @@ This module contains functions for:
 - Feature engineering and final preprocessing
 """
 
+# Import biomarker imputation pipeline
+from .biomarker_imputation import BiommarkerImputationPipeline
 from .cleaners import (
     clean_demographics,
     clean_fs7_aparc,
@@ -57,6 +59,8 @@ __all__ = [
     "create_master_dataframe",
     "preprocess_master_df",
     "engineer_features",
+    # Biomarker imputation
+    "BiommarkerImputationPipeline",
     # Imaging data functions
     "parse_xml_metadata",
     "load_all_xml_metadata",
