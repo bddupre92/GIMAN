@@ -141,7 +141,7 @@ class TestXMLMetadataParsing:
         assert validation["unique_subjects"] == 3
         assert validation["unique_visits"] == 3
         assert validation["missing_patno"] == 0
-        assert validation["validation_passed"] == True
+        assert validation["validation_passed"]
 
 
 class TestDICOMProcessing:
@@ -245,7 +245,7 @@ class TestDICOMProcessing:
 
             result = convert_dicom_to_nifti(str(dicom_dir), output_path)
 
-            assert result["success"] == True
+            assert result["success"]
             assert result["volume_shape"] == (256, 256, 176)
             assert result["patient_id"] == "3001"
             assert mock_nib.save.called
@@ -260,7 +260,7 @@ class TestDICOMProcessing:
 
             result = convert_dicom_to_nifti("/fake/dicom/dir", output_path)
 
-            assert result["success"] == False
+            assert not result["success"]
             assert "DICOM read error" in result["error"]
 
     def test_process_imaging_batch(self):
@@ -304,10 +304,10 @@ class TestDICOMProcessing:
         with tempfile.NamedTemporaryFile(suffix=".nii.gz") as temp_file:
             validation = validate_nifti_output(temp_file.name)
 
-            assert validation["file_exists"] == True
-            assert validation["loadable"] == True
+            assert validation["file_exists"]
+            assert validation["loadable"]
             assert validation["shape"] == (256, 256, 176)
-            assert validation["has_valid_affine"] == True
+            assert validation["has_valid_affine"]
 
 
 class TestImagingQualityAssessment:
@@ -346,20 +346,20 @@ class TestImagingQualityAssessment:
 
     def test_assess_imaging_quality(self, imaging_quality_assessor, sample_imaging_df):
         """Test comprehensive imaging quality assessment."""
-        with patch("pathlib.Path.exists", return_value=True):
-            with patch("giman_pipeline.data_processing.imaging_preprocessors.nib.load"):
-                report = imaging_quality_assessor.assess_imaging_quality(
-                    sample_imaging_df
-                )
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("giman_pipeline.data_processing.imaging_preprocessors.nib.load"),
+        ):
+            report = imaging_quality_assessor.assess_imaging_quality(sample_imaging_df)
 
-                assert report.step_name == "imaging_processing"
-                assert len(report.metrics) > 0
+            assert report.step_name == "imaging_processing"
+            assert len(report.metrics) > 0
 
-                # Check specific metrics (metrics is a dict with metric names as keys)
-                metric_names = list(report.metrics.keys())
-                assert "imaging_file_existence" in metric_names
-                assert "dicom_conversion_success" in metric_names
-                assert "volume_shape_consistency" in metric_names
+            # Check specific metrics (metrics is a dict with metric names as keys)
+            metric_names = list(report.metrics.keys())
+            assert "imaging_file_existence" in metric_names
+            assert "dicom_conversion_success" in metric_names
+            assert "volume_shape_consistency" in metric_names
 
     def test_imaging_quality_thresholds(self, imaging_quality_assessor):
         """Test that imaging quality thresholds are properly set."""

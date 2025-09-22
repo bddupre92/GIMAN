@@ -142,7 +142,7 @@ class TestPPMIManifestCreation:
         """Test manifest creation handles scanning exceptions gracefully."""
         mock_glob.side_effect = Exception("Directory access error")
 
-        with pytest.raises(Exception):
+        with pytest.raises(OSError):
             create_ppmi_imaging_manifest("/fake/path")
 
 

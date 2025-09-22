@@ -186,9 +186,9 @@ class TestDataQualityAssessment:
         )
 
         # Should have custom validation metrics
-        assert any("custom_completeness_AGE" in name for name in report.metrics.keys())
-        assert any("dtype_check_PATNO" in name for name in report.metrics.keys())
-        assert any("range_check_AGE" in name for name in report.metrics.keys())
+        assert any("custom_completeness_AGE" in name for name in report.metrics)
+        assert any("dtype_check_PATNO" in name for name in report.metrics)
+        assert any("range_check_AGE" in name for name in report.metrics)
 
     def test_quality_dashboard_generation(self, quality_assessor, sample_df):
         """Test quality dashboard generation."""

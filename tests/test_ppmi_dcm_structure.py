@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quick test to understand the PPMI_dcm directory structure and adapt our pipeline"""
+"""Quick test to understand the PPMI_dcm directory structure and adapt our pipeline."""
 
 import sys
 from pathlib import Path
@@ -15,7 +15,7 @@ sys.path.insert(0, str(project_root))
 def analyze_ppmi_dcm_structure(
     ppmi_dcm_root: str, sample_size: int = 10
 ) -> pd.DataFrame:
-    """Analyze the PPMI_dcm directory structure to understand the organization
+    """Analyze the PPMI_dcm directory structure to understand the organization.
 
     Args:
         ppmi_dcm_root: Path to PPMI_dcm directory
@@ -109,7 +109,7 @@ def analyze_ppmi_dcm_structure(
 
 
 def normalize_modality_simple(modality: str) -> str:
-    """Simple modality normalization for PPMI_dcm structure"""
+    """Simple modality normalization for PPMI_dcm structure."""
     modality_upper = modality.upper()
 
     if "DATSCAN" in modality_upper or "DAT" in modality_upper:
@@ -127,7 +127,7 @@ def normalize_modality_simple(modality: str) -> str:
 
 
 def main():
-    """Main analysis function"""
+    """Main analysis function."""
     ppmi_dcm_root = "/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/GIMAN/ppmi_data_csv/PPMI_dcm"
 
     print("🚀 PPMI_dcm Structure Analysis")
