@@ -129,7 +129,7 @@ def create_master_dataframe(
     
     Args:
         data_dict: Dictionary of dataset name -> DataFrame
-        merge_type: "patient_level" (PATNO only) or "visit_level" (PATNO+EVENT_ID)
+        merge_type: "patient_level" (PATNO only), "visit_level" (PATNO+EVENT_ID), or "longitudinal" (PATNO+EVENT_ID)
         
     Returns:
         Master DataFrame with all datasets merged
@@ -142,7 +142,7 @@ def create_master_dataframe(
         >>> clinical_long = create_master_dataframe({
         ...     "updrs_i": updrs_i_df,
         ...     "updrs_iii": updrs_iii_df
-        ... }, "visit_level")
+        ... }, "longitudinal")
     """
     if not data_dict:
         raise ValueError("No datasets provided")
@@ -161,7 +161,7 @@ def create_master_dataframe(
         ]
         merge_func = merge_on_patno_only
         
-    elif merge_type == "visit_level":
+    elif merge_type in ["visit_level", "longitudinal"]:
         # Longitudinal data: clinical assessments
         merge_order = [
             "mds_updrs_i",        # Clinical assessments
@@ -171,7 +171,7 @@ def create_master_dataframe(
         merge_func = merge_on_patno_event
         
     else:
-        raise ValueError(f"Unknown merge_type: {merge_type}")
+        raise ValueError(f"Unknown merge_type: {merge_type}. Use 'patient_level', 'visit_level', or 'longitudinal'")
     
     # Filter to available datasets
     available_datasets = [key for key in merge_order if key in data_dict]

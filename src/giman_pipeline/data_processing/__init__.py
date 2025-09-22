@@ -37,6 +37,16 @@ from .imaging_preprocessors import (
     validate_nifti_output
 )
 
+# Import Phase 2 batch processing functions
+try:
+    from .imaging_batch_processor import (
+        PPMIImagingBatchProcessor,
+        create_production_imaging_pipeline
+    )
+    _BATCH_PROCESSING_AVAILABLE = True
+except ImportError:
+    _BATCH_PROCESSING_AVAILABLE = False
+
 __all__ = [
     # Tabular data functions
     "load_ppmi_data",
@@ -64,3 +74,10 @@ __all__ = [
     "process_imaging_batch",
     "validate_nifti_output"
 ]
+
+# Add Phase 2 batch processing to __all__ if available
+if _BATCH_PROCESSING_AVAILABLE:
+    __all__.extend([
+        "PPMIImagingBatchProcessor",
+        "create_production_imaging_pipeline"
+    ])

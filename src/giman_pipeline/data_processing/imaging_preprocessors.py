@@ -68,14 +68,27 @@ def read_dicom_series(dicom_directory: Union[str, Path],
     if not dicom_dir.exists():
         raise FileNotFoundError(f"DICOM directory not found: {dicom_dir}")
     
-    # Find all DICOM files
+    # Find all DICOM files (including in subdirectories)
     dicom_files = []
+    
+    # First try to find DICOM files directly in the directory
     for file_path in dicom_dir.iterdir():
         if file_path.is_file() and not file_path.name.startswith('.'):
             dicom_files.append(file_path)
     
+    # If no DICOM files found directly, search recursively in subdirectories
     if not dicom_files:
-        raise ValueError(f"No DICOM files found in {dicom_dir}")
+        logger.info(f"No DICOM files found directly in {dicom_dir}, searching subdirectories...")
+        for root, dirs, files in os.walk(dicom_dir):
+            for file in files:
+                if not file.startswith('.') and (file.lower().endswith('.dcm') or 
+                                               'dcm' in file.lower() or 
+                                               len(file.split('.')) == 1):  # DICOM files may have no extension
+                    file_path = Path(root) / file
+                    dicom_files.append(file_path)
+    
+    if not dicom_files:
+        raise ValueError(f"No DICOM files found in {dicom_dir} or its subdirectories")
     
     # Read and validate DICOM files
     slices = []
