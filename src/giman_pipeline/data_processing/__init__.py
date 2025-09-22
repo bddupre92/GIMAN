@@ -9,40 +9,37 @@ This module contains functions for:
 - Feature engineering and final preprocessing
 """
 
-from .loaders import load_ppmi_data, load_csv_file
 from .cleaners import (
-    clean_demographics, 
-    clean_mds_updrs, 
-    clean_participant_status,
+    clean_demographics,
     clean_fs7_aparc,
+    clean_mds_updrs,
+    clean_participant_status,
     clean_xing_core_lab,
 )
-from .mergers import merge_on_patno_event, create_master_dataframe
-from .preprocessors import preprocess_master_df, engineer_features
 
 # Import imaging processing functions
 from .imaging_loaders import (
-    parse_xml_metadata,
+    align_imaging_with_visits,
+    create_ppmi_imaging_manifest,
     load_all_xml_metadata,
     map_visit_identifiers,
-    validate_imaging_metadata,
     normalize_modality,
-    create_ppmi_imaging_manifest,
-    align_imaging_with_visits,
+    parse_xml_metadata,
+    validate_imaging_metadata,
 )
 from .imaging_preprocessors import (
-    read_dicom_series,
     convert_dicom_to_nifti,
     process_imaging_batch,
-    validate_nifti_output
+    read_dicom_series,
+    validate_nifti_output,
 )
+from .loaders import load_csv_file, load_ppmi_data
+from .mergers import create_master_dataframe, merge_on_patno_event
+from .preprocessors import engineer_features, preprocess_master_df
 
 # Import Phase 2 batch processing functions
 try:
-    from .imaging_batch_processor import (
-        PPMIImagingBatchProcessor,
-        create_production_imaging_pipeline
-    )
+    # Imaging batch processing (optional)
     _BATCH_PROCESSING_AVAILABLE = True
 except ImportError:
     _BATCH_PROCESSING_AVAILABLE = False
@@ -50,7 +47,7 @@ except ImportError:
 __all__ = [
     # Tabular data functions
     "load_ppmi_data",
-    "load_csv_file", 
+    "load_csv_file",
     "clean_demographics",
     "clean_mds_updrs",
     "clean_participant_status",
@@ -60,7 +57,6 @@ __all__ = [
     "create_master_dataframe",
     "preprocess_master_df",
     "engineer_features",
-    
     # Imaging data functions
     "parse_xml_metadata",
     "load_all_xml_metadata",
@@ -69,15 +65,12 @@ __all__ = [
     "normalize_modality",
     "create_ppmi_imaging_manifest",
     "align_imaging_with_visits",
-    "read_dicom_series", 
+    "read_dicom_series",
     "convert_dicom_to_nifti",
     "process_imaging_batch",
-    "validate_nifti_output"
+    "validate_nifti_output",
 ]
 
 # Add Phase 2 batch processing to __all__ if available
 if _BATCH_PROCESSING_AVAILABLE:
-    __all__.extend([
-        "PPMIImagingBatchProcessor",
-        "create_production_imaging_pipeline"
-    ])
+    __all__.extend(["PPMIImagingBatchProcessor", "create_production_imaging_pipeline"])
