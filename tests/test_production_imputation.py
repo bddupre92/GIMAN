@@ -14,7 +14,7 @@ import pandas as pd
 from giman_pipeline.data_processing import BiommarkerImputationPipeline
 
 # Add source directory to path
-project_root = Path(__file__).parent
+project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root / "src"))
 
 

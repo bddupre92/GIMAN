@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
 import networkx as nx
@@ -71,10 +71,10 @@ def load_real_ppmi_data():
             df[feature].fillna(median_val, inplace=True)
             print(f"     * Filled {feature} NaNs with median: {median_val:.3f}")
 
-    print(f"   - PD cases: {(df['COHORT_DEFINITION'] == "Parkinson's Disease").sum()}")
-    print(
-        f"   - Healthy controls: {(df['COHORT_DEFINITION'] == 'Healthy Control').sum()}"
-    )
+    pd_count = (df['COHORT_DEFINITION'] == "Parkinson's Disease").sum()
+    hc_count = (df['COHORT_DEFINITION'] == 'Healthy Control').sum()
+    print(f"   - PD cases: {pd_count}")
+    print(f"   - Healthy controls: {hc_count}")
 
     return df
 
@@ -161,7 +161,7 @@ def test_real_data_integration():
     # Test 2: Create Similarity Graph
     print("\n2️⃣ Creating Patient Similarity Graph...")
     try:
-        similarity_graph = create_similarity_graph(
+        _ = create_similarity_graph(
             patient_data, similarity_threshold=0.3
         )
         print("✅ Similarity graph created successfully!")

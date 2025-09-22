@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
 
@@ -197,9 +197,8 @@ def test_simplified_giman():
 
             if not missing_cols:
                 print("✅ Real data has all required columns!")
-                print(
-                    f"   - PD cases: {(df['COHORT_DEFINITION'] == "Parkinson's Disease").sum()}"
-                )
+                pd_count = (df['COHORT_DEFINITION'] == "Parkinson's Disease").sum()
+                print(f"   - PD cases: {pd_count}")
                 print(
                     f"   - Healthy controls: {(df['COHORT_DEFINITION'] == 'Healthy Control').sum()}"
                 )

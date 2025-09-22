@@ -15,7 +15,7 @@ from pathlib import Path
 import pandas as pd
 
 # Add the src directory to Python path
-src_path = Path(__file__).parent / "src"
+src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
 from giman_pipeline.data_processing import (
