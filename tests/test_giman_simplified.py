@@ -252,7 +252,7 @@ def test_model_components():
         print("✅ Backbone component test passed!")
         print(f"   - Output keys: {list(output.keys())}")
         print(
-            f"   - Layer embeddings: {[k for k in output['layer_embeddings'].keys()]}"
+            f"   - Layer embeddings: {list(output['layer_embeddings'])}"
         )
 
         return True

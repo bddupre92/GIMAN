@@ -1,7 +1,16 @@
 """GIMAN Core GNN Backbone Implementation.
 
 This module implements the Graph-Informed Multimodal Attention Network (GIMAN)
-backbone architecture using PyTorch Geometric. The architecture follows a
+backbone architecture using PyTorch Geometric. The archi        h3 = self.conv3(h2, edge_index)
+        h3 = self.bn3(h3)
+        
+        # Optional residual connection
+        if self.use_residual:
+            residual = self.residual_proj(h1) if self.residual_proj is not None else h1
+            h3 = h3 + residual
+
+        h3 = torch.nn.functional.relu(h3)
+        h3 = self.dropout(h3)llows a
 3-layer GraphConv design with residual connections and multimodal integration.
 
 Architecture Overview:
@@ -17,7 +26,7 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
+import torch.nn.functional
 from torch_geometric.data import Data
 from torch_geometric.nn import GraphConv, global_max_pool, global_mean_pool
 
@@ -163,16 +172,16 @@ class GIMANBackbone(nn.Module):
         layer_embeddings = {}
 
         # Layer 1: Input → 64
-        h1 = self.conv1(x, edge_index, edge_weight)
+        h1 = self.conv1(x, edge_index)
         h1 = self.bn1(h1)
-        h1 = F.relu(h1)
+        h1 = torch.nn.functional.relu(h1)
         h1 = self.dropout(h1)
         layer_embeddings["layer_1"] = h1
 
         # Layer 2: 64 → 128
-        h2 = self.conv2(h1, edge_index, edge_weight)
+        h2 = self.conv2(h1, edge_index)
         h2 = self.bn2(h2)
-        h2 = F.relu(h2)
+        h2 = torch.nn.functional.relu(h2)
         h2 = self.dropout(h2)
         layer_embeddings["layer_2"] = h2
 
@@ -185,7 +194,7 @@ class GIMANBackbone(nn.Module):
             residual = self.residual_proj(h1) if self.residual_proj is not None else h1
             h3 = h3 + residual
 
-        h3 = F.relu(h3)
+        h3 = torch.nn.functional.relu(h3)
         h3 = self.dropout(h3)
         layer_embeddings["layer_3"] = h3
 
@@ -340,7 +349,7 @@ class GIMANClassifier(nn.Module):
         """
         with torch.no_grad():
             logits = self.forward(data)["logits"]
-            return F.softmax(logits, dim=1)
+            return torch.nn.functional.softmax(logits, dim=1)
 
     def predict(self, data: Data) -> torch.Tensor:
         """Get class predictions.
@@ -440,6 +449,8 @@ def create_giman_model(
 
     print(f"🔧 Created GIMAN {model_type} model:")
     print(f"   - Parameters: {config['parameters']:,}")
-    print(f"   - Architecture: {input_dim} → {' → '.join(map(str, hidden_dims))} → {output_dim if model_type == 'classifier' else 'embeddings'}")
+    print(
+        f"   - Architecture: {input_dim} → {' → '.join(map(str, hidden_dims))} → {output_dim if model_type == 'classifier' else 'embeddings'}"
+    )
 
     return model, config
