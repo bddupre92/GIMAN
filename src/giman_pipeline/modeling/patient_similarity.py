@@ -278,7 +278,9 @@ class PatientSimilarityGraph:
             )
 
         if self.patient_data is None:
-            raise ValueError("Patient data not loaded. Call load_enhanced_cohort() first.")
+            raise ValueError(
+                "Patient data not loaded. Call load_enhanced_cohort() first."
+            )
 
         n_patients = self.similarity_matrix.shape[0]
         G = nx.Graph()
@@ -326,7 +328,9 @@ class PatientSimilarityGraph:
 
         else:
             # Use similarity threshold approach (traditional method)
-            logger.info(f"Creating threshold graph with threshold={self.similarity_threshold}")
+            logger.info(
+                f"Creating threshold graph with threshold={self.similarity_threshold}"
+            )
             for i in range(n_patients):
                 for j in range(i + 1, n_patients):
                     similarity = self.similarity_matrix[i, j]
@@ -337,13 +341,13 @@ class PatientSimilarityGraph:
 
         # Store the graph and log statistics
         self.similarity_graph = G
-        
+
         avg_similarity = np.mean(similarity_values) if similarity_values else 0.0
         logger.info(
             f"Created similarity graph: {n_patients} nodes, {edges_added} edges, "
             f"avg similarity: {avg_similarity:.3f}"
         )
-        
+
         return G
 
     def detect_communities(self) -> dict:

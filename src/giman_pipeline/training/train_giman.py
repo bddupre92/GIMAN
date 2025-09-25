@@ -24,6 +24,7 @@ import torch
 from torch_geometric.loader import DataLoader
 
 from giman_pipeline.modeling.patient_similarity import create_patient_similarity_graph
+
 from .data_loaders import GIMANDataLoader
 from .models import GIMANClassifier
 from .trainer import GIMANTrainer

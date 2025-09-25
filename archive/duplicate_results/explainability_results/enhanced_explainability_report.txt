@@ -1,0 +1,95 @@
+================================================================================
+🧠 ENHANCED GIMAN EXPLAINABILITY ANALYSIS REPORT
+================================================================================
+
+## 1. Model Information
+• Architecture: GIMAN (Unified Multimodal System)
+• Modalities: Spatial, Genomic, Temporal Embeddings (256D each)
+• Prognostic Tasks: Motor Progression (Regression), Cognitive Conversion (Classification)
+• Samples Analyzed: 95 patients
+• Device: cpu
+
+## 2. Modality Ablation Analysis
+This analysis quantifies the performance degradation when a specific modality is removed (set to zeros).
+```
+                motor_r2  cognitive_auc
+Baseline (All)   -14.472          0.627
+No Spatial       -14.472          0.627
+No Genomic       -32.870          0.643
+No Temporal      -19.073          0.659
+```
+
+**Key Insight (Motor R² Degradation):**
+• Removing **Spatial** leads to a **0.0%** drop in Motor R².
+• Removing **Genomic** leads to a **0.0%** drop in Motor R².
+• Removing **Temporal** leads to a **0.0%** drop in Motor R².
+
+
+## 3. SHAP Analysis: Motor Progression
+SHAP values indicate the contribution of each feature to the motor progression prediction.
+
+**Modality Importance (Mean |SHAP Value|):**
+• **spatial**: 33.270020
+• **genomic**: 33.313260
+• **temporal**: 33.416721
+
+**Top 10 Influential Abstract Features (Motor):**
+• 1. Temporal_Emb_243: 0.009752
+• 2. Spatial_Emb_173: 0.009658
+• 3. Genomic_Emb_64: 0.009630
+• 4. Temporal_Emb_142: 0.009625
+• 5. Genomic_Emb_127: 0.009602
+• 6. Genomic_Emb_231: 0.009533
+• 7. Spatial_Emb_181: 0.009479
+• 8. Temporal_Emb_65: 0.009454
+• 9. Spatial_Emb_104: 0.009373
+• 10. Temporal_Emb_149: 0.009285
+
+
+## 4. SHAP Analysis: Cognitive Conversion
+SHAP values for cognitive conversion prediction.
+
+**Modality Importance (Mean |SHAP Value|):**
+• **spatial**: 33.078949
+• **genomic**: 33.297364
+• **temporal**: 33.623687
+
+**Top 10 Influential Abstract Features (Cognitive):**
+• 1. Temporal_Emb_105: 0.010029
+• 2. Genomic_Emb_176: 0.009928
+• 3. Genomic_Emb_211: 0.009838
+• 4. Temporal_Emb_222: 0.009785
+• 5. Temporal_Emb_102: 0.009727
+• 6. Genomic_Emb_81: 0.009695
+• 7. Genomic_Emb_111: 0.009692
+• 8. Spatial_Emb_16: 0.009658
+• 9. Spatial_Emb_252: 0.009631
+• 10. Spatial_Emb_55: 0.009574
+
+
+## 5. Modality Attention Weights
+These are the learned weights indicating the relative importance of each modality for the final fusion.
+
+**Learned Modality Weights:**
+• **Spatial**: 0.500
+• **Genomic**: 0.500
+
+
+## 6. Overall Model Performance
+• **Final Motor Progression R²**: -14.4715
+• **Final Cognitive Conversion AUC**: 0.6266
+
+
+## 7. Key Insights and Clinical Implications
+Based on the comprehensive analysis:
+• **Critical Modality (Ablation)**: **Spatial** seems most indispensable, causing a **0.0%** R² drop in motor prediction when removed.
+• **Most Influential for Motor (SHAP)**: The **temporal** modality's features are highly influential, with a mean |SHAP value| of **33.416721**.
+• **Most Influential for Cognitive (SHAP)**: Similarly, **temporal** features significantly drive cognitive predictions (mean |SHAP value| **33.623687**).
+
+**Clinical Relevance:**
+The distinct contributions from spatial (neuroimaging progression), genomic (genetic risk), and temporal (longitudinal patterns) modalities highlight their integrated roles in Parkinson's disease prognosis. Understanding these contributions can inform targeted interventions and personalized patient management strategies.
+
+**Research Contributions:**
+This comprehensive explainability framework provides deep insights into the black-box nature of multimodal GNNs, advancing the interpretability of AI in neurodegenerative disease research.
+
+================================================================================

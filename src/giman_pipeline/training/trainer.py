@@ -24,9 +24,9 @@ import time
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -49,24 +49,26 @@ logger = logging.getLogger(__name__)
 
 class FocalLoss(nn.Module):
     """Focal Loss implementation for handling class imbalance.
-    
+
     This loss focuses on hard-to-classify examples and reduces the relative loss
     for well-classified examples, addressing class imbalance issues.
-    
+
     Args:
         alpha (float): Weighting factor for rare class (default: 1.0)
         gamma (float): Focusing parameter (default: 2.0)
         class_weights (torch.Tensor): Optional class weights for additional balancing
     """
-    
+
     def __init__(self, alpha=1.0, gamma=2.0, class_weights=None):
         super(FocalLoss, self).__init__()
         self.alpha = alpha
         self.gamma = gamma
         self.class_weights = class_weights
-        
+
     def forward(self, inputs, targets):
-        ce_loss = nn.functional.cross_entropy(inputs, targets, weight=self.class_weights, reduction='none')
+        ce_loss = nn.functional.cross_entropy(
+            inputs, targets, weight=self.class_weights, reduction="none"
+        )
         pt = torch.exp(-ce_loss)
         focal_loss = self.alpha * (1 - pt) ** self.gamma * ce_loss
         return focal_loss.mean()
@@ -74,32 +76,32 @@ class FocalLoss(nn.Module):
 
 class LabelSmoothingCrossEntropy(nn.Module):
     """CrossEntropyLoss with label smoothing and class weighting.
-    
+
     Label smoothing helps prevent overconfident predictions and can improve
     generalization, especially with imbalanced datasets.
     """
-    
+
     def __init__(self, smoothing=0.1, class_weights=None):
         super(LabelSmoothingCrossEntropy, self).__init__()
         self.smoothing = smoothing
         self.class_weights = class_weights
-        
+
     def forward(self, inputs, targets):
         log_prob = nn.functional.log_softmax(inputs, dim=-1)
-        
+
         # Apply label smoothing
         n_classes = inputs.size(-1)
         one_hot = torch.zeros_like(log_prob).scatter(1, targets.unsqueeze(1), 1)
         one_hot = one_hot * (1 - self.smoothing) + self.smoothing / n_classes
-        
+
         # Compute loss
         loss = -(one_hot * log_prob).sum(dim=-1)
-        
+
         # Apply class weights if provided
         if self.class_weights is not None:
             weight = self.class_weights[targets]
             loss = loss * weight
-            
+
         return loss.mean()
 
 
@@ -568,40 +570,38 @@ class GIMANTrainer:
 
     def compute_class_weights(self, train_loader):
         """Compute class weights for imbalanced dataset using sklearn.
-        
+
         Args:
             train_loader: Training data loader
-            
+
         Returns:
             torch.Tensor: Class weights for loss function
         """
         # Collect all labels from training data
         all_labels = []
         for batch in train_loader:
-            if hasattr(batch, 'y'):
+            if hasattr(batch, "y"):
                 all_labels.extend(batch.y.cpu().numpy())
             elif isinstance(batch, (list, tuple)) and len(batch) >= 2:
                 all_labels.extend(batch[1].cpu().numpy())
-        
+
         # Compute balanced class weights
         unique_classes = np.unique(all_labels)
         class_weights_array = compute_class_weight(
-            'balanced', 
-            classes=unique_classes, 
-            y=all_labels
+            "balanced", classes=unique_classes, y=all_labels
         )
-        
+
         # Convert to torch tensor
         class_weights = torch.FloatTensor(class_weights_array).to(self.device)
-        
+
         logger.info(f"Computed class weights: {class_weights}")
         logger.info(f"Class distribution: {np.bincount(all_labels)}")
-        
+
         return class_weights
-    
+
     def setup_focal_loss(self, train_loader, alpha=1.0, gamma=2.0):
         """Setup Focal Loss with computed class weights.
-        
+
         Args:
             train_loader: Training data loader for class weight computation
             alpha (float): Weighting factor for rare class
@@ -609,47 +609,46 @@ class GIMANTrainer:
         """
         # Compute class weights
         class_weights = self.compute_class_weights(train_loader)
-        
+
         # Setup focal loss
         self.criterion = FocalLoss(
-            alpha=alpha, 
-            gamma=gamma, 
-            class_weights=class_weights
+            alpha=alpha, gamma=gamma, class_weights=class_weights
         )
         self.class_weights = class_weights
-        
+
         logger.info(f"Setup Focal Loss with alpha={alpha}, gamma={gamma}")
-        
+
     def setup_weighted_loss(self, train_loader):
         """Setup weighted CrossEntropyLoss with computed class weights.
-        
+
         Args:
             train_loader: Training data loader for class weight computation
         """
         # Compute class weights
         class_weights = self.compute_class_weights(train_loader)
-        
+
         # Setup weighted cross entropy loss
         self.criterion = nn.CrossEntropyLoss(weight=class_weights)
         self.class_weights = class_weights
-        
-        logger.info(f"Setup Weighted CrossEntropyLoss")
-        
+
+        logger.info("Setup Weighted CrossEntropyLoss")
+
     def setup_label_smoothing_loss(self, train_loader, smoothing=0.1):
         """Setup Label Smoothing CrossEntropyLoss with computed class weights.
-        
+
         Args:
             train_loader: Training data loader for class weight computation
             smoothing (float): Label smoothing factor (0.1 = 10% smoothing)
         """
         # Compute class weights
         class_weights = self.compute_class_weights(train_loader)
-        
+
         # Setup label smoothing loss
         self.criterion = LabelSmoothingCrossEntropy(
-            smoothing=smoothing,
-            class_weights=class_weights
+            smoothing=smoothing, class_weights=class_weights
         )
         self.class_weights = class_weights
-        
-        logger.info(f"Setup Label Smoothing CrossEntropyLoss with smoothing={smoothing}")
+
+        logger.info(
+            f"Setup Label Smoothing CrossEntropyLoss with smoothing={smoothing}"
+        )

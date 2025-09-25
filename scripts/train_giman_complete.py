@@ -16,8 +16,6 @@ from datetime import datetime
 from pathlib import Path
 
 import torch
-import numpy as np
-from torch_geometric.loader import DataLoader
 
 # Add src to path for imports
 sys.path.append(str(Path(__file__).parent.parent / "src"))
@@ -70,14 +68,14 @@ def main():
         "scheduler_type": "plateau",
         "early_stopping_patience": 15,
         # Class balancing parameters
-        "loss_function": "focal",     # Use Focal Loss for severe class imbalance
-        "focal_alpha": 1.0,           # Focal loss alpha parameter  
-        "focal_gamma": 1.8,           # Moderate increase for harder examples
-        "label_smoothing": 0.1,       # Label smoothing factor (10% smoothing)
+        "loss_function": "focal",  # Use Focal Loss for severe class imbalance
+        "focal_alpha": 1.0,  # Focal loss alpha parameter
+        "focal_gamma": 1.8,  # Moderate increase for harder examples
+        "label_smoothing": 0.1,  # Label smoothing factor (10% smoothing)
         # Training adjustments for imbalanced data
         "learning_rate": 0.0005,  # Slightly higher learning rate for faster convergence
         "early_stopping_patience": 25,  # Reduce patience for faster training
-        "num_epochs": 150,        # More epochs to allow learning minority classes
+        "num_epochs": 150,  # More epochs to allow learning minority classes
         # Device
         "device": "cuda" if torch.cuda.is_available() else "cpu",
     }
@@ -161,34 +159,35 @@ def main():
         )
 
         logger.info("✅ Trainer setup completed")
-        
+
         # Step 3.5: Setup Class Balancing for Imbalanced Data
         logger.info("⚖️ Setting up class balancing to address data imbalance...")
-        
+
         loss_function = config["loss_function"]
-        
+
         if loss_function == "focal":
             # Use Focal Loss for severe imbalance
             trainer.setup_focal_loss(
-                train_loader, 
-                alpha=config["focal_alpha"], 
-                gamma=config["focal_gamma"]
+                train_loader, alpha=config["focal_alpha"], gamma=config["focal_gamma"]
             )
-            logger.info(f"   Using Focal Loss with alpha={config['focal_alpha']}, gamma={config['focal_gamma']}")
-            
+            logger.info(
+                f"   Using Focal Loss with alpha={config['focal_alpha']}, gamma={config['focal_gamma']}"
+            )
+
         elif loss_function == "label_smoothing":
             # Use Label Smoothing CrossEntropyLoss for better generalization
             trainer.setup_label_smoothing_loss(
-                train_loader,
-                smoothing=config["label_smoothing"]
+                train_loader, smoothing=config["label_smoothing"]
             )
-            logger.info(f"   Using Label Smoothing CrossEntropyLoss with smoothing={config['label_smoothing']}")
-            
+            logger.info(
+                f"   Using Label Smoothing CrossEntropyLoss with smoothing={config['label_smoothing']}"
+            )
+
         else:  # "weighted"
             # Use Weighted CrossEntropyLoss (most stable option)
             trainer.setup_weighted_loss(train_loader)
             logger.info("   Using Weighted CrossEntropyLoss")
-        
+
         logger.info("✅ Class balancing setup completed")
 
         # Step 4: Model Training

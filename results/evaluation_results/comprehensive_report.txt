@@ -1,0 +1,65 @@
+================================================================================
+GIMAN Phase 4 Model: Comprehensive Performance Evaluation Report
+================================================================================
+Generated: 2025-09-24 22:16:38
+Device: cpu
+
+EXECUTIVE SUMMARY
+----------------------------------------
+• Total experiments conducted: 5
+• Successful runs: 5
+• Failed runs: 0
+• Total training time: 0.0 minutes
+
+MOTOR PROGRESSION PREDICTION (R²)
+----------------------------------------
+• Mean R²: -0.0492 ± 0.0692
+• Median R²: -0.0404
+• Range: [-0.1770, 0.0317]
+• IQR: [-0.0418, -0.0185]
+• 95% CI: [-0.1453, 0.0469]
+• Positive R² rate: 20.0%
+
+COGNITIVE CONVERSION PREDICTION (AUC)
+----------------------------------------
+• Mean AUC: 0.4200 ± 0.2089
+• Median AUC: 0.5250
+• Range: [0.1429, 0.6923]
+• IQR: [0.2100, 0.5300]
+• 95% CI: [0.1300, 0.7100]
+• Above random (>0.5): 60.0%
+• Good performance (>0.6): 20.0%
+
+PERFORMANCE BENCHMARKS
+----------------------------------------
+Motor Performance Rating: Poor
+  - Mean R² = -0.0492
+  - Benchmark: >0 (explains variance), >0.1 (good performance)
+Cognitive Performance Rating: Poor
+  - Mean AUC = 0.4200
+  - Benchmark: >0.5 (better than random), >0.6 (good), >0.7 (excellent)
+
+MODEL RELIABILITY ANALYSIS
+----------------------------------------
+• Motor R² coefficient of variation: 1.407
+• Cognitive AUC coefficient of variation: 0.497
+• Success rate: 5/5 (100.0%)
+• Overall reliability: Medium
+
+RECOMMENDATIONS
+----------------------------------------
+• Motor prediction: Model struggling with motor progression prediction.
+  Consider: feature engineering, hyperparameter tuning, architecture changes.
+• Cognitive prediction: Below good performance threshold.
+  Consider: class balancing, feature selection, model regularization.
+• Model stability: High variance detected. Consider regularization or ensemble methods.
+
+INDIVIDUAL RUN DETAILS
+----------------------------------------
+Run  1: Motor R² = -0.0404, Cognitive AUC = 0.5250, Duration =   0.7s
+Run  2: Motor R² = 0.0317, Cognitive AUC = 0.1429, Duration =   0.3s
+Run  3: Motor R² = -0.1770, Cognitive AUC = 0.2100, Duration =   0.2s
+Run  4: Motor R² = -0.0185, Cognitive AUC = 0.6923, Duration =   0.3s
+Run  5: Motor R² = -0.0418, Cognitive AUC = 0.5300, Duration =   0.2s
+
+================================================================================
