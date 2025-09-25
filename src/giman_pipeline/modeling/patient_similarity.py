@@ -22,9 +22,12 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 import pandas as pd
+import torch
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
-from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from torch_geometric.data import Data
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,7 @@ class PatientSimilarityGraph:
         top_k_connections: int | None = None,
         similarity_metric: str = "cosine",
         random_state: int = 42,
+        binary_classification: bool = False,
     ) -> None:
         """Initialize patient similarity graph constructor.
 
@@ -65,15 +69,18 @@ class PatientSimilarityGraph:
                       Defaults to project data directory.
             similarity_threshold: Minimum similarity for graph edges.
             top_k_connections: Optional limit on connections per node.
-            similarity_metric: Similarity metric ('cosine', 'euclidean', 'correlation').
-            random_state: Random seed for reproducible community detection.
+            similarity_metric: Similarity metric ('cosine', 'euclidean', 'manhattan').
+            random_state: Random seed for reproducibility.
+            binary_classification: If True, group all disease types vs healthy.
         """
         self.data_path = self._setup_data_path(data_path)
         self.similarity_threshold = similarity_threshold
         self.top_k_connections = top_k_connections
         self.similarity_metric = similarity_metric
         self.random_state = random_state
+        self.binary_classification = binary_classification
         self.scaler = StandardScaler()
+        self.label_encoder = LabelEncoder()
 
         # Core 7-biomarker feature set (imputed) - updated for 557-patient enhanced dataset
         self.biomarker_features = [
@@ -122,28 +129,45 @@ class PatientSimilarityGraph:
         Raises:
             FileNotFoundError: If imputed dataset is not found.
         """
-        # Find the latest imputed dataset file
-        imputed_files = list(
-            self.data_path.glob("giman_biomarker_imputed_*_patients_*.csv")
-        )
+        # Find the latest complete dataset file (prioritize fixed datasets)
+        fixed_files = list(self.data_path.glob("giman_biomarker_complete_fixed_*.csv"))
 
-        if not imputed_files:
-            # Fallback to specific filename pattern
-            imputed_file = self.data_path / "enhanced_biomarker_cohort_imputed.csv"
-            if not imputed_file.exists():
-                raise FileNotFoundError(
-                    f"Enhanced imputed dataset not found. Expected files: "
-                    f"giman_biomarker_imputed_*_patients_*.csv or enhanced_biomarker_cohort_imputed.csv "
-                    f"in directory: {self.data_path}. Please run biomarker imputation pipeline first."
-                )
+        if fixed_files:
+            latest_file = max(fixed_files, key=lambda x: x.stat().st_mtime)
+            logger.info(f"Loading fixed dataset: {latest_file.name}")
         else:
-            # Use the most recent file (sorted by filename which contains timestamp)
-            imputed_file = sorted(imputed_files)[-1]
+            # Fallback to complete datasets
+            complete_files = list(self.data_path.glob("giman_biomarker_complete_*.csv"))
 
-        logger.info(f"Loading enhanced cohort from {imputed_file}")
+            if complete_files:
+                latest_file = max(complete_files, key=lambda x: x.stat().st_mtime)
+                logger.info(f"Loading complete dataset: {latest_file.name}")
+            else:
+                # Original fallback pattern
+                imputed_files = list(
+                    self.data_path.glob("giman_biomarker_imputed_*_patients_*.csv")
+                )
 
-        # Load imputed dataset
-        df = pd.read_csv(imputed_file)
+                if not imputed_files:
+                    # Final fallback to specific filename pattern
+                    imputed_file = (
+                        self.data_path / "enhanced_biomarker_cohort_imputed.csv"
+                    )
+                    if not imputed_file.exists():
+                        raise FileNotFoundError(
+                            f"Enhanced imputed dataset not found. Expected files: "
+                            f"giman_biomarker_complete_*.csv or enhanced_biomarker_cohort_imputed.csv "
+                            f"in directory: {self.data_path}. Please run biomarker imputation pipeline first."
+                        )
+                    latest_file = imputed_file
+                else:
+                    # Use the most recent file (sorted by filename which contains timestamp)
+                    latest_file = sorted(imputed_files)[-1]
+
+        logger.info(f"Loading enhanced cohort from {latest_file}")
+
+        # Load dataset
+        df = pd.read_csv(latest_file)
 
         # Validate required columns
         missing_features = set(self.biomarker_features) - set(df.columns)
@@ -240,64 +264,86 @@ class PatientSimilarityGraph:
         return similarity_matrix
 
     def create_similarity_graph(self) -> nx.Graph:
-        """Create NetworkX patient similarity graph with edge filtering.
+        """Create patient similarity graph using computed similarity matrix.
 
         Returns:
             NetworkX graph with patients as nodes and similarity edges.
 
         Raises:
-            ValueError: If similarity matrix not calculated.
+            ValueError: If similarity matrix not computed or patient data not loaded.
         """
         if self.similarity_matrix is None:
             raise ValueError(
-                "Similarity matrix not calculated. Call calculate_patient_similarity() first."
+                "Similarity matrix not computed. Call calculate_patient_similarity() first."
             )
 
-        n_patients = self.similarity_matrix.shape[0]
-        logger.info(f"Creating similarity graph for {n_patients} patients")
+        if self.patient_data is None:
+            raise ValueError("Patient data not loaded. Call load_enhanced_cohort() first.")
 
-        # Initialize graph with patient nodes
+        n_patients = self.similarity_matrix.shape[0]
         G = nx.Graph()
+
+        # Add nodes with patient metadata
         for i in range(n_patients):
             patient_id = self.patient_data.iloc[i]["PATNO"]
             cohort = self.patient_data.iloc[i].get("COHORT_DEFINITION", "Unknown")
-            G.add_node(i, patient_id=patient_id, cohort=cohort)
 
-        # Add edges based on similarity threshold and/or top-k connections
+            G.add_node(
+                i,
+                patient_id=patient_id,
+                cohort=cohort,
+                **{
+                    feature: self.patient_data.iloc[i][feature]
+                    for feature in self.biomarker_features
+                    if feature in self.patient_data.columns
+                },
+            )
+
+        # Add edges based on similarity threshold or top-k connections
         edges_added = 0
+        similarity_values = []
 
-        if self.top_k_connections is not None:
-            # Top-k similarity edges per node
+        if self.top_k_connections:
+            # Use top-k connections approach (k-NN graph)
+            logger.info(f"Creating k-NN graph with k={self.top_k_connections}")
             for i in range(n_patients):
                 # Get top-k most similar patients (excluding self)
                 similarities = self.similarity_matrix[i].copy()
                 similarities[i] = -np.inf  # Exclude self-connection
 
+                # Get indices of top-k most similar patients
                 top_k_indices = np.argpartition(similarities, -self.top_k_connections)[
                     -self.top_k_connections :
                 ]
 
+                # Add edges to top-k neighbors
                 for j in top_k_indices:
                     similarity = self.similarity_matrix[i, j]
-                    if similarity >= self.similarity_threshold and not G.has_edge(i, j):
-                        G.add_edge(i, j, weight=similarity, similarity=similarity)
+                    if similarity > 0 and not G.has_edge(i, j):
+                        G.add_edge(i, j, weight=similarity)
                         edges_added += 1
+                        similarity_values.append(similarity)
+
         else:
-            # Threshold-based edges
+            # Use similarity threshold approach (traditional method)
+            logger.info(f"Creating threshold graph with threshold={self.similarity_threshold}")
             for i in range(n_patients):
                 for j in range(i + 1, n_patients):
                     similarity = self.similarity_matrix[i, j]
                     if similarity >= self.similarity_threshold:
-                        G.add_edge(i, j, weight=similarity, similarity=similarity)
+                        G.add_edge(i, j, weight=similarity)
                         edges_added += 1
+                        similarity_values.append(similarity)
 
+        # Store the graph and log statistics
         self.similarity_graph = G
-
+        
+        avg_similarity = np.mean(similarity_values) if similarity_values else 0.0
         logger.info(
-            f"Created similarity graph: {G.number_of_nodes()} nodes, "
-            f"{G.number_of_edges()} edges (density: {nx.density(G):.4f})"
+            f"Created similarity graph: {n_patients} nodes, {edges_added} edges, "
+            f"avg similarity: {avg_similarity:.3f}"
         )
-
+        
         return G
 
     def detect_communities(self) -> dict:
@@ -571,6 +617,189 @@ class PatientSimilarityGraph:
             )
 
         return metadata
+
+    def to_pytorch_geometric(self) -> Data:
+        """Convert similarity graph to PyTorch Geometric Data object.
+
+        Returns:
+            PyTorch Geometric Data object ready for GNN training.
+
+        Raises:
+            ValueError: If required components not available.
+        """
+        if self.similarity_graph is None:
+            raise ValueError(
+                "Similarity graph not created. Call create_similarity_graph() first."
+            )
+
+        if self.patient_data is None:
+            raise ValueError(
+                "Patient data not loaded. Call load_enhanced_cohort() first."
+            )
+
+        # Extract features and labels
+        X = self.patient_data[self.biomarker_features].values
+
+        # Use scaled features if scaler was fitted
+        if hasattr(self.scaler, "mean_"):
+            X = self.scaler.transform(X)
+        else:
+            X = self.scaler.fit_transform(X)
+
+        # Encode cohort labels
+        if "COHORT_DEFINITION" not in self.patient_data.columns:
+            raise ValueError("COHORT_DEFINITION column not found for labels")
+
+        if self.binary_classification:
+            # Binary classification: Healthy vs Disease
+            cohort_binary = self.patient_data["COHORT_DEFINITION"].map(
+                lambda x: "Healthy" if x == "Healthy Control" else "Disease"
+            )
+            y = self.label_encoder.fit_transform(cohort_binary)
+            logger.info("Using binary classification: Healthy vs Disease")
+        else:
+            # Multi-class: HC, PD, Prodromal, SWEDD
+            y = self.label_encoder.fit_transform(self.patient_data["COHORT_DEFINITION"])
+            logger.info("Using 4-class classification: HC, PD, Prodromal, SWEDD")
+
+        # Convert NetworkX graph to edge_index
+        edge_list = list(self.similarity_graph.edges())
+        if edge_list:
+            edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
+        else:
+            # Empty graph case
+            edge_index = torch.empty((2, 0), dtype=torch.long)
+
+        # Create PyTorch Geometric Data object
+        data = Data(
+            x=torch.tensor(X, dtype=torch.float),
+            y=torch.tensor(y, dtype=torch.long),
+            edge_index=edge_index,
+        )
+
+        # Add metadata
+        data.feature_names = self.biomarker_features
+        data.cohort_mapping = dict(
+            zip(
+                self.label_encoder.transform(self.label_encoder.classes_),
+                self.label_encoder.classes_,
+                strict=False,
+            )
+        )
+
+        # Add patient IDs if available
+        if "PATNO" in self.patient_data.columns:
+            data.patient_ids = torch.tensor(
+                self.patient_data["PATNO"].values, dtype=torch.long
+            )
+
+        # Add edge weights if available
+        if edge_list and "similarity" in self.similarity_graph.edges[edge_list[0]]:
+            edge_weights = []
+            for edge in edge_list:
+                edge_weights.append(self.similarity_graph.edges[edge]["similarity"])
+            data.edge_attr = torch.tensor(edge_weights, dtype=torch.float).unsqueeze(1)
+
+        logger.info(f"✅ Converted to PyTorch Geometric: {data}")
+
+        return data
+
+    def split_for_training(
+        self, test_size: float = 0.15, val_size: float = 0.15, random_state: int = None
+    ) -> tuple[Data, Data, Data]:
+        """Split similarity graph data for train/val/test with stratification.
+
+        Args:
+            test_size: Proportion of data for testing
+            val_size: Proportion of data for validation
+            random_state: Random seed for reproducibility
+
+        Returns:
+            Tuple of (train_data, val_data, test_data)
+        """
+        if random_state is None:
+            random_state = self.random_state
+
+        # Convert to PyTorch Geometric format
+        data = self.to_pytorch_geometric()
+
+        n_patients = data.x.shape[0]
+        indices = np.arange(n_patients)
+        labels = data.y.numpy()
+
+        # First split: train + val vs test
+        train_val_idx, test_idx = train_test_split(
+            indices, test_size=test_size, stratify=labels, random_state=random_state
+        )
+
+        # Second split: train vs val
+        train_idx, val_idx = train_test_split(
+            train_val_idx,
+            test_size=val_size / (1 - test_size),  # Adjust for previous split
+            stratify=labels[train_val_idx],
+            random_state=random_state,
+        )
+
+        # Create data splits
+        train_data = self._create_subset(data, train_idx)
+        val_data = self._create_subset(data, val_idx)
+        test_data = self._create_subset(data, test_idx)
+
+        logger.info("✅ Data split for training completed:")
+        logger.info(
+            f"  Train: {len(train_idx)} patients ({len(train_idx) / n_patients * 100:.1f}%)"
+        )
+        logger.info(
+            f"  Val:   {len(val_idx)} patients ({len(val_idx) / n_patients * 100:.1f}%)"
+        )
+        logger.info(
+            f"  Test:  {len(test_idx)} patients ({len(test_idx) / n_patients * 100:.1f}%)"
+        )
+
+        return train_data, val_data, test_data
+
+    def _create_subset(self, data: Data, indices: np.ndarray) -> Data:
+        """Create a data subset for train/val/test splits.
+
+        Args:
+            data: Complete PyTorch Geometric Data object
+            indices: Indices for the subset
+
+        Returns:
+            Data subset with filtered nodes and edges
+        """
+        # Create mapping from old to new indices
+        idx_map = {old_idx: new_idx for new_idx, old_idx in enumerate(indices)}
+
+        # Filter node features and labels
+        subset_data = Data(x=data.x[indices], y=data.y[indices])
+
+        # Filter edges (keep only edges between nodes in the subset)
+        edge_mask = torch.isin(data.edge_index[0], torch.tensor(indices)) & torch.isin(
+            data.edge_index[1], torch.tensor(indices)
+        )
+
+        subset_edges = data.edge_index[:, edge_mask]
+
+        # Remap edge indices to new node indices
+        for i, old_idx in enumerate(indices):
+            subset_edges[subset_edges == old_idx] = i
+
+        subset_data.edge_index = subset_edges
+
+        # Filter edge attributes if available
+        if hasattr(data, "edge_attr") and data.edge_attr is not None:
+            subset_data.edge_attr = data.edge_attr[edge_mask]
+
+        # Copy metadata
+        subset_data.feature_names = data.feature_names
+        subset_data.cohort_mapping = data.cohort_mapping
+
+        # Copy patient IDs if available
+        if hasattr(data, "patient_ids"):
+            subset_data.patient_ids = data.patient_ids[indices]
+
+        return subset_data
 
     def build_complete_similarity_graph(self) -> tuple[nx.Graph, csr_matrix, dict]:
         """Complete pipeline to build patient similarity graph from enhanced cohort.

@@ -3,7 +3,7 @@
 This module implements the Graph-Informed Multimodal Attention Network (GIMAN)
 backbone architecture using PyTorch Geometric. The archi        h3 = self.conv3(h2, edge_index)
         h3 = self.bn3(h3)
-        
+
         # Optional residual connection
         if self.use_residual:
             residual = self.residual_proj(h1) if self.residual_proj is not None else h1
@@ -61,6 +61,7 @@ class GIMANBackbone(nn.Module):
         dropout_rate: float = 0.3,
         pooling_method: str = "concat",
         use_residual: bool = True,
+        classification_level: str = "graph",  # 'node' or 'graph'
     ):
         """Initialize the GIMAN backbone architecture.
 
@@ -71,6 +72,7 @@ class GIMANBackbone(nn.Module):
             dropout_rate: Dropout probability for regularization
             pooling_method: Graph pooling method ('mean', 'max', 'concat')
             use_residual: Whether to use residual connections
+            classification_level: 'node' for per-node classification, 'graph' for per-graph
         """
         super().__init__()
 
@@ -83,6 +85,7 @@ class GIMANBackbone(nn.Module):
         self.dropout_rate = dropout_rate
         self.pooling_method = pooling_method
         self.use_residual = use_residual
+        self.classification_level = classification_level
 
         # Validate architecture parameters
         if len(hidden_dims) != 3:
@@ -107,14 +110,24 @@ class GIMANBackbone(nn.Module):
         else:
             self.residual_proj = None
 
-        # Graph pooling and classification head
-        pooled_dim = self._get_pooled_dimension(hidden_dims[2])
-        self.classifier = nn.Sequential(
-            nn.Linear(pooled_dim, pooled_dim // 2),
-            nn.ReLU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(pooled_dim // 2, output_dim),
-        )
+        # Classification head - different for node vs graph level
+        if classification_level == "node":
+            # Node-level classification: direct mapping from node embeddings
+            self.classifier = nn.Sequential(
+                nn.Linear(hidden_dims[2], hidden_dims[2] // 2),
+                nn.ReLU(),
+                nn.Dropout(dropout_rate),
+                nn.Linear(hidden_dims[2] // 2, output_dim),
+            )
+        else:
+            # Graph-level classification: pooling + classification
+            pooled_dim = self._get_pooled_dimension(hidden_dims[2])
+            self.classifier = nn.Sequential(
+                nn.Linear(pooled_dim, pooled_dim // 2),
+                nn.ReLU(),
+                nn.Dropout(dropout_rate),
+                nn.Linear(pooled_dim // 2, output_dim),
+            )
 
         # Initialize weights
         self._initialize_weights()
@@ -201,22 +214,31 @@ class GIMANBackbone(nn.Module):
         # Final node embeddings
         node_embeddings = h3
 
-        # Graph-level pooling
-        if batch is None:
-            # Single graph case - create dummy batch
-            batch = torch.zeros(x.size(0), dtype=torch.long, device=x.device)
+        # Classification based on level
+        if self.classification_level == "node":
+            # Node-level classification: one prediction per node
+            logits = self.classifier(node_embeddings)
 
-        graph_embedding = self._pool_graph_features(node_embeddings, batch)
+            return {
+                "logits": logits,
+                "node_embeddings": node_embeddings,
+                "layer_embeddings": layer_embeddings,
+            }
+        else:
+            # Graph-level classification: pooling + one prediction per graph
+            if batch is None:
+                # Single graph case - create dummy batch
+                batch = torch.zeros(x.size(0), dtype=torch.long, device=x.device)
 
-        # Classification
-        logits = self.classifier(graph_embedding)
+            graph_embedding = self._pool_graph_features(node_embeddings, batch)
+            logits = self.classifier(graph_embedding)
 
-        return {
-            "logits": logits,
-            "node_embeddings": node_embeddings,
-            "graph_embedding": graph_embedding,
-            "layer_embeddings": layer_embeddings,
-        }
+            return {
+                "logits": logits,
+                "node_embeddings": node_embeddings,
+                "graph_embedding": graph_embedding,
+                "layer_embeddings": layer_embeddings,
+            }
 
     def _pool_graph_features(
         self, node_embeddings: torch.Tensor, batch: torch.Tensor
@@ -296,6 +318,7 @@ class GIMANClassifier(nn.Module):
         output_dim: int = 2,
         dropout_rate: float = 0.3,
         pooling_method: str = "concat",
+        classification_level: str = "node",  # 'node' or 'graph'
     ):
         """Initialize GIMAN classifier.
 
@@ -305,6 +328,7 @@ class GIMANClassifier(nn.Module):
             output_dim: Number of output classes
             dropout_rate: Dropout probability
             pooling_method: Graph pooling method
+            classification_level: 'node' for per-node classification, 'graph' for per-graph
         """
         super().__init__()
 
@@ -317,10 +341,12 @@ class GIMANClassifier(nn.Module):
             output_dim=output_dim,
             dropout_rate=dropout_rate,
             pooling_method=pooling_method,
+            classification_level=classification_level,
         )
 
         self.input_dim = input_dim
         self.output_dim = output_dim
+        self.classification_level = classification_level
 
     def forward(self, data: Data) -> dict[str, torch.Tensor]:
         """Forward pass using PyG Data object.

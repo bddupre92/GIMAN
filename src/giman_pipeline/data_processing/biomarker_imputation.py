@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.experimental import enable_iterative_imputer  # noqa
 from sklearn.impute import IterativeImputer, KNNImputer
 
 # Configure logging
@@ -30,9 +31,9 @@ class BiommarkerImputationPipeline:
 
     This class implements a multi-strategy approach for imputing missing biomarker
     values based on missingness patterns:
-    - KNN imputation for low missingness (<20%)
-    - MICE with RandomForest for moderate missingness (40-55%)
-    - Cohort-based median imputation for high missingness (>70%)
+    - KNN imputation for low-to-moderate missingness (<40%)
+    - MICE with RandomForest for moderate-to-high missingness (40-70%)
+    - Cohort-based median imputation for very high missingness (>70%)
 
     Attributes:
         biomarker_columns (List[str]): List of biomarker column names to impute
@@ -123,14 +124,20 @@ class BiommarkerImputationPipeline:
         Returns:
             Tuple of (low_missing, moderate_missing, high_missing) biomarker lists
         """
-        low_missing = []  # <20% missing - KNN imputation
-        moderate_missing = []  # 40-55% missing - MICE imputation
+        low_missing = []  # <40% missing - KNN imputation
+        moderate_missing = []  # 40-70% missing - MICE imputation
         high_missing = []  # >70% missing - Cohort median imputation
 
         for biomarker, pct in missingness.items():
             if pct < 20:
                 low_missing.append(biomarker)
+            elif 20 <= pct < 40:
+                # Handle intermediate missingness with KNN (20-40% missing)
+                low_missing.append(biomarker)
             elif 40 <= pct <= 55:
+                moderate_missing.append(biomarker)
+            elif 55 < pct <= 70:
+                # Handle high-intermediate missingness with MICE (55-70% missing)
                 moderate_missing.append(biomarker)
             elif pct > 70:
                 high_missing.append(biomarker)

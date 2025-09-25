@@ -14,7 +14,7 @@ import pandas as pd
 from giman_pipeline.data_processing import BiommarkerImputationPipeline
 
 # Add source directory to path
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent
 sys.path.append(str(project_root / "src"))
 
 
@@ -102,11 +102,9 @@ def test_production_pipeline():
         print(f"     {biomarker}: {pct:.1f}% missing")
 
     # Categorize by missingness
-    (
-        low_missing,
-        moderate_missing,
-        high_missing,
-    ) = biomarker_imputer.categorize_by_missingness(missingness)
+    low_missing, moderate_missing, high_missing = (
+        biomarker_imputer.categorize_by_missingness(missingness)
+    )
 
     print("\n   Missingness Categories:")
     print(f"     Low (<20%): {low_missing}")

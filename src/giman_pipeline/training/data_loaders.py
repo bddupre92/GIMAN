@@ -89,32 +89,66 @@ class GIMANDataLoader:
         """
         print("🔄 Loading preprocessed GIMAN data...")
 
-        # Load imputed patient data
-        imputed_file = self.data_dir / "giman_imputed_biomarkers_557_patients.csv"
-        if not imputed_file.exists():
-            raise FileNotFoundError(
-                f"Imputed dataset not found at {imputed_file}. "
-                "Please run the preprocessing pipeline first."
-            )
+        # Load completely imputed patient data - use most recent fixed file
+        fixed_pattern = "giman_biomarker_complete_fixed_557_patients_*.csv"
+        fixed_files = list(self.data_dir.glob(fixed_pattern))
+
+        if fixed_files:
+            # Use the most recent fixed file (fully imputed + cohort labels fixed)
+            imputed_file = max(fixed_files, key=lambda x: x.stat().st_mtime)
+            print(f"📁 Using fixed complete dataset: {imputed_file.name}")
+        else:
+            # Fallback to complete files
+            complete_pattern = "giman_biomarker_complete_557_patients_*.csv"
+            complete_files = list(self.data_dir.glob(complete_pattern))
+
+            if complete_files:
+                imputed_file = max(complete_files, key=lambda x: x.stat().st_mtime)
+                print(f"📁 Using complete dataset: {imputed_file.name}")
+            else:
+                # Final fallback to partial imputation files
+                imputed_pattern = "giman_biomarker_imputed_557_patients_*.csv"
+                imputed_files = list(self.data_dir.glob(imputed_pattern))
+
+                if not imputed_files:
+                    raise FileNotFoundError(
+                        f"No imputed dataset found matching patterns in {self.data_dir}. "
+                        "Please run the preprocessing pipeline first."
+                    )
+
+                imputed_file = max(imputed_files, key=lambda x: x.stat().st_mtime)
+                print(f"📁 Using partial imputation dataset: {imputed_file.name}")
 
         self.patient_data = pd.read_csv(imputed_file)
         print(f"✅ Loaded patient data: {self.patient_data.shape}")
 
         # Load similarity graph
         similarity_constructor = PatientSimilarityGraph(
-            data_path=self.data_dir, threshold=self.similarity_threshold
+            data_path=self.data_dir, similarity_threshold=self.similarity_threshold
         )
 
         # Load existing graph or create new one
+        similarity_graphs_dir = self.data_dir.parent / "03_similarity_graphs"
         try:
-            self.similarity_graph = similarity_constructor.load_similarity_graph()
-            print(
-                f"✅ Loaded similarity graph: {self.similarity_graph.number_of_nodes()} nodes, "
-                f"{self.similarity_graph.number_of_edges()} edges"
-            )
+            # Find the most recent similarity graph directory
+            if similarity_graphs_dir.exists():
+                graph_dirs = list(similarity_graphs_dir.glob("similarity_graph_*"))
+                if graph_dirs:
+                    latest_graph_dir = max(graph_dirs, key=lambda x: x.stat().st_mtime)
+                    self.similarity_graph = (
+                        similarity_constructor.load_similarity_graph(latest_graph_dir)
+                    )
+                    print(
+                        f"✅ Loaded similarity graph: {self.similarity_graph.number_of_nodes()} nodes, "
+                        f"{self.similarity_graph.number_of_edges()} edges from {latest_graph_dir.name}"
+                    )
+                else:
+                    raise FileNotFoundError("No similarity graph directories found")
+            else:
+                raise FileNotFoundError("Similarity graphs directory does not exist")
         except FileNotFoundError:
             print("🔄 Creating new similarity graph...")
-            similarity_constructor.load_imputed_data()
+            similarity_constructor.load_enhanced_cohort()
             self.similarity_graph = similarity_constructor.create_similarity_graph()
             similarity_constructor.save_similarity_graph()
             print(
@@ -144,8 +178,16 @@ class GIMANDataLoader:
 
         print("🔄 Converting to PyTorch Geometric format...")
 
-        # Extract node features (biomarker values)
+        # Extract node features (biomarker values) from pre-imputed dataset
+        # The data should already be clean from your imputation pipeline
         node_features = self.patient_data[self.biomarker_features].values
+
+        # Verify no NaN values exist (they shouldn't in properly imputed data)
+        if np.isnan(node_features).any():
+            nan_count = np.isnan(node_features).sum()
+            raise ValueError(
+                f"Found {nan_count} NaN values in supposedly imputed biomarker data. Please check your imputation pipeline."
+            )
 
         # Standardize features
         node_features_scaled = self.feature_scaler.fit_transform(node_features)
@@ -161,8 +203,14 @@ class GIMANDataLoader:
             edge_weights.append(self.similarity_graph[u][v]["weight"])
         edge_attr = torch.FloatTensor(edge_weights)
 
-        # Create node labels (PD classification)
-        cohort_mapping = {"Parkinson's Disease": 1, "Healthy Control": 0}
+        # Create node labels (PD classification - binary)
+        # Map all PD-related conditions to 1, only HC to 0
+        cohort_mapping = {
+            "Parkinson's Disease": 1,
+            "Healthy Control": 0,
+            "Prodromal": 1,  # Prodromal PD is early-stage PD
+            "SWEDD": 1,  # SWEDD (Subjects Without Evidence of Dopaminergic Deficit) - treat as PD-related
+        }
         y = torch.LongTensor(
             [
                 cohort_mapping[cohort]

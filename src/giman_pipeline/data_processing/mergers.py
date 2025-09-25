@@ -44,18 +44,32 @@ def merge_on_patno_only(
     # Prepare right dataframe for patient-level merge
     right_prepared = right.copy()
 
+    print(f"📊 Processing right dataset: {right.shape[0]:,} records")
+
     # If right has EVENT_ID, consolidate to one record per patient
     if "EVENT_ID" in right_prepared.columns:
-        # Take the most recent/complete record per patient
+        print("🔄 Consolidating to one record per patient...")
+        # For very large datasets, use more efficient groupby
+        if len(right_prepared) > 100000:
+            print("⚡ Using optimized groupby for large dataset...")
+            # Drop duplicates first to speed up groupby
+            right_prepared = right_prepared.drop_duplicates(
+                subset=["PATNO", "EVENT_ID"]
+            )
+            print(f"   After deduplication: {right_prepared.shape[0]:,} records")
+
         right_prepared = right_prepared.groupby("PATNO").last().reset_index()
         print(
-            f"Consolidated {right.shape[0]} visit records to {right_prepared.shape[0]} patient records"
+            f"✅ Consolidated {right.shape[0]:,} visit records to {right_prepared.shape[0]:,} patient records"
         )
 
     # Perform the merge on PATNO only
+    print(
+        f"🔄 Performing merge: left={left.shape[0]:,} × right={right_prepared.shape[0]:,}"
+    )
     merged = pd.merge(left, right_prepared, on=merge_key, how=how, suffixes=suffixes)
 
-    print(f"Patient-level merge on {merge_key}: {merged.shape[0]} records")
+    print(f"✅ Patient-level merge on {merge_key}: {merged.shape[0]:,} records")
     return merged
 
 
@@ -116,7 +130,7 @@ def create_master_dataframe(
 
     Args:
         data_dict: Dictionary of dataset name -> DataFrame
-        merge_type: "patient_level" (PATNO only), "visit_level" (PATNO+EVENT_ID), or "longitudinal" (PATNO+EVENT_ID)
+        merge_type: "patient_level" (PATNO only), "visit_level" (PATNO+EVENT_ID), or "longitudinal" (smart merge)
 
     Returns:
         Master DataFrame with all datasets merged
@@ -125,82 +139,158 @@ def create_master_dataframe(
         >>> # Patient registry (baseline features)
         >>> patient_registry = create_master_dataframe(data_dict, "patient_level")
         >>>
-        >>> # Longitudinal clinical data
-        >>> clinical_long = create_master_dataframe({
-        ...     "updrs_i": updrs_i_df,
-        ...     "updrs_iii": updrs_iii_df
-        ... }, "longitudinal")
+        >>> # Longitudinal clinical data (smart merge based on EVENT_ID availability)
+        >>> clinical_long = create_master_dataframe(data_dict, "longitudinal")
     """
     if not data_dict:
         raise ValueError("No datasets provided")
 
     print(f"Creating {merge_type} master dataframe from {len(data_dict)} datasets")
 
-    # Define merge order based on merge type
+    # Smart strategy: start with the largest longitudinal dataset that has EVENT_ID
+    if merge_type == "longitudinal":
+        # Define datasets that should be treated as patient-level despite having EVENT_ID
+        # These represent screening/enrollment phases, not clinical visits
+        patient_level_override = {
+            "demographics",  # TRANS/SC screening events
+            "participant_status",  # enrollment data
+            "iu_genetic_consensus_20250515",  # genetic data (already no EVENT_ID)
+            "pathology_core_study_data",  # pathology data
+            "neuropathology_results",  # autopsy data (AUT)
+        }
+
+        # Find datasets with EVENT_ID (longitudinal) and without (patient-level)
+        longitudinal_datasets = {}
+        patient_level_datasets = {}
+
+        for name, df in data_dict.items():
+            if name in patient_level_override or "EVENT_ID" not in df.columns:
+                patient_level_datasets[name] = df
+            elif "EVENT_ID" in df.columns:
+                # Check if this dataset has clinical visit EVENT_ID values (BL, V01, V04, etc.)
+                events = set(df["EVENT_ID"].dropna().unique())
+                clinical_events = {
+                    "BL",
+                    "V01",
+                    "V02",
+                    "V03",
+                    "V04",
+                    "V05",
+                    "V06",
+                    "V07",
+                    "V08",
+                    "V09",
+                    "V10",
+                }
+                if events.intersection(clinical_events):
+                    longitudinal_datasets[name] = df
+                else:
+                    # Has EVENT_ID but not clinical visit codes - treat as patient-level
+                    print(
+                        f"Dataset {name} has EVENT_ID but non-clinical events: {sorted(events)[:5]} - treating as patient-level"
+                    )
+                    patient_level_datasets[name] = df
+
+        print(
+            f"Found {len(longitudinal_datasets)} longitudinal datasets and {len(patient_level_datasets)} patient-level datasets"
+        )
+
+        # Start with the largest longitudinal dataset as base
+        if longitudinal_datasets:
+            base_name = max(
+                longitudinal_datasets.keys(),
+                key=lambda k: len(longitudinal_datasets[k]),
+            )
+            master_df = longitudinal_datasets[base_name].copy()
+            print(f"Starting with longitudinal base: {base_name} ({master_df.shape})")
+
+            # Merge other longitudinal datasets using visit-level merge
+            for name, df in longitudinal_datasets.items():
+                if name != base_name:
+                    print(f"Merging longitudinal dataset: {name} ({df.shape})")
+                    master_df = merge_on_patno_event(
+                        master_df, df, how="left", suffixes=("", f"_{name}")
+                    )
+                    print(f"After longitudinal merge: {master_df.shape}")
+
+            # Merge patient-level datasets using patient-level merge
+            for name, df in patient_level_datasets.items():
+                # Skip extremely large datasets that might cause memory issues
+                if len(df) > 500000:
+                    print(
+                        f"⚠️  Skipping large dataset {name}: {df.shape} (too large for efficient merging)"
+                    )
+                    continue
+
+                print(f"Merging patient-level dataset: {name} ({df.shape})")
+                master_df = merge_on_patno_only(
+                    master_df, df, how="left", suffixes=("", f"_{name}")
+                )
+                print(f"After patient-level merge: {master_df.shape}")
+
+        else:
+            # No longitudinal datasets - fall back to patient-level merge
+            print("No longitudinal datasets found - using patient-level merge")
+            merge_type = "patient_level"
+
+    # Original logic for patient_level and visit_level
     if merge_type == "patient_level":
         # Patient registry: static/baseline data first
         merge_order = [
             "participant_status",  # Base patient registry
             "demographics",  # Demographics (screening phase)
-            "genetic_consensus",  # Genetics (patient-level)
+            "iu_genetic_consensus_20250515",  # Genetics (patient-level)
             "fs7_aparc_cth",  # Baseline imaging
-            "xing_core_lab",  # Baseline DAT-SPECT
+            "xing_core_lab__quant_sbr",  # Baseline DAT-SPECT
         ]
         merge_func = merge_on_patno_only
 
-    elif merge_type in ["visit_level", "longitudinal"]:
+    elif merge_type == "visit_level":
         # Longitudinal data: clinical assessments
         merge_order = [
-            "mds_updrs_i",  # Clinical assessments
-            "mds_updrs_iii",
-            "xing_core_lab",  # Longitudinal imaging
+            "mds_updrs_part_i",  # Clinical assessments
+            "mds_updrs_part_iii",
+            "xing_core_lab__quant_sbr",  # Longitudinal imaging
         ]
         merge_func = merge_on_patno_event
 
-    else:
-        raise ValueError(
-            f"Unknown merge_type: {merge_type}. Use 'patient_level', 'visit_level', or 'longitudinal'"
-        )
+    if merge_type in ["patient_level", "visit_level"]:
+        # Filter to available datasets
+        available_datasets = [key for key in merge_order if key in data_dict]
 
-    # Filter to available datasets
-    available_datasets = [key for key in merge_order if key in data_dict]
+        if not available_datasets:
+            # If no datasets match merge_order, use all available
+            available_datasets = list(data_dict.keys())
 
-    if not available_datasets:
-        # If no datasets match merge_order, use all available
-        available_datasets = list(data_dict.keys())
+        print(f"Merging datasets in order: {available_datasets}")
 
-    print(f"Merging datasets in order: {available_datasets}")
+        # Start with first dataset
+        master_df = data_dict[available_datasets[0]].copy()
+        print(f"Starting with {available_datasets[0]}: {master_df.shape}")
 
-    # Start with first dataset
-    master_df = data_dict[available_datasets[0]].copy()
-    print(f"Starting with {available_datasets[0]}: {master_df.shape}")
+        # Sequentially merge remaining datasets
+        for dataset_name in available_datasets[1:]:
+            if dataset_name in data_dict:
+                print(f"Merging {dataset_name}: {data_dict[dataset_name].shape}")
 
-    # Sequentially merge remaining datasets
-    for dataset_name in available_datasets[1:]:
-        if dataset_name in data_dict:
-            print(f"Merging {dataset_name}: {data_dict[dataset_name].shape}")
+                master_df = merge_func(
+                    master_df,
+                    data_dict[dataset_name],
+                    how="left",  # Use left join to preserve all base records
+                    suffixes=("", f"_{dataset_name}"),
+                )
 
-            master_df = merge_func(
-                master_df,
-                data_dict[dataset_name],
-                how="left",  # Use left join to preserve all base records
-                suffixes=("", f"_{dataset_name}"),
-            )
-
-            print(f"After merge: {master_df.shape}")
+                print(f"After merge: {master_df.shape}")
 
     # Sort appropriately
-    if merge_type == "patient_level":
-        if "PATNO" in master_df.columns:
-            master_df = master_df.sort_values(["PATNO"]).reset_index(drop=True)
-    else:
-        if "PATNO" in master_df.columns and "EVENT_ID" in master_df.columns:
-            master_df = master_df.sort_values(["PATNO", "EVENT_ID"]).reset_index(
-                drop=True
-            )
-
-    print(f"Final {merge_type} dataframe: {master_df.shape}")
-    if "PATNO" in master_df.columns:
+    if "PATNO" in master_df.columns and "EVENT_ID" in master_df.columns:
+        master_df = master_df.sort_values(["PATNO", "EVENT_ID"]).reset_index(drop=True)
+        print(f"Final longitudinal dataframe: {master_df.shape}")
+        print(f"Unique patients: {master_df['PATNO'].nunique()}")
+        print(f"Unique visits: {master_df['EVENT_ID'].nunique()}")
+    elif "PATNO" in master_df.columns:
+        master_df = master_df.sort_values(["PATNO"]).reset_index(drop=True)
+        print(f"Final patient-level dataframe: {master_df.shape}")
         print(f"Unique patients: {master_df['PATNO'].nunique()}")
 
     return master_df

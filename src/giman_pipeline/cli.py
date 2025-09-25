@@ -132,7 +132,8 @@ def run_preprocessing_pipeline(
 
         # Step 3: Merge datasets
         print("\n=== Step 3: Merging datasets ===")
-        master_df = create_master_dataframe(cleaned_data)
+        # Use longitudinal merge to preserve EVENT_ID for visit-level data
+        master_df = create_master_dataframe(cleaned_data, merge_type="longitudinal")
 
         # Step 4: Final preprocessing
         print("\n=== Step 4: Final preprocessing ===")
