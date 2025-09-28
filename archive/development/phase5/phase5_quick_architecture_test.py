@@ -10,9 +10,10 @@ Date: September 2025
 
 import logging
 import warnings
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 from sklearn.metrics import r2_score, roc_auc_score
 
 # Suppress warnings
@@ -26,7 +27,14 @@ logger = logging.getLogger(__name__)
 class TaskSpecificGAT(nn.Module):
     """Simplified GAT for testing."""
 
-    def __init__(self, in_features=96, hidden_features=32, out_features=32, num_heads=2, dropout=0.7):
+    def __init__(
+        self,
+        in_features=96,
+        hidden_features=32,
+        out_features=32,
+        num_heads=2,
+        dropout=0.7,
+    ):
         super().__init__()
         self.num_heads = num_heads
         self.hidden_features = hidden_features
@@ -75,7 +83,9 @@ class TaskSpecificGAT(nn.Module):
 class TaskSpecificGIMANTest(nn.Module):
     """Simplified Phase 5 GIMAN for testing."""
 
-    def __init__(self, spatial_dim=256, genomic_dim=8, temporal_dim=64, embed_dim=32, dropout=0.7):
+    def __init__(
+        self, spatial_dim=256, genomic_dim=8, temporal_dim=64, embed_dim=32, dropout=0.7
+    ):
         super().__init__()
         self.embed_dim = embed_dim
 
@@ -196,15 +206,15 @@ def test_phase5_architecture():
     spatial = torch.randn(batch_size, num_nodes, spatial_dim)
     genomic = torch.randn(batch_size, genomic_dim)
     temporal = torch.randn(batch_size, num_nodes, temporal_dim)
-    
+
     # Adjacency matrix (fully connected for simplicity)
     adj_matrix = torch.ones(num_nodes, num_nodes)
-    
+
     # Synthetic targets
     y_motor = torch.randn(batch_size)
     y_cognitive = torch.randint(0, 2, (batch_size,)).float()
 
-    logger.info(f"📊 Synthetic data created:")
+    logger.info("📊 Synthetic data created:")
     logger.info(f"   Batch size: {batch_size}")
     logger.info(f"   Spatial: {spatial.shape}")
     logger.info(f"   Genomic: {genomic.shape}")
@@ -216,8 +226,8 @@ def test_phase5_architecture():
     model = TaskSpecificGIMANTest()
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    
-    logger.info(f"✅ Model created successfully")
+
+    logger.info("✅ Model created successfully")
     logger.info(f"   Total parameters: {total_params:,}")
     logger.info(f"   Trainable parameters: {trainable_params:,}")
 
@@ -226,35 +236,37 @@ def test_phase5_architecture():
     model.eval()
     with torch.no_grad():
         motor_pred, cognitive_pred = model(spatial, genomic, temporal, adj_matrix)
-    
-    logger.info(f"✅ Forward pass successful")
+
+    logger.info("✅ Forward pass successful")
     logger.info(f"   Motor predictions shape: {motor_pred.shape}")
     logger.info(f"   Cognitive predictions shape: {cognitive_pred.shape}")
     logger.info(f"   Motor range: [{motor_pred.min():.3f}, {motor_pred.max():.3f}]")
-    logger.info(f"   Cognitive range: [{cognitive_pred.min():.3f}, {cognitive_pred.max():.3f}]")
+    logger.info(
+        f"   Cognitive range: [{cognitive_pred.min():.3f}, {cognitive_pred.max():.3f}]"
+    )
 
     # Test training step
     logger.info("\n🏃 Testing training step...")
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    
+
     motor_criterion = nn.MSELoss()
     cognitive_criterion = nn.BCELoss()
-    
+
     # Forward pass
     motor_pred, cognitive_pred = model(spatial, genomic, temporal, adj_matrix)
-    
+
     # Compute losses
     motor_loss = motor_criterion(motor_pred.squeeze(), y_motor)
     cognitive_loss = cognitive_criterion(cognitive_pred.squeeze(), y_cognitive)
     total_loss = 0.7 * motor_loss + 0.3 * cognitive_loss
-    
+
     # Backward pass
     optimizer.zero_grad()
     total_loss.backward()
     optimizer.step()
-    
-    logger.info(f"✅ Training step successful")
+
+    logger.info("✅ Training step successful")
     logger.info(f"   Motor loss: {motor_loss.item():.4f}")
     logger.info(f"   Cognitive loss: {cognitive_loss.item():.4f}")
     logger.info(f"   Total loss: {total_loss.item():.4f}")
@@ -262,22 +274,22 @@ def test_phase5_architecture():
     # Test multiple training steps
     logger.info("\n🔄 Testing multiple training steps...")
     losses = []
-    
+
     for epoch in range(10):
         optimizer.zero_grad()
         motor_pred, cognitive_pred = model(spatial, genomic, temporal, adj_matrix)
-        
+
         motor_loss = motor_criterion(motor_pred.squeeze(), y_motor)
         cognitive_loss = cognitive_criterion(cognitive_pred.squeeze(), y_cognitive)
         total_loss = 0.7 * motor_loss + 0.3 * cognitive_loss
-        
+
         total_loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
-        
+
         losses.append(total_loss.item())
-    
-    logger.info(f"✅ Multi-step training successful")
+
+    logger.info("✅ Multi-step training successful")
     logger.info(f"   Initial loss: {losses[0]:.4f}")
     logger.info(f"   Final loss: {losses[-1]:.4f}")
     logger.info(f"   Loss change: {losses[-1] - losses[0]:+.4f}")
@@ -287,22 +299,22 @@ def test_phase5_architecture():
     model.eval()
     with torch.no_grad():
         motor_pred, cognitive_pred = model(spatial, genomic, temporal, adj_matrix)
-    
+
     # Convert to numpy for metrics
     motor_pred_np = motor_pred.squeeze().numpy()
     cognitive_pred_np = cognitive_pred.squeeze().numpy()
     y_motor_np = y_motor.numpy()
     y_cognitive_np = y_cognitive.numpy()
-    
+
     # Calculate metrics
     motor_r2 = r2_score(y_motor_np, motor_pred_np)
-    
+
     try:
         cognitive_auc = roc_auc_score(y_cognitive_np, cognitive_pred_np)
     except ValueError:
         cognitive_auc = 0.5  # Random baseline
-    
-    logger.info(f"✅ Metrics computation successful")
+
+    logger.info("✅ Metrics computation successful")
     logger.info(f"   Motor R²: {motor_r2:.4f}")
     logger.info(f"   Cognitive AUC: {cognitive_auc:.4f}")
 
@@ -339,20 +351,22 @@ def test_dynamic_loss_weighting():
         def _adaptive_weighting(self, motor_loss, cognitive_loss):
             self.motor_losses.append(motor_loss)
             self.cognitive_losses.append(cognitive_loss)
-            
+
             if len(self.motor_losses) < 3:
                 return self.motor_weight, self.cognitive_weight
-            
+
             avg_motor = np.mean(self.motor_losses[-3:])
             avg_cognitive = np.mean(self.cognitive_losses[-3:])
-            
+
             total = avg_motor + avg_cognitive
             if total > 0:
                 motor_rel = avg_motor / total
                 target_motor_weight = 0.5 + (motor_rel - 0.5) * 0.4
-                self.motor_weight += self.adaptation_rate * (target_motor_weight - self.motor_weight)
+                self.motor_weight += self.adaptation_rate * (
+                    target_motor_weight - self.motor_weight
+                )
                 self.cognitive_weight = 1.0 - self.motor_weight
-            
+
             return self.motor_weight, self.cognitive_weight
 
         def _curriculum_weighting(self, epoch):
@@ -363,24 +377,28 @@ def test_dynamic_loss_weighting():
                 progress = (epoch - 25) / 25
                 progress = min(progress, 1.0)
                 motor_weight = 0.7 - 0.2 * progress
-            
+
             return motor_weight, 1.0 - motor_weight
 
     # Test all strategies
     strategies = ["fixed", "adaptive", "curriculum"]
-    
+
     for strategy in strategies:
         logger.info(f"\n🔧 Testing '{strategy}' strategy...")
         weighter = DynamicLossWeighter(strategy=strategy)
-        
+
         # Simulate training with changing losses
         motor_losses = [0.8, 0.6, 0.4, 0.5, 0.3]
         cognitive_losses = [0.7, 0.8, 0.6, 0.4, 0.5]
-        
-        for epoch, (m_loss, c_loss) in enumerate(zip(motor_losses, cognitive_losses)):
+
+        for epoch, (m_loss, c_loss) in enumerate(
+            zip(motor_losses, cognitive_losses, strict=False)
+        ):
             m_weight, c_weight = weighter.get_weights(m_loss, c_loss, epoch)
-            logger.info(f"   Epoch {epoch}: Motor={m_weight:.3f}, Cognitive={c_weight:.3f}")
-        
+            logger.info(
+                f"   Epoch {epoch}: Motor={m_weight:.3f}, Cognitive={c_weight:.3f}"
+            )
+
         logger.info(f"✅ {strategy.capitalize()} strategy working correctly")
 
     return True
@@ -399,20 +417,22 @@ if __name__ == "__main__":
     # Summary
     logger.info("\n🎉 Phase 5 Quick Test Summary")
     logger.info("=" * 40)
-    logger.info(f"✅ Task-specific architecture: WORKING")
+    logger.info("✅ Task-specific architecture: WORKING")
     logger.info(f"   Model parameters: {arch_results['model_params']:,}")
     logger.info(f"   Motor R²: {arch_results['motor_r2']:.4f}")
     logger.info(f"   Cognitive AUC: {arch_results['cognitive_auc']:.4f}")
     logger.info(f"   Loss reduction: {arch_results['loss_reduction']:.4f}")
-    
-    logger.info(f"✅ Dynamic loss weighting: WORKING")
-    
+
+    logger.info("✅ Dynamic loss weighting: WORKING")
+
     print("\n🎉 Phase 5 Architecture Test Complete!")
     print("✅ Task-specific towers functioning correctly")
     print("✅ Dynamic loss weighting operational")
     print("🚀 Phase 5 core architecture validated!")
-    print(f"\nKey Results:")
+    print("\nKey Results:")
     print(f"  - Model size: {arch_results['model_params']:,} parameters")
     print(f"  - Motor performance: R² = {arch_results['motor_r2']:.4f}")
     print(f"  - Cognitive performance: AUC = {arch_results['cognitive_auc']:.4f}")
-    print(f"  - Training convergence: {arch_results['loss_reduction']:.4f} loss reduction")
+    print(
+        f"  - Training convergence: {arch_results['loss_reduction']:.4f} loss reduction"
+    )

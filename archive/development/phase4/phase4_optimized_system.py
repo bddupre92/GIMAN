@@ -588,7 +588,7 @@ def main():
     phase3_dir = Path(__file__).parent.parent / "phase3"
     sys.path.insert(0, str(phase3_dir))
 
-    from phase3_1_real_data_integration import RealDataPhase3Integration
+    from phase3.phase3_1_real_data_integration import RealDataPhase3Integration
 
     integrator = RealDataPhase3Integration()
     integrator.load_real_ppmi_data()

@@ -22,13 +22,10 @@ Date: September 2025
 
 import logging
 import warnings
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
 
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from sklearn.metrics import r2_score, roc_auc_score
 from sklearn.model_selection import LeaveOneOut
 from sklearn.preprocessing import StandardScaler
@@ -37,16 +34,17 @@ from sklearn.preprocessing import StandardScaler
 warnings.filterwarnings("ignore")
 
 # Import our dependencies
+import os
 import sys
 
-sys.path.append(
-    "/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/archive/development/phase3"
+# Add Phase 3 path
+phase3_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "phase3"
 )
-from phase3.phase3_1_real_data_integration import RealDataPhase3Integration
+sys.path.insert(0, phase3_path)
+from phase3_1_real_data_integration import RealDataPhase3Integration
 
-sys.path.append(
-    "/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/archive/development/phase5"
-)
+# Import from same directory
 from phase5_task_specific_giman import TaskSpecificGIMANSystem
 
 # Configure logging
@@ -59,7 +57,7 @@ class DynamicLossWeighter:
 
     def __init__(self, strategy: str = "fixed", initial_motor_weight: float = 0.7):
         """Initialize dynamic loss weighter.
-        
+
         Args:
             strategy: Loss weighting strategy ("fixed", "adaptive", "curriculum")
             initial_motor_weight: Initial weight for motor task (cognitive = 1 - motor)
@@ -67,27 +65,31 @@ class DynamicLossWeighter:
         self.strategy = strategy
         self.motor_weight = initial_motor_weight
         self.cognitive_weight = 1.0 - initial_motor_weight
-        
+
         # Adaptive weighting parameters
         self.motor_losses = []
         self.cognitive_losses = []
         self.adaptation_rate = 0.1
-        
+
         # Curriculum parameters
         self.epoch_count = 0
         self.curriculum_epochs = 50
-        
-        logger.info(f"🎯 Dynamic Loss Weighter initialized with '{strategy}' strategy")
-        logger.info(f"   Initial weights: Motor={self.motor_weight:.2f}, Cognitive={self.cognitive_weight:.2f}")
 
-    def get_weights(self, motor_loss: float, cognitive_loss: float, epoch: int = 0) -> Tuple[float, float]:
+        logger.info(f"🎯 Dynamic Loss Weighter initialized with '{strategy}' strategy")
+        logger.info(
+            f"   Initial weights: Motor={self.motor_weight:.2f}, Cognitive={self.cognitive_weight:.2f}"
+        )
+
+    def get_weights(
+        self, motor_loss: float, cognitive_loss: float, epoch: int = 0
+    ) -> tuple[float, float]:
         """Get current loss weights based on strategy.
-        
+
         Args:
             motor_loss: Current motor task loss
             cognitive_loss: Current cognitive task loss
             epoch: Current training epoch
-            
+
         Returns:
             Tuple of (motor_weight, cognitive_weight)
         """
@@ -101,47 +103,53 @@ class DynamicLossWeighter:
             logger.warning(f"Unknown strategy '{self.strategy}', using fixed weighting")
             return self._fixed_weighting()
 
-    def _fixed_weighting(self) -> Tuple[float, float]:
+    def _fixed_weighting(self) -> tuple[float, float]:
         """Fixed weighting strategy."""
         return self.motor_weight, self.cognitive_weight
 
-    def _adaptive_weighting(self, motor_loss: float, cognitive_loss: float) -> Tuple[float, float]:
+    def _adaptive_weighting(
+        self, motor_loss: float, cognitive_loss: float
+    ) -> tuple[float, float]:
         """Adaptive weighting based on relative task performance."""
         self.motor_losses.append(motor_loss)
         self.cognitive_losses.append(cognitive_loss)
-        
+
         # Keep only recent losses for adaptation
         if len(self.motor_losses) > 10:
             self.motor_losses = self.motor_losses[-10:]
             self.cognitive_losses = self.cognitive_losses[-10:]
-        
+
         if len(self.motor_losses) < 3:
             return self.motor_weight, self.cognitive_weight
-        
+
         # Calculate relative performance (higher loss = worse performance = higher weight)
         avg_motor_loss = np.mean(self.motor_losses[-3:])
-        avg_cognitive_loss = np.mean(self.cognitive_losses[-3:]) 
-        
+        avg_cognitive_loss = np.mean(self.cognitive_losses[-3:])
+
         # Normalize losses to [0, 1] range for comparison
         total_loss = avg_motor_loss + avg_cognitive_loss
         if total_loss > 0:
             motor_relative = avg_motor_loss / total_loss
             cognitive_relative = avg_cognitive_loss / total_loss
-            
+
             # Adaptive update (focus more on worse-performing task)
-            target_motor_weight = 0.5 + (motor_relative - 0.5) * 0.4  # Range: [0.3, 0.7]
+            target_motor_weight = (
+                0.5 + (motor_relative - 0.5) * 0.4
+            )  # Range: [0.3, 0.7]
             target_cognitive_weight = 1.0 - target_motor_weight
-            
+
             # Smooth adaptation
-            self.motor_weight += self.adaptation_rate * (target_motor_weight - self.motor_weight)
+            self.motor_weight += self.adaptation_rate * (
+                target_motor_weight - self.motor_weight
+            )
             self.cognitive_weight = 1.0 - self.motor_weight
-        
+
         return self.motor_weight, self.cognitive_weight
 
-    def _curriculum_weighting(self, epoch: int) -> Tuple[float, float]:
+    def _curriculum_weighting(self, epoch: int) -> tuple[float, float]:
         """Curriculum weighting that shifts emphasis during training."""
         self.epoch_count = epoch
-        
+
         if epoch < self.curriculum_epochs // 2:
             # Early training: Focus more on motor task (easier to optimize)
             progress = epoch / (self.curriculum_epochs // 2)
@@ -149,21 +157,25 @@ class DynamicLossWeighter:
             cognitive_weight = 1.0 - motor_weight
         else:
             # Later training: Gradually increase cognitive focus
-            progress = (epoch - self.curriculum_epochs // 2) / (self.curriculum_epochs // 2)
+            progress = (epoch - self.curriculum_epochs // 2) / (
+                self.curriculum_epochs // 2
+            )
             progress = min(progress, 1.0)
             motor_weight = 0.7 - 0.2 * progress  # 0.7 -> 0.5
             cognitive_weight = 1.0 - motor_weight
-        
+
         return motor_weight, cognitive_weight
 
-    def get_status(self) -> Dict[str, float]:
+    def get_status(self) -> dict[str, float]:
         """Get current weighting status."""
         return {
             "strategy": self.strategy,
             "motor_weight": self.motor_weight,
             "cognitive_weight": self.cognitive_weight,
             "recent_motor_loss": self.motor_losses[-1] if self.motor_losses else 0.0,
-            "recent_cognitive_loss": self.cognitive_losses[-1] if self.cognitive_losses else 0.0,
+            "recent_cognitive_loss": self.cognitive_losses[-1]
+            if self.cognitive_losses
+            else 0.0,
         }
 
 
@@ -172,32 +184,36 @@ class DynamicLossGIMANSystem(TaskSpecificGIMANSystem):
 
     def __init__(self, loss_strategy: str = "fixed", **kwargs):
         """Initialize dynamic loss GIMAN system.
-        
+
         Args:
             loss_strategy: Loss weighting strategy
             **kwargs: Arguments passed to TaskSpecificGIMANSystem
         """
         super().__init__(**kwargs)
         self.loss_weighter = DynamicLossWeighter(strategy=loss_strategy)
-        logger.info(f"🔄 Dynamic Loss GIMAN initialized with '{loss_strategy}' weighting")
+        logger.info(
+            f"🔄 Dynamic Loss GIMAN initialized with '{loss_strategy}' weighting"
+        )
 
-    def compute_weighted_loss(self, motor_pred, motor_target, cognitive_pred, cognitive_target, epoch: int = 0):
+    def compute_weighted_loss(
+        self, motor_pred, motor_target, cognitive_pred, cognitive_target, epoch: int = 0
+    ):
         """Compute dynamically weighted loss."""
         # Task-specific losses
         motor_criterion = nn.MSELoss()
         cognitive_criterion = nn.BCELoss()
-        
+
         motor_loss = motor_criterion(motor_pred.squeeze(), motor_target)
         cognitive_loss = cognitive_criterion(cognitive_pred.squeeze(), cognitive_target)
-        
+
         # Get dynamic weights
         motor_weight, cognitive_weight = self.loss_weighter.get_weights(
             motor_loss.item(), cognitive_loss.item(), epoch
         )
-        
+
         # Weighted combination
         total_loss = motor_weight * motor_loss + cognitive_weight * cognitive_loss
-        
+
         return total_loss, motor_loss, cognitive_loss, motor_weight, cognitive_weight
 
 
@@ -210,8 +226,14 @@ class DynamicLossLOOCVEvaluator:
         self.scaler = StandardScaler()
 
     def evaluate_strategy(
-        self, X_spatial, X_genomic, X_temporal, y_motor, y_cognitive, adj_matrix,
-        loss_strategy: str = "fixed"
+        self,
+        X_spatial,
+        X_genomic,
+        X_temporal,
+        y_motor,
+        y_cognitive,
+        adj_matrix,
+        loss_strategy: str = "fixed",
     ):
         """Evaluate a specific loss weighting strategy."""
         logger.info(f"🔄 Evaluating '{loss_strategy}' loss weighting strategy...")
@@ -226,7 +248,9 @@ class DynamicLossLOOCVEvaluator:
         training_histories = []
 
         for fold, (train_idx, test_idx) in enumerate(loo.split(X_spatial)):
-            logger.info(f"📊 Processing fold {fold + 1}/{n_samples} with {loss_strategy} weighting")
+            logger.info(
+                f"📊 Processing fold {fold + 1}/{n_samples} with {loss_strategy} weighting"
+            )
 
             # Split data
             X_train_spatial, X_test_spatial = X_spatial[train_idx], X_spatial[test_idx]
@@ -266,8 +290,13 @@ class DynamicLossLOOCVEvaluator:
             # Train model with dynamic loss
             model = DynamicLossGIMANSystem(loss_strategy=loss_strategy).to(self.device)
             training_history = self._train_fold_dynamic(
-                model, X_train_spatial, X_train_genomic, X_train_temporal,
-                y_train_motor, y_train_cognitive, adj_matrix
+                model,
+                X_train_spatial,
+                X_train_genomic,
+                X_train_temporal,
+                y_train_motor,
+                y_train_cognitive,
+                adj_matrix,
             )
 
             # Test model
@@ -348,11 +377,15 @@ class DynamicLossLOOCVEvaluator:
             optimizer.zero_grad()
 
             # Forward pass
-            motor_pred, cognitive_pred = model(X_spatial, X_genomic, X_temporal, adj_matrix)
+            motor_pred, cognitive_pred = model(
+                X_spatial, X_genomic, X_temporal, adj_matrix
+            )
 
             # Dynamic weighted loss
-            total_loss, motor_loss, cognitive_loss, motor_weight, cognitive_weight = model.compute_weighted_loss(
-                motor_pred, y_motor, cognitive_pred, y_cognitive, epoch
+            total_loss, motor_loss, cognitive_loss, motor_weight, cognitive_weight = (
+                model.compute_weighted_loss(
+                    motor_pred, y_motor, cognitive_pred, y_cognitive, epoch
+                )
             )
 
             # Backward pass
@@ -363,7 +396,7 @@ class DynamicLossLOOCVEvaluator:
             # Record training history
             training_history["total_losses"].append(total_loss.item())
             training_history["motor_losses"].append(motor_loss.item())
-            training_history["cognitive_losses"].append(cognitive_loss.item()) 
+            training_history["cognitive_losses"].append(cognitive_loss.item())
             training_history["motor_weights"].append(motor_weight)
             training_history["cognitive_weights"].append(cognitive_weight)
 
@@ -396,7 +429,9 @@ class DynamicLossLOOCVEvaluator:
                 X_temporal = X_temporal.unsqueeze(0)
 
             # Forward pass
-            motor_pred, cognitive_pred = model(X_spatial, X_genomic, X_temporal, adj_matrix)
+            motor_pred, cognitive_pred = model(
+                X_spatial, X_genomic, X_temporal, adj_matrix
+            )
 
             return motor_pred.cpu().numpy(), cognitive_pred.cpu().numpy()
 
@@ -431,14 +466,19 @@ def run_dynamic_loss_experiments():
 
     for strategy in strategies:
         logger.info(f"\n🔄 Testing '{strategy}' loss weighting strategy...")
-        
+
         results = evaluator.evaluate_strategy(
-            X_spatial, X_genomic, X_temporal, y_motor, y_cognitive, adj_matrix,
-            loss_strategy=strategy
+            X_spatial,
+            X_genomic,
+            X_temporal,
+            y_motor,
+            y_cognitive,
+            adj_matrix,
+            loss_strategy=strategy,
         )
-        
+
         all_results[strategy] = results
-        
+
         logger.info(f"📊 {strategy.upper()} Results:")
         logger.info(f"   Motor R² = {results['motor_r2']:.4f}")
         logger.info(f"   Cognitive AUC = {results['cognitive_auc']:.4f}")
@@ -446,16 +486,22 @@ def run_dynamic_loss_experiments():
     # Compare strategies
     logger.info("\n🏆 STRATEGY COMPARISON:")
     logger.info("=" * 50)
-    
-    best_motor_strategy = max(all_results.keys(), key=lambda k: all_results[k]['motor_r2'])
-    best_cognitive_strategy = max(all_results.keys(), key=lambda k: all_results[k]['cognitive_auc'])
-    
+
+    best_motor_strategy = max(
+        all_results.keys(), key=lambda k: all_results[k]["motor_r2"]
+    )
+    best_cognitive_strategy = max(
+        all_results.keys(), key=lambda k: all_results[k]["cognitive_auc"]
+    )
+
     for strategy in strategies:
         results = all_results[strategy]
         motor_flag = "🥇" if strategy == best_motor_strategy else "  "
         cognitive_flag = "🥇" if strategy == best_cognitive_strategy else "  "
-        
-        logger.info(f"{motor_flag} {cognitive_flag} {strategy.upper():>10}: Motor R² = {results['motor_r2']:>7.4f} | Cognitive AUC = {results['cognitive_auc']:>6.4f}")
+
+        logger.info(
+            f"{motor_flag} {cognitive_flag} {strategy.upper():>10}: Motor R² = {results['motor_r2']:>7.4f} | Cognitive AUC = {results['cognitive_auc']:>6.4f}"
+        )
 
     return all_results
 
@@ -466,10 +512,12 @@ if __name__ == "__main__":
 
     print("\n🎉 Phase 5 Dynamic Loss Weighting Experiments Completed!")
     print("\nBest performing strategies:")
-    
-    best_motor = max(results.keys(), key=lambda k: results[k]['motor_r2'])
-    best_cognitive = max(results.keys(), key=lambda k: results[k]['cognitive_auc'])
-    
+
+    best_motor = max(results.keys(), key=lambda k: results[k]["motor_r2"])
+    best_cognitive = max(results.keys(), key=lambda k: results[k]["cognitive_auc"])
+
     print(f"🎯 Best Motor R²: {best_motor} ({results[best_motor]['motor_r2']:.4f})")
-    print(f"🧠 Best Cognitive AUC: {best_cognitive} ({results[best_cognitive]['cognitive_auc']:.4f})")
+    print(
+        f"🧠 Best Cognitive AUC: {best_cognitive} ({results[best_cognitive]['cognitive_auc']:.4f})"
+    )
     print("\n📈 Dynamic loss weighting analysis complete!")

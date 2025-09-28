@@ -35,7 +35,7 @@ import sys
 sys.path.append(
     "/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/archive/development/phase3"
 )
-from phase3_1_real_data_integration import RealDataPhase3Integration
+from phase3.phase3_1_real_data_integration import RealDataPhase3Integration
 
 # Configure logging
 logging.basicConfig(
