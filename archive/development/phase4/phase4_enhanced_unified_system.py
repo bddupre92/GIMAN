@@ -19,6 +19,7 @@ Date: September 24, 2025
 import logging
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -649,6 +650,9 @@ def main():
     logger.info(f"📋 Configuration: {config}")
 
     # Load data (using Phase 3.1 integration)
+    # Import our previous phase models
+    archive_phase3_path = Path(__file__).parent.parent / "phase3"
+    sys.path.append(str(archive_phase3_path))
     from phase3_1_real_data_integration import RealDataPhase3Integration
 
     integrator = RealDataPhase3Integration()

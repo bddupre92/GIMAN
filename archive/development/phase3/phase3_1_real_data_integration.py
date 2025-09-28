@@ -67,9 +67,11 @@ class RealDataPhase3Integration:
 
         # Get project root (3 levels up from archive/development/phase3/)
         project_root = Path(__file__).resolve().parent.parent.parent.parent
-        
+
         # Load enhanced dataset (genetic variants, biomarkers)
-        self.enhanced_df = pd.read_csv(project_root / "data/enhanced/enhanced_dataset_latest.csv")
+        self.enhanced_df = pd.read_csv(
+            project_root / "data/enhanced/enhanced_dataset_latest.csv"
+        )
         logger.info(f"✅ Enhanced dataset: {len(self.enhanced_df)} patients")
 
         # Load longitudinal dataset (imaging features)
@@ -469,9 +471,12 @@ class RealDataPhase3Integration:
                 temporal_embeddings.append(np.zeros(256))
 
         self.temporal_embeddings = np.array(temporal_embeddings, dtype=np.float32)
-        self.temporal_embeddings = self.temporal_embeddings / np.linalg.norm(
-            self.temporal_embeddings, axis=1, keepdims=True
-        )
+
+        # Safe normalization with epsilon to prevent division by zero
+        norms = np.linalg.norm(self.temporal_embeddings, axis=1, keepdims=True)
+        epsilon = 1e-8
+        safe_norms = np.where(norms < epsilon, epsilon, norms)
+        self.temporal_embeddings = self.temporal_embeddings / safe_norms
 
         logger.info(f"✅ Temporal embeddings: {self.temporal_embeddings.shape}")
 
@@ -600,42 +605,51 @@ def main():
     """Demonstrate Phase 3.1 Real Data Integration."""
     logger.info("🚀 Phase 3.1 Real Data Integration Demo")
     logger.info("=" * 50)
-    
+
     # Initialize the integration system
     integrator = RealDataPhase3Integration()
-    
+
     # Load and prepare all data
     integrator.load_and_prepare_data()
-    
+
     # Display final summary
     logger.info("\n📋 Final Data Summary:")
     logger.info(f"   Total patients: {len(integrator.patient_ids)}")
-    
+
     if integrator.spatiotemporal_embeddings is not None:
-        logger.info(f"   Spatiotemporal embeddings: {integrator.spatiotemporal_embeddings.shape}")
-        logger.info(f"   Spatiotemporal mean: {np.mean(integrator.spatiotemporal_embeddings):.4f}")
-    
+        logger.info(
+            f"   Spatiotemporal embeddings: {integrator.spatiotemporal_embeddings.shape}"
+        )
+        logger.info(
+            f"   Spatiotemporal mean: {np.mean(integrator.spatiotemporal_embeddings):.4f}"
+        )
+
     if integrator.genomic_embeddings is not None:
         logger.info(f"   Genomic embeddings: {integrator.genomic_embeddings.shape}")
         logger.info(f"   Genomic mean: {np.mean(integrator.genomic_embeddings):.4f}")
-    
+
     if integrator.temporal_embeddings is not None:
         logger.info(f"   Temporal embeddings: {integrator.temporal_embeddings.shape}")
         logger.info(f"   Temporal mean: {np.mean(integrator.temporal_embeddings):.4f}")
-    
+
     if integrator.prognostic_targets is not None:
         logger.info(f"   Prognostic targets: {integrator.prognostic_targets.shape}")
         motor_mean = np.mean(integrator.prognostic_targets[:, 0])
         cognitive_rate = np.mean(integrator.prognostic_targets[:, 1])
         logger.info(f"   Motor progression mean: {motor_mean:.4f}")
         logger.info(f"   Cognitive conversion rate: {cognitive_rate:.1%}")
-    
-    if hasattr(integrator, 'similarity_matrix') and integrator.similarity_matrix is not None:
+
+    if (
+        hasattr(integrator, "similarity_matrix")
+        and integrator.similarity_matrix is not None
+    ):
         logger.info(f"   Similarity matrix: {integrator.similarity_matrix.shape}")
-        logger.info(f"   Graph edges: {integrator.edge_index.shape[1] if hasattr(integrator, 'edge_index') else 'N/A'}")
-    
+        logger.info(
+            f"   Graph edges: {integrator.edge_index.shape[1] if hasattr(integrator, 'edge_index') else 'N/A'}"
+        )
+
     logger.info("\n✅ Phase 3.1 Real Data Integration completed successfully!")
-    
+
     return integrator
 
 

@@ -583,11 +583,11 @@ def main():
     # Load data
     import sys
     from pathlib import Path
-    
+
     # Add Phase 3 directory to Python path
     phase3_dir = Path(__file__).parent.parent / "phase3"
     sys.path.insert(0, str(phase3_dir))
-    
+
     from phase3_1_real_data_integration import RealDataPhase3Integration
 
     integrator = RealDataPhase3Integration()
