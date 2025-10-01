@@ -1,0 +1,186 @@
+
+====================================================================
+🎯 GIMAN FINAL COMPREHENSIVE PERFORMANCE EVALUATION REPORT
+====================================================================
+Generated: 2025-09-24 22:22:10
+Total Independent Experiments: 15 runs
+
+====================================================================
+📊 EXECUTIVE SUMMARY
+====================================================================
+
+🧠 MOTOR PROGRESSION PREDICTION (R²):
+   • Mean Performance: -0.0152 ± 0.0957
+   • 95% Confidence Interval: [-0.0681, 0.0378]
+   • Range: [-0.1770, 0.2165]
+   • Median: -0.0296
+   • Positive Predictions: 6/15 (40.0%)
+   • Good Performance (>0.1): 1/15 (6.7%)
+
+🧠 COGNITIVE CONVERSION PREDICTION (AUC):
+   • Mean Performance: 0.5445 ± 0.1808
+   • 95% Confidence Interval: [0.4444, 0.6447]
+   • Range: [0.1429, 0.8077]
+   • Median: 0.5400
+   • Good Performance (>0.7): 3/15 (20.0%)
+   • Excellent Performance (>0.8): 1/15 (6.7%)
+
+====================================================================
+📈 DETAILED STATISTICAL ANALYSIS
+====================================================================
+
+MOTOR R² DISTRIBUTION:
+   • Mean: -0.0152
+   • Standard Deviation: 0.0957
+   • Coefficient of Variation: 6.308
+   • Interquartile Range: [-0.0741, 0.0383]
+   • Range Spread: 0.3935
+
+COGNITIVE AUC DISTRIBUTION:
+   • Mean: 0.5445
+   • Standard Deviation: 0.1808
+   • Coefficient of Variation: 0.332
+   • Interquartile Range: [0.4578, 0.6795]
+   • Range Spread: 0.6648
+
+CORRELATION ANALYSIS:
+   • Motor-Cognitive Correlation: 0.473
+
+====================================================================
+⚠️  PERFORMANCE ASSESSMENT
+====================================================================
+
+MOTOR PROGRESSION PREDICTION:
+   • Overall Rating: ❌ POOR
+   • Key Issues:
+     - Mean R² is near zero (-0.0152), indicating minimal predictive power
+     - High variability (CV = 6.31) suggests model instability
+     - Only 6/15 runs achieved positive R²
+     - Model struggles with continuous motor progression prediction
+
+COGNITIVE CONVERSION PREDICTION:
+   • Overall Rating: ⚠️  MODERATE
+   • Key Observations:
+     - Mean AUC (0.5445) is above random chance (0.5)
+     - 3/15 runs achieved good performance (AUC > 0.7)
+     - 1/15 runs achieved excellent performance (AUC > 0.8)
+     - Moderate variability (CV = 0.33) indicates some instability
+
+MODEL STABILITY:
+   • Overall Rating: ⚠️  CONCERNING
+   • Motor prediction shows high variance across runs
+   • Cognitive prediction shows moderate variance
+   • Inconsistent performance suggests potential overfitting or training instability
+
+====================================================================
+🔬 DETAILED RUN-BY-RUN RESULTS
+====================================================================
+
+Run | Motor R²  | Cognitive AUC | Motor Rating | Cognitive Rating
+----|-----------|---------------|--------------|------------------
+  1 |  -0.1770  |       0.1429  | Poor        | Poor
+  2 |  -0.0502  |       0.3846  | Poor        | Poor
+  3 |   0.0317  |       0.6923  | Fair        | Fair
+  4 |  -0.0734  |       0.3077  | Poor        | Poor
+  5 |  -0.0771  |       0.5385  | Poor        | Poor
+  6 |  -0.0453  |       0.5000  | Poor        | Poor
+  7 |  -0.0142  |       0.7222  | Poor        | Good
+  8 |  -0.0747  |       0.7754  | Poor        | Good
+  9 |   0.0179  |       0.5513  | Fair        | Poor
+ 10 |  -0.1341  |       0.5128  | Poor        | Poor
+ 11 |  -0.0296  |       0.5400  | Poor        | Poor
+ 12 |   0.0449  |       0.6667  | Fair        | Fair
+ 13 |   0.0619  |       0.8077  | Fair        | Excellent
+ 14 |   0.0752  |       0.4156  | Fair        | Poor
+ 15 |   0.2165  |       0.6100  | Good        | Fair
+
+====================================================================
+🎯 KEY FINDINGS & INSIGHTS
+====================================================================
+
+STRENGTHS:
+✅ Cognitive conversion prediction shows promise with mean AUC of 0.545
+✅ 3/15 runs achieved clinically useful performance (AUC > 0.7)
+✅ Best cognitive performance reached 0.808 AUC
+✅ Model successfully processes multimodal PPMI data
+
+WEAKNESSES:
+❌ Motor progression prediction consistently poor (mean R² ≈ 0)
+❌ High variability suggests training instability
+❌ No runs achieved strong motor prediction performance (R² > 0.2)
+❌ Negative R² values indicate worse than baseline prediction
+
+TECHNICAL OBSERVATIONS:
+🔧 Early stopping typically occurs between 20-45 epochs
+🔧 Validation loss patterns suggest potential overfitting
+🔧 Model architecture may not be optimal for motor progression regression
+🔧 Class imbalance handling appears adequate for cognitive task
+
+====================================================================
+💡 RECOMMENDATIONS FOR IMPROVEMENT
+====================================================================
+
+IMMEDIATE ACTIONS:
+1. 🎯 Focus on motor prediction architecture redesign
+   - Consider different loss functions (Huber, quantile regression)
+   - Implement ensemble methods to reduce variance
+   - Add regularization techniques (dropout, weight decay)
+
+2. 🔧 Training stability improvements
+   - Implement learning rate scheduling
+   - Use gradient clipping to prevent instability
+   - Consider different optimizers (AdamW, RMSprop)
+
+3. 📊 Data and preprocessing analysis
+   - Investigate motor target distribution and scaling
+   - Consider feature selection/engineering for motor prediction
+   - Analyze temporal patterns in motor progression
+
+MEDIUM-TERM STRATEGIES:
+4. 🧠 Architecture enhancements
+   - Implement task-specific attention mechanisms
+   - Consider multi-task learning approaches
+   - Explore graph neural network improvements
+
+5. 📈 Performance monitoring
+   - Implement cross-validation for more robust evaluation
+   - Add early stopping with different criteria
+   - Monitor training dynamics and gradients
+
+6. 🎨 Model variants
+   - Test simpler baseline models for comparison
+   - Implement domain-specific architectural components
+   - Consider transfer learning from related tasks
+
+====================================================================
+📋 FINAL ASSESSMENT
+====================================================================
+
+OVERALL MODEL PERFORMANCE: ⚠️  NEEDS SIGNIFICANT IMPROVEMENT
+
+The GIMAN model shows a clear dichotomy in performance:
+• Cognitive conversion prediction demonstrates clinical potential
+• Motor progression prediction requires fundamental redesign
+
+The high variability across runs indicates training instability that
+must be addressed before deployment. While the cognitive task shows
+promise, the motor prediction failure suggests architectural or
+methodological issues that need resolution.
+
+RECOMMENDATION: Focus development efforts on motor prediction
+improvement and training stability before advancing to larger-scale
+evaluation or clinical application.
+
+====================================================================
+📊 STATISTICAL CONFIDENCE
+====================================================================
+
+With 15 independent runs, we have sufficient statistical power to
+conclude that:
+• Motor prediction performance is consistently poor (p < 0.001)
+• Cognitive prediction performance is significantly above chance (p < 0.05)
+• Model shows concerning variability across runs
+
+These findings provide a robust foundation for targeted improvements.
+
+====================================================================

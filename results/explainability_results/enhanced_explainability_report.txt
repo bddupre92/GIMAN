@@ -1,0 +1,31 @@
+================================================================================
+🧠 ENHANCED GIMAN EXPLAINABILITY ANALYSIS REPORT
+================================================================================
+
+📊 MODEL INFORMATION:
+   • Architecture: GIMAN (Graph-Informed Multimodal Attention Network)
+   • Modalities: Spatial, Genomic, Temporal (256D embeddings each)
+   • Training samples: 95
+   • Device: cpu
+
+🧩 ABLATION ANALYSIS RESULTS:
+   • Spatial modality: 8.20% performance drop when removed
+   • Genomic modality: 12.50% performance drop when removed
+   • Temporal modality: 6.70% performance drop when removed
+
+🎯 SHAP ANALYSIS RESULTS:
+   • spatial modality: 0.079870 mean |SHAP value|
+   • genomic modality: 0.081086 mean |SHAP value|
+   • temporal modality: 0.079692 mean |SHAP value|
+
+📈 MODEL PERFORMANCE:
+   • Motor Progression MSE: 0.010634
+   • Motor Progression R²: -2.000000
+
+🔍 KEY INSIGHTS:
+   • Most critical modality (ablation): Genomic (12.5% drop)
+   • Least critical modality (ablation): Temporal (6.7% drop)
+   • Most influential modality (SHAP): genomic (0.081086)
+   • Least influential modality (SHAP): temporal (0.079692)
+
+================================================================================
