@@ -1,0 +1,78 @@
+{
+  "total_modules": 36,
+  "external_dependencies": 37,
+  "total_connections": 409,
+  "most_connected_modules": [
+    [
+      "giman_pipeline.training.create_final_binary_model",
+      47
+    ],
+    [
+      "giman_pipeline.training.train_giman_complete",
+      46
+    ],
+    [
+      "giman_pipeline.training.optimize_binary_classifier",
+      45
+    ],
+    [
+      "giman_pipeline.training.train_giman",
+      45
+    ],
+    [
+      "giman_pipeline.cli",
+      24
+    ],
+    [
+      "giman_pipeline.data_processing.explainability_Gemini",
+      22
+    ],
+    [
+      "giman_pipeline",
+      20
+    ],
+    [
+      "giman_pipeline.training.evaluator",
+      20
+    ]
+  ],
+  "external_deps_list": [
+    "SimpleITK",
+    "argparse",
+    "collections",
+    "configs",
+    "dataclasses",
+    "datetime",
+    "json",
+    "logging",
+    "matplotlib",
+    "mlflow",
+    "networkx",
+    "nibabel",
+    "numpy",
+    "optuna",
+    "os",
+    "pandas",
+    "pathlib",
+    "phase3_1_real_data_integration",
+    "phase4_unified_giman_system",
+    "pickle",
+    "plotly",
+    "pydicom",
+    "scipy",
+    "seaborn",
+    "shap",
+    "shutil",
+    "sklearn",
+    "subprocess",
+    "sys",
+    "time",
+    "torch",
+    "torch_geometric",
+    "traceback",
+    "typing",
+    "warnings",
+    "xml",
+    "yaml"
+  ]
+}
