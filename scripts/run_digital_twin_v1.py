@@ -6,9 +6,11 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "src"))
 
-from giman_pipeline.digital_twin.counterfactual import TwinRunConfig, run_twin_counterfactual
+from giman_pipeline.digital_twin.counterfactual import (
+    TwinRunConfig,
+    run_twin_counterfactual,
+)
 from giman_pipeline.digital_twin.state import CounterfactualSpec
-
 
 if __name__ == "__main__":
     run_twin_counterfactual(

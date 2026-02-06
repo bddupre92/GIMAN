@@ -8,7 +8,6 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch_geometric.data import Data
 
 from .state import CounterfactualSpec, TwinSimulationResult, TwinState
 
@@ -19,17 +18,30 @@ def _repo_root() -> Path:
 
 def _load_models(in_features: int, device: torch.device):
     root = _repo_root()
-    phase8_dir = root / "archive" / "development" / "phase8" / "subphase8_2_dynamic_endpoints"
+    phase8_dir = (
+        root / "archive" / "development" / "phase8" / "subphase8_2_dynamic_endpoints"
+    )
     if str(phase8_dir) not in sys.path:
         sys.path.append(str(phase8_dir))
     if str(root) not in sys.path:
         sys.path.append(str(root))
 
     from train_final_giman_survival import GIMANSurvivalGAT
+
     from archive.development.phase9.neuro_fuzzy import NeuroFuzzyGIMAN
 
-    phase8_ckpt = root / "outputs" / "phase8_2_final_training_sota_run" / "giman_survival_final.pth"
-    phase9_ckpt = root / "outputs" / "phase9_neuro_fuzzy_sota_run_from50ckpt" / "neuro_fuzzy_best.pth"
+    phase8_ckpt = (
+        root
+        / "outputs"
+        / "phase8_2_final_training_sota_run"
+        / "giman_survival_final.pth"
+    )
+    phase9_ckpt = (
+        root
+        / "outputs"
+        / "phase9_neuro_fuzzy_sota_run_from50ckpt"
+        / "neuro_fuzzy_best.pth"
+    )
 
     surv = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128).to(device)
     surv_state = torch.load(phase8_ckpt, map_location=device, weights_only=False)
@@ -54,7 +66,9 @@ class DataDrivenTwinSimulator:
             device=self.device,
         )
 
-    def _predict(self, x_override: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+    def _predict(
+        self, x_override: np.ndarray | None = None
+    ) -> tuple[np.ndarray, np.ndarray]:
         d = self.data.clone()
         if x_override is not None:
             d.x = torch.tensor(x_override, dtype=torch.float32, device=self.device)
@@ -74,7 +88,11 @@ class DataDrivenTwinSimulator:
             horizons = [0, 6, 12, 18, 24]
 
         x_np = self.data.x.detach().cpu().numpy()
-        patno = int(self.data.patno[patient_idx].detach().cpu().item()) if hasattr(self.data, "patno") else int(patient_idx)
+        patno = (
+            int(self.data.patno[patient_idx].detach().cpu().item())
+            if hasattr(self.data, "patno")
+            else int(patient_idx)
+        )
 
         risk_all, saa_all = self._predict(x_override=x_np)
         risk0 = float(risk_all[patient_idx])
@@ -123,7 +141,9 @@ class DataDrivenTwinSimulator:
             cf_vector = base_vector.copy()
             cf_vector[idx] = cf_vector[idx] + spec.delta
             if spec.bounds is not None:
-                cf_vector[idx] = float(np.clip(cf_vector[idx], spec.bounds[0], spec.bounds[1]))
+                cf_vector[idx] = float(
+                    np.clip(cf_vector[idx], spec.bounds[0], spec.bounds[1])
+                )
 
             x_cf = x_np.copy()
             x_cf[patient_idx] = cf_vector
@@ -133,14 +153,18 @@ class DataDrivenTwinSimulator:
 
             key = f"{spec.feature_name}:{spec.delta:+.3f}"
             states: list[TwinState] = []
-            for h in (horizons or [0, 6, 12, 18, 24]):
+            for h in horizons or [0, 6, 12, 18, 24]:
                 h_scale = 1.0 + (h / 24.0) * 0.25
                 risk_h = float(risk0 * h_scale)
-                saa_h = float(np.clip(saa0 + (h / 24.0) * 0.05 * (saa0 - 0.5), 0.0, 1.0))
+                saa_h = float(
+                    np.clip(saa0 + (h / 24.0) * 0.05 * (saa0 - 0.5), 0.0, 1.0)
+                )
                 unc = max(0.03, 0.12 * saa_h)
                 states.append(
                     TwinState(
-                        patno=int(self.data.patno[patient_idx].detach().cpu().item()) if hasattr(self.data, "patno") else int(patient_idx),
+                        patno=int(self.data.patno[patient_idx].detach().cpu().item())
+                        if hasattr(self.data, "patno")
+                        else int(patient_idx),
                         t_month=int(h),
                         feature_vector=cf_vector.tolist(),
                         risk_survival=risk_h,
@@ -171,7 +195,8 @@ def save_simulation_result(result: TwinSimulationResult, output_path: Path) -> N
     payload = {
         "baseline_path": [asdict(x) for x in result.baseline_path],
         "counterfactual_paths": {
-            k: [asdict(v) for v in vals] for k, vals in result.counterfactual_paths.items()
+            k: [asdict(v) for v in vals]
+            for k, vals in result.counterfactual_paths.items()
         },
         "delta_risk": result.delta_risk,
         "confidence_interval": {
@@ -186,11 +211,21 @@ def save_simulation_result(result: TwinSimulationResult, output_path: Path) -> N
 if __name__ == "__main__":
     root = _repo_root()
     sim = DataDrivenTwinSimulator(
-        data_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt",
-        metadata_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "pyg_data_metadata.json",
+        data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "test_data.pt",
+        metadata_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "pyg_data_metadata.json",
     )
     result = sim.simulate_counterfactual(
         patient_idx=0,
         specs=[CounterfactualSpec(feature_name="UPDRS_I", delta=-0.5)],
     )
-    save_simulation_result(result, root / "outputs" / "digital_twin" / "patient_0_twin.json")
+    save_simulation_result(
+        result, root / "outputs" / "digital_twin" / "patient_0_twin.json"
+    )

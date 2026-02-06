@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 from .real_data_explain import run_real_data_explainability
@@ -90,10 +89,29 @@ def generate_appendix_package(
     explain_dir = output_root / "explainability"
     prep_dir = output_root / "preprocessing"
 
-    test_data_path = root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt"
-    metadata_path = root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "pyg_data_metadata.json"
-    checkpoint_path = root / "outputs" / "phase9_neuro_fuzzy_sota_run_from50ckpt" / "neuro_fuzzy_best.pth"
-    final_csv = root / "data" / "03_prodromal" / "final_training_dataset" / "unified_longitudinal_early_pd.csv"
+    test_data_path = (
+        root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt"
+    )
+    metadata_path = (
+        root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "pyg_data_metadata.json"
+    )
+    checkpoint_path = (
+        root
+        / "outputs"
+        / "phase9_neuro_fuzzy_sota_run_from50ckpt"
+        / "neuro_fuzzy_best.pth"
+    )
+    final_csv = (
+        root
+        / "data"
+        / "03_prodromal"
+        / "final_training_dataset"
+        / "unified_longitudinal_early_pd.csv"
+    )
 
     explain_summary = run_real_data_explainability(
         test_data_path=test_data_path,
@@ -106,7 +124,10 @@ def generate_appendix_package(
     provenance = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "inputs": {
-            "test_data": {"path": str(test_data_path), "sha256": _sha256(test_data_path)},
+            "test_data": {
+                "path": str(test_data_path),
+                "sha256": _sha256(test_data_path),
+            },
             "metadata": {"path": str(metadata_path), "sha256": _sha256(metadata_path)},
             "neuro_fuzzy_checkpoint": {
                 "path": str(checkpoint_path),

@@ -137,12 +137,16 @@ def split_patient_level(
     random_state: int,
 ) -> tuple[np.ndarray, np.ndarray, dict[str, object]]:
     """Patient-level deterministic split with leakage protection."""
-    patient_df = pd.DataFrame(
-        {"PATNO": patno_ids, "event": event, "saa_label": saa_label}
-    ).groupby("PATNO", as_index=False).max()
+    patient_df = (
+        pd.DataFrame({"PATNO": patno_ids, "event": event, "saa_label": saa_label})
+        .groupby("PATNO", as_index=False)
+        .max()
+    )
 
     # Prefer joint stratification over (event, saa_label) when feasible
-    joint_strata = patient_df["event"].astype(int) * 2 + patient_df["saa_label"].astype(int)
+    joint_strata = patient_df["event"].astype(int) * 2 + patient_df["saa_label"].astype(
+        int
+    )
     strata_counts = joint_strata.value_counts().to_dict()
 
     stratify = None
@@ -168,7 +172,9 @@ def split_patient_level(
     test_mask = np.isin(patno_ids, test_patnos)
 
     if np.any(np.isin(train_patnos, test_patnos)):
-        raise RuntimeError("Patient leakage detected: overlapping PATNO between train/test")
+        raise RuntimeError(
+            "Patient leakage detected: overlapping PATNO between train/test"
+        )
 
     train_idx = np.where(train_mask)[0]
     test_idx = np.where(test_mask)[0]
@@ -360,7 +366,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--seed", type=int, default=SEED_DEFAULT, help="Random seed")
     parser.add_argument(
-        "--test-size", type=float, default=0.15, help="Patient-level test split fraction"
+        "--test-size",
+        type=float,
+        default=0.15,
+        help="Patient-level test split fraction",
     )
     parser.add_argument("--knn-k", type=int, default=10, help="k for kNN graph")
     return parser.parse_args()

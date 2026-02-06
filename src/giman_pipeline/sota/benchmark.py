@@ -127,8 +127,18 @@ def _build_baselines(data: dict[str, np.ndarray]) -> dict[str, dict[str, Any]]:
 
 def _load_fuzzy_artifacts(root: Path) -> dict[str, Any]:
     result: dict[str, Any] = {}
-    p_full = root / "outputs" / "phase9_neuro_fuzzy_sota_run_from50ckpt" / "full_training_results.json"
-    p_multi = root / "outputs" / "phase9_neuro_fuzzy_sota_run_from50ckpt" / "multitask_training_results.json"
+    p_full = (
+        root
+        / "outputs"
+        / "phase9_neuro_fuzzy_sota_run_from50ckpt"
+        / "full_training_results.json"
+    )
+    p_multi = (
+        root
+        / "outputs"
+        / "phase9_neuro_fuzzy_sota_run_from50ckpt"
+        / "multitask_training_results.json"
+    )
     p8 = root / "outputs" / "phase8_2_final_training_sota_run" / "training_results.json"
 
     if p_full.exists():
@@ -317,9 +327,21 @@ if __name__ == "__main__":
     report_path = root / "Docs" / "audit" / "SOTA_INTERNAL_LOCK_REPORT.md"
     fig_dir = root / "visualizations" / "publication_internal"
     run_internal_sota_lock(
-        train_data_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "train_data.pt",
-        test_data_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt",
-        metadata_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "pyg_data_metadata.json",
+        train_data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "train_data.pt",
+        test_data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "test_data.pt",
+        metadata_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "pyg_data_metadata.json",
         output_json_path=payload_path,
         output_report_path=report_path,
         figure_dir=fig_dir,

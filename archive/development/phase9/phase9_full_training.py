@@ -29,12 +29,16 @@ project_root = Path(__file__).resolve().parents[3]
 sys.path.append(str(project_root))
 
 # Import GIMAN components
-sys.path.append(str(project_root / "archive/development/phase8/subphase8_2_dynamic_endpoints"))
+sys.path.append(
+    str(project_root / "archive/development/phase8/subphase8_2_dynamic_endpoints")
+)
 from train_final_giman_survival import GIMANSurvivalGAT
 
 from archive.development.phase9.neuro_fuzzy import NeuroFuzzyGIMAN
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,7 +57,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--checkpoint-path",
         type=Path,
-        default=project_root / "outputs/phase8_2_final_training_sota_run/giman_survival_final.pth",
+        default=project_root
+        / "outputs/phase8_2_final_training_sota_run/giman_survival_final.pth",
     )
     parser.add_argument(
         "--output-dir",
@@ -106,10 +111,14 @@ def validate_label_contract(args: argparse.Namespace) -> None:
         )
 
 
-def load_pretrained_gat(model: NeuroFuzzyGIMAN, checkpoint_path: Path) -> NeuroFuzzyGIMAN:
+def load_pretrained_gat(
+    model: NeuroFuzzyGIMAN, checkpoint_path: Path
+) -> NeuroFuzzyGIMAN:
     """Load pretrained Phase 8 GAT encoder weights when available."""
     if not checkpoint_path.exists():
-        logging.warning("Checkpoint not found at %s. Training from scratch.", checkpoint_path)
+        logging.warning(
+            "Checkpoint not found at %s. Training from scratch.", checkpoint_path
+        )
         return model
 
     logging.info("Loading pre-trained GAT from %s", checkpoint_path)
@@ -198,7 +207,9 @@ def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
 
     in_features = train_data.x.shape[1]
     gat_encoder = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
-    model = NeuroFuzzyGIMAN(gat_encoder, num_classes=2, num_rules=args.num_rules).to(device)
+    model = NeuroFuzzyGIMAN(gat_encoder, num_classes=2, num_rules=args.num_rules).to(
+        device
+    )
     model = load_pretrained_gat(model, args.checkpoint_path)
 
     optimizer = optim.Adam(

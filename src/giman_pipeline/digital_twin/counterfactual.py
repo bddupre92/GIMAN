@@ -55,10 +55,22 @@ def run_twin_counterfactual(
 if __name__ == "__main__":
     root = Path(__file__).resolve().parents[3]
     run_twin_counterfactual(
-        data_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt",
-        metadata_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "pyg_data_metadata.json",
+        data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "test_data.pt",
+        metadata_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "pyg_data_metadata.json",
         output_json=root / "outputs" / "digital_twin" / "patient_0_counterfactual.json",
-        output_figure=root / "visualizations" / "appendix" / "digital_twin" / "patient_0_counterfactual.png",
+        output_figure=root
+        / "visualizations"
+        / "appendix"
+        / "digital_twin"
+        / "patient_0_counterfactual.png",
         config=TwinRunConfig(
             patient_idx=0,
             specs=[

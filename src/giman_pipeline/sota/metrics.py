@@ -86,7 +86,9 @@ def c_index_with_ci(
 ) -> MetricResult:
     value = simple_c_index(risk, time, event)
 
-    def _metric(y_true_event: np.ndarray, pred_risk: np.ndarray, time_arr: np.ndarray) -> float:
+    def _metric(
+        y_true_event: np.ndarray, pred_risk: np.ndarray, time_arr: np.ndarray
+    ) -> float:
         return simple_c_index(pred_risk, time_arr, y_true_event)
 
     low, high = bootstrap_ci(

@@ -8,7 +8,6 @@ sys.path.insert(0, str(root / "src"))
 
 from giman_pipeline.explainability.appendix_figures import generate_appendix_package
 
-
 if __name__ == "__main__":
     generate_appendix_package(
         output_root=root / "visualizations" / "appendix",

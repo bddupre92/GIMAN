@@ -21,17 +21,23 @@ project_root = Path(__file__).resolve().parents[3]
 sys.path.append(str(project_root))
 
 # Import GIMAN components
-sys.path.append(str(project_root / "archive/development/phase8/subphase8_2_dynamic_endpoints"))
+sys.path.append(
+    str(project_root / "archive/development/phase8/subphase8_2_dynamic_endpoints")
+)
 from train_final_giman_survival import GIMANSurvivalGAT
 
 from archive.development.phase9.neuro_fuzzy import NeuroFuzzyGIMAN
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI args."""
-    parser = argparse.ArgumentParser(description="Phase 9 quick neuro-fuzzy verification")
+    parser = argparse.ArgumentParser(
+        description="Phase 9 quick neuro-fuzzy verification"
+    )
     parser.add_argument(
         "--train-data-path",
         type=Path,
@@ -120,7 +126,9 @@ def bootstrap_auc_ci(
 
 def train_neuro_fuzzy(args: argparse.Namespace) -> None:
     """Quick neuro-fuzzy verification on pre-split train/test data."""
-    logging.info("🚀 Starting Phase 9: Neuro-Fuzzy Enhancement (SOTA-hardened quick run)")
+    logging.info(
+        "🚀 Starting Phase 9: Neuro-Fuzzy Enhancement (SOTA-hardened quick run)"
+    )
     validate_label_contract(args)
     set_seed(args.seed)
 
@@ -132,8 +140,12 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
     train_data = torch.load(args.train_data_path, weights_only=False)
     test_data = torch.load(args.test_data_path, weights_only=False)
 
-    _ = require_attr(train_data, args.classification_label_key, "train classification labels")
-    _ = require_attr(test_data, args.classification_label_key, "test classification labels")
+    _ = require_attr(
+        train_data, args.classification_label_key, "train classification labels"
+    )
+    _ = require_attr(
+        test_data, args.classification_label_key, "test classification labels"
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_data = train_data.to(device)
@@ -143,7 +155,9 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
 
     in_features = train_data.x.shape[1]
     gat_encoder = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
-    model = NeuroFuzzyGIMAN(gat_encoder, num_classes=2, num_rules=args.num_rules).to(device)
+    model = NeuroFuzzyGIMAN(gat_encoder, num_classes=2, num_rules=args.num_rules).to(
+        device
+    )
 
     optimizer = optim.Adam(
         model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
@@ -164,7 +178,9 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
         optimizer.step()
 
         if (epoch + 1) % 10 == 0:
-            logging.info("Epoch %d/%d, Loss: %.4f", epoch + 1, args.epochs, float(loss.item()))
+            logging.info(
+                "Epoch %d/%d, Loss: %.4f", epoch + 1, args.epochs, float(loss.item())
+            )
 
     model.eval()
     with torch.no_grad():

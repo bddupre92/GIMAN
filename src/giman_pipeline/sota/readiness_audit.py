@@ -4,10 +4,12 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
-from .contracts import DatasetContract, FeatureLineageRecord, ModalityRegistry, load_contract_from_metadata
+from .contracts import (
+    FeatureLineageRecord,
+    load_contract_from_metadata,
+)
 
 
 @dataclass(frozen=True)
@@ -38,15 +40,58 @@ def _repo_root() -> Path:
 
 def _domain_from_name(name: str) -> str:
     n = name.lower()
-    if any(k in n for k in ["updrs", "moca", "rbd", "scopa", "upsit", "epworth", "clinical", "participant", "history"]):
+    if any(
+        k in n
+        for k in [
+            "updrs",
+            "moca",
+            "rbd",
+            "scopa",
+            "upsit",
+            "epworth",
+            "clinical",
+            "participant",
+            "history",
+        ]
+    ):
         return "clinical"
-    if any(k in n for k in ["datscan", "sbr", "mri", "freesurfer", "cortical", "vol", "nifti", "dicom"]):
+    if any(
+        k in n
+        for k in [
+            "datscan",
+            "sbr",
+            "mri",
+            "freesurfer",
+            "cortical",
+            "vol",
+            "nifti",
+            "dicom",
+        ]
+    ):
         return "imaging"
-    if any(k in n for k in ["genetic", "wgs", "gene", "consensus", "lrrk2", "gba", "apoe", "snca"]):
+    if any(
+        k in n
+        for k in ["genetic", "wgs", "gene", "consensus", "lrrk2", "gba", "apoe", "snca"]
+    ):
         return "genetics"
-    if any(k in n for k in ["csf", "biospecimen", "olink", "alpha", "tau", "abeta", "ptau", "metabolomic", "saa"]):
+    if any(
+        k in n
+        for k in [
+            "csf",
+            "biospecimen",
+            "olink",
+            "alpha",
+            "tau",
+            "abeta",
+            "ptau",
+            "metabolomic",
+            "saa",
+        ]
+    ):
         return "biospecimen"
-    if any(k in n for k in ["adverse", "status", "socio", "visit", "project", "family"]):
+    if any(
+        k in n for k in ["adverse", "status", "socio", "visit", "project", "family"]
+    ):
         return "ehr_like"
     return "other"
 
@@ -173,10 +218,14 @@ def _analyze_csv_source(path: Path) -> SourceSummary:
     )
 
 
-def _imaging_summaries(raw_dcm_dir: Path, nifti_dirs: list[Path]) -> list[SourceSummary]:
+def _imaging_summaries(
+    raw_dcm_dir: Path, nifti_dirs: list[Path]
+) -> list[SourceSummary]:
     records: list[SourceSummary] = []
 
-    dcm_count = sum(1 for _ in raw_dcm_dir.rglob("*.dcm")) if raw_dcm_dir.exists() else 0
+    dcm_count = (
+        sum(1 for _ in raw_dcm_dir.rglob("*.dcm")) if raw_dcm_dir.exists() else 0
+    )
     records.append(
         SourceSummary(
             modality_id="raw_dicom",
@@ -203,7 +252,9 @@ def _imaging_summaries(raw_dcm_dir: Path, nifti_dirs: list[Path]) -> list[Source
     for nd in nifti_dirs:
         count = 0
         if nd.exists():
-            count = sum(1 for _ in nd.rglob("*.nii")) + sum(1 for _ in nd.rglob("*.nii.gz"))
+            count = sum(1 for _ in nd.rglob("*.nii")) + sum(
+                1 for _ in nd.rglob("*.nii.gz")
+            )
         records.append(
             SourceSummary(
                 modality_id=f"nifti_{nd.name}",
@@ -212,7 +263,10 @@ def _imaging_summaries(raw_dcm_dir: Path, nifti_dirs: list[Path]) -> list[Source
                 source_type="nifti",
                 row_count=int(count),
                 n_columns=0,
-                key_columns=["PATNO (filename-level)", "EVENT_ID/date (filename-level)"],
+                key_columns=[
+                    "PATNO (filename-level)",
+                    "EVENT_ID/date (filename-level)",
+                ],
                 time_columns=["scan_date (filename-level)"],
                 has_patno=True,
                 has_event_id=False,
@@ -237,14 +291,25 @@ def _map_feature_lineage(feature_name: str) -> FeatureLineageRecord:
         steps = ["extract_genetic_features.py", "merge_all_features.py"]
         imputation = "genetics_mode_or_median"
         usage = "used"
-    elif any(k in f for k in ["UPDRS", "SCHWAB", "PIGD", "TREMOR", "RBD", "UPSIT", "SCOPA", "ESS"]):
+    elif any(
+        k in f
+        for k in ["UPDRS", "SCHWAB", "PIGD", "TREMOR", "RBD", "UPSIT", "SCOPA", "ESS"]
+    ):
         source = "MDS-UPDRS_* + MoCA/RBD/SCOPA clinical CSVs"
-        steps = ["extract_expanded_clinical.py", "extract_clinical_biomarkers.py", "merge_all_features.py"]
+        steps = [
+            "extract_expanded_clinical.py",
+            "extract_clinical_biomarkers.py",
+            "merge_all_features.py",
+        ]
         imputation = "knn_then_standard_scaler_train_only"
         usage = "used"
     elif any(k in f for k in ["VOL", "CTH"]):
         source = "FS7_ASEG_VOL_30Sep2025.csv + FS7_APARC_CTH_30Sep2025.csv"
-        steps = ["extract_freesurfer_volumes.py", "extract_cortical_thickness.py", "merge_all_features.py"]
+        steps = [
+            "extract_freesurfer_volumes.py",
+            "extract_cortical_thickness.py",
+            "merge_all_features.py",
+        ]
         imputation = "knn_then_standard_scaler_train_only"
         usage = "used"
     elif any(k in f for k in ["SBR", "ASYMMETRY"]):
@@ -254,7 +319,11 @@ def _map_feature_lineage(feature_name: str) -> FeatureLineageRecord:
         usage = "used"
     elif any(k in f for k in ["ALPHA", "TAU", "ABETA", "PTAU", "SAA"]):
         source = "Current_Biospecimen_Analysis_Results_* + saa_raw_labels.csv"
-        steps = ["extract_csf_biomarkers.py", "phase8_3_saa_integration", "merge_all_features.py"]
+        steps = [
+            "extract_csf_biomarkers.py",
+            "phase8_3_saa_integration",
+            "merge_all_features.py",
+        ]
         imputation = "knn_then_standard_scaler_train_only"
         usage = "used"
     else:
@@ -418,5 +487,11 @@ if __name__ == "__main__":
     out_md = root / "Docs" / "audit" / "PPMI_MULTIMODAL_READINESS_AUDIT.md"
     out_matrix = root / "Docs" / "audit" / "PPMI_MODALITY_COVERAGE_MATRIX.csv"
     out_backlog = root / "Docs" / "audit" / "PPMI_INTEGRATION_BACKLOG_RANKED.csv"
-    metadata = root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "pyg_data_metadata.json"
+    metadata = (
+        root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "pyg_data_metadata.json"
+    )
     run_multimodal_readiness_audit(out_md, out_matrix, out_backlog, metadata)

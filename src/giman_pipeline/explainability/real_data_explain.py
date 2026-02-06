@@ -26,13 +26,16 @@ def _safe_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
 
 def _load_nf_model(in_features: int, checkpoint_path: Path, device: torch.device):
     root = _repo_root()
-    phase8_dir = root / "archive" / "development" / "phase8" / "subphase8_2_dynamic_endpoints"
+    phase8_dir = (
+        root / "archive" / "development" / "phase8" / "subphase8_2_dynamic_endpoints"
+    )
     if str(phase8_dir) not in sys.path:
         sys.path.append(str(phase8_dir))
     if str(root) not in sys.path:
         sys.path.append(str(root))
 
     from train_final_giman_survival import GIMANSurvivalGAT
+
     from archive.development.phase9.neuro_fuzzy import NeuroFuzzyGIMAN
 
     gat = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
@@ -138,7 +141,9 @@ def run_real_data_explainability(
     plt.close(fig)
 
     # Calibration curve
-    frac_pos, mean_pred = calibration_curve(y_true, probs, n_bins=10, strategy="quantile")
+    frac_pos, mean_pred = calibration_curve(
+        y_true, probs, n_bins=10, strategy="quantile"
+    )
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot([0, 1], [0, 1], "k--", label="Perfect")
     ax.plot(mean_pred, frac_pos, "o-", color="#E15759", label="FUZZY GIMAN")
@@ -170,8 +175,19 @@ def run_real_data_explainability(
 if __name__ == "__main__":
     root = _repo_root()
     run_real_data_explainability(
-        test_data_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt",
-        metadata_path=root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "pyg_data_metadata.json",
-        checkpoint_path=root / "outputs" / "phase9_neuro_fuzzy_sota_run_from50ckpt" / "neuro_fuzzy_best.pth",
+        test_data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "test_data.pt",
+        metadata_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "pyg_data_metadata.json",
+        checkpoint_path=root
+        / "outputs"
+        / "phase9_neuro_fuzzy_sota_run_from50ckpt"
+        / "neuro_fuzzy_best.pth",
         output_dir=root / "visualizations" / "appendix" / "explainability",
     )

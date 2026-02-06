@@ -8,7 +8,6 @@ sys.path.insert(0, str(root / "src"))
 
 from giman_pipeline.sota.benchmark import run_internal_sota_lock
 
-
 if __name__ == "__main__":
     run_internal_sota_lock(
         train_data_path=root

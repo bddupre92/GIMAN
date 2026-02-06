@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
-import json
 
 
 @dataclass(frozen=True)
@@ -55,13 +54,10 @@ def assert_classification_contract(
 ) -> None:
     if classification_key in PROXY_CLASSIFICATION_KEYS:
         raise ValueError(
-            "classification label key cannot be a survival proxy: "
-            f"{classification_key}"
+            f"classification label key cannot be a survival proxy: {classification_key}"
         )
     if classification_key == survival_event_key:
-        raise ValueError(
-            "classification label key must differ from survival event key"
-        )
+        raise ValueError("classification label key must differ from survival event key")
 
 
 def load_contract_from_metadata(metadata_path: Path) -> DatasetContract:

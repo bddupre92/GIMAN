@@ -20,7 +20,9 @@ from sklearn.metrics import roc_auc_score
 project_root = Path(__file__).resolve().parents[3]
 sys.path.append(str(project_root))
 
-sys.path.append(str(project_root / "archive/development/phase8/subphase8_2_dynamic_endpoints"))
+sys.path.append(
+    str(project_root / "archive/development/phase8/subphase8_2_dynamic_endpoints")
+)
 from train_final_giman_survival import (
     GIMANSurvivalGAT,
     concordance_index,
@@ -29,12 +31,16 @@ from train_final_giman_survival import (
 
 from archive.development.phase9.neuro_fuzzy import MultiTaskNeuroFuzzyGIMAN
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI args."""
-    parser = argparse.ArgumentParser(description="Phase 9 multi-task neuro-fuzzy training")
+    parser = argparse.ArgumentParser(
+        description="Phase 9 multi-task neuro-fuzzy training"
+    )
     parser.add_argument(
         "--train-data-path",
         type=Path,
@@ -48,7 +54,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--checkpoint-path",
         type=Path,
-        default=project_root / "outputs/phase8_2_final_training_sota_run/giman_survival_final.pth",
+        default=project_root
+        / "outputs/phase8_2_final_training_sota_run/giman_survival_final.pth",
     )
     parser.add_argument(
         "--output-dir",
@@ -105,7 +112,9 @@ def load_pretrained_gat(
 ) -> MultiTaskNeuroFuzzyGIMAN:
     """Load pretrained GAT weights if present."""
     if not checkpoint_path.exists():
-        logging.warning("Checkpoint not found at %s. Training from scratch.", checkpoint_path)
+        logging.warning(
+            "Checkpoint not found at %s. Training from scratch.", checkpoint_path
+        )
         return model
 
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
@@ -114,7 +123,9 @@ def load_pretrained_gat(
         model.gat_encoder.load_state_dict(gat_state_dict, strict=False)
         logging.info("Loaded pretrained GAT weights")
     except Exception as exc:  # pragma: no cover - defensive
-        logging.warning("Could not load pretrained GAT weights: %s. Training from scratch.", exc)
+        logging.warning(
+            "Could not load pretrained GAT weights: %s. Training from scratch.", exc
+        )
     return model
 
 
@@ -169,7 +180,9 @@ def _cindex_metric(risk: np.ndarray, event: np.ndarray, time: np.ndarray) -> flo
 
 def train_multitask(args: argparse.Namespace) -> None:
     """Train multi-task neuro-fuzzy model on canonical pre-split datasets."""
-    logging.info("🚀 Starting Phase 9: Multi-Task Learning Verification (SOTA-hardened)")
+    logging.info(
+        "🚀 Starting Phase 9: Multi-Task Learning Verification (SOTA-hardened)"
+    )
     validate_label_contract(args)
     set_seed(args.seed)
 
@@ -186,8 +199,12 @@ def train_multitask(args: argparse.Namespace) -> None:
     _ = require_attr(test_data, "x", "test features")
     _ = require_attr(test_data, "edge_index", "test graph")
 
-    _ = require_attr(train_data, args.classification_label_key, "train classification labels")
-    _ = require_attr(test_data, args.classification_label_key, "test classification labels")
+    _ = require_attr(
+        train_data, args.classification_label_key, "train classification labels"
+    )
+    _ = require_attr(
+        test_data, args.classification_label_key, "test classification labels"
+    )
     _ = require_attr(train_data, args.survival_event_key, "train survival event")
     _ = require_attr(train_data, args.survival_time_key, "train survival time")
     _ = require_attr(test_data, args.survival_event_key, "test survival event")
@@ -294,7 +311,9 @@ def train_multitask(args: argparse.Namespace) -> None:
     final_c_index = safe_c_index(risk_np, time_np, event_np)
 
     logging.info("✅ Multi-task verification complete")
-    logging.info("Final SAA AUC: %.4f (95%% CI [%.4f, %.4f])", final_auc, auc_ci_low, auc_ci_high)
+    logging.info(
+        "Final SAA AUC: %.4f (95%% CI [%.4f, %.4f])", final_auc, auc_ci_low, auc_ci_high
+    )
     logging.info(
         "Final C-index: %.4f (95%% CI [%.4f, %.4f])",
         final_c_index,
