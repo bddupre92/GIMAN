@@ -27,7 +27,7 @@ Blair.Dupre@und.edu}
 \maketitle
 
 \begin{abstract}
-Parkinson's disease (PD) presents profound prognostic challenges due to its clinical heterogeneity and complex, nonlinear progression patterns. This paper presents GIMAN (Graph-Informed Multimodal Attention Network), a hybrid neuro-fuzzy soft computing system for precision PD prognosis. We developed a complete computational pipeline spanning 11 development phases: multimodal data integration (imaging, genetics, clinical assessments), graph-based population modeling, survival analysis, and novel neuro-fuzzy enhancements. Our hybrid approach synergistically combines neural networks' representational power with fuzzy logic's principled uncertainty handling. The final system achieves exceptional performance: survival prediction C-index of 0.9999, classification AUC of 0.9993, with superior robustness to noise (2× better than crisp models). Critically, we demonstrate that fuzzy logic layers address vanishing gradients while maintaining interpretability through transparent rule-based reasoning. Multi-level explainability (GNNExplainer, fuzzy rules, attention visualization) provides clinical trust. This work advances soft computing methodology in precision medicine, demonstrating that hybrid approaches yield systems that are simultaneously accurate, robust, and interpretable---essential properties for clinical deployment.
+Parkinson's disease (PD) presents profound prognostic challenges due to its clinical heterogeneity and complex, nonlinear progression patterns. This paper presents GIMAN (Graph-Informed Multimodal Attention Network), a hybrid neuro-fuzzy soft computing system for precision PD prognosis. We developed a complete computational pipeline spanning 11 development phases: multimodal data integration (imaging, genetics, clinical assessments), graph-based population modeling, survival analysis, and neuro-fuzzy enhancements. Our hybrid approach combines neural networks' representational power with fuzzy logic's uncertainty handling. In internal held-out evaluation, the Phase 8 survival model achieved best test C-index up to 0.9666 with 5-fold CV mean 0.8445, while Phase 9 neuro-fuzzy classification runs showed variable AUC depending on label/split configuration. These results indicate competitive internal performance and strong methodological potential, but external validation remains pending. Multi-level explainability (GNNExplainer, fuzzy rules, attention visualization) provides clinically relevant transparency. This work advances soft computing methodology in precision medicine while defining a reproducibility-first path toward externally validated deployment.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -71,7 +71,7 @@ This paper makes four primary contributions to soft computing in precision medic
     
     \item \textbf{Novel Hybrid Neuro-Fuzzy Architecture:} We implement differentiable fuzzy logic layers that solve vanishing gradient issues while maintaining transparency. Our architecture synergistically combines Graph Attention Networks with Takagi-Sugeno fuzzy inference (Section~\ref{sec:neurofuzzy}).
     
-    \item \textbf{Comprehensive Benchmark Evaluation:} We provide extensive experimental validation demonstrating state-of-the-art performance (C-index: 0.9988, AUC: 0.9955) and superior robustness compared to purely neural or purely fuzzy baselines (Section~\ref{sec:results}).
+    \item \textbf{Comprehensive Internal Benchmark Evaluation:} We provide internal benchmark analyses showing competitive prognostic performance and robustness trends relative to baseline model families, alongside explicit uncertainty and validation caveats (Section~\ref{sec:results}).
     
     \item \textbf{Multi-Level Clinical Explainability:} We demonstrate that hybrid approaches enable multi-level interpretability---feature importance (GNNExplainer), rule-level reasoning (fuzzy rules), and population-level context (attention visualization)---essential for clinical trust and regulatory approval (Section~\ref{sec:explainability}).
 \end{enumerate}
@@ -197,7 +197,7 @@ where $f_\theta$ is a 3-layer MLP risk head and $h_0(t)$ is the baseline hazard.
 
 where $\delta_i$ indicates event occurrence and $\mathcal{R}_i$ is the risk set.
 
-\textbf{Results (Phase 8 Baseline):} The GAT-Cox model achieved test C-index = 0.9999, substantially outperforming:
+\textbf{Results (Phase 8 Baseline):} In internal held-out evaluation, the GAT-Cox model achieved best test C-index = 0.9666 and 5-fold CV mean C-index = 0.8445 (SD = 0.1191). In internal baseline comparisons, this model outperformed simpler comparator families:
 \begin{itemize}
     \item Linear Cox with clinical features only: C-index = 0.72
     \item Random Forest Cox: C-index = 0.78
@@ -296,22 +296,22 @@ The complete Neuro-Fuzzy GIMAN architecture:
 
 \subsection{Results}
 
-\textbf{SAA Classification Performance:}
+\textbf{SAA Classification Performance (Internal):}
 \begin{itemize}
-    \item Baseline GAT (no fuzzy layer): AUC = 0.623
-    \item Neuro-Fuzzy GIMAN: \textbf{AUC = 0.9910} (+59\% relative improvement)
-    \item Precision: 0.94, Recall: 0.93, F1-score: 0.935
+    \item Baseline Phase 8.3 test artifact: AUC = 0.5752
+    \item Neuro-fuzzy internal runs were variable across configurations (e.g., exploratory AUC spanning approximately 0.79 to 0.98 in archived run logs)
+    \item Interpretation: endpoint definition, deterministic splitting, and leakage controls materially affect reported discrimination
 \end{itemize}
 
-\textbf{Multi-Task Learning (SAA + Survival):}
+\textbf{Multi-Task Learning (SAA + Survival, Internal):}
 Joint training on both tasks with weighted loss ($\lambda_{saa}=0.5, \lambda_{surv}=0.5$) achieved:
 \begin{itemize}
-    \item SAA AUC: 0.9993 (further improved from single-task)
-    \item Survival C-index: 0.9999 (maintained from baseline)
-    \item Training stability: No gradient explosion/vanishing across 50 epochs
+    \item Exploratory SAA AUC up to 0.9816 in archived runs
+    \item Exploratory survival C-index around 0.9491 in archived runs
+    \item Training stability improvements relative to earlier crisp baselines
 \end{itemize}
 
-\textbf{Analysis:} Multi-task learning acts as implicit regularization, preventing overfitting to either task. Shared GAT representations capture generalizable disease patterns.
+\textbf{Analysis:} Multi-task learning can act as implicit regularization, but these Phase 9 results remain internal and require locked deterministic protocols plus external cohort validation before clinical claims.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{visualizations/publication/Figure6_Calibration_Plots.png}}
@@ -367,16 +367,16 @@ Table~\ref{tab:results} summarizes comprehensive experimental results across all
 \toprule
 \textbf{Task} & \textbf{Metric} & \textbf{Score} \\
 \midrule
-\multicolumn{3}{c}{\textit{Classification Tasks}} \\
+\multicolumn{3}{c}{\textit{Classification Tasks (Internal)}} \\
 \midrule
-SAA Prediction (Single-Task) & AUC-ROC & 0.9910 \\
-SAA Prediction (Multi-Task) & AUC-ROC & 0.9993 \\
+SAA Prediction (Phase 8.3 artifact) & AUC-ROC & 0.5752 \\
+SAA Prediction (Neuro-fuzzy exploratory) & AUC-ROC & 0.7935-0.9816 \\
 \midrule
-\multicolumn{3}{c}{\textit{Survival Analysis}} \\
+\multicolumn{3}{c}{\textit{Survival Analysis (Internal)}} \\
 \midrule
-Survival Prediction & C-index & 0.9999 \\
-Time-Dependent AUC (12mo) & AUC & 0.9950 \\
-Time-Dependent AUC (24mo) & AUC & 0.9900 \\
+Survival Prediction (best held-out) & C-index & 0.9666 \\
+Survival Prediction (5-fold CV mean) & C-index & 0.8445 \\
+Survival Prediction (5-fold CV SD) & C-index & 0.1191 \\
 \midrule
 \multicolumn{3}{c}{\textit{Clustering/Subtyping}} \\
 \midrule
@@ -391,7 +391,7 @@ Fuzzy C-Means & Silhouette & 0.52 \\
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{visualizations/publication/Figure5_Time_Dependent_AUC.png}}
-\caption{Time-Dependent AUC. Performance remains consistently high across prediction horizons. Crisp GIMAN maintains C-index near 1.0. Neuro-fuzzy variant shows slight improvement in AUC-ROC, particularly at 24-month horizon. Confidence bands indicate stable, reliable predictions.}
+\caption{Time-dependent performance should be interpreted as internal exploratory evidence. Calibration and horizon-specific estimates require a locked deterministic protocol and external validation before clinical claims.}
 \label{fig:timedep}
 \end{figure}
 
@@ -399,16 +399,16 @@ Fuzzy C-Means & Silhouette & 0.52 \\
 
 We conducted systematic ablation studies to isolate component contributions:
 
-\textbf{Graph Structure:} Removing GAT (using only multimodal encoders + MLP) reduced C-index from 0.9999 to 0.89 ($-10.9\%$), confirming population-level patterns significantly improve individual predictions.
+\textbf{Graph Structure:} Internal ablation logs indicate that removing GAT (using multimodal encoders + MLP) reduced survival discrimination from the strongest internal configuration (C-index up to 0.9666) toward approximately 0.89, supporting the value of population-level relational modeling.
 
-\textbf{Fuzzy Logic Layer:} Removing fuzzy layer (replacing with standard 2-layer MLP) dropped SAA AUC from 0.9910 to 0.623 ($-37.1\%$), demonstrating fuzzy logic's critical role in handling classification under uncertainty.
+\textbf{Fuzzy Logic Layer:} In exploratory internal runs, replacing fuzzy components with standard MLP heads reduced classification performance in several configurations; however, effect size estimates remain protocol-sensitive and should be treated as provisional.
 
 \textbf{Multimodal Integration:} Using single modalities achieved:
 \begin{itemize}
     \item Imaging only: C-index = 0.80
     \item Genetics only: C-index = 0.75
     \item Clinical only: C-index = 0.78
-    \item Full multimodal fusion: C-index = 0.9999
+    \item Full multimodal fusion: C-index up to 0.9666 in internal held-out testing
 \end{itemize}
 
 \textbf{Attention Mechanism:} Replacing GAT with standard GCN reduced C-index to 0.89, highlighting attention's importance for adaptive weighting.
@@ -422,17 +422,17 @@ We conducted systematic ablation studies to isolate component contributions:
 \subsection{Robustness Analysis}
 
 \subsubsection{Cross-Validation Stability}
-5-fold cross-validation results demonstrate consistent performance:
+5-fold cross-validation results show moderate variability:
 
 \begin{itemize}
-    \item C-Index: 0.9999 ± 0.0001 (GIMAN), 0.9998 ± 0.0002 (Neuro-Fuzzy)
-    \item AUC: 0.9932 ± 0.0037 (GIMAN), 0.9986 ± 0.0015 (Neuro-Fuzzy)
-    \item Neuro-fuzzy shows 40-60\% lower variance across folds
+    \item Survival C-index (Phase 8 baseline): 0.8445 ± 0.1191 across 5 folds
+    \item Neuro-fuzzy classification metrics are configuration-dependent in internal runs (approximately 0.7935-0.9816 AUC range reported)
+    \item Variance and stability require locked split/label contracts and independent replication
 \end{itemize}
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=\columnwidth]{visualizations/publication/Figure7_CV_Robustness.png}}
-\caption{5-Fold Cross-Validation Box Plots. Neuro-fuzzy GIMAN exhibits both higher mean performance and lower variance compared to crisp model, indicating superior generalization and stability. Diamond markers show mean values. Lower variance particularly evident in AUC and MAE metrics.}
+\caption{5-Fold cross-validation summary should be interpreted as internal evidence only. Robustness claims require deterministic reruns, confidence intervals, and external cohort confirmation.}
 \label{fig:cv}
 \end{figure}
 
@@ -590,19 +590,19 @@ This work demonstrates general principles for hybrid soft computing in biomedici
 
 \section{Conclusion}
 
-This paper presented GIMAN, a comprehensive hybrid neuro-fuzzy graph neural network system for Parkinson's disease prognosis. Through 11 development phases, we demonstrated that synergistic integration of neural networks (representation learning, gradient-based optimization) with fuzzy logic (uncertainty handling, transparent reasoning) yields systems that are simultaneously accurate, robust, and interpretable.
+This paper presented GIMAN, a comprehensive hybrid neuro-fuzzy graph neural network system for Parkinson's disease prognosis. Through 11 development phases, we showed that integrating neural networks (representation learning, gradient-based optimization) with fuzzy logic (uncertainty handling, transparent reasoning) can yield robust and interpretable prognostic systems.
 
 Our key contributions include:
 
 \begin{itemize}
     \item \textbf{Complete development pipeline} from multimodal data preprocessing through advanced explainability
     \item \textbf{Novel differentiable fuzzy layers} solving vanishing gradients while maintaining linguistic interpretability
-    \item \textbf{State-of-the-art performance:} C-index 0.9999, AUC 0.9993, surpassing purely neural and purely fuzzy baselines
+    \item \textbf{Competitive internal performance:} best internal survival C-index up to 0.9666 with exploratory neuro-fuzzy gains; external validation pending
     \item \textbf{Superior robustness:} 2× better noise tolerance from fuzzy boundaries
     \item \textbf{Multi-level explainability:} Feature importance (GNNExplainer), fuzzy rules, attention visualization
 \end{itemize}
 
-Beyond PD specifically, this work advances soft computing methodology in precision medicine. As AI increasingly augments clinical decision-making, hybrid approaches that embrace uncertainty, provide transparency, and capture complex biological realities represent a principled path toward trustworthy, deployable systems. The integration of neuro-computing's power with fuzzy-computing's interpretability offers a promising paradigm for addressing biomedicine's fundamental challenges: heterogeneity, uncertainty, and the need for explainable predictions affecting human lives.
+Beyond PD specifically, this work advances soft computing methodology in precision medicine. As AI increasingly augments clinical decision-making, hybrid approaches that embrace uncertainty, provide transparency, and capture complex biological realities represent a principled path toward trustworthy systems. The integration of neuro-computing's power with fuzzy-computing's interpretability remains promising, with external validation as the next required milestone for clinical deployment.
 
 \textit{Code, data, and interactive visualizations available at:} \url{https://github.com/bddupre92/GIMAN}
 
@@ -767,4 +767,3 @@ A. Adeli and M. Neshat, ``A fuzzy expert system for heart disease diagnosis,'' i
 \end{thebibliography}
 
 \end{document}
-

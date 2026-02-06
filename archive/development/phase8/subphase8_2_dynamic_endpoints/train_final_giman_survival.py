@@ -10,6 +10,7 @@ Implements comprehensive survival analysis training with:
 
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -414,6 +415,27 @@ def train_final_model(
 
 def main() -> None:
     """Main training pipeline."""
+    parser = argparse.ArgumentParser(description="Phase 8.2 GIMAN survival training")
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=project_root / "data" / "03_prodromal" / "final_pyg_data",
+        help="Directory containing train_data.pt and test_data.pt",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=project_root / "outputs" / "phase8_2_final_training",
+        help="Directory to save checkpoint and training results",
+    )
+    parser.add_argument(
+        "--max-epochs",
+        type=int,
+        default=100,
+        help="Maximum epochs for CV and final training",
+    )
+    args = parser.parse_args()
+
     print("="*60)
     print("PHASE 8.2: GIMAN-GAT SURVIVAL MODEL TRAINING")
     print("="*60 + "\n")
@@ -422,8 +444,15 @@ def main() -> None:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}\n")
     
+    # Load data
+    data_dir = args.data_dir
+    train_data = torch.load(data_dir / "train_data.pt", weights_only=False)
+    test_data = torch.load(data_dir / "test_data.pt", weights_only=False)
+
+    inferred_in_features = int(train_data.x.shape[1])
+
     model_config = {
-        'in_features': 49,
+        'in_features': inferred_in_features,
         'hidden_dim': 128,
         'num_heads': 4,
         'num_layers': 3,
@@ -433,17 +462,13 @@ def main() -> None:
     training_config = {
         'learning_rate': 0.001,
         'weight_decay': 1e-5,
-        'max_epochs': 100,
+        'max_epochs': args.max_epochs,
         'patience': 20
     }
     
-    # Load data
-    data_dir = project_root / "data" / "03_prodromal" / "final_pyg_data"
-    train_data = torch.load(data_dir / "train_data.pt", weights_only=False)
-    test_data = torch.load(data_dir / "test_data.pt", weights_only=False)
-    
     print(f"✓ Loaded training data: {train_data.num_nodes} nodes, {train_data.event.sum()} events")
     print(f"✓ Loaded test data: {test_data.num_nodes} nodes, {test_data.event.sum()} events\n")
+    print(f"✓ Inferred input features: {inferred_in_features}\n")
     
     # 5-fold cross-validation
     cv_results = k_fold_cross_validation(
@@ -451,7 +476,7 @@ def main() -> None:
     )
     
     # Train final model
-    save_dir = project_root / "outputs" / "phase8_2_final_training"
+    save_dir = args.output_dir
     final_results = train_final_model(
         train_data, test_data, model_config, training_config, device, save_dir
     )

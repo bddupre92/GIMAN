@@ -155,6 +155,9 @@ logs/
 ehthumbs.db
 Thumbs.db
 
+# Allow tracked audit claim matrix CSV deliverable
+!Docs/audit/SOTA_CLAIM_ALIGNMENT_MATRIX.csv
+
 # Hydra
 outputs/
 .hydra/
