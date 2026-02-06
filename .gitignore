@@ -43,6 +43,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+*.xml
 *.cover
 *.py,cover
 .hypothesis/
@@ -167,3 +168,24 @@ wandb/
 
 # DVC
 .dvc/cache
+
+
+data/
+datasets/
+*.ckpt
+*.pt
+*.pth
+*.h5
+*.joblib
+*.pkl
+*.weights
+*.onnx
+*.log
+*.out
+*.tmp
+.ipynb_checkpoints/
+results/
+cache/
+__pycache__/
+.DS_Store
+Thumbs.db

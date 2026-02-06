@@ -1,0 +1,18 @@
+MULTIMODAL FEATURE EXTRACTION SUMMARY
+================================================================================
+
+Date: 2025-10-03 22:19:21
+
+Total Patients: 2046
+Total Features: 62
+
+Feature Groups:
+  clinical            :   5 features
+  datscan_sbr         :  20 features
+  grey_matter         :   1 features
+  csf_biomarkers      :   0 features
+
+Coverage Statistics:
+  clinical            :  88.2% (5 features)
+  datscan_sbr         :  41.7% (20 features)
+  grey_matter         :   6.2% (1 features)

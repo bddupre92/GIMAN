@@ -1,0 +1,165 @@
+================================================================================
+HYPERPARAMETER OPTIMIZATION REPORT
+================================================================================
+
+Optimization Date: 2025-10-03 21:56:19
+Total Trials: 30
+CV Folds: 3
+Max Epochs/Trial: 30
+
+================================================================================
+BEST CONFIGURATION
+================================================================================
+
+Combined Score: 0.1038
+
+Performance:
+  Motor R2:      0.0216
+  Cognitive AUC: 0.6478
+
+Hyperparameters:
+
+Model Architecture:
+  hidden_dim:           256
+  num_gat_layers:       2
+  num_attention_heads:  4
+  dropout:              0.2533
+
+Training:
+  learning_rate:        0.000502
+  weight_decay:         0.000010
+
+Loss Function:
+  motor_weight:         0.6550
+  focal_alpha:          0.3778
+  focal_gamma:          1.4881
+
+Graph Construction:
+  k_neighbors:          7
+
+================================================================================
+TOP 5 TRIALS
+================================================================================
+
+
+1. Trial 24:
+   Combined Score: 0.1038
+   Motor R2:       0.0216
+   Cognitive AUC:  0.6478
+   Key params: hidden_dim=256, k=7, lr=0.000502
+
+2. Trial 14:
+   Combined Score: 0.1003
+   Motor R2:       0.0201
+   Cognitive AUC:  0.6437
+   Key params: hidden_dim=256, k=9, lr=0.000234
+
+3. Trial 15:
+   Combined Score: 0.0993
+   Motor R2:       0.0178
+   Cognitive AUC:  0.6447
+   Key params: hidden_dim=256, k=9, lr=0.001146
+
+4. Trial 1:
+   Combined Score: 0.0983
+   Motor R2:       0.0216
+   Cognitive AUC:  0.6386
+   Key params: hidden_dim=256, k=7, lr=0.000384
+
+5. Trial 25:
+   Combined Score: 0.0948
+   Motor R2:       0.0228
+   Cognitive AUC:  0.6315
+   Key params: hidden_dim=256, k=9, lr=0.000670
+
+================================================================================
+PARAMETER STATISTICS
+================================================================================
+
+
+hidden_dim:
+  Mean:   202.6667
+  Std:    78.9820
+  Min:    64.0000
+  Max:    256.0000
+  Median: 256.0000
+
+num_gat_layers:
+  Mean:   2.5667
+  Std:    0.7279
+  Min:    2.0000
+  Max:    4.0000
+  Median: 2.0000
+
+num_attention_heads:
+  Mean:   4.7333
+  Std:    2.1324
+  Min:    2.0000
+  Max:    8.0000
+  Median: 4.0000
+
+dropout:
+  Mean:   0.2420
+  Std:    0.1026
+  Min:    0.1072
+  Max:    0.4894
+  Median: 0.2215
+
+learning_rate:
+  Mean:   0.0014
+  Std:    0.0021
+  Min:    0.0001
+  Max:    0.0087
+  Median: 0.0006
+
+weight_decay:
+  Mean:   0.0001
+  Std:    0.0002
+  Min:    0.0000
+  Max:    0.0008
+  Median: 0.0001
+
+motor_weight:
+  Mean:   0.6538
+  Std:    0.0936
+  Min:    0.5069
+  Max:    0.8758
+  Median: 0.6376
+
+focal_alpha:
+  Mean:   0.3362
+  Std:    0.0935
+  Min:    0.1308
+  Max:    0.4880
+  Median: 0.3466
+
+focal_gamma:
+  Mean:   1.6292
+  Std:    0.5690
+  Min:    1.0059
+  Max:    2.8939
+  Median: 1.4720
+
+k_neighbors:
+  Mean:   7.7000
+  Std:    1.6846
+  Min:    4.0000
+  Max:    10.0000
+  Median: 8.0000
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+Improvement over Task 2.3 baseline:
+  Motor R2:      +0.0084 (+63.7%)
+  Cognitive AUC: +0.0260 (+4.2%)
+
+Next Steps:
+  1. Run full 100-epoch training with best hyperparameters
+  2. Validate on held-out test set
+  3. Proceed to Research Plan Phase 3 (Multimodal Integration)
+
+Expected Performance with Full Training:
+  Motor R2:      0.0238 - 0.0259
+  Cognitive AUC: 0.6608 - 0.6802

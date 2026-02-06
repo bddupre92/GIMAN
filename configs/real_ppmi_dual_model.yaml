@@ -1,0 +1,228 @@
+# GIMAN Dual Model Configuration - Real PPMI Cohort
+# Week 2 Implementation: Progression & Conversion Prediction
+# Date: October 8, 2025
+# Version: 8.1.0
+
+# ==============================================================================
+# DATA CONFIGURATION
+# ==============================================================================
+data:
+  # Real PPMI cohort paths
+  cohort_path: "data/02_processed/enhanced_real_ppmi_cohort.csv"
+  metadata_path: "data/02_processed/real_ppmi_cohort_metadata.json"
+  
+  # Data splits (stratified by conversion status)
+  train_split: 0.70  # 89 patients
+  val_split: 0.15    # 19 patients
+  test_split: 0.15   # 19 patients
+  random_seed: 42
+  
+  # Feature configuration
+  num_features: 32  # Updated to match prepared training data
+  feature_groups:
+    demographics: ["SEX", "AGE_COMPUTED"]
+    clinical: ["NP3TOT", "NHY"]
+    genetics: ["LRRK2", "GBA", "APOE_RISK"]
+    imaging: ["CAUDATE_MEAN", "PUTAMEN_MEAN", "STRIATUM_MEAN"]
+    biomarkers: ["PTAU", "TTAU", "UPSIT_TOTAL", "ALPHA_SYN"]
+  
+  # Data preprocessing
+  normalization: "z-score"  # z-score standardization
+  handle_missing: "knn"     # KNN imputation (k=5)
+  
+  # Patient similarity graph
+  graph_construction:
+    method: "knn"           # k-nearest neighbors
+    k_neighbors: 10         # Connect to 10 most similar patients
+    similarity_metric: "cosine"
+    edge_threshold: 0.5     # Minimum similarity for edge creation
+
+# ==============================================================================
+# GIMAN-PROGRESSION CONFIGURATION
+# ==============================================================================
+giman_progression:
+  # Model architecture
+  model:
+    num_features: 32  # Updated to match prepared training data
+    hidden_dim: 64
+    num_gat_layers: 3
+    num_heads: 4
+    survival_hidden_dims: [32, 16]
+    dropout: 0.3
+  
+  # Training configuration
+  training:
+    batch_size: 32          # Full cohort is small, use mini-batches
+    learning_rate: 0.001
+    weight_decay: 0.0001    # L2 regularization
+    max_epochs: 200
+    early_stopping:
+      enabled: true
+      patience: 30
+      min_delta: 0.001
+      monitor: "val_concordance"
+      mode: "max"
+  
+  # Loss function
+  loss:
+    type: "cox_partial_likelihood"
+    
+  # Optimizer
+  optimizer:
+    type: "adam"
+    betas: [0.9, 0.999]
+    eps: 1.0e-08
+  
+  # Learning rate scheduler
+  scheduler:
+    type: "reduce_on_plateau"
+    mode: "max"
+    factor: 0.5
+    patience: 15
+    min_lr: 1.0e-06
+  
+  # Evaluation metrics
+  metrics:
+    - "concordance_index"   # C-index for survival analysis
+    - "integrated_brier_score"
+    - "time_dependent_auc"
+  
+  # Survival analysis specific
+  survival:
+    time_points: [0, 6, 12, 18, 24, 30, 36]  # Months
+    baseline_hazard_estimation: "breslow"
+
+# ==============================================================================
+# GIMAN-CONVERSION CONFIGURATION
+# ==============================================================================
+giman_conversion:
+  # Model architecture (identical backbone to progression)
+  model:
+    num_features: 32  # Updated to match prepared training data
+    hidden_dim: 64
+    num_gat_layers: 3
+    num_heads: 4
+    classifier_hidden_dims: [32, 16]  # Renamed for consistency with model code
+    dropout: 0.3
+  
+  # Training configuration
+  training:
+    batch_size: 32
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    max_epochs: 200
+    early_stopping:
+      enabled: true
+      patience: 30
+      min_delta: 0.001
+      monitor: "val_auc"
+      mode: "max"
+  
+  # Loss function (class imbalance handling)
+  loss:
+    type: "weighted_bce"
+    pos_weight: 2.0         # Weight for positive class (conversion)
+    auto_weight: true       # Auto-compute from class distribution
+  
+  # Optimizer
+  optimizer:
+    type: "adam"
+    betas: [0.9, 0.999]
+    eps: 1.0e-08
+  
+  # Learning rate scheduler
+  scheduler:
+    type: "reduce_on_plateau"
+    mode: "max"
+    factor: 0.5
+    patience: 15
+    min_lr: 1.0e-06
+  
+  # Evaluation metrics
+  metrics:
+    - "auc_roc"
+    - "auc_pr"              # Precision-Recall AUC
+    - "accuracy"
+    - "balanced_accuracy"
+    - "sensitivity"
+    - "specificity"
+    - "f1_score"
+  
+  # Classification thresholds
+  classification:
+    default_threshold: 0.5
+    optimize_threshold: true  # Optimize on validation set
+
+# ==============================================================================
+# TRAINING INFRASTRUCTURE
+# ==============================================================================
+training:
+  # Hardware
+  device: "cuda"            # "cuda" or "cpu"
+  num_workers: 4            # DataLoader workers
+  pin_memory: true
+  
+  # Reproducibility
+  seed: 42
+  deterministic: true
+  
+  # Checkpointing
+  checkpoint:
+    save_dir: "checkpoints/week2"
+    save_best: true
+    save_last: true
+    save_frequency: 10      # Save every N epochs
+    monitor: "val_loss"
+    mode: "min"
+  
+  # Logging
+  logging:
+    log_dir: "logs/week2"
+    log_frequency: 1        # Log every epoch
+    tensorboard: true
+    wandb: false            # Weights & Biases integration
+    
+  # Gradient clipping
+  gradient_clipping:
+    enabled: true
+    max_norm: 1.0
+    norm_type: 2
+
+# ==============================================================================
+# EVALUATION CONFIGURATION
+# ==============================================================================
+evaluation:
+  # Test set evaluation
+  test_time_augmentation: false
+  bootstrap_confidence: true
+  bootstrap_iterations: 1000
+  confidence_level: 0.95
+  
+  # Visualization
+  generate_plots: true
+  plot_formats: ["png", "pdf"]
+  save_predictions: true
+
+# ==============================================================================
+# EXPERIMENT TRACKING
+# ==============================================================================
+experiment:
+  name: "week4_real_endpoints_dual_model"
+  version: "8.2.0"
+  description: "GIMAN dual model training on 127-patient real PPMI cohort with hybrid real+simulated endpoints"
+  tags:
+    - "real_ppmi"
+    - "giman_progression"
+    - "giman_conversion"
+    - "week4"
+    - "real_endpoints"
+    - "hybrid_labels"
+    - "phase8.1"
+  
+  # Output directories
+  output:
+    base_dir: "results/week4"
+    progression_dir: "results/week4/progression"
+    conversion_dir: "results/week4/conversion"
+    figures_dir: "results/week4/figures"
+    reports_dir: "results/week4/reports"

@@ -949,24 +949,18 @@ def main():
         "archive/development/phase7/phase7_aggressive_optimization_results.json", "w"
     ) as f:
         # Convert numpy types to Python native types for JSON serialization
-        json_results = {}
-        for key, value in results.items():
+        def to_json_safe(value):
             if isinstance(value, dict):
-                json_results[key] = {
-                    k: float(v) if isinstance(v, (np.integer, np.floating)) else v
-                    for k, v in value.items()
-                }
-            elif isinstance(value, list):
-                json_results[key] = [
-                    float(x) if isinstance(x, (np.integer, np.floating)) else x
-                    for x in value
-                ]
-            else:
-                json_results[key] = (
-                    float(value)
-                    if isinstance(value, (np.integer, np.floating))
-                    else value
-                )
+                return {k: to_json_safe(v) for k, v in value.items()}
+            if isinstance(value, list):
+                return [to_json_safe(v) for v in value]
+            if isinstance(value, np.bool_):
+                return bool(value)
+            if isinstance(value, (np.integer, np.floating)):
+                return float(value)
+            return value
+
+        json_results = to_json_safe(results)
 
         json.dump(json_results, f, indent=2)
 

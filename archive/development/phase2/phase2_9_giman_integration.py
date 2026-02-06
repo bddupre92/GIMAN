@@ -117,7 +117,7 @@ Number of Sessions: {len(self.embeddings_data)}
 \"\"\"
 
 import numpy as np
-from typing import Dict, Optional, List
+from typing import Any, Dict, Optional, List
 import logging
 
 logger = logging.getLogger(__name__)
@@ -772,12 +772,12 @@ def main():
     base_dir = Path(
         "/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025"
     )
-    embeddings_path = Path("./embeddings_output/giman_spatiotemporal_embeddings.json")
+    embeddings_path = Path("archive/development/phase2/embeddings_output/giman_spatiotemporal_embeddings.json")
 
-    # Verify inputs
-    if not embeddings_path.exists():
+    # Check for required inputs
+    if not (Path("archive/development/phase2/embeddings_output/giman_spatiotemporal_embeddings.json").exists()):
         raise FileNotFoundError(
-            f"Spatiotemporal embeddings not found: {embeddings_path}"
+            "Spatiotemporal embeddings not found: archive/development/phase2/embeddings_output/giman_spatiotemporal_embeddings.json"
         )
 
     # Initialize integrator

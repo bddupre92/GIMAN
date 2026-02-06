@@ -1,0 +1,49 @@
+\subsection{Cohort Selection and Data Sources}
+
+We analyzed longitudinal data from the Parkinson's Progression Markers Initiative (\ppmi)\cite{marek2011ppmi}, including 536 early-stage PD patients (Hoehn \& Yahr stage $\leq$ 2, disease duration $<$ 2 years at baseline) with $\geq$3 clinical assessments over 5 years. Clinical measures included Movement Disorder Society-Unified Parkinson's Disease Rating Scale Part III (MDS-UPDRS-III) motor scores\cite{goetz2008movement} and Montreal Cognitive Assessment (MoCA)\cite{nasreddine2005moca} at baseline (BL), 12 months (V04), 18 months (V06), 24 months (V08), and 36-60 months (V12). Biomarker data comprised DaTscan SPECT striatal binding ratios, CSF $\alpha$-synuclein levels, and genetic variants (\textit{GBA}, \textit{LRRK2}, \textit{SNCA})\cite{nalls2019identification}. Demographic variables included age, sex, education, and disease duration. The study was approved by institutional review boards at all \ppmi{} sites, with written informed consent from all participants.
+
+\subsection{Longitudinal Trajectory Extraction}
+
+For each patient, we computed individual progression slopes via linear mixed-effects models\cite{bates2015lme4}:
+\begin{equation}
+Y_{ij} = \beta_0 + \beta_1 t_{ij} + b_{0i} + b_{1i} t_{ij} + \epsilon_{ij}
+\end{equation}
+where $Y_{ij}$ is the outcome (UPDRS-III or MoCA) for patient $i$ at time $t_{ij}$, $\beta_0$ and $\beta_1$ are fixed intercept and slope, $b_{0i}$ and $b_{1i}$ are patient-specific random effects, and $\epsilon_{ij}$ is residual error. Individual slopes $\hat{b}_{1i}$ quantified motor progression (UPDRS-III slope, points/year) and cognitive decline (MoCA slope, points/year). Quality control excluded patients with $<$3 timepoints, non-monotonic trajectories (reversals >5 points), or incomplete baseline assessments, yielding 536 patients for analysis.
+
+\subsection{Latent Time Alignment}
+
+To account for variable disease duration at enrollment, we applied latent time alignment\cite{donohue2014preclinical} to normalize patients to a common disease progression timescale. We modeled latent disease time $\tau_i$ for each patient via:
+\begin{equation}
+\tau_{ij} = \alpha_i + \beta t_{ij}
+\end{equation}
+where $\alpha_i$ is patient-specific time shift (disease duration offset) and $\beta$ is time warp (progression rate heterogeneity). Parameters were estimated via Bayesian inference (Stan)\cite{carpenter2017stan} using UPDRS-III as the anchor variable. Aligned trajectories $Y_{ij}(\tau_{ij})$ were resampled at uniform latent time intervals for subsequent clustering.
+
+\subsection{Trajectory Clustering with Variational Autoencoders}
+
+We employed variational autoencoders (\vader)\cite{fortuin2020gp} to learn low-dimensional trajectory embeddings while preserving temporal dynamics. \vader{} encodes multivariate time series (UPDRS-III, MoCA) into latent representations $\mathbf{z}_i \in \mathbb{R}^{10}$ via Gaussian process priors\cite{fortuin2020gp}:
+\begin{equation}
+q_\phi(\mathbf{z}_i | \mathbf{Y}_i) = \mathcal{N}(\mu_\phi(\mathbf{Y}_i), \sigma_\phi^2(\mathbf{Y}_i))
+\end{equation}
+where $\phi$ are encoder parameters learned via evidence lower bound (ELBO) optimization. Decoder $p_\theta(\mathbf{Y}_i | \mathbf{z}_i)$ reconstructs trajectories, with reconstruction loss and KL divergence balanced via $\beta$-VAE ($\beta=0.5$). Training used Adam optimizer (learning rate $10^{-3}$), 200 epochs, and 80/20 train-validation split.
+
+Learned embeddings $\{\mathbf{z}_i\}_{i=1}^{536}$ were clustered via hierarchical clustering (Ward linkage) and k-means clustering ($k=2$ to $k=10$). Optimal cluster number was determined via silhouette scores\cite{rousseeuw1987silhouettes}:
+\begin{equation}
+s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
+\end{equation}
+where $a(i)$ is mean intra-cluster distance and $b(i)$ is mean nearest-cluster distance. We also evaluated cophenetic correlation (hierarchical) and Davies-Bouldin index (k-means).
+
+\subsection{Subtype Characterization}
+
+Identified subtypes were characterized via: (1) \textbf{Clinical profiles}: mean UPDRS-III/MoCA slopes, baseline scores, age, sex, disease duration (Kruskal-Wallis tests for group differences); (2) \textbf{Biomarker associations}: DaTscan striatal binding ratio (SBR), CSF $\alpha$-synuclein, genetic variant prevalence (ANOVA for continuous, chi-square for categorical); (3) \textbf{Natural history}: Kaplan-Meier analysis for time to disability milestones (H\&Y stage 3, UPDRS-III $\geq$ 32, MoCA $<$ 21).
+
+\subsection{Baseline Subtype Prediction}
+
+To assess prospective stratification feasibility, we trained classifiers to predict subtype membership from baseline features. Features included demographics (age, sex, education), baseline UPDRS-III/MoCA, disease duration, DaTscan SBR, and genetic variants. We compared logistic regression, random forest, and gradient boosting (XGBoost)\cite{chen2016xgboost} via 5-fold cross-validation. Performance metrics: accuracy, AUC (one-vs-rest), balanced accuracy (accounting for class imbalance). Feature importance was quantified via SHAP values\cite{lundberg2017unified}.
+
+\subsection{Clinical Trial Simulation}
+
+We simulated parallel-group placebo-controlled trials under three scenarios: (1) \textbf{Standard enrollment}: all eligible patients; (2) \textbf{Enrichment with rapid progressors}: selecting top 30\% predicted fast subtype; (3) \textbf{Subtype-stratified randomization}: balancing subtypes across arms. Trial endpoint: change in UPDRS-III at 12 months. Treatment effect: 30\% reduction in progression rate (clinically meaningful\cite{olanow2009effect}). Sample size calculations assumed 80\% power, $\alpha=0.05$, two-sided t-tests, with progression slopes drawn from observed subtype distributions. We compared required $N$, minimum detectable effect size (MDES), and trial duration across scenarios via 10,000 Monte Carlo simulations.
+
+\subsection{Statistical Analysis}
+
+Group comparisons: Kruskal-Wallis tests for continuous variables (non-normal distributions), chi-square tests for categorical variables. Post-hoc pairwise comparisons: Dunn's test with Bonferroni correction. Survival analysis: Log-rank tests. Classifier evaluation: DeLong test for AUC comparisons. Statistical significance: $p < 0.05$ (two-tailed). Analyses used R 4.2.1 (lme4, survival, randomForest packages) and Python 3.9 (scikit-learn, XGBoost, PyTorch for VAE).

@@ -45,10 +45,11 @@ def clean_participant_status(df: pd.DataFrame) -> pd.DataFrame:
     """
     df_clean = df.copy()
 
-    # Ensure key columns are proper types
-    for col in ["PATNO", "EVENT_ID"]:
-        if col in df_clean.columns:
-            df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce")
+    # Ensure PATNO is numeric; EVENT_ID is a visit code string (BL, V06, V08, ...)
+    if "PATNO" in df_clean.columns:
+        df_clean["PATNO"] = pd.to_numeric(df_clean["PATNO"], errors="coerce")
+    if "EVENT_ID" in df_clean.columns:
+        df_clean["EVENT_ID"] = df_clean["EVENT_ID"].astype(str).str.strip()
 
     # Clean enrollment category (ENROLL_CAT)
     if "ENROLL_CAT" in df_clean.columns:
@@ -77,10 +78,11 @@ def clean_mds_updrs(df: pd.DataFrame, part: str = "I") -> pd.DataFrame:
     """
     df_clean = df.copy()
 
-    # Ensure key columns are proper types
-    for col in ["PATNO", "EVENT_ID"]:
-        if col in df_clean.columns:
-            df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce")
+    # Ensure PATNO is numeric; EVENT_ID remains categorical visit code
+    if "PATNO" in df_clean.columns:
+        df_clean["PATNO"] = pd.to_numeric(df_clean["PATNO"], errors="coerce")
+    if "EVENT_ID" in df_clean.columns:
+        df_clean["EVENT_ID"] = df_clean["EVENT_ID"].astype(str).str.strip()
 
     # Find UPDRS score columns (typically start with 'NP' followed by numbers)
     updrs_cols = [
@@ -114,10 +116,11 @@ def clean_fs7_aparc(df: pd.DataFrame) -> pd.DataFrame:
     """
     df_clean = df.copy()
 
-    # Ensure key columns are proper types
-    for col in ["PATNO", "EVENT_ID"]:
-        if col in df_clean.columns:
-            df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce")
+    # Ensure PATNO is numeric; EVENT_ID remains categorical visit code
+    if "PATNO" in df_clean.columns:
+        df_clean["PATNO"] = pd.to_numeric(df_clean["PATNO"], errors="coerce")
+    if "EVENT_ID" in df_clean.columns:
+        df_clean["EVENT_ID"] = df_clean["EVENT_ID"].astype(str).str.strip()
 
     # Find cortical thickness columns (typically end with '_CTH')
     cth_cols = [col for col in df_clean.columns if col.endswith("_CTH")]
@@ -147,10 +150,11 @@ def clean_xing_core_lab(df: pd.DataFrame) -> pd.DataFrame:
     """
     df_clean = df.copy()
 
-    # Ensure key columns are proper types
-    for col in ["PATNO", "EVENT_ID"]:
-        if col in df_clean.columns:
-            df_clean[col] = pd.to_numeric(df_clean[col], errors="coerce")
+    # Ensure PATNO is numeric; EVENT_ID remains categorical visit code
+    if "PATNO" in df_clean.columns:
+        df_clean["PATNO"] = pd.to_numeric(df_clean["PATNO"], errors="coerce")
+    if "EVENT_ID" in df_clean.columns:
+        df_clean["EVENT_ID"] = df_clean["EVENT_ID"].astype(str).str.strip()
 
     # Find striatal binding ratio columns
     sbr_cols = [col for col in df_clean.columns if "SBR" in col.upper()]

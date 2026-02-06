@@ -1,0 +1,87 @@
+\documentclass[10pt]{article}
+
+% Lancet Neurology formatting
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Custom commands
+\newcommand{\ppmi}{PPMI}
+\newcommand{\deepsurv}{DeepSurv}
+
+% Hyperref settings
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue
+}
+
+% Caption formatting
+\captionsetup{font=small,labelfont=bf}
+
+% Title and authors
+\title{\textbf{Deep Neural Survival Modeling for Predicting Prodromal-to-Clinical Parkinson's Disease Transition: A Longitudinal Biomarker Study}}
+
+\author{
+[Author Names]$^{1,2,3}$ \\
+\\
+\small $^1$[Department], [Institution] \\
+\small $^2$[Department], [Institution] \\
+\small $^3$Correspondence: [email@institution.edu]
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% Abstract
+\input{abstract}
+
+% Main sections
+\section{Introduction}
+\input{introduction}
+
+\section{Methods}
+\input{methods}
+
+\section{Results}
+\input{results}
+
+\section{Discussion}
+\input{discussion}
+
+\section{Data Availability}
+Data from PPMI (\url{www.ppmi-info.org/data}). Access requires registration.
+
+\section{Code Availability}
+DeepSurv implementation and risk calculator available at [GitHub repository].
+
+\section{Acknowledgments}
+PPMI data acknowledgment. Funded by Michael J. Fox Foundation.
+
+\section{Author Contributions}
+[To be filled in]
+
+\section{Competing Interests}
+The authors declare no competing interests.
+
+% References
+\bibliographystyle{vancouver}
+\bibliography{references}
+
+\end{document}

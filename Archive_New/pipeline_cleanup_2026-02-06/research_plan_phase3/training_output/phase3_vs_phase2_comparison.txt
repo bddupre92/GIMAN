@@ -1,0 +1,28 @@
+PHASE 3 MULTIMODAL vs PHASE 2 BASELINE COMPARISON
+================================================================================
+
+Date: 2025-10-03 22:25:26
+
+MOTOR PROGRESSION (R2 Score):
+  Phase 2 Baseline (7 features):   0.0346
+  Phase 3 Multimodal (~62 features): 0.0164 +/- 0.0138
+  Absolute Improvement:            -0.0182
+  Relative Improvement:            -52.6%
+
+COGNITIVE DECLINE (AUC-ROC):
+  Phase 2 Baseline (7 features):   0.6646
+  Phase 3 Multimodal (~62 features): 0.6603 +/- 0.0276
+  Absolute Improvement:            -0.0043
+  Relative Improvement:            -0.6%
+
+FEATURE COMPARISON:
+  Phase 2: 7 clinical features
+  Phase 3: ~62 multimodal features
+    - Clinical: 5 features
+    - DAT-SPECT SBR: 20 features (41.7% coverage)
+    - Grey matter: 1 feature (6.2% coverage)
+    - Other: ~36 features
+
+CONCLUSION:
+  WARNING: Multimodal model did not improve motor prediction
+  WARNING: Multimodal model did not improve cognitive prediction

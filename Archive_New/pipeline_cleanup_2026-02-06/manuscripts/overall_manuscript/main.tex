@@ -1,0 +1,183 @@
+% GIMAN Comprehensive Manuscript
+% A Graph-Informed Multimodal Attention Network for Parkinson's Disease:
+% From Data Preprocessing to Explainable Precision Medicine
+
+\documentclass[9pt,twocolumn]{article}
+
+% Essential packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{natbib}
+\usepackage{geometry}
+\usepackage{lineno}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% Page geometry for Nature-style formatting
+\geometry{
+    letterpaper,
+    left=1.5cm,
+    right=1.5cm,
+    top=2cm,
+    bottom=2cm
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+% Custom commands
+\newcommand{\giman}{\textsc{GIMAN}}
+\newcommand{\ppmi}{\textsc{PPMI}}
+\newcommand{\pd}{\textsc{PD}}
+\newcommand{\gat}{\textsc{GAT}}
+\newcommand{\updrs}{\textsc{UPDRS}}
+\newcommand{\moca}{\textsc{MoCA}}
+
+% Title and authors
+\title{
+    \Large\textbf{GIMAN: A Graph-Informed Multimodal Attention Network for Explainable Parkinson's Disease Precision Medicine}
+}
+
+\author{
+    Your Name$^{1,*}$, 
+    Co-Author 2$^{1}$, 
+    Co-Author 3$^{2}$, 
+    Senior Author$^{1,3,*}$ \\
+    \small $^{1}$Department of [Your Department], [Your University] \\
+    \small $^{2}$[Collaborator Institution] \\
+    \small $^{3}$[Additional Affiliation] \\
+    \small $^{*}$Corresponding authors: \texttt{your.email@university.edu}
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% Line numbers for review
+\linenumbers
+
+% Abstract
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+% Keywords
+\noindent\textbf{Keywords:} Parkinson's disease, graph neural networks, multimodal integration, disease progression, explainable AI, precision medicine, survival analysis, attention mechanisms
+
+\section{Introduction}
+\input{introduction}
+
+\section{Methods}
+\label{sec:methods}
+
+% Overview
+Parkinson's disease (\pd) research requires integrating diverse data modalities—clinical assessments, neuroimaging, genetic profiles, and longitudinal trajectories—to understand disease heterogeneity and predict outcomes. The Graph-Informed Multimodal Attention Network (\giman) framework addresses this challenge through a comprehensive pipeline spanning data preprocessing, graph-based patient similarity modeling, deep learning for trajectory analysis and prognostic prediction, and multi-method explainability. This section details each component.
+
+\subsection{Data Collection and Preprocessing}
+\label{sec:methods:preprocessing}
+\input{methods_preprocessing}
+
+\subsection{Graph Construction and Patient Similarity}
+\label{sec:methods:graph}
+\input{methods_graph}
+
+\subsection{GIMAN Architecture}
+\label{sec:methods:giman}
+\input{methods_giman}
+
+\subsection{Longitudinal Progression Subtyping (Phase 4)}
+\label{sec:methods:phase4}
+\input{methods_phase4}
+
+\subsection{Prodromal Conversion Prediction (Phase 5)}
+\label{sec:methods:phase5}
+\input{methods_phase5}
+
+\subsection{Explainability Framework (Phase 6)}
+\label{sec:methods:phase6}
+\input{methods_phase6}
+
+\section{Results}
+\label{sec:results}
+
+We applied the \giman\ framework to the Parkinson's Progression Markers Initiative (\ppmi) dataset, demonstrating its ability to characterize disease heterogeneity, predict progression, and provide interpretable insights.
+
+\subsection{Cohort Characteristics}
+\label{sec:results:cohort}
+\input{results_cohort}
+
+\subsection{Phase 4: Longitudinal Progression Subtypes}
+\label{sec:results:phase4}
+\input{results_phase4}
+
+\subsection{Phase 5: Prodromal Conversion Prediction}
+\label{sec:results:phase5}
+\input{results_phase5}
+
+\subsection{Phase 6: Explainability and Clinical Interpretation}
+\label{sec:results:phase6}
+\input{results_phase6}
+
+\subsection{Integrated Analysis}
+\label{sec:results:integrated}
+\input{results_integrated}
+
+\section{Discussion}
+\label{sec:discussion}
+\input{discussion}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{conclusion}
+
+% Acknowledgments
+\section*{Acknowledgments}
+This work was supported by [funding sources]. Data used in the preparation of this article were obtained from the Parkinson's Progression Markers Initiative (PPMI) database (\url{www.ppmi-info.org/data}). PPMI is sponsored and partially funded by The Michael J. Fox Foundation for Parkinson's Research.
+
+% Author contributions
+\section*{Author Contributions}
+Y.N. conceived the study, developed the methodology, performed analyses, and wrote the manuscript. C.A.2 contributed to data preprocessing and validation. C.A.3 provided clinical interpretation. S.A. supervised the project and revised the manuscript. All authors reviewed and approved the final manuscript.
+
+% Competing interests
+\section*{Competing Interests}
+The authors declare no competing interests.
+
+% Data availability
+\section*{Data Availability}
+PPMI data are publicly available at \url{www.ppmi-info.org/access-data-specimens/download-data/}. Code implementing the \giman\ framework is available at [GitHub repository URL].
+
+% References
+\bibliographystyle{naturemag}
+\bibliography{references}
+
+% Figures
+\clearpage
+\section*{Figures}
+\input{figures}
+
+% Tables
+\clearpage
+\section*{Tables}
+\input{tables}
+
+% Supplementary Information
+\clearpage
+\section*{Supplementary Information}
+See supplementary materials for additional methods, figures, and tables.
+
+\end{document}
