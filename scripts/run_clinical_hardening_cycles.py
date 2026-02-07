@@ -8,16 +8,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn.functional as F
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "src"))
-
-from giman_pipeline.digital_twin.counterfactual import run_twin_sensitivity_scan
-from giman_pipeline.digital_twin.state import CounterfactualSpec
-from giman_pipeline.explainability.appendix_figures import generate_appendix_package
-from giman_pipeline.sota.benchmark import run_internal_sota_lock
-from giman_pipeline.sota.metrics import safe_auc
 
 
 def _load_nf_model(in_features: int, checkpoint_path: Path):
@@ -45,10 +38,12 @@ def _load_nf_model(in_features: int, checkpoint_path: Path):
 def _predict_prob(model, data) -> np.ndarray:
     with torch.no_grad():
         logits, _ = model(data)
-        return F.softmax(logits, dim=1)[:, 1].detach().cpu().numpy()
+        return torch.softmax(logits, dim=1)[:, 1].detach().cpu().numpy()
 
 
 def _cycle1_proxy_dependency(checkpoint_path: Path) -> dict[str, Any]:
+    from giman_pipeline.sota.metrics import safe_auc
+
     explain_summary = json.loads(
         (
             root
@@ -202,7 +197,12 @@ def _cycle3_calibration() -> dict[str, Any]:
 
 
 def _cycle4_digital_twin_sensitivity() -> dict[str, Any]:
-    data_path = root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt"
+    from giman_pipeline.digital_twin.counterfactual import run_twin_sensitivity_scan
+    from giman_pipeline.digital_twin.state import CounterfactualSpec
+
+    data_path = (
+        root / "data" / "03_prodromal" / "final_pyg_data_sota_run" / "test_data.pt"
+    )
     metadata_path = (
         root
         / "data"
@@ -215,21 +215,33 @@ def _cycle4_digital_twin_sensitivity() -> dict[str, Any]:
         CounterfactualSpec(feature_name="SCOPA_AUT_SCORE", delta=-0.5),
         CounterfactualSpec(feature_name="TREMOR_SCORE", delta=-0.5),
         CounterfactualSpec(feature_name="UPSIT_SCORE", delta=0.5),
+        CounterfactualSpec(feature_name="ALPHA_SYNUCLEIN", delta=-0.5),
+        CounterfactualSpec(feature_name="LRRK2", delta=-0.5),
     ]
     specs_stress = [
         CounterfactualSpec(feature_name="UPDRS_I", delta=-3.0),
         CounterfactualSpec(feature_name="SCOPA_AUT_SCORE", delta=-3.0),
         CounterfactualSpec(feature_name="TREMOR_SCORE", delta=-3.0),
         CounterfactualSpec(feature_name="UPSIT_SCORE", delta=3.0),
+        CounterfactualSpec(feature_name="ALPHA_SYNUCLEIN", delta=-3.0),
+        CounterfactualSpec(feature_name="LRRK2", delta=-3.0),
     ]
 
     out_csv_mod = root / "outputs" / "digital_twin" / "sensitivity_scan_moderate.csv"
     out_fig_mod = (
-        root / "visualizations" / "appendix" / "digital_twin" / "sensitivity_scan_moderate.png"
+        root
+        / "visualizations"
+        / "appendix"
+        / "digital_twin"
+        / "sensitivity_scan_moderate.png"
     )
     out_csv_stress = root / "outputs" / "digital_twin" / "sensitivity_scan_stress.csv"
     out_fig_stress = (
-        root / "visualizations" / "appendix" / "digital_twin" / "sensitivity_scan_stress.png"
+        root
+        / "visualizations"
+        / "appendix"
+        / "digital_twin"
+        / "sensitivity_scan_stress.png"
     )
 
     df_mod = run_twin_sensitivity_scan(
@@ -254,12 +266,12 @@ def _cycle4_digital_twin_sensitivity() -> dict[str, Any]:
     )
     mean_abs_mod = float(df_mod["abs_delta_risk"].mean()) if len(df_mod) else 0.0
     max_abs_mod = float(df_mod["abs_delta_risk"].max()) if len(df_mod) else 0.0
-    mean_abs_stress = float(df_stress["abs_delta_risk"].mean()) if len(df_stress) else 0.0
+    mean_abs_stress = (
+        float(df_stress["abs_delta_risk"].mean()) if len(df_stress) else 0.0
+    )
     max_abs_stress = float(df_stress["abs_delta_risk"].max()) if len(df_stress) else 0.0
     passed = bool(
-        max_abs_mod >= 0.005
-        and mean_abs_stress >= 0.002
-        and max_abs_stress >= 0.02
+        max_abs_mod >= 0.005 and mean_abs_stress >= 0.002 and max_abs_stress >= 0.02
     )
     return {
         "cycle": "C4_digital_twin_sensitivity",
@@ -280,9 +292,9 @@ def _cycle4_digital_twin_sensitivity() -> dict[str, Any]:
 
 def _cycle5_metric_contract() -> dict[str, Any]:
     payload = json.loads(
-        (
-            root / "outputs" / "sota_lock" / "internal_sota_lock.json"
-        ).read_text(encoding="utf-8")
+        (root / "outputs" / "sota_lock" / "internal_sota_lock.json").read_text(
+            encoding="utf-8"
+        )
     )
     baselines = payload.get("baselines", {})
     has_pr = all("pr_auc" in v for v in baselines.values())
@@ -302,7 +314,9 @@ def _cycle5_metric_contract() -> dict[str, Any]:
 
 def _cycle6_clinical_gate(cycles: list[dict[str, Any]]) -> dict[str, Any]:
     fail_cycles = [c["cycle"] for c in cycles if not c["pass"]]
-    external_validation_artifact = root / "Docs" / "audit" / "EXTERNAL_VALIDATION_REPORT.md"
+    external_validation_artifact = (
+        root / "Docs" / "audit" / "EXTERNAL_VALIDATION_REPORT.md"
+    )
     has_external_validation = external_validation_artifact.exists()
     passed = len(fail_cycles) == 0 and has_external_validation
     return {
@@ -343,7 +357,13 @@ def _write_report(payload: dict[str, Any], out_md: Path) -> None:
 
 
 def main() -> None:
-    hardened_ckpt = root / "outputs" / "phase9_neuro_fuzzy_hardened" / "neuro_fuzzy_best.pth"
+    """Run hardening cycles and write machine-readable plus markdown reports."""
+    from giman_pipeline.explainability.appendix_figures import generate_appendix_package
+    from giman_pipeline.sota.benchmark import run_internal_sota_lock
+
+    hardened_ckpt = (
+        root / "outputs" / "phase9_neuro_fuzzy_hardened" / "neuro_fuzzy_best.pth"
+    )
     checkpoint_path = (
         hardened_ckpt
         if hardened_ckpt.exists()

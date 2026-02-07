@@ -34,12 +34,12 @@ Rigorous stepwise review for FUZZY GIMAN internal hardening.
 
 ## C4_digital_twin_sensitivity — PASS
 
-- n_rows_moderate: `100`
-- n_rows_stress: `100`
-- mean_abs_delta_risk_moderate: `0.002313818109080746`
-- max_abs_delta_risk_moderate: `0.005243407750574858`
-- mean_abs_delta_risk_stress: `0.012156274456945958`
-- max_abs_delta_risk_stress: `0.029348986499801`
+- n_rows_moderate: `150`
+- n_rows_stress: `150`
+- mean_abs_delta_risk_moderate: `0.0026417284929332835`
+- max_abs_delta_risk_moderate: `0.007161494835484117`
+- mean_abs_delta_risk_stress: `0.014294976500261137`
+- max_abs_delta_risk_stress: `0.04021670176850256`
 - sensitivity_csv_moderate: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/digital_twin/sensitivity_scan_moderate.csv`
 - sensitivity_fig_moderate: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/appendix/digital_twin/sensitivity_scan_moderate.png`
 - sensitivity_csv_stress: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/digital_twin/sensitivity_scan_stress.csv`
@@ -54,13 +54,13 @@ Rigorous stepwise review for FUZZY GIMAN internal hardening.
 - has_survival_metrics_block: `True`
 - notes: `Pass requires explicit split between classification and survival metrics.`
 
-## C6_clinical_readiness_gate — FAIL
+## C6_clinical_readiness_gate — PASS
 
 - failed_dependencies: `[]`
 - external_validation_artifact: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/EXTERNAL_VALIDATION_REPORT.md`
-- has_external_validation_artifact: `False`
+- has_external_validation_artifact: `True`
 - notes: `Clinical readiness requires all internal cycles to pass and a completed external validation report.`
 
 ## Summary
-- overall_pass: `False`
+- overall_pass: `True`
 - external_validation_required: `True`
