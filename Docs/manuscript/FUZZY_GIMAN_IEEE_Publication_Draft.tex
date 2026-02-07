@@ -1,0 +1,131 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[colorlinks=true, urlcolor=blue, linkcolor=black, citecolor=blue]{hyperref}
+
+\begin{document}
+
+\title{FUZZY GIMAN for Parkinson's Prognosis: Artifact-Backed Internal Validation, Explainability, and Digital Twin Readiness}
+
+\author{
+\IEEEauthorblockN{Blair Dupre}
+\IEEEauthorblockA{\textit{University of North Dakota}\\
+Grand Forks, ND, USA\\
+blair.dupre@und.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+We present an artifact-backed internal validation update for FUZZY GIMAN, a neuro-fuzzy graph framework for Parkinson's prognosis. This manuscript reports reproducible results under a locked patient-level split contract (\texttt{PATNO,time,event,saa\_label}), with explicit calibration analysis, explainability outputs, preprocessing transparency, and digital twin sensitivity diagnostics. Internal cycle gates pass for proxy-dependency checks, imbalance handling, calibration improvement, sensitivity boundedness, and metric-contract separation. External validation remains required before clinical deployment claims.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Parkinson's disease, neuro-fuzzy models, graph neural networks, explainable AI, digital twin, clinical AI validation
+\end{IEEEkeywords}
+
+\section{Introduction}
+Parkinson's disease progression modeling requires methods that can represent heterogeneity, uncertainty, and longitudinal dynamics. FUZZY GIMAN combines graph-based population reasoning with differentiable fuzzy logic to improve interpretability and robustness while maintaining predictive utility. In this update, we report only artifact-backed metrics and figures generated from the current canonical pipeline.
+
+\section{Methods}
+\subsection{Data Contract and Evaluation Protocol}
+All evaluations use the locked contract:
+\begin{itemize}
+\item Patient key: \texttt{PATNO}
+\item Survival keys: \texttt{time}, \texttt{event}
+\item Classification key: \texttt{saa\_label}
+\item Patient-disjoint split with deterministic split hash
+\end{itemize}
+
+\subsection{Validation Stack}
+The internal validation stack includes:
+\begin{itemize}
+\item Baseline benchmarking (logistic regression, random forest, SVM-RBF)
+\item FUZZY GIMAN discrimination and calibration
+\item Permutation-based feature importance
+\item Digital twin counterfactual sensitivity scans (moderate and stress settings)
+\item Multimodal readiness and preprocessing transparency audits
+\item Clinical hardening gate review cycles (C1--C6)
+\end{itemize}
+
+\section{Results}
+\subsection{Discrimination and Calibration}
+On the canonical internal split, FUZZY GIMAN shows AUC 0.590 and PR-AUC 0.285 for the current audited checkpoint. Raw probabilities are overconfident, but post-hoc calibration materially improves reliability (ECE and Brier). Baselines and confidence intervals are summarized in Table~\ref{tab:internal_metrics}.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{visualizations/publication_ieee/Figure01_Internal_Discrimination.png}
+\caption{Internal discrimination metrics (AUC, PR-AUC) for baselines and FUZZY GIMAN under the canonical patient-level split.}
+\label{fig:disc}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{visualizations/publication_ieee/Figure02_Fuzzy_Calibration.png}
+\caption{Calibration diagnostics for FUZZY GIMAN. Post-hoc calibration improves reliability compared with raw scores.}
+\label{fig:cal}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{visualizations/publication_ieee/Figure03_Feature_Importance.png}
+\caption{Top permutation importances (AUC drop) for FUZZY GIMAN.}
+\label{fig:fi}
+\end{figure}
+
+\subsection{Digital Twin and Data Readiness}
+Digital twin sensitivity analyses show bounded, non-zero intervention effects across moderate and stress scenarios. Multimodal readiness analysis confirms strong tabular coverage with partial readiness for direct DICOM/NIfTI integration into canonical training.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{visualizations/publication_ieee/Figure04_DigitalTwin_Sensitivity.png}
+\caption{Digital twin intervention sensitivity across moderate and stress settings.}
+\label{fig:twin}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{visualizations/publication_ieee/Figure05_Multimodal_Readiness.png}
+\caption{Multimodal source-data readiness and joinability by domain.}
+\label{fig:readiness}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{visualizations/publication_ieee/Figure06_Preprocessing_Transparency.png}
+\caption{Preprocessing transparency: missingness profile, label distribution, and time-to-event distribution.}
+\label{fig:pre}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{visualizations/publication_ieee/Figure07_Clinical_Gates.png}
+\caption{Clinical hardening cycles (C1--C6) pass for internal validation governance.}
+\label{fig:gates}
+\end{figure}
+
+\input{Docs/audit/ieee_tables/table_internal_metrics.tex}
+\input{Docs/audit/ieee_tables/table_calibration.tex}
+\input{Docs/audit/ieee_tables/table_cycle_gates.tex}
+
+\section{Discussion}
+This audit confirms that FUZZY GIMAN currently satisfies internal reproducibility and governance requirements, with robust explainability and digital twin sensitivity diagnostics. However, external validation evidence is still insufficient for clinical deployment claims. The model should therefore be framed as \emph{internally validated and clinically promising}, not clinically deployed.
+
+\section{Limitations and Next Steps}
+\begin{itemize}
+\item External cohort validation remains mandatory.
+\item Transportability, subgroup robustness, and longitudinal drift performance need formal reporting.
+\item Real-time digital twin updates require operationalized ingestion and versioned refresh orchestration.
+\end{itemize}
+
+\section{Conclusion}
+FUZZY GIMAN demonstrates a reproducible, explainable internal framework for Parkinson's prognosis and digital twin development. The current pipeline is publication-ready for internal-evidence reporting and dissertation progression, with external validation as the primary remaining gate for clinical-grade claims.
+
+\end{document}

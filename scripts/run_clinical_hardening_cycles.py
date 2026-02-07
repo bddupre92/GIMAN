@@ -314,19 +314,52 @@ def _cycle5_metric_contract() -> dict[str, Any]:
 
 def _cycle6_clinical_gate(cycles: list[dict[str, Any]]) -> dict[str, Any]:
     fail_cycles = [c["cycle"] for c in cycles if not c["pass"]]
-    external_validation_artifact = (
-        root / "Docs" / "audit" / "EXTERNAL_VALIDATION_REPORT.md"
+    report_candidates = sorted(
+        (root / "Docs" / "audit").glob("EXTERNAL_VALIDATION_REPORT_EV_*.md")
     )
-    has_external_validation = external_validation_artifact.exists()
-    passed = len(fail_cycles) == 0 and has_external_validation
+    metrics_candidates = sorted(
+        (root / "outputs" / "external_validation").glob("*/external_metrics.json")
+    )
+    external_validation_artifact = report_candidates[-1] if report_candidates else None
+    external_metrics_artifact = metrics_candidates[-1] if metrics_candidates else None
+
+    has_external_validation = (
+        external_validation_artifact is not None
+        and external_metrics_artifact is not None
+    )
+
+    real_data_only = False
+    if external_metrics_artifact is not None:
+        try:
+            payload = json.loads(external_metrics_artifact.read_text(encoding="utf-8"))
+            governance = payload.get("governance", {})
+            real_data_only = bool(
+                governance.get("real_data_only", False)
+                and not governance.get("synthetic_label_generation", True)
+            )
+        except Exception:
+            real_data_only = False
+
+    passed = len(fail_cycles) == 0 and has_external_validation and real_data_only
     return {
         "cycle": "C6_clinical_readiness_gate",
         "pass": passed,
         "failed_dependencies": fail_cycles,
-        "external_validation_artifact": str(external_validation_artifact),
+        "external_validation_artifact": (
+            str(external_validation_artifact)
+            if external_validation_artifact is not None
+            else ""
+        ),
+        "external_metrics_artifact": (
+            str(external_metrics_artifact)
+            if external_metrics_artifact is not None
+            else ""
+        ),
         "has_external_validation_artifact": has_external_validation,
+        "external_validation_real_data_only": real_data_only,
         "notes": (
-            "Clinical readiness requires all internal cycles to pass and a completed external validation report."
+            "Clinical readiness is blocked unless all prior cycles pass and "
+            "a run-tagged external validation artifact (real-data-only) exists."
         ),
     }
 
