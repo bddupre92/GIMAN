@@ -84,6 +84,7 @@ def generate_appendix_package(
     output_root: Path,
     index_md: Path,
     provenance_json: Path,
+    checkpoint_override: Path | None = None,
 ) -> dict[str, Any]:
     root = _repo_root()
     explain_dir = output_root / "explainability"
@@ -100,7 +101,9 @@ def generate_appendix_package(
         / "pyg_data_metadata.json"
     )
     checkpoint_path = (
-        root
+        checkpoint_override
+        if checkpoint_override is not None
+        else root
         / "outputs"
         / "phase9_neuro_fuzzy_sota_run_from50ckpt"
         / "neuro_fuzzy_best.pth"
@@ -114,6 +117,11 @@ def generate_appendix_package(
     )
 
     explain_summary = run_real_data_explainability(
+        train_data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "train_data.pt",
         test_data_path=test_data_path,
         metadata_path=metadata_path,
         checkpoint_path=checkpoint_path,

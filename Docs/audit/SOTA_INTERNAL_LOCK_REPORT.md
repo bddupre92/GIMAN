@@ -16,9 +16,14 @@ Internal evidence lock on canonical patient-level split. Clinical-superiority cl
 - Classification label proxy check (`saa_label` vs `event`): `pass`
 
 ## Baseline Results (Artifact-backed)
-- `logistic_regression`: AUC 0.9907 [95% CI 0.9714, 1.0000], C-index 0.3718 [95% CI 0.1928, 0.6004], ECE 0.0625, Brier 0.0341
-- `random_forest`: AUC 1.0000 [95% CI 1.0000, 1.0000], C-index 0.1667 [95% CI 0.0915, 0.2500], ECE 0.0307, Brier 0.0086
-- `svm_rbf`: AUC 0.9823 [95% CI 0.9534, 1.0000], C-index 0.2179 [95% CI 0.1392, 0.3133], ECE 0.0302, Brier 0.0331
+- `logistic_regression`: AUC 0.4734 [95% CI 0.3604, 0.5590], PR-AUC 0.1716 [95% CI 0.1034, 0.2702], Recall@P>=0.80 0.0000, ECE 0.3381, Brier 0.2669, CalSlope -0.168, CalIntercept -1.622
+- `random_forest`: AUC 0.4573 [95% CI 0.3402, 0.5663], PR-AUC 0.1672 [95% CI 0.0968, 0.2494], Recall@P>=0.80 0.0000, ECE 0.3052, Brier 0.2362, CalSlope -0.991, CalIntercept -1.807
+- `svm_rbf`: AUC 0.5359 [95% CI 0.4319, 0.6393], PR-AUC 0.2257 [95% CI 0.1337, 0.4231], Recall@P>=0.80 0.0000, ECE 0.0032, Brier 0.1455, CalSlope 0.835, CalIntercept -0.254
+
+## Survival Results (Artifact-backed)
+- Phase8 GIMAN survival metric unavailable due to checkpoint/dataset feature mismatch.
+- reason: `Error(s) in loading state_dict for GIMANSurvivalGAT:
+	size mismatch for convs.0.lin.weight: copying a param with shape torch.Size([512, 50]) from checkpoint, the shape in current model is torch.Size([512, 49]).`
 
 ## FUZZY GIMAN Artifacts
 - Phase 9 full artifact present: `True`
@@ -34,8 +39,9 @@ Internal evidence lock on canonical patient-level split. Clinical-superiority cl
 - External validation artifact is required before clinical-readiness claims.
 
 ## Figures
-- Benchmark metrics: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_internal/internal_benchmark_metrics.png`
+- Classification metrics: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_internal/internal_classification_metrics.png`
 - Calibration metrics: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_internal/internal_calibration_metrics.png`
+- Survival metric: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_internal/internal_survival_metrics.png`
 
 ## Outputs
 - JSON payload: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/sota_lock/internal_sota_lock.json`

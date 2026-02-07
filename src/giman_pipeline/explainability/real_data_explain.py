@@ -11,7 +11,12 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 from sklearn.calibration import calibration_curve
+from sklearn.isotonic import IsotonicRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
+
+from giman_pipeline.sota.metrics import brier, expected_calibration_error, safe_pr_auc
 
 
 def _repo_root() -> Path:
@@ -46,6 +51,36 @@ def _load_nf_model(in_features: int, checkpoint_path: Path, device: torch.device
     return model
 
 
+def _predict_probs(model, data) -> tuple[np.ndarray, np.ndarray]:
+    with torch.no_grad():
+        logits, rule_weights = model(data)
+        probs = F.softmax(logits, dim=1)[:, 1].detach().cpu().numpy()
+    return probs, rule_weights.detach().cpu().numpy()
+
+
+def _fit_calibrators(
+    probs: np.ndarray,
+    y_true: np.ndarray,
+) -> tuple[LogisticRegression, IsotonicRegression]:
+    x = probs.reshape(-1, 1)
+    platt = LogisticRegression(C=1e6, solver="lbfgs")
+    platt.fit(x, y_true.astype(int))
+
+    isotonic = IsotonicRegression(out_of_bounds="clip")
+    isotonic.fit(probs, y_true.astype(int))
+    return platt, isotonic
+
+
+def _calibrate_scores(
+    probs: np.ndarray,
+    platt: LogisticRegression,
+    isotonic: IsotonicRegression,
+) -> tuple[np.ndarray, np.ndarray]:
+    platt_probs = platt.predict_proba(probs.reshape(-1, 1))[:, 1]
+    isotonic_probs = isotonic.predict(probs)
+    return platt_probs, isotonic_probs
+
+
 def _permutation_importance(
     model,
     data,
@@ -77,6 +112,7 @@ def _permutation_importance(
 
 
 def run_real_data_explainability(
+    train_data_path: Path,
     test_data_path: Path,
     metadata_path: Path,
     checkpoint_path: Path,
@@ -88,8 +124,15 @@ def run_real_data_explainability(
     feature_names = metadata.get("feature_names", [])
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_data = torch.load(train_data_path, weights_only=False).to(device)
     test_data = torch.load(test_data_path, weights_only=False).to(device)
+    if not hasattr(train_data, "patno"):
+        raise ValueError(
+            "train_data must include patno for patient-level calibration split"
+        )
+
     y_true = test_data.saa_label.detach().cpu().numpy().astype(int)
+    y_train = train_data.saa_label.detach().cpu().numpy().astype(int)
 
     model = _load_nf_model(
         in_features=int(test_data.x.shape[1]),
@@ -97,11 +140,38 @@ def run_real_data_explainability(
         device=device,
     )
 
-    with torch.no_grad():
-        logits, rule_weights = model(test_data)
-        probs = F.softmax(logits, dim=1)[:, 1].detach().cpu().numpy()
+    probs, rule_weights = _predict_probs(model, test_data)
+    probs_train, _ = _predict_probs(model, train_data)
 
     auc = _safe_auc(y_true, probs)
+    pr_auc = safe_pr_auc(y_true, probs)
+
+    # Fit calibration models on patient-disjoint calibration subset from training graph.
+    pat_train = train_data.patno.detach().cpu().numpy().astype(int)
+    patient_df = pd.DataFrame({"patno": pat_train, "label": y_train}).groupby(
+        "patno", as_index=False
+    )["label"].max()
+    stratify = patient_df["label"].to_numpy() if patient_df["label"].nunique() > 1 else None
+    try:
+        val_pat, _ = train_test_split(
+            patient_df["patno"].to_numpy(),
+            test_size=0.5,
+            random_state=42,
+            stratify=stratify,
+        )
+    except ValueError:
+        # Fallback when a class has too few samples for stratified split.
+        val_pat, _ = train_test_split(
+            patient_df["patno"].to_numpy(),
+            test_size=0.5,
+            random_state=42,
+            stratify=None,
+        )
+    cal_mask = np.isin(pat_train, val_pat)
+    probs_cal = probs_train[cal_mask]
+    y_cal = y_train[cal_mask]
+    platt, isotonic = _fit_calibrators(probs_cal, y_cal)
+    probs_platt, probs_iso = _calibrate_scores(probs, platt, isotonic)
 
     # Permutation importance
     pi_df = _permutation_importance(model, test_data, y_true, auc, feature_names)
@@ -120,7 +190,7 @@ def run_real_data_explainability(
     plt.close(fig)
 
     # Fuzzy rule activation heatmap
-    rw = rule_weights.detach().cpu().numpy()
+    rw = rule_weights
     n_rows = min(40, rw.shape[0])
     idx = np.argsort(probs)[-n_rows:]
     rule_var = np.var(rw, axis=0)
@@ -144,9 +214,29 @@ def run_real_data_explainability(
     frac_pos, mean_pred = calibration_curve(
         y_true, probs, n_bins=10, strategy="quantile"
     )
+    frac_pos_platt, mean_pred_platt = calibration_curve(
+        y_true, probs_platt, n_bins=10, strategy="quantile"
+    )
+    frac_pos_iso, mean_pred_iso = calibration_curve(
+        y_true, probs_iso, n_bins=10, strategy="quantile"
+    )
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot([0, 1], [0, 1], "k--", label="Perfect")
-    ax.plot(mean_pred, frac_pos, "o-", color="#E15759", label="FUZZY GIMAN")
+    ax.plot(mean_pred, frac_pos, "o-", color="#E15759", label="FUZZY GIMAN (raw)")
+    ax.plot(
+        mean_pred_platt,
+        frac_pos_platt,
+        "o-",
+        color="#4E79A7",
+        label="Platt calibrated",
+    )
+    ax.plot(
+        mean_pred_iso,
+        frac_pos_iso,
+        "o-",
+        color="#59A14F",
+        label="Isotonic calibrated",
+    )
     ax.set_title("SAA Calibration Curve (Test split)")
     ax.set_xlabel("Mean predicted probability")
     ax.set_ylabel("Observed frequency")
@@ -159,6 +249,21 @@ def run_real_data_explainability(
     summary = {
         "n_test": int(len(y_true)),
         "auc": auc,
+        "pr_auc": pr_auc,
+        "calibration_metrics": {
+            "raw": {
+                "ece": expected_calibration_error(y_true, probs, n_bins=10),
+                "brier": brier(y_true, probs),
+            },
+            "platt": {
+                "ece": expected_calibration_error(y_true, probs_platt, n_bins=10),
+                "brier": brier(y_true, probs_platt),
+            },
+            "isotonic": {
+                "ece": expected_calibration_error(y_true, probs_iso, n_bins=10),
+                "brier": brier(y_true, probs_iso),
+            },
+        },
         "checkpoint": str(checkpoint_path),
         "feature_importance_csv": str(pi_path),
         "feature_importance_fig": str(top_fig),
@@ -175,6 +280,11 @@ def run_real_data_explainability(
 if __name__ == "__main__":
     root = _repo_root()
     run_real_data_explainability(
+        train_data_path=root
+        / "data"
+        / "03_prodromal"
+        / "final_pyg_data_sota_run"
+        / "train_data.pt",
         test_data_path=root
         / "data"
         / "03_prodromal"

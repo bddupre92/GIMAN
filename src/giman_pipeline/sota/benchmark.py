@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -15,9 +16,12 @@ from .contracts import assert_classification_contract, load_contract_from_metada
 from .metrics import (
     auc_with_ci,
     brier,
+    calibration_slope_intercept,
     c_index_with_ci,
     decision_curve_net_benefit,
     expected_calibration_error,
+    pr_auc_with_ci,
+    recall_at_precision,
 )
 
 
@@ -82,17 +86,23 @@ def _evaluate_classifier(
     event: np.ndarray,
 ) -> dict[str, Any]:
     auc = auc_with_ci(y_true, y_prob, n_bootstrap=300, seed=42)
-    cidx = c_index_with_ci(y_prob, time, event, n_bootstrap=300, seed=42)
+    pr_auc = pr_auc_with_ci(y_true, y_prob, n_bootstrap=300, seed=42)
+    slope, intercept = calibration_slope_intercept(y_true, y_prob)
     ece = expected_calibration_error(y_true, y_prob, n_bins=10)
     brier_score = brier(y_true, y_prob)
     nb = decision_curve_net_benefit(y_true, y_prob)
     return {
         "auc": auc.value,
         "auc_ci_95": [auc.ci_low, auc.ci_high],
-        "c_index": cidx.value,
-        "c_index_ci_95": [cidx.ci_low, cidx.ci_high],
+        "pr_auc": pr_auc.value,
+        "pr_auc_ci_95": [pr_auc.ci_low, pr_auc.ci_high],
+        "recall_at_precision_80": recall_at_precision(
+            y_true, y_prob, target_precision=0.8
+        ),
         "ece": ece,
         "brier": brier_score,
+        "calibration_slope": slope,
+        "calibration_intercept": intercept,
         "decision_curve": nb,
     }
 
@@ -102,25 +112,39 @@ def _build_baselines(data: dict[str, np.ndarray]) -> dict[str, dict[str, Any]]:
     x_test = data["x_test"]
     y_train = data["y_train"]
     y_test = data["y_test"]
-    t_test = data["t_test"]
-    e_test = data["e_test"]
-
     out: dict[str, dict[str, Any]] = {}
 
-    lr = LogisticRegression(max_iter=1500, random_state=42)
+    lr = LogisticRegression(max_iter=1500, random_state=42, class_weight="balanced")
     lr.fit(x_train, y_train)
     prob_lr = lr.predict_proba(x_test)[:, 1]
-    out["logistic_regression"] = _evaluate_classifier(y_test, prob_lr, t_test, e_test)
+    out["logistic_regression"] = _evaluate_classifier(
+        y_test,
+        prob_lr,
+        data["t_test"],
+        data["e_test"],
+    )
 
-    rf = RandomForestClassifier(n_estimators=300, random_state=42)
+    rf = RandomForestClassifier(
+        n_estimators=300, random_state=42, class_weight="balanced_subsample"
+    )
     rf.fit(x_train, y_train)
     prob_rf = rf.predict_proba(x_test)[:, 1]
-    out["random_forest"] = _evaluate_classifier(y_test, prob_rf, t_test, e_test)
+    out["random_forest"] = _evaluate_classifier(
+        y_test,
+        prob_rf,
+        data["t_test"],
+        data["e_test"],
+    )
 
-    svm = SVC(probability=True, random_state=42)
+    svm = SVC(probability=True, random_state=42, class_weight="balanced")
     svm.fit(x_train, y_train)
     prob_svm = svm.predict_proba(x_test)[:, 1]
-    out["svm_rbf"] = _evaluate_classifier(y_test, prob_svm, t_test, e_test)
+    out["svm_rbf"] = _evaluate_classifier(
+        y_test,
+        prob_svm,
+        data["t_test"],
+        data["e_test"],
+    )
 
     return out
 
@@ -151,27 +175,30 @@ def _load_fuzzy_artifacts(root: Path) -> dict[str, Any]:
     return result
 
 
-def _plot_benchmark(metrics: dict[str, dict[str, Any]], output_dir: Path) -> Path:
+def _plot_classification_benchmark(
+    metrics: dict[str, dict[str, Any]],
+    output_dir: Path,
+) -> Path:
     names = list(metrics.keys())
     auc_vals = [metrics[n]["auc"] for n in names]
-    cidx_vals = [metrics[n]["c_index"] for n in names]
+    pr_vals = [metrics[n]["pr_auc"] for n in names]
 
     x = np.arange(len(names))
     width = 0.38
 
     fig, ax = plt.subplots(figsize=(12, 5))
     ax.bar(x - width / 2, auc_vals, width, label="AUC", color="#4E79A7")
-    ax.bar(x + width / 2, cidx_vals, width, label="C-index", color="#F28E2B")
+    ax.bar(x + width / 2, pr_vals, width, label="PR-AUC", color="#F28E2B")
     ax.set_xticks(x)
     ax.set_xticklabels(names, rotation=20, ha="right")
     ax.set_ylim(0.0, 1.05)
-    ax.set_title("Internal Benchmark: Baselines on Canonical Patient Split")
+    ax.set_title("Internal Classification Benchmark (Canonical Patient Split)")
     ax.legend()
     ax.grid(axis="y", linestyle="--", alpha=0.3)
     fig.tight_layout()
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    out = output_dir / "internal_benchmark_metrics.png"
+    out = output_dir / "internal_classification_metrics.png"
     fig.savefig(out, dpi=300)
     plt.close(fig)
     return out
@@ -202,6 +229,87 @@ def _plot_calibration(metrics: dict[str, dict[str, Any]], output_dir: Path) -> P
     return out
 
 
+def _predict_phase8_survival_cindex(test_data_path: Path) -> dict[str, Any]:
+    root = _repo_root()
+    phase8_dir = (
+        root / "archive" / "development" / "phase8" / "subphase8_2_dynamic_endpoints"
+    )
+    if str(phase8_dir) not in sys.path:
+        sys.path.append(str(phase8_dir))
+    if str(root) not in sys.path:
+        sys.path.append(str(root))
+
+    from train_final_giman_survival import GIMANSurvivalGAT
+
+    ckpt = root / "outputs" / "phase8_2_final_training_sota_run" / "giman_survival_final.pth"
+    if not ckpt.exists():
+        raise FileNotFoundError(f"Missing Phase 8 checkpoint: {ckpt}")
+
+    test_data = torch.load(test_data_path, weights_only=False)
+    model = GIMANSurvivalGAT(in_features=int(test_data.x.shape[1]), hidden_dim=128)
+    state = torch.load(ckpt, map_location="cpu", weights_only=False)
+    try:
+        model.load_state_dict(state["model_state_dict"])
+    except RuntimeError as exc:
+        return {
+            "available": False,
+            "reason": str(exc),
+        }
+    model.eval()
+    with torch.no_grad():
+        risk = model(test_data).detach().cpu().numpy()
+
+    time = test_data.time.detach().cpu().numpy().astype(float)
+    event = test_data.event.detach().cpu().numpy().astype(int)
+    cidx = c_index_with_ci(risk, time, event, n_bootstrap=500, seed=42)
+    return {
+        "available": True,
+        "c_index": float(cidx.value),
+        "c_index_ci_95": [float(cidx.ci_low), float(cidx.ci_high)],
+    }
+
+
+def _plot_survival_metrics(survival_metrics: dict[str, Any], output_dir: Path) -> Path:
+    fig, ax = plt.subplots(figsize=(7, 4))
+    if survival_metrics.get("available", True):
+        ax.bar(
+            ["phase8_giman_survival"],
+            [survival_metrics["c_index"]],
+            color="#76B7B2",
+        )
+        ax.set_ylim(0.0, 1.05)
+        ax.set_title("Internal Survival Metric (Canonical Test Split)")
+        ax.set_ylabel("C-index")
+        ci_low, ci_high = survival_metrics["c_index_ci_95"]
+        ax.errorbar(
+            [0],
+            [survival_metrics["c_index"]],
+            yerr=[
+                [survival_metrics["c_index"] - ci_low],
+                [ci_high - survival_metrics["c_index"]],
+            ],
+            fmt="none",
+            ecolor="black",
+            capsize=5,
+        )
+        ax.grid(axis="y", linestyle="--", alpha=0.3)
+    else:
+        ax.axis("off")
+        ax.text(
+            0.02,
+            0.7,
+            "Survival metric unavailable:\nfeature-count mismatch\nbetween dataset and phase8 checkpoint.",
+            fontsize=11,
+            va="top",
+        )
+    fig.tight_layout()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out = output_dir / "internal_survival_metrics.png"
+    fig.savefig(out, dpi=300)
+    plt.close(fig)
+    return out
+
+
 def run_internal_sota_lock(
     train_data_path: Path,
     test_data_path: Path,
@@ -217,10 +325,12 @@ def run_internal_sota_lock(
 
     tensors = _load_tensor_data(train_data_path, test_data_path)
     baseline_metrics = _build_baselines(tensors)
+    survival_metrics = _predict_phase8_survival_cindex(test_data_path)
     fuzzy = _load_fuzzy_artifacts(root)
 
-    benchmark_fig = _plot_benchmark(baseline_metrics, figure_dir)
+    benchmark_fig = _plot_classification_benchmark(baseline_metrics, figure_dir)
     calibration_fig = _plot_calibration(baseline_metrics, figure_dir)
+    survival_fig = _plot_survival_metrics(survival_metrics, figure_dir)
 
     manuscript_paths = [
         root / "Archive_New" / "pipeline_cleanup_2026-02-06" / "main.tex",
@@ -238,6 +348,7 @@ def run_internal_sota_lock(
     payload = {
         "contract": contract.as_dict(),
         "baselines": baseline_metrics,
+        "survival_metrics": survival_metrics,
         "fuzzy_artifacts": fuzzy,
         "validation_checks": {
             "required_tensor_fields": list(REQUIRED_TENSOR_FIELDS),
@@ -247,8 +358,9 @@ def run_internal_sota_lock(
         },
         "claim_governance": governance_hits,
         "figures": {
-            "benchmark": str(benchmark_fig),
+            "classification_benchmark": str(benchmark_fig),
             "calibration": str(calibration_fig),
+            "survival": str(survival_fig),
         },
     }
     output_json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -257,8 +369,10 @@ def run_internal_sota_lock(
     def _fmt_metric(m: dict[str, Any]) -> str:
         return (
             f"AUC {m['auc']:.4f} [95% CI {m['auc_ci_95'][0]:.4f}, {m['auc_ci_95'][1]:.4f}], "
-            f"C-index {m['c_index']:.4f} [95% CI {m['c_index_ci_95'][0]:.4f}, {m['c_index_ci_95'][1]:.4f}], "
-            f"ECE {m['ece']:.4f}, Brier {m['brier']:.4f}"
+            f"PR-AUC {m['pr_auc']:.4f} [95% CI {m['pr_auc_ci_95'][0]:.4f}, {m['pr_auc_ci_95'][1]:.4f}], "
+            f"Recall@P>=0.80 {m['recall_at_precision_80']:.4f}, "
+            f"ECE {m['ece']:.4f}, Brier {m['brier']:.4f}, "
+            f"CalSlope {m['calibration_slope']:.3f}, CalIntercept {m['calibration_intercept']:.3f}"
         )
 
     lines = [
@@ -287,6 +401,21 @@ def run_internal_sota_lock(
 
     lines += [
         "",
+        "## Survival Results (Artifact-backed)",
+    ]
+    if survival_metrics.get("available", True):
+        lines.append(
+            f"- Phase8 GIMAN survival C-index: {survival_metrics['c_index']:.4f} "
+            f"[95% CI {survival_metrics['c_index_ci_95'][0]:.4f}, {survival_metrics['c_index_ci_95'][1]:.4f}]"
+        )
+    else:
+        lines.append(
+            "- Phase8 GIMAN survival metric unavailable due to checkpoint/dataset feature mismatch."
+        )
+        lines.append(f"- reason: `{survival_metrics.get('reason', 'unknown')}`")
+
+    lines += [
+        "",
         "## FUZZY GIMAN Artifacts",
         f"- Phase 9 full artifact present: `{('fuzzy_full' in fuzzy)}`",
         f"- Phase 9 multitask artifact present: `{('fuzzy_multitask' in fuzzy)}`",
@@ -308,8 +437,9 @@ def run_internal_sota_lock(
         "- External validation artifact is required before clinical-readiness claims.",
         "",
         "## Figures",
-        f"- Benchmark metrics: `{benchmark_fig}`",
+        f"- Classification metrics: `{benchmark_fig}`",
         f"- Calibration metrics: `{calibration_fig}`",
+        f"- Survival metric: `{survival_fig}`",
         "",
         "## Outputs",
         f"- JSON payload: `{output_json_path}`",

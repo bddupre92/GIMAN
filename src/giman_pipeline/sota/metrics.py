@@ -3,7 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-from sklearn.metrics import brier_score_loss, roc_auc_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    average_precision_score,
+    brier_score_loss,
+    precision_recall_curve,
+    roc_auc_score,
+)
 
 
 @dataclass(frozen=True)
@@ -17,6 +23,12 @@ def safe_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
     if len(np.unique(y_true)) < 2:
         return 0.5
     return float(roc_auc_score(y_true, y_score))
+
+
+def safe_pr_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
+    if len(np.unique(y_true)) < 2:
+        return float(np.mean(y_true))
+    return float(average_precision_score(y_true, y_score))
 
 
 def simple_c_index(risk: np.ndarray, time: np.ndarray, event: np.ndarray) -> float:
@@ -74,6 +86,17 @@ def auc_with_ci(
 ) -> MetricResult:
     value = safe_auc(y_true, y_score)
     low, high = bootstrap_ci(safe_auc, y_true, y_score, n_bootstrap, seed)
+    return MetricResult(value=value, ci_low=low, ci_high=high)
+
+
+def pr_auc_with_ci(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    n_bootstrap: int = 500,
+    seed: int = 42,
+) -> MetricResult:
+    value = safe_pr_auc(y_true, y_score)
+    low, high = bootstrap_ci(safe_pr_auc, y_true, y_score, n_bootstrap, seed)
     return MetricResult(value=value, ci_low=low, ci_high=high)
 
 
@@ -148,3 +171,34 @@ def decision_curve_net_benefit(
         "thresholds": thresholds.tolist(),
         "net_benefit": net_benefits,
     }
+
+
+def recall_at_precision(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    target_precision: float = 0.8,
+) -> float:
+    """Return the best recall achievable at or above target precision."""
+    if len(np.unique(y_true)) < 2:
+        return 0.0
+    precision, recall, _ = precision_recall_curve(y_true, y_score)
+    mask = precision >= target_precision
+    if not np.any(mask):
+        return 0.0
+    return float(np.max(recall[mask]))
+
+
+def calibration_slope_intercept(
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+) -> tuple[float, float]:
+    """Fit logistic calibration model: y ~ intercept + slope * logit(p)."""
+    y_prob = np.clip(y_prob, 1e-6, 1 - 1e-6)
+    logits = np.log(y_prob / (1 - y_prob)).reshape(-1, 1)
+    if len(np.unique(y_true)) < 2:
+        return (0.0, 0.0)
+    lr = LogisticRegression(C=1e6, solver="lbfgs")
+    lr.fit(logits, y_true.astype(int))
+    slope = float(lr.coef_[0][0])
+    intercept = float(lr.intercept_[0])
+    return slope, intercept

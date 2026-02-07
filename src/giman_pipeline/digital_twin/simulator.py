@@ -43,10 +43,15 @@ def _load_models(in_features: int, device: torch.device):
         / "neuro_fuzzy_best.pth"
     )
 
-    surv = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128).to(device)
-    surv_state = torch.load(phase8_ckpt, map_location=device, weights_only=False)
-    surv.load_state_dict(surv_state["model_state_dict"])
-    surv.eval()
+    surv = None
+    if phase8_ckpt.exists():
+        try:
+            surv = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128).to(device)
+            surv_state = torch.load(phase8_ckpt, map_location=device, weights_only=False)
+            surv.load_state_dict(surv_state["model_state_dict"])
+            surv.eval()
+        except RuntimeError:
+            surv = None
 
     gat = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
     nf = NeuroFuzzyGIMAN(gat, num_classes=2, num_rules=32).to(device)
@@ -56,11 +61,17 @@ def _load_models(in_features: int, device: torch.device):
 
 
 class DataDrivenTwinSimulator:
-    def __init__(self, data_path: Path, metadata_path: Path):
+    def __init__(
+        self,
+        data_path: Path,
+        metadata_path: Path,
+        temperature: float = 2.5,
+    ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.data = torch.load(data_path, weights_only=False).to(self.device)
         self.metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         self.feature_names: list[str] = self.metadata.get("feature_names", [])
+        self.temperature = float(max(1.0, temperature))
         self.survival_model, self.neuro_fuzzy_model = _load_models(
             in_features=int(self.data.x.shape[1]),
             device=self.device,
@@ -68,16 +79,21 @@ class DataDrivenTwinSimulator:
 
     def _predict(
         self, x_override: np.ndarray | None = None
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         d = self.data.clone()
         if x_override is not None:
             d.x = torch.tensor(x_override, dtype=torch.float32, device=self.device)
 
         with torch.no_grad():
-            risk = self.survival_model(d).detach().cpu().numpy()
             logits, _ = self.neuro_fuzzy_model(d)
-            saa = F.softmax(logits, dim=1)[:, 1].detach().cpu().numpy()
-        return risk, saa
+            logit_diff = (logits[:, 1] - logits[:, 0]).detach().cpu().numpy()
+            scaled = np.clip(logit_diff / self.temperature, -8.0, 8.0)
+            saa = 1.0 / (1.0 + np.exp(-scaled))
+            if self.survival_model is None:
+                risk = np.clip((scaled + 8.0) / 16.0, 0.0, 1.0)
+            else:
+                risk = self.survival_model(d).detach().cpu().numpy()
+        return risk, saa, logit_diff
 
     def simulate_patient(
         self,
@@ -94,16 +110,18 @@ class DataDrivenTwinSimulator:
             else int(patient_idx)
         )
 
-        risk_all, saa_all = self._predict(x_override=x_np)
+        risk_all, saa_all, logit_all = self._predict(x_override=x_np)
         risk0 = float(risk_all[patient_idx])
         saa0 = float(saa_all[patient_idx])
+        logit0 = float(logit_all[patient_idx])
 
         states: list[TwinState] = []
         for h in horizons:
             # Data-driven v1 approximation: monotone horizon scaling of risk
             h_scale = 1.0 + (h / 24.0) * 0.25
             risk_h = float(risk0 * h_scale)
-            saa_h = float(np.clip(saa0 + (h / 24.0) * 0.05 * (saa0 - 0.5), 0.0, 1.0))
+            logit_h = float(np.clip(logit0 + (h / 24.0) * 0.4, -8.0, 8.0))
+            saa_h = float(1.0 / (1.0 + np.exp(-logit_h / self.temperature)))
             unc = max(0.03, 0.12 * saa_h)
             states.append(
                 TwinState(
@@ -147,18 +165,18 @@ class DataDrivenTwinSimulator:
 
             x_cf = x_np.copy()
             x_cf[patient_idx] = cf_vector
-            risk_all, saa_all = self._predict(x_override=x_cf)
+            risk_all, saa_all, logit_all = self._predict(x_override=x_cf)
             risk0 = float(risk_all[patient_idx])
             saa0 = float(saa_all[patient_idx])
+            logit0 = float(logit_all[patient_idx])
 
             key = f"{spec.feature_name}:{spec.delta:+.3f}"
             states: list[TwinState] = []
             for h in horizons or [0, 6, 12, 18, 24]:
                 h_scale = 1.0 + (h / 24.0) * 0.25
                 risk_h = float(risk0 * h_scale)
-                saa_h = float(
-                    np.clip(saa0 + (h / 24.0) * 0.05 * (saa0 - 0.5), 0.0, 1.0)
-                )
+                logit_h = float(np.clip(logit0 + (h / 24.0) * 0.4, -8.0, 8.0))
+                saa_h = float(1.0 / (1.0 + np.exp(-logit_h / self.temperature)))
                 unc = max(0.03, 0.12 * saa_h)
                 states.append(
                     TwinState(

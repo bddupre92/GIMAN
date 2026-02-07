@@ -207,6 +207,7 @@ def prepare_feature_blocks(
     df: pd.DataFrame,
     train_idx: np.ndarray,
     test_idx: np.ndarray,
+    drop_feature_names: set[str] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """Prepare feature matrices with train-only imputer/scaler fitting."""
     exclude_cols = {
@@ -220,6 +221,9 @@ def prepare_feature_blocks(
         "cohort",
     }
     feature_cols = [c for c in df.columns if c not in exclude_cols]
+    if drop_feature_names:
+        feature_cols = [c for c in feature_cols if c not in drop_feature_names]
+        print(f"✓ Feature drop list applied: removed {len(drop_feature_names)} requested columns")
     if not feature_cols:
         raise SchemaError("No feature columns found after exclusions")
 
@@ -372,6 +376,18 @@ def parse_args() -> argparse.Namespace:
         help="Patient-level test split fraction",
     )
     parser.add_argument("--knn-k", type=int, default=10, help="k for kNN graph")
+    parser.add_argument(
+        "--drop-feature-names",
+        type=str,
+        default="",
+        help="Comma-separated feature names to exclude from model inputs",
+    )
+    parser.add_argument(
+        "--drop-feature-file",
+        type=Path,
+        default=None,
+        help="Optional file with one feature name per line to exclude",
+    )
     return parser.parse_args()
 
 
@@ -399,7 +415,26 @@ def main() -> None:
         random_state=args.seed,
     )
 
-    x_train, x_test, feature_names = prepare_feature_blocks(df, train_idx, test_idx)
+    drop_features: set[str] = set()
+    if args.drop_feature_names.strip():
+        drop_features |= {
+            x.strip()
+            for x in args.drop_feature_names.split(",")
+            if x.strip()
+        }
+    if args.drop_feature_file is not None and args.drop_feature_file.exists():
+        drop_features |= {
+            line.strip()
+            for line in args.drop_feature_file.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+
+    x_train, x_test, feature_names = prepare_feature_blocks(
+        df,
+        train_idx,
+        test_idx,
+        drop_feature_names=drop_features if drop_features else None,
+    )
 
     edge_index_train = construct_knn_graph(x_train, k=args.knn_k)
     edge_index_test = construct_knn_graph(x_test, k=args.knn_k)

@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score
 
 # Add project root to sys.path
 project_root = Path(__file__).resolve().parents[3]
@@ -68,6 +68,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--classification-label-key", type=str, default="saa_label")
     parser.add_argument("--survival-event-key", type=str, default="event")
     parser.add_argument("--survival-time-key", type=str, default="time")
+    parser.add_argument("--metadata-path", type=Path, default=None)
+    parser.add_argument(
+        "--feature-blacklist",
+        type=str,
+        default="",
+        help="Comma-separated feature names to zero during training (e.g., ALPHA_SYN_VALUE).",
+    )
+    parser.add_argument(
+        "--feature-dropout-rate",
+        type=float,
+        default=0.0,
+        help="Random per-feature dropout probability applied each epoch.",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--learning-rate", type=float, default=0.005)
@@ -75,6 +88,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-rules", type=int, default=32)
     parser.add_argument("--entropy-reg", type=float, default=0.01)
     parser.add_argument("--bootstrap-iters", type=int, default=500)
+    parser.add_argument(
+        "--classification-loss",
+        type=str,
+        default="cross_entropy",
+        choices=["cross_entropy", "focal"],
+    )
+    parser.add_argument("--focal-gamma", type=float, default=2.0)
     return parser.parse_args()
 
 
@@ -141,6 +161,39 @@ def safe_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
     return float(roc_auc_score(y_true, y_score))
 
 
+def safe_pr_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
+    """Compute PR-AUC with single-class guard."""
+    if len(np.unique(y_true)) < 2:
+        return float(np.mean(y_true))
+    return float(average_precision_score(y_true, y_score))
+
+
+def recall_at_precision(y_true: np.ndarray, y_score: np.ndarray, target: float = 0.8) -> float:
+    """Best recall achieved at precision >= target."""
+    if len(np.unique(y_true)) < 2:
+        return 0.0
+    precision, recall, _ = precision_recall_curve(y_true, y_score)
+    mask = precision >= target
+    if not np.any(mask):
+        return 0.0
+    return float(np.max(recall[mask]))
+
+
+class FocalLoss(nn.Module):
+    """Focal loss for imbalanced binary classification via logits."""
+
+    def __init__(self, class_weights: torch.Tensor, gamma: float = 2.0):
+        super().__init__()
+        self.class_weights = class_weights
+        self.gamma = gamma
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        ce = F.cross_entropy(logits, targets, reduction="none", weight=self.class_weights)
+        pt = torch.exp(-ce)
+        loss = ((1 - pt) ** self.gamma) * ce
+        return loss.mean()
+
+
 def bootstrap_auc_ci(
     y_true: np.ndarray, y_score: np.ndarray, seed: int, n_bootstrap: int
 ) -> tuple[float, float]:
@@ -160,6 +213,51 @@ def bootstrap_auc_ci(
         return (0.5, 0.5)
 
     return (float(np.percentile(vals, 2.5)), float(np.percentile(vals, 97.5)))
+
+
+def resolve_feature_blacklist_indices(
+    metadata_path: Path | None,
+    blacklist_csv: str,
+) -> list[int]:
+    """Resolve feature names to indices from metadata feature_names."""
+    if not blacklist_csv.strip() or metadata_path is None:
+        return []
+    if not metadata_path.exists():
+        logging.warning("Metadata path not found: %s; skipping feature blacklist", metadata_path)
+        return []
+
+    payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+    feature_names = payload.get("feature_names", [])
+    if not feature_names:
+        logging.warning("No feature_names found in metadata; skipping feature blacklist")
+        return []
+
+    requested = [x.strip() for x in blacklist_csv.split(",") if x.strip()]
+    idxs: list[int] = []
+    missing: list[str] = []
+    for name in requested:
+        if name in feature_names:
+            idxs.append(int(feature_names.index(name)))
+        else:
+            missing.append(name)
+    if missing:
+        logging.warning("Requested blacklist features not found: %s", missing)
+    return sorted(set(idxs))
+
+
+def apply_feature_regularization(
+    x: torch.Tensor,
+    feature_dropout_rate: float,
+    blacklist_indices: list[int],
+) -> torch.Tensor:
+    """Apply deterministic blacklist zeroing + stochastic feature dropout."""
+    x_reg = x.clone()
+    if blacklist_indices:
+        x_reg[:, blacklist_indices] = 0.0
+    if feature_dropout_rate > 0:
+        drop = torch.rand((x_reg.shape[1],), device=x_reg.device) < feature_dropout_rate
+        x_reg[:, drop] = 0.0
+    return x_reg
 
 
 def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
@@ -206,6 +304,15 @@ def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
     )
 
     in_features = train_data.x.shape[1]
+    blacklist_indices = resolve_feature_blacklist_indices(
+        metadata_path=args.metadata_path,
+        blacklist_csv=args.feature_blacklist,
+    )
+    if blacklist_indices:
+        logging.info("Applying feature blacklist indices: %s", blacklist_indices)
+    if args.feature_dropout_rate > 0:
+        logging.info("Applying feature dropout rate: %.3f", args.feature_dropout_rate)
+
     gat_encoder = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
     model = NeuroFuzzyGIMAN(gat_encoder, num_classes=2, num_rules=args.num_rules).to(
         device
@@ -219,6 +326,8 @@ def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
         optimizer, mode="max", factor=0.5, patience=20
     )
     criterion = nn.CrossEntropyLoss(weight=class_weights)
+    if args.classification_loss == "focal":
+        criterion = FocalLoss(class_weights=class_weights, gamma=args.focal_gamma)
 
     best_auc = 0.0
     best_model_state = None
@@ -229,7 +338,13 @@ def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
         model.train()
         optimizer.zero_grad()
 
-        logits, weights = model(train_data)
+        train_batch = train_data.clone()
+        train_batch.x = apply_feature_regularization(
+            train_batch.x,
+            feature_dropout_rate=args.feature_dropout_rate,
+            blacklist_indices=blacklist_indices,
+        )
+        logits, weights = model(train_batch)
         loss = criterion(logits, train_targets)
 
         entropy = -torch.sum(weights * torch.log(weights + 1e-6), dim=1).mean()
@@ -269,6 +384,8 @@ def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
         best_logits, _ = model(test_data)
         best_probs = F.softmax(best_logits, dim=1)[:, 1].detach().cpu().numpy()
         y_test = test_targets_t.detach().cpu().numpy()
+        final_pr_auc = safe_pr_auc(y_test, best_probs)
+        final_recall80 = recall_at_precision(y_test, best_probs, target=0.8)
 
     auc_ci_low, auc_ci_high = bootstrap_auc_ci(
         y_true=y_test,
@@ -287,11 +404,21 @@ def train_neuro_fuzzy_full(args: argparse.Namespace) -> None:
         "seed": args.seed,
         "train_data_path": str(args.train_data_path),
         "test_data_path": str(args.test_data_path),
+        "metadata_path": str(args.metadata_path) if args.metadata_path else None,
         "classification_label_key": args.classification_label_key,
         "survival_event_key": args.survival_event_key,
         "survival_time_key": args.survival_time_key,
+        "feature_blacklist": [
+            x.strip() for x in args.feature_blacklist.split(",") if x.strip()
+        ],
+        "feature_blacklist_indices": blacklist_indices,
+        "feature_dropout_rate": args.feature_dropout_rate,
         "best_test_auc": float(best_auc),
         "auc_ci_95": [auc_ci_low, auc_ci_high],
+        "test_pr_auc": float(final_pr_auc),
+        "test_recall_at_precision_80": float(final_recall80),
+        "classification_loss": args.classification_loss,
+        "focal_gamma": args.focal_gamma,
         "train_positive": pos_count,
         "train_negative": neg_count,
         "epochs": args.epochs,
