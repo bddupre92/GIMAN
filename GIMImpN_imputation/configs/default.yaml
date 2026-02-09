@@ -1,0 +1,113 @@
+# GIMIN - Default Configuration
+# Graph-based Iterative Multimodal Imputation Network
+# ===================================================
+
+data_paths:
+  raw_data_dir: "../../data/00_raw"
+  processed_data_dir: "data/01_processed"
+  interim_data_dir: "data/02_interim"
+  output_dir: "outputs"
+  checkpoint_dir: "outputs/checkpoints"
+  log_dir: "outputs/logs"
+
+graph:
+  k_neighbors: 15
+  similarity_metric: "cosine"
+  min_overlap: 3
+  graph_refinement_iterations: 3
+  alpha_start: 1.0
+  alpha_end: 0.5
+
+model:
+  embed_dim: 64
+  num_gnn_layers: 3
+  num_heads: 4
+  mc_dropout_rate: 0.1
+
+training:
+  lr: 0.001
+  weight_decay: 0.00001
+  num_epochs: 200
+  batch_mask_fraction: 0.2
+  lambda_dist: 0.1
+  lambda_cross: 0.05
+  early_stopping_patience: 30
+
+evaluation:
+  eval_mask_fractions:
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.5
+  eval_num_runs: 10
+  mc_samples: 50
+
+incremental:
+  rebuild_interval: 100
+  local_hop_count: 2
+
+random_seed: 42
+
+modalities:
+  - name: "genetic"
+    features:
+      - "LRRK2"
+      - "GBA"
+      - "APOE_E4"
+      - "SNCA"
+      - "GENETIC_RISK_SCORE"
+
+  - name: "motor_clinical"
+    features:
+      - "NP3TOT"
+      - "NP1RTOT"
+      - "NHY"
+      - "PIGD_SCORE"
+      - "TREMOR_SCORE"
+      - "MCATOT"
+
+  - name: "structural_imaging"
+    features:
+      - "CAUDATE_L_VOL"
+      - "CAUDATE_R_VOL"
+      - "PUTAMEN_L_VOL"
+      - "PUTAMEN_R_VOL"
+      - "HIPPOCAMPUS_L_VOL"
+      - "HIPPOCAMPUS_R_VOL"
+
+  - name: "spect_sbr"
+    features:
+      - "CAUDATE_L_SBR"
+      - "CAUDATE_R_SBR"
+      - "PUTAMEN_L_SBR"
+      - "PUTAMEN_R_SBR"
+      - "CAUDATE_ASYMMETRY"
+      - "PUTAMEN_ASYMMETRY"
+
+  - name: "csf_biomarkers"
+    features:
+      - "ALPHA_SYNUCLEIN"
+      - "TOTAL_TAU"
+      - "ABETA42"
+      - "PTAU181"
+
+  - name: "clinical_biomarkers"
+    features:
+      - "UPSIT_TOTAL"
+      - "RBD_TOTAL"
+      - "SCOPA_AUT_TOTAL"
+      - "ESS_TOTAL"
+
+  - name: "cortical_thickness"
+    features:
+      - "ENTORHINAL_L_CTH"
+      - "ENTORHINAL_R_CTH"
+      - "CINGULATE_L_CTH"
+      - "CINGULATE_R_CTH"
+      - "PRECENTRAL_L_CTH"
+      - "PRECENTRAL_R_CTH"
+
+  - name: "demographics"
+    features:
+      - "SEX"
+      - "AGE_AT_VISIT"
