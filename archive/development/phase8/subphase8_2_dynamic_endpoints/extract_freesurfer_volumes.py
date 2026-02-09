@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Week 1: FreeSurfer Volume Features Extraction
+"""Phase 8.2 Week 1: FreeSurfer Volume Features Extraction
 
 Purpose:
     Extract subcortical brain volumes from FreeSurfer ASEG parcellation
@@ -19,7 +18,7 @@ Data Source:
 
 Output:
     - data/03_prodromal/enhanced/freesurfer_volumes.csv
-      Columns: PATNO, CAUDATE_L_VOL, CAUDATE_R_VOL, PUTAMEN_L_VOL, 
+      Columns: PATNO, CAUDATE_L_VOL, CAUDATE_R_VOL, PUTAMEN_L_VOL,
                PUTAMEN_R_VOL, HIPPOCAMPUS_L_VOL, HIPPOCAMPUS_R_VOL
 
 Expected Coverage:
@@ -30,38 +29,44 @@ Date: October 12, 2025
 Phase: 8.2 Week 1
 """
 
+import os
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from raw_file_resolver import RawFileResolver, default_raw_roots
 
 
-def load_freesurfer_aseg(data_dir: Path) -> pd.DataFrame:
-    """
-    Load FreeSurfer ASEG volume data.
+def load_freesurfer_aseg(project_root: Path) -> tuple[pd.DataFrame, dict]:
+    """Load FreeSurfer ASEG volume data.
 
     Args:
-        data_dir: Base data directory
+        project_root: Project root directory
 
     Returns:
-        DataFrame with subcortical volumes
+        Tuple of (DataFrame with subcortical volumes, source metadata)
     """
-    aseg_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "FS7_ASEG_VOL_30Sep2025.csv"
+    resolver = RawFileResolver(default_raw_roots(project_root))
+    resolved = resolver.resolve_latest(
+        "freesurfer_aseg",
+        ["FS7_ASEG_VOL_*.csv"],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve FreeSurfer ASEG file.")
 
-    if not aseg_file.exists():
-        raise FileNotFoundError(f"FreeSurfer ASEG file not found: {aseg_file}")
-
-    print(f"Loading FreeSurfer ASEG from: {aseg_file}")
-    df = pd.read_csv(aseg_file)
+    print(f"Loading FreeSurfer ASEG from: {resolved.path}")
+    df = pd.read_csv(resolved.path)
     print(f"✓ Loaded {len(df)} records")
 
-    return df
+    return df, resolved.as_dict()
 
 
 def extract_subcortical_volumes(aseg_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Extract key subcortical volumes implicated in PD pathology.
+    """Extract key subcortical volumes implicated in PD pathology.
 
     Regions:
     - Caudate: Part of striatum, affected early in PD
@@ -83,7 +88,7 @@ def extract_subcortical_volumes(aseg_df: pd.DataFrame) -> pd.DataFrame:
         "Left_Putamen": "PUTAMEN_L_VOL",
         "Right_Putamen": "PUTAMEN_R_VOL",
         "Left_Hippocampus": "HIPPOCAMPUS_L_VOL",
-        "Right_Hippocampus": "HIPPOCAMPUS_R_VOL"
+        "Right_Hippocampus": "HIPPOCAMPUS_R_VOL",
     }
 
     # Check which columns exist
@@ -106,7 +111,7 @@ def extract_subcortical_volumes(aseg_df: pd.DataFrame) -> pd.DataFrame:
         print(f"\n✓ Filtered to baseline visits: {len(baseline_df)} records")
     else:
         baseline_df = aseg_df.copy()
-        print(f"\n⚠ No EVENT_ID column, using all records")
+        print("\n⚠ No EVENT_ID column, using all records")
 
     # Create output DataFrame
     volumes_df = pd.DataFrame({"PATNO": baseline_df["PATNO"]})
@@ -133,11 +138,9 @@ def extract_subcortical_volumes(aseg_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def merge_with_prodromal_cohort(
-    volumes_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge FreeSurfer volumes with prodromal cohort.
+    volumes_df: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge FreeSurfer volumes with prodromal cohort.
 
     Args:
         volumes_df: DataFrame with PATNO and volume features
@@ -146,23 +149,27 @@ def merge_with_prodromal_cohort(
     Returns:
         Tuple of (merged_df, coverage_stats)
     """
-    prodromal_file = data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    cohort_override = os.getenv("GIMAN_COHORT_CSV", "").strip()
+    prodromal_file = (
+        Path(cohort_override)
+        if cohort_override
+        else data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    )
     print(f"\nLoading prodromal cohort: {prodromal_file}")
     prodromal_df = pd.read_csv(prodromal_file)
     print(f"✓ Loaded {len(prodromal_df)} prodromal patients")
 
     # Merge
-    merged_df = prodromal_df[["PATNO"]].merge(
-        volumes_df,
-        on="PATNO",
-        how="left"
-    )
+    merged_df = prodromal_df[["PATNO"]].merge(volumes_df, on="PATNO", how="left")
 
     # Compute coverage
     feature_cols = [
-        "CAUDATE_L_VOL", "CAUDATE_R_VOL",
-        "PUTAMEN_L_VOL", "PUTAMEN_R_VOL",
-        "HIPPOCAMPUS_L_VOL", "HIPPOCAMPUS_R_VOL"
+        "CAUDATE_L_VOL",
+        "CAUDATE_R_VOL",
+        "PUTAMEN_L_VOL",
+        "PUTAMEN_R_VOL",
+        "HIPPOCAMPUS_L_VOL",
+        "HIPPOCAMPUS_R_VOL",
     ]
 
     coverage_stats = {}
@@ -179,18 +186,18 @@ def merge_with_prodromal_cohort(
     if avg_coverage < 60:
         print(f"⚠ WARNING: Coverage {avg_coverage:.1f}% below target 60%")
     else:
-        print(f"✓ Coverage exceeds target (60%)")
+        print("✓ Coverage exceeds target (60%)")
 
     return merged_df, coverage_stats
 
 
 def save_freesurfer_volumes(
     volumes_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    coverage_stats: dict[str, float],
+    output_dir: Path,
+    source_meta: dict,
 ) -> None:
-    """
-    Save FreeSurfer volumes and metadata.
+    """Save FreeSurfer volumes and metadata.
 
     Args:
         volumes_df: DataFrame with PATNO and volume features
@@ -207,23 +214,25 @@ def save_freesurfer_volumes(
 
     # Save metadata
     metadata = {
-        "extraction_date": "2025-10-12",
+        "extraction_date_utc": datetime.now(timezone.utc).isoformat(),
         "n_patients": len(volumes_df),
         "n_features": len(volumes_df.columns) - 1,
         "features": list(volumes_df.columns.drop("PATNO")),
         "coverage": coverage_stats,
         "average_coverage": np.mean(list(coverage_stats.values())),
         "target_coverage": 60.0,
-        "source_file": "GIMAN/ppmi_data_csv/FS7_ASEG_VOL_30Sep2025.csv",
+        "source_file": source_meta.get("path", ""),
+        "source_resolution": source_meta,
         "parcellation": "FreeSurfer 7.x ASEG",
         "regions": {
             "caudate": "Part of striatum, dopaminergic dysfunction",
             "putamen": "Part of striatum, motor symptoms",
-            "hippocampus": "Cognitive symptoms and dementia risk"
-        }
+            "hippocampus": "Cognitive symptoms and dementia risk",
+        },
     }
 
     import json
+
     metadata_file = output_dir / "freesurfer_volumes_metadata.json"
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
@@ -232,9 +241,7 @@ def save_freesurfer_volumes(
 
 
 def main() -> None:
-    """
-    Main execution function for FreeSurfer volume extraction.
-    """
+    """Main execution function for FreeSurfer volume extraction."""
     print("=" * 70)
     print("PHASE 8.2 WEEK 1: FREESURFER VOLUME FEATURES EXTRACTION")
     print("=" * 70)
@@ -252,7 +259,7 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 1: Load FreeSurfer ASEG Data")
     print("-" * 70)
-    aseg_df = load_freesurfer_aseg(data_dir)
+    aseg_df, source_meta = load_freesurfer_aseg(base_dir)
 
     # Extract volumes
     print("\n" + "-" * 70)
@@ -270,13 +277,13 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 4: Save Results")
     print("-" * 70)
-    save_freesurfer_volumes(merged_df, coverage_stats, output_dir)
+    save_freesurfer_volumes(merged_df, coverage_stats, output_dir, source_meta)
 
     # Summary
     print("\n" + "=" * 70)
     print("FREESURFER VOLUME EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"✓ Extracted 6 FreeSurfer volume features")
+    print("✓ Extracted 6 FreeSurfer volume features")
     print(f"✓ Cohort size: {len(merged_df)} patients")
     print(f"✓ Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"✓ Output: {output_dir / 'freesurfer_volumes.csv'}")

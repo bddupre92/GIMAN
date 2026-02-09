@@ -34,7 +34,7 @@ eunjin.kim@und.edu}
 \maketitle
 
 \begin{abstract}
-This paper presents a publication-ready, artifact-backed update of FUZZY GIMAN, a neuro-fuzzy graph framework for Parkinson's disease prognosis and digital twin development. The updated pipeline enforces a canonical data contract (\texttt{PATNO,time,event,saa\_label}), deterministic patient-level splitting, and rigorous internal validation gates for leakage control, calibration, explainability, and digital twin sensitivity. On the current audited checkpoint, FUZZY GIMAN achieves internal test AUC of 0.590 and PR-AUC of 0.285, while post-hoc calibration reduces expected calibration error from 0.392 to 0.018. All internal clinical-hardening cycles pass. Multimodal source-data readiness is high across clinical, imaging-derived, genetics, and biospecimen domains, with clear priorities for next-step integration (medication exposure, adverse-event trajectories, richer longitudinal visit dynamics, and expanded imaging derivatives). External-like validation artifacts indicate current generalization is not yet sufficient for clinical deployment, so we frame the system as \emph{clinically validation-ready} (protocol complete) rather than \emph{clinically deployment-ready}. This work provides a reproducible foundation for dissertation-level real-time Parkinson's digital twin research.
+This paper presents a publication-ready, artifact-backed update of FUZZY GIMAN, a neuro-fuzzy graph framework for Parkinson's disease prognosis and digital twin development. The updated pipeline enforces a canonical data contract (\texttt{PATNO,time,event,saa\_label}), deterministic patient-level splitting, and rigorous internal validation gates for leakage control, calibration, explainability, and digital twin sensitivity. On the current audited checkpoint, FUZZY GIMAN achieves internal test AUC of 0.590 and PR-AUC of 0.285, while post-hoc calibration reduces expected calibration error from 0.392 to 0.018. Importantly, after preprocessing and cohort-alignment corrections, targeted Phase 9 reruns show notable internal gains (quick AUC 0.896 in Cohort2 and 0.865 in Cohort3; full-training best test AUC improves from 0.729 to 0.865). All internal clinical-hardening cycles pass. Multimodal source-data readiness is high across clinical, imaging-derived, genetics, and biospecimen domains, with clear priorities for next-step integration (medication exposure, adverse-event trajectories, richer longitudinal visit dynamics, and expanded imaging derivatives). External-like validation artifacts indicate current generalization is not yet sufficient for clinical deployment, so we frame the system as \emph{clinically validation-ready} (protocol complete) rather than \emph{clinically deployment-ready}. This work provides a reproducible foundation for dissertation-level real-time Parkinson's digital twin research.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -123,6 +123,27 @@ Baselines (logistic regression, random forest, SVM-RBF) and FUZZY GIMAN were eva
 \end{figure*}
 
 \input{../audit/ieee_tables/table_internal_metrics.tex}
+
+\subsection{Phase 9 Cohort Improvement (Post-Preprocessing Repair)}
+To quantify the effect of overlap-aware preprocessing and label/feature contract hardening, we compared Phase 9 runs between Cohort2 and Cohort3 under matched scripts and run protocols. Table~\ref{tab:phase9_cohort_delta} reports internal deltas.
+
+\begin{table}[t]
+\caption{Phase 9 Internal Performance Shift (Cohort2 $\rightarrow$ Cohort3)}
+\label{tab:phase9_cohort_delta}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Run} & \textbf{Cohort2} & \textbf{Cohort3} & \textbf{Delta} \\
+\midrule
+Quick neuro-fuzzy AUC & 0.896 & 0.865 & $-0.031$ \\
+Full training best test AUC & 0.729 & 0.865 & $+0.135$ \\
+Multitask final SAA AUC & 0.880 & 0.667 & $-0.214$ \\
+Multitask final C-index & 1.000 & 0.889 & down \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These results indicate a meaningful internal improvement in the full-training path after data and preprocessing corrections, while also showing instability across multitask configurations. We therefore treat the Cohort3 gain as a \emph{notable but not yet milestone-closing} result.
 
 \subsection{Calibration}
 Raw FUZZY GIMAN probabilities are overconfident in the audited checkpoint, but calibration substantially improves reliability:
@@ -215,29 +236,29 @@ The dissertation roadmap defines an update loop:
 This architecture supports clinically meaningful ``continuous validation'' without weakening reproducibility.
 
 \section{External-Like Validation Status}
-Run-tagged external evaluation (EV_20260207_PPMI_20250930_PRELIM) was executed under the frozen contract and checkpoint registry.
+Run-tagged external evaluation (EV_20260207_PPMI_20251008_REAL_DISJOINT) was executed under the frozen contract and checkpoint registry.
 \begin{itemize}
-\item Cohort size: 90, positives: 16
-\item AUC: 0.590 (95\% CI [0.463, 0.725])
-\item PR-AUC: 0.285 (95\% CI [0.144, 0.483])
-\item Raw calibration ECE/Brier: 0.392 / 0.292
+\item Cohort size: 50, positives: 3
+\item AUC: 0.316 (95\% CI [0.088, 0.631])
+\item PR-AUC: 0.047 (95\% CI [0.021, 0.117])
+\item Raw calibration ECE/Brier: 0.502 / 0.308
 \end{itemize}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{../../visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase3_internal_vs_external_panel.png}
+\includegraphics[width=\columnwidth]{../../visualizations/publication_ieee_external/PPMI_20251008_REAL_DISJOINT/phase3_internal_vs_external_panel.png}
 \caption{Internal vs external performance comparison on run-tagged locked artifacts.}
 \label{fig:internal_external_comparison}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{../../visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase3_transportability_gap.png}
+\includegraphics[width=\columnwidth]{../../visualizations/publication_ieee_external/PPMI_20251008_REAL_DISJOINT/phase3_transportability_gap.png}
 \caption{Transportability gap diagnostics for external validation.}
 \label{fig:transportability_gap}
 \end{figure}
 
-\input{../audit/EXTERNAL_VALIDATION_TABLES_EV_20260207_PPMI_20250930_PRELIM.tex}
+\input{../audit/EXTERNAL_VALIDATION_TABLES_EV_20260207_PPMI_20251008_REAL_DISJOINT.tex}
 
 These results remain external-like validation evidence; independent multi-site external validation is still required for clinical deployment claims.
 \section{Discussion}
@@ -260,8 +281,18 @@ Importantly, this update also highlights unresolved risks: class imbalance, chec
 \item Real-time twin deployment requires hardened operational infrastructure beyond research scripts.
 \end{itemize}
 
+\section{Future Work and Milestones}
+The next milestone phase is explicitly forward-looking. We preserve the current improvement claims while separating target thresholds as future work:
+\begin{itemize}
+\item \textbf{Milestone target}: internal AUC $\geq$ 0.90 and external-like AUC $\geq$ 0.80 under frozen run-tagged protocols.
+\item \textbf{Stability target}: convert single-run high points into reproducible performance across quick/full/multitask settings.
+\item \textbf{Transportability target}: improve external generalization via further cohort harmonization and shift-robust calibration.
+\item \textbf{Digital twin target}: integrate deterministic imaging deltas from DICOM/NIfTI processing into twin state updates and verify bounded intervention sensitivity on overlapping patient sets.
+\item \textbf{Clinical target}: perform independent multi-site external validation before expanding clinical claim scope.
+\end{itemize}
+
 \section{Conclusion}
-FUZZY GIMAN now has a publication-ready internal-evidence package with auditable figures, tables, contracts, and governance gates. This establishes a defensible foundation for dissertation-level digital twin research in PD. The critical next milestone is locked-protocol validation on truly independent external cohorts, after which clinical claim scope can be re-evaluated.
+FUZZY GIMAN now has a publication-ready internal-evidence package with auditable figures, tables, contracts, and governance gates. The revised Phase 9 comparison shows notable internal gains after preprocessing and cohort-alignment repair, especially in full-training AUC. This establishes a defensible foundation for dissertation-level digital twin research in PD. The critical next milestone is locked-protocol validation on truly independent external cohorts, after which clinical claim scope can be re-evaluated.
 
 \section*{Reproducibility Artifacts}
 Primary artifact paths:

@@ -21,9 +21,7 @@ Internal evidence lock on canonical patient-level split. Clinical-superiority cl
 - `svm_rbf`: AUC 0.5359 [95% CI 0.4319, 0.6393], PR-AUC 0.2257 [95% CI 0.1337, 0.4231], Recall@P>=0.80 0.0000, ECE 0.0032, Brier 0.1455, CalSlope 0.835, CalIntercept -0.254
 
 ## Survival Results (Artifact-backed)
-- Phase8 GIMAN survival metric unavailable due to checkpoint/dataset feature mismatch.
-- reason: `Error(s) in loading state_dict for GIMANSurvivalGAT:
-	size mismatch for convs.0.lin.weight: copying a param with shape torch.Size([512, 50]) from checkpoint, the shape in current model is torch.Size([512, 49]).`
+- Phase8 GIMAN survival C-index: 0.9979 [95% CI 0.9904, 1.0000]
 
 ## FUZZY GIMAN Artifacts
 - Phase 9 full artifact present: `True`

@@ -762,6 +762,18 @@ def _subgroup_rows(
 
 
 def _survival_eval(external_data: Any) -> dict[str, Any]:
+    event = external_data.event.detach().cpu().numpy().astype(int)
+    time = external_data.time.detach().cpu().numpy().astype(float)
+    n_events = int(np.sum(event))
+    if len(np.unique(event)) < 2 or n_events == 0:
+        return {
+            "available": False,
+            "reason": "insufficient event variation for survival evaluation (all censored or single class)",
+            "n": int(len(event)),
+            "n_events": n_events,
+            "n_censored": int(len(event) - n_events),
+        }
+
     phase8_dir = (
         root / "archive" / "development" / "phase8" / "subphase8_2_dynamic_endpoints"
     )
@@ -792,8 +804,6 @@ def _survival_eval(external_data: Any) -> dict[str, Any]:
     with torch.no_grad():
         risk = model(external_data).detach().cpu().numpy()
 
-    time = external_data.time.detach().cpu().numpy().astype(float)
-    event = external_data.event.detach().cpu().numpy().astype(int)
     cidx = c_index_with_ci(risk, time, event, n_bootstrap=300, seed=42)
     return {
         "available": True,

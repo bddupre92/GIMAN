@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Week 1: DAT-SPECT SBR Features Extraction
+"""Phase 8.2 Week 1: DAT-SPECT SBR Features Extraction
 
 Purpose:
     Extract dopamine transporter (DAT) imaging biomarkers from DaTSCAN SPECT
@@ -30,39 +29,91 @@ Date: October 12, 2025
 Phase: 8.2 Week 1
 """
 
+import os
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from raw_file_resolver import RawFileResolver, default_raw_roots
 
 
-def load_dat_spect_sbr(data_dir: Path) -> pd.DataFrame:
-    """
-    Load pre-computed DAT-SPECT SBR values.
+def load_dat_spect_sbr(
+    project_root: Path, data_dir: Path
+) -> tuple[pd.DataFrame, dict, str]:
+    """Load pre-computed DAT-SPECT SBR values.
 
     Args:
+        project_root: Project root directory
         data_dir: Base data directory
 
     Returns:
-        DataFrame with SBR values
+        Tuple of (DataFrame with SBR values, source metadata, source kind)
     """
+    resolver = RawFileResolver(default_raw_roots(project_root))
+
+    xing = resolver.resolve_latest(
+        "datscan_xing_core_sbr",
+        ["Xing_Core_Lab_-_Quant_SBR_*.csv"],
+        required=False,
+        allow_empty=False,
+        required_columns=["PATNO"],
+    )
+    if xing is not None:
+        print(f"Loading DAT-SPECT SBR from Xing core file: {xing.path}")
+        df = pd.read_csv(xing.path, low_memory=False)
+        print(f"✓ Loaded {len(df)} records")
+        print(f"  Columns: {list(df.columns)}")
+        return df, xing.as_dict(), "xing"
+
+    datscan = resolver.resolve_latest(
+        "datscan_sbr_analysis",
+        ["DaTScan_SBR_Analysis_*.csv"],
+        required=False,
+        allow_empty=False,
+        required_columns=["PATNO"],
+    )
+    if datscan is not None:
+        print(f"Loading DAT-SPECT SBR from DaTScan analysis file: {datscan.path}")
+        df = pd.read_csv(datscan.path, low_memory=False)
+        print(f"✓ Loaded {len(df)} records")
+        print(f"  Columns: {list(df.columns)}")
+        return df, datscan.as_dict(), "datscan"
+
     sbr_file = data_dir / "01_processed" / "dat_spect_sbr_values.csv"
+    if sbr_file.exists():
+        print(f"Loading DAT-SPECT SBR from processed fallback: {sbr_file}")
+        df = pd.read_csv(sbr_file)
+        print(f"✓ Loaded {len(df)} records")
+        print(f"  Columns: {list(df.columns)}")
+        source_meta = {
+            "modality_id": "dat_spect_sbr_processed_fallback",
+            "path": str(sbr_file),
+            "pattern": "01_processed/dat_spect_sbr_values.csv",
+            "root": str(data_dir / "01_processed"),
+            "resolution_mode": "processed_fallback",
+            "size_bytes": int(sbr_file.stat().st_size),
+            "sha256": "",
+            "modified_utc": datetime.fromtimestamp(
+                sbr_file.stat().st_mtime, tz=timezone.utc
+            ).isoformat(),
+        }
+        return df, source_meta, "processed"
 
-    if not sbr_file.exists():
-        raise FileNotFoundError(f"DAT-SPECT SBR file not found: {sbr_file}")
-
-    print(f"Loading DAT-SPECT SBR from: {sbr_file}")
-    df = pd.read_csv(sbr_file)
-    print(f"✓ Loaded {len(df)} records")
-    print(f"  Columns: {list(df.columns)}")
-
-    return df
+    raise FileNotFoundError(
+        "No DAT-SPECT source found. Tried Xing_Core, DaTScan_SBR_Analysis, "
+        "and data/01_processed/dat_spect_sbr_values.csv."
+    )
 
 
-def extract_sbr_features(sbr_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Extract key SBR features for prognostic modeling.
+def _safe_asymmetry(left: pd.Series, right: pd.Series) -> pd.Series:
+    denom = (left + right) / 2.0
+    out = (left - right) / denom
+    return out.replace([np.inf, -np.inf], np.nan)
+
+
+def extract_sbr_features(sbr_df: pd.DataFrame, source_kind: str) -> pd.DataFrame:
+    """Extract key SBR features for prognostic modeling.
 
     Features:
     - Caudate/Putamen L/R SBR: Direct measures of dopaminergic function
@@ -76,15 +127,33 @@ def extract_sbr_features(sbr_df: pd.DataFrame) -> pd.DataFrame:
     """
     print("\nExtracting SBR features...")
 
-    # Define target columns
-    feature_mapping = {
-        "CAUDATE_L": "CAUDATE_L_SBR",
-        "CAUDATE_R": "CAUDATE_R_SBR",
-        "PUTAMEN_L": "PUTAMEN_L_SBR",
-        "PUTAMEN_R": "PUTAMEN_R_SBR",
-        "CAUDATE_ASYMMETRY": "CAUDATE_ASYMMETRY",
-        "PUTAMEN_ASYMMETRY": "PUTAMEN_ASYMMETRY"
-    }
+    if source_kind == "xing":
+        feature_mapping = {
+            "CAUDATE_L_REF_CWM": "CAUDATE_L_SBR",
+            "CAUDATE_R_REF_CWM": "CAUDATE_R_SBR",
+            "PUTAMEN_L_REF_CWM": "PUTAMEN_L_SBR",
+            "PUTAMEN_R_REF_CWM": "PUTAMEN_R_SBR",
+            "CAUDATE_ASYMMETRY": "CAUDATE_ASYMMETRY",
+            "PUTAMEN_ASYMMETRY": "PUTAMEN_ASYMMETRY",
+        }
+    elif source_kind == "datscan":
+        feature_mapping = {
+            "DATSCAN_CAUDATE_L": "CAUDATE_L_SBR",
+            "DATSCAN_CAUDATE_R": "CAUDATE_R_SBR",
+            "DATSCAN_PUTAMEN_L": "PUTAMEN_L_SBR",
+            "DATSCAN_PUTAMEN_R": "PUTAMEN_R_SBR",
+            "CAUDATE_ASYMMETRY": "CAUDATE_ASYMMETRY",
+            "PUTAMEN_ASYMMETRY": "PUTAMEN_ASYMMETRY",
+        }
+    else:
+        feature_mapping = {
+            "CAUDATE_L": "CAUDATE_L_SBR",
+            "CAUDATE_R": "CAUDATE_R_SBR",
+            "PUTAMEN_L": "PUTAMEN_L_SBR",
+            "PUTAMEN_R": "PUTAMEN_R_SBR",
+            "CAUDATE_ASYMMETRY": "CAUDATE_ASYMMETRY",
+            "PUTAMEN_ASYMMETRY": "PUTAMEN_ASYMMETRY",
+        }
 
     # Check which columns exist
     available_cols = []
@@ -106,7 +175,7 @@ def extract_sbr_features(sbr_df: pd.DataFrame) -> pd.DataFrame:
         print(f"\n✓ Filtered to baseline/screening visits: {len(baseline_df)} records")
     else:
         baseline_df = sbr_df.copy()
-        print(f"\n⚠ No EVENT_ID column, using all records")
+        print("\n⚠ No EVENT_ID column, using all records")
 
     # Create output DataFrame
     sbr_features_df = pd.DataFrame({"PATNO": baseline_df["PATNO"]})
@@ -119,6 +188,18 @@ def extract_sbr_features(sbr_df: pd.DataFrame) -> pd.DataFrame:
         new_col = feature_mapping[orig_col]
         sbr_features_df[new_col] = np.nan
         print(f"  ⚠ {new_col} set to NaN (source column missing)")
+
+    # Compute asymmetry from left/right when source does not provide explicit columns.
+    if "CAUDATE_ASYMMETRY" in missing_cols:
+        sbr_features_df["CAUDATE_ASYMMETRY"] = _safe_asymmetry(
+            sbr_features_df["CAUDATE_L_SBR"], sbr_features_df["CAUDATE_R_SBR"]
+        )
+        print("  ✓ Derived CAUDATE_ASYMMETRY from left/right SBR")
+    if "PUTAMEN_ASYMMETRY" in missing_cols:
+        sbr_features_df["PUTAMEN_ASYMMETRY"] = _safe_asymmetry(
+            sbr_features_df["PUTAMEN_L_SBR"], sbr_features_df["PUTAMEN_R_SBR"]
+        )
+        print("  ✓ Derived PUTAMEN_ASYMMETRY from left/right SBR")
 
     # Remove duplicates (keep first occurrence, prioritize BL over SC)
     n_before = len(sbr_features_df)
@@ -141,11 +222,9 @@ def extract_sbr_features(sbr_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def merge_with_prodromal_cohort(
-    sbr_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge DAT-SPECT SBR features with prodromal cohort.
+    sbr_df: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge DAT-SPECT SBR features with prodromal cohort.
 
     Args:
         sbr_df: DataFrame with PATNO and SBR features
@@ -154,23 +233,27 @@ def merge_with_prodromal_cohort(
     Returns:
         Tuple of (merged_df, coverage_stats)
     """
-    prodromal_file = data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    cohort_override = os.getenv("GIMAN_COHORT_CSV", "").strip()
+    prodromal_file = (
+        Path(cohort_override)
+        if cohort_override
+        else data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    )
     print(f"\nLoading prodromal cohort: {prodromal_file}")
     prodromal_df = pd.read_csv(prodromal_file)
     print(f"✓ Loaded {len(prodromal_df)} prodromal patients")
 
     # Merge
-    merged_df = prodromal_df[["PATNO"]].merge(
-        sbr_df,
-        on="PATNO",
-        how="left"
-    )
+    merged_df = prodromal_df[["PATNO"]].merge(sbr_df, on="PATNO", how="left")
 
     # Compute coverage
     feature_cols = [
-        "CAUDATE_L_SBR", "CAUDATE_R_SBR",
-        "PUTAMEN_L_SBR", "PUTAMEN_R_SBR",
-        "CAUDATE_ASYMMETRY", "PUTAMEN_ASYMMETRY"
+        "CAUDATE_L_SBR",
+        "CAUDATE_R_SBR",
+        "PUTAMEN_L_SBR",
+        "PUTAMEN_R_SBR",
+        "CAUDATE_ASYMMETRY",
+        "PUTAMEN_ASYMMETRY",
     ]
 
     coverage_stats = {}
@@ -187,18 +270,19 @@ def merge_with_prodromal_cohort(
     if avg_coverage < 60:
         print(f"⚠ WARNING: Coverage {avg_coverage:.1f}% below target 60%")
     else:
-        print(f"✓ Coverage exceeds target (60%)")
+        print("✓ Coverage exceeds target (60%)")
 
     return merged_df, coverage_stats
 
 
 def save_dat_spect_sbr(
     sbr_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    coverage_stats: dict[str, float],
+    output_dir: Path,
+    source_meta: dict,
+    source_kind: str,
 ) -> None:
-    """
-    Save DAT-SPECT SBR features and metadata.
+    """Save DAT-SPECT SBR features and metadata.
 
     Args:
         sbr_df: DataFrame with PATNO and SBR features
@@ -215,24 +299,27 @@ def save_dat_spect_sbr(
 
     # Save metadata
     metadata = {
-        "extraction_date": "2025-10-12",
+        "extraction_date_utc": datetime.now(timezone.utc).isoformat(),
         "n_patients": len(sbr_df),
         "n_features": len(sbr_df.columns) - 1,
         "features": list(sbr_df.columns.drop("PATNO")),
         "coverage": coverage_stats,
         "average_coverage": np.mean(list(coverage_stats.values())),
         "target_coverage": 60.0,
-        "source_file": "01_processed/dat_spect_sbr_values.csv",
+        "source_file": source_meta.get("path", ""),
+        "source_resolution": source_meta,
+        "source_kind": source_kind,
         "modality": "DaTSCAN SPECT imaging",
         "biomarker": "Dopamine transporter (DAT) binding",
         "clinical_relevance": {
             "caudate_sbr": "Early PD marker, cognitive symptoms",
             "putamen_sbr": "Motor symptom severity, disease stage",
-            "asymmetry": "Lateralization pattern, diagnostic value"
-        }
+            "asymmetry": "Lateralization pattern, diagnostic value",
+        },
     }
 
     import json
+
     metadata_file = output_dir / "dat_spect_sbr_metadata.json"
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
@@ -241,9 +328,7 @@ def save_dat_spect_sbr(
 
 
 def main() -> None:
-    """
-    Main execution function for DAT-SPECT SBR extraction.
-    """
+    """Main execution function for DAT-SPECT SBR extraction."""
     print("=" * 70)
     print("PHASE 8.2 WEEK 1: DAT-SPECT SBR FEATURES EXTRACTION")
     print("=" * 70)
@@ -261,13 +346,13 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 1: Load DAT-SPECT SBR Data")
     print("-" * 70)
-    sbr_df = load_dat_spect_sbr(data_dir)
+    sbr_df, source_meta, source_kind = load_dat_spect_sbr(base_dir, data_dir)
 
     # Extract SBR features
     print("\n" + "-" * 70)
     print("STEP 2: Extract SBR Features")
     print("-" * 70)
-    sbr_features_df = extract_sbr_features(sbr_df)
+    sbr_features_df = extract_sbr_features(sbr_df, source_kind)
 
     # Merge with prodromal cohort
     print("\n" + "-" * 70)
@@ -279,13 +364,13 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 4: Save Results")
     print("-" * 70)
-    save_dat_spect_sbr(merged_df, coverage_stats, output_dir)
+    save_dat_spect_sbr(merged_df, coverage_stats, output_dir, source_meta, source_kind)
 
     # Summary
     print("\n" + "=" * 70)
     print("DAT-SPECT SBR EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"✓ Extracted 6 DAT-SPECT SBR features")
+    print("✓ Extracted 6 DAT-SPECT SBR features")
     print(f"✓ Cohort size: {len(merged_df)} patients")
     print(f"✓ Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"✓ Output: {output_dir / 'dat_spect_sbr.csv'}")

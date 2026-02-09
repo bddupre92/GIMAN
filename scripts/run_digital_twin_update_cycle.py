@@ -130,14 +130,59 @@ def _plot_patient_before_after(
     plt.close(fig)
 
 
+def _plot_reference_before_after(
+    baseline_sim: DataDrivenTwinSimulator,
+    updated_sim: DataDrivenTwinSimulator,
+    output_path: Path,
+) -> None:
+    base_map = _build_patno_index(baseline_sim)
+    upd_map = _build_patno_index(updated_sim)
+    base_pat = sorted(base_map.keys())[0]
+    upd_pat = sorted(upd_map.keys())[0]
+
+    b = baseline_sim.simulate_patient(base_map[base_pat], horizons=DEFAULT_HORIZONS)
+    u = updated_sim.simulate_patient(upd_map[upd_pat], horizons=DEFAULT_HORIZONS)
+
+    months = [s.t_month for s in b]
+    b_risk = [s.risk_saa for s in b]
+    u_risk = [s.risk_saa for s in u]
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.0))
+    ax.plot(
+        months, b_risk, "o-", label=f"baseline_ref PATNO={base_pat}", color="#4E79A7"
+    )
+    ax.plot(months, u_risk, "o-", label=f"updated_ref PATNO={upd_pat}", color="#E15759")
+    ax.set_ylim(0, 1)
+    ax.set_title("Reference Trajectories (No Common PATNO Across Pulls)")
+    ax.set_xlabel("month")
+    ax.set_ylabel("predicted SAA risk")
+    ax.grid(True, linestyle="--", alpha=0.25)
+    ax.legend()
+    fig.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=300)
+    plt.close(fig)
+
+
 def _plot_cohort_delta_distribution(delta_df: pd.DataFrame, output_path: Path) -> None:
     fig, ax = plt.subplots(figsize=(8.5, 4.8))
-    ax.hist(delta_df["delta_risk"], bins=20, color="#59A14F", alpha=0.9)
-    ax.axvline(0.0, color="black", linestyle="--", linewidth=1)
-    ax.set_title("Cohort Delta Distribution (Updated - Baseline)")
-    ax.set_xlabel("delta risk")
-    ax.set_ylabel("count")
-    ax.grid(axis="y", linestyle="--", alpha=0.25)
+    if delta_df.empty:
+        ax.axis("off")
+        ax.text(
+            0.05,
+            0.55,
+            "No common PATNO across baseline and updated pull.\n"
+            "Patient-level delta distribution is unavailable.",
+            fontsize=11,
+            va="center",
+        )
+    else:
+        ax.hist(delta_df["delta_risk"], bins=20, color="#59A14F", alpha=0.9)
+        ax.axvline(0.0, color="black", linestyle="--", linewidth=1)
+        ax.set_title("Cohort Delta Distribution (Updated - Baseline)")
+        ax.set_xlabel("delta risk")
+        ax.set_ylabel("count")
+        ax.grid(axis="y", linestyle="--", alpha=0.25)
     fig.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=300)
@@ -182,6 +227,12 @@ def parse_args() -> argparse.Namespace:
         / "final_pyg_data_sota_run"
         / "pyg_data_metadata.json",
     )
+    parser.add_argument(
+        "--imaging-feature-csv",
+        type=Path,
+        default=None,
+        help="Optional PATNO-level imaging delta feature CSV to inject into twin state outputs.",
+    )
     return parser.parse_args()
 
 
@@ -215,22 +266,81 @@ def main() -> None:
     baseline_pat = set(_build_patno_index(baseline_sim).keys())
     updated_pat = set(_build_patno_index(updated_sim).keys())
     common_patnos = sorted(baseline_pat & updated_pat)
-    if not common_patnos:
-        raise ValueError("No common PATNO values between baseline and updated data")
+    has_common_patnos = len(common_patnos) > 0
 
     out_dir = root / "outputs" / "digital_twin_updates" / pull_id
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    delta_df = _compute_patient_deltas(baseline_sim, updated_sim, common_patnos)
-    changed_df = delta_df[delta_df["abs_delta_risk"] > 1e-6].copy()
+    if has_common_patnos:
+        delta_df = _compute_patient_deltas(baseline_sim, updated_sim, common_patnos)
+        changed_df = delta_df[delta_df["abs_delta_risk"] > 1e-6].copy()
+    else:
+        delta_df = pd.DataFrame(
+            columns=[
+                "PATNO",
+                "baseline_final_risk",
+                "updated_final_risk",
+                "delta_risk",
+                "abs_delta_risk",
+            ]
+        )
+        changed_df = delta_df.copy()
 
     all_delta_path = out_dir / "all_patient_deltas.csv"
     changed_path = out_dir / "changed_patients.csv"
     delta_df.to_csv(all_delta_path, index=False)
     changed_df.to_csv(changed_path, index=False)
 
+    # Optional PATNO-level imaging feature injection for twin state sidecar
+    twin_state_with_imaging = None
+    imaging_join_coverage = None
+    if args.imaging_feature_csv is not None:
+        if args.imaging_feature_csv.exists():
+            imaging_df = pd.read_csv(args.imaging_feature_csv)
+            if "PATNO" in imaging_df.columns:
+                imaging_df["PATNO"] = pd.to_numeric(
+                    imaging_df["PATNO"], errors="coerce"
+                ).astype("Int64")
+                state_df = delta_df.copy()
+                if not state_df.empty:
+                    state_df["PATNO"] = pd.to_numeric(
+                        state_df["PATNO"], errors="coerce"
+                    ).astype("Int64")
+                twin_state_with_imaging = state_df.merge(
+                    imaging_df, on="PATNO", how="left"
+                )
+                twin_state_path = out_dir / "twin_state_with_imaging.csv"
+                twin_state_with_imaging.to_csv(twin_state_path, index=False)
+                matched = int(
+                    twin_state_with_imaging.filter(items=["PATNO"]).dropna().shape[0]
+                )
+                imaging_cols = [c for c in imaging_df.columns if c != "PATNO"]
+                non_null_any = int(
+                    twin_state_with_imaging.filter(items=imaging_cols)
+                    .notna()
+                    .any(axis=1)
+                    .sum()
+                )
+                imaging_join_coverage = {
+                    "n_rows": int(len(twin_state_with_imaging)),
+                    "n_patno_rows": matched,
+                    "n_rows_with_any_imaging_feature": non_null_any,
+                    "imaging_feature_columns": int(max(len(imaging_df.columns) - 1, 0)),
+                    "path": str(twin_state_path),
+                }
+            else:
+                imaging_join_coverage = {
+                    "error": "imaging_feature_csv_missing_PATNO",
+                    "path": str(args.imaging_feature_csv),
+                }
+        else:
+            imaging_join_coverage = {
+                "error": "imaging_feature_csv_not_found",
+                "path": str(args.imaging_feature_csv),
+            }
+
     # Counterfactual sensitivity comparison
-    specs = [
+    preferred_specs = [
         CounterfactualSpec(feature_name="UPDRS_I", delta=-0.5),
         CounterfactualSpec(feature_name="SCOPA_AUT_SCORE", delta=-0.5),
         CounterfactualSpec(feature_name="TREMOR_SCORE", delta=-0.5),
@@ -238,12 +348,26 @@ def main() -> None:
         CounterfactualSpec(feature_name="ALPHA_SYNUCLEIN", delta=-0.5),
         CounterfactualSpec(feature_name="LRRK2", delta=-0.5),
     ]
+    feature_set = set(baseline_sim.feature_names)
+    specs = [s for s in preferred_specs if s.feature_name in feature_set]
+    spec_warnings: list[str] = []
+    if not specs and baseline_sim.feature_names:
+        specs = [
+            CounterfactualSpec(feature_name=baseline_sim.feature_names[0], delta=-0.1)
+        ]
+        spec_warnings.append(
+            "preferred_specs_missing_in_feature_set_using_fallback_spec"
+        )
 
     base_idx = _build_patno_index(baseline_sim)
     upd_idx = _build_patno_index(updated_sim)
-    selected_patnos = common_patnos[: min(25, len(common_patnos))]
-    base_indices = [base_idx[p] for p in selected_patnos]
-    upd_indices = [upd_idx[p] for p in selected_patnos]
+    if has_common_patnos:
+        selected_patnos = common_patnos[: min(25, len(common_patnos))]
+        base_indices = [base_idx[p] for p in selected_patnos]
+        upd_indices = [upd_idx[p] for p in selected_patnos]
+    else:
+        base_indices = list(base_idx.values())[: min(25, len(base_idx))]
+        upd_indices = list(upd_idx.values())[: min(25, len(upd_idx))]
 
     sens_base = _compute_sensitivity(baseline_sim, base_indices, specs)
     sens_upd = _compute_sensitivity(updated_sim, upd_indices, specs)
@@ -283,42 +407,70 @@ def main() -> None:
     sens_summary.to_csv(sens_summary_path, index=False)
 
     # Zero-delta invariance check
-    probe_pat = common_patnos[0]
+    probe_pat = common_patnos[0] if has_common_patnos else sorted(base_idx.keys())[0]
     probe_idx = base_idx[probe_pat]
-    zero_result = baseline_sim.simulate_counterfactual(
-        patient_idx=probe_idx,
-        specs=[CounterfactualSpec(feature_name="UPDRS_I", delta=0.0)],
-        horizons=DEFAULT_HORIZONS,
-    )
-    zero_key = list(zero_result.counterfactual_paths.keys())[0]
-    baseline_final = float(zero_result.baseline_path[-1].risk_saa)
-    cf_final = float(zero_result.counterfactual_paths[zero_key][-1].risk_saa)
-    zero_delta_pass = abs(cf_final - baseline_final) <= 1e-9
+    zero_delta_pass = False
+    if baseline_sim.feature_names:
+        zero_spec = CounterfactualSpec(
+            feature_name=baseline_sim.feature_names[0], delta=0.0
+        )
+        zero_result = baseline_sim.simulate_counterfactual(
+            patient_idx=probe_idx,
+            specs=[zero_spec],
+            horizons=DEFAULT_HORIZONS,
+        )
+        if zero_result.counterfactual_paths:
+            zero_key = list(zero_result.counterfactual_paths.keys())[0]
+            baseline_final = float(zero_result.baseline_path[-1].risk_saa)
+            cf_final = float(zero_result.counterfactual_paths[zero_key][-1].risk_saa)
+            zero_delta_pass = abs(cf_final - baseline_final) <= 1e-9
 
     # Determinism check
-    hash1 = _sha256_json(
-        {
-            "mean_abs_delta": float(delta_df["abs_delta_risk"].mean()),
-            "max_abs_delta": float(delta_df["abs_delta_risk"].max()),
-            "n_changed": int(len(changed_df)),
-        }
-    )
-    delta_df_repeat = _compute_patient_deltas(baseline_sim, updated_sim, common_patnos)
-    hash2 = _sha256_json(
-        {
-            "mean_abs_delta": float(delta_df_repeat["abs_delta_risk"].mean()),
-            "max_abs_delta": float(delta_df_repeat["abs_delta_risk"].max()),
-            "n_changed": int(np.sum(delta_df_repeat["abs_delta_risk"] > 1e-6)),
-        }
-    )
-    deterministic = hash1 == hash2
+    if has_common_patnos:
+        hash1 = _sha256_json(
+            {
+                "mean_abs_delta": float(delta_df["abs_delta_risk"].mean()),
+                "max_abs_delta": float(delta_df["abs_delta_risk"].max()),
+                "n_changed": int(len(changed_df)),
+            }
+        )
+        delta_df_repeat = _compute_patient_deltas(
+            baseline_sim, updated_sim, common_patnos
+        )
+        hash2 = _sha256_json(
+            {
+                "mean_abs_delta": float(delta_df_repeat["abs_delta_risk"].mean()),
+                "max_abs_delta": float(delta_df_repeat["abs_delta_risk"].max()),
+                "n_changed": int(np.sum(delta_df_repeat["abs_delta_risk"] > 1e-6)),
+            }
+        )
+        deterministic = hash1 == hash2
+    else:
+        hash1 = _sha256_json(
+            {
+                "baseline_sens": sens_base.to_dict(orient="records"),
+                "updated_sens": sens_upd.to_dict(orient="records"),
+            }
+        )
+        sens_base_repeat = _compute_sensitivity(baseline_sim, base_indices, specs)
+        sens_upd_repeat = _compute_sensitivity(updated_sim, upd_indices, specs)
+        hash2 = _sha256_json(
+            {
+                "baseline_sens": sens_base_repeat.to_dict(orient="records"),
+                "updated_sens": sens_upd_repeat.to_dict(orient="records"),
+            }
+        )
+        deterministic = hash1 == hash2
 
     # Visuals
     vis_dir = root / "visualizations" / "appendix" / "digital_twin_updates" / pull_id
     vis_dir.mkdir(parents=True, exist_ok=True)
 
     patient_fig = vis_dir / "patient_before_after_trajectory.png"
-    _plot_patient_before_after(baseline_sim, updated_sim, probe_pat, patient_fig)
+    if has_common_patnos:
+        _plot_patient_before_after(baseline_sim, updated_sim, probe_pat, patient_fig)
+    else:
+        _plot_reference_before_after(baseline_sim, updated_sim, patient_fig)
 
     cohort_fig = vis_dir / "cohort_delta_distribution.png"
     _plot_cohort_delta_distribution(delta_df, cohort_fig)
@@ -329,9 +481,15 @@ def main() -> None:
     summary = {
         "pull_id": pull_id,
         "n_patients_refreshed": int(len(common_patnos)),
+        "n_baseline_patients": int(len(baseline_pat)),
+        "n_updated_patients": int(len(updated_pat)),
         "n_changed_patients": int(len(changed_df)),
-        "mean_abs_delta_risk": float(delta_df["abs_delta_risk"].mean()),
-        "max_abs_delta_risk": float(delta_df["abs_delta_risk"].max()),
+        "mean_abs_delta_risk": (
+            float(delta_df["abs_delta_risk"].mean()) if not delta_df.empty else 0.0
+        ),
+        "max_abs_delta_risk": (
+            float(delta_df["abs_delta_risk"].max()) if not delta_df.empty else 0.0
+        ),
         "calibration_shift": {
             "note": "computed in external validation stage",
             "external_metrics_path": str(
@@ -342,7 +500,8 @@ def main() -> None:
                 / "external_metrics.json"
             ),
         },
-        "warnings": [] if len(common_patnos) > 0 else ["no_common_patients"],
+        "warnings": ([] if has_common_patnos else ["no_common_patients"])
+        + spec_warnings,
         "validation": {
             "zero_delta_counterfactual_pass": bool(zero_delta_pass),
             "deterministic_rerun_pass": bool(deterministic),
@@ -356,6 +515,12 @@ def main() -> None:
             "sensitivity_shift_figure": str(sens_fig),
         },
     }
+    if imaging_join_coverage is not None:
+        summary["imaging_feature_injection"] = imaging_join_coverage
+        if "path" in imaging_join_coverage:
+            summary["artifacts"]["twin_state_with_imaging"] = imaging_join_coverage[
+                "path"
+            ]
 
     summary_path = out_dir / "twin_refresh_summary.json"
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")

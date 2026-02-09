@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Week 1: CSF Biomarkers Extraction
+"""Phase 8.2 Week 1: CSF Biomarkers Extraction
 
 Purpose:
     Extract cerebrospinal fluid (CSF) biomarkers from PPMI biospecimen analysis
@@ -27,16 +26,24 @@ Date: October 12, 2025
 Phase: 8.2 Week 1
 """
 
+import os
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from raw_file_resolver import RawFileResolver, default_raw_roots
 
 
-def load_csf_biospecimen(data_dir: Path) -> pd.DataFrame:
-    """
-    Load PPMI CSF biospecimen analysis data.
+def _normalize_text(series: pd.Series) -> pd.Series:
+    return (
+        series.astype(str).str.strip().str.replace(r"\s+", " ", regex=True).str.lower()
+    )
+
+
+def load_csf_biospecimen(
+    data_dir: Path, resolver: RawFileResolver
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Load PPMI CSF biospecimen analysis data.
 
     Args:
         data_dir: Base data directory
@@ -44,28 +51,33 @@ def load_csf_biospecimen(data_dir: Path) -> pd.DataFrame:
     Returns:
         DataFrame with CSF biomarker measurements
     """
-    biospecimen_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "Current_Biospecimen_Analysis_Results_18Sep2025.csv"
-
-    if not biospecimen_file.exists():
-        raise FileNotFoundError(f"CSF biospecimen file not found: {biospecimen_file}")
+    resolved = resolver.resolve_latest(
+        "csf_biospecimen_current",
+        ["Current_Biospecimen_Analysis_Results_*.csv"],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO", "TESTNAME", "TESTVALUE"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve CSF biospecimen file.")
+    biospecimen_file = Path(resolved.path)
 
     print(f"Loading CSF biospecimen data from: {biospecimen_file}")
     df = pd.read_csv(biospecimen_file)
     print(f"✓ Loaded {len(df)} records")
     print(f"  Unique patients: {df['PATNO'].nunique()}")
-    
+
     # Show available columns
     print(f"\nAvailable columns ({len(df.columns)}):")
     print(f"  {', '.join(list(df.columns)[:20])}")
     if len(df.columns) > 20:
         print(f"  ... and {len(df.columns) - 20} more")
 
-    return df
+    return df, resolved.as_dict()
 
 
 def extract_csf_biomarkers(biospecimen_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Extract key CSF biomarkers for prognostic modeling.
+    """Extract key CSF biomarkers for prognostic modeling.
 
     Biomarkers:
     - α-synuclein: Core PD pathology marker
@@ -81,62 +93,82 @@ def extract_csf_biomarkers(biospecimen_df: pd.DataFrame) -> pd.DataFrame:
     """
     print("\nExtracting CSF biomarkers...")
 
-    # Filter to CSF samples only
+    # Filter to CSF samples only (supports both "CSF" and "Cerebrospinal Fluid").
     if "TYPE" in biospecimen_df.columns:
-        csf_df = biospecimen_df[biospecimen_df["TYPE"].str.upper().str.contains("CSF", na=False)].copy()
-        print(f"✓ Filtered to CSF samples: {len(csf_df)} records")
+        type_norm = _normalize_text(biospecimen_df["TYPE"])
+        csf_mask = type_norm.str.contains(
+            r"\bcsf\b", regex=True, na=False
+        ) | type_norm.str.contains("cerebrospinal", na=False)
+        csf_df = biospecimen_df[csf_mask].copy()
+        print(
+            f"✓ Filtered to CSF samples: {len(csf_df)} records ({csf_df['PATNO'].nunique()} patients)"
+        )
     else:
         print("⚠ No TYPE column found, assuming all samples are CSF")
         csf_df = biospecimen_df.copy()
 
-    # Filter to baseline if CLINICAL_EVENT exists
+    # Prefer baseline/screening events when available.
     if "CLINICAL_EVENT" in csf_df.columns:
-        csf_df = csf_df[csf_df["CLINICAL_EVENT"].isin(["BL", "SC"])].copy()
-        print(f"✓ Filtered to baseline/screening: {len(csf_df)} records")
+        baseline = csf_df[csf_df["CLINICAL_EVENT"].isin(["BL", "SC", "BLTOT"])].copy()
+        if baseline.empty:
+            print(
+                "⚠ No BL/SC CSF rows found; using all visit events for fallback selection"
+            )
+        else:
+            csf_df = baseline
+        print(
+            f"✓ CSF rows retained for extraction: {len(csf_df)} records ({csf_df['PATNO'].nunique()} patients)"
+        )
 
-    # Define target biomarkers (TESTNAME values in the data)
+    # Define target biomarkers with precedence of acceptable TESTNAME aliases.
     biomarker_mapping = {
-        "ALPHA_SYNUCLEIN": "CSF Alpha-synuclein",
-        "TOTAL_TAU": "tTau",
-        "ABETA42": "ABeta42",  # Also try "ABeta 1-42"
-        "PTAU181": "pTau181"   # Also try "pTau"
+        "ALPHA_SYNUCLEIN": [
+            "CSF Alpha-synuclein",
+            "alpha-synuclein",
+            "alpha synuclein",
+        ],
+        "TOTAL_TAU": ["tTau", "total tau", "tau total"],
+        "ABETA42": ["ABeta42", "ABeta 1-42", "ABeta raw", "ABeta"],
+        "PTAU181": ["pTau181", "pTau"],
     }
 
-    # Pivot data from long to wide format
-    csf_features = None
+    if "RUNDATE" in csf_df.columns:
+        csf_df["_run_date"] = pd.to_datetime(csf_df["RUNDATE"], errors="coerce")
+    else:
+        csf_df["_run_date"] = pd.NaT
+    csf_df["_testname_norm"] = _normalize_text(csf_df["TESTNAME"])
+    csf_df["TESTVALUE_NUM"] = pd.to_numeric(csf_df["TESTVALUE"], errors="coerce")
 
-    for target_name, test_name in biomarker_mapping.items():
-        # Try exact match first
-        biomarker_data = csf_df[csf_df["TESTNAME"] == test_name].copy()
-        
-        # If no exact match, try partial match
-        if len(biomarker_data) == 0 and target_name == "ABETA42":
-            biomarker_data = csf_df[csf_df["TESTNAME"] == "ABeta 1-42"].copy()
-        elif len(biomarker_data) == 0 and target_name == "PTAU181":
-            biomarker_data = csf_df[csf_df["TESTNAME"] == "pTau"].copy()
+    # Pivot data from long to wide format.
+    csf_features = pd.DataFrame(
+        {"PATNO": sorted(csf_df["PATNO"].dropna().unique().tolist())}
+    )
 
-        if len(biomarker_data) > 0:
-            # Convert TESTVALUE to numeric (handle non-numeric values)
-            biomarker_data["TESTVALUE"] = pd.to_numeric(biomarker_data["TESTVALUE"], errors="coerce")
-            
-            # Group by PATNO and take mean (if multiple measurements)
-            biomarker_pivot = biomarker_data.groupby("PATNO")["TESTVALUE"].mean().reset_index()
+    for target_name, aliases in biomarker_mapping.items():
+        alias_rank = {alias.strip().lower(): i for i, alias in enumerate(aliases)}
+        selected = csf_df[csf_df["_testname_norm"].isin(alias_rank.keys())].copy()
+
+        if not selected.empty:
+            selected = selected.dropna(subset=["TESTVALUE_NUM"]).copy()
+            selected["_alias_rank"] = (
+                selected["_testname_norm"].map(alias_rank).astype(int)
+            )
+            selected = selected.sort_values(["PATNO", "_alias_rank", "_run_date"])
+            biomarker_pivot = selected.groupby("PATNO", as_index=False)[
+                "TESTVALUE_NUM"
+            ].first()
             biomarker_pivot.columns = ["PATNO", target_name]
-            
-            print(f"  ✓ Found {target_name}: {len(biomarker_pivot)} patients")
-            
-            if csf_features is None:
-                csf_features = biomarker_pivot
-            else:
-                csf_features = csf_features.merge(biomarker_pivot, on="PATNO", how="outer")
+            csf_features = csf_features.merge(biomarker_pivot, on="PATNO", how="left")
+            print(
+                f"  ✓ Found {target_name}: {biomarker_pivot[target_name].notna().sum()} patients "
+                f"(aliases={aliases})"
+            )
         else:
-            print(f"  ⚠ Missing {target_name}: TESTNAME='{test_name}' not found")
+            csf_features[target_name] = np.nan
+            print(f"  ⚠ Missing {target_name}: none of aliases found {aliases}")
 
-    # Ensure all biomarkers have columns (even if empty)
-    if csf_features is None:
-        csf_features = pd.DataFrame({"PATNO": []})
-    
-    for target_name in biomarker_mapping.keys():
+    # Ensure all biomarkers exist as columns.
+    for target_name in biomarker_mapping:
         if target_name not in csf_features.columns:
             csf_features[target_name] = np.nan
 
@@ -157,11 +189,9 @@ def extract_csf_biomarkers(biospecimen_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def merge_with_prodromal_cohort(
-    csf_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge CSF biomarkers with prodromal cohort.
+    csf_df: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge CSF biomarkers with prodromal cohort.
 
     Args:
         csf_df: DataFrame with PATNO and CSF biomarker features
@@ -170,17 +200,18 @@ def merge_with_prodromal_cohort(
     Returns:
         Tuple of (merged_df, coverage_stats)
     """
-    prodromal_file = data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    cohort_override = os.getenv("GIMAN_COHORT_CSV", "").strip()
+    prodromal_file = (
+        Path(cohort_override)
+        if cohort_override
+        else data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    )
     print(f"\nLoading prodromal cohort: {prodromal_file}")
     prodromal_df = pd.read_csv(prodromal_file)
     print(f"✓ Loaded {len(prodromal_df)} prodromal patients")
 
     # Merge
-    merged_df = prodromal_df[["PATNO"]].merge(
-        csf_df,
-        on="PATNO",
-        how="left"
-    )
+    merged_df = prodromal_df[["PATNO"]].merge(csf_df, on="PATNO", how="left")
 
     # Compute coverage
     feature_cols = ["ALPHA_SYNUCLEIN", "TOTAL_TAU", "ABETA42", "PTAU181"]
@@ -199,18 +230,18 @@ def merge_with_prodromal_cohort(
     if avg_coverage < 55:
         print(f"⚠ WARNING: Coverage {avg_coverage:.1f}% below target 55%")
     else:
-        print(f"✓ Coverage exceeds target (55%)")
+        print("✓ Coverage exceeds target (55%)")
 
     return merged_df, coverage_stats
 
 
 def save_csf_biomarkers(
     csf_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    coverage_stats: dict[str, float],
+    source_file: dict[str, object],
+    output_dir: Path,
 ) -> None:
-    """
-    Save CSF biomarker features and metadata.
+    """Save CSF biomarker features and metadata.
 
     Args:
         csf_df: DataFrame with PATNO and CSF biomarker features
@@ -234,17 +265,18 @@ def save_csf_biomarkers(
         "coverage": coverage_stats,
         "average_coverage": np.mean(list(coverage_stats.values())),
         "target_coverage": 55.0,
-        "source_file": "GIMAN/ppmi_data_csv/Current_Biospecimen_Analysis_Results_18Sep2025.csv",
+        "source_file": source_file,
         "sample_type": "Cerebrospinal fluid (CSF)",
         "clinical_relevance": {
             "alpha_synuclein": "Core PD pathology, Lewy body formation",
             "total_tau": "Neurodegeneration marker, cognitive decline",
             "abeta42": "Amyloid burden, dementia risk in PD",
-            "ptau181": "Tau phosphorylation, cognitive impairment"
-        }
+            "ptau181": "Tau phosphorylation, cognitive impairment",
+        },
     }
 
     import json
+
     metadata_file = output_dir / "csf_biomarkers_metadata.json"
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
@@ -253,9 +285,7 @@ def save_csf_biomarkers(
 
 
 def main() -> None:
-    """
-    Main execution function for CSF biomarker extraction.
-    """
+    """Main execution function for CSF biomarker extraction."""
     print("=" * 70)
     print("PHASE 8.2 WEEK 1: CSF BIOMARKERS EXTRACTION")
     print("=" * 70)
@@ -264,6 +294,7 @@ def main() -> None:
     base_dir = Path(__file__).resolve().parents[4]
     data_dir = base_dir / "data"
     output_dir = data_dir / "03_prodromal" / "enhanced"
+    resolver = RawFileResolver(default_raw_roots(base_dir))
 
     print(f"\nBase directory: {base_dir}")
     print(f"Data directory: {data_dir}")
@@ -273,7 +304,7 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 1: Load CSF Biospecimen Data")
     print("-" * 70)
-    biospecimen_df = load_csf_biospecimen(data_dir)
+    biospecimen_df, biospec_src = load_csf_biospecimen(data_dir, resolver)
 
     # Extract biomarkers
     print("\n" + "-" * 70)
@@ -291,13 +322,13 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 4: Save Results")
     print("-" * 70)
-    save_csf_biomarkers(merged_df, coverage_stats, output_dir)
+    save_csf_biomarkers(merged_df, coverage_stats, biospec_src, output_dir)
 
     # Summary
     print("\n" + "=" * 70)
     print("CSF BIOMARKER EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"✓ Extracted 4 CSF biomarker features")
+    print("✓ Extracted 4 CSF biomarker features")
     print(f"✓ Cohort size: {len(merged_df)} patients")
     print(f"✓ Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"✓ Output: {output_dir / 'csf_biomarkers.csv'}")

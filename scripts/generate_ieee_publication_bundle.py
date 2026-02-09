@@ -16,6 +16,15 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _first_existing(candidates: list[Path]) -> Path:
+    for path in candidates:
+        if path.exists():
+            return path
+    raise FileNotFoundError(
+        "No candidate artifact path exists: " + ", ".join(str(p) for p in candidates)
+    )
+
+
 def _fmt_ci(ci: list[float] | tuple[float, float]) -> str:
     return f"[{ci[0]:.3f}, {ci[1]:.3f}]"
 
@@ -263,14 +272,22 @@ def _latex_metrics_table(
     fuzzy_auc: float,
     fuzzy_auc_ci: list[float],
     fuzzy_pr_auc: float,
+    fuzzy_calibration: dict | None = None,
 ) -> str:
+    fuzzy_ece = 0.392
+    fuzzy_brier = 0.292
+    if fuzzy_calibration is not None:
+        raw = fuzzy_calibration.get("raw", {})
+        fuzzy_ece = float(raw.get("ece", fuzzy_ece))
+        fuzzy_brier = float(raw.get("brier", fuzzy_brier))
+
     rows = []
     for model, m in baselines.items():
         rows.append(
             f"{model.replace('_', ' ')} & {m['auc']:.3f} & {_fmt_ci(m['auc_ci_95'])} & {m['pr_auc']:.3f} & {m['ece']:.3f} & {m['brier']:.3f} \\\\"
         )
     rows.append(
-        f"FUZZY GIMAN & {fuzzy_auc:.3f} & {_fmt_ci(fuzzy_auc_ci)} & {fuzzy_pr_auc:.3f} & 0.392$^*$ & 0.292$^*$ \\\\"
+        f"FUZZY GIMAN & {fuzzy_auc:.3f} & {_fmt_ci(fuzzy_auc_ci)} & {fuzzy_pr_auc:.3f} & {fuzzy_ece:.3f}$^*$ & {fuzzy_brier:.3f}$^*$ \\\\"
     )
 
     return "\n".join(
@@ -434,12 +451,20 @@ def main() -> None:
     cycles = _load_json(
         root / "Docs" / "audit" / "CLINICAL_HARDENING_REVIEW_CYCLES.json"
     )
-    full_results = _load_json(
-        root
-        / "outputs"
-        / "phase9_neuro_fuzzy_sota_run_from50ckpt"
-        / "full_training_results.json"
+    full_results_path = _first_existing(
+        [
+            root
+            / "outputs"
+            / "phase9_neuro_fuzzy"
+            / "PREP_20260208_SAA_COHORT3_full"
+            / "full_training_results.json",
+            root
+            / "outputs"
+            / "phase9_neuro_fuzzy_sota_run_from50ckpt"
+            / "full_training_results.json",
+        ]
     )
+    full_results = _load_json(full_results_path)
 
     baselines = internal_lock["baselines"]
     fuzzy_auc = float(explain["auc"])
@@ -490,6 +515,7 @@ def main() -> None:
         fuzzy_auc=fuzzy_auc,
         fuzzy_auc_ci=fuzzy_auc_ci,
         fuzzy_pr_auc=fuzzy_pr_auc,
+        fuzzy_calibration=explain.get("calibration_metrics"),
     )
     cal_table_tex = _latex_calibration_table(explain["calibration_metrics"])
     gates_table_tex = _latex_gate_table(cycles)

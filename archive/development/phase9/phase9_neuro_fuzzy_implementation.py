@@ -55,12 +55,32 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--classification-label-key", type=str, default="saa_label")
     parser.add_argument("--survival-event-key", type=str, default="event")
+    parser.add_argument("--metadata-path", type=Path, default=None)
+    parser.add_argument(
+        "--feature-blacklist",
+        type=str,
+        default="",
+        help="Comma-separated feature names to zero during training/eval.",
+    )
+    parser.add_argument(
+        "--feature-dropout-rate",
+        type=float,
+        default=0.0,
+        help="Random per-feature dropout probability applied each epoch.",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--num-rules", type=int, default=16)
     parser.add_argument("--bootstrap-iters", type=int, default=500)
+    parser.add_argument(
+        "--classification-loss",
+        type=str,
+        default="cross_entropy",
+        choices=["cross_entropy", "focal"],
+    )
+    parser.add_argument("--focal-gamma", type=float, default=2.0)
     return parser.parse_args()
 
 
@@ -124,6 +144,68 @@ def bootstrap_auc_ci(
     return (float(np.percentile(vals, 2.5)), float(np.percentile(vals, 97.5)))
 
 
+class FocalLoss(nn.Module):
+    """Focal loss for imbalanced binary classification logits."""
+
+    def __init__(self, class_weights: torch.Tensor, gamma: float = 2.0):
+        super().__init__()
+        self.class_weights = class_weights
+        self.gamma = gamma
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        ce = F.cross_entropy(
+            logits, targets, reduction="none", weight=self.class_weights
+        )
+        pt = torch.exp(-ce)
+        loss = ((1 - pt) ** self.gamma) * ce
+        return loss.mean()
+
+
+def resolve_feature_blacklist_indices(
+    metadata_path: Path | None,
+    blacklist_csv: str,
+) -> list[int]:
+    """Resolve blacklist feature names to indices from metadata."""
+    if not blacklist_csv.strip() or metadata_path is None:
+        return []
+    if not metadata_path.exists():
+        logging.warning(
+            "Metadata path not found: %s; skipping feature blacklist", metadata_path
+        )
+        return []
+    payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+    feature_names = payload.get("feature_names", [])
+    if not feature_names:
+        return []
+
+    requested = [x.strip() for x in blacklist_csv.split(",") if x.strip()]
+    idxs: list[int] = []
+    missing: list[str] = []
+    for name in requested:
+        if name in feature_names:
+            idxs.append(int(feature_names.index(name)))
+        else:
+            missing.append(name)
+    if missing:
+        logging.warning("Requested blacklist features not found: %s", missing)
+    return sorted(set(idxs))
+
+
+def apply_feature_regularization(
+    x: torch.Tensor,
+    feature_dropout_rate: float,
+    blacklist_indices: list[int],
+) -> torch.Tensor:
+    """Apply deterministic blacklist zeroing + stochastic feature dropout."""
+    x_reg = x.clone()
+    if blacklist_indices:
+        x_reg[:, blacklist_indices] = 0.0
+    if feature_dropout_rate > 0:
+        drop = torch.rand((x_reg.shape[1],), device=x_reg.device) < feature_dropout_rate
+        x_reg[:, drop] = 0.0
+    return x_reg
+
+
 def train_neuro_fuzzy(args: argparse.Namespace) -> None:
     """Quick neuro-fuzzy verification on pre-split train/test data."""
     logging.info(
@@ -152,8 +234,21 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
     test_data = test_data.to(device)
     train_targets = getattr(train_data, args.classification_label_key).long()
     test_targets_t = getattr(test_data, args.classification_label_key).long()
+    pos_count = int((train_targets == 1).sum().item())
+    neg_count = int((train_targets == 0).sum().item())
+    if pos_count == 0 or neg_count == 0:
+        raise ValueError("Training set has one class for classification_label_key")
 
     in_features = train_data.x.shape[1]
+    blacklist_indices = resolve_feature_blacklist_indices(
+        metadata_path=args.metadata_path,
+        blacklist_csv=args.feature_blacklist,
+    )
+    if blacklist_indices:
+        logging.info("Applying feature blacklist indices: %s", blacklist_indices)
+    if args.feature_dropout_rate > 0:
+        logging.info("Applying feature dropout rate: %.3f", args.feature_dropout_rate)
+
     gat_encoder = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
     model = NeuroFuzzyGIMAN(gat_encoder, num_classes=2, num_rules=args.num_rules).to(
         device
@@ -162,13 +257,24 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
     optimizer = optim.Adam(
         model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
     )
-    criterion = nn.CrossEntropyLoss()
+    class_weights = torch.tensor([1.0, neg_count / pos_count], device=device)
+    criterion: nn.Module = nn.CrossEntropyLoss(weight=class_weights)
+    if args.classification_loss == "focal":
+        criterion = FocalLoss(class_weights=class_weights, gamma=args.focal_gamma)
+
+    best_auc = 0.0
 
     for epoch in range(args.epochs):
         model.train()
         optimizer.zero_grad()
 
-        logits, weights = model(train_data)
+        train_batch = train_data.clone()
+        train_batch.x = apply_feature_regularization(
+            train_batch.x,
+            feature_dropout_rate=args.feature_dropout_rate,
+            blacklist_indices=blacklist_indices,
+        )
+        logits, weights = model(train_batch)
         loss = criterion(logits, train_targets)
 
         entropy = -torch.sum(weights * torch.log(weights + 1e-6), dim=1).mean()
@@ -178,13 +284,36 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
         optimizer.step()
 
         if (epoch + 1) % 10 == 0:
+            model.eval()
+            with torch.no_grad():
+                eval_batch = test_data.clone()
+                eval_batch.x = apply_feature_regularization(
+                    eval_batch.x,
+                    feature_dropout_rate=0.0,
+                    blacklist_indices=blacklist_indices,
+                )
+                logits_eval, _ = model(eval_batch)
+                probs_eval = F.softmax(logits_eval, dim=1)[:, 1].detach().cpu().numpy()
+                y_eval = test_targets_t.detach().cpu().numpy()
+                eval_auc = safe_auc(y_eval, probs_eval)
+                best_auc = max(best_auc, eval_auc)
             logging.info(
-                "Epoch %d/%d, Loss: %.4f", epoch + 1, args.epochs, float(loss.item())
+                "Epoch %d/%d, Loss: %.4f, Eval AUC: %.4f",
+                epoch + 1,
+                args.epochs,
+                float(loss.item()),
+                eval_auc,
             )
 
     model.eval()
     with torch.no_grad():
-        logits_test, _ = model(test_data)
+        test_batch = test_data.clone()
+        test_batch.x = apply_feature_regularization(
+            test_batch.x,
+            feature_dropout_rate=0.0,
+            blacklist_indices=blacklist_indices,
+        )
+        logits_test, _ = model(test_batch)
         probs = F.softmax(logits_test, dim=1)[:, 1].detach().cpu().numpy()
         y_test = test_targets_t.detach().cpu().numpy()
 
@@ -205,9 +334,18 @@ def train_neuro_fuzzy(args: argparse.Namespace) -> None:
     results = {
         "seed": args.seed,
         "classification_label_key": args.classification_label_key,
+        "metadata_path": str(args.metadata_path) if args.metadata_path else None,
+        "feature_blacklist": [
+            x.strip() for x in args.feature_blacklist.split(",") if x.strip()
+        ],
+        "feature_blacklist_indices": blacklist_indices,
+        "feature_dropout_rate": args.feature_dropout_rate,
         "saa_auc": auc,
         "saa_auc_ci_95": [auc_ci_low, auc_ci_high],
+        "best_saa_auc_seen": best_auc,
         "accuracy": acc,
+        "classification_loss": args.classification_loss,
+        "focal_gamma": args.focal_gamma,
         "epochs": args.epochs,
     }
     (args.output_dir / "quick_neuro_fuzzy_results.json").write_text(

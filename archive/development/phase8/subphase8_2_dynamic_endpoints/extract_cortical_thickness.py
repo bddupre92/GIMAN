@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Week 1: Cortical Thickness Features Extraction
+"""Phase 8.2 Week 1: Cortical Thickness Features Extraction
 
 Purpose:
     Extract cortical thickness measures from FreeSurfer parcellation.
@@ -29,39 +28,45 @@ Date: October 12, 2025
 Phase: 8.2 Week 1
 """
 
+import os
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from raw_file_resolver import RawFileResolver, default_raw_roots
 
 
-def load_cortical_thickness(data_dir: Path) -> pd.DataFrame:
-    """
-    Load FreeSurfer cortical thickness data.
+def load_cortical_thickness(project_root: Path) -> tuple[pd.DataFrame, dict]:
+    """Load FreeSurfer cortical thickness data.
 
     Args:
-        data_dir: Base data directory
+        project_root: Project root directory
 
     Returns:
-        DataFrame with cortical thickness values
+        Tuple of (DataFrame with cortical thickness values, source metadata)
     """
-    cth_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "FS7_APARC_CTH_30Sep2025.csv"
+    resolver = RawFileResolver(default_raw_roots(project_root))
+    resolved = resolver.resolve_latest(
+        "freesurfer_aparc_thickness",
+        ["FS7_APARC_CTH_*.csv"],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve cortical thickness file.")
 
-    if not cth_file.exists():
-        raise FileNotFoundError(f"Cortical thickness file not found: {cth_file}")
-
-    print(f"Loading cortical thickness from: {cth_file}")
-    df = pd.read_csv(cth_file)
+    print(f"Loading cortical thickness from: {resolved.path}")
+    df = pd.read_csv(resolved.path)
     print(f"✓ Loaded {len(df)} records")
     print(f"  Columns: {len(df.columns)} regions")
 
-    return df
+    return df, resolved.as_dict()
 
 
 def extract_thickness_features(cth_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Extract key cortical thickness features for PD prediction.
+    """Extract key cortical thickness features for PD prediction.
 
     Regions:
     - Entorhinal: Early Alzheimer's/cognitive marker
@@ -81,10 +86,18 @@ def extract_thickness_features(cth_df: pd.DataFrame) -> pd.DataFrame:
     region_mapping = {
         "entorhinal_L": ["lh_entorhinal", "Left_entorhinal", "entorhinal_lh"],
         "entorhinal_R": ["rh_entorhinal", "Right_entorhinal", "entorhinal_rh"],
-        "cingulate_L": ["lh_rostralanteriorcingulate", "lh_caudalanteriorcingulate", "Left_cingulate"],
-        "cingulate_R": ["rh_rostralanteriorcingulate", "rh_caudalanteriorcingulate", "Right_cingulate"],
+        "cingulate_L": [
+            "lh_rostralanteriorcingulate",
+            "lh_caudalanteriorcingulate",
+            "Left_cingulate",
+        ],
+        "cingulate_R": [
+            "rh_rostralanteriorcingulate",
+            "rh_caudalanteriorcingulate",
+            "Right_cingulate",
+        ],
         "precentral_L": ["lh_precentral", "Left_precentral", "precentral_lh"],
-        "precentral_R": ["rh_precentral", "Right_precentral", "precentral_rh"]
+        "precentral_R": ["rh_precentral", "Right_precentral", "precentral_rh"],
     }
 
     # Find matching columns
@@ -107,18 +120,30 @@ def extract_thickness_features(cth_df: pd.DataFrame) -> pd.DataFrame:
         print(f"\n✓ Filtered to baseline visits: {len(baseline_df)} records")
     else:
         baseline_df = cth_df.copy()
-        print(f"\n⚠ No EVENT_ID column, using all records")
+        print("\n⚠ No EVENT_ID column, using all records")
 
     # Create output DataFrame
     cth_features_df = pd.DataFrame({"PATNO": baseline_df["PATNO"]})
 
     # Add features
-    cth_features_df["ENTORHINAL_L_CTH"] = baseline_df[features["entorhinal_L"]] if features["entorhinal_L"] else np.nan
-    cth_features_df["ENTORHINAL_R_CTH"] = baseline_df[features["entorhinal_R"]] if features["entorhinal_R"] else np.nan
-    cth_features_df["CINGULATE_L_CTH"] = baseline_df[features["cingulate_L"]] if features["cingulate_L"] else np.nan
-    cth_features_df["CINGULATE_R_CTH"] = baseline_df[features["cingulate_R"]] if features["cingulate_R"] else np.nan
-    cth_features_df["PRECENTRAL_L_CTH"] = baseline_df[features["precentral_L"]] if features["precentral_L"] else np.nan
-    cth_features_df["PRECENTRAL_R_CTH"] = baseline_df[features["precentral_R"]] if features["precentral_R"] else np.nan
+    cth_features_df["ENTORHINAL_L_CTH"] = (
+        baseline_df[features["entorhinal_L"]] if features["entorhinal_L"] else np.nan
+    )
+    cth_features_df["ENTORHINAL_R_CTH"] = (
+        baseline_df[features["entorhinal_R"]] if features["entorhinal_R"] else np.nan
+    )
+    cth_features_df["CINGULATE_L_CTH"] = (
+        baseline_df[features["cingulate_L"]] if features["cingulate_L"] else np.nan
+    )
+    cth_features_df["CINGULATE_R_CTH"] = (
+        baseline_df[features["cingulate_R"]] if features["cingulate_R"] else np.nan
+    )
+    cth_features_df["PRECENTRAL_L_CTH"] = (
+        baseline_df[features["precentral_L"]] if features["precentral_L"] else np.nan
+    )
+    cth_features_df["PRECENTRAL_R_CTH"] = (
+        baseline_df[features["precentral_R"]] if features["precentral_R"] else np.nan
+    )
 
     # Remove duplicates
     n_before = len(cth_features_df)
@@ -127,17 +152,17 @@ def extract_thickness_features(cth_df: pd.DataFrame) -> pd.DataFrame:
     if n_before > n_after:
         print(f"\n✓ Removed {n_before - n_after} duplicate PATNOs")
 
-    print(f"\n✓ Extracted thickness features for {len(cth_features_df)} unique patients")
+    print(
+        f"\n✓ Extracted thickness features for {len(cth_features_df)} unique patients"
+    )
 
     return cth_features_df
 
 
 def merge_with_prodromal_cohort(
-    cth_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge cortical thickness features with prodromal cohort.
+    cth_df: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge cortical thickness features with prodromal cohort.
 
     Args:
         cth_df: DataFrame with PATNO and thickness features
@@ -146,23 +171,27 @@ def merge_with_prodromal_cohort(
     Returns:
         Tuple of (merged_df, coverage_stats)
     """
-    prodromal_file = data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    cohort_override = os.getenv("GIMAN_COHORT_CSV", "").strip()
+    prodromal_file = (
+        Path(cohort_override)
+        if cohort_override
+        else data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    )
     print(f"\nLoading prodromal cohort: {prodromal_file}")
     prodromal_df = pd.read_csv(prodromal_file)
     print(f"✓ Loaded {len(prodromal_df)} prodromal patients")
 
     # Merge
-    merged_df = prodromal_df[["PATNO"]].merge(
-        cth_df,
-        on="PATNO",
-        how="left"
-    )
+    merged_df = prodromal_df[["PATNO"]].merge(cth_df, on="PATNO", how="left")
 
     # Compute coverage
     feature_cols = [
-        "ENTORHINAL_L_CTH", "ENTORHINAL_R_CTH",
-        "CINGULATE_L_CTH", "CINGULATE_R_CTH",
-        "PRECENTRAL_L_CTH", "PRECENTRAL_R_CTH"
+        "ENTORHINAL_L_CTH",
+        "ENTORHINAL_R_CTH",
+        "CINGULATE_L_CTH",
+        "CINGULATE_R_CTH",
+        "PRECENTRAL_L_CTH",
+        "PRECENTRAL_R_CTH",
     ]
 
     coverage_stats = {}
@@ -179,18 +208,18 @@ def merge_with_prodromal_cohort(
     if avg_coverage < 75:
         print(f"⚠ WARNING: Coverage {avg_coverage:.1f}% below target 75%")
     else:
-        print(f"✓ Coverage meets target (75%)")
+        print("✓ Coverage meets target (75%)")
 
     return merged_df, coverage_stats
 
 
 def save_cortical_thickness(
     cth_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    coverage_stats: dict[str, float],
+    output_dir: Path,
+    source_meta: dict,
 ) -> None:
-    """
-    Save cortical thickness features and metadata.
+    """Save cortical thickness features and metadata.
 
     Args:
         cth_df: DataFrame with PATNO and thickness features
@@ -207,23 +236,25 @@ def save_cortical_thickness(
 
     # Save metadata
     metadata = {
-        "extraction_date": "2025-10-12",
+        "extraction_date_utc": datetime.now(timezone.utc).isoformat(),
         "n_patients": len(cth_df),
         "n_features": len(cth_df.columns) - 1,
         "features": list(cth_df.columns.drop("PATNO")),
         "coverage": coverage_stats,
         "average_coverage": np.mean(list(coverage_stats.values())),
         "target_coverage": 75.0,
-        "source_file": "GIMAN/ppmi_data_csv/FS7_APARC_CTH_30Sep2025.csv",
+        "source_file": source_meta.get("path", ""),
+        "source_resolution": source_meta,
         "parcellation": "FreeSurfer 7.x Desikan-Killiany",
         "regions": {
             "entorhinal": "Memory/cognitive function",
             "cingulate": "Cognitive control and emotion",
-            "precentral": "Primary motor cortex"
-        }
+            "precentral": "Primary motor cortex",
+        },
     }
 
     import json
+
     metadata_file = output_dir / "cortical_thickness_metadata.json"
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
@@ -232,9 +263,7 @@ def save_cortical_thickness(
 
 
 def main() -> None:
-    """
-    Main execution function for cortical thickness extraction.
-    """
+    """Main execution function for cortical thickness extraction."""
     print("=" * 70)
     print("PHASE 8.2 WEEK 1: CORTICAL THICKNESS FEATURES EXTRACTION")
     print("=" * 70)
@@ -252,7 +281,7 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 1: Load Cortical Thickness Data")
     print("-" * 70)
-    cth_df = load_cortical_thickness(data_dir)
+    cth_df, source_meta = load_cortical_thickness(base_dir)
 
     # Extract features
     print("\n" + "-" * 70)
@@ -270,13 +299,13 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 4: Save Results")
     print("-" * 70)
-    save_cortical_thickness(merged_df, coverage_stats, output_dir)
+    save_cortical_thickness(merged_df, coverage_stats, output_dir, source_meta)
 
     # Summary
     print("\n" + "=" * 70)
     print("CORTICAL THICKNESS EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"✓ Extracted 6 cortical thickness features")
+    print("✓ Extracted 6 cortical thickness features")
     print(f"✓ Cohort size: {len(merged_df)} patients")
     print(f"✓ Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"✓ Output: {output_dir / 'cortical_thickness.csv'}")

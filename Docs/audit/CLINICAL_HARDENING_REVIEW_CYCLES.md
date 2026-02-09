@@ -57,13 +57,11 @@ Rigorous stepwise review for FUZZY GIMAN internal hardening.
 ## C6_clinical_readiness_gate — PASS
 
 - failed_dependencies: `[]`
-- external_validation_artifact: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/EXTERNAL_VALIDATION_REPORT_EV_20260207_PPMI_20250930_PRELIM.md`
-- external_metrics_artifact: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/external_validation/PPMI_20250930_PRELIM/external_metrics.json`
+- external_validation_artifact: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/EXTERNAL_VALIDATION_REPORT_EV_20260207_PPMI_20251008_REAL_DISJOINT.md`
+- external_metrics_artifact: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/external_validation/PPMI_20251008_REAL_DISJOINT/external_metrics.json`
 - has_external_validation_artifact: `True`
 - external_validation_real_data_only: `True`
-- notes: `Clinical readiness is blocked unless all prior cycles pass and external validation is complete.`
-- external_validation_run_tag: `EV_20260207_PPMI_20250930_PRELIM`
-- external_metrics_path: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/external_validation/PPMI_20250930_PRELIM/external_metrics.json`
+- notes: `Clinical readiness is blocked unless all prior cycles pass and a run-tagged external validation artifact (real-data-only) exists.`
 
 ## Summary
 - overall_pass: `True`

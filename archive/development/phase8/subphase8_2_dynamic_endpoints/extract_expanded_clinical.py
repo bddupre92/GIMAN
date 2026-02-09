@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Week 1: Expanded Clinical Features Extraction
+"""Phase 8.2 Week 1: Expanded Clinical Features Extraction
 
 Purpose:
     Extract expanded clinical assessments beyond the baseline 4 features
@@ -29,16 +28,18 @@ Date: October 12, 2025
 Phase: 8.2 Week 1
 """
 
+import os
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from raw_file_resolver import RawFileResolver, default_raw_roots
 
 
-def load_updrs_part_i(data_dir: Path) -> pd.DataFrame:
-    """
-    Load UPDRS Part I (non-motor experiences).
+def load_updrs_part_i(
+    data_dir: Path, resolver: RawFileResolver
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Load UPDRS Part I (non-motor experiences).
 
     Args:
         data_dir: Base data directory
@@ -46,10 +47,20 @@ def load_updrs_part_i(data_dir: Path) -> pd.DataFrame:
     Returns:
         DataFrame with PATNO and UPDRS_I total score
     """
-    updrs_i_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "MDS-UPDRS_Part_I_18Sep2025.csv"
-
-    if not updrs_i_file.exists():
-        raise FileNotFoundError(f"UPDRS Part I file not found: {updrs_i_file}")
+    resolved = resolver.resolve_latest(
+        "updrs_part_i",
+        [
+            "MDS-UPDRS_Part_I_*.csv",
+            "MDS-UPDRS_Part_I_Patient_Questionnaire_*.csv",
+            "MDS-UPDRS_Part_I_Non-Motor_Aspects__Online__*.csv",
+        ],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO", "EVENT_ID"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve UPDRS Part I file.")
+    updrs_i_file = Path(resolved.path)
 
     print(f"Loading UPDRS Part I from: {updrs_i_file}")
     df = pd.read_csv(updrs_i_file)
@@ -78,14 +89,17 @@ def load_updrs_part_i(data_dir: Path) -> pd.DataFrame:
     if "EVENT_ID" in df.columns:
         df_out = df_out[df["EVENT_ID"] == "BL"]
 
-    print(f"✓ UPDRS Part I: {df_out['UPDRS_I'].notna().sum()}/{len(df_out)} non-null scores")
+    print(
+        f"✓ UPDRS Part I: {df_out['UPDRS_I'].notna().sum()}/{len(df_out)} non-null scores"
+    )
 
-    return df_out
+    return df_out, resolved.as_dict()
 
 
-def load_updrs_part_ii(data_dir: Path) -> pd.DataFrame:
-    """
-    Load UPDRS Part II (motor experiences of daily living).
+def load_updrs_part_ii(
+    data_dir: Path, resolver: RawFileResolver
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Load UPDRS Part II (motor experiences of daily living).
 
     Args:
         data_dir: Base data directory
@@ -93,10 +107,19 @@ def load_updrs_part_ii(data_dir: Path) -> pd.DataFrame:
     Returns:
         DataFrame with PATNO and UPDRS_II total score
     """
-    updrs_ii_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "MDS_UPDRS_Part_II__Patient_Questionnaire_18Sep2025.csv"
-
-    if not updrs_ii_file.exists():
-        raise FileNotFoundError(f"UPDRS Part II file not found: {updrs_ii_file}")
+    resolved = resolver.resolve_latest(
+        "updrs_part_ii",
+        [
+            "MDS_UPDRS_Part_II__Patient_Questionnaire_*.csv",
+            "MDS-UPDRS_Part_II_Motor_Aspects__Online__*.csv",
+        ],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO", "EVENT_ID"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve UPDRS Part II file.")
+    updrs_ii_file = Path(resolved.path)
 
     print(f"\nLoading UPDRS Part II from: {updrs_ii_file}")
     df = pd.read_csv(updrs_ii_file)
@@ -121,14 +144,17 @@ def load_updrs_part_ii(data_dir: Path) -> pd.DataFrame:
     if "EVENT_ID" in df.columns:
         df_out = df_out[df["EVENT_ID"] == "BL"]
 
-    print(f"✓ UPDRS Part II: {df_out['UPDRS_II'].notna().sum()}/{len(df_out)} non-null scores")
+    print(
+        f"✓ UPDRS Part II: {df_out['UPDRS_II'].notna().sum()}/{len(df_out)} non-null scores"
+    )
 
-    return df_out
+    return df_out, resolved.as_dict()
 
 
-def load_schwab_england(data_dir: Path) -> pd.DataFrame:
-    """
-    Load Schwab & England ADL scale.
+def load_schwab_england(
+    data_dir: Path, resolver: RawFileResolver
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Load Schwab & England ADL scale.
 
     Schwab & England is a 0-100 scale of functional capacity:
     - 100 = completely independent
@@ -141,13 +167,27 @@ def load_schwab_england(data_dir: Path) -> pd.DataFrame:
         DataFrame with PATNO and SCHWAB_ENGLAND score
     """
     # Schwab & England typically in UPDRS Part II file
-    updrs_ii_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "MDS_UPDRS_Part_II__Patient_Questionnaire_18Sep2025.csv"
+    resolved = resolver.resolve_latest(
+        "updrs_part_ii_for_schwab",
+        [
+            "MDS_UPDRS_Part_II__Patient_Questionnaire_*.csv",
+            "MDS-UPDRS_Part_II_Motor_Aspects__Online__*.csv",
+        ],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO", "EVENT_ID"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve UPDRS Part II (Schwab) file.")
+    updrs_ii_file = Path(resolved.path)
 
     print(f"\nLoading Schwab & England from: {updrs_ii_file}")
     df = pd.read_csv(updrs_ii_file)
 
     # Look for Schwab & England column
-    schwab_cols = [col for col in df.columns if "SCHWAB" in col.upper() or "SE_ADL" in col.upper()]
+    schwab_cols = [
+        col for col in df.columns if "SCHWAB" in col.upper() or "SE_ADL" in col.upper()
+    ]
 
     if not schwab_cols:
         print("⚠ No Schwab & England column found, returning NaN")
@@ -160,14 +200,17 @@ def load_schwab_england(data_dir: Path) -> pd.DataFrame:
     if "EVENT_ID" in df.columns:
         df_out = df_out[df["EVENT_ID"] == "BL"]
 
-    print(f"✓ Schwab & England: {df_out['SCHWAB_ENGLAND'].notna().sum()}/{len(df_out)} non-null scores")
+    print(
+        f"✓ Schwab & England: {df_out['SCHWAB_ENGLAND'].notna().sum()}/{len(df_out)} non-null scores"
+    )
 
-    return df_out
+    return df_out, resolved.as_dict()
 
 
-def load_pigd_tremor_scores(data_dir: Path) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Load PIGD and tremor subscores from UPDRS Part III.
+def load_pigd_tremor_scores(
+    data_dir: Path, resolver: RawFileResolver
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
+    """Load PIGD and tremor subscores from UPDRS Part III.
 
     PIGD (Postural Instability and Gait Difficulty):
     - Sum of items: arising from chair, gait, freezing of gait, postural stability, posture
@@ -181,10 +224,16 @@ def load_pigd_tremor_scores(data_dir: Path) -> Tuple[pd.DataFrame, pd.DataFrame]
     Returns:
         Tuple of (pigd_df, tremor_df)
     """
-    updrs_iii_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "MDS-UPDRS_Part_III_18Sep2025.csv"
-
-    if not updrs_iii_file.exists():
-        raise FileNotFoundError(f"UPDRS Part III file not found: {updrs_iii_file}")
+    resolved = resolver.resolve_latest(
+        "updrs_part_iii",
+        ["MDS-UPDRS_Part_III_*.csv"],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO", "EVENT_ID"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve UPDRS Part III file.")
+    updrs_iii_file = Path(resolved.path)
 
     print(f"\nLoading UPDRS Part III from: {updrs_iii_file}")
     df = pd.read_csv(updrs_iii_file)
@@ -222,10 +271,14 @@ def load_pigd_tremor_scores(data_dir: Path) -> Tuple[pd.DataFrame, pd.DataFrame]
         pigd_df = pigd_df[df["EVENT_ID"] == "BL"]
         tremor_df = tremor_df[df["EVENT_ID"] == "BL"]
 
-    print(f"✓ PIGD: {pigd_df['PIGD_SCORE'].notna().sum()}/{len(pigd_df)} non-null scores")
-    print(f"✓ Tremor: {tremor_df['TREMOR_SCORE'].notna().sum()}/{len(tremor_df)} non-null scores")
+    print(
+        f"✓ PIGD: {pigd_df['PIGD_SCORE'].notna().sum()}/{len(pigd_df)} non-null scores"
+    )
+    print(
+        f"✓ Tremor: {tremor_df['TREMOR_SCORE'].notna().sum()}/{len(tremor_df)} non-null scores"
+    )
 
-    return pigd_df, tremor_df
+    return pigd_df, tremor_df, resolved.as_dict()
 
 
 def merge_expanded_clinical(
@@ -234,10 +287,9 @@ def merge_expanded_clinical(
     schwab_england: pd.DataFrame,
     pigd: pd.DataFrame,
     tremor: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge all expanded clinical features with prodromal cohort.
+    data_dir: Path,
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge all expanded clinical features with prodromal cohort.
 
     Args:
         updrs_i: UPDRS Part I DataFrame
@@ -250,7 +302,12 @@ def merge_expanded_clinical(
     Returns:
         Tuple of (merged_df, coverage_stats)
     """
-    prodromal_file = data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    cohort_override = os.getenv("GIMAN_COHORT_CSV", "").strip()
+    prodromal_file = (
+        Path(cohort_override)
+        if cohort_override
+        else data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    )
     print(f"\nLoading prodromal cohort: {prodromal_file}")
     prodromal_df = pd.read_csv(prodromal_file)
     print(f"✓ Loaded {len(prodromal_df)} prodromal patients")
@@ -264,12 +321,18 @@ def merge_expanded_clinical(
         (updrs_ii, "UPDRS_II"),
         (schwab_england, "SCHWAB_ENGLAND"),
         (pigd, "PIGD_SCORE"),
-        (tremor, "TREMOR_SCORE")
+        (tremor, "TREMOR_SCORE"),
     ]:
         merged_df = merged_df.merge(df_feat, on="PATNO", how="left")
 
     # Compute coverage statistics
-    feature_cols = ["UPDRS_I", "UPDRS_II", "SCHWAB_ENGLAND", "PIGD_SCORE", "TREMOR_SCORE"]
+    feature_cols = [
+        "UPDRS_I",
+        "UPDRS_II",
+        "SCHWAB_ENGLAND",
+        "PIGD_SCORE",
+        "TREMOR_SCORE",
+    ]
     coverage_stats = {}
 
     print("\nExpanded clinical feature coverage in prodromal cohort:")
@@ -285,18 +348,18 @@ def merge_expanded_clinical(
     if avg_coverage < 95:
         print(f"⚠ WARNING: Coverage {avg_coverage:.1f}% below target 95%")
     else:
-        print(f"✓ Coverage exceeds target (95%)")
+        print("✓ Coverage exceeds target (95%)")
 
     return merged_df, coverage_stats
 
 
 def save_expanded_clinical(
     clinical_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    coverage_stats: dict[str, float],
+    source_files: list[dict[str, object]],
+    output_dir: Path,
 ) -> None:
-    """
-    Save expanded clinical features and metadata.
+    """Save expanded clinical features and metadata.
 
     Args:
         clinical_df: DataFrame with PATNO and expanded clinical features
@@ -320,14 +383,11 @@ def save_expanded_clinical(
         "coverage": coverage_stats,
         "average_coverage": np.mean(list(coverage_stats.values())),
         "target_coverage": 95.0,
-        "source_files": [
-            "MDS-UPDRS_Part_I_18Sep2025.csv",
-            "MDS_UPDRS_Part_II__Patient_Questionnaire_18Sep2025.csv",
-            "MDS-UPDRS_Part_III_18Sep2025.csv"
-        ]
+        "source_files": source_files,
     }
 
     import json
+
     metadata_file = output_dir / "expanded_clinical_features_metadata.json"
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
@@ -336,9 +396,7 @@ def save_expanded_clinical(
 
 
 def main() -> None:
-    """
-    Main execution function for expanded clinical feature extraction.
-    """
+    """Main execution function for expanded clinical feature extraction."""
     print("=" * 70)
     print("PHASE 8.2 WEEK 1: EXPANDED CLINICAL FEATURES EXTRACTION")
     print("=" * 70)
@@ -347,6 +405,7 @@ def main() -> None:
     base_dir = Path(__file__).resolve().parents[4]
     data_dir = base_dir / "data"
     output_dir = data_dir / "03_prodromal" / "enhanced"
+    resolver = RawFileResolver(default_raw_roots(base_dir))
 
     print(f"\nBase directory: {base_dir}")
     print(f"Data directory: {data_dir}")
@@ -357,10 +416,10 @@ def main() -> None:
     print("STEP 1: Load Expanded Clinical Features")
     print("-" * 70)
 
-    updrs_i = load_updrs_part_i(data_dir)
-    updrs_ii = load_updrs_part_ii(data_dir)
-    schwab_england = load_schwab_england(data_dir)
-    pigd, tremor = load_pigd_tremor_scores(data_dir)
+    updrs_i, updrs_i_src = load_updrs_part_i(data_dir, resolver)
+    updrs_ii, updrs_ii_src = load_updrs_part_ii(data_dir, resolver)
+    schwab_england, schwab_src = load_schwab_england(data_dir, resolver)
+    pigd, tremor, updrs_iii_src = load_pigd_tremor_scores(data_dir, resolver)
 
     # Merge with prodromal cohort
     print("\n" + "-" * 70)
@@ -374,13 +433,18 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 3: Save Results")
     print("-" * 70)
-    save_expanded_clinical(merged_df, coverage_stats, output_dir)
+    save_expanded_clinical(
+        merged_df,
+        coverage_stats,
+        [updrs_i_src, updrs_ii_src, schwab_src, updrs_iii_src],
+        output_dir,
+    )
 
     # Summary
     print("\n" + "=" * 70)
     print("EXPANDED CLINICAL FEATURE EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"✓ Extracted 5 expanded clinical features")
+    print("✓ Extracted 5 expanded clinical features")
     print(f"✓ Cohort size: {len(merged_df)} patients")
     print(f"✓ Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"✓ Output: {output_dir / 'expanded_clinical_features.csv'}")

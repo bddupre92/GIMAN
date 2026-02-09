@@ -53,26 +53,9 @@ biospecimen          0.750217          5      5        0        0
 
 ### Preprocessing Summary
 {
-  "n_rows": 1046,
-  "n_cols": 56,
-  "positive_events": 43,
-  "negative_events": 1003,
-  "median_time_to_event": 18.0
+  "n_rows": 195,
+  "n_cols": 40,
+  "positive_events": 11,
+  "negative_events": 184,
+  "median_time_to_event": 30.0
 }
-
-## External Validation Refresh (EV_20260207_PPMI_20250930_PRELIM)
-
-- External unified: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/data/04_external_validation/PPMI_20250930_PRELIM/external_unified.csv`
-- External data tensor: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/data/04_external_validation/PPMI_20250930_PRELIM/external_data.pt`
-- External metadata: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/data/04_external_validation/PPMI_20250930_PRELIM/external_metadata.json`
-- External metrics JSON: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/outputs/external_validation/PPMI_20250930_PRELIM/external_metrics.json`
-- External report: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/EXTERNAL_VALIDATION_REPORT_EV_20260207_PPMI_20250930_PRELIM.md`
-- External LaTeX tables: `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/EXTERNAL_VALIDATION_TABLES_EV_20260207_PPMI_20250930_PRELIM.tex`
-
-### External Figures
-- `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase2_roc_pr_curves.png`
-- `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase2_calibration_curves.png`
-- `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase2_decision_curve.png`
-- `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase2_subgroup_forest.png`
-- `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase3_internal_vs_external_panel.png`
-- `/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee_external/PPMI_20250930_PRELIM/phase3_transportability_gap.png`

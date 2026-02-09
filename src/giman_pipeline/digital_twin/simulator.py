@@ -7,7 +7,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 from .state import CounterfactualSpec, TwinSimulationResult, TwinState
 
@@ -36,7 +35,7 @@ def _load_models(in_features: int, device: torch.device):
         / "phase8_2_final_training_sota_run"
         / "giman_survival_final.pth"
     )
-    phase9_ckpt = (
+    legacy_phase9_ckpt = (
         root
         / "outputs"
         / "phase9_neuro_fuzzy_sota_run_from50ckpt"
@@ -47,7 +46,9 @@ def _load_models(in_features: int, device: torch.device):
     if phase8_ckpt.exists():
         try:
             surv = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128).to(device)
-            surv_state = torch.load(phase8_ckpt, map_location=device, weights_only=False)
+            surv_state = torch.load(
+                phase8_ckpt, map_location=device, weights_only=False
+            )
             surv.load_state_dict(surv_state["model_state_dict"])
             surv.eval()
         except RuntimeError:
@@ -55,7 +56,38 @@ def _load_models(in_features: int, device: torch.device):
 
     gat = GIMANSurvivalGAT(in_features=in_features, hidden_dim=128)
     nf = NeuroFuzzyGIMAN(gat, num_classes=2, num_rules=32).to(device)
-    nf.load_state_dict(torch.load(phase9_ckpt, map_location=device, weights_only=False))
+    phase9_candidates: list[Path] = []
+    phase9_root = root / "outputs" / "phase9_neuro_fuzzy"
+    if phase9_root.exists():
+        phase9_candidates.extend(
+            sorted(
+                phase9_root.glob("**/neuro_fuzzy_best.pth"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
+        )
+    phase9_candidates.extend(
+        [
+            root / "outputs" / "phase9_neuro_fuzzy_sota_run" / "neuro_fuzzy_best.pth",
+            root / "outputs" / "phase9_neuro_fuzzy" / "neuro_fuzzy_best.pth",
+            legacy_phase9_ckpt,
+        ]
+    )
+    loaded_phase9 = None
+    for ckpt in phase9_candidates:
+        if not ckpt.exists():
+            continue
+        try:
+            state = torch.load(ckpt, map_location=device, weights_only=False)
+            nf.load_state_dict(state)
+            loaded_phase9 = ckpt
+            break
+        except RuntimeError:
+            continue
+    if loaded_phase9 is None:
+        raise RuntimeError(
+            f"No compatible phase9 neuro-fuzzy checkpoint found for in_features={in_features}"
+        )
     nf.eval()
     return surv, nf
 

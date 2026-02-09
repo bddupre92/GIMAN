@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Week 1: Genetic Features Extraction
+"""Phase 8.2 Week 1: Genetic Features Extraction
 
 Purpose:
     Extract genetic risk factors from PPMI genetic consensus data for the
@@ -28,16 +27,18 @@ Date: October 12, 2025
 Phase: 8.2 Week 1
 """
 
+import os
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
+from raw_file_resolver import RawFileResolver, default_raw_roots
 
 
-def load_genetic_consensus(data_dir: Path) -> pd.DataFrame:
-    """
-    Load PPMI genetic consensus data.
+def load_genetic_consensus(
+    data_dir: Path, resolver: RawFileResolver
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Load PPMI genetic consensus data.
 
     Args:
         data_dir: Base data directory containing 00_raw folder
@@ -48,25 +49,26 @@ def load_genetic_consensus(data_dir: Path) -> pd.DataFrame:
     Raises:
         FileNotFoundError: If genetic consensus file not found
     """
-    genetic_file = data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "iu_genetic_consensus_20250515_18Sep2025.csv"
-
-    if not genetic_file.exists():
-        raise FileNotFoundError(
-            f"Genetic consensus file not found: {genetic_file}\n"
-            f"Expected in: {genetic_file.parent}\n"
-            f"Please ensure PPMI genetic data is downloaded."
-        )
+    resolved = resolver.resolve_latest(
+        "genetic_consensus",
+        ["iu_genetic_consensus_*.csv"],
+        required=True,
+        allow_empty=False,
+        required_columns=["PATNO"],
+    )
+    if resolved is None:
+        raise RuntimeError("Failed to resolve genetic consensus file.")
+    genetic_file = Path(resolved.path)
 
     print(f"Loading genetic data from: {genetic_file}")
     df = pd.read_csv(genetic_file)
     print(f"✓ Loaded {len(df)} patients with genetic data")
 
-    return df
+    return df, resolved.as_dict()
 
 
 def extract_lrrk2_status(genetic_df: pd.DataFrame) -> pd.Series:
-    """
-    Extract LRRK2 mutation status.
+    """Extract LRRK2 mutation status.
 
     LRRK2 G2019S is the most common PD-associated mutation.
     Look for columns: LRRK2, LRRK2_G2019S, or similar.
@@ -107,8 +109,7 @@ def extract_lrrk2_status(genetic_df: pd.DataFrame) -> pd.Series:
 
 
 def extract_gba_status(genetic_df: pd.DataFrame) -> pd.Series:
-    """
-    Extract GBA mutation status.
+    """Extract GBA mutation status.
 
     GBA variants (e.g., N370S, L444P) increase PD risk.
 
@@ -144,8 +145,7 @@ def extract_gba_status(genetic_df: pd.DataFrame) -> pd.Series:
 
 
 def extract_apoe_status(genetic_df: pd.DataFrame) -> pd.Series:
-    """
-    Extract APOE ε4 carrier status.
+    """Extract APOE ε4 carrier status.
 
     APOE ε4 allele associated with cognitive decline in PD.
 
@@ -185,14 +185,15 @@ def extract_apoe_status(genetic_df: pd.DataFrame) -> pd.Series:
     n_noncarrier = (apoe_status == 0).sum()
     n_unknown = (apoe_status == 2).sum()
 
-    print(f"  APOE ε4: {n_carrier} carriers, {n_noncarrier} non-carriers, {n_unknown} unknown")
+    print(
+        f"  APOE ε4: {n_carrier} carriers, {n_noncarrier} non-carriers, {n_unknown} unknown"
+    )
 
     return apoe_status
 
 
 def extract_snca_status(genetic_df: pd.DataFrame) -> pd.Series:
-    """
-    Extract SNCA mutation status.
+    """Extract SNCA mutation status.
 
     SNCA (α-synuclein gene) mutations are rare but highly penetrant.
 
@@ -228,13 +229,9 @@ def extract_snca_status(genetic_df: pd.DataFrame) -> pd.Series:
 
 
 def compute_genetic_risk_score(
-    lrrk2: pd.Series,
-    gba: pd.Series,
-    apoe: pd.Series,
-    snca: pd.Series
+    lrrk2: pd.Series, gba: pd.Series, apoe: pd.Series, snca: pd.Series
 ) -> pd.Series:
-    """
-    Compute composite genetic risk score.
+    """Compute composite genetic risk score.
 
     Score = sum of positive variants (0-4).
     Unknown variants (value=2) not counted toward score.
@@ -263,11 +260,9 @@ def compute_genetic_risk_score(
 
 
 def merge_with_prodromal_cohort(
-    genetic_features: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge genetic features with prodromal cohort (n=381).
+    genetic_features: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge genetic features with prodromal cohort (n=381).
 
     Args:
         genetic_features: DataFrame with PATNO and genetic features
@@ -278,7 +273,12 @@ def merge_with_prodromal_cohort(
         - merged_df: Prodromal cohort with genetic features
         - coverage_stats: Dict of feature_name -> coverage percentage
     """
-    prodromal_file = data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    cohort_override = os.getenv("GIMAN_COHORT_CSV", "").strip()
+    prodromal_file = (
+        Path(cohort_override)
+        if cohort_override
+        else data_dir / "prodromal_cohort" / "prodromal_survival_data.csv"
+    )
 
     if not prodromal_file.exists():
         raise FileNotFoundError(
@@ -291,11 +291,7 @@ def merge_with_prodromal_cohort(
     print(f"✓ Loaded {len(prodromal_df)} prodromal patients")
 
     # Merge genetic features
-    merged_df = prodromal_df[["PATNO"]].merge(
-        genetic_features,
-        on="PATNO",
-        how="left"
-    )
+    merged_df = prodromal_df[["PATNO"]].merge(genetic_features, on="PATNO", how="left")
 
     # Compute coverage statistics
     feature_cols = ["LRRK2", "GBA", "APOE_E4", "SNCA", "GENETIC_RISK_SCORE"]
@@ -319,18 +315,18 @@ def merge_with_prodromal_cohort(
     if avg_coverage < 85:
         print(f"⚠ WARNING: Coverage {avg_coverage:.1f}% below target 85%")
     else:
-        print(f"✓ Coverage exceeds target (85%)")
+        print("✓ Coverage exceeds target (85%)")
 
     return merged_df, coverage_stats
 
 
 def save_genetic_features(
     genetic_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    coverage_stats: dict[str, float],
+    source_file: dict[str, object],
+    output_dir: Path,
 ) -> None:
-    """
-    Save genetic features and metadata.
+    """Save genetic features and metadata.
 
     Args:
         genetic_df: DataFrame with PATNO and genetic features
@@ -354,10 +350,11 @@ def save_genetic_features(
         "coverage": coverage_stats,
         "average_coverage": np.mean(list(coverage_stats.values())),
         "target_coverage": 85.0,
-        "source_file": "GIMAN/ppmi_data_csv/iu_genetic_consensus_20250515_18Sep2025.csv"
+        "source_file": source_file,
     }
 
     import json
+
     metadata_file = output_dir / "genetic_features_metadata.json"
     with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
@@ -366,9 +363,7 @@ def save_genetic_features(
 
 
 def main() -> None:
-    """
-    Main execution function for genetic feature extraction.
-    """
+    """Main execution function for genetic feature extraction."""
     print("=" * 70)
     print("PHASE 8.2 WEEK 1: GENETIC FEATURES EXTRACTION")
     print("=" * 70)
@@ -377,6 +372,7 @@ def main() -> None:
     base_dir = Path(__file__).resolve().parents[4]
     data_dir = base_dir / "data"
     output_dir = data_dir / "03_prodromal" / "enhanced"
+    resolver = RawFileResolver(default_raw_roots(base_dir))
 
     print(f"\nBase directory: {base_dir}")
     print(f"Data directory: {data_dir}")
@@ -386,7 +382,7 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 1: Load Genetic Consensus Data")
     print("-" * 70)
-    genetic_df = load_genetic_consensus(data_dir)
+    genetic_df, genetic_src = load_genetic_consensus(data_dir, resolver)
 
     # Extract features
     print("\n" + "-" * 70)
@@ -409,14 +405,16 @@ def main() -> None:
     risk_score = compute_genetic_risk_score(lrrk2, gba, apoe_e4, snca)
 
     # Combine features
-    genetic_features = pd.DataFrame({
-        "PATNO": genetic_df["PATNO"],
-        "LRRK2": lrrk2,
-        "GBA": gba,
-        "APOE_E4": apoe_e4,
-        "SNCA": snca,
-        "GENETIC_RISK_SCORE": risk_score
-    })
+    genetic_features = pd.DataFrame(
+        {
+            "PATNO": genetic_df["PATNO"],
+            "LRRK2": lrrk2,
+            "GBA": gba,
+            "APOE_E4": apoe_e4,
+            "SNCA": snca,
+            "GENETIC_RISK_SCORE": risk_score,
+        }
+    )
 
     # Merge with prodromal cohort
     print("\n" + "-" * 70)
@@ -428,13 +426,13 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 4: Save Results")
     print("-" * 70)
-    save_genetic_features(merged_df, coverage_stats, output_dir)
+    save_genetic_features(merged_df, coverage_stats, genetic_src, output_dir)
 
     # Summary
     print("\n" + "=" * 70)
     print("GENETIC FEATURE EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"✓ Extracted 5 genetic features")
+    print("✓ Extracted 5 genetic features")
     print(f"✓ Cohort size: {len(merged_df)} patients")
     print(f"✓ Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"✓ Output: {output_dir / 'genetic_features.csv'}")
