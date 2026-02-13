@@ -99,15 +99,19 @@ class MaskedValueExperiment:
         edge_weight: torch.Tensor | None,
         scaler: object | None = None,
     ) -> dict[str, np.ndarray]:
-        """Run the GIMIN model on corrupted data.
+        """Run the GIMIN model on corrupted data with MC dropout uncertainty.
+
+        Performs multiple stochastic forward passes with dropout enabled
+        and combines epistemic (MC) and aleatoric (heteroscedastic)
+        uncertainty via the law of total variance.
 
         If a scaler is provided, input features are normalized before
-        the model forward pass and the output is inverse-transformed
-        back to the original clinical scale.
+        the model forward pass and both means and variances are
+        inverse-transformed back to the original clinical scale.
 
         Returns:
-            Dictionary with ``"imputed"``, and optionally
-            ``"pred_mean"``, ``"pred_std"`` arrays.
+            Dictionary with ``"imputed"``, ``"pred_mean"``,
+            ``"pred_std"``, ``"epistemic_std"``, ``"aleatoric_std"``.
         """
         device = next(model.parameters()).device
         feat_t = torch.from_numpy(features.astype(np.float32)).to(device)
@@ -132,7 +136,7 @@ class MaskedValueExperiment:
         )
         of = torch.ones(ei.shape[1], device=device)
 
-        # Get modality_dims from config or model attribute
+        # Get modality_dims from config or model attribute.
         if self.config is not None:
             modality_dims = self.config.modality_dims
         elif hasattr(model, "modality_dims"):
@@ -149,35 +153,71 @@ class MaskedValueExperiment:
             "modality_dims": modality_dims,
         }
 
+        # Number of MC samples (use config if available).
+        mc_samples = 50
+        if self.config is not None:
+            mc_samples = getattr(self.config.evaluation, "mc_samples", 50)
+
+        # MC dropout: enable only dropout layers, keep norms in eval.
         model.eval()
+        for module in model.modules():
+            if isinstance(module, (torch.nn.Dropout, torch.nn.Dropout2d)):
+                module.train()
+
+        mc_means: list[np.ndarray] = []
+        mc_aleatoric_vars: list[np.ndarray] = []
+
         with torch.no_grad():
-            output = model(**model_input)
+            for _ in range(mc_samples):
+                output = model(**model_input)
+                mean_norm_t = output.get("pred_mean", output["imputed"])
+                mean_t = output["imputed"]
+                if scaler is not None:
+                    mean_t = scaler.inverse_transform(mean_t)
+                mc_means.append(mean_t.cpu().numpy())
 
-        imputed_t = output["imputed"]
+                if "pred_log_var" in output:
+                    log_var_t = output["pred_log_var"]
+                    aleatoric_var_norm = torch.exp(log_var_t)
+                    if scaler is not None:
+                        aleatoric_var_orig = scaler.inverse_transform_variance(
+                            aleatoric_var_norm,
+                            mean_normalized=mean_norm_t,
+                        )
+                    else:
+                        aleatoric_var_orig = aleatoric_var_norm
+                    mc_aleatoric_vars.append(
+                        aleatoric_var_orig.cpu().numpy()
+                        if isinstance(aleatoric_var_orig, torch.Tensor)
+                        else aleatoric_var_orig
+                    )
 
-        # Inverse-transform back to clinical scale if scaler is available.
-        if scaler is not None:
-            imputed_t = scaler.inverse_transform(imputed_t)
+        model.eval()  # Restore full eval mode.
 
-        result: dict[str, np.ndarray] = {
-            "imputed": imputed_t.cpu().numpy()
-            if isinstance(imputed_t, torch.Tensor)
-            else imputed_t,
+        mc_stack = np.stack(mc_means, axis=0)  # (S, N, F)
+        pred_mean = mc_stack.mean(axis=0)
+
+        # Epistemic variance: Var[means across MC samples].
+        epistemic_var = mc_stack.var(axis=0)
+
+        # Aleatoric variance: E[predicted variance] across MC samples.
+        if mc_aleatoric_vars:
+            aleatoric_stack = np.stack(mc_aleatoric_vars, axis=0)
+            mean_aleatoric_var = aleatoric_stack.mean(axis=0)
+        else:
+            mean_aleatoric_var = np.zeros_like(pred_mean)
+
+        # Law of total variance: total = epistemic + aleatoric.
+        total_var = epistemic_var + mean_aleatoric_var
+        total_std = np.sqrt(np.maximum(total_var, 1e-8))
+
+        return {
+            "imputed": pred_mean,
+            "pred_mean": pred_mean,
+            "pred_std": total_std,
+            "epistemic_std": np.sqrt(np.maximum(epistemic_var, 1e-8)),
+            "aleatoric_std": np.sqrt(np.maximum(mean_aleatoric_var, 1e-8)),
         }
-        if "pred_mean" in output:
-            pred_mean_t = output["pred_mean"]
-            if scaler is not None:
-                pred_mean_t = scaler.inverse_transform(pred_mean_t)
-            result["pred_mean"] = (
-                pred_mean_t.cpu().numpy()
-                if isinstance(pred_mean_t, torch.Tensor)
-                else pred_mean_t
-            )
-        if "pred_log_var" in output:
-            pred_std = np.exp(0.5 * output["pred_log_var"].cpu().numpy())
-            result["pred_std"] = pred_std
-
-        return result
 
     # ------------------------------------------------------------------
     # Baseline imputation

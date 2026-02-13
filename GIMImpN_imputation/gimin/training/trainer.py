@@ -92,6 +92,8 @@ class GIMINTrainer:
         self.criterion = GIMINLoss(
             lambda_dist=tp.lambda_dist,
             lambda_cross=tp.lambda_cross,
+            lambda_cal=getattr(tp, "lambda_cal", 0.01),
+            cal_warmup_epochs=getattr(tp, "cal_warmup_epochs", 50),
             cross_modal_pairs=cross_modal_pairs,
             binary_feature_indices=binary_indices,
         )
@@ -174,6 +176,7 @@ class GIMINTrainer:
         edge_index: torch.Tensor,
         edge_weight: torch.Tensor,
         overlap_frac: torch.Tensor | None = None,
+        epoch: int = 0,
     ) -> dict[str, float]:
         """Run one training epoch.
 
@@ -184,6 +187,8 @@ class GIMINTrainer:
             edge_weight: Edge weights, shape ``(E,)``.
             overlap_frac: Optional per-edge overlap fraction used by the
                 availability-gated message passing layers.
+            epoch: Current epoch number (0-indexed), passed to the loss
+                for calibration warm-up scheduling.
 
         Returns:
             Dictionary of per-component loss values for this epoch.
@@ -217,12 +222,13 @@ class GIMINTrainer:
 
         model_output = self.model(**model_input)
 
-        # Compute loss.
+        # Compute loss (pass epoch for calibration warm-up).
         loss_dict = self.criterion(
             model_output=model_output,
             true_values=features,
             target_mask=target_mask,
             observed_mask=mask,
+            epoch=epoch,
         )
 
         # Backward pass and optimise.
@@ -372,6 +378,7 @@ class GIMINTrainer:
                     edge_index=edge_index,
                     edge_weight=edge_weight,
                     overlap_frac=overlap_frac,
+                    epoch=epoch,
                 )
                 self.scheduler.step()
                 elapsed = time.time() - t0
@@ -381,15 +388,19 @@ class GIMINTrainer:
 
                 # Logging.
                 if (epoch + 1) % 10 == 0 or epoch == round_start_epoch:
+                    cal_str = ""
+                    if "calibration" in epoch_losses:
+                        cal_str = f"  cal={epoch_losses['calibration']:.4f}"
                     logger.info(
                         "Epoch %3d/%d  |  loss=%.4f  recon=%.4f  "
-                        "dist=%.4f  cross=%.4f  |  lr=%.2e  |  %.1fs",
+                        "dist=%.4f  cross=%.4f%s  |  lr=%.2e  |  %.1fs",
                         epoch + 1,
                         num_epochs,
                         epoch_losses["total"],
                         epoch_losses["reconstruction"],
                         epoch_losses["distribution"],
                         epoch_losses["cross_modal"],
+                        cal_str,
                         self.optimizer.param_groups[0]["lr"],
                         elapsed,
                     )

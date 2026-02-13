@@ -266,9 +266,14 @@ def run_uncertainty_analysis(
     )
     of = torch.ones(ei.shape[1], device=device)
 
-    # MC dropout: multiple forward passes
-    model.train()  # Enable dropout
-    mc_predictions = []
+    # MC dropout: enable ONLY dropout layers (keep batchnorm/layernorm in eval)
+    model.eval()
+    for module in model.modules():
+        if isinstance(module, (torch.nn.Dropout, torch.nn.Dropout2d)):
+            module.train()
+
+    mc_means: list[np.ndarray] = []
+    mc_aleatoric_vars: list[np.ndarray] = []
 
     with torch.no_grad():
         for _ in range(mc_samples):
@@ -280,16 +285,43 @@ def run_uncertainty_analysis(
                 overlap_frac=of,
                 modality_dims=config.modality_dims,
             )
+            # Collect inverse-transformed mean for epistemic variance
+            mean_norm_t = output.get("pred_mean", output["imputed"])
             imputed_t = output["imputed"]
             if scaler is not None:
                 imputed_t = scaler.inverse_transform(imputed_t)
-            mc_predictions.append(imputed_t.cpu().numpy())
+            mc_means.append(imputed_t.cpu().numpy())
+
+            # Collect aleatoric variance (from heteroscedastic decoder)
+            if "pred_log_var" in output:
+                log_var_t = output["pred_log_var"]
+                aleatoric_var_norm = torch.exp(
+                    torch.clamp(log_var_t, min=-10.0, max=10.0)
+                )
+                if scaler is not None:
+                    aleatoric_var_orig = scaler.inverse_transform_variance(
+                        aleatoric_var_norm,
+                        mean_normalized=mean_norm_t,
+                    )
+                else:
+                    aleatoric_var_orig = aleatoric_var_norm
+                mc_aleatoric_vars.append(aleatoric_var_orig.cpu().numpy())
 
     model.eval()
 
-    mc_stack = np.stack(mc_predictions, axis=0)  # (S, N, F)
+    # Law of total variance: Var_total = E[Var_aleatoric] + Var[Mean_epistemic]
+    mc_stack = np.stack(mc_means, axis=0)  # (S, N, F)
     pred_mean = mc_stack.mean(axis=0)
-    pred_std = mc_stack.std(axis=0)
+    epistemic_var = mc_stack.var(axis=0)
+
+    if mc_aleatoric_vars:
+        aleatoric_stack = np.stack(mc_aleatoric_vars, axis=0)  # (S, N, F)
+        mean_aleatoric_var = aleatoric_stack.mean(axis=0)
+        total_var = epistemic_var + mean_aleatoric_var
+    else:
+        total_var = epistemic_var
+
+    pred_std = np.sqrt(np.maximum(total_var, 1e-8))
 
     # Calibration analysis at held-out positions
     target_positions = target_mask.astype(bool)
@@ -328,12 +360,33 @@ def run_uncertainty_analysis(
             }
         col_start = col_end
 
+    # Uncertainty decomposition diagnostics
+    epistemic_std = np.sqrt(np.maximum(epistemic_var, 1e-8))
+    if mc_aleatoric_vars:
+        aleatoric_std = np.sqrt(np.maximum(mean_aleatoric_var, 1e-8))
+        logger.info(
+            "  Uncertainty decomposition: epistemic=%.4f, aleatoric=%.4f, total=%.4f",
+            epistemic_std[target_positions].mean(),
+            aleatoric_std[target_positions].mean(),
+            std_at_target.mean(),
+        )
+    else:
+        aleatoric_std = None
+        logger.info(
+            "  Uncertainty (epistemic only): total_std=%.4f",
+            std_at_target.mean(),
+        )
+
     results = {
         "mc_samples": mc_samples,
         "n_target_positions": int(target_positions.sum()),
         "calibration": calibration,
         "modality_uncertainty": modality_uncertainty,
         "overall_mean_std": float(std_at_target.mean()),
+        "epistemic_mean_std": float(epistemic_std[target_positions].mean()),
+        "aleatoric_mean_std": float(aleatoric_std[target_positions].mean())
+        if aleatoric_std is not None
+        else None,
     }
 
     return results
@@ -677,8 +730,8 @@ def create_figures(analysis_results, fig_dir, logger):
         ax.set_ylabel("Observed Coverage")
         ax.set_title("Uncertainty Calibration Diagram")
         ax.legend()
-        ax.set_xlim(0.4, 1.0)
-        ax.set_ylim(0.4, 1.0)
+        ax.set_xlim(0.0, 1.0)
+        ax.set_ylim(0.0, 1.0)
         plt.tight_layout()
         plt.savefig(fig_dir / "calibration_diagram.png", dpi=150)
         plt.close()

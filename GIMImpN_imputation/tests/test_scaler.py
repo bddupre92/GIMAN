@@ -260,3 +260,113 @@ class TestBuildScalerFromConfig:
         # (demographics=2 features, then motor starts at index 2)
         for i in range(2, 7):
             assert scaler.strategies[i] == RANKGAUSS
+
+
+class TestInverseTransformVariance:
+    """Tests for ModalityAwareScaler.inverse_transform_variance()."""
+
+    def test_zscore_variance_scaling(self, rng):
+        """Zscore: var_orig = var_norm * std^2."""
+        n_samples = 100
+        features = rng.standard_normal((n_samples, 1)) * 10 + 50
+        mask = np.ones((n_samples, 1))
+
+        scaler = ModalityAwareScaler(strategies={0: ZSCORE})
+        scaler.fit(features, mask)
+
+        # A unit variance in normalized space should map to std^2.
+        var_norm = torch.ones(n_samples, 1)
+        var_orig = scaler.inverse_transform_variance(var_norm)
+
+        expected = scaler._std[0] ** 2
+        np.testing.assert_allclose(var_orig.numpy(), expected, rtol=1e-5)
+
+    def test_zscore_consistency_with_inverse_transform(self, rng):
+        """For zscore, check span of inverse_transform(mean +/- std)
+        matches sqrt(inverse_transform_variance(var))."""
+        n_samples = 50
+        features = rng.standard_normal((n_samples, 1)) * 10 + 50
+        mask = np.ones((n_samples, 1))
+
+        scaler = ModalityAwareScaler(strategies={0: ZSCORE})
+        scaler.fit(features, mask)
+
+        transformed = scaler.transform(features, mask)
+        mean_norm = transformed.numpy()
+
+        # Compute +-1 std span in original scale.
+        plus_1 = scaler.inverse_transform(
+            torch.from_numpy(mean_norm + 1.0).float()
+        ).numpy()
+        minus_1 = scaler.inverse_transform(
+            torch.from_numpy(mean_norm - 1.0).float()
+        ).numpy()
+        span_orig = (plus_1 - minus_1) / 2.0  # half-span = 1 std in orig
+
+        # Compare with inverse_transform_variance.
+        var_norm = np.ones_like(mean_norm)
+        var_orig = scaler.inverse_transform_variance(
+            torch.from_numpy(var_norm).float(),
+            mean_normalized=torch.from_numpy(mean_norm).float(),
+        ).numpy()
+        std_orig = np.sqrt(var_orig)
+
+        np.testing.assert_allclose(std_orig, np.abs(span_orig), rtol=1e-4)
+
+    def test_log_zscore_variance_scaling(self, rng):
+        """Log-zscore variance should be scaled by Jacobian^2."""
+        n_samples = 100
+        features = np.exp(rng.standard_normal((n_samples, 1))) * 1000
+        mask = np.ones((n_samples, 1))
+
+        scaler = ModalityAwareScaler(strategies={0: LOG_ZSCORE})
+        scaler.fit(features, mask)
+
+        transformed = scaler.transform(features, mask)
+        mean_norm = transformed
+
+        var_norm = torch.ones(n_samples, 1) * 0.01  # small variance
+        var_orig = scaler.inverse_transform_variance(
+            var_norm, mean_normalized=mean_norm
+        )
+
+        # Variance should be positive and not trivially zero.
+        assert (var_orig.numpy() > 0).all()
+        # Variance should vary with the mean (larger mean -> larger var).
+        assert var_orig.numpy().std() > 0
+
+    def test_none_strategy_passthrough(self, rng):
+        """'none' strategy should return variance unchanged."""
+        n_samples = 20
+        var_norm = rng.random((n_samples, 1)).astype(np.float32)
+        mask = np.ones((n_samples, 1))
+        features = rng.standard_normal((n_samples, 1))
+
+        scaler = ModalityAwareScaler(strategies={0: NONE})
+        scaler.fit(features, mask)
+
+        var_orig = scaler.inverse_transform_variance(torch.from_numpy(var_norm))
+        np.testing.assert_allclose(var_orig.numpy(), var_norm, atol=1e-6)
+
+    def test_rankgauss_variance_positive(self, rng):
+        """RankGauss variance should be positive for positive input."""
+        n_samples = 200
+        features = rng.standard_normal((n_samples, 1)) * 50
+        mask = np.ones((n_samples, 1))
+
+        scaler = ModalityAwareScaler(strategies={0: RANKGAUSS})
+        scaler.fit(features, mask)
+
+        transformed = scaler.transform(features, mask)
+        var_norm = torch.ones(n_samples, 1) * 0.1
+        var_orig = scaler.inverse_transform_variance(
+            var_norm, mean_normalized=transformed
+        )
+
+        assert (var_orig.numpy() > 0).all()
+
+    def test_unfitted_raises(self):
+        """inverse_transform_variance should raise if not fitted."""
+        scaler = ModalityAwareScaler()
+        with pytest.raises(RuntimeError, match="not been fitted"):
+            scaler.inverse_transform_variance(torch.ones(5, 2))

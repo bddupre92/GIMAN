@@ -168,7 +168,13 @@ class TestSingleTrainEpoch:
             overlap_frac=synthetic_data["overlap_frac"],
         )
 
-        required_keys = {"total", "reconstruction", "distribution", "cross_modal"}
+        required_keys = {
+            "total",
+            "reconstruction",
+            "distribution",
+            "cross_modal",
+            "calibration",
+        }
         assert required_keys == set(losses.keys()), (
             f"Missing keys: {required_keys - set(losses.keys())}"
         )

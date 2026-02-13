@@ -284,35 +284,75 @@ class GIMINImputer:
             }
 
         # MC dropout: multiple stochastic forward passes.
-        self.model.train()  # Enable dropout.
-        mc_predictions: list[np.ndarray] = []
-        last_log_var: np.ndarray | None = None
+        # Collect both inverse-transformed means AND aleatoric variances
+        # for every MC sample, then combine via law of total variance:
+        #   total_var = E[aleatoric_var] + Var[mc_means]
+        self.model.eval()
+        # Enable only dropout layers (keep batchnorm/layernorm in eval).
+        for module in self.model.modules():
+            if isinstance(module, (torch.nn.Dropout, torch.nn.Dropout2d)):
+                module.train()
+
+        mc_means: list[np.ndarray] = []
+        mc_aleatoric_vars: list[np.ndarray] = []
 
         with torch.no_grad():
             for _ in range(self.mc_samples):
                 output = self.model(**model_kwargs)
-                imputed_t = output["imputed"]
+                # Get the normalized mean for Jacobian computation.
+                mean_norm_t = output.get("pred_mean", output["imputed"])
+                # Inverse-transform the predicted mean to original scale.
+                mean_t = output["imputed"]
                 if self.scaler is not None:
-                    imputed_t = self.scaler.inverse_transform(imputed_t)
-                mc_predictions.append(imputed_t.cpu().numpy())
+                    mean_t = self.scaler.inverse_transform(mean_t)
+                mc_means.append(mean_t.cpu().numpy())
+
+                # Collect aleatoric variance for this sample.
                 if "pred_log_var" in output:
-                    last_log_var = output["pred_log_var"].cpu().numpy()
+                    log_var_t = output["pred_log_var"]
+                    aleatoric_var_norm = torch.exp(log_var_t)
+                    # Transform variance to original scale via Jacobian.
+                    if self.scaler is not None:
+                        aleatoric_var_orig = self.scaler.inverse_transform_variance(
+                            aleatoric_var_norm,
+                            mean_normalized=mean_norm_t,
+                        )
+                    else:
+                        aleatoric_var_orig = aleatoric_var_norm
+                    mc_aleatoric_vars.append(
+                        aleatoric_var_orig.cpu().numpy()
+                        if isinstance(aleatoric_var_orig, torch.Tensor)
+                        else aleatoric_var_orig
+                    )
 
-        self.model.eval()
+        self.model.eval()  # Restore full eval mode.
 
-        mc_stack = np.stack(mc_predictions, axis=0)  # (S, N, F)
-        pred_mean = mc_stack.mean(axis=0)
-        pred_std = mc_stack.std(axis=0)
+        mc_stack = np.stack(mc_means, axis=0)  # (S, N, F)
+        pred_mean = mc_stack.mean(axis=0)  # (N, F)
 
-        result: dict[str, np.ndarray] = {
+        # Epistemic variance: Var[means across MC samples].
+        epistemic_var = mc_stack.var(axis=0)  # (N, F)
+
+        # Aleatoric variance: E[predicted variance] across MC samples.
+        if mc_aleatoric_vars:
+            aleatoric_stack = np.stack(mc_aleatoric_vars, axis=0)
+            mean_aleatoric_var = aleatoric_stack.mean(axis=0)
+        else:
+            mean_aleatoric_var = np.zeros_like(pred_mean)
+
+        # Total variance via law of total variance.
+        total_var = epistemic_var + mean_aleatoric_var
+        total_std = np.sqrt(np.maximum(total_var, 1e-8))
+        epistemic_std = np.sqrt(np.maximum(epistemic_var, 1e-8))
+        aleatoric_std = np.sqrt(np.maximum(mean_aleatoric_var, 1e-8))
+
+        return {
             "imputed": pred_mean,
             "pred_mean": pred_mean,
-            "pred_std": pred_std,
+            "pred_std": total_std,
+            "epistemic_std": epistemic_std,
+            "aleatoric_std": aleatoric_std,
         }
-        if last_log_var is not None:
-            result["pred_log_var"] = last_log_var
-
-        return result
 
     # ------------------------------------------------------------------
     # DataFrame convenience

@@ -65,7 +65,9 @@ class TrainingParams:
     num_epochs: int = 200
     batch_mask_fraction: float = 0.2
     lambda_dist: float = 0.1
-    lambda_cross: float = 0.05
+    lambda_cross: float = 0.10
+    lambda_cal: float = 0.01
+    cal_warmup_epochs: int = 50
     early_stopping_patience: int = 30
 
 
@@ -141,10 +143,30 @@ class GIMINConfig:
     # 27:ENTORH_L 28:ENTORH_R 29:CING_L 30:CING_R 31:PRECEN_L 32:PRECEN_R
     cross_modal_pairs: list[list[int]] = field(
         default_factory=lambda: [
+            # --- Structure-function pairs (VOL <-> SBR) ---
             [7, 13],  # CAUDATE_L_VOL <-> CAUDATE_L_SBR
             [8, 14],  # CAUDATE_R_VOL <-> CAUDATE_R_SBR
             [9, 15],  # PUTAMEN_L_VOL <-> PUTAMEN_L_SBR
             [10, 16],  # PUTAMEN_R_VOL <-> PUTAMEN_R_SBR
+            # --- Bilateral symmetry: structural volumes ---
+            [7, 8],  # CAUDATE_L_VOL <-> CAUDATE_R_VOL
+            [9, 10],  # PUTAMEN_L_VOL <-> PUTAMEN_R_VOL
+            [11, 12],  # HIPPOCAMPUS_L_VOL <-> HIPPOCAMPUS_R_VOL
+            # --- Bilateral symmetry: SPECT SBR ---
+            [13, 14],  # CAUDATE_L_SBR <-> CAUDATE_R_SBR
+            [15, 16],  # PUTAMEN_L_SBR <-> PUTAMEN_R_SBR
+            # --- Bilateral symmetry: cortical thickness ---
+            [27, 28],  # ENTORHINAL_L_CTH <-> ENTORHINAL_R_CTH
+            [29, 30],  # CINGULATE_L_CTH <-> CINGULATE_R_CTH
+            [31, 32],  # PRECENTRAL_L_CTH <-> PRECENTRAL_R_CTH
+            # --- Biochemical relationship ---
+            [20, 22],  # TOTAL_TAU <-> PTAU181 (ptau is fraction of total)
+            # --- Anatomical adjacency (hippocampus-entorhinal co-atrophy) ---
+            [11, 27],  # HIPPOCAMPUS_L_VOL <-> ENTORHINAL_L_CTH
+            [12, 28],  # HIPPOCAMPUS_R_VOL <-> ENTORHINAL_R_CTH
+            # --- Motor-imaging (disease severity <-> dopamine) ---
+            [3, 15],  # NHY <-> PUTAMEN_L_SBR
+            [3, 16],  # NHY <-> PUTAMEN_R_SBR
         ]
     )
 

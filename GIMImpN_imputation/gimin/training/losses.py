@@ -1,6 +1,6 @@
 """Composite loss functions for GIMIN training.
 
-The total GIMIN training objective combines three complementary losses:
+The total GIMIN training objective combines four complementary losses:
 
 1. **Reconstruction loss** -- Gaussian negative log-likelihood computed only
    on artificially masked observed values (self-supervised signal).
@@ -8,10 +8,14 @@ The total GIMIN training objective combines three complementary losses:
    and observed marginal distributions, encouraging distributional fidelity.
 3. **Cross-modal consistency loss** -- MSE penalty between features that
    should agree across modalities (e.g., FreeSurfer vs. DICOM volumes).
+4. **Calibration loss** -- Differentiable penalty that encourages the
+   model's predicted uncertainty intervals to contain the correct fraction
+   of ground-truth values (warm-started after a configurable epoch).
 
 The losses are combined as:
 
     L_total = L_recon + lambda_dist * L_dist + lambda_cross * L_cross
+              + lambda_cal * L_cal
 """
 
 from __future__ import annotations
@@ -28,14 +32,19 @@ logger = logging.getLogger(__name__)
 class GIMINLoss(nn.Module):
     """Composite loss for GIMIN training.
 
-    Combines reconstruction, distribution-matching, and cross-modal
-    consistency objectives into a single differentiable loss.
+    Combines reconstruction, distribution-matching, cross-modal
+    consistency, and calibration objectives into a single
+    differentiable loss.
 
     Args:
         lambda_dist: Weight for the distribution-matching loss term.
             Default: 0.1.
         lambda_cross: Weight for the cross-modal consistency loss term.
-            Default: 0.05.
+            Default: 0.10.
+        lambda_cal: Weight for the calibration loss term. Default: 0.01.
+        cal_warmup_epochs: Number of epochs before calibration loss
+            activates (model learns reasonable predictions first).
+            Default: 50.
         cross_modal_pairs: Optional list of (feature_idx_a, feature_idx_b)
             tuples identifying pairs of features that should agree across
             modalities.  When ``None``, the cross-modal loss is skipped.
@@ -45,7 +54,9 @@ class GIMINLoss(nn.Module):
     def __init__(
         self,
         lambda_dist: float = 0.1,
-        lambda_cross: float = 0.05,
+        lambda_cross: float = 0.10,
+        lambda_cal: float = 0.01,
+        cal_warmup_epochs: int = 50,
         cross_modal_pairs: list[tuple[int, int]] | None = None,
         binary_feature_indices: list[int] | None = None,
         eps: float = 1e-6,
@@ -53,6 +64,8 @@ class GIMINLoss(nn.Module):
         super().__init__()
         self.lambda_dist = lambda_dist
         self.lambda_cross = lambda_cross
+        self.lambda_cal = lambda_cal
+        self.cal_warmup_epochs = cal_warmup_epochs
         self.cross_modal_pairs = cross_modal_pairs
         self.binary_feature_indices = set(binary_feature_indices or [])
         self.eps = eps
@@ -240,6 +253,79 @@ class GIMINLoss(nn.Module):
 
         return (total_mse / num_pairs).squeeze()
 
+    def calibration_loss(
+        self,
+        pred_mean: torch.Tensor,
+        pred_log_var: torch.Tensor,
+        true_values: torch.Tensor,
+        target_mask: torch.Tensor,
+        target_coverage: float = 0.50,
+        beta: float = 10.0,
+    ) -> torch.Tensor:
+        """Differentiable calibration penalty for uncertainty estimates.
+
+        Uses a soft sigmoid approximation to compute the fraction of
+        ground-truth values that fall within the predicted confidence
+        interval, then penalises deviation from the target coverage.
+
+        For a 50% confidence interval, the critical z-value is 0.6745.
+        The soft indicator uses ``sigmoid(beta * (z_crit - |z|))`` so
+        that gradient flows through the coverage computation.
+
+        .. math::
+
+            z_i = |y_i - \\hat{\\mu}_i| / \\sigma_i
+            \\text{soft\\_within}_i = \\sigma(\\beta \\cdot (z_{crit} - z_i))
+            \\hat{p} = \\frac{\\sum_i m_i \\cdot \\text{soft\\_within}_i}{\\sum_i m_i}
+            L_{cal} = (\\hat{p} - p_{target})^2
+
+        Args:
+            pred_mean: Predicted means, shape ``(N, F)``.
+            pred_log_var: Predicted log-variances, shape ``(N, F)``.
+            true_values: Ground-truth feature values, shape ``(N, F)``.
+            target_mask: Binary mask for evaluation positions, ``(N, F)``.
+            target_coverage: Desired coverage fraction. Default: 0.50.
+            beta: Sigmoid sharpness parameter. Default: 10.0.
+
+        Returns:
+            Scalar calibration loss tensor.
+        """
+        num_targets = target_mask.sum()
+        if num_targets < 1.0:
+            return (pred_mean * 0.0).sum()
+
+        # Only evaluate continuous features (exclude binary).
+        num_features = pred_mean.shape[1]
+        binary_cols = torch.zeros(
+            num_features, dtype=torch.bool, device=pred_mean.device
+        )
+        for idx in self.binary_feature_indices:
+            if idx < num_features:
+                binary_cols[idx] = True
+
+        cont_mask = target_mask.clone()
+        cont_mask[:, binary_cols] = 0.0
+        cont_count = cont_mask.sum()
+        if cont_count < 1.0:
+            return (pred_mean * 0.0).sum()
+
+        # Compute standardized residuals.
+        log_var = torch.clamp(pred_log_var, min=-10.0, max=10.0)
+        pred_std = torch.sqrt(torch.exp(log_var) + self.eps)
+        z_scores = torch.abs(true_values - pred_mean) / pred_std
+
+        # z_critical for 50% CI: quantile(0.75) of standard normal.
+        z_critical = 0.6745
+
+        # Soft indicator: 1 if z < z_critical, 0 otherwise.
+        soft_within = torch.sigmoid(beta * (z_critical - z_scores))
+
+        # Empirical coverage at masked positions.
+        empirical_coverage = (soft_within * cont_mask).sum() / cont_count
+
+        # Squared deviation from target coverage.
+        return (empirical_coverage - target_coverage) ** 2
+
     # ------------------------------------------------------------------
     # Combined forward
     # ------------------------------------------------------------------
@@ -250,6 +336,7 @@ class GIMINLoss(nn.Module):
         true_values: torch.Tensor,
         target_mask: torch.Tensor,
         observed_mask: torch.Tensor,
+        epoch: int = 0,
     ) -> dict[str, torch.Tensor]:
         """Compute the composite GIMIN loss.
 
@@ -265,11 +352,13 @@ class GIMINLoss(nn.Module):
                 (1 = was masked for self-supervision), shape ``(N, F)``.
             observed_mask: Binary observation mask for the *original* data
                 (1 = genuinely observed), shape ``(N, F)``.
+            epoch: Current training epoch (0-indexed). The calibration loss
+                is activated only after ``self.cal_warmup_epochs``.
 
         Returns:
             Dictionary with keys ``"total"``, ``"reconstruction"``,
-            ``"distribution"``, and ``"cross_modal"``, each mapping to a
-            scalar loss tensor.
+            ``"distribution"``, ``"cross_modal"``, and ``"calibration"``,
+            each mapping to a scalar loss tensor.
         """
         pred_mean = model_output["pred_mean"]
         pred_log_var = model_output["pred_log_var"]
@@ -290,12 +379,26 @@ class GIMINLoss(nn.Module):
         # 3. Cross-modal consistency loss.
         l_cross = self.cross_modal_consistency_loss(imputed)
 
+        # 4. Calibration loss (warm-started after cal_warmup_epochs).
+        if epoch >= self.cal_warmup_epochs and self.lambda_cal > 0:
+            l_cal = self.calibration_loss(
+                pred_mean, pred_log_var, true_values, target_mask
+            )
+        else:
+            l_cal = torch.zeros(1, device=pred_mean.device).squeeze()
+
         # Weighted combination.
-        l_total = l_recon + self.lambda_dist * l_dist + self.lambda_cross * l_cross
+        l_total = (
+            l_recon
+            + self.lambda_dist * l_dist
+            + self.lambda_cross * l_cross
+            + self.lambda_cal * l_cal
+        )
 
         return {
             "total": l_total,
             "reconstruction": l_recon,
             "distribution": l_dist,
             "cross_modal": l_cross,
+            "calibration": l_cal,
         }
