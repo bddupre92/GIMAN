@@ -24,7 +24,7 @@ import torch
 from ..config import GIMINConfig
 from ..utils import ArrayLike
 from ..utils import to_numpy as _to_numpy
-from . import metrics as M
+from . import metrics as M  # noqa: N812
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +97,13 @@ class MaskedValueExperiment:
         corrupted_mask: np.ndarray,
         edge_index: torch.Tensor | None,
         edge_weight: torch.Tensor | None,
+        scaler: object | None = None,
     ) -> dict[str, np.ndarray]:
         """Run the GIMIN model on corrupted data.
+
+        If a scaler is provided, input features are normalized before
+        the model forward pass and the output is inverse-transformed
+        back to the original clinical scale.
 
         Returns:
             Dictionary with ``"imputed"``, and optionally
@@ -107,6 +112,10 @@ class MaskedValueExperiment:
         device = next(model.parameters()).device
         feat_t = torch.from_numpy(features.astype(np.float32)).to(device)
         mask_t = torch.from_numpy(corrupted_mask.astype(np.float32)).to(device)
+
+        # Normalize input if scaler is available.
+        if scaler is not None:
+            feat_t = scaler.transform(feat_t, mask_t)
 
         # Zero out hidden positions.
         feat_t = feat_t * mask_t
@@ -144,11 +153,26 @@ class MaskedValueExperiment:
         with torch.no_grad():
             output = model(**model_input)
 
+        imputed_t = output["imputed"]
+
+        # Inverse-transform back to clinical scale if scaler is available.
+        if scaler is not None:
+            imputed_t = scaler.inverse_transform(imputed_t)
+
         result: dict[str, np.ndarray] = {
-            "imputed": output["imputed"].cpu().numpy(),
+            "imputed": imputed_t.cpu().numpy()
+            if isinstance(imputed_t, torch.Tensor)
+            else imputed_t,
         }
         if "pred_mean" in output:
-            result["pred_mean"] = output["pred_mean"].cpu().numpy()
+            pred_mean_t = output["pred_mean"]
+            if scaler is not None:
+                pred_mean_t = scaler.inverse_transform(pred_mean_t)
+            result["pred_mean"] = (
+                pred_mean_t.cpu().numpy()
+                if isinstance(pred_mean_t, torch.Tensor)
+                else pred_mean_t
+            )
         if "pred_log_var" in output:
             pred_std = np.exp(0.5 * output["pred_log_var"].cpu().numpy())
             result["pred_std"] = pred_std
@@ -265,6 +289,7 @@ class MaskedValueExperiment:
         edge_index: torch.Tensor | None = None,
         edge_weight: torch.Tensor | None = None,
         random_seed: int = 42,
+        scaler: object | None = None,
     ) -> dict[str, Any]:
         """Run the full masked-value reconstruction benchmark.
 
@@ -348,7 +373,12 @@ class MaskedValueExperiment:
                 # -- GIMIN model --
                 t0 = time.time()
                 model_result = self._impute_with_model(
-                    model, features_np, corrupted_mask, edge_index, edge_weight
+                    model,
+                    features_np,
+                    corrupted_mask,
+                    edge_index,
+                    edge_weight,
+                    scaler=scaler,
                 )
                 gimin_time = time.time() - t0
 

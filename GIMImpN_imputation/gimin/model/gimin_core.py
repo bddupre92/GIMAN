@@ -83,6 +83,7 @@ class GIMIN(nn.Module):
         num_gnn_layers: int = 3,
         num_heads: int = 4,
         mc_dropout: float = 0.1,
+        binary_feature_indices: list[int] | None = None,
     ) -> None:
         super().__init__()
         self.modality_dims = modality_dims
@@ -90,6 +91,7 @@ class GIMIN(nn.Module):
         self.embed_dim = embed_dim
         self.num_gnn_layers = num_gnn_layers
         self.mc_dropout = mc_dropout
+        self.binary_feature_indices = binary_feature_indices or []
 
         # ---- Component 1: Per-modality encoding ----
         self.encoder_bank = ModalityEncoderBank(
@@ -159,7 +161,6 @@ class GIMIN(nn.Module):
             modality_dims = self.modality_dims
 
         # --- Step 1: Split features by modality and compute per-modality masks ---
-        modality_features = self._split_by_modality(features, modality_dims)
         modality_masks = self._split_by_modality(mask, modality_dims)
 
         # --- Step 2: Encode each modality ---
@@ -183,9 +184,21 @@ class GIMIN(nn.Module):
         imputed_mean = decoded[:, : self.total_features]  # (N, F)
         imputed_log_var = decoded[:, self.total_features :]  # (N, F)
 
+        # --- Step 5b: Apply sigmoid to binary feature predictions ---
+        # For binary features, imputed_mean contains raw logits.  The loss
+        # uses these logits directly (BCE with logits).  For the blend step
+        # we need valid [0,1] probabilities.
+        if self.binary_feature_indices:
+            imputed_mean_for_blend = imputed_mean.clone()
+            for idx in self.binary_feature_indices:
+                if idx < self.total_features:
+                    imputed_mean_for_blend[:, idx] = torch.sigmoid(imputed_mean[:, idx])
+        else:
+            imputed_mean_for_blend = imputed_mean
+
         # --- Step 6: Blend observed values with predicted values ---
         # Keep original values where observed; use predicted mean where missing.
-        imputed_values = features * mask + imputed_mean * (1.0 - mask)
+        imputed_values = features * mask + imputed_mean_for_blend * (1.0 - mask)
 
         # --- Step 7: Clamp log_var to avoid numerical instability ---
         imputed_log_var = imputed_log_var.clamp(min=-10.0, max=10.0)

@@ -1,6 +1,10 @@
 # GIMIN - Default Configuration
 # Graph-based Iterative Multimodal Imputation Network
 # ===================================================
+# NOTE: Column order MUST match the parquet file exactly.
+# Zero-variance features dropped: LRRK2, GBA, APOE_E4, SNCA,
+# GENETIC_RISK_SCORE (all constant 0), NP1RTOT (no observations).
+# Total: 33 features (down from 39).
 
 data_paths:
   raw_data_dir: "../../data/00_raw"
@@ -48,19 +52,16 @@ incremental:
 
 random_seed: 42
 
+# Modality definitions -- order matches parquet column layout
 modalities:
-  - name: "genetic"
+  - name: "demographics"
     features:
-      - "LRRK2"
-      - "GBA"
-      - "APOE_E4"
-      - "SNCA"
-      - "GENETIC_RISK_SCORE"
+      - "SEX"
+      - "AGE_AT_VISIT"
 
   - name: "motor_clinical"
     features:
       - "NP3TOT"
-      - "NP1RTOT"
       - "NHY"
       - "PIGD_SCORE"
       - "TREMOR_SCORE"
@@ -107,7 +108,27 @@ modalities:
       - "PRECENTRAL_L_CTH"
       - "PRECENTRAL_R_CTH"
 
-  - name: "demographics"
-    features:
-      - "SEX"
-      - "AGE_AT_VISIT"
+# Per-modality normalization strategy
+normalization:
+  demographics: "zscore"
+  motor_clinical: "rankgauss"
+  structural_imaging: "log_zscore"
+  spect_sbr: "log_zscore"
+  csf_biomarkers: "rankgauss"
+  clinical_biomarkers: "rankgauss"
+  cortical_thickness: "log_zscore"
+
+# Binary (0/1) feature indices in the flat feature vector
+# SEX=0 (only true binary feature)
+binary_feature_indices: [0]
+
+# Cross-modal feature pairs for consistency loss
+# Indices for 33-feature vector:
+#  0:SEX 1:AGE 2:NP3TOT 3:NHY 4:PIGD 5:TREMOR 6:MCATOT
+#  7-12: structural_imaging  13-18: spect_sbr
+#  19-22: csf_biomarkers  23-26: clinical_biomarkers  27-32: cortical_thickness
+cross_modal_pairs:
+  - [7, 13]   # CAUDATE_L_VOL <-> CAUDATE_L_SBR
+  - [8, 14]   # CAUDATE_R_VOL <-> CAUDATE_R_SBR
+  - [9, 15]   # PUTAMEN_L_VOL <-> PUTAMEN_L_SBR
+  - [10, 16]  # PUTAMEN_R_VOL <-> PUTAMEN_R_SBR

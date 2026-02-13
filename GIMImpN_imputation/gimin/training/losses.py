@@ -20,7 +20,7 @@ import logging
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: N812
 
 logger = logging.getLogger(__name__)
 
@@ -47,12 +47,14 @@ class GIMINLoss(nn.Module):
         lambda_dist: float = 0.1,
         lambda_cross: float = 0.05,
         cross_modal_pairs: list[tuple[int, int]] | None = None,
+        binary_feature_indices: list[int] | None = None,
         eps: float = 1e-6,
     ) -> None:
         super().__init__()
         self.lambda_dist = lambda_dist
         self.lambda_cross = lambda_cross
         self.cross_modal_pairs = cross_modal_pairs
+        self.binary_feature_indices = set(binary_feature_indices or [])
         self.eps = eps
 
     # ------------------------------------------------------------------
@@ -66,22 +68,19 @@ class GIMINLoss(nn.Module):
         true_values: torch.Tensor,
         target_mask: torch.Tensor,
     ) -> torch.Tensor:
-        """Gaussian negative log-likelihood on artificially masked values.
+        """Heterogeneous reconstruction loss.
+
+        BCE for binary features, Gaussian NLL for continuous.
 
         Only positions where ``target_mask == 1`` contribute to the loss.
-        The heteroscedastic formulation allows the model to learn per-value
-        predictive variance.
-
-        .. math::
-
-            L = 0.5 \\cdot \\text{mean}\\bigl[
-                \\log(\\sigma^2) +
-                \\frac{(x_{\\text{true}} - x_{\\text{pred}})^2}{\\sigma^2}
-            \\bigr]
+        Binary features use BCE on sigmoid(pred_mean).  Continuous features
+        use the heteroscedastic Gaussian NLL formulation.
 
         Args:
-            pred_mean: Predicted mean values, shape ``(N, F)``.
+            pred_mean: Predicted mean values (raw logits for binary features),
+                shape ``(N, F)``.
             pred_log_var: Predicted log-variance, shape ``(N, F)``.
+                Ignored for binary features.
             true_values: Ground-truth feature values, shape ``(N, F)``.
             target_mask: Binary mask (1 = artificially masked position where
                 loss is computed), shape ``(N, F)``.
@@ -89,20 +88,50 @@ class GIMINLoss(nn.Module):
         Returns:
             Scalar loss tensor.
         """
-        # Clamp log-variance for numerical stability.
-        pred_log_var = torch.clamp(pred_log_var, min=-10.0, max=10.0)
-        variance = torch.exp(pred_log_var) + self.eps
-
-        squared_error = (true_values - pred_mean) ** 2
-        nll = 0.5 * (pred_log_var + squared_error / variance)
-
-        # Apply mask -- only compute loss on artificially masked entries.
-        masked_nll = nll * target_mask
         num_targets = target_mask.sum()
         if num_targets < 1.0:
             return (pred_mean * 0.0).sum()
 
-        return masked_nll.sum() / num_targets
+        num_features = pred_mean.shape[1]
+        total_loss = torch.zeros(1, device=pred_mean.device)
+
+        # Build boolean masks for binary vs continuous feature columns.
+        binary_cols = torch.zeros(
+            num_features, dtype=torch.bool, device=pred_mean.device
+        )
+        for idx in self.binary_feature_indices:
+            if idx < num_features:
+                binary_cols[idx] = True
+        continuous_cols = ~binary_cols
+
+        # --- Binary features: BCE loss on sigmoid(pred_mean) ---
+        if binary_cols.any() and self.binary_feature_indices:
+            bin_mask = target_mask[:, binary_cols]
+            bin_count = bin_mask.sum()
+            if bin_count > 0:
+                bin_targets = true_values[:, binary_cols]
+                bin_logits = pred_mean[:, binary_cols]
+                bce = F.binary_cross_entropy_with_logits(
+                    bin_logits, bin_targets, reduction="none"
+                )
+                total_loss = total_loss + (bce * bin_mask).sum() / bin_count
+
+        # --- Continuous features: Gaussian NLL ---
+        if continuous_cols.any():
+            cont_mask = target_mask[:, continuous_cols]
+            cont_count = cont_mask.sum()
+            if cont_count > 0:
+                cont_log_var = torch.clamp(
+                    pred_log_var[:, continuous_cols], min=-10.0, max=10.0
+                )
+                variance = torch.exp(cont_log_var) + self.eps
+                squared_error = (
+                    true_values[:, continuous_cols] - pred_mean[:, continuous_cols]
+                ) ** 2
+                nll = 0.5 * (cont_log_var + squared_error / variance)
+                total_loss = total_loss + (nll * cont_mask).sum() / cont_count
+
+        return total_loss.squeeze()
 
     def distribution_loss(
         self,

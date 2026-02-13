@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 
@@ -74,6 +75,7 @@ class GIMINImputer:
         # Instantiate or use the provided model.
         if model is not None:
             self.model = model.to(self.device)
+            self.scaler = None
         else:
             self.model = self._load_model(model_path, config)
 
@@ -112,8 +114,9 @@ class GIMINImputer:
             num_gnn_layers=config.model.num_gnn_layers,
             num_heads=config.model.num_heads,
             mc_dropout=config.model.mc_dropout_rate,
+            binary_feature_indices=getattr(config, "binary_feature_indices", None),
         )
-        checkpoint = torch.load(filepath, map_location=self.device, weights_only=True)
+        checkpoint = torch.load(filepath, map_location=self.device, weights_only=False)
 
         # Support both full-checkpoint and state-dict-only formats.
         if "model_state_dict" in checkpoint:
@@ -123,6 +126,17 @@ class GIMINImputer:
 
         model = model.to(self.device)
         model.eval()
+
+        # Load scaler from checkpoint if present.
+        if isinstance(checkpoint, dict) and "scaler_state_dict" in checkpoint:
+            from ..data.scaler import ModalityAwareScaler
+
+            self.scaler = ModalityAwareScaler()
+            self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
+            logger.info("Loaded scaler from checkpoint.")
+        else:
+            self.scaler = None
+
         logger.info("Loaded GIMIN model from %s", filepath)
         return model
 
@@ -237,6 +251,10 @@ class GIMINImputer:
         ei = ei.to(self.device)
         ew = ew.to(self.device) if ew is not None else None
 
+        # Normalize input if scaler is available.
+        if self.scaler is not None:
+            features_t = self.scaler.transform(features_t, mask_t)
+
         model_kwargs: dict[str, Any] = {
             "features": features_t,
             "mask": mask_t,
@@ -254,9 +272,15 @@ class GIMINImputer:
             with torch.no_grad():
                 output = self.model(**model_kwargs)
 
+            imputed_t = output["imputed"]
+            pred_mean_t = output["pred_mean"]
+            if self.scaler is not None:
+                imputed_t = self.scaler.inverse_transform(imputed_t)
+                pred_mean_t = self.scaler.inverse_transform(pred_mean_t)
+
             return {
-                "imputed": output["imputed"].cpu().numpy(),
-                "pred_mean": output["pred_mean"].cpu().numpy(),
+                "imputed": imputed_t.cpu().numpy(),
+                "pred_mean": pred_mean_t.cpu().numpy(),
             }
 
         # MC dropout: multiple stochastic forward passes.
@@ -267,7 +291,10 @@ class GIMINImputer:
         with torch.no_grad():
             for _ in range(self.mc_samples):
                 output = self.model(**model_kwargs)
-                mc_predictions.append(output["imputed"].cpu().numpy())
+                imputed_t = output["imputed"]
+                if self.scaler is not None:
+                    imputed_t = self.scaler.inverse_transform(imputed_t)
+                mc_predictions.append(imputed_t.cpu().numpy())
                 if "pred_log_var" in output:
                     last_log_var = output["pred_log_var"].cpu().numpy()
 
@@ -293,12 +320,12 @@ class GIMINImputer:
 
     def impute_to_dataframe(
         self,
-        df: pandas.DataFrame,
+        df: pd.DataFrame,
         feature_columns: list[str],
         return_uncertainty: bool = True,
         edge_index: torch.Tensor | None = None,
         edge_weight: torch.Tensor | None = None,
-    ) -> pandas.DataFrame:
+    ) -> pd.DataFrame:
         """Impute from/to a pandas DataFrame.
 
         Missing values in the DataFrame are identified as NaN.  The

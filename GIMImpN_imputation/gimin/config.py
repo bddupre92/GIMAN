@@ -109,18 +109,59 @@ class GIMINConfig:
     # Global settings
     random_seed: int = 42
 
-    # Modality definitions
+    # Normalization: modality name -> strategy (zscore|log_zscore|rankgauss|none)
+    # NOTE: Zero-variance features (LRRK2, GBA, APOE_E4, SNCA,
+    #       GENETIC_RISK_SCORE, NP1RTOT) are excluded -- they are constant
+    #       in the PPMI cohort and provide no signal for imputation.
+    normalization: dict[str, str] = field(
+        default_factory=lambda: {
+            "demographics": "zscore",
+            "motor_clinical": "rankgauss",
+            "structural_imaging": "log_zscore",
+            "spect_sbr": "log_zscore",
+            "csf_biomarkers": "rankgauss",
+            "clinical_biomarkers": "rankgauss",
+            "cortical_thickness": "log_zscore",
+        }
+    )
+
+    # Indices of binary (0/1) features in the flat feature vector.
+    # SEX is the only true binary feature (index 0 in the parquet).
+    binary_feature_indices: list[int] = field(default_factory=lambda: [0])
+
+    # Cross-modal feature pairs for consistency loss (list of [idx_a, idx_b])
+    # Indices match the ACTUAL parquet column order after dropping zero-var cols:
+    #  0:SEX 1:AGE 2:NP3TOT 3:NHY 4:PIGD 5:TREMOR 6:MCATOT
+    #  7:CAUDATE_L_VOL 8:CAUDATE_R_VOL 9:PUTAMEN_L_VOL 10:PUTAMEN_R_VOL
+    # 11:HIPPOCAMPUS_L_VOL 12:HIPPOCAMPUS_R_VOL
+    # 13:CAUDATE_L_SBR 14:CAUDATE_R_SBR 15:PUTAMEN_L_SBR 16:PUTAMEN_R_SBR
+    # 17:CAUDATE_ASYM 18:PUTAMEN_ASYM
+    # 19:ALPHA_SYN 20:TOTAL_TAU 21:ABETA42 22:PTAU181
+    # 23:UPSIT 24:RBD 25:SCOPA 26:ESS
+    # 27:ENTORH_L 28:ENTORH_R 29:CING_L 30:CING_R 31:PRECEN_L 32:PRECEN_R
+    cross_modal_pairs: list[list[int]] = field(
+        default_factory=lambda: [
+            [7, 13],  # CAUDATE_L_VOL <-> CAUDATE_L_SBR
+            [8, 14],  # CAUDATE_R_VOL <-> CAUDATE_R_SBR
+            [9, 15],  # PUTAMEN_L_VOL <-> PUTAMEN_L_SBR
+            [10, 16],  # PUTAMEN_R_VOL <-> PUTAMEN_R_SBR
+        ]
+    )
+
+    # Modality definitions -- ORDER MUST MATCH parquet column order.
+    # Zero-variance features dropped: LRRK2, GBA, APOE_E4, SNCA,
+    # GENETIC_RISK_SCORE (all constant 0), NP1RTOT (no observations).
+    # Total: 33 features (down from 39).
     modalities: list[ModalityDefinition] = field(
         default_factory=lambda: [
             ModalityDefinition(
-                name="genetic",
-                features=["LRRK2", "GBA", "APOE_E4", "SNCA", "GENETIC_RISK_SCORE"],
+                name="demographics",
+                features=["SEX", "AGE_AT_VISIT"],
             ),
             ModalityDefinition(
                 name="motor_clinical",
                 features=[
                     "NP3TOT",
-                    "NP1RTOT",
                     "NHY",
                     "PIGD_SCORE",
                     "TREMOR_SCORE",
@@ -178,10 +219,6 @@ class GIMINConfig:
                     "PRECENTRAL_R_CTH",
                 ],
             ),
-            ModalityDefinition(
-                name="demographics",
-                features=["SEX", "AGE_AT_VISIT"],
-            ),
         ]
     )
 
@@ -237,6 +274,22 @@ class GIMINConfig:
         modalities_raw = raw.get("modalities", [])
         modalities = [ModalityDefinition(**m) for m in modalities_raw]
 
+        normalization = raw.get("normalization", None)
+        if normalization is None:
+            normalization = cls().normalization
+
+        cross_modal_pairs_raw = raw.get("cross_modal_pairs", None)
+        if cross_modal_pairs_raw is None:
+            cross_modal_pairs = cls().cross_modal_pairs
+        else:
+            cross_modal_pairs = [list(pair) for pair in cross_modal_pairs_raw]
+
+        binary_feature_indices_raw = raw.get("binary_feature_indices", None)
+        if binary_feature_indices_raw is None:
+            binary_feature_indices = cls().binary_feature_indices
+        else:
+            binary_feature_indices = list(binary_feature_indices_raw)
+
         return cls(
             data_paths=data_paths,
             graph=graph,
@@ -246,6 +299,9 @@ class GIMINConfig:
             incremental=incremental,
             random_seed=raw.get("random_seed", 42),
             modalities=modalities if modalities else cls().modalities,
+            normalization=normalization,
+            binary_feature_indices=binary_feature_indices,
+            cross_modal_pairs=cross_modal_pairs,
         )
 
     @property

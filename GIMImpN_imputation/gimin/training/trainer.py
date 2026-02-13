@@ -88,10 +88,12 @@ class GIMINTrainer:
         )
 
         # Loss function.
+        binary_indices = getattr(config, "binary_feature_indices", None)
         self.criterion = GIMINLoss(
             lambda_dist=tp.lambda_dist,
             lambda_cross=tp.lambda_cross,
             cross_modal_pairs=cross_modal_pairs,
+            binary_feature_indices=binary_indices,
         )
 
         # Graph refinement.
@@ -111,6 +113,9 @@ class GIMINTrainer:
         self._best_model_state: dict[str, Any] | None = None
         self._epochs_without_improvement: int = 0
         self._history: list[dict[str, float]] = []
+
+        # Optional scaler (set externally by the training script).
+        self.scaler: Any | None = None
 
     # ------------------------------------------------------------------
     # Masking
@@ -350,6 +355,8 @@ class GIMINTrainer:
                     mask=mask,
                     alpha=alpha,
                 )
+                # Update overlap_frac to match the new edge count.
+                overlap_frac = torch.ones(edge_index.shape[1])
                 self.graph_refiner.advance_round()
 
             # Train for this round's epochs.
@@ -440,6 +447,8 @@ class GIMINTrainer:
             "history": self._history,
             "graph_refiner_round": self.graph_refiner.current_round,
         }
+        if self.scaler is not None and hasattr(self.scaler, "state_dict"):
+            checkpoint["scaler_state_dict"] = self.scaler.state_dict()
         torch.save(checkpoint, filepath)
         logger.info("Checkpoint saved to %s", filepath)
 
@@ -471,6 +480,14 @@ class GIMINTrainer:
         self.graph_refiner.reset()
         for _ in range(round_num):
             self.graph_refiner.advance_round()
+
+        # Restore scaler if present.
+        if "scaler_state_dict" in checkpoint:
+            from ..data.scaler import ModalityAwareScaler
+
+            self.scaler = ModalityAwareScaler()
+            self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
+            logger.info("Scaler restored from checkpoint.")
 
         logger.info("Checkpoint loaded from %s", filepath)
 

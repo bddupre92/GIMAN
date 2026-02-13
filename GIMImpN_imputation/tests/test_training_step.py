@@ -24,8 +24,10 @@ from gimin.training.trainer import GIMINTrainer
 # Constants
 # ---------------------------------------------------------------------------
 N_PATIENTS = 20
-MODALITY_DIMS = [5, 6, 6, 6, 4, 4, 6, 2]
-TOTAL_FEATURES = sum(MODALITY_DIMS)
+# Updated to match new config:
+# demo=2, motor=5, struct=6, spect=6, csf=4, clinical=4, cortical=6
+MODALITY_DIMS = [2, 5, 6, 6, 4, 4, 6]
+TOTAL_FEATURES = sum(MODALITY_DIMS)  # 33
 EMBED_DIM = 32
 
 
@@ -98,7 +100,7 @@ class _DummyGraphBuilder:
     """A dummy graph builder that simply returns the provided edges."""
 
     def build(self, features, mask=None, k=None):
-        N = features.shape[0]
+        N = features.shape[0]  # noqa: N806
         # Return a simple ring graph
         src = list(range(N))
         dst = [(i + 1) % N for i in range(N)]
@@ -142,9 +144,10 @@ class TestCreateMaskedBatch:
             "training_mask should have fewer (or equal) observed entries than original."
         )
 
-        # target_mask marks the difference: positions hidden for self-supervision
-        difference = mask - training_mask
-        # target_mask should be a subset of this difference (both are the artificially hidden)
+        # target_mask marks the difference:
+        # positions hidden for self-supervision
+        # target_mask should be a subset of this difference
+        # (both are the artificially hidden)
         assert (target_mask[target_mask.bool()] > 0).all()
 
         # The positions marked in target_mask should have been 1 in the original mask
@@ -205,7 +208,7 @@ class TestGaussianNLLLoss:
 
         criterion = GIMINLoss(lambda_dist=0.0, lambda_cross=0.0)
 
-        N, F = 10, 5
+        N, F = 10, 5  # noqa: N806
         true_values = torch.randn(N, F)
         pred_mean = true_values + torch.randn(N, F) * 0.5  # noisy prediction
         pred_log_var = torch.zeros(N, F)  # log(1) = 0 -> variance = 1

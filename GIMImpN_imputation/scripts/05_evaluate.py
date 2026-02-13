@@ -86,6 +86,7 @@ def main() -> None:
     from gimin.config import GIMINConfig
     from gimin.data.missingness import MissingnessAnalyzer
     from gimin.data.modality_registry import ModalityRegistry
+    from gimin.data.scaler import ModalityAwareScaler
 
     # Load config
     if args.config:
@@ -118,6 +119,16 @@ def main() -> None:
     features_df = pd.read_parquet(feat_path)
     logger.info("Loading mask from: %s", mask_path)
     mask_df = pd.read_parquet(mask_path)
+
+    # Filter to only the features defined in config (drops zero-variance cols)
+    keep_cols = config.all_feature_names
+    dropped = [c for c in features_df.columns if c not in keep_cols]
+    if dropped:
+        logger.info(
+            "Dropping %d zero-variance/unused columns: %s", len(dropped), dropped
+        )
+    features_df = features_df[keep_cols]
+    mask_df = mask_df[keep_cols]
 
     # Analyze existing missingness
     registry = ModalityRegistry()
@@ -170,6 +181,7 @@ def main() -> None:
         num_gnn_layers=config.model.num_gnn_layers,
         num_heads=config.model.num_heads,
         mc_dropout=config.model.mc_dropout_rate,
+        binary_feature_indices=getattr(config, "binary_feature_indices", None),
     )
 
     ckpt_path = (
@@ -177,6 +189,7 @@ def main() -> None:
         if args.checkpoint
         else output_dir / "checkpoints" / "gimin_best.pt"
     )
+    scaler = None
     if ckpt_path.exists():
         checkpoint = torch.load(ckpt_path, weights_only=False)
         if "model_state_dict" in checkpoint:
@@ -185,6 +198,14 @@ def main() -> None:
             model.load_state_dict(checkpoint)
         model.eval()
         logger.info("Loaded model from %s", ckpt_path)
+
+        # Load scaler from checkpoint if present.
+        if "scaler_state_dict" in checkpoint:
+            scaler = ModalityAwareScaler()
+            scaler.load_state_dict(checkpoint["scaler_state_dict"])
+            logger.info("Loaded scaler from checkpoint.")
+        else:
+            logger.warning("No scaler in checkpoint; GIMIN will use raw features.")
     else:
         logger.warning("No checkpoint at %s, running baselines only", ckpt_path)
         model = None
@@ -237,6 +258,7 @@ def main() -> None:
             edge_index=edge_index,
             edge_weight=edge_weight,
             random_seed=args.seed,
+            scaler=scaler,
         )
     else:
         # Baselines-only mode: run each baseline through the experiment
@@ -263,7 +285,7 @@ def main() -> None:
                     corrupted_features[~corrupted_mask.astype(bool)] = 0.0
                     b_imputed = bmodel.fit_transform(corrupted_features, corrupted_mask)
 
-                    from gimin.evaluation import metrics as M
+                    from gimin.evaluation import metrics as M  # noqa: N812
 
                     run_metrics = {
                         "rmse": M.rmse(b_imputed, features_np, target_mask),
@@ -359,7 +381,6 @@ def main() -> None:
     # Create per-modality CSV from results
     # ------------------------------------------------------------------
     modality_rows = []
-    summary_data = results.get("summary", {})
     methods = [k for k in results if k not in ("summary", "metadata", "baselines_only")]
 
     # Try to extract per-modality breakdown from GIMIN results

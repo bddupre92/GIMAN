@@ -72,6 +72,7 @@ def main() -> None:
     import pandas as pd
 
     from gimin.config import GIMINConfig
+    from gimin.data.scaler import build_scaler_from_config
 
     # Load config
     if args.config:
@@ -118,6 +119,20 @@ def main() -> None:
     features_df = pd.read_parquet(feat_path)
     logger.info("Loading mask from: %s", mask_path)
     mask_df = pd.read_parquet(mask_path)
+
+    # Filter to only the features defined in config (drops zero-variance cols)
+    keep_cols = config.all_feature_names
+    missing_cols = [c for c in keep_cols if c not in features_df.columns]
+    if missing_cols:
+        logger.error("Config features not found in parquet: %s", missing_cols)
+        sys.exit(1)
+    dropped = [c for c in features_df.columns if c not in keep_cols]
+    if dropped:
+        logger.info(
+            "Dropping %d zero-variance/unused columns: %s", len(dropped), dropped
+        )
+    features_df = features_df[keep_cols]
+    mask_df = mask_df[keep_cols]
 
     logger.info(
         "  %d patients, %d features",
@@ -189,6 +204,14 @@ def main() -> None:
         )
 
         # ----------------------------------------------------------
+        # Fit modality-aware scaler and normalize features
+        # ----------------------------------------------------------
+        scaler = build_scaler_from_config(config)
+        scaler.fit(features_t, mask_t)
+        features_t = scaler.transform(features_t, mask_t)
+        logger.info("Features normalized with modality-aware scaler.")
+
+        # ----------------------------------------------------------
         # Instantiate the GIMIN model
         # ----------------------------------------------------------
         model = GIMIN(
@@ -197,6 +220,7 @@ def main() -> None:
             num_gnn_layers=config.model.num_gnn_layers,
             num_heads=config.model.num_heads,
             mc_dropout=config.model.mc_dropout_rate,
+            binary_feature_indices=getattr(config, "binary_feature_indices", None),
         )
         total_params = sum(p.numel() for p in model.parameters())
         logger.info(
@@ -211,8 +235,23 @@ def main() -> None:
         # ----------------------------------------------------------
         # Create the trainer
         # ----------------------------------------------------------
-        trainer = GIMINTrainer(model, config, graph_builder=builder)
+        cross_modal_pairs = (
+            [tuple(pair) for pair in config.cross_modal_pairs]
+            if config.cross_modal_pairs
+            else None
+        )
+        trainer = GIMINTrainer(
+            model,
+            config,
+            graph_builder=builder,
+            cross_modal_pairs=cross_modal_pairs,
+        )
+        trainer.scaler = scaler
         logger.info("Trainer initialised on device: %s", trainer.device)
+        if cross_modal_pairs:
+            logger.info(
+                "Cross-modal pairs configured: %d pairs", len(cross_modal_pairs)
+            )
 
         # Resume from checkpoint if requested
         if args.resume:
