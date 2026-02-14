@@ -1,15 +1,18 @@
 """GIMAN Model Implementation Module.
 
-This module contains the core Graph-Informed Multimodal Attention Network (GIMAN)
-implementation for Parkinson's disease prognosis prediction.
+This module contains the True GIMAN (Graph-Informed Multimodal Attention Network)
+architecture for Parkinson's disease prediction.
 
 Components:
-- patient_similarity.py: Stage I - Patient similarity graph construction
-- encoders/: Stage II - Modality-specific encoders (imaging, genomic, clinical)
-- giman_model.py: Stage III - Full GIMAN architecture integration
-- validation.py: Cross-validation framework for small cohort evaluation
+- patient_similarity.py: Patient similarity graph construction
+- modality_encoders.py: Per-modality MLP encoders (7 modalities)
+- cross_modal_attention.py: Multi-head cross-modal attention fusion
+- giman_backbone.py: 3-layer GATConv backbone with residual connections
+- task_heads.py: Task-specific prediction heads (survival, subtype, diagnostic)
+- true_giman.py: Full TrueGIMAN model assembly
 """
 
 from .patient_similarity import PatientSimilarityGraph
+from .true_giman import TrueGIMAN, TrueGIMANOutput
 
-__all__ = ["PatientSimilarityGraph"]
+__all__ = ["PatientSimilarityGraph", "TrueGIMAN", "TrueGIMANOutput"]

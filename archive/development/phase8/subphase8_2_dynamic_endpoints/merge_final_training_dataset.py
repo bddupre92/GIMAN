@@ -1,15 +1,16 @@
-"""Merge Final Training Dataset: Longitudinal Prodromal (36 features) + Early PD.
+"""Merge Final Training Dataset: Longitudinal Prodromal (36 features).
 
-Creates the final training dataset by:
-1. Loading longitudinal prodromal cohort with 36 features
-2. Loading early PD cohort (treating as already converted)
-3. For early PD: extract same 23 features from existing prodromal extraction
-4. Merge into unified dataset ready for PyG training
+Creates the final clean training dataset using ONLY prodromal patients
+with real PPMI phenoconversion endpoints. No early PD merge.
+
+Historical note: Previous versions merged early PD patients (time_to_event=0,
+phenoconverted=1) into training data, inflating C-index to 0.998 via trivial
+discrimination. This version removes that contamination entirely.
 """
 
 from __future__ import annotations
 
-import os
+import json
 import sys
 from pathlib import Path
 
@@ -20,6 +21,22 @@ from sklearn.impute import IterativeImputer
 # Add project root to path
 project_root = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(project_root))
+
+
+def assert_no_early_pd_contamination(df: pd.DataFrame) -> None:
+    """Verify dataset contains no early PD contamination.
+
+    Early PD patients have time_to_event=0 AND phenoconverted=1,
+    which represents already-diagnosed patients and inflates metrics.
+    """
+    contaminated = (df["time_to_event"] == 0) & (df["phenoconverted"] == 1)
+    n_contaminated = contaminated.sum()
+    if n_contaminated > 0:
+        raise ValueError(
+            f"CONTAMINATION DETECTED: {n_contaminated} rows have "
+            f"time_to_event=0 AND phenoconverted=1 (early PD signature). "
+            f"These must be removed before training."
+        )
 
 
 def load_longitudinal_prodromal() -> pd.DataFrame:
@@ -98,58 +115,8 @@ def load_longitudinal_prodromal() -> pd.DataFrame:
     return merged
 
 
-def load_early_pd_cohort() -> pd.DataFrame:
-    """Load early PD patients with real extracted features only."""
-    unified_path = (
-        project_root
-        / "data"
-        / "03_prodromal"
-        / "unified_cohort"
-        / "unified_prodromal_early_pd.csv"
-    )
-    prodromal_features_path = (
-        project_root
-        / "data"
-        / "03_prodromal"
-        / "enhanced"
-        / "prodromal_multimodal_features.csv"
-    )
-
-    # Load unified cohort to get early PD patient IDs
-    unified = pd.read_csv(unified_path)
-    early_pd = unified[unified["cohort"] == "early_pd"].copy()
-    early_pd_patnos = early_pd["PATNO"].unique().tolist()
-
-    print(f"\n✓ Found {len(early_pd_patnos)} early PD patients")
-
-    prodromal_features = pd.read_csv(prodromal_features_path)
-
-    # Get feature columns (exclude PATNO)
-    feature_cols = [c for c in prodromal_features.columns if c != "PATNO"]
-
-    early_pd_data = prodromal_features[
-        prodromal_features["PATNO"].isin(early_pd_patnos)
-    ].copy()
-    if early_pd_data.empty:
-        raise ValueError(
-            "No real early PD feature rows available. Refusing synthetic feature fallback."
-        )
-
-    # Keep one baseline-style row per patient when duplicates exist.
-    early_pd_data = early_pd_data.groupby("PATNO", as_index=False).first()
-
-    # Survival labels: early PD are treated as converted-at-baseline only when explicitly enabled.
-    early_pd_data["time_to_event"] = 0.0
-    early_pd_data["phenoconverted"] = 1
-    early_pd_data["landmark_month"] = 0
-    early_pd_data["original_time"] = 0.0
-    early_pd_data["original_event"] = 1
-
-    print(f"✓ Created early PD dataset: {early_pd_data.shape}")
-    print(f"  Patients: {len(early_pd_data)}")
-    print(f"  Events: {early_pd_data['phenoconverted'].sum()} (100.0%)")
-
-    return early_pd_data
+## load_early_pd_cohort REMOVED — early PD merge causes data contamination.
+## See docstring for historical context.
 
 
 def apply_advanced_imputation(df: pd.DataFrame) -> pd.DataFrame:
@@ -224,135 +191,77 @@ def apply_advanced_imputation(df: pd.DataFrame) -> pd.DataFrame:
     return df_imputed
 
 
-def merge_and_validate(prodromal: pd.DataFrame, early_pd: pd.DataFrame) -> pd.DataFrame:
-    """Merge prodromal and early PD cohorts."""
-    print("\n" + "=" * 60)
-    print("MERGING COHORTS")
-    print("=" * 60 + "\n")
-
-    # Add cohort labels
-    prodromal["cohort"] = "prodromal"
-    early_pd["cohort"] = "early_pd"
-
-    # Merge
-    unified = pd.concat([prodromal, early_pd], axis=0, ignore_index=True)
-
-    print(f"Prodromal observations: {len(prodromal)}")
-    print(
-        f"  Events: {prodromal['phenoconverted'].sum()} ({prodromal['phenoconverted'].mean() * 100:.1f}%)"
-    )
-    print(f"\nEarly PD observations: {len(early_pd)}")
-    print(f"  Events: {early_pd['phenoconverted'].sum()} (100.0%)")
-    print(f"\nUnified cohort: {len(unified)}")
-    print(
-        f"  Total events: {unified['phenoconverted'].sum()} ({unified['phenoconverted'].mean() * 100:.1f}%)"
-    )
-
-    # Validation
-    print("\n" + "=" * 60)
-    print("VALIDATION CHECKS")
-    print("=" * 60 + "\n")
-
-    # Check for duplicates
-    n_duplicates = unified.duplicated(subset=["PATNO", "landmark_month"]).sum()
-    print(f"✓ Duplicates: {n_duplicates} (should be 0)")
-
-    # Check time values
-    n_negative_time = (unified["time_to_event"] < 0).sum()
-    print(f"✓ Negative times: {n_negative_time} (should be 0)")
-
-    # Event distribution by cohort
-    print("\nEvent distribution by cohort:")
-    print(unified.groupby("cohort")["phenoconverted"].agg(["sum", "count", "mean"]))
-
-    # Feature completeness
-    feature_cols = [
-        c
-        for c in unified.columns
-        if c
-        not in {
-            "PATNO",
-            "time_to_event",
-            "phenoconverted",
-            "landmark_month",
-            "original_time",
-            "original_event",
-            "cohort",
-        }
-    ]
-
-    missing_pct = unified[feature_cols].isnull().mean() * 100
-    print("\nFeature completeness:")
-    print(f"  Average: {100 - missing_pct.mean():.1f}%")
-    print(f"  Min: {100 - missing_pct.max():.1f}%")
-    print(f"  Max: {100 - missing_pct.min():.1f}%")
-
-    return unified
+## merge_and_validate REMOVED — no longer merging early PD cohort.
 
 
 def main() -> None:
-    """Create final unified training dataset."""
+    """Create final clean prodromal-only training dataset."""
     print("=" * 60)
-    print("PHASE 8.2: FINAL TRAINING DATASET PREPARATION")
+    print("TRUE GIMAN: CLEAN PRODROMAL-ONLY DATASET PREPARATION")
     print("=" * 60 + "\n")
 
-    include_early_pd = os.getenv("GIMAN_INCLUDE_EARLY_PD", "0") == "1"
-
-    # Load datasets
+    # Load prodromal cohort only
     prodromal = load_longitudinal_prodromal()
-    if include_early_pd:
-        early_pd = load_early_pd_cohort()
-        unified = merge_and_validate(prodromal, early_pd)
-    else:
-        print(
-            "⚠️  GIMAN_INCLUDE_EARLY_PD not set; building REAL prodromal-only training dataset."
-        )
-        prodromal = prodromal.copy()
-        prodromal["cohort"] = "prodromal"
-        unified = prodromal
+    prodromal["cohort"] = "prodromal"
+
+    # CRITICAL: Assert no early PD contamination
+    assert_no_early_pd_contamination(prodromal)
+    print("PASSED: No early PD contamination detected")
 
     # Apply imputation to fill any remaining missing values
-    unified_imputed = apply_advanced_imputation(unified)
+    dataset = apply_advanced_imputation(prodromal)
+
+    # Final contamination check after imputation
+    assert_no_early_pd_contamination(dataset)
+
+    # Validate event rate is in expected prodromal range
+    event_rate = dataset["phenoconverted"].mean()
+    if event_rate > 0.15:
+        print(
+            f"WARNING: Event rate {event_rate:.1%} is unusually high for "
+            f"prodromal phenoconversion (expected 3-10%). "
+            f"Verify endpoint extraction."
+        )
 
     # Save
     output_dir = project_root / "data" / "03_prodromal" / "final_training_dataset"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    output_path = output_dir / "unified_longitudinal_early_pd.csv"
-    unified_imputed.to_csv(output_path, index=False)
+    output_path = output_dir / "prodromal_only_clean.csv"
+    dataset.to_csv(output_path, index=False)
 
-    print(f"\n✓ Saved final training dataset: {output_path}")
-    print(f"  Shape: {unified_imputed.shape}")
-    print(f"  Observations: {len(unified_imputed)}")
-    print(f"  Patients: {unified_imputed['PATNO'].nunique()}")
-    print(f"  Events: {unified_imputed['phenoconverted'].sum()}")
-    print(f"  Event rate: {unified_imputed['phenoconverted'].mean() * 100:.1f}%")
-    print(f"  Features: {unified_imputed.shape[1] - 7}")  # Exclude metadata columns
+    print(f"\n{'=' * 60}")
+    print("CLEAN DATASET SUMMARY")
+    print(f"{'=' * 60}")
+    print(f"  Output: {output_path}")
+    print(f"  Shape: {dataset.shape}")
+    print(f"  Observations: {len(dataset)}")
+    print(f"  Patients: {dataset['PATNO'].nunique()}")
+    print(f"  Events: {dataset['phenoconverted'].sum()}")
+    print(f"  Event rate: {event_rate:.1%}")
+    n_features = dataset.shape[1] - 7  # Exclude metadata columns
+    print(f"  Features: {n_features}")
 
     # Save metadata
-    import json
-
     metadata = {
-        "n_observations": int(len(unified_imputed)),
-        "n_patients": int(unified_imputed["PATNO"].nunique()),
-        "n_events": int(unified_imputed["phenoconverted"].sum()),
-        "event_rate": float(unified_imputed["phenoconverted"].mean()),
-        "n_features": int(unified_imputed.shape[1] - 7),
-        "cohorts": {
-            "prodromal": int((unified_imputed["cohort"] == "prodromal").sum()),
-            "early_pd": int((unified_imputed["cohort"] == "early_pd").sum()),
-        },
+        "n_observations": int(len(dataset)),
+        "n_patients": int(dataset["PATNO"].nunique()),
+        "n_events": int(dataset["phenoconverted"].sum()),
+        "event_rate": float(event_rate),
+        "n_features": n_features,
+        "cohort": "prodromal_only",
+        "early_pd_contamination": False,
+        "simulated_endpoints": False,
     }
 
     metadata_path = output_dir / "dataset_metadata.json"
     with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
 
-    print(f"✓ Saved metadata: {metadata_path}")
-
-    print("\n" + "=" * 60)
-    print("DATASET PREPARATION COMPLETE")
-    print("=" * 60)
+    print(f"  Metadata: {metadata_path}")
+    print(f"\n{'=' * 60}")
+    print("CLEAN DATASET PREPARATION COMPLETE")
+    print(f"{'=' * 60}")
 
 
 if __name__ == "__main__":
