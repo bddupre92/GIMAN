@@ -781,3 +781,72 @@ LRRK2 and GBA carrier subgroups have too few patients for reliable per-subgroup 
 
 ### Paper 4 Gotcha: fig9 Gate Activation Attribute Names
 The `GraphDigitalTwin` model uses `gate_linear` (not `gate`), `gat_layers_list` + `gat_proj` + `gat_norm` (not `gat_encoder`), and `graph_collate_fn` batch dict uses `sequences` (not `x`), `seq_lens` (not `lengths`), `graph_idxs` (not `graph_idx`). Gate output is per-hidden-dim, must `.mean(dim=-1)` for scalar per patient.
+
+## Mechanistic Digital Twin — Phase 4 Roadmap (updated 2026-04-12)
+
+### Phase Status
+
+| Phase | Status | Paper | Key Result |
+|---|---|---|---|
+| Phase 1 | **DONE** | Paper 7 | SBR decay calibration, 93.75% LOO, 909/1,065 patients |
+| Phase 2 | **DONE** | Paper 7 | Coupled α-syn + N(t) ODE, T_tox posteriors, 3.29%/yr median |
+| Phase 3 | **DONE** | Papers 8a + 8b | M1 wins (ΔAIC=3,856), spatial propagation NOT detectable |
+| **Phase 4** | **PLANNED — lit review complete** | **Paper 9** | N(t)→DA→UPDRS coupled PK/PD model |
+| Phase 5 | FUTURE | Paper 10 | Mechanistic vs GIMAN head-to-head benchmark |
+| DeNoPa | FUTURE | Paper 11? | External validation (requires PI collaboration) |
+
+### Phase 4: N(t)→DA→UPDRS Coupled PK/PD Model (Paper 9)
+
+**Research question (locked 2026-04-12):** "Does a mechanistic model coupling per-patient DaT-SPECT-calibrated neuron death trajectories N(t) to levodopa pharmacodynamics via DA(t) = k_AADC × C_brain_pop(LEDD) × N(t)/N₀ predict longitudinal UPDRS-III trajectories and reproduce the clinically observed wearing-off?"
+
+**Framework:** Level 2.5 hybrid — population-average PK (published params from Simon 2016 / Contin 1997) + patient-specific N(t) from Phase 2.
+
+**Key equation:** `DA(t) = k_AADC × C_brain_pop(LEDD(t)) × N(t)/N₀` → `UPDRS3(t) = UPDRS3_max × (1 - DA^h / (EC50^h + DA^h))`
+
+**Parameters to fit:** k_AADC, EC50, h (3 params from UPDRS + LEDD + N(t))
+
+**NOT a PBPK model.** Full PBPK is infeasible (no plasma levels) and unnecessary. Only one published levodopa PBPK exists (Wollmer 2022) and it models GI absorption, not disease progression.
+
+**Data (all available):**
+- LEDD: `data/00_raw/LEDD_Concomitant_Medication_Log_12Apr2026.csv` (9,583 rows, 1,678 patients)
+- UPDRS-III: 16,699 visits, 1,900 patients
+- Calibrated N(t): 1,065 patients from Phase 2 IS posteriors
+
+**Gap confirmed (3-agent lit review + Consensus, 2026-04-12):** No published model couples per-patient DaT-SPECT-calibrated N(t) ODE to levodopa PD response. Primary competitor: Gupta 2025 (Clin Pharmacol Ther) — SBR-directed IRT on 419 PPMI patients, statistical not mechanistic, no medication covariate.
+
+**Key biological finding:** Levodopa does NOT cause neuron death (LEAP trial, Verschuur 2019, NEJM, 236 cit). LEDD modeled as proxy for unmeasured severity, not causal mechanism.
+
+**Target venue:** CPT: Pharmacometrics & Systems Pharmacology
+
+**Defensive citations needed:** Gupta 2025, Jacqmin 2007 (K-PD framework), Chae 2021, Djaldetti 2018, Verschuur 2019, Véronneau-Veilleux 2020, Ursino 2020, Holford 2006
+
+### Connectome Data (downloaded 2026-04-12)
+
+Directory: `data/00_raw/connectome/` (2.6GB, gitignored)
+
+| Source | Status | Size |
+|---|---|---|
+| DSI Studio HCP1065 (1mm + 2mm + DB) | DOWNLOADED | 2.4GB |
+| Melbourne Subcortex (Tian 2020) | DOWNLOADED | 144MB |
+| Budapest v3.0 | HAVE | 108KB |
+| HCPex Extended | CLONED | 78MB |
+| ATAG 7T | NEEDS BROWSER LOGIN | ~56MB |
+| ConnectomeDB (raw HCP) | NEEDS REGISTRATION | Large |
+
+### Git Repository
+
+**Working directory:** `~/Projects/CSCI-FALL-2025/` (primary, operate here)
+**Mirror:** `~/My Drive/CSCI FALL 2025/` (Google Drive auto-sync to cloud)
+**Remote:** `pd_phd` → https://github.com/bddupre92/PD_PHD (main branch)
+**Data files:** gitignored (`data/`, `*.csv`, `*.parquet`), live in Drive + local only
+
+### Session 2026-04-12 Summary
+
+- Mempalace initialized at `~/Projects/.mempalace/` — 15,398 memories from 826 conversation files
+- Connectome data: 4/6 sources downloaded to `data/00_raw/connectome/`
+- Phase 4 literature review: 3 parallel agents + Consensus (40+ papers)
+- Phase 4 framework decided: Level 2.5 hybrid (pop-avg PK + patient-specific N(t))
+- LEDD data: re-downloaded (9,583 rows, replaces 0-byte Feb file)
+- DATA_LITERATURE_REGISTRY updated with Phase 4 sections (§8-§9)
+- Git: migrated history from Drive to Projects, merged to main, pushed to pd_phd
+- Drive synced with all new files (connectome, LEDD, mechanistic_twin outputs)
