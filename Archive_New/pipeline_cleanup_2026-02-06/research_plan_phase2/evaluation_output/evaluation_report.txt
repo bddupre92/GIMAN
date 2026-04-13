@@ -1,0 +1,58 @@
+
+================================================================================
+MOTOR TASK EVALUATION SUMMARY
+================================================================================
+
+Overall Performance:
+  MAE:  1.5595 pts/year
+  RMSE: 1.9551 pts/year
+  R²:   0.4926
+
+Correlation Analysis:
+  Pearson r:  0.7999 (p=1.6714e-112)
+  Spearman r: 0.7809 (p=7.4614e-104)
+
+Distribution Statistics:
+  Predictions: 1.053 ± 3.247
+  Targets:     0.989 ± 2.745
+
+Per-Cohort Performance:
+  HC:
+    n=152, R²=0.5939, MAE=1.4913
+  PD:
+    n=178, R²=0.5522, MAE=1.4342
+  Prodromal:
+    n=170, R²=0.3025, MAE=1.7516
+================================================================================
+
+================================================================================
+COGNITIVE TASK EVALUATION SUMMARY
+================================================================================
+
+Discriminative Performance:
+  AUC-ROC: 0.9889
+
+Classification Metrics:
+  F1 Score:    0.7971
+  Precision:   0.6962
+  Recall:      0.9322
+  Specificity: 0.9456
+
+Confusion Matrix:
+  True Positives:  55
+  True Negatives:  417
+  False Positives: 24
+  False Negatives: 4
+
+Class Distribution:
+  Actual positive rate:    11.8%
+  Predicted positive rate: 15.8%
+
+Per-Cohort Performance:
+  HC:
+    n=152, AUC=0.9873, Positive rate=15.8%
+  PD:
+    n=178, AUC=0.9920, Positive rate=9.6%
+  Prodromal:
+    n=170, AUC=0.9942, Positive rate=10.6%
+================================================================================

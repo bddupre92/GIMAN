@@ -1,0 +1,458 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{A Review of Hybrid Neuro-Fuzzy Graph Models for Parkinson's Disease Prognosis: Enhancing GIMAN with Soft Computing}
+
+\author{\IEEEauthorblockN{Blair Dupre}
+\IEEEauthorblockA{\textit{Department of Biomedical Engineering} \\
+\textit{University of North Dakota}\\
+Grand Forks, ND, USA \\
+Blair.Dupre@und.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Parkinson's disease (PD) exhibits profound clinical heterogeneity, presenting significant challenges for accurate prognostic modeling. This review examines soft computing methodologies applied to PD prognosis through a detailed case study of the Graph-Informed Multimodal Attention Network (GIMAN). We analyze GIMAN's neuro-computing architecture, which leverages graph neural networks and multimodal deep learning to capture population-level disease patterns. Building upon this foundation, we propose a novel hybrid neuro-fuzzy enhancement that integrates fuzzy logic principles to address inherent uncertainties in patient similarity and disease subtype definitions. Our review synthesizes recent advances in graph attention networks, fuzzy clustering, and survival analysis, demonstrating how hybrid soft computing approaches can yield more robust, interpretable, and clinically relevant prognostic models for neurodegenerative diseases.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Soft Computing, Parkinson's Disease, Graph Neural Networks, Fuzzy Logic, Neuro-Fuzzy Systems, Deep Learning, Prognosis
+\end{IEEEkeywords}
+
+\section{Introduction}
+Parkinson's disease (PD) is the second most common neurodegenerative disorder, affecting over 10 million individuals worldwide \cite{dorsey2018parkinsons}. The disease manifests through progressive motor symptoms including tremor, rigidity, and bradykinesia, alongside diverse non-motor features such as cognitive decline, autonomic dysfunction, and psychiatric disturbances \cite{schapira2017nonmotor}. This clinical heterogeneity presents a fundamental challenge: patients with seemingly similar initial presentations may follow dramatically different disease trajectories, with progression rates varying by orders of magnitude \cite{fereshtehnejad2017clinical}.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{fig_hetrogeneity.jpg}}
+\caption{Line graph representation of disease progression in 3 idealized patients. Patient (Pt) A has slow disease progression and with age may notice or report few symptoms (ie, low impact/low disease activity/mild disease). Patient B has greater progression and symptoms become noticeable in the 60s (moderate impact/moderate disease activity/moderate disease). Patient C has rapid disease progression leading to symptoms in the 30s (major impact/high disease activity/mild disease).\cite{stockley201biomarkerspd}}
+\label{fig:giman_arch}
+\end{figure}
+
+The development of robust prognostic models is critical for multiple stakeholders. Clinicians require accurate predictions to optimize therapeutic interventions and counsel patients effectively. Pharmaceutical companies need patient stratification tools to design efficient clinical trials and identify responders to disease-modifying therapies. Patients and caregivers seek reliable information to plan for future care needs. However, traditional statistical approaches struggle to capture the complex, nonlinear relationships within high-dimensional, multimodal biomedical data \cite{marek2011ppmi}.
+
+\subsection{Soft Computing: A Paradigm for Medical Uncertainty}
+Soft Computing (SC), introduced by Zadeh \cite{zadeh1994soft}, represents a departure from conventional "hard" computing. Rather than demanding absolute precision and certainty, SC embraces imprecision, uncertainty, and partial truth as inherent features of real-world problems. This paradigm is particularly well-suited to biomedicine, where measurement noise, biological variability, and the fundamentally stochastic nature of disease processes create unavoidable uncertainty \cite{kuncheva2010fuzzy}.
+
+SC comprises several complementary methodologies, with two pillars being particularly relevant to medical prognosis:
+
+\textbf{Neuro-Computing} leverages artificial neural networks' ability to learn complex, hierarchical representations from data through iterative optimization. Deep learning architectures, including convolutional neural networks (CNNs), recurrent neural networks (RNNs), and attention mechanisms, have demonstrated remarkable success in medical imaging \cite{litjens2017survey}, genomics \cite{eraslan2019deep}, and electronic health records \cite{rajkomar2019machine}.
+
+\textbf{Fuzzy-Computing} provides a mathematical framework for reasoning with vague, imprecise concepts. Unlike classical binary logic, fuzzy logic allows partial membership in sets, enabling models to represent concepts like "moderate disease severity" or "high genetic risk" that resist crisp definition \cite{zadeh1965fuzzy}. Fuzzy systems have proven valuable in clinical decision support \cite{pota2013fuzzy}, medical diagnosis \cite{adeli2010fuzzy}, and handling linguistic variables in patient assessment \cite{torres2006fuzzy}.
+
+\subsection{Contributions and Scope}
+This paper presents a comprehensive review of soft computing approaches to PD prognosis through the lens of the Graph-Informed Multimodal Attention Network (GIMAN), a state-of-the-art neuro-computing framework. Our contributions are threefold:
+
+\begin{enumerate}
+    \item We systematically review GIMAN's neuro-computing architecture, analyzing its multimodal encoders, graph neural network components, and survival analysis outputs.
+    \item We survey recent advances in fuzzy logic applications to medical data, particularly fuzzy clustering for patient subtyping and fuzzy graph construction.
+    \item We propose a novel hybrid neuro-fuzzy enhancement to GIMAN, integrating fuzzy C-means clustering and fuzzy graph attention mechanisms to improve robustness and interpretability.
+\end{enumerate}
+
+The remainder of this paper is organized as follows: Section II reviews GIMAN's neuro-computing backbone; Section III proposes fuzzy-computing enhancements; Section IV discusses implementation considerations and expected benefits; Section V concludes with future directions.
+
+\section{Neuro-Computing Foundation: The GIMAN Architecture}
+
+The Graph-Informed Multimodal Attention Network represents a sophisticated neuro-computing system designed specifically for PD prognosis using data from the Parkinson's Progression Markers Initiative (PPMI) \cite{marek2011ppmi}. PPMI is a landmark observational study collecting longitudinal clinical, imaging, and genetic data from over 1,000 participants, providing an ideal testbed for advanced machine learning approaches.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{fig1_giman_architecture.png}}
+\caption{The GIMAN Neuro-Computing Architecture. Multimodal inputs are processed by domain-specific encoders. The resulting embeddings are used to build a patient similarity graph, which a Graph Attention Network (GAT) processes to produce population-informed embeddings for prognostic prediction.}
+\label{fig:giman_arch}
+\end{figure}
+
+\subsection{Multimodal Deep Learning Encoders}
+
+GIMAN's foundation rests on domain-specific neural encoders that transform heterogeneous raw data into unified, fixed-dimensional embeddings. This approach avoids naive feature concatenation, instead learning modality-specific representations that capture unique data characteristics \cite{baltrusaitis2018multimodal}.
+
+\subsubsection{Spatiotemporal Imaging Encoder}
+Neuroimaging biomarkers, particularly DaTscan SPECT imaging of striatal dopamine transporter density, provide objective measures of neurodegeneration \cite{marek2001dopamine}. GIMAN employs a hybrid 3D-CNN-GRU architecture to process longitudinal imaging sequences \cite{bai2018recurrent}. The 3D-CNN component extracts spatial features from each volumetric scan, capturing patterns of striatal degeneration. These spatial features are then fed sequentially to a Gated Recurrent Unit (GRU), which models temporal evolution across patient visits. This spatiotemporal embedding encodes both the current state and trajectory of neurodegeneration.
+
+Recent work has demonstrated the superiority of such hybrid architectures over static imaging analysis. For instance, studies applying 3D-CNNs to Alzheimer's disease progression have shown significant improvements in predicting conversion to dementia when temporal dynamics are explicitly modeled \cite{wen20203d}. The GRU's gating mechanism enables selective retention of relevant historical information while discarding noise, making it particularly suitable for irregular clinical visit schedules \cite{choi2016doctor}.
+
+\subsubsection{Genomic Transformer}
+Genetic factors play a crucial role in PD risk and progression. Variants in genes such as \textit{LRRK2}, \textit{GBA}, \textit{SNCA}, and \textit{APOE} are associated with disease susceptibility and phenotypic variability \cite{nalls2019identification}. Traditional genetic risk scores treat single nucleotide polymorphisms (SNPs) independently, failing to capture epistatic interactions.
+
+GIMAN implements a Transformer-based genomic encoder inspired by DNABERT and similar foundation models \cite{ji2021dnabert}. The self-attention mechanism enables modeling of long-range dependencies between genetic loci, potentially capturing gene-gene interactions that linear models miss. Pre-training on large genomic datasets allows the model to learn biologically meaningful representations aligned with functional genomic annotations \cite{avsec2021effective}.
+
+\subsubsection{Clinical Temporal Encoder}
+Longitudinal clinical assessments, including the Movement Disorder Society-Unified Parkinson's Disease Rating Scale (MDS-UPDRS) and Montreal Cognitive Assessment (MoCA), track disease progression over time \cite{goetz2008movement}. A dedicated GRU processes these time-series data, learning to encode both the current clinical state and rate of change. This temporal abstraction is critical, as progression velocity is often more predictive than baseline severity \cite{holden2018progression}.
+
+The clinical encoder must handle several challenges: irregular sampling intervals, missing data from skipped visits, and measurement variability. GRU's architecture naturally accommodates variable-length sequences, and techniques such as forward-filling or learned imputation can address missingness \cite{che2018recurrent}.
+
+\subsection{Graph Neural Networks for Population Modeling}
+
+A key innovation of GIMAN is its explicit modeling of the patient population as a graph structure. This approach recognizes that patients are not independent samples but exist within a complex web of similarities based on shared genetic risk, similar disease trajectories, and comparable clinical presentations.
+
+\subsubsection{Graph Construction}
+Let $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ denote the patient similarity graph, where $\mathcal{V} = \{v_1, \ldots, v_N\}$ represents $N$ patients and $\mathcal{E}$ represents edges encoding similarity. Each node $v_i$ is associated with a feature vector $\vec{h}_i \in \mathbb{R}^d$, formed by concatenating the embeddings from all modality-specific encoders.
+
+Edge construction typically employs $k$-nearest neighbors ($k$-NN) based on cosine similarity:
+\begin{equation}
+\text{sim}(v_i, v_j) = \frac{\vec{h}_i \cdot \vec{h}_j}{\|\vec{h}_i\| \|\vec{h}_j\|}
+\end{equation}
+
+An edge $(v_i, v_j) \in \mathcal{E}$ exists if $v_j$ is among the $k$ most similar patients to $v_i$. This creates a sparse, directed graph where each patient is connected to their most similar peers \cite{wang2019patient}.
+
+\subsubsection{Graph Attention Networks}
+GIMAN processes this graph using Graph Attention Networks (GATs) \cite{velickovic2018graph}, which enable each node to aggregate information from its neighbors through a learned attention mechanism. For node $i$ with neighbors $\mathcal{N}_i$, the attention coefficient for neighbor $j$ is computed as:
+\begin{equation}
+e_{ij} = \text{LeakyReLU}\left(\vec{a}^T [\mathbf{W}\vec{h}_i \| \mathbf{W}\vec{h}_j]\right)
+\end{equation}
+where $\mathbf{W} \in \mathbb{R}^{d' \times d}$ is a learnable weight matrix, $\vec{a} \in \mathbb{R}^{2d'}$ is an attention vector, and $\|$ denotes concatenation.
+
+These coefficients are normalized across neighbors using softmax:
+\begin{equation}
+\alpha_{ij} = \frac{\exp(e_{ij})}{\sum_{k \in \mathcal{N}_i} \exp(e_{ik})}
+\end{equation}
+
+The updated node representation is a weighted sum of transformed neighbor features:
+\begin{equation}
+\vec{h}'_i = \sigma\left(\sum_{j \in \mathcal{N}_i} \alpha_{ij} \mathbf{W}\vec{h}_j\right)
+\end{equation}
+where $\sigma$ is a nonlinear activation function.
+
+Multi-head attention extends this mechanism by computing $K$ independent attention operations and concatenating their outputs:
+\begin{equation}
+\vec{h}'_i = \|_{k=1}^K \sigma\left(\sum_{j \in \mathcal{N}_i} \alpha_{ij}^k \mathbf{W}^k\vec{h}_j\right)
+\end{equation}
+
+This attention mechanism offers several advantages over simpler graph convolutions. First, it assigns differential importance to neighbors, enabling the model to focus on the most relevant patients. Second, the learned attention weights provide interpretability, revealing which patients are most influential for each prediction \cite{ying2019gnnexplainer}. Third, multi-head attention increases model capacity and robustness \cite{brody2022attentive}.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{fig5_gat_attention.png}}
+\caption{The GIMAN Neuro-Computing Architecture. Multimodal inputs are processed by domain-specific encoders. The resulting embeddings are used to build a patient similarity graph, which a Graph Attention Network (GAT) processes to produce population-informed embeddings for prognostic prediction.}
+\label{fig:gat_arch}
+\end{figure}
+
+\subsection{Survival Analysis for Time-to-Event Prediction}
+
+Clinical prognosis often concerns time-to-event outcomes: When will a patient develop motor complications? How long until cognitive decline necessitates care assistance? Traditional classification models that predict binary outcomes at fixed time horizons discard valuable temporal information and cannot handle censored data (patients who exit the study before experiencing the event).
+
+GIMAN implements neural survival models based on the Cox proportional hazards framework \cite{cox1972regression}. The Cox model assumes a hazard function:
+\begin{equation}
+h(t|x_i) = h_0(t) \exp(f(x_i))
+\end{equation}
+where $h_0(t)$ is the baseline hazard and $f(x_i)$ is a learned risk function. In DeepSurv \cite{katzman2018deepsurv}, $f(x_i)$ is parameterized by a neural network, enabling nonlinear risk modeling.
+
+The model is trained using the partial likelihood loss:
+\begin{equation}
+\mathcal{L} = -\sum_{i: \delta_i=1} \left[f(x_i) - \log\sum_{j \in \mathcal{R}_i} \exp(f(x_j))\right]
+\end{equation}
+where $\delta_i$ indicates whether patient $i$ experienced the event and $\mathcal{R}_i$ is the risk set (patients still at risk at time $t_i$).
+
+This approach yields several benefits. Predicted risk scores enable patient ranking by urgency. Survival curves can be estimated for individualized counseling. The model naturally handles censoring, maximizing information from all patients. Recent extensions incorporate time-varying covariates and competing risks \cite{lee2018deephit}.
+
+\section{Fuzzy-Computing Enhancement: Toward a Hybrid Model}
+
+While GIMAN's neuro-computing architecture is powerful, it operates under "crisp" assumptions that may not align with clinical reality. Patients are assigned to discrete clusters, edges in the similarity graph are binary, and predictions are deterministic. However, disease states exist on continua, patient similarities are matters of degree, and clinical uncertainty is ubiquitous.
+
+\subsection{Motivation: Uncertainty in Medical Data}
+
+Fuzzy logic, introduced by Zadeh \cite{zadeh1965fuzzy}, provides a mathematical framework for reasoning with imprecise concepts. Its relevance to medicine stems from several sources of uncertainty:
+
+\textbf{Measurement Imprecision:} Clinical assessments involve subjective judgments. MDS-UPDRS scoring depends on clinician interpretation and patient self-report, introducing variability even in standardized protocols \cite{goetz2008movement}.
+
+\textbf{Biological Variability:} Disease processes are stochastic. Two patients with identical measurable characteristics may follow divergent trajectories due to unmeasured factors.
+
+\textbf{Definitional Ambiguity:} Disease states lack crisp boundaries. When does "mild cognitive impairment" become "dementia"? Such transitions are gradual, not abrupt \cite{dubois2014advancing}.
+
+\textbf{Linguistic Variables:} Clinicians reason using fuzzy terms: "high risk," "rapid progression," "strong similarity." Fuzzy logic formalizes these concepts, enabling computational reasoning that mirrors human expertise \cite{torres2006fuzzy}.
+
+Integrating fuzzy logic into GIMAN could yield a system that is more robust to noise, more interpretable to clinicians, and more aligned with the inherent uncertainties of medical decision-making.
+
+\subsection{Fuzzy Patient Similarity Graph}
+
+The current GIMAN constructs a crisp graph where edges are binary: either two patients are "similar" (connected) or they are not. This dichotomy is artificial. In reality, similarity is a matter of degree.
+
+\subsubsection{Fuzzy Adjacency Matrix}
+We propose replacing the binary adjacency matrix $\mathbf{A} \in \{0,1\}^{N \times N}$ with a fuzzy adjacency matrix $\tilde{\mathbf{A}} \in [0,1]^{N \times N}$, where $\tilde{A}_{ij} = \mu_{\text{sim}}(v_i, v_j)$ represents the degree of membership in the fuzzy set "similar patients."
+
+This membership function can aggregate multiple similarity measures. For instance, let $\mu_{\text{gen}}(v_i, v_j)$ quantify genetic similarity, $\mu_{\text{motor}}(v_i, v_j)$ quantify motor trajectory similarity, and $\mu_{\text{cog}}(v_i, v_j)$ quantify cognitive similarity. The overall fuzzy similarity could be a weighted average:
+\begin{equation}
+\mu_{\text{sim}}(v_i, v_j) = w_1\mu_{\text{gen}} + w_2\mu_{\text{motor}} + w_3\mu_{\text{cog}}
+\end{equation}
+where $w_1 + w_2 + w_3 = 1$.
+
+Alternatively, fuzzy T-norms (e.g., product, minimum) can combine these measures, encoding different logical interpretations of "and" \cite{klement2013triangular}.
+
+\subsubsection{Gaussian Membership Functions}
+For continuous variables, Gaussian membership functions provide smooth, interpretable similarity measures. For motor progression slopes $s_i$ and $s_j$ derived from clinical encoders:
+\begin{equation}
+\mu_{\text{motor}}(v_i, v_j) = \exp\left(-\frac{(s_i - s_j)^2}{2\sigma^2}\right)
+\end{equation}
+where $\sigma$ controls the width of the similarity region. This formulation ensures that patients with nearly identical progression rates receive high similarity scores, while the score decays smoothly as differences increase.
+
+\subsubsection{Fuzzy Graph Attention}
+The GAT can be modified to leverage fuzzy edge weights. Instead of learning attention from scratch, we can use fuzzy similarity as a prior:
+\begin{equation}
+e_{ij} = \tilde{A}_{ij} \cdot \text{LeakyReLU}\left(\vec{a}^T [\mathbf{W}\vec{h}_i \| \mathbf{W}\vec{h}_j]\right)
+\end{equation}
+
+This "fuzzy-modulated attention" encourages the model to attend more strongly to neighbors with high fuzzy similarity, incorporating domain knowledge into the learning process. The fuzzy prior can stabilize training, particularly with limited data, by guiding attention toward clinically meaningful connections \cite{abu2019mixhop}.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{fig7_crisp_vs_fuzzy.png}}
+\caption{Conceptual difference between crisp and fuzzy computing. (a) A crisp membership function uses a hard threshold, while a fuzzy function allows for partial membership (degrees of truth). (b) Crisp clustering (e.g., K-Means) assigns each patient to one subtype, while fuzzy clustering (e.g., FCM) assigns a membership vector, better modeling patients on a phenotypic continuum.}
+\label{fig:crisp_fuzzy}
+\end{figure}
+
+\subsection{Fuzzy C-Means for Patient Subtyping}
+
+PD exhibits clinical subtypes with distinct prognoses: tremor-dominant, postural instability and gait difficulty (PIGD), and diffuse malignant forms \cite{fereshtehnejad2017clinical}. However, patients rarely fit neatly into one category; many exhibit mixed phenotypes.
+
+\subsubsection{Crisp vs. Fuzzy Clustering}
+Traditional clustering algorithms like K-means assign each patient to exactly one cluster. This hard assignment is problematic when patients lie on phenotypic spectra. Fuzzy C-Means (FCM) \cite{bezdek1981pattern} addresses this by allowing partial membership in multiple clusters.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{FuzzyClustering.jpg}}
+\caption{Hard or "Crisp" vs Fuzzy Clustering. \cite{}}
+\label{fig:crisp_vs_fuzzy}
+\end{figure}
+
+FCM minimizes the objective function:
+\begin{equation}
+J_m = \sum_{i=1}^{N} \sum_{j=1}^{C} u_{ij}^m \|\vec{h}'_i - \mathbf{c}_j\|^2
+\end{equation}
+subject to $\sum_{j=1}^{C} u_{ij} = 1$ for all $i$, where:
+\begin{itemize}
+    \item $N$ is the number of patients
+    \item $C$ is the number of clusters (subtypes)
+    \item $\vec{h}'_i$ is the population-informed embedding from GAT
+    \item $\mathbf{c}_j$ is the centroid of cluster $j$
+    \item $u_{ij} \in [0,1]$ is the membership of patient $i$ in cluster $j$
+    \item $m > 1$ is the fuzzification parameter controlling membership "softness"
+\end{itemize}
+
+The membership degrees are computed as:
+\begin{equation}
+u_{ij} = \frac{1}{\sum_{k=1}^{C} \left(\frac{\|\vec{h}'_i - \mathbf{c}_j\|}{\|\vec{h}'_i - \mathbf{c}_k\|}\right)^{2/(m-1)}}
+\end{equation}
+
+\subsubsection{Clinical Interpretation}
+FCM yields a membership vector $\vec{u}_i = [u_{i1}, \ldots, u_{iC}]$ for each patient, representing their "phenotypic signature." A patient might be "60\% tremor-dominant, 30\% PIGD, 10\% rapid-decline," providing a nuanced characterization that aligns with clinical observation \cite{mu2017parkinson}.
+
+These membership vectors can be used in two ways:
+\begin{enumerate}
+    \item \textbf{Feature Augmentation:} Concatenate $\vec{u}_i$ with $\vec{h}'_i$ before the prediction layer, explicitly informing the model of subtype memberships.
+    \item \textbf{Subtype-Specific Models:} Train separate prediction heads for each subtype, then combine predictions weighted by membership degrees.
+\end{enumerate}
+
+\subsection{Adaptive Neuro-Fuzzy Inference Systems}
+
+For fully interpretable models, Adaptive Neuro-Fuzzy Inference Systems (ANFIS) \cite{jang1993anfis} combine neural learning with fuzzy rule-based reasoning. ANFIS represents a Takagi-Sugeno fuzzy system as a neural network, enabling gradient-based optimization of fuzzy rules.
+
+A typical ANFIS rule has the form:
+\begin{equation}
+\text{IF } x_1 \text{ is } A_1 \text{ AND } x_2 \text{ is } A_2 \text{ THEN } y = p_1x_1 + p_2x_2 + p_0
+\end{equation}
+where $A_1, A_2$ are fuzzy sets and $p_i$ are consequent parameters.
+
+While GIMAN's deep architecture may be too complex for full ANFIS replacement, ANFIS could be applied to specific components. For instance, the final prediction layer could be replaced with an ANFIS module that takes GAT embeddings as inputs and produces predictions via interpretable fuzzy rules. This would enable clinicians to inspect rules like "IF genetic risk is HIGH AND motor progression is RAPID THEN survival risk is VERY HIGH," providing transparency lacking in black-box neural networks \cite{adeli2010fuzzy}.
+
+\section{Implementation and Expected Benefits}
+
+\subsection{Hybrid Architecture Design}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{fig4_hybrid_architecture.png}}
+\caption{Proposed Hybrid Neuro-Fuzzy GIMAN Architecture. GAT embeddings ($\vec{h}'_i$) are used by an FCM module to generate a subtype membership vector ($\vec{u}_i$). This vector is concatenated with the original embedding to create a "subtype-aware" feature vector, explicitly informing the final prediction heads.}
+\label{fig:hybrid_arch}
+\end{figure}
+
+The proposed neuro-fuzzy GIMAN integrates fuzzy computing at three levels:
+
+\textbf{Level 1 - Graph Construction:} Replace binary $k$-NN with fuzzy similarity graph using domain-specific membership functions.
+
+\textbf{Level 2 - Subtype Discovery:} Apply FCM to GAT embeddings, yielding fuzzy subtype memberships.
+
+\textbf{Level 3 - Prediction:} Augment features with fuzzy memberships and/or employ fuzzy-modulated attention.
+
+This modular design allows incremental adoption. Each fuzzy component can be added and evaluated independently, facilitating ablation studies to quantify individual contributions.
+
+\subsection{Training Considerations}
+
+Fuzzy components introduce additional hyperparameters: fuzzification parameter $m$, membership function widths $\sigma$, and aggregation weights $w_i$. These can be treated as hyperparameters tuned via cross-validation or as learnable parameters optimized end-to-end.
+
+For end-to-end learning, fuzzy operations must be differentiable. Fortunately, Gaussian membership functions and fuzzy aggregation operators are smooth and differentiable, enabling backpropagation through the entire pipeline \cite{guney2020fuzzy}.
+
+\subsection{Expected Benefits}
+
+\subsubsection{Robustness}
+Fuzzy models are inherently more robust to noise and outliers. Small perturbations in input features cause gradual changes in membership degrees rather than discrete category flips. This stability is crucial for clinical deployment, where measurement noise is unavoidable \cite{kuncheva2010fuzzy}.
+
+\subsubsection{Interpretability}
+Fuzzy memberships and rules provide human-readable explanations. Clinicians can inspect a patient's subtype profile, understand which fuzzy rules fired for a prediction, and trace attention weights to influential similar patients. This transparency is essential for clinical trust and regulatory approval \cite{holzinger2019causability}.
+
+\subsubsection{Clinical Alignment}
+By modeling disease as a continuum rather than discrete states, the hybrid model better reflects biological reality. Fuzzy transitions between disease stages align with clinical experience, where progression is gradual and boundaries are blurred \cite{dubois2014advancing}.
+
+\subsubsection{Knowledge Integration}
+Fuzzy membership functions can encode domain expertise. For instance, clinician-defined thresholds for "high genetic risk" can initialize membership functions, guiding learning toward clinically meaningful representations \cite{torres2006fuzzy}.
+
+\subsection{Validation Strategy}
+
+Rigorous validation is essential. We propose a multi-faceted evaluation:
+
+\textbf{Predictive Performance:} Compare hybrid model against crisp GIMAN using metrics appropriate for survival analysis (C-index, integrated Brier score) and classification (AUC-ROC, calibration plots).
+
+\textbf{Robustness Analysis:} Evaluate performance under simulated noise, missing data, and distribution shifts to quantify robustness improvements.
+
+\textbf{Interpretability Assessment:} Conduct user studies with clinicians, evaluating whether fuzzy explanations improve understanding and trust compared to black-box predictions.
+
+\textbf{Subtype Validation:} Compare FCM-derived subtypes against established clinical subtypes and assess whether fuzzy memberships better capture phenotypic heterogeneity.
+
+\section{Conclusion and Future Directions}
+
+This paper reviewed soft computing approaches to Parkinson's disease prognosis through the lens of the Graph-Informed Multimodal Attention Network. We analyzed GIMAN's sophisticated neuro-computing architecture, which leverages multimodal deep learning, graph neural networks, and survival analysis to achieve state-of-the-art prognostic performance.
+
+Building on this foundation, we proposed a novel hybrid neuro-fuzzy enhancement integrating fuzzy logic at multiple levels: fuzzy patient similarity graphs, Fuzzy C-Means clustering for subtype discovery, and fuzzy-modulated graph attention. This hybrid approach aims to address inherent uncertainties in medical data, yielding models that are more robust, interpretable, and aligned with clinical reasoning.
+
+The future of medical AI likely lies in such hybrid systems that synergistically combine the learning power of neural networks with the uncertainty handling and transparency of fuzzy logic. Several promising directions warrant exploration:
+
+\textbf{Explainable AI:} Integrating fuzzy logic with attention visualization and counterfactual explanations could yield comprehensive explanation frameworks satisfying diverse stakeholder needs.
+
+\textbf{Federated Learning:} Fuzzy aggregation operators could enable privacy-preserving multi-site learning, combining knowledge from distributed medical centers without sharing patient data.
+
+\textbf{Active Learning:} Fuzzy uncertainty measures could guide intelligent data acquisition, identifying patients whose additional data would most reduce model uncertainty.
+
+\textbf{Causal Inference:} Combining graph neural networks with causal discovery and fuzzy do-calculus could enable estimation of treatment effects and personalized intervention planning.
+
+As we advance toward precision medicine, hybrid soft computing systems offer a principled approach to building AI systems that are not only accurate but also trustworthy, interpretable, and aligned with the complex, uncertain nature of clinical practice.
+
+\begin{thebibliography}{00}
+
+\bibitem{dorsey2018parkinsons}
+E. R. Dorsey et al., "The emerging evidence of the Parkinson pandemic," \textit{Journal of Parkinson's Disease}, vol. 8, no. s1, pp. S3--S8, 2018. \href{https://doi.org/10.3233/JPD-181474}{https://doi.org/10.3233/JPD-181474}
+
+\bibitem{schapira2017nonmotor}
+A. H. V. Schapira, K. R. Chaudhuri, and P. Jenner, "Non-motor features of Parkinson disease," \textit{Nature Reviews Neuroscience}, vol. 18, no. 7, pp. 435--450, 2017. \href{https://doi.org/10.1038/nrn.2017.62}{https://doi.org/10.1038/nrn.2017.62}
+
+\bibitem{fereshtehnejad2017clinical}
+S.-M. Fereshtehnejad et al., "Clinical criteria for subtyping Parkinson's disease: biomarkers and longitudinal progression," \textit{Brain}, vol. 140, no. 7, pp. 1959--1976, 2017. \href{https://doi.org/10.1093/brain/awx118}{https://doi.org/10.1093/brain/awx118}
+
+\bibitem{marek2011ppmi}
+K. Marek et al., "The Parkinson Progression Marker Initiative (PPMI)," \textit{Progress in Neurobiology}, vol. 95, no. 4, pp. 629--635, 2011. \href{https://doi.org/10.1016/j.pneurobio.2011.09.005}{https://doi.org/10.1016/j.pneurobio.2011.09.005}
+
+\bibitem{zadeh1994soft}
+L. A. Zadeh, "Fuzzy logic, neural networks, and soft computing," \textit{Communications of the ACM}, vol. 37, no. 3, pp. 77--84, 1994. \href{https://doi.org/10.1145/175247.175255}{https://doi.org/10.1145/175247.175255}
+
+\bibitem{kuncheva2010fuzzy}
+L. I. Kuncheva and F. Steimann, "Fuzzy diagnosis," \textit{Artificial Intelligence in Medicine}, vol. 16, no. 2, pp. 121--128, 1999. \href{https://doi.org/10.1016/S0933-3657(98)00069-4}{https://doi.org/10.1016/S0933-3657(98)00069-4}
+
+\bibitem{zadeh1965fuzzy}
+L. A. Zadeh, "Fuzzy sets," \textit{Information and Control}, vol. 8, no. 3, pp. 338--353, 1965. \href{https://doi.org/10.1016/S0019-9958(65)90241-X}{https://doi.org/10.1016/S0019-9958(65)90241-X}
+
+\bibitem{litjens2017survey}
+G. Litjens et al., "A survey on deep learning in medical image analysis," \textit{Medical Image Analysis}, vol. 42, pp. 60--88, 2017. \href{https://doi.org/10.1016/j.media.2017.07.005}{https://doi.org/10.1016/j.media.2017.07.005}
+
+\bibitem{eraslan2019deep}
+G. Eraslan et al., "Deep learning: new computational modelling techniques for genomics," \textit{Nature Reviews Genetics}, vol. 20, no. 7, pp. 389--403, 2019. \href{https://doi.org/10.1038/s41576-019-0122-6}{https://doi.org/10.1038/s41576-019-0122-6}
+
+\bibitem{rajkomar2019machine}
+A. Rajkomar et al., "Machine learning in medicine," \textit{New England Journal of Medicine}, vol. 380, no. 14, pp. 1347--1358, 2019. \href{https://doi.org/10.1056/NEJMra1814259}{https://doi.org/10.1056/NEJMra1814259}
+
+\bibitem{pota2013fuzzy}
+M. Pota et al., "A fuzzy approach to medical diagnosis," in \textit{Proc. IEEE Int. Conf. Fuzzy Systems}, 2013, pp. 1--8. \href{https://doi.org/10.1109/FUZZ-IEEE.2013.6622487}{https://doi.org/10.1109/FUZZ-IEEE.2013.6622487}
+
+\bibitem{adeli2010fuzzy}
+A. Adeli and M. Neshat, "A fuzzy expert system for heart disease diagnosis," in \textit{Proc. Int. Multi-Conf. Engineers and Computer Scientists}, vol. 1, 2010, pp. 134--139.
+
+\bibitem{torres2006fuzzy}
+A. Torres and J. J. Nieto, "Fuzzy logic in medicine and bioinformatics," \textit{Journal of Biomedicine and Biotechnology}, vol. 2006, Article ID 91908, 2006. \href{https://doi.org/10.1155/JBB/2006/91908}{https://doi.org/10.1155/JBB/2006/91908}
+
+\bibitem{baltrusaitis2018multimodal}
+T. Baltrusaitis, C. Ahuja, and L.-P. Morency, "Multimodal machine learning: A survey and taxonomy," \textit{IEEE Trans. Pattern Analysis and Machine Intelligence}, vol. 41, no. 2, pp. 423--443, 2018. \href{https://doi.org/10.1109/TPAMI.2018.2798607}{https://doi.org/10.1109/TPAMI.2018.2798607}
+
+\bibitem{marek2001dopamine}
+K. Marek et al., "Dopamine transporter brain imaging to assess the effects of pramipexole vs levodopa on Parkinson disease progression," \textit{JAMA}, vol. 287, no. 13, pp. 1653--1661, 2002. \href{https://doi.org/10.1001/jama.287.13.1653}{https://doi.org/10.1001/jama.287.13.1653}
+
+\bibitem{bai2018recurrent}
+S. Bai, J. Z. Kolter, and V. Koltun, "An empirical evaluation of generic convolutional and recurrent networks for sequence modeling," \textit{arXiv preprint arXiv:1803.01271}, 2018. \href{https://arxiv.org/abs/1803.01271}{https://arxiv.org/abs/1803.01271}
+
+\bibitem{wen20203d}
+J. Wen et al., "Convolutional neural networks for classification of Alzheimer's disease: Overview and reproducible evaluation," \textit{Medical Image Analysis}, vol. 63, p. 101694, 2020. \href{https://doi.org/10.1016/j.media.2020.101694}{https://doi.org/10.1016/j.media.2020.101694}
+
+\bibitem{choi2016doctor}
+E. Choi et al., "Doctor AI: Predicting clinical events via recurrent neural networks," in \textit{Proc. Machine Learning for Healthcare Conf.}, 2016, pp. 301--318. \href{https://arxiv.org/abs/1511.05942}{https://arxiv.org/abs/1511.05942}
+
+\bibitem{nalls2019identification}
+M. A. Nalls et al., "Identification of novel risk loci, causal insights, and heritable risk for Parkinson's disease: a meta-analysis of genome-wide association studies," \textit{The Lancet Neurology}, vol. 18, no. 12, pp. 1091--1102, 2019. \href{https://doi.org/10.1016/S1474-4422(19)30320-5}{https://doi.org/10.1016/S1474-4422(19)30320-5}
+
+\bibitem{ji2021dnabert}
+Y. Ji et al., "DNABERT: pre-trained bidirectional encoder representations from transformers model for DNA-language in genome," \textit{Bioinformatics}, vol. 37, no. 15, pp. 2112--2120, 2021. \href{https://doi.org/10.1093/bioinformatics/btab083}{https://doi.org/10.1093/bioinformatics/btab083}
+
+\bibitem{avsec2021effective}
+Ž. Avsec et al., "Effective gene expression prediction from sequence by integrating long-range interactions," \textit{Nature Methods}, vol. 18, no. 10, pp. 1196--1203, 2021. \href{https://doi.org/10.1038/s41592-021-01252-x}{https://doi.org/10.1038/s41592-021-01252-x}
+
+\bibitem{goetz2008movement}
+C. G. Goetz et al., "Movement Disorder Society-sponsored revision of the Unified Parkinson's Disease Rating Scale (MDS-UPDRS)," \textit{Movement Disorders}, vol. 23, no. 15, pp. 2129--2170, 2008. \href{https://doi.org/10.1002/mds.22340}{https://doi.org/10.1002/mds.22340}
+
+\bibitem{holden2018progression}
+S. K. Holden et al., "Progression of MDS-UPDRS scores over five years in de novo Parkinson disease from the Parkinson's Progression Markers Initiative cohort," \textit{Movement Disorders Clinical Practice}, vol. 5, no. 1, pp. 47--53, 2018. \href{https://doi.org/10.1002/mdc3.12553}{https://doi.org/10.1002/mdc3.12553}
+
+\bibitem{che2018recurrent}
+Z. Che et al., "Recurrent neural networks for multivariate time series with missing values," \textit{Scientific Reports}, vol. 8, no. 1, pp. 1--12, 2018. \href{https://doi.org/10.1038/s41598-018-24271-9}{https://doi.org/10.1038/s41598-018-24271-9}
+
+\bibitem{wang2019patient}
+Xiao Wang, Houye Ji, Chuan Shi, Bai Wang, Yanfang Ye, Peng Cui, and Philip S Yu. 2019. Heterogeneous Graph Attention Network. In The World Wide Web Conference. in \textit{Association for Computing Machinery} New York, NY, USA, 2019. \href{https://doi.org/10.1145/3308558.3313562}{https://doi.org/10.1145/3308558.3313562}
+
+\bibitem{velickovic2018graph}
+P. Veličković et al., "Graph attention networks," in \textit{Proc. Int. Conf. Learning Representations}, 2018. \href{https://arxiv.org/abs/1710.10903}{https://arxiv.org/abs/1710.10903}
+
+\bibitem{ying2019gnnexplainer}
+R. Ying et al., "GNNExplainer: Generating explanations for graph neural networks," in \textit{Advances in Neural Information Processing Systems}, vol. 32, 2019. \href{https://arxiv.org/abs/1903.03894}{https://arxiv.org/abs/1903.03894}
+
+\bibitem{brody2022attentive}
+S. Brody, U. Alon, and E. Yahav, "How attentive are graph attention networks?" in \textit{Proc. Int. Conf. Learning Representations}, 2022. \href{https://arxiv.org/abs/2105.14491}{https://arxiv.org/abs/2105.14491}
+
+\bibitem{cox1972regression}
+D. R. Cox, "Regression models and life-tables," \textit{Journal of the Royal Statistical Society: Series B (Methodological)}, vol. 34, no. 2, pp. 187--202, 1972. \href{https://doi.org/10.1111/j.2517-6161.1972.tb00899.x}{https://doi.org/10.1111/j.2517-6161.1972.tb00899.x}
+
+\bibitem{katzman2018deepsurv}
+J. L. Katzman et al., "DeepSurv: personalized treatment recommender system using a Cox proportional hazards deep neural network," \textit{BMC Medical Research Methodology}, vol. 18, no. 1, p. 24, 2018. \href{https://doi.org/10.1186/s12874-018-0482-1}{https://doi.org/10.1186/s12874-018-0482-1}
+
+\bibitem{lee2018deephit}
+C. Lee, W. R. Zame, J. Yoon, and M. van der Schaar, "DeepHit: A deep learning approach to survival analysis with competing risks," in \textit{Proc. AAAI Conf. Artificial Intelligence}, vol. 32, 2018. \href{https://arxiv.org/abs/1802.06713}{https://arxiv.org/abs/1802.06713}
+
+\bibitem{dubois2014advancing}
+B. Dubois et al., "Advancing research diagnostic criteria for Alzheimer's disease: the IWG-2 criteria," \textit{The Lancet Neurology}, vol. 13, no. 6, pp. 614--629, 2014. \href{https://doi.org/10.1016/S1474-4422(14)70090-0}{https://doi.org/10.1016/S1474-4422(14)70090-0}
+
+\bibitem{klement2013triangular}
+E. P. Klement, R. Mesiar, and E. Pap, \textit{Triangular Norms}. Springer Science \& Business Media, 2013. \href{https://doi.org/10.1007/978-94-015-9540-7}{https://doi.org/10.1007/978-94-015-9540-7}
+
+\bibitem{abu2019mixhop}
+S. Abu-El-Haija et al., "MixHop: Higher-order graph convolutional architectures via sparsified neighborhood mixing," in \textit{Proc. Int. Conf. Machine Learning}, 2019, pp. 21--29. \href{https://arxiv.org/abs/1905.00067}{https://arxiv.org/abs/1905.00067}
+
+\bibitem{bezdek1981pattern}
+J. C. Bezdek, \textit{Pattern Recognition with Fuzzy Objective Function Algorithms}. Springer Science \& Business Media, 1981. \href{https://doi.org/10.1007/978-1-4757-0450-1}{https://doi.org/10.1007/978-1-4757-0450-1}
+
+\bibitem{mu2017parkinson}
+J. Mu et al., "Parkinson's disease subtypes identified from cluster analysis of motor and non-motor symptoms," \textit{Frontiers in Aging Neuroscience}, vol. 9, p. 301, 2017. \href{https://doi.org/10.3389/fnagi.2017.00301}{https://doi.org/10.3389/fnagi.2017.00301}
+
+\bibitem{jang1993anfis}
+J.-S. R. Jang, "ANFIS: adaptive-network-based fuzzy inference system," \textit{IEEE Trans. Systems, Man, and Cybernetics}, vol. 23, no. 3, pp. 665--685, 1993. \href{https://doi.org/10.1109/21.256541}{https://doi.org/10.1109/21.256541}
+
+\bibitem{guney2020fuzzy}
+K. Guney and N. Sarikaya, "Comparison of Mamdani and Sugeno fuzzy inference system models for resonant frequency calculation of rectangular microstrip antennas," \textit{Progress In Electromagnetics Research B}, vol. 12, pp. 81--104, 2009. \href{https://doi.org/10.2528/PIERB08121302}{https://doi.org/10.2528/PIERB08121302}
+
+\bibitem{holzinger2019causability}
+A. Holzinger et al., "Causability and explainability of artificial intelligence in medicine," \textit{Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery}, vol. 9, no. 4, p. e1312, 2019. \href{https://doi.org/10.1002/widm.1312}{https://doi.org/10.1002/widm.1312}
+
+\bibitem{stockley201biomarkerspd}
+Stockley, Robert, "Biomarkers in chronic obstructive pulmonary disease: confusing or useful?,"
+\textit{International Journal of Chronic Obstructive Pulmonary Disease}, vol. 9, pp. 163--177, 2014. \href{https://doi.org/10.2147/COPD.S42362}{https://doi.org/10.2147/COPD.S42362}
+
+\end{thebibliography}
+
+\end{document}

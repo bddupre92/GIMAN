@@ -1,0 +1,92 @@
+\documentclass[9pt,twocolumn,twoside]{article}
+
+% Nature Machine Intelligence formatting
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% Custom commands
+\newcommand{\giman}{GIMAN}
+\newcommand{\gat}{GAT}
+\newcommand{\ig}{IntegratedGradients}
+\newcommand{\shap}{GradientSHAP}
+
+% Hyperref settings
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue
+}
+
+% Caption formatting
+\captionsetup{font=small,labelfont=bf}
+
+% Title and authors
+\title{\textbf{Interpretable Graph Neural Networks for Parkinson's Disease Prognosis: A Comprehensive Explainability Framework}}
+
+\author{
+[Author Names]$^{1,2}$ \\
+\\
+\small $^1$[Institution Name], [Department] \\
+\small $^2$[Institution Name], [Department] \\
+\small Correspondence: [email@institution.edu]
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% Abstract
+\input{abstract}
+
+% Main sections
+\section{Introduction}
+\input{introduction}
+
+\section{Methods}
+\input{methods}
+
+\section{Results}
+\input{results}
+
+\section{Discussion}
+\input{discussion}
+
+\section{Data Availability}
+Data used in this study were obtained from the Parkinson's Progression Markers Initiative (PPMI) database (\url{www.ppmi-info.org/data}). PPMI is sponsored and partially funded by The Michael J. Fox Foundation for Parkinson's Research. Access to PPMI data requires registration and approval at \url{www.ppmi-info.org}.
+
+\section{Code Availability}
+Code for the \giman{} framework and explainability analyses is available at [GitHub repository to be created upon acceptance].
+
+\section{Acknowledgments}
+Data used in the preparation of this article were obtained from the Parkinson's Progression Markers Initiative (PPMI) database (\url{www.ppmi-info.org/data}). For up-to-date information on the study, visit \url{www.ppmi-info.org}. PPMI is sponsored and partially funded by The Michael J. Fox Foundation for Parkinson's Research and funding partners listed at \url{www.ppmi-info.org/fundingpartners}.
+
+\section{Author Contributions}
+[To be filled in with specific contributions]
+
+\section{Competing Interests}
+The authors declare no competing interests.
+
+% References
+\bibliographystyle{naturemag}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,134 @@
+% Methods: GIMAN Architecture
+
+The Graph-Informed Multimodal Attention Network (\giman) employs Graph Attention Networks (GATs)\cite{velickovic2018graph} to learn patient representations from multimodal graphs.
+
+\subsubsection{Graph Attention Networks}
+
+GATs extend graph convolutional networks by computing edge-specific attention coefficients, allowing the model to weigh neighbor importance adaptively\cite{velickovic2018graph}.
+
+\paragraph{Attention Mechanism.}
+For patient $i$ with neighbors $\mathcal{N}(i)$, the GAT layer computes:
+
+\begin{equation}
+    \mathbf{h}_i^{(l+1)} = \sigma \left( \sum_{j \in \mathcal{N}(i) \cup \{i\}} \alpha_{ij}^{(l)} \mathbf{W}^{(l)} \mathbf{h}_j^{(l)} \right)
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\mathbf{h}_i^{(l)} \in \mathbb{R}^{d_l}$: Node embedding at layer $l$ (initial: $\mathbf{h}_i^{(0)} = \mathbf{x}_i$)
+    \item $\mathbf{W}^{(l)} \in \mathbb{R}^{d_{l+1} \times d_l}$: Learnable transformation matrix
+    \item $\alpha_{ij}^{(l)}$: Attention coefficient for edge $(i,j)$
+    \item $\sigma$: Non-linearity (ELU activation\cite{clevert2015fast})
+\end{itemize}
+
+Attention coefficients are computed via:
+
+\begin{align}
+    e_{ij}^{(l)} &= \text{LeakyReLU}(\mathbf{a}^{(l)\top} [\mathbf{W}^{(l)} \mathbf{h}_i^{(l)} \| \mathbf{W}^{(l)} \mathbf{h}_j^{(l)}]) \\
+    \alpha_{ij}^{(l)} &= \frac{\exp(e_{ij}^{(l)})}{\sum_{k \in \mathcal{N}(i) \cup \{i\}} \exp(e_{ik}^{(l)})}
+\end{align}
+
+where $\mathbf{a}^{(l)}$ is a learnable attention vector and $\|$ denotes concatenation. This mechanism allows the model to learn which neighbors are most informative for each patient.
+
+\paragraph{Multi-Head Attention.}
+To stabilize learning and capture diverse relationships, we employ $K=4$ attention heads:
+
+\begin{equation}
+    \mathbf{h}_i^{(l+1)} = \|_{k=1}^K \sigma \left( \sum_{j \in \mathcal{N}(i)} \alpha_{ij}^{(l,k)} \mathbf{W}^{(l,k)} \mathbf{h}_j^{(l)} \right)
+\end{equation}
+
+Each head learns independent attention patterns. For the final layer, we average across heads instead of concatenating to produce fixed-size representations.
+
+\subsubsection{GIMAN Architecture}
+
+The full \giman\ model consists of:
+
+\begin{enumerate}
+    \item \textbf{Input layer.} Node features $\mathbf{X} \in \mathbb{R}^{n \times 87}$ (Phase 4) or $\mathbb{R}^{n \times 78}$ (Phase 5).
+    
+    \item \textbf{GAT layers.} Three GAT layers with dimensions:
+    \begin{itemize}
+        \item Layer 1: $87 \to 128$ (4 heads $\times$ 32 dims) + dropout (0.3)
+        \item Layer 2: $128 \to 64$ (4 heads $\times$ 16 dims) + dropout (0.3)
+        \item Layer 3: $64 \to 32$ (4 heads, averaged) + dropout (0.2)
+    \end{itemize}
+    Dropout prevents overfitting on small medical datasets\cite{srivastava2014dropout}.
+    
+    \item \textbf{Task-specific heads.} The learned 32-dimensional embeddings $\mathbf{H} \in \mathbb{R}^{n \times 32}$ are fed to task-specific output layers:
+    \begin{itemize}
+        \item \textit{Phase 4 (subtype classification):} 2-layer MLP (32 $\to$ 16 $\to$ 3 classes) + softmax
+        \item \textit{Phase 5 (survival prediction):} Cox proportional hazards output (32 $\to$ 1 log-hazard) + partial likelihood loss\cite{faraggi1995neural}
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Training Procedures}
+
+\paragraph{Loss Functions.}
+\begin{itemize}
+    \item \textbf{Phase 4:} Cross-entropy loss for 3-class subtype classification:
+    \begin{equation}
+        \mathcal{L}_{\text{CE}} = -\frac{1}{n} \sum_{i=1}^n \sum_{c=1}^3 y_{ic} \log(\hat{y}_{ic})
+    \end{equation}
+    
+    \item \textbf{Phase 5:} Cox partial likelihood loss for survival analysis:
+    \begin{equation}
+        \mathcal{L}_{\text{Cox}} = -\sum_{i \in \mathcal{D}} \left[ \eta_i - \log \sum_{j \in \mathcal{R}(t_i)} \exp(\eta_j) \right]
+    \end{equation}
+    where $\mathcal{D}$ is the set of events (conversions), $\mathcal{R}(t_i)$ is the risk set at time $t_i$, and $\eta_i$ is the log-hazard for patient $i$.
+\end{itemize}
+
+\paragraph{Optimization.}
+\begin{itemize}
+    \item Optimizer: Adam\cite{kingma2014adam} with learning rate $10^{-3}$, weight decay $10^{-4}$
+    \item Learning rate scheduling: ReduceLROnPlateau (factor=0.5, patience=10 epochs)
+    \item Early stopping: Monitor validation loss, patience=20 epochs
+    \item Batch processing: Full-batch training (medical graphs are small enough)
+    \item Training epochs: Max 200, typically converges by 80-100
+\end{itemize}
+
+\paragraph{Train/Validation/Test Split.}
+We used stratified random splits:
+\begin{itemize}
+    \item 60\% training, 20\% validation, 20\% test
+    \item Stratification by outcome label (Phase 4: subtype; Phase 5: conversion status)
+    \item Fixed random seed for reproducibility
+    \item 5-fold cross-validation for hyperparameter tuning (Supplementary Table S2)
+\end{itemize}
+
+\subsubsection{Hyperparameter Tuning}
+
+We tuned:
+\begin{itemize}
+    \item Graph sparsity: $k \in \{5, 10, 15, 20\}$ (selected $k=10$)
+    \item GAT hidden dimensions: \{64, 128, 256\} (selected 128)
+    \item Number of GAT layers: \{2, 3, 4\} (selected 3)
+    \item Attention heads: \{2, 4, 8\} (selected 4)
+    \item Dropout: \{0.1, 0.2, 0.3, 0.5\} (selected 0.2-0.3)
+    \item Learning rate: $\{10^{-4}, 10^{-3}, 10^{-2}\}$ (selected $10^{-3}$)
+\end{itemize}
+
+Tuning used validation set performance (accuracy for Phase 4, C-index for Phase 5). Final evaluation used the held-out test set.
+
+\subsubsection{Baseline Comparisons}
+
+To demonstrate \giman's advantages, we compared against:
+
+\begin{itemize}
+    \item \textbf{Traditional ML:} Logistic regression, random forest, XGBoost on concatenated features (no graph)
+    \item \textbf{Deep learning:} Multi-layer perceptrons (MLPs) with same architecture but no graph structure
+    \item \textbf{Graph baselines:} Graph Convolutional Networks (GCNs)\cite{kipf2017semi} (uniform neighbor weighting, no attention)
+    \item \textbf{Ablations:} GIMAN without imaging, without genetic, without clinical features
+\end{itemize}
+
+All baselines used identical train/val/test splits and hyperparameter tuning budgets.
+
+\subsubsection{Implementation Details}
+
+\begin{itemize}
+    \item Framework: PyTorch 2.0\cite{paszke2019pytorch} + PyTorch Geometric 2.3\cite{fey2019fast}
+    \item Hardware: NVIDIA A100 GPU (40GB), training time: 15-30 minutes per model
+    \item Code: Available at [GitHub URL] under MIT license
+    \item Reproducibility: Fixed random seeds (42), deterministic operations enabled
+\end{itemize}
+
+The trained \giman\ models produce patient embeddings $\mathbf{H} \in \mathbb{R}^{n \times 32}$ and task predictions (subtypes, survival risk), which form the basis for explainability analyses (Phase 6).

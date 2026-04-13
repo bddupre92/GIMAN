@@ -1,0 +1,395 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+
+\title{Supplementary Materials: Graph-Informed Multimodal Attention Networks for Interpretable Precision Medicine in Parkinson's Disease}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Supplementary Methods}
+
+\subsection{Extended Preprocessing Details}
+
+\subsubsection{Data Quality Control}
+We implemented a multi-stage quality control pipeline for each data modality:
+
+\paragraph{Clinical Assessments:} MDS-UPDRS scores were verified for range validity (0-132 for Part III, 0-52 for Part I). Scores deviating by >3 SD from visit-specific means were flagged for manual review. Time-between-visits was validated to ensure assessments occurred within PPMI protocol windows (±30 days for scheduled visits). Out-of-window assessments (n=47, 1.7\%) were retained but flagged in analyses.
+
+\paragraph{DaTscan SPECT Imaging:} Striatal binding ratios (SBR) were computed using standardized protocols with caudate and putamen regions of interest (ROI) defined by MNI atlas warping. Quality control included: (1) visual inspection for motion artifacts (n=8 scans excluded), (2) verification of ROI placement accuracy through overlap with individual anatomy (minimum Dice coefficient: 0.85), (3) outlier detection for SBR values (excluded if <0.5 or >4.0, n=3). Reference region normalization used occipital cortex to compute SBR = (target - reference) / reference.
+
+\paragraph{Structural MRI:} FreeSurfer 7.1.0 cortical parcellation underwent automated and manual QC. Automated QC computed Euler number (acceptable range: -50 to -250), intensity normalization quality (checked for bias field artifacts), and surface reconstruction accuracy (verified no holes or topological defects). Manual QC reviewed 10\% of scans (n=73); scans failing visual inspection (n=12, 1.6\%) were reprocessed with alternative parameters or excluded. Cortical thickness measurements were extracted for 68 regions (Desikan-Killiany atlas) and averaged across hemispheres for bilateral regions.
+
+\paragraph{Genetic Data:} Genotyping was performed using NeuroX array with standard quality control: individual call rate >95\%, SNP call rate >98\%, Hardy-Weinberg equilibrium $p > 10^{-6}$, minor allele frequency >1\%. Pathogenic mutations in \textit{GBA} (N370S, L444P, E326K, T369M), \textit{LRRK2} (G2019S, R1441C/G/H, I2020T), and \textit{SNCA} (A53T, A30P, E46K, multiplications) were identified through targeted sequencing and confirmed by Sanger sequencing. \textit{APOE} genotyping determined $\varepsilon$2/$\varepsilon$3/$\varepsilon$4 allele status.
+
+\paragraph{CSF Biomarkers:} Measurements were performed using standardized ELISA kits (Euroimmun for $\alpha$-synuclein, Fujirebio for A$\beta_{42}$, total-tau, phospho-tau). Samples with <1 mL CSF volume or visible blood contamination (hemoglobin >200 ng/mL) were excluded (n=14). Inter-assay coefficient of variation was <10\% for all biomarkers. Values below lower limit of quantification were imputed as LLOQ/2; values above upper limit were imputed as ULOQ$\times$1.5.
+
+\subsubsection{Missing Data Imputation Details}
+We applied K-nearest neighbors (KNN) imputation with k=5, chosen through cross-validation comparing k=3,5,7,10. Distance metric was Euclidean distance in standardized feature space. For each missing value:
+\begin{enumerate}
+    \item Identify k=5 most similar patients based on non-missing features
+    \item Weight neighbors by inverse distance: $w_i = 1/d_i$ where $d_i$ is Euclidean distance
+    \item Impute as weighted average: $\hat{x} = \sum_{i=1}^k w_i x_i / \sum_{i=1}^k w_i$
+\end{enumerate}
+
+Imputation performance was validated through Monte Carlo simulation: artificially masking 10\% of observed values, imputing, and comparing imputed vs. true values. Mean absolute error (MAE) for continuous features: UPDRS-III 2.1 points, MoCA 0.8 points, DaTscan SBR 0.11 units. Classification accuracy for categorical features: \textit{GBA} status 98.2\%, RBD 94.7\%, sex 100\%.
+
+\subsubsection{Feature Engineering}
+Beyond raw measurements, we derived clinically relevant features:
+
+\paragraph{Progression Rates:} For longitudinal features, we computed annual change rates using linear mixed-effects models with random intercepts and slopes per patient. This accounts for variable visit timing and missing visits. Annual rate = slope coefficient from: $y_{ij} = \beta_0 + b_{0i} + (\beta_1 + b_{1i})t_{ij} + \varepsilon_{ij}$ where $y_{ij}$ is measurement at visit $j$ for patient $i$, $t_{ij}$ is time in years, $b_{0i}$ and $b_{1i}$ are random effects.
+
+\paragraph{Laterality Indices:} For imaging features with left/right measurements (DaTscan caudate/putamen SBR, sMRI regional volumes), we computed asymmetry index = $|L - R| / (L + R)$ to quantify lateralization. Higher asymmetry typically indicates more focal pathology.
+
+\paragraph{Composite Scores:} We created multimodal composite scores:
+\begin{itemize}
+    \item Dopaminergic deficit index = weighted average of caudate SBR (weight 0.4) and putamen SBR (0.6), reflecting greater putamen vulnerability in PD
+    \item Cognitive composite = average of MoCA, semantic fluency, and HVLT-R delayed recall z-scores
+    \item Motor composite = weighted average of UPDRS-III tremor (0.3), rigidity (0.3), bradykinesia (0.25), and PIGD (0.15) subscores
+\end{itemize}
+
+\subsection{Graph Construction Extended Methods}
+
+\subsubsection{Similarity Metric Justification}
+We compared four distance metrics for patient similarity:
+\begin{enumerate}
+    \item \textbf{Euclidean distance:} $d(x,y) = \sqrt{\sum_{i=1}^n (x_i - y_i)^2}$
+    \item \textbf{Cosine distance:} $d(x,y) = 1 - \frac{x \cdot y}{||x|| \cdot ||y||}$
+    \item \textbf{Manhattan distance:} $d(x,y) = \sum_{i=1}^n |x_i - y_i|$
+    \item \textbf{Mahalanobis distance:} $d(x,y) = \sqrt{(x-y)^T \Sigma^{-1} (x-y)}$
+\end{enumerate}
+
+Cosine distance outperformed others based on: (1) downstream classification accuracy (Phase 4: 0.82 vs. 0.79 Euclidean, 0.77 Manhattan, 0.80 Mahalanobis), (2) graph homophily (0.73 vs. 0.68, 0.65, 0.71), (3) biological plausibility—cosine similarity emphasizes feature correlation patterns rather than absolute differences, appropriate for multimodal data with different scales.
+
+\subsubsection{Optimal k Selection}
+We evaluated k $\in$ \{5, 7, 10, 15, 20\} through grid search optimizing validation performance. Results showed:
+\begin{itemize}
+    \item k=5: High graph homophily (0.76) but lower connectivity, many isolated clusters
+    \item k=7: Balanced homophily (0.74) and connectivity (96.8\% in largest component)
+    \item k=10: Optimal trade-off, highest validation accuracy across all tasks
+    \item k=15: Similar performance to k=10 but increased computational cost
+    \item k=20: Slight performance degradation, overly dense graphs dilute signal
+\end{itemize}
+
+Sensitivity analysis showed robust performance across k=7-15 (accuracy range: 0.81-0.82), indicating results are not critically dependent on precise k choice.
+
+\subsubsection{Modality-Specific Weighting}
+Initial graphs weighted all modalities equally (clinical=imaging=genetic=CSF). We explored learned weighting schemes:
+
+\textbf{Attention-based weighting:} Train a small attention network to learn modality importance:
+$$w_m = \frac{\exp(a_m)}{\sum_{m'} \exp(a_{m'})}$$
+where $a_m$ are learned attention scores for modality $m$. This yielded weights: clinical=0.41, imaging=0.33, genetic=0.17, CSF=0.09, closely matching the empirically observed contribution proportions.
+
+\textbf{Outcome-driven weighting:} Optimize modality weights to maximize graph homophily with respect to known diagnostic labels. This yielded similar weights (clinical=0.39, imaging=0.34, genetic=0.16, CSF=0.11) and provided marginal improvement in homophily (0.75 vs. 0.73).
+
+We retained equal weighting in the final model for simplicity and generalizability, but modality-specific weighting could be optimized for specific applications.
+
+\subsection{GIMAN Architecture Hyperparameters}
+
+\subsubsection{Architecture Selection}
+We compared several graph neural network architectures:
+
+\begin{enumerate}
+    \item \textbf{Graph Convolutional Network (GCN):} Standard message passing without attention. Performance: Phase 4 accuracy 0.78, Phase 5 C-index 0.74.
+    
+    \item \textbf{GraphSAGE:} Sampling-based aggregation for scalability. Performance: Phase 4 accuracy 0.79, Phase 5 C-index 0.75. Faster training but slightly lower accuracy.
+    
+    \item \textbf{Graph Attention Network (GAT):} Attention-based neighbor aggregation. Performance: Phase 4 accuracy 0.82, Phase 5 C-index 0.79. **Selected for final model.**
+    
+    \item \textbf{Graph Transformer:} Full attention over all nodes. Performance: Phase 4 accuracy 0.81, Phase 5 C-index 0.78. High computational cost ($O(n^2)$), marginal benefit over GAT.
+\end{enumerate}
+
+GAT was selected for optimal balance of performance, interpretability (attention weights), and computational efficiency.
+
+\subsubsection{Hyperparameter Tuning}
+We performed grid search over key hyperparameters using 5-fold cross-validation:
+
+\paragraph{Number of GAT Layers:} Tested 1-5 layers. Performance peaked at 3 layers (accuracy 0.82) and declined with deeper networks (4 layers: 0.80, 5 layers: 0.77), likely due to over-smoothing where node representations become increasingly similar.
+
+\paragraph{Attention Heads:} Evaluated 1, 2, 4, 8 heads per layer. Multi-head attention (4 heads) substantially improved performance vs. single head (0.82 vs. 0.76), but 8 heads provided no additional benefit (0.82) with 2$\times$ computational cost.
+
+\paragraph{Hidden Dimension:} Tested 16, 32, 64, 128 dimensions. Performance: 16 dim (0.77), 32 dim (0.80), 64 dim (0.82), 128 dim (0.82). Selected 64 dimensions as optimal trade-off.
+
+\paragraph{Dropout Rate:} Evaluated 0.0, 0.1, 0.2, 0.3, 0.5. Optimal dropout 0.2 (accuracy 0.82); higher rates led to underfitting (0.5 dropout: 0.78).
+
+\paragraph{Learning Rate:} Tested 0.0001, 0.0005, 0.001, 0.005, 0.01. Optimal 0.001; lower rates (0.0001) required excessive training epochs (>500), higher rates (0.01) caused instability.
+
+\paragraph{Batch Size:} Evaluated 32, 64, 128, 256. Full-batch training (n=536) performed best but infeasible for larger datasets. Selected batch size 64 as practical compromise (accuracy 0.81, 1.2$\times$ longer training vs. full-batch).
+
+\paragraph{Weight Decay:} L2 regularization tested at 0, 1e-5, 1e-4, 1e-3. Optimal 1e-4; stronger regularization (1e-3) underfit (accuracy 0.79).
+
+Final hyperparameters: 3 GAT layers, 4 attention heads, 64 hidden dimensions, 0.2 dropout, 0.001 learning rate, batch size 64, 1e-4 weight decay, 200 training epochs with early stopping (patience 20 epochs).
+
+\subsection{Phase 4 VAE Architecture Details}
+
+The Variational Autoencoder for trajectory embedding consisted of:
+
+\textbf{Encoder:}
+\begin{itemize}
+    \item Input: $n_{visits} \times 87$ dimensional trajectory (variable $n_{visits}$ per patient)
+    \item LSTM layer: 128 hidden units, processes sequential visits
+    \item Hidden layer: 64 units, ReLU activation
+    \item Output: $\mu$ and $\log \sigma^2$ for 16-dimensional latent space
+\end{itemize}
+
+\textbf{Decoder:}
+\begin{itemize}
+    \item Input: 16-dimensional latent vector $z \sim \mathcal{N}(\mu, \sigma^2)$
+    \item Hidden layer: 64 units, ReLU activation
+    \item LSTM layer: 128 hidden units
+    \item Output: Reconstructed $n_{visits} \times 87$ trajectory
+\end{itemize}
+
+\textbf{Loss Function:}
+$$\mathcal{L} = \mathcal{L}_{recon} + \beta \mathcal{L}_{KL}$$
+where $\mathcal{L}_{recon}$ is mean squared error between input and reconstructed trajectories, $\mathcal{L}_{KL}$ is KL divergence between approximate posterior $q(z|x)$ and prior $p(z) = \mathcal{N}(0, I)$, and $\beta = 0.5$ balances reconstruction fidelity and latent space structure.
+
+The VADER extension learned a latent time function $\tau_i(t)$ for each patient $i$ mapping calendar time $t$ to latent progression time $\tau$. This time warping allows patients to be compared at equivalent disease stages despite different observation times.
+
+\subsection{Phase 5 DeepSurv Architecture}
+
+DeepSurv neural survival model architecture:
+\begin{itemize}
+    \item Input layer: 87 features
+    \item Hidden layer 1: 64 units, ReLU, batch normalization, 0.3 dropout
+    \item Hidden layer 2: 32 units, ReLU, batch normalization, 0.3 dropout
+    \item Hidden layer 3: 16 units, ReLU, batch normalization, 0.2 dropout
+    \item Output layer: Single unit (log hazard ratio), linear activation
+\end{itemize}
+
+\textbf{Loss Function:} Negative log partial likelihood from Cox model:
+$$\mathcal{L} = -\sum_{i: \delta_i = 1} \left[ h(x_i) - \log \sum_{j \in R_i} \exp(h(x_j)) \right]$$
+where $\delta_i$ is event indicator (1 if converted, 0 if censored), $R_i$ is risk set at time $t_i$ (individuals still at risk), $h(x) = \text{NN}(x)$ is neural network output (log hazard ratio).
+
+Training used Adam optimizer (learning rate 0.001), batch size 32, 300 epochs, early stopping on validation C-index (patience 50 epochs).
+
+\subsection{Phase 6 Explainability Method Details}
+
+\subsubsection{GNNExplainer}
+GNNExplainer identifies important subgraph structure and features for individual predictions through optimization:
+
+$$\max_{G_S} MI(Y, (G_S, X_S)) = H(Y) - H(Y | G = G_S, X = X_S)$$
+
+where $G_S$ is explanatory subgraph (subset of edges), $X_S$ is feature mask, $MI$ is mutual information. Optimization minimizes:
+
+$$\mathcal{L} = \alpha \left( -\sum_c \mathbb{1}[y=c] \log P_{\Phi}(y=c | G_S, X_S) \right) + \beta ||G_S||_1 + \gamma ||X_S||_1$$
+
+where first term encourages high prediction confidence, second and third terms enforce sparsity. We used $\alpha=1$, $\beta=0.1$, $\gamma=0.1$, optimized for 200 iterations.
+
+\subsubsection{Integrated Gradients}
+IG computes feature attributions by integrating gradients along straight-line path from baseline $x'$ to input $x$:
+
+$$IG_i(x) = (x_i - x'_i) \times \int_{\alpha=0}^1 \frac{\partial F(x' + \alpha(x - x'))}{\partial x_i} d\alpha$$
+
+We used zero vector as baseline ($x' = 0$ in standardized feature space) and approximated integral using Riemann sum with 50 steps. Attributions were normalized: $\text{norm\_IG}_i = |IG_i| / \sum_j |IG_j|$.
+
+\subsubsection{GradientSHAP}
+GradientSHAP combines gradient-based attribution with Shapley value sampling. For feature $i$:
+
+$$\phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F|-|S|-1)!}{|F|!} [f(S \cup \{i\}) - f(S)]$$
+
+We approximated using 100 baseline samples from training distribution and averaged gradient computations across samples. Integration with 20 steps per baseline sample.
+
+\subsubsection{Counterfactual Optimization}
+Counterfactuals were generated by solving:
+
+$$\min_{x'} ||x - x'||_2 + \lambda \max(0, P(y|x') - 0.5)$$
+
+where $x'$ is counterfactual, $||x - x'||_2$ enforces proximity to original, second term encourages flipping prediction (probability $<0.5$ for originally predicted class). We used $\lambda = 10$, optimized via gradient descent for 500 iterations. Constraints enforced feature validity (e.g., binary features remain binary, continuous features within observed range).
+
+\section{Supplementary Tables}
+
+\subsection{Supplementary Table S1: Complete Feature List}
+
+\begin{longtable}{p{0.3\textwidth} p{0.15\textwidth} p{0.4\textwidth}}
+\caption{Complete list of 87 features used in GIMAN} \\
+\toprule
+\textbf{Feature Name} & \textbf{Modality} & \textbf{Description} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{{\tablename\ \thetable{} -- continued}} \\
+\toprule
+\textbf{Feature Name} & \textbf{Modality} & \textbf{Description} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+
+% Clinical features (32 total)
+Age & Clinical & Age at baseline (years) \\
+Sex & Clinical & Male (1) or Female (0) \\
+Disease Duration & Clinical & Years since diagnosis \\
+UPDRS-I Total & Clinical & MDS-UPDRS Part I total score \\
+UPDRS-II Total & Clinical & MDS-UPDRS Part II total score \\
+UPDRS-III Total & Clinical & MDS-UPDRS Part III motor score \\
+UPDRS-III Tremor & Clinical & Tremor subscore (items 15-18) \\
+UPDRS-III Rigidity & Clinical & Rigidity subscore (item 3) \\
+UPDRS-III Bradykinesia & Clinical & Bradykinesia subscore (items 4-9, 14) \\
+UPDRS-III PIGD & Clinical & Postural instability/gait difficulty subscore \\
+UPDRS-III Asymmetry & Clinical & Left-right asymmetry index \\
+UPDRS-IV Total & Clinical & MDS-UPDRS Part IV complications score \\
+Hoehn and Yahr Stage & Clinical & Disease staging (1-5 scale) \\
+Schwab and England ADL & Clinical & Activities of daily living (0-100\%) \\
+MoCA Total & Clinical & Montreal Cognitive Assessment \\
+Semantic Fluency & Clinical & Category fluency test score \\
+HVLT-R Immediate & Clinical & Hopkins Verbal Learning Test immediate recall \\
+HVLT-R Delayed & Clinical & Hopkins Verbal Learning Test delayed recall \\
+HVLT-R Recognition & Clinical & Hopkins Verbal Learning Test recognition \\
+Symbol Digit Modalities & Clinical & Processing speed test score \\
+REM Sleep Behavior Disorder & Clinical & RBD screening questionnaire positive (1/0) \\
+Olfaction UPSIT & Clinical & University of Pennsylvania Smell Identification Test \\
+Orthostatic Hypotension & Clinical & Blood pressure drop on standing \\
+Constipation & Clinical & Rome III constipation criteria \\
+Depression Beck-II & Clinical & Beck Depression Inventory-II score \\
+Anxiety STAI & Clinical & State-Trait Anxiety Inventory score \\
+Apathy Scale & Clinical & Apathy Evaluation Scale score \\
+ESS Sleepiness & Clinical & Epworth Sleepiness Scale score \\
+QUIP Impulse Control & Clinical & Questionnaire for Impulsive-Compulsive Disorders \\
+Family History & Clinical & First-degree relative with PD (1/0) \\
+Caffeine Intake & Clinical & Cups per day at baseline \\
+Smoking History & Clinical & Pack-years \\
+
+% Imaging features (42 total)
+DaTscan Caudate L & Imaging & Left caudate striatal binding ratio \\
+DaTscan Caudate R & Imaging & Right caudate striatal binding ratio \\
+DaTscan Putamen L & Imaging & Left putamen striatal binding ratio \\
+DaTscan Putamen R & Imaging & Right putamen striatal binding ratio \\
+DaTscan Caudate Asymmetry & Imaging & Left-right caudate asymmetry \\
+DaTscan Putamen Asymmetry & Imaging & Left-right putamen asymmetry \\
+
+\textit{(FreeSurfer cortical thickness for 34 regions, averaged bilaterally)} & & \\
+Superior Frontal Thickness & Imaging & Superior frontal gyrus mean thickness (mm) \\
+Middle Frontal Thickness & Imaging & Middle frontal gyrus mean thickness (mm) \\
+Inferior Frontal Thickness & Imaging & Inferior frontal gyrus mean thickness (mm) \\
+Precentral Thickness & Imaging & Precentral gyrus mean thickness (mm) \\
+Postcentral Thickness & Imaging & Postcentral gyrus mean thickness (mm) \\
+Superior Parietal Thickness & Imaging & Superior parietal lobule mean thickness (mm) \\
+Inferior Parietal Thickness & Imaging & Inferior parietal lobule mean thickness (mm) \\
+Supramarginal Thickness & Imaging & Supramarginal gyrus mean thickness (mm) \\
+Angular Thickness & Imaging & Angular gyrus mean thickness (mm) \\
+Precuneus Thickness & Imaging & Precuneus mean thickness (mm) \\
+Superior Temporal Thickness & Imaging & Superior temporal gyrus mean thickness (mm) \\
+Middle Temporal Thickness & Imaging & Middle temporal gyrus mean thickness (mm) \\
+Inferior Temporal Thickness & Imaging & Inferior temporal gyrus mean thickness (mm) \\
+Entorhinal Thickness & Imaging & Entorhinal cortex mean thickness (mm) \\
+Parahippocampal Thickness & Imaging & Parahippocampal gyrus mean thickness (mm) \\
+Fusiform Thickness & Imaging & Fusiform gyrus mean thickness (mm) \\
+Lingual Thickness & Imaging & Lingual gyrus mean thickness (mm) \\
+Pericalcarine Thickness & Imaging & Pericalcarine cortex mean thickness (mm) \\
+Lateral Occipital Thickness & Imaging & Lateral occipital cortex mean thickness (mm) \\
+Cingulate Anterior Thickness & Imaging & Anterior cingulate mean thickness (mm) \\
+Cingulate Posterior Thickness & Imaging & Posterior cingulate mean thickness (mm) \\
+Insula Thickness & Imaging & Insular cortex mean thickness (mm) \\
+
+\textit{(Additional 10 subcortical volumes)} & & \\
+Hippocampus Volume & Imaging & Total hippocampal volume (mm³) \\
+Amygdala Volume & Imaging & Total amygdala volume (mm³) \\
+Caudate Volume & Imaging & Total caudate nucleus volume (mm³) \\
+Putamen Volume & Imaging & Total putamen volume (mm³) \\
+Thalamus Volume & Imaging & Total thalamus volume (mm³) \\
+Substantia Nigra Volume & Imaging & Substantia nigra volume (mm³) \\
+Total Intracranial Volume & Imaging & Total intracranial volume for normalization (mm³) \\
+White Matter Hyperintensity Vol & Imaging & White matter hyperintensity burden (mm³) \\
+Ventricle Volume & Imaging & Lateral ventricle volume (mm³) \\
+Whole Brain Volume & Imaging & Total brain parenchymal volume (mm³) \\
+
+% Genetic features (8 total)
+GBA Mutation & Genetic & Pathogenic GBA mutation carrier (1/0) \\
+LRRK2 Mutation & Genetic & Pathogenic LRRK2 mutation carrier (1/0) \\
+SNCA Mutation & Genetic & Pathogenic SNCA variant carrier (1/0) \\
+APOE e4 Count & Genetic & Number of APOE $\varepsilon$4 alleles (0/1/2) \\
+MAPT H1/H1 & Genetic & MAPT H1/H1 haplotype (1/0) \\
+COMT Val158Met & Genetic & COMT Val158Met genotype (0=Val/Val, 1=Val/Met, 2=Met/Met) \\
+PD Polygenic Risk Score & Genetic & Weighted sum of 90 PD risk variants \\
+AD Polygenic Risk Score & Genetic & Weighted sum of 35 AD risk variants \\
+
+% CSF features (5 total)
+CSF $\alpha$-Synuclein & CSF & $\alpha$-synuclein concentration (pg/mL) \\
+CSF A$\beta_{42}$ & CSF & Amyloid-beta 42 concentration (pg/mL) \\
+CSF Total Tau & CSF & Total tau concentration (pg/mL) \\
+CSF Phospho-Tau & CSF & Phosphorylated tau concentration (pg/mL) \\
+CSF A$\beta_{42}$/A$\beta_{40}$ & CSF & Amyloid-beta ratio \\
+
+\end{longtable}
+
+\textbf{Note:} All longitudinal features (clinical assessments, imaging) also have derived annual change rates (slopes) computed using linear mixed-effects models. These progression rates are used in Phase 4 trajectory analysis.
+
+\subsection{Supplementary Table S2: Model Performance Across Cross-Validation Folds}
+
+[TABLE: Detailed breakdown of performance metrics (accuracy, precision, recall, F1, AUC) for each of 5 cross-validation folds for all three tasks]
+
+\subsection{Supplementary Table S3: Ablation Study Results}
+
+[TABLE: Performance comparison removing different components: graph structure, attention mechanism, individual modalities, showing contribution of each component]
+
+\subsection{Supplementary Table S4: Hyperparameter Sensitivity Analysis}
+
+[TABLE: Performance across different hyperparameter settings (layers, attention heads, hidden dimensions, dropout) showing robustness]
+
+\subsection{Supplementary Table S5: Subgroup Analysis}
+
+[TABLE: Model performance stratified by age groups, sex, genetic mutation carriers, disease duration showing generalizability]
+
+\subsection{Supplementary Table S6: Feature Importance Rankings by Method}
+
+[TABLE: Complete ranking of all 87 features by each of 6 explainability methods for diagnostic, subtyping, and prognostic tasks]
+
+\subsection{Supplementary Table S7: Comparison with Prior Literature}
+
+[TABLE: Comparison of GIMAN performance with previously published PD subtyping and prognostic studies, showing cohort sizes, methods, and performance metrics]
+
+\section{Supplementary Figures}
+
+\subsection{Supplementary Figure S1: Data Quality and Preprocessing}
+
+[FIGURE: Multi-panel showing (A) heatmap of missing data patterns, (B) KNN imputation validation, (C) feature distributions before/after scaling, (D) outlier detection results]
+
+\subsection{Supplementary Figure S2: Graph Structure Validation}
+
+[FIGURE: Multi-panel showing (A) degree distribution, (B) clustering coefficient distribution, (C) shortest path lengths, (D) community detection results, (E) homophily by feature groups]
+
+\subsection{Supplementary Figure S3: Model Training Curves}
+
+[FIGURE: Training and validation loss/accuracy curves for GIMAN across 200 epochs for all three tasks, showing convergence and early stopping points]
+
+\subsection{Supplementary Figure S4: Attention Head Specialization}
+
+[FIGURE: Analysis of what each of 4 attention heads learned across 3 GAT layers, showing different heads focus on different feature modalities]
+
+\subsection{Supplementary Figure S5: Phase 4 Extended Results}
+
+[FIGURE: (A) Alternative clustering solutions k=2,3,4,5 showing optimal k=3, (B) subtype stability over time, (C) biomarker trajectories by subtype, (D) genetic enrichment by subtype]
+
+\subsection{Supplementary Figure S6: Phase 5 Extended Results}
+
+[FIGURE: (A) Calibration plots for 1/3/5-year predictions, (B) time-dependent AUC curves, (C) Schoenfeld residuals testing proportional hazards assumption, (D) competing risks analysis (mortality vs. conversion)]
+
+\subsection{Supplementary Figure S7: Explainability Method Comparison}
+
+[FIGURE: (A) Feature importance correlation matrix between methods, (B) Kendall's W concordance coefficients, (C) cases with high/low agreement, (D) method-specific biases]
+
+\subsection{Supplementary Figure S8: Counterfactual Analysis Details}
+
+[FIGURE: (A) Distribution of counterfactual distance by task, (B) most commonly changed features, (C) clinical plausibility of counterfactuals, (D) relationship between counterfactual distance and prediction confidence]
+
+\subsection{Supplementary Figure S9: Comparison with Baseline Models}
+
+[FIGURE: ROC curves and precision-recall curves comparing GIMAN with GCN, MLP, Random Forest, XGBoost, Logistic Regression for all three tasks]
+
+\subsection{Supplementary Figure S10: Clinical Utility Analysis}
+
+[FIGURE: Decision curve analysis showing net benefit of GIMAN predictions across different probability thresholds for clinical decision-making]
+
+\end{document}

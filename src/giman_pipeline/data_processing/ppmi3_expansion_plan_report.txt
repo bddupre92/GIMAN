@@ -1,0 +1,77 @@
+================================================================================
+PPMI 3 LONGITUDINAL DATASET EXPANSION PLAN
+================================================================================
+Generated: 2025-09-26 21:47:15
+
+EXECUTIVE SUMMARY:
+• We have identified 21 longitudinal patients
+• Total longitudinal sessions: 42
+• This is a 10x increase from our previous 2-patient cohort
+• Expected to significantly improve GIMAN model training and validation
+
+MODALITY BREAKDOWN:
+• DATSCAN:
+  - Patients: 4
+  - Total DICOMs: 8
+  - Avg follow-up: 388 days
+• DaTSCAN:
+  - Patients: 10
+  - Total DICOMs: 20
+  - Avg follow-up: 369 days
+• MPRAGE:
+  - Patients: 1
+  - Total DICOMs: 384
+  - Avg follow-up: 216 days
+• SAG_3D_MPRAGE:
+  - Patients: 6
+  - Total DICOMs: 2,304
+  - Avg follow-up: 354 days
+
+CONVERSION REQUIREMENTS:
+• Structural MRI: 7 patients, 14 sessions
+• DAT-SPECT: 14 patients, 28 sessions
+
+PHASED IMPLEMENTATION PLAN:
+
+High-Priority Structural MRI (6 patients):
+  Priority: HIGH
+  Patients: 7
+  Description: Convert structural MRI for patients with longest follow-up
+  Estimated time: 2-3 hours
+  Patient IDs: 100960, 101021, 100712, 100232, 100677...
+
+High-Priority DAT-SPECT (10 patients):
+  Priority: HIGH
+  Patients: 14
+  Description: Convert DAT-SPECT for patients with longest follow-up
+  Estimated time: 1-2 hours
+  Patient IDs: 130828, 213006, 293487, 239732, 140568...
+
+Remaining Longitudinal Patients (5 patients):
+  Priority: MEDIUM
+  Patients: 0
+  Description: Convert remaining longitudinal imaging data
+  Estimated time: 1-2 hours
+  Patient IDs: 
+
+EXPECTED OUTCOMES:
+• Robust longitudinal dataset for 3D CNN + GRU architecture
+• Multiple timepoints per patient (avg ~1 year follow-up)
+• Both structural and functional imaging modalities
+• Sufficient data for proper train/validation/test splits
+• Ability to study disease progression patterns
+
+NEXT STEPS:
+1. Install/verify dcm2niix conversion tool
+2. Execute Phase 1: High-priority structural MRI conversion
+3. Execute Phase 2: High-priority DAT-SPECT conversion
+4. Validate converted NIfTI files
+5. Execute Phase 3: Remaining conversions
+6. Update GIMAN preprocessing pipeline for expanded dataset
+7. Begin 3D CNN + GRU training with longitudinal cohort
+
+TECHNICAL REQUIREMENTS:
+• dcm2niix converter (for DICOM → NIfTI conversion)
+• ~2-3 GB additional storage for expanded NIfTI files
+• Updated data loading pipelines for larger cohort
+• Longitudinal data handling in GIMAN architecture

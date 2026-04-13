@@ -1,0 +1,61 @@
+schema_version: ev_file_map_v1
+modality_files:
+  - modality_id: canonical_external_unified
+    required: true
+    filename_patterns:
+      - external_unified.csv
+      - unified_longitudinal_early_pd.csv
+      - unified_prodromal_early_pd.csv
+    key_columns: [PATNO, time, event, saa_label]
+    event_id_policy: optional
+  - modality_id: participant_visit
+    required: false
+    filename_patterns:
+      - Participant-Visit_Information__Online_*.csv
+      - Participant-Visit_Information__Online__*.csv
+      - Participant_Visit_Information*.csv
+    key_columns: [PATNO, EVENT_ID]
+    event_id_policy: expected
+  - modality_id: demographics
+    required: false
+    filename_patterns:
+      - Demographics_*.csv
+      - Subject_Cohort_History_*.csv
+    key_columns: [PATNO]
+    event_id_policy: optional
+  - modality_id: clinical_motor
+    required: false
+    filename_patterns:
+      - MDS-UPDRS_Part_III_*.csv
+      - MDS-UPDRS_Part_I_*.csv
+      - MDS_UPDRS_Part_II__Patient_Questionnaire_*.csv
+      - SCOPA-AUT_*.csv
+      - University_of_Pennsylvania_Smell_Identification_Test_UPSIT_*.csv
+    key_columns: [PATNO, EVENT_ID]
+    event_id_policy: expected
+  - modality_id: biospecimen
+    required: false
+    filename_patterns:
+      - Current_Biospecimen_Analysis_Results_*.csv
+      - PPMI_Project_9000_CSF_NEU_NPX_*.csv
+      - PPMI_Project_222_CSF_NEU_NPX_*.csv
+    key_columns: [PATNO, EVENT_ID]
+    event_id_policy: expected
+  - modality_id: genetics
+    required: false
+    filename_patterns:
+      - iu_genetic_consensus_*.csv
+      - PPMI_PD_Variants_Genetic_Status_WGS_*.csv
+      - Genetic_Testing_Results__Online__*.csv
+    key_columns: [PATNO]
+    event_id_policy: optional
+  - modality_id: imaging
+    required: false
+    filename_patterns:
+      - DaTScan_SBR_Analysis_*.csv
+      - Xing_Core_Lab_-_Quant_SBR_*.csv
+      - FS7_ASEG_VOL_*.csv
+      - FS7_APARC_CTH_*.csv
+      - Grey_Matter_Volume_*.csv
+    key_columns: [PATNO, EVENT_ID]
+    event_id_policy: expected

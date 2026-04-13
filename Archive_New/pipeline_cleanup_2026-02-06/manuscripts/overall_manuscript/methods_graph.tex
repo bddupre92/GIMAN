@@ -1,0 +1,85 @@
+% Methods: Graph Construction and Patient Similarity (Phase 3)
+
+Patient similarity graphs provide a structured representation of relationships between individuals based on multimodal features\cite{parisot2018disease,kazi2019graph}. We constructed separate graphs for Phase 4 (PD patients) and Phase 5 (prodromal subjects) cohorts.
+
+\subsubsection{Graph Representation}
+
+A patient similarity graph $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathbf{X})$ consists of:
+\begin{itemize}
+    \item \textbf{Nodes} $\mathcal{V}$: Each patient is a node ($|\mathcal{V}| = n$).
+    \item \textbf{Edges} $\mathcal{E}$: Undirected edges connect similar patients.
+    \item \textbf{Node features} $\mathbf{X} \in \mathbb{R}^{n \times d}$: Each node has a $d$-dimensional feature vector (multimodal features from Phases 1-2).
+\end{itemize}
+
+The graph is represented by an adjacency matrix $\mathbf{A} \in \{0,1\}^{n \times n}$, where $A_{ij} = 1$ indicates an edge between patients $i$ and $j$.
+
+\subsubsection{Edge Construction via K-Nearest Neighbors}
+
+We employed k-nearest neighbors (kNN) to define edges:
+
+\begin{enumerate}
+    \item \textbf{Distance metric.} For each patient pair $(i, j)$, we computed cosine similarity on z-normalized features:
+    \begin{equation}
+        \text{sim}(i, j) = \frac{\mathbf{x}_i \cdot \mathbf{x}_j}{\|\mathbf{x}_i\| \|\mathbf{x}_j\|}
+    \end{equation}
+    Cosine similarity is robust to feature scale differences and captures angular similarity\cite{parisot2018disease}.
+    
+    \item \textbf{Neighbor selection.} For each patient $i$, we identified the $k$ most similar patients and created edges: $A_{ij} = 1$ if $j \in \text{kNN}(i, k)$. The graph is symmetrized: if $i$ is a neighbor of $j$ \textit{or} $j$ is a neighbor of $i$, then $A_{ij} = A_{ji} = 1$.
+    
+    \item \textbf{Hyperparameter selection.} We set $k=10$ based on cross-validation (Supplementary Fig. S1). Smaller $k$ yields sparse graphs with high specificity; larger $k$ increases connectivity but may introduce noise. $k=10$ balanced graph density (mean degree: 18-20 edges per node) with meaningful clinical similarity.
+\end{enumerate}
+
+\subsubsection{Edge Weighting}
+
+While the adjacency matrix $\mathbf{A}$ is binary, we optionally used edge weights $\mathbf{W} \in \mathbb{R}^{n \times n}$ for some analyses:
+\begin{equation}
+    W_{ij} = \begin{cases}
+        \text{sim}(i, j) & \text{if } A_{ij} = 1 \\
+        0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+Weighted edges allow GATs to learn adaptive attention based on raw similarity scores.
+
+\subsubsection{Graph Topology Analysis}
+
+We characterized graph properties to ensure biological plausibility:
+
+\begin{itemize}
+    \item \textbf{Degree distribution:} Mean degree 19.3 (SD: 4.1) for Phase 4, 18.7 (SD: 3.8) for Phase 5. Approximately normal distributions indicated no hubs or isolated nodes.
+    
+    \item \textbf{Clustering coefficient:} Average 0.42 (Phase 4) and 0.39 (Phase 5), higher than random graphs ($p < 0.001$, permutation test), suggesting meaningful patient subgroups.
+    
+    \item \textbf{Connected components:} Both graphs had a single connected component (all patients reachable), ensuring information flow during GNN message passing.
+    
+    \item \textbf{Homophily:} We computed label homophily\cite{zhu2020beyond} for known clinical labels (e.g., H\&Y stage, cognitive impairment). Homophily values of 0.68-0.72 indicated that connected patients share similar clinical states, validating edge construction.
+\end{itemize}
+
+\subsubsection{Modality-Specific Subgraphs}
+
+To assess relative contributions of data modalities, we constructed subgraphs using only clinical, imaging, or genetic features:
+
+\begin{itemize}
+    \item $\mathcal{G}_{\text{clinical}}$: Edges based on clinical scores (\updrs, \moca, non-motor)
+    \item $\mathcal{G}_{\text{imaging}}$: Edges based on DaTscan SBR and MRI cortical thickness
+    \item $\mathcal{G}_{\text{genetic}}$: Edges based on shared genetic variants
+\end{itemize}
+
+Graph overlap analysis (Supplementary Fig. S2) showed that 68\% of edges in the full multimodal graph were supported by $\geq$2 modalities, confirming cross-modal consistency.
+
+\subsubsection{Temporal Graph Construction}
+
+For Phase 4 longitudinal analysis, we constructed \textit{time-varying graphs} where node features $\mathbf{X}(t)$ and edges $\mathbf{A}(t)$ evolve over time. At each annual visit, we recomputed kNN based on current clinical state, capturing dynamic patient similarity as disease progresses. Temporal graphs enabled analysis of how patient neighborhoods shift over disease course (see Phase 6 results).
+
+\subsubsection{Graph Validation}
+
+To validate that constructed graphs capture clinically meaningful similarity:
+
+\begin{enumerate}
+    \item \textbf{Clinical correlation.} We computed pairwise clinical distance (\updrs\ difference) for connected vs. random patient pairs. Connected pairs had 42\% lower \updrs\ difference ($p < 0.001$, Mann-Whitney U test).
+    
+    \item \textbf{Biomarker concordance.} Connected patients exhibited similar DaTscan SBR patterns (Pearson $r = 0.58$) and cortical thickness profiles ($r = 0.51$), both significantly higher than random pairs ($p < 0.001$).
+    
+    \item \textbf{Progression similarity.} For Phase 4, connected patients had more similar \updrs\ progression slopes (mean difference: 1.2 points/year) compared to random pairs (3.8 points/year, $p < 0.001$).
+\end{enumerate}
+
+These results confirm that the graph structure encodes biologically relevant patient similarity, providing a foundation for GNN-based modeling.

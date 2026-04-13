@@ -1,0 +1,20 @@
+\subsection{Study Population and Phenoconversion Definition}
+Prodromal cohort: 412 \ppmi{} participants with RBD (polysomnography-confirmed) and/or hyposmia (University of Pennsylvania Smell Identification Test <15th percentile), but no motor PD (UPDRS-III<15, no dopaminergic medication). Follow-up: 5.1$\pm$1.6 years (range 1.2-8.7). Phenoconversion: UPDRS-III$\geq$15 at two consecutive visits or clinical PD diagnosis by site investigator. Time-to-event: months from baseline to first conversion visit. Censoring: Participants remaining prodromal through last follow-up.
+
+\subsection{Baseline Features}
+Clinical: Age, sex, education, baseline UPDRS-III (0-14), baseline MoCA, RBD status, hyposmia severity, constipation. Biomarkers: DaTscan striatal binding ratio (SBR), CSF $\alpha$-synuclein. Genetics: GBA, LRRK2, SNCA variants. Missing data (<12\% per feature) imputed via MICE.
+
+\subsection{Cox Proportional Hazards Models}
+Standard Cox model\cite{cox1972regression}: $h(t|X) = h_0(t) \exp(\beta^T X)$, where $h_0(t)$ is baseline hazard, $X$ covariates, $\beta$ coefficients. Fitted via partial likelihood. Hazard ratios (HR) with 95\% CI reported. Proportional hazards assumption verified via Schoenfeld residuals.
+
+\subsection{Deep Neural Survival (\deepsurv) Models}
+\deepsurv\cite{katzman2018deepsurv}: Feed-forward neural network parameterizing log-hazard. Architecture: Input layer (18 features) → 3 hidden layers (64, 32, 16 neurons, ReLU activation, dropout 0.3) → Output layer (log-hazard). Loss: negative log partial likelihood. Training: Adam optimizer, learning rate $10^{-3}$, 500 epochs, early stopping (patience 50). 5-fold cross-validation for hyperparameter tuning.
+
+\subsection{Model Evaluation}
+Concordance index (C-index): Probability correctly ordered pairs. Time-dependent AUC at 2, 5, 10 years. Calibration: Observed vs. predicted survival (Kaplan-Meier). Brier score (0=perfect, 0.25=uninformative). DeLong test for AUC comparisons.
+
+\subsection{Risk Stratification and Clinical Utility}
+Tertile-based risk strata: Low (<33rd percentile predicted risk), medium (33-67th), high (>67th). Kaplan-Meier survival by stratum. Sensitivity/specificity for high-risk classification. Positive/negative predictive values.
+
+\subsection{Trial Enrichment Simulation}
+Simulated 2-year preventive trials (neuroprotective agent reducing conversion hazard by 40\%). Standard enrollment: all prodromal. High-risk enrichment: top tertile. Sample size for 80\% power, $\alpha=0.05$, log-rank test. Monte Carlo simulation (10,000 iterations).

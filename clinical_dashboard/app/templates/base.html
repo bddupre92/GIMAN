@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NSD-ISS Clinical Digital Twin{% endblock %}</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stage0: '#2ecc71',
+                        stage1: '#3498db',
+                        stage2b: '#f1c40f',
+                        stage3: '#e67e22',
+                        stage4: '#e74c3c',
+                        stage5: '#9b59b6',
+                        stage6: '#7f8c8d',
+                        clinical: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            200: '#bcccdc',
+                            300: '#9fb3c8',
+                            400: '#829ab1',
+                            500: '#627d98',
+                            600: '#486581',
+                            700: '#334e68',
+                            800: '#243b53',
+                            900: '#102a43',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+
+    <!-- Plotly.js for CIF charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- D3.js v7 for patient similarity graph -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+
+    {% block head %}{% endblock %}
+</head>
+<body class="h-full bg-clinical-50 text-clinical-800">
+    <!-- Navigation bar -->
+    <nav class="bg-clinical-900 text-white shadow-lg">
+        <div class="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <div>
+                        <span class="text-lg font-bold tracking-tight">NSD-ISS Digital Twin</span>
+                        <span class="text-xs text-clinical-300 block -mt-1">Clinical Decision Support</span>
+                    </div>
+                </a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/" class="px-3 py-1 rounded text-sm hover:bg-clinical-700 transition-colors">
+                    Patients
+                </a>
+                <span class="text-clinical-400 text-xs">v0.1 MVP</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-2xl p-6 flex items-center space-x-4">
+            <svg class="animate-spin h-8 w-8 text-clinical-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-clinical-700 font-medium" id="loading-text">Loading models...</span>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="max-w-screen-2xl mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-clinical-100 border-t border-clinical-200 mt-auto py-4 text-center text-xs text-clinical-500">
+        NSD-ISS Clinical Digital Twin Dashboard &mdash; PhD Research by Blair Dupre &mdash;
+        PPMI Data (1,900 patients, 16,699 visits, 2,859 transitions)
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

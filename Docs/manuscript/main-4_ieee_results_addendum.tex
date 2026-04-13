@@ -1,0 +1,60 @@
+\section{Artifact-Backed Internal Validation Update}
+This update replaces unsupported near-perfect claims with evidence from reproducible artifacts generated on the canonical patient-disjoint split. Performance should be interpreted as \emph{internal validation only}.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure01_Internal_Discrimination.png}
+\caption{Internal discrimination metrics (AUC and PR-AUC) for baseline models and FUZZY GIMAN on the canonical split.}
+\label{fig:ieee_internal_discrimination}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure02_Fuzzy_Calibration.png}
+\caption{Calibration diagnostics for FUZZY GIMAN. Post-hoc calibration substantially improves ECE and Brier score.}
+\label{fig:ieee_calibration}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure03_Feature_Importance.png}
+\caption{Top permutation importances for FUZZY GIMAN (AUC-drop criterion).}
+\label{fig:ieee_feature_importance}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure04_DigitalTwin_Sensitivity.png}
+\caption{Digital twin sensitivity by intervention intensity. Stress scenarios produce larger but bounded risk deltas.}
+\label{fig:ieee_twin_sensitivity}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure05_Multimodal_Readiness.png}
+\caption{Multimodal readiness audit summary across source domains.}
+\label{fig:ieee_readiness}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure06_Preprocessing_Transparency.png}
+\caption{Preprocessing transparency: missingness profile, label balance, and time-to-event distribution.}
+\label{fig:ieee_preprocessing}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/visualizations/publication_ieee/Figure07_Clinical_Gates.png}
+\caption{Clinical hardening cycle outcomes. All internal gates pass; external validation remains required.}
+\label{fig:ieee_cycle_gates}
+\end{figure}
+
+\input{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/ieee_tables/table_internal_metrics.tex}
+\input{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/ieee_tables/table_calibration.tex}
+\input{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/ieee_tables/table_cycle_gates.tex}
+
+\section{Clinical Claim Boundary}
+The external validation artifact indicates that clinical deployment claims remain out of scope at this stage. We therefore frame the model as an internally validated, explainable research system pending independent cohort validation.
+
+\noindent\textbf{External validation artifact:} \texttt{/Users/blair.dupre/Library/CloudStorage/GoogleDrive-dupre.blair92@gmail.com/My Drive/CSCI FALL 2025/Docs/audit/EXTERNAL_VALIDATION_REPORT.md}

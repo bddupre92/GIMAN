@@ -1,0 +1,59 @@
+# Python version
+target-version = "py310"
+
+# Line length
+line-length = 88
+
+# Exclude directories and files
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+    "notebooks",  # Jupyter notebooks have different conventions
+    "*.ipynb",
+]
+
+[lint]
+# Enable specific rules
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings  
+    "F",  # Pyflakes
+    "I",  # isort
+    "N",  # pep8-naming
+    "D",  # pydocstyle
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+    "SIM", # flake8-simplify
+    "C4",  # flake8-comprehensions
+]
+
+# Ignore specific rules that are too strict for this project
+ignore = [
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
+    "D203",  # 1 blank line required before class docstring
+    "D213",  # Multi-line docstring summary should start at the second line
+    "E501",  # Line too long (handled by formatter)
+]
+
+[lint.per-file-ignores]
+# Test files can have more relaxed rules
+"tests/*.py" = [
+    "D100", "D101", "D102", "D103",  # Missing docstrings are OK in tests
+    "S101",  # assert statements are expected in tests
+    "PLR2004",  # Magic values are OK in tests
+]
+
+# Allow more flexible rules for scripts
+"*.py" = [
+    "T201",  # print statements OK in scripts
+]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+known-first-party = ["giman_pipeline"]

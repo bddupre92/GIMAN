@@ -18,11 +18,13 @@ def test_imports():
     """Test that our package can be imported."""
     try:
         import giman_pipeline
-        assert hasattr(giman_pipeline, '__version__')
+
+        assert hasattr(giman_pipeline, "__version__")
         assert giman_pipeline.__version__ == "0.1.0"
     except ImportError:
         # If dependencies not installed, skip this test
         import pytest
+
         pytest.skip("giman_pipeline package not available - dependencies not installed")
 
 
@@ -30,8 +32,12 @@ def test_data_processing_imports():
     """Test that data processing modules can be imported."""
     try:
         from giman_pipeline.data_processing import loaders
-        assert hasattr(loaders, 'load_csv_file')
-        assert hasattr(loaders, 'load_ppmi_data')
+
+        assert hasattr(loaders, "load_csv_file")
+        assert hasattr(loaders, "load_ppmi_data")
     except ImportError:
         import pytest
-        pytest.skip("Data processing modules not available - dependencies not installed")
+
+        pytest.skip(
+            "Data processing modules not available - dependencies not installed"
+        )

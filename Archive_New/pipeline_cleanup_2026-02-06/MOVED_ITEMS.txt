@@ -1,0 +1,44 @@
+Dupre-Paper1.pdf
+Dupre-Paper2.tex
+FINAL_PROJECT_PAPER.tex
+GIMAN_Final_Project_Paper.tex
+GIMAN_Presentation_Corrected.md
+GIMAN_Survival_Explanation.md
+Project-Description-SC-F25 (1).pdf
+SciSpace_GIMAN-2.tex
+main.tex
+main-2.tex
+paper_content.txt
+manuscripts
+Phase7_GIMAN_SHAP_Visualization_Pipeline.ipynb
+notebooks
+explainability_env
+saliency_maps
+analyze_phase8_3_results.py
+check_model_outputs.py
+consolidate_phase4_5_results.py
+create_preprocessing_figures.py
+diagnose_training.py
+execute_all_pipelines.py
+phase3_test_outputs
+phase7_checkpoints
+models
+results
+visualizations
+venv
+archive/development/phase10
+archive/development/phase11
+archive/development/phase13
+archive/development/research_plan_phase2
+archive/development/research_plan_phase3
+archive/development/phase4/__pycache__
+archive/development/__pycache__
+archive/development/phase1/__pycache__
+archive/development/phase2/__pycache__
+archive/development/phase3/__pycache__
+archive/development/phase5/__pycache__
+archive/development/phase6/__pycache__
+archive/development/phase7/__pycache__
+archive/development/phase9/__pycache__
+phase3_test_outputs -> phase3_test_outputs_2026-02-06_regen
+spatiotemporal_embedding_analysis.png -> spatiotemporal_embedding_analysis_2026-02-06_regen.png

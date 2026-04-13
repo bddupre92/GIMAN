@@ -1,0 +1,265 @@
+================================================================================
+COMPREHENSIVE PPMI 3 LONGITUDINAL IMAGING ANALYSIS
+================================================================================
+
+OVERALL STATISTICS:
+  Total patients with imaging data: 96
+  Patients with longitudinal data: 21
+  Longitudinal percentage: 21.9%
+
+MODALITY BREAKDOWN:
+  3D_T1-WEIGHTED_MPRAGE:
+    Total patients: 3
+    Longitudinal patients: 0
+    Longitudinal percentage: 0.0%
+  3D_T1_MPRAGE:
+    Total patients: 1
+    Longitudinal patients: 0
+    Longitudinal percentage: 0.0%
+  DATSCAN:
+    Total patients: 18
+    Longitudinal patients: 4
+    Longitudinal percentage: 22.2%
+  DaTSCAN:
+    Total patients: 34
+    Longitudinal patients: 10
+    Longitudinal percentage: 29.4%
+  DaTScan:
+    Total patients: 2
+    Longitudinal patients: 0
+    Longitudinal percentage: 0.0%
+  DaTscan:
+    Total patients: 3
+    Longitudinal patients: 0
+    Longitudinal percentage: 0.0%
+  Datscan:
+    Total patients: 13
+    Longitudinal patients: 0
+    Longitudinal percentage: 0.0%
+  MPRAGE:
+    Total patients: 10
+    Longitudinal patients: 1
+    Longitudinal percentage: 10.0%
+  SAG_3D_MPRAGE:
+    Total patients: 12
+    Longitudinal patients: 6
+    Longitudinal percentage: 50.0%
+
+MULTIMODAL LONGITUDINAL PATIENTS: 0
+
+DETAILED LONGITUDINAL PATIENT LIST:
+--------------------------------------------------
+
+Patient 100232:
+  Total sessions: 2
+  Multimodal: No
+  SAG_3D_MPRAGE:
+    Timepoints: 2
+    Follow-up: 349 days
+    First scan: 2023-06-27
+    Last scan: 2024-06-10
+
+Patient 100677:
+  Total sessions: 2
+  Multimodal: No
+  SAG_3D_MPRAGE:
+    Timepoints: 2
+    Follow-up: 349 days
+    First scan: 2023-08-17
+    Last scan: 2024-07-31
+
+Patient 100712:
+  Total sessions: 2
+  Multimodal: No
+  SAG_3D_MPRAGE:
+    Timepoints: 2
+    Follow-up: 357 days
+    First scan: 2023-09-06
+    Last scan: 2024-08-29
+
+Patient 100960:
+  Total sessions: 2
+  Multimodal: No
+  SAG_3D_MPRAGE:
+    Timepoints: 2
+    Follow-up: 363 days
+    First scan: 2023-07-18
+    Last scan: 2024-07-15
+
+Patient 101021:
+  Total sessions: 2
+  Multimodal: No
+  SAG_3D_MPRAGE:
+    Timepoints: 2
+    Follow-up: 362 days
+    First scan: 2023-06-28
+    Last scan: 2024-06-24
+
+Patient 101178:
+  Total sessions: 2
+  Multimodal: No
+  SAG_3D_MPRAGE:
+    Timepoints: 2
+    Follow-up: 344 days
+    First scan: 2023-08-01
+    Last scan: 2024-07-11
+
+Patient 121109:
+  Total sessions: 2
+  Multimodal: No
+  MPRAGE:
+    Timepoints: 2
+    Follow-up: 216 days
+    First scan: 2024-04-10
+    Last scan: 2024-11-13
+
+Patient 123594:
+  Total sessions: 2
+  Multimodal: No
+  DATSCAN:
+    Timepoints: 2
+    Follow-up: 297 days
+    First scan: 2023-06-08
+    Last scan: 2024-04-01
+
+Patient 130828:
+  Total sessions: 2
+  Multimodal: No
+  DATSCAN:
+    Timepoints: 2
+    Follow-up: 458 days
+    First scan: 2023-05-23
+    Last scan: 2024-08-23
+
+Patient 140568:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 380 days
+    First scan: 2023-05-16
+    Last scan: 2024-05-30
+
+Patient 142957:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 366 days
+    First scan: 2023-06-21
+    Last scan: 2024-06-21
+
+Patient 148093:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 357 days
+    First scan: 2023-06-06
+    Last scan: 2024-05-28
+
+Patient 148699:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 377 days
+    First scan: 2023-06-20
+    Last scan: 2024-07-02
+
+Patient 149511:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 365 days
+    First scan: 2023-07-11
+    Last scan: 2024-07-10
+
+Patient 149516:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 364 days
+    First scan: 2023-09-19
+    Last scan: 2024-09-17
+
+Patient 150505:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 369 days
+    First scan: 2023-07-13
+    Last scan: 2024-07-16
+
+Patient 162793:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 349 days
+    First scan: 2023-10-04
+    Last scan: 2024-09-17
+
+Patient 162994:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 357 days
+    First scan: 2023-09-12
+    Last scan: 2024-09-03
+
+Patient 213006:
+  Total sessions: 2
+  Multimodal: No
+  DATSCAN:
+    Timepoints: 2
+    Follow-up: 412 days
+    First scan: 2023-07-27
+    Last scan: 2024-09-11
+
+Patient 239732:
+  Total sessions: 2
+  Multimodal: No
+  DATSCAN:
+    Timepoints: 2
+    Follow-up: 385 days
+    First scan: 2023-02-07
+    Last scan: 2024-02-28
+
+Patient 293487:
+  Total sessions: 2
+  Multimodal: No
+  DaTSCAN:
+    Timepoints: 2
+    Follow-up: 405 days
+    First scan: 2023-10-17
+    Last scan: 2024-11-26
+
+CLINICAL DATA INTEGRATION:
+  Longitudinal imaging patients with clinical data: 21
+  Patients with both longitudinal imaging and clinical data:
+    100232
+    100677
+    100712
+    100960
+    101021
+    101178
+    121109
+    123594
+    130828
+    140568
+    142957
+    148093
+    148699
+    149511
+    149516
+    150505
+    162793
+    162994
+    213006
+    239732
+    293487

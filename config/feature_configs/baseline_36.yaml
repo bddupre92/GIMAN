@@ -1,0 +1,39 @@
+# Baseline feature configuration for True GIMAN
+# Does NOT include disease-state features (NP3TOT, NP1RTOT, NHY, MCATOT)
+# Use this as the primary result for publication
+#
+# DAT-SPECT SBR is excluded because quantitative SBR analysis was not performed
+# for prodromal patients in PPMI (only PD, HC, and SWEDD cohorts).
+# Imputing an entirely absent modality is not scientifically valid.
+#
+# Modalities with high missingness (structural imaging ~69%, CSF ~78%,
+# cortical thickness ~69%) use learned missing embeddings + availability
+# gating instead of MICE imputation. MICE is only used for modalities
+# with <50% missingness where the MAR assumption is reasonable.
+
+modalities:
+  genetic:
+    features: [LRRK2, GBA, APOE_E4, SNCA, GENETIC_RISK_SCORE]
+    dim: 5
+
+  expanded_clinical:
+    features: [UPDRS_I, UPDRS_II, SCHWAB_ENGLAND, PIGD_SCORE, TREMOR_SCORE]
+    dim: 5
+
+  structural_imaging:
+    features: [CAUDATE_L_VOL, CAUDATE_R_VOL, PUTAMEN_L_VOL, PUTAMEN_R_VOL, HIPPOCAMPUS_L_VOL, HIPPOCAMPUS_R_VOL]
+    dim: 6
+
+  csf_biomarkers:
+    features: [ALPHA_SYNUCLEIN, TAU, ABETA42, PTAU181]
+    dim: 4
+
+  clinical_biomarkers:
+    features: [UPSIT_SCORE, RBD_SCORE, SCOPA_AUT_SCORE, ESS_SCORE]
+    dim: 4
+
+  cortical_thickness:
+    features: [ENTORHINAL_L_CTH, ENTORHINAL_R_CTH, CINGULATE_L_CTH, CINGULATE_R_CTH, PRECENTRAL_L_CTH, PRECENTRAL_R_CTH]
+    dim: 6
+
+total_features: 30

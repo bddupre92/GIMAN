@@ -1,0 +1,112 @@
+% Methods: Data Collection and Preprocessing (Phases 1-2)
+
+\subsubsection{Data Source: Parkinson's Progression Markers Initiative}
+
+We utilized data from the Parkinson's Progression Markers Initiative (\ppmi), a landmark international, multicenter observational study designed to identify PD progression biomarkers\cite{marek2018parkinson}. \ppmi\ enrolled over 2,000 participants across three cohorts: (1) de novo PD patients (drug-naïve at baseline), (2) prodromal subjects (RBD, hyposmia, or genetic risk without motor diagnosis), and (3) healthy controls. Participants underwent annual comprehensive assessments including clinical evaluations, neuroimaging, biospecimen collection, and genetic testing. Data were downloaded from the \ppmi\ database (\url{www.ppmi-info.org/data}) under Data Use Agreement, accessed September 2025.
+
+\subsubsection{Cohort Selection}
+
+For \textbf{Phase 4 (longitudinal analysis)}, we selected PD patients meeting these criteria:
+\begin{itemize}
+    \item Confirmed PD diagnosis (MDS criteria\cite{postuma2015mds})
+    \item Baseline visit (BL) plus $\geq$3 follow-up visits spanning $\geq$2 years
+    \item Complete \updrs-III (motor) and \moca\ (cognitive) assessments at each visit
+    \item No major protocol deviations or data quality flags
+\end{itemize}
+This yielded $n=536$ patients with median 5 years follow-up (range: 2-9 years).
+
+For \textbf{Phase 5 (prodromal prediction)}, we selected prodromal subjects:
+\begin{itemize}
+    \item Enrolled as prodromal (RBD, hyposmia, or genetic risk cohort)
+    \item No PD diagnosis at baseline
+    \item $\geq$1 year follow-up with documented conversion status
+    \item Complete clinical and biomarker data
+\end{itemize}
+This yielded $n=194$ prodromal subjects, of whom 68 converted to clinical PD during follow-up (median time-to-conversion: 3.2 years).
+
+\subsubsection{Multimodal Data Extraction}
+
+We extracted data across four modalities:
+
+\paragraph{Clinical Features.} 
+\begin{itemize}
+    \item Demographics: age, sex, race, education
+    \item Motor: \updrs\ Parts I-III (non-motor experiences, motor experiences, motor examination)
+    \item Cognitive: \moca\ total score (visuospatial, naming, attention, language, abstraction, memory, orientation)
+    \item Non-motor: REM sleep behavior disorder questionnaire (RBDQ), Epworth Sleepiness Scale (ESS), autonomic symptoms
+    \item Olfaction: University of Pennsylvania Smell Identification Test (UPSIT)
+    \item Disease characteristics: disease duration, Hoehn \& Yahr (H\&Y) stage, medication status
+\end{itemize}
+
+\paragraph{Neuroimaging Biomarkers.}
+\begin{itemize}
+    \item \textit{DaTscan (DAT-SPECT):} Striatal Binding Ratios (SBRs) for caudate and putamen, reflecting dopaminergic neuron integrity. SBRs were quantified using standardized templates\cite{marek2018parkinson}.
+    \item \textit{Structural MRI (T1-weighted):} FreeSurfer 7.0\cite{fischl2012freesurfer} automated parcellation provided 68 cortical thickness measures (Desikan-Killiany atlas) and 14 subcortical volumes. We focused on cortical thickness in motor (precentral gyrus), cognitive (frontal, temporal), and visual (occipital) regions.
+\end{itemize}
+
+\paragraph{Genetic Profiles.}
+\begin{itemize}
+    \item \textit{Major PD genes:} LRRK2 (G2019S, R1441G/C), GBA (N370S, L444P, other variants), SNCA (multiplications, A53T)
+    \item \textit{Risk alleles:} APOE $\varepsilon$4 status, MAPT H1/H2 haplotype
+    \item Genetic data were consensus-called across multiple platforms (genotyping arrays, whole-genome sequencing) as per \ppmi\ protocols\cite{blauwendraat2020genetic}.
+\end{itemize}
+
+\paragraph{Longitudinal Trajectories.}
+For Phase 4, we constructed time-series for \updrs-III and \moca\ scores, with median 6 observations per patient (range: 3-10). Event times were normalized to years since baseline.
+
+\subsubsection{Quality Control and Data Cleaning}
+
+We implemented multi-stage quality control:
+
+\begin{enumerate}
+    \item \textbf{Missing data thresholds.} Excluded patients with $>$30\% missing features at baseline or $>$50\% missing longitudinal observations.
+    
+    \item \textbf{Outlier detection.} Flagged and reviewed clinical values $>$3 standard deviations from cohort mean (e.g., \moca\ $<$10 or $>$30). Outliers confirmed as data entry errors were excluded; biologically plausible outliers (e.g., severe cognitive impairment) were retained.
+    
+    \item \textbf{Imaging quality.} Excluded scans with motion artifacts, failed FreeSurfer segmentation, or quality control flags in \ppmi\ imaging protocols.
+    
+    \item \textbf{Trajectory smoothness.} For Phase 4, excluded trajectories with $>$2 non-monotonic jumps (e.g., \updrs\ increase of $>$15 points between consecutive visits), suggestive of medication changes or intercurrent illness.
+\end{enumerate}
+
+\subsubsection{Missing Data Imputation}
+
+After quality control, remaining missing values (median 8\% per feature) were imputed using a hybrid strategy:
+
+\begin{itemize}
+    \item \textbf{Clinical scores:} K-Nearest Neighbors (KNN) imputation ($k=5$) using Euclidean distance on non-missing features. KNN preserves local structure and handles mixed data types\cite{troyanskaya2001missing}.
+    
+    \item \textbf{Imaging biomarkers:} Multiple imputation by chained equations (MICE) with predictive mean matching\cite{buuren2011mice}, generating 10 imputed datasets and averaging.
+    
+    \item \textbf{Genetic variants:} No imputation (coded as binary present/absent); missing = wild-type.
+    
+    \item \textbf{Longitudinal trajectories:} Linear interpolation for single missing visits; exclusion if $>$1 consecutive missing visit.
+\end{itemize}
+
+Sensitivity analyses (Supplementary Methods) confirmed robustness to imputation strategy.
+
+\subsubsection{Feature Engineering}
+
+We engineered time-varying and aggregate features:
+
+\begin{itemize}
+    \item \textbf{Progression slopes:} Linear regression slope of \updrs-III and \moca\ over time (points/year).
+    \item \textbf{Baseline severity:} Baseline \updrs-III and \moca\ z-scores relative to cohort distribution.
+    \item \textbf{Cognitive-motor ratio:} $\moca_{\text{baseline}} / \updrs_{\text{baseline}}$ to capture relative impairment.
+    \item \textbf{Imaging asymmetry:} Absolute difference in left vs. right putamen SBR, a lateralization marker.
+    \item \textbf{Genetic burden:} Binary indicators for any pathogenic variant in LRRK2, GBA, SNCA, or APOE $\varepsilon$4 carrier status.
+\end{itemize}
+
+\subsubsection{Normalization and Scaling}
+
+All continuous features were z-score normalized (mean=0, SD=1) within each cohort (PD vs. prodromal) to account for baseline differences. Categorical features (sex, H\&Y stage) were one-hot encoded. For graph construction and neural network training, features were further scaled to $[0, 1]$ using min-max normalization to ensure numerical stability.
+
+\subsubsection{Final Preprocessed Datasets}
+
+After preprocessing, we generated two master datasets:
+
+\begin{itemize}
+    \item \textbf{Phase 4:} $n=536$ PD patients $\times$ 87 features (42 clinical, 28 imaging, 5 genetic, 12 derived)
+    \item \textbf{Phase 5:} $n=194$ prodromal subjects $\times$ 78 features (39 clinical, 24 imaging, 5 genetic, 10 derived)
+\end{itemize}
+
+These datasets served as input for graph construction (Phase 3) and subsequent modeling (Phases 4-6). Detailed feature lists are provided in Supplementary Table S1.

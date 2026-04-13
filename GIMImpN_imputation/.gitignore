@@ -1,0 +1,51 @@
+# Data files - MUST NOT commit PPMI patient data
+data/
+outputs/
+exports/
+results/
+*.csv
+*.parquet
+*.xlsx
+
+# Model checkpoints and weights
+*.pt
+*.pth
+*.pkl
+*.pickle
+*.npy
+*.npz
+checkpoints/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
