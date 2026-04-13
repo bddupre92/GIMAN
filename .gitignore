@@ -193,3 +193,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 references/nsd-iss_biofind
+
+# Local database dumps
+db_dump/
