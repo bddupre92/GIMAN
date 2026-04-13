@@ -791,34 +791,91 @@ The `GraphDigitalTwin` model uses `gate_linear` (not `gate`), `gat_layers_list` 
 | Phase 1 | **DONE** | Paper 7 | SBR decay calibration, 93.75% LOO, 909/1,065 patients |
 | Phase 2 | **DONE** | Paper 7 | Coupled α-syn + N(t) ODE, T_tox posteriors, 3.29%/yr median |
 | Phase 3 | **DONE** | Papers 8a + 8b | M1 wins (ΔAIC=3,856), spatial propagation NOT detectable |
-| **Phase 4** | **PLANNED — lit review complete** | **Paper 9** | N(t)→DA→UPDRS coupled PK/PD model |
+| **Phase 4** | **ANALYSIS COMPLETE — manuscript drafted** | **Paper 9** | Three-pathway PK/PD: ON-OFF gap interaction POSITIVE (p=0.044), OFF-UPDRS & wearing-off negative |
 | Phase 5 | FUTURE | Paper 10 | Mechanistic vs GIMAN head-to-head benchmark |
 | DeNoPa | FUTURE | Paper 11? | External validation (requires PI collaboration) |
 
-### Phase 4: N(t)→DA→UPDRS Coupled PK/PD Model (Paper 9)
+### Phase 4: Three-Pathway PK/PD Analysis (Paper 9) — ANALYSIS COMPLETE
 
-**Research question (locked 2026-04-12):** "Does a mechanistic model coupling per-patient DaT-SPECT-calibrated neuron death trajectories N(t) to levodopa pharmacodynamics via DA(t) = k_AADC × C_brain_pop(LEDD) × N(t)/N₀ predict longitudinal UPDRS-III trajectories and reproduce the clinically observed wearing-off?"
+**Research question (revised 2026-04-12):** "Does per-patient DaT-SPECT-calibrated N(t) predict treatment benefit (ON-OFF gap), motor trajectory, and wearing-off timing?"
 
-**Framework:** Level 2.5 hybrid — population-average PK (published params from Simon 2016 / Contin 1997) + patient-specific N(t) from Phase 2.
+**Framework:** Level 2.5 hybrid — population-average PK + patient-specific N(t) from Phase 2. Three complementary pathways tested.
 
-**Key equation:** `DA(t) = k_AADC × C_brain_pop(LEDD(t)) × N(t)/N₀` → `UPDRS3(t) = UPDRS3_max × (1 - DA^h / (EC50^h + DA^h))`
+**Key equation (Path B):** `GAP = β₀ + β₁×N(t)/N₀ + β₂×LEDD + β₃×N(t)/N₀×LEDD + (1|patient)`
 
-**Parameters to fit:** k_AADC, EC50, h (3 params from UPDRS + LEDD + N(t))
+**Identifiability:** 3-param Hill model (k_eff, EC50, h) structurally non-identifiable (Jacobian rank 2). Reparametrize to ρ=k_eff/EC50, fix h=2. FIM κ=3.5M → h practically non-identifiable.
 
-**NOT a PBPK model.** Full PBPK is infeasible (no plasma levels) and unnecessary. Only one published levodopa PBPK exists (Wollmer 2022) and it models GI absorption, not disease progression.
+**N(t)/N₀ computation:** `n_frac = (1 - pct_loss_per_yr_median/100)^years` (compound decay, standardized across all paths).
 
-**Data (all available):**
+### Phase 4 Results (2026-04-12)
+
+| Path | Outcome | Headline Result |
+|---|---|---|
+| A: N(t)→OFF-UPDRS | Informative negative | Time-only LME beats N(t) (ΔAIC=+803); N(t)/N₀ ≈ monotonic transform of time |
+| **B: ON-OFF Gap** | **POSITIVE** | N(t)×LEDD interaction p=0.044 (after severity control), ΔAIC=-72 vs baselines |
+| C: Wearing-off timing | Informative negative | ρ=-0.050, p=0.43, C-index=0.515; wearing-off is PK-driven (90.2% event rate) |
+
+**Path B details:** 4,203 paired ON-OFF visits, 1,220 patients. β(n_frac)=-12.57 (fewer neurons → less benefit). Mixed-effects conditional R²=0.491. Hill model fails → sub-EC50 linear regime (h_free=0.13). After severity control (OFF-UPDRS covariate), interaction attenuates 34% but survives (p=0.044). Within-patient first-difference inconclusive (p=0.533, likely underpowered).
+
+**Hypotheses (H1 primary, H2-H5 exploratory):**
+
+- H1 PASS: Interaction model beats baselines (ΔAIC=-72)
+- H2 PASS: N(t) moderates treatment benefit (β=-12.57)
+- H3 FAIL: Wearing-off not predicted by N(t)
+- H4 FAIL: N(t) doesn't beat time for OFF-UPDRS
+- H5 CONFIRMED: Sub-EC50 linear regime
+
+**Data:**
+
 - LEDD: `data/00_raw/LEDD_Concomitant_Medication_Log_12Apr2026.csv` (9,583 rows, 1,678 patients)
-- UPDRS-III: 16,699 visits, 1,900 patients
+- UPDRS-III (ON+OFF): `data/00_raw/MDS-UPDRS Part IV/MDS-UPDRS_Part_III_12Apr2026.csv` (37,398 rows, PDSTATE column)
+- Part IV (wearing-off): `data/00_raw/MDS-UPDRS Part IV/MDS-UPDRS_Part_IV__Motor_Complications_12Apr2026.csv` (10,687 rows, NP4OFF column)
 - Calibrated N(t): 1,065 patients from Phase 2 IS posteriors
+- Assembled dataset: `outputs/mechanistic_twin/phase4/phase4_assembled_data.parquet` (22,270 OFF-state visits)
 
-**Gap confirmed (3-agent lit review + Consensus, 2026-04-12):** No published model couples per-patient DaT-SPECT-calibrated N(t) ODE to levodopa PD response. Primary competitor: Gupta 2025 (Clin Pharmacol Ther) — SBR-directed IRT on 419 PPMI patients, statistical not mechanistic, no medication covariate.
-
-**Key biological finding:** Levodopa does NOT cause neuron death (LEAP trial, Verschuur 2019, NEJM, 236 cit). LEDD modeled as proxy for unmeasured severity, not causal mechanism.
-
+**Competitors:** Gupta 2025 (SBR-IRT, no medication), Véronneau-Veilleux 2020 (generic N(t)), Holford 2006 (empirical NLME)
 **Target venue:** CPT: Pharmacometrics & Systems Pharmacology
+**Manuscript:** `outputs/mechanistic_twin/phase4/latex/main.tex`
+**Figures:** `outputs/mechanistic_twin/phase4/figures/` (10 figures, PNG+PDF)
 
-**Defensive citations needed:** Gupta 2025, Jacqmin 2007 (K-PD framework), Chae 2021, Djaldetti 2018, Verschuur 2019, Véronneau-Veilleux 2020, Ursino 2020, Holford 2006
+### Phase 4 Key Files
+
+**Scripts (12):**
+
+- `scripts/mechanistic_twin/phase4_assemble_ledd_updrs.py` — Data assembly (LEDD + UPDRS ON/OFF + Part IV + posteriors)
+- `scripts/mechanistic_twin/phase4_pkpd_model.py` — Core Hill PK/PD model (42 tests pass)
+- `scripts/mechanistic_twin/phase4_task0_decisive_test.py` — Original + corrected decisive tests
+- `scripts/mechanistic_twin/phase4_identifiability_proof.py` — Jacobian rank + FIM condition number
+- `scripts/mechanistic_twin/phase4_fit_population.py` — Population-level model comparison (3 models)
+- `scripts/mechanistic_twin/phase4_path_a_off_updrs.py` — Path A: N(t)→OFF-UPDRS (5 models)
+- `scripts/mechanistic_twin/phase4_path_b_on_off_gap.py` — Path B: ON-OFF gap (6 models)
+- `scripts/mechanistic_twin/phase4_path_c_wearing_off.py` — Path C: wearing-off survival (KM + Cox)
+- `scripts/mechanistic_twin/phase4_confounding_control.py` — Severity control + first-difference + Granger
+- `scripts/mechanistic_twin/phase4_hypothesis_tests.py` — H1-H5 with BH-FDR correction
+- `scripts/mechanistic_twin/phase4_generate_figures.py` — 10 publication figures
+- `scripts/mechanistic_twin/phase4_refine_priority_figures.py` — Refined Figs 1, 5, 10
+
+**Tests (2):**
+
+- `tests/mechanistic_twin/test_phase4_data_assembly.py` — 18 tests
+- `tests/mechanistic_twin/test_phase4_pkpd_model.py` — 42 tests
+
+### Phase 4 Gotchas
+
+#### T_tox_median vs pct_loss_per_yr_median
+`T_tox_median` from Phase 2 posteriors is in per-SECOND units (~1e-6), giving n_frac ≈ 1.0 (useless). Use `pct_loss_per_yr_median` with compound decay: `n_frac = (1 - pct/100)^years`. Median loss rate is 3.29%/yr → N/N₀ = 0.72 at 10 years.
+
+#### OFF-state UPDRS is irrelevant to LEDD
+OFF-state assessments are done during medication washout. Current LEDD does not mechanistically predict OFF-state UPDRS. The coupled PK/PD model (LEDD×N(t)→UPDRS) only works for the ON-OFF GAP (treatment benefit), not for OFF-state scores.
+
+#### Hill Model Degenerates in PPMI
+PPMI patients are in the sub-EC50 linear regime of the dose-response curve (free Hill h=0.13, R²≈0). The Hill/Emax sigmoid never reaches its inflection point. Use linear interaction models instead.
+
+#### COMT Inhibitor LEDD Values
+613 rows have non-numeric LEDD like 'LD x 0.33' for COMT inhibitors. Use `pd.to_numeric(errors='coerce')` to exclude. These represent multipliers on concurrent levodopa.
+
+#### Confounding by Indication
+LEDD correlates with UPDRS residuals (partial ρ=0.180) but this is confounding (sicker → more LEDD), not mechanistic. The N(t)×LEDD interaction survives severity control (p=0.044) but within-patient first-difference is inconclusive (p=0.533).
 
 ### Connectome Data (downloaded 2026-04-12)
 
