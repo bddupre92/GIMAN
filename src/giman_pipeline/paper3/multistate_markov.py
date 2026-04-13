@@ -1,5 +1,4 @@
-"""
-Continuous-Time Multi-State Markov Model for NSD-ISS Stage Transitions.
+"""Continuous-Time Multi-State Markov Model for NSD-ISS Stage Transitions.
 
 Implements the Kalbfleisch-Lawless (1985) exact likelihood for interval-censored
 panel data, where patients are observed at discrete visits but transitions occur
@@ -21,16 +20,14 @@ from __future__ import annotations
 
 import json
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
 from scipy.linalg import expm
 from scipy.optimize import minimize
 from tqdm import tqdm
-
 
 # NSD-ISS stage ordering: 0, 1, 2B, 3, 4, 5, 6
 STAGE_LABELS = ["0", "1", "2B", "3", "4", "5", "6"]
@@ -39,12 +36,12 @@ N_STATES = len(STAGE_LABELS)
 
 # Core transitions for the covariate model (most data, clinically important)
 CORE_TRANSITIONS = [
-    (STAGE_TO_IDX["2B"], STAGE_TO_IDX["3"]),   # 2B -> 3  forward
-    (STAGE_TO_IDX["3"], STAGE_TO_IDX["4"]),     # 3 -> 4   forward
-    (STAGE_TO_IDX["4"], STAGE_TO_IDX["5"]),     # 4 -> 5   forward
-    (STAGE_TO_IDX["3"], STAGE_TO_IDX["2B"]),    # 3 -> 2B  backward
-    (STAGE_TO_IDX["4"], STAGE_TO_IDX["3"]),     # 4 -> 3   backward
-    (STAGE_TO_IDX["5"], STAGE_TO_IDX["4"]),     # 5 -> 4   backward
+    (STAGE_TO_IDX["2B"], STAGE_TO_IDX["3"]),  # 2B -> 3  forward
+    (STAGE_TO_IDX["3"], STAGE_TO_IDX["4"]),  # 3 -> 4   forward
+    (STAGE_TO_IDX["4"], STAGE_TO_IDX["5"]),  # 4 -> 5   forward
+    (STAGE_TO_IDX["3"], STAGE_TO_IDX["2B"]),  # 3 -> 2B  backward
+    (STAGE_TO_IDX["4"], STAGE_TO_IDX["3"]),  # 4 -> 3   backward
+    (STAGE_TO_IDX["5"], STAGE_TO_IDX["4"]),  # 5 -> 4   backward
 ]
 
 
@@ -61,14 +58,14 @@ class MarkovResult:
     sojourn_times: dict[str, float]  # stage -> mean sojourn time (years)
     transition_probs: dict[str, np.ndarray]  # horizon -> P(t) matrix
     allowed_transitions: list[tuple[int, int]]
-    covariate_names: Optional[list[str]] = None
-    covariate_betas: Optional[np.ndarray] = None  # (n_transitions, n_covariates)
-    covariate_hazard_ratios: Optional[dict] = None
-    bootstrap_ci: Optional[dict] = None
+    covariate_names: list[str] | None = None
+    covariate_betas: np.ndarray | None = None  # (n_transitions, n_covariates)
+    covariate_hazard_ratios: dict | None = None
+    bootstrap_ci: dict | None = None
 
 
 def build_allowed_transitions(
-    transition_matrix: Optional[dict] = None, min_count: int = 5
+    transition_matrix: dict | None = None, min_count: int = 5
 ) -> list[tuple[int, int]]:
     """Determine allowed transitions from observed data."""
     if transition_matrix is None:
@@ -89,9 +86,7 @@ def build_allowed_transitions(
     return sorted(allowed)
 
 
-def _params_to_Q(
-    params: np.ndarray, allowed: list[tuple[int, int]]
-) -> np.ndarray:
+def _params_to_Q(params: np.ndarray, allowed: list[tuple[int, int]]) -> np.ndarray:
     """Convert unconstrained parameters to a valid intensity matrix Q.
 
     Each off-diagonal element q_ij = exp(param) to enforce positivity.
@@ -196,7 +191,7 @@ def _negative_log_likelihood_covariates(
 
 def prepare_panel_data(
     features_df: pd.DataFrame,
-    covariates: Optional[list[str]] = None,
+    covariates: list[str] | None = None,
 ) -> tuple[list, list[str]]:
     """Convert longitudinal features DataFrame to panel observation pairs."""
     df = features_df.sort_values(["PATNO", "months_from_baseline"]).copy()
@@ -209,8 +204,9 @@ def prepare_panel_data(
     patient_ids = df["PATNO"].unique().tolist()
 
     groups = list(df.groupby("PATNO"))
-    for patno, grp in tqdm(groups, desc="Building panel data", unit="patient",
-                           leave=False):
+    for patno, grp in tqdm(
+        groups, desc="Building panel data", unit="patient", leave=False
+    ):
         grp = grp.sort_values("months_from_baseline").reset_index(drop=True)
         if len(grp) < 2:
             continue
@@ -262,8 +258,8 @@ def _initialize_Q(
 
 def fit_homogeneous(
     features_df: pd.DataFrame,
-    allowed: Optional[list[tuple[int, int]]] = None,
-    transition_matrix: Optional[dict] = None,
+    allowed: list[tuple[int, int]] | None = None,
+    transition_matrix: dict | None = None,
     min_transition_count: int = 5,
     max_iter: int = 500,
     verbose: bool = True,
@@ -281,17 +277,26 @@ def fit_homogeneous(
 
     if verbose:
         n_trans = sum(1 for s_f, s_t, _ in panel_data if s_f != s_t)
-        print(f"\nPanel data: {len(panel_data)} observation pairs "
-              f"from {len(patient_ids)} patients, {n_trans} transitions")
+        print(
+            f"\nPanel data: {len(panel_data)} observation pairs "
+            f"from {len(patient_ids)} patients, {n_trans} transitions"
+        )
 
     Q_init = _initialize_Q(panel_data, allowed)
     params_init = _Q_to_params(Q_init, allowed)
 
     if verbose:
-        print(f"Initial NLL: {_negative_log_likelihood(params_init, panel_data, allowed):.1f}")
+        print(
+            f"Initial NLL: {_negative_log_likelihood(params_init, panel_data, allowed):.1f}"
+        )
 
-    pbar = tqdm(total=max_iter, desc="Optimizing Q (homogeneous)",
-                unit="iter", leave=False) if verbose else None
+    pbar = (
+        tqdm(
+            total=max_iter, desc="Optimizing Q (homogeneous)", unit="iter", leave=False
+        )
+        if verbose
+        else None
+    )
     iter_state = {"n": 0, "nll": float("inf")}
 
     def _callback(xk):
@@ -316,8 +321,10 @@ def fit_homogeneous(
     Q_fit = _params_to_Q(result.x, allowed)
 
     if verbose:
-        print(f"Optimization {'converged' if result.success else 'DID NOT CONVERGE'} "
-              f"in {iter_state['n']} iterations")
+        print(
+            f"Optimization {'converged' if result.success else 'DID NOT CONVERGE'} "
+            f"in {iter_state['n']} iterations"
+        )
         print(f"Final NLL: {result.fun:.1f}")
 
     sojourn = {}
@@ -351,8 +358,8 @@ def fit_homogeneous(
 def fit_with_covariates(
     features_df: pd.DataFrame,
     covariate_names: list[str],
-    allowed: Optional[list[tuple[int, int]]] = None,
-    transition_matrix: Optional[dict] = None,
+    allowed: list[tuple[int, int]] | None = None,
+    transition_matrix: dict | None = None,
     min_transition_count: int = 5,
     max_iter: int = 500,
     verbose: bool = True,
@@ -379,8 +386,10 @@ def fit_with_covariates(
     panel_data, patient_ids = prepare_panel_data(df, covariates=covariate_names)
 
     if verbose:
-        print(f"Fitting covariate CTMC: {len(allowed)} transitions, "
-              f"{len(covariate_names)} covariates")
+        print(
+            f"Fitting covariate CTMC: {len(allowed)} transitions, "
+            f"{len(covariate_names)} covariates"
+        )
         print(f"Panel data: {len(panel_data)} pairs from {len(patient_ids)} patients")
 
     n_trans = len(allowed)
@@ -392,11 +401,16 @@ def fit_with_covariates(
     params_init = np.concatenate([base_params, np.zeros(n_trans * n_cov)])
 
     if verbose:
-        print(f"Parameters: {n_trans} intensities + {n_trans * n_cov} covariate effects "
-              f"= {len(params_init)} total")
+        print(
+            f"Parameters: {n_trans} intensities + {n_trans * n_cov} covariate effects "
+            f"= {len(params_init)} total"
+        )
 
-    pbar = tqdm(total=max_iter, desc="Optimizing Q (covariates)",
-                unit="iter", leave=False) if verbose else None
+    pbar = (
+        tqdm(total=max_iter, desc="Optimizing Q (covariates)", unit="iter", leave=False)
+        if verbose
+        else None
+    )
     iter_state = {"n": 0}
 
     def _callback(xk):
@@ -416,8 +430,10 @@ def fit_with_covariates(
         pbar.close()
 
     if verbose:
-        print(f"Optimization {'converged' if result.success else 'DID NOT CONVERGE'} "
-              f"in {iter_state['n']} iterations")
+        print(
+            f"Optimization {'converged' if result.success else 'DID NOT CONVERGE'} "
+            f"in {iter_state['n']} iterations"
+        )
         print(f"Final NLL: {result.fun:.1f}")
 
     base_params_fit = result.x[:n_trans]
@@ -491,10 +507,10 @@ def predict_trajectory(
 
 def predict_patient_trajectory(
     Q: np.ndarray,
-    betas: Optional[np.ndarray],
+    betas: np.ndarray | None,
     allowed: list[tuple[int, int]],
     initial_stage: str,
-    covariates: Optional[np.ndarray],
+    covariates: np.ndarray | None,
     time_horizons_months: list[float],
 ) -> pd.DataFrame:
     """Predict trajectory for a specific patient with covariates."""
@@ -531,8 +547,9 @@ def compute_expected_transition_times(
 
     times = np.arange(dt, max_time_months, dt)
     cdf = np.zeros(len(times))
-    for k, t in enumerate(tqdm(times, desc=f"  FPT {from_stage}->{to_stage}",
-                               unit="pt", leave=False)):
+    for k, t in enumerate(
+        tqdm(times, desc=f"  FPT {from_stage}->{to_stage}", unit="pt", leave=False)
+    ):
         P = _compute_transition_prob(Q_abs, t)
         cdf[k] = P[s_from, s_to]
 
@@ -554,8 +571,12 @@ def compute_expected_transition_times(
         "median_years": float(median_months / 12.0),
         "q25_years": float(q25 / 12.0),
         "q75_years": float(q75 / 12.0),
-        "prob_at_5yr": float(cdf[np.searchsorted(times, 60.0)] if 60.0 < max_time_months else 0),
-        "prob_at_10yr": float(cdf[np.searchsorted(times, 120.0)] if 120.0 < max_time_months else 0),
+        "prob_at_5yr": float(
+            cdf[np.searchsorted(times, 60.0)] if max_time_months > 60.0 else 0
+        ),
+        "prob_at_10yr": float(
+            cdf[np.searchsorted(times, 120.0)] if max_time_months > 120.0 else 0
+        ),
     }
 
 
@@ -576,8 +597,11 @@ def bootstrap_ci(
     Q_samples = []
     sojourn_samples = []
 
-    boot_iter = tqdm(range(n_bootstrap), desc="Bootstrap", unit="resample",
-                     leave=True) if verbose else range(n_bootstrap)
+    boot_iter = (
+        tqdm(range(n_bootstrap), desc="Bootstrap", unit="resample", leave=True)
+        if verbose
+        else range(n_bootstrap)
+    )
     for b in boot_iter:
         boot_patients = rng.choice(patients, size=len(patients), replace=True)
         boot_dfs = []
@@ -636,7 +660,7 @@ def format_Q_matrix(Q: np.ndarray) -> str:
     header = "         " + "".join(f"{s:>9s}" for s in STAGE_LABELS)
     lines.append(header)
     for i, label in enumerate(STAGE_LABELS):
-        vals = "".join(f"{Q[i,j]:9.5f}" for j in range(N_STATES))
+        vals = "".join(f"{Q[i, j]:9.5f}" for j in range(N_STATES))
         lines.append(f"  {label:>4s}  {vals}")
     return "\n".join(lines)
 
@@ -647,7 +671,7 @@ def format_transition_probs(P: np.ndarray, horizon: str) -> str:
     header = "         " + "".join(f"{s:>9s}" for s in STAGE_LABELS)
     lines.append(header)
     for i, label in enumerate(STAGE_LABELS):
-        vals = "".join(f"{P[i,j]:9.4f}" for j in range(N_STATES))
+        vals = "".join(f"{P[i, j]:9.4f}" for j in range(N_STATES))
         lines.append(f"  {label:>4s}  {vals}")
     return "\n".join(lines)
 
@@ -665,12 +689,9 @@ def save_results(result: MarkovResult, output_dir: Path) -> None:
         "converged": result.converged,
         "sojourn_times": result.sojourn_times,
         "allowed_transitions": [
-            (STAGE_LABELS[i], STAGE_LABELS[j])
-            for i, j in result.allowed_transitions
+            (STAGE_LABELS[i], STAGE_LABELS[j]) for i, j in result.allowed_transitions
         ],
-        "transition_probs": {
-            k: v.tolist() for k, v in result.transition_probs.items()
-        },
+        "transition_probs": {k: v.tolist() for k, v in result.transition_probs.items()},
     }
 
     if result.covariate_names is not None:

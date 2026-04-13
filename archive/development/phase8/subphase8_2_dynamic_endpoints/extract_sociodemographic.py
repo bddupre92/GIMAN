@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Expansion: Sociodemographic Feature Extraction
+"""Phase 8.2 Expansion: Sociodemographic Feature Extraction
 
 Purpose:
     Extract sociodemographic features (education, family history) from PPMI
@@ -28,15 +27,13 @@ Phase: 8.2 Feature Expansion
 
 import json
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
 
 
 def load_education(data_dir: Path) -> pd.DataFrame:
-    """
-    Load years of education (EDUCYRS) from Socio-Economics file.
+    """Load years of education (EDUCYRS) from Socio-Economics file.
 
     Education is a proxy for cognitive reserve. Higher education is associated
     with later onset of cognitive symptoms in neurodegenerative disease.
@@ -48,7 +45,10 @@ def load_education(data_dir: Path) -> pd.DataFrame:
         DataFrame with PATNO and EDUCYRS
     """
     socio_file = (
-        data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv"
+        data_dir
+        / "00_raw"
+        / "GIMAN"
+        / "ppmi_data_csv"
         / "Socio-Economics_30Sep2025.csv"
     )
 
@@ -76,16 +76,20 @@ def load_education(data_dir: Path) -> pd.DataFrame:
     else:
         df_combined = df.copy()
 
-    result = df_combined[["PATNO", "EDUCYRS"]].drop_duplicates(
-        subset=["PATNO"], keep="first"
-    ).copy()
+    result = (
+        df_combined[["PATNO", "EDUCYRS"]]
+        .drop_duplicates(subset=["PATNO"], keep="first")
+        .copy()
+    )
 
     result["EDUCYRS"] = pd.to_numeric(result["EDUCYRS"], errors="coerce")
 
     valid_edu = result["EDUCYRS"].dropna()
     if len(valid_edu) > 0:
         print(f"  EDUCYRS range: {valid_edu.min():.0f} - {valid_edu.max():.0f} years")
-        print(f"  EDUCYRS mean: {valid_edu.mean():.1f}, median: {valid_edu.median():.1f}")
+        print(
+            f"  EDUCYRS mean: {valid_edu.mean():.1f}, median: {valid_edu.median():.1f}"
+        )
 
     print(f"  EDUCYRS: {result['EDUCYRS'].notna().sum()}/{len(result)} non-null")
 
@@ -93,8 +97,7 @@ def load_education(data_dir: Path) -> pd.DataFrame:
 
 
 def load_family_history(data_dir: Path) -> pd.DataFrame:
-    """
-    Load family history of PD (ANYFAMPD) from Family_History file.
+    """Load family history of PD (ANYFAMPD) from Family_History file.
 
     ANYFAMPD: Binary indicator for any first- or second-degree relative
     with Parkinson's disease. Family history of PD increases risk 2-3x.
@@ -106,8 +109,7 @@ def load_family_history(data_dir: Path) -> pd.DataFrame:
         DataFrame with PATNO and ANYFAMPD
     """
     fam_file = (
-        data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv"
-        / "Family_History_30Sep2025.csv"
+        data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv" / "Family_History_30Sep2025.csv"
     )
 
     if not fam_file.exists():
@@ -157,12 +159,9 @@ def load_family_history(data_dir: Path) -> pd.DataFrame:
 
 
 def merge_sociodemographic(
-    edu_df: pd.DataFrame,
-    fam_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge sociodemographic features with prodromal cohort.
+    edu_df: pd.DataFrame, fam_df: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge sociodemographic features with prodromal cohort.
 
     Args:
         edu_df: Education DataFrame
@@ -202,12 +201,9 @@ def merge_sociodemographic(
 
 
 def save_sociodemographic(
-    df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    df: pd.DataFrame, coverage_stats: dict[str, float], output_dir: Path
 ) -> None:
-    """
-    Save sociodemographic features and metadata.
+    """Save sociodemographic features and metadata.
 
     Args:
         df: DataFrame with PATNO, EDUCYRS, ANYFAMPD
@@ -233,12 +229,12 @@ def save_sociodemographic(
         "target_coverage": 100.0,
         "source_files": [
             "Socio-Economics_30Sep2025.csv",
-            "Family_History_30Sep2025.csv"
+            "Family_History_30Sep2025.csv",
         ],
         "clinical_relevance": {
             "EDUCYRS": "Cognitive reserve proxy; higher education delays symptom onset",
-            "ANYFAMPD": "Family PD history; 2-3x increased risk with affected relative"
-        }
+            "ANYFAMPD": "Family PD history; 2-3x increased risk with affected relative",
+        },
     }
 
     metadata_file = output_dir / "sociodemographic_metadata.json"
@@ -275,9 +271,7 @@ def main() -> None:
     print("\n" + "-" * 70)
     print("STEP 2: Merge with Prodromal Cohort")
     print("-" * 70)
-    merged_df, coverage_stats = merge_sociodemographic(
-        edu_df, fam_df, data_dir
-    )
+    merged_df, coverage_stats = merge_sociodemographic(edu_df, fam_df, data_dir)
 
     # Save results
     print("\n" + "-" * 70)
@@ -289,7 +283,7 @@ def main() -> None:
     print("\n" + "=" * 70)
     print("SOCIODEMOGRAPHIC EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"  Extracted 2 features: EDUCYRS, ANYFAMPD")
+    print("  Extracted 2 features: EDUCYRS, ANYFAMPD")
     print(f"  Cohort size: {len(merged_df)} patients")
     print(f"  Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"  Output: {output_dir / 'sociodemographic.csv'}")

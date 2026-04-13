@@ -10,7 +10,6 @@ Phase: PhD Paper 1
 
 from __future__ import annotations
 
-import json
 import logging
 import sys
 from pathlib import Path
@@ -23,16 +22,15 @@ from sklearn.impute import SimpleImputer
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from giman_pipeline.staging.target_encoding import (
-    enrich_staging_with_targets,
-    THREE_CLASS_NAMES,
-    OBSERVED_STAGE_NAMES,
-    NSD_POSITIVE_NAMES,
-)
 from giman_pipeline.sota.nsd_iss_benchmark import (
+    format_results_table,
     run_nsd_iss_benchmark,
     save_benchmark_results,
-    format_results_table,
+)
+from giman_pipeline.staging.target_encoding import (
+    NSD_POSITIVE_NAMES,
+    OBSERVED_STAGE_NAMES,
+    THREE_CLASS_NAMES,
 )
 
 logging.basicConfig(
@@ -51,10 +49,21 @@ OUTPUT_DIR = ROOT / "outputs" / "paper1_benchmark"
 # - Staging anchors (circular): putamen SBR is already excluded in assembly
 # - Staging metadata columns
 STAGING_COLS = {
-    "PATNO", "nsd_iss_stage", "nsd_iss_stage_numeric", "nsd_iss_stage_ordinal",
-    "s_positive", "d_positive", "has_clinical_signs", "has_functional_impairment",
-    "functional_impairment_level", "staging_confidence", "n_missing_anchors",
-    "missing_anchors", "target_binary", "target_3class", "target_full_ordinal",
+    "PATNO",
+    "nsd_iss_stage",
+    "nsd_iss_stage_numeric",
+    "nsd_iss_stage_ordinal",
+    "s_positive",
+    "d_positive",
+    "has_clinical_signs",
+    "has_functional_impairment",
+    "functional_impairment_level",
+    "staging_confidence",
+    "n_missing_anchors",
+    "missing_anchors",
+    "target_binary",
+    "target_3class",
+    "target_full_ordinal",
     "target_nsd_positive",
 }
 HIGH_MISS_COLS = {"UPDRS4_TOTAL", "MOCA_TOTAL"}
@@ -77,8 +86,7 @@ def prepare_data(
     """
     # Identify feature columns
     feature_cols = [
-        c for c in df.columns
-        if c not in STAGING_COLS and c not in HIGH_MISS_COLS
+        c for c in df.columns if c not in STAGING_COLS and c not in HIGH_MISS_COLS
     ]
 
     # Filter to valid targets
@@ -100,7 +108,7 @@ def prepare_data(
 
     logger.info(
         f"Prepared data: {X.shape[0]} samples, {X.shape[1]} features, "
-        f"target={target_col}, classes={np.bincount(y, minlength=y.max()+1).tolist()}"
+        f"target={target_col}, classes={np.bincount(y, minlength=y.max() + 1).tolist()}"
     )
 
     return X, y, feature_cols
@@ -121,10 +129,10 @@ def main() -> None:
     report_lines: list[str] = [
         "# Paper 1: NSD-ISS Stage Prediction Benchmark Report",
         "",
-        f"**Date**: February 2026",
+        "**Date**: February 2026",
         f"**Patients**: {len(df)}",
-        f"**CV**: 5-fold stratified",
-        f"**Bootstrap CIs**: 1000 iterations",
+        "**CV**: 5-fold stratified",
+        "**Bootstrap CIs**: 1000 iterations",
         "",
     ]
 
@@ -135,10 +143,12 @@ def main() -> None:
     X_bin, y_bin, feat_names = prepare_data(df, "target_binary")
 
     from giman_pipeline.staging.target_encoding import compute_balanced_weights
+
     w_bin = compute_balanced_weights(y_bin)
 
     results_binary = run_nsd_iss_benchmark(
-        X=X_bin, y=y_bin,
+        X=X_bin,
+        y=y_bin,
         target_name="binary",
         n_classes=2,
         is_ordinal=False,
@@ -160,7 +170,8 @@ def main() -> None:
     w_3c = compute_balanced_weights(y_3c[y_3c >= 0])
 
     results_3class = run_nsd_iss_benchmark(
-        X=X_3c, y=y_3c,
+        X=X_3c,
+        y=y_3c,
         target_name="three_class",
         n_classes=3,
         is_ordinal=True,
@@ -182,7 +193,8 @@ def main() -> None:
     w_full = compute_balanced_weights(y_full[y_full >= 0])
 
     results_full = run_nsd_iss_benchmark(
-        X=X_full, y=y_full,
+        X=X_full,
+        y=y_full,
         target_name="full_ordinal",
         n_classes=5,
         is_ordinal=True,
@@ -204,7 +216,8 @@ def main() -> None:
     w_nsd = compute_balanced_weights(y_nsd[y_nsd >= 0])
 
     results_nsd = run_nsd_iss_benchmark(
-        X=X_nsd, y=y_nsd,
+        X=X_nsd,
+        y=y_nsd,
         target_name="nsd_positive",
         n_classes=4,
         is_ordinal=True,
@@ -215,28 +228,32 @@ def main() -> None:
     )
     all_results["nsd_positive"] = results_nsd
     save_benchmark_results(results_nsd, OUTPUT_DIR / "nsd_positive_results.json")
-    report_lines.append(format_results_table(results_nsd, "NSD-Positive Subgroup (4-class)"))
+    report_lines.append(
+        format_results_table(results_nsd, "NSD-Positive Subgroup (4-class)")
+    )
     report_lines.append("")
 
     # --- Summary ---
-    report_lines.extend([
-        "---",
-        "",
-        "## Feature Set",
-        f"**Features used ({len(feat_names)})**: {', '.join(feat_names)}",
-        "",
-        f"**Excluded (high missingness)**: {', '.join(HIGH_MISS_COLS)}",
-        "",
-        "**Imputation**: Median imputation for remaining missing values",
-        "",
-        "**Scaling**: Per-fold Z-score standardization (fit on train, transform test)",
-        "",
-        "## Notes",
-        "- Putamen SBR excluded from features (used in D anchor staging definition)",
-        "- NP3TOT excluded (UPDRS-III total used in clinical staging threshold)",
-        "- UPDRS-III subscales used instead (tremor, rigidity, bradykinesia, axial)",
-        "- Caudate SBR and caudate/putamen ratio included (non-circular)",
-    ])
+    report_lines.extend(
+        [
+            "---",
+            "",
+            "## Feature Set",
+            f"**Features used ({len(feat_names)})**: {', '.join(feat_names)}",
+            "",
+            f"**Excluded (high missingness)**: {', '.join(HIGH_MISS_COLS)}",
+            "",
+            "**Imputation**: Median imputation for remaining missing values",
+            "",
+            "**Scaling**: Per-fold Z-score standardization (fit on train, transform test)",
+            "",
+            "## Notes",
+            "- Putamen SBR excluded from features (used in D anchor staging definition)",
+            "- NP3TOT excluded (UPDRS-III total used in clinical staging threshold)",
+            "- UPDRS-III subscales used instead (tremor, rigidity, bradykinesia, axial)",
+            "- Caudate SBR and caudate/putamen ratio included (non-circular)",
+        ]
+    )
 
     report_path = OUTPUT_DIR / "paper1_benchmark_report.md"
     report_path.write_text("\n".join(report_lines), encoding="utf-8")

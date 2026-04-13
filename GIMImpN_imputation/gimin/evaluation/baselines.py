@@ -450,7 +450,8 @@ class SAITSBaseline:
                     batch_first=True,
                 )
                 self_.encoder = nn.TransformerEncoder(
-                    encoder_layer, num_layers=n_layers,
+                    encoder_layer,
+                    num_layers=n_layers,
                 )
                 self_.output = nn.Linear(d_model, 1)
                 self_.n_feat = n_feat
@@ -464,8 +465,12 @@ class SAITSBaseline:
                 return out
 
         model = _SAITSModel(
-            n_features, self.d_model, self.n_heads,
-            self.d_ffn, self.n_layers, self.dropout,
+            n_features,
+            self.d_model,
+            self.n_heads,
+            self.d_ffn,
+            self.n_layers,
+            self.dropout,
         )
         optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
 

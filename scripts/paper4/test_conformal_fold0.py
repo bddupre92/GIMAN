@@ -14,33 +14,30 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from giman_pipeline.paper3.dynamic_deephit import (
-    extract_episodes,
-    build_patient_arrays,
     DeepHitDataset,
-    predict_all,
+    build_patient_arrays,
+    extract_episodes,
     load_deephit_checkpoint,
-    TIME_BIN_ENDS,
+    predict_all,
 )
 from giman_pipeline.paper3.multistate_markov import STAGE_LABELS
-from giman_pipeline.paper4.conformal_survival import (
-    evaluate_conformal_on_fold,
-    conformal_result_to_dict,
-    timing_result_to_dict,
-)
 from giman_pipeline.paper4.calibration import (
     evaluate_calibration,
-    calibration_result_to_dict,
+)
+from giman_pipeline.paper4.conformal_survival import (
+    evaluate_conformal_on_fold,
 )
 
 DATA_DIR = PROJECT_ROOT / "data"
 FEATURES_PATH = DATA_DIR / "07_paper3_features" / "longitudinal_features.csv"
-CHECKPOINT_PATH = PROJECT_ROOT / "outputs" / "paper3_checkpoints" / "deephit" / "fold0_deephit.pt"
+CHECKPOINT_PATH = (
+    PROJECT_ROOT / "outputs" / "paper3_checkpoints" / "deephit" / "fold0_deephit.pt"
+)
 
 
 def main():
@@ -137,7 +134,11 @@ def main():
     if "1yr" in cal_result.ece_by_cause_horizon:
         for k, ece in sorted(cal_result.ece_by_cause_horizon["1yr"].items()):
             label = STAGE_LABELS[k] if k < len(STAGE_LABELS) else f"Cause {k}"
-            print(f"    {label}: ECE={ece:.4f}" if not np.isnan(ece) else f"    {label}: ECE=N/A (insufficient data)")
+            print(
+                f"    {label}: ECE={ece:.4f}"
+                if not np.isnan(ece)
+                else f"    {label}: ECE=N/A (insufficient data)"
+            )
 
     # Hosmer-Lemeshow for major causes at 3yr
     print("\n  Hosmer-Lemeshow test (3yr horizon, major causes):")
@@ -156,7 +157,9 @@ def main():
     print("\n" + "=" * 60)
     coverage_ok = cif_result.marginal_coverage >= 0.85  # Allow 5% slack on fold 0
     print(f"INTEGRATION TEST: {'PASS' if coverage_ok else 'WARN'}")
-    print(f"  Coverage {cif_result.marginal_coverage:.4f} {'>=0.85' if coverage_ok else '<0.85 (below target)'}")
+    print(
+        f"  Coverage {cif_result.marginal_coverage:.4f} {'>=0.85' if coverage_ok else '<0.85 (below target)'}"
+    )
     print("=" * 60)
 
 

@@ -1,0 +1,58 @@
+# Training configuration for Temporal GIMAN
+# Longitudinal Disease Progression Model for Parkinson's Disease
+# Extends True GIMAN with GRU temporal encoder for [N,T,F] sequences
+
+model:
+  # Stages 1-2: Same as true_giman.yaml
+  modality_embed_dim: 64
+  cross_modal_heads: 4
+  fused_dim: 128
+  gat_hidden_dim: 64
+  gat_output_dim: 64
+  gat_heads: 4
+  gat_layers: 3
+  dropout: 0.3
+
+  # Adaptive cross-modal fusion (same as TrueGIMAN)
+  adaptive_fusion: true
+  observed_threshold: 0.3
+
+  # Stage 2.5: Temporal encoder
+  temporal:
+    hidden_dim: 64
+    num_layers: 2
+    type: GRU  # Unidirectional (causal)
+    positional_encoding: continuous_sinusoidal
+
+training:
+  lr: 0.0005  # Lower than cross-sectional (more parameters)
+  weight_decay: 1e-5
+  max_epochs: 200
+  patience: 25
+  grad_clip: 1.0
+  batch_size: 64
+
+  scheduler:
+    type: ReduceLROnPlateau
+    mode: max
+    factor: 0.5
+    patience: 10
+
+loss:
+  cox_weight: 1.0
+  trajectory_weight: 0.5
+
+data:
+  feature_config: config/feature_configs/longitudinal_34.yaml
+  data_dir: data/03_prodromal/longitudinal_training
+  endpoints: data/prodromal_cohort/prodromal_survival_data.csv
+  graph_k: 10
+  k_folds: 5
+  min_visits: 2
+
+evaluation:
+  landmark_times: [12, 24, 36, 48]
+  bootstrap_samples: 1000
+  confidence_level: 0.95
+  primary_metric: dynamic_c_index_24
+  monotonicity_check: true

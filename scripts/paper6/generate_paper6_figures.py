@@ -21,11 +21,12 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from matplotlib.gridspec import GridSpec
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.gridspec import GridSpec
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
@@ -36,13 +37,13 @@ SELECTION_PATH = ROOT / "outputs" / "paper6" / "patient_selection.json"
 
 # Color scheme for NSD-ISS stages
 STAGE_COLORS = {
-    "0": "#2ecc71",   # Green
-    "1": "#3498db",   # Blue
+    "0": "#2ecc71",  # Green
+    "1": "#3498db",  # Blue
     "2B": "#f1c40f",  # Yellow
-    "3": "#e67e22",   # Orange
-    "4": "#e74c3c",   # Red
-    "5": "#9b59b6",   # Purple
-    "6": "#7f8c8d",   # Gray
+    "3": "#e67e22",  # Orange
+    "4": "#e74c3c",  # Red
+    "5": "#9b59b6",  # Purple
+    "6": "#7f8c8d",  # Gray
 }
 
 STAGE_ORDER = ["0", "1", "2B", "3", "4", "5", "6"]
@@ -53,18 +54,20 @@ TIME_BIN_ENDS = [3, 6, 12, 18, 24, 36, 48, 60, 84, 120, 180]
 
 def setup_style():
     """Set publication-quality matplotlib defaults."""
-    plt.rcParams.update({
-        "font.size": 10,
-        "axes.titlesize": 12,
-        "axes.labelsize": 10,
-        "xtick.labelsize": 9,
-        "ytick.labelsize": 9,
-        "legend.fontsize": 8,
-        "figure.dpi": 300,
-        "savefig.dpi": 300,
-        "savefig.bbox": "tight",
-        "font.family": "sans-serif",
-    })
+    plt.rcParams.update(
+        {
+            "font.size": 10,
+            "axes.titlesize": 12,
+            "axes.labelsize": 10,
+            "xtick.labelsize": 9,
+            "ytick.labelsize": 9,
+            "legend.fontsize": 8,
+            "figure.dpi": 300,
+            "savefig.dpi": 300,
+            "savefig.bbox": "tight",
+            "font.family": "sans-serif",
+        }
+    )
 
 
 def fig1_pipeline_architecture():
@@ -85,14 +88,25 @@ def fig1_pipeline_architecture():
 
     for x, y, w, h, label, color in boxes:
         rect = mpatches.FancyBboxPatch(
-            (x, y), w, h,
+            (x, y),
+            w,
+            h,
             boxstyle="round,pad=0.1",
-            facecolor=color, alpha=0.3,
-            edgecolor=color, linewidth=2,
+            facecolor=color,
+            alpha=0.3,
+            edgecolor=color,
+            linewidth=2,
         )
         ax.add_patch(rect)
-        ax.text(x + w / 2, y + h / 2, label,
-                ha="center", va="center", fontsize=9, fontweight="bold")
+        ax.text(
+            x + w / 2,
+            y + h / 2,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+        )
 
     # Arrows
     arrow_style = dict(arrowstyle="->,head_width=0.15", color="#2c3e50", lw=1.5)
@@ -102,7 +116,12 @@ def fig1_pipeline_architecture():
     ax.annotate("", xy=(7.2, 2.3), xytext=(6.5, 3.0), arrowprops=arrow_style)
     ax.annotate("", xy=(7.2, 1.7), xytext=(6.5, 1.0), arrowprops=arrow_style)
 
-    ax.set_title("Unified Clinical Decision Support Pipeline", fontsize=14, fontweight="bold", pad=15)
+    ax.set_title(
+        "Unified Clinical Decision Support Pipeline",
+        fontsize=14,
+        fontweight="bold",
+        pad=15,
+    )
 
     for fmt in ["png", "pdf"]:
         fig.savefig(OUTPUT_DIR / f"fig1_pipeline_architecture.{fmt}")
@@ -120,7 +139,7 @@ def fig_patient_composite(patno: int, result: dict, patient_idx: int):
     stages = result["stage_trajectory"]
     times = result["visit_times_months"]
 
-    for i, (t, s) in enumerate(zip(times, stages)):
+    for i, (t, s) in enumerate(zip(times, stages, strict=False)):
         color = STAGE_COLORS.get(str(s), "#95a5a6")
         y = STAGE_Y.get(str(s), 3)
         ax_a.scatter(t, y, c=color, s=40, zorder=3, edgecolors="black", linewidths=0.5)
@@ -137,8 +156,13 @@ def fig_patient_composite(patno: int, result: dict, patient_idx: int):
     # Highlight current stage
     current = result["current_stage"]
     current_y = STAGE_Y.get(str(current), 3)
-    ax_a.axhline(y=current_y, color=STAGE_COLORS.get(str(current), "gray"),
-                 linestyle="--", alpha=0.4, lw=1)
+    ax_a.axhline(
+        y=current_y,
+        color=STAGE_COLORS.get(str(current), "gray"),
+        linestyle="--",
+        alpha=0.4,
+        lw=1,
+    )
 
     # ── Panel B: CatBoost staging probabilities ──
     ax_b = fig.add_subplot(gs[0, 1])
@@ -148,22 +172,41 @@ def fig_patient_composite(patno: int, result: dict, patient_idx: int):
     prob_values = list(probs.values())
     colors_b = [STAGE_COLORS.get(s, "#95a5a6") for s in stage_labels]
 
-    bars = ax_b.barh(stage_labels, prob_values, color=colors_b, alpha=0.8, edgecolor="black", linewidth=0.5)
+    bars = ax_b.barh(
+        stage_labels,
+        prob_values,
+        color=colors_b,
+        alpha=0.8,
+        edgecolor="black",
+        linewidth=0.5,
+    )
     ax_b.set_xlabel("Probability")
     ax_b.set_xlim(0, 1)
-    ax_b.set_title(f"(B) NSD-ISS Stage Prediction", fontweight="bold")
+    ax_b.set_title("(B) NSD-ISS Stage Prediction", fontweight="bold")
 
     # Annotate predicted and actual
     pred_stage = staging["predicted_stage"]
     actual_stage = staging["actual_stage"]
-    ax_b.text(0.95, 0.95, f"Predicted: Stage {pred_stage}\nActual: Stage {actual_stage}",
-              transform=ax_b.transAxes, ha="right", va="top", fontsize=9,
-              bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+    ax_b.text(
+        0.95,
+        0.95,
+        f"Predicted: Stage {pred_stage}\nActual: Stage {actual_stage}",
+        transform=ax_b.transAxes,
+        ha="right",
+        va="top",
+        fontsize=9,
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+    )
 
-    for bar, val in zip(bars, prob_values):
+    for bar, val in zip(bars, prob_values, strict=False):
         if val > 0.05:
-            ax_b.text(bar.get_width() + 0.02, bar.get_y() + bar.get_height() / 2,
-                      f"{val:.2f}", va="center", fontsize=8)
+            ax_b.text(
+                bar.get_width() + 0.02,
+                bar.get_y() + bar.get_height() / 2,
+                f"{val:.2f}",
+                va="center",
+                fontsize=8,
+            )
 
     # ── Panel C: CIF curves with conformal bands ──
     ax_c = fig.add_subplot(gs[1, 0])
@@ -187,16 +230,26 @@ def fig_patient_composite(patno: int, result: dict, patient_idx: int):
         ax_c.plot(time_months, dh_cif[k], color=color, lw=2, label=label_dh)
 
         # Graph-DT CIF (dashed)
-        ax_c.plot(time_months, gdt_cif[k], color=color, lw=1.5, linestyle="--",
-                  label=label_gdt, alpha=0.7)
+        ax_c.plot(
+            time_months,
+            gdt_cif[k],
+            color=color,
+            lw=1.5,
+            linestyle="--",
+            label=label_gdt,
+            alpha=0.7,
+        )
 
         # Conformal band (fill)
-        ax_c.fill_between(time_months, dh_bands[k, :, 0], dh_bands[k, :, 1],
-                          color=color, alpha=0.15)
+        ax_c.fill_between(
+            time_months, dh_bands[k, :, 0], dh_bands[k, :, 1], color=color, alpha=0.15
+        )
 
     ax_c.set_xlabel("Time from Current Stage (months)")
     ax_c.set_ylabel("Cumulative Incidence")
-    ax_c.set_title("(C) Transition CIF Predictions (90% Conformal Bands)", fontweight="bold")
+    ax_c.set_title(
+        "(C) Transition CIF Predictions (90% Conformal Bands)", fontweight="bold"
+    )
     ax_c.legend(loc="upper left", fontsize=7, framealpha=0.8)
     ax_c.set_xlim(0, 180)
     ax_c.set_ylim(0, 1.05)
@@ -211,10 +264,10 @@ def fig_patient_composite(patno: int, result: dict, patient_idx: int):
         f"{'─' * 30}",
         f"Current Stage: {result['current_stage']}",
         f"Follow-up: {result['follow_up_months']:.0f} months ({result['n_visits']} visits)",
-        f"",
+        "",
         f"CatBoost Predicted: Stage {staging['predicted_stage']}",
         f"   (Prob: {max(prob_values):.1%})",
-        f"",
+        "",
     ]
 
     if top_trans:
@@ -236,12 +289,21 @@ def fig_patient_composite(patno: int, result: dict, patient_idx: int):
                 summary_lines.append(f"  {feat}: {info['pct']:.0f}% missing")
 
     text = "\n".join(summary_lines)
-    ax_d.text(0.05, 0.95, text, transform=ax_d.transAxes,
-              va="top", fontsize=9, fontfamily="monospace",
-              bbox=dict(boxstyle="round,pad=0.5", facecolor="#ecf0f1", alpha=0.5))
+    ax_d.text(
+        0.05,
+        0.95,
+        text,
+        transform=ax_d.transAxes,
+        va="top",
+        fontsize=9,
+        fontfamily="monospace",
+        bbox=dict(boxstyle="round,pad=0.5", facecolor="#ecf0f1", alpha=0.5),
+    )
     ax_d.set_title("(D) Clinical Summary", fontweight="bold")
 
-    fig.suptitle(f"Unified Pipeline — Patient {patno}", fontsize=14, fontweight="bold", y=1.01)
+    fig.suptitle(
+        f"Unified Pipeline — Patient {patno}", fontsize=14, fontweight="bold", y=1.01
+    )
 
     for fmt in ["png", "pdf"]:
         fig.savefig(OUTPUT_DIR / f"fig_patient_{patno}_composite.{fmt}")
@@ -262,8 +324,9 @@ def fig_summary_comparison(all_results: dict, selected_patnos: list[int]):
         stages = r["stage_trajectory"]
         times = r["visit_times_months"]
         ys = [STAGE_Y.get(str(s), 3) + i * 0.08 for s in stages]
-        ax.plot(times, ys, marker=".", markersize=3, lw=0.8, alpha=0.7,
-                label=f"Pt {patno}")
+        ax.plot(
+            times, ys, marker=".", markersize=3, lw=0.8, alpha=0.7, label=f"Pt {patno}"
+        )
 
     ax.set_yticks(range(len(STAGE_ORDER)))
     ax.set_yticklabels([f"Stage {s}" for s in STAGE_ORDER])
@@ -291,10 +354,26 @@ def fig_summary_comparison(all_results: dict, selected_patnos: list[int]):
     pred_y = [STAGE_Y.get(str(s), 3) for s in predicted]
     act_y = [STAGE_Y.get(str(s), 3) for s in actual]
 
-    bars1 = ax.bar(x_pos - bar_width / 2, pred_y, bar_width, label="Predicted",
-                   color="#3498db", alpha=0.7, edgecolor="black", linewidth=0.5)
-    bars2 = ax.bar(x_pos + bar_width / 2, act_y, bar_width, label="Actual",
-                   color="#e74c3c", alpha=0.7, edgecolor="black", linewidth=0.5)
+    bars1 = ax.bar(
+        x_pos - bar_width / 2,
+        pred_y,
+        bar_width,
+        label="Predicted",
+        color="#3498db",
+        alpha=0.7,
+        edgecolor="black",
+        linewidth=0.5,
+    )
+    bars2 = ax.bar(
+        x_pos + bar_width / 2,
+        act_y,
+        bar_width,
+        label="Actual",
+        color="#e74c3c",
+        alpha=0.7,
+        edgecolor="black",
+        linewidth=0.5,
+    )
 
     ax.set_xticks(x_pos)
     ax.set_xticklabels([f"Pt\n{p}" for p in pats], fontsize=8)
@@ -319,7 +398,12 @@ def fig_summary_comparison(all_results: dict, selected_patnos: list[int]):
         gdt_cif = np.array(r["graph_dt_cif"])
         k = top["cause_idx"]
 
-        ax.plot(TIME_BIN_ENDS, dh_cif[k], lw=2, label=f"Pt {patno} →{top['destination_stage']}")
+        ax.plot(
+            TIME_BIN_ENDS,
+            dh_cif[k],
+            lw=2,
+            label=f"Pt {patno} →{top['destination_stage']}",
+        )
 
     ax.set_xlabel("Time from Current Stage (months)")
     ax.set_ylabel("Cumulative Incidence")

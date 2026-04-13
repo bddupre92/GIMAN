@@ -1,0 +1,32 @@
+# Bayesian calibration settings
+
+inference:
+  method: "NUTS"           # NUTS (No-U-Turn Sampler) via Turing.jl
+  n_samples: 1000          # posterior samples per chain
+  n_chains: 4              # parallel chains
+  warmup: 500              # warmup/burn-in samples
+  target_acceptance: 0.8   # NUTS target acceptance rate
+
+graph_prior:
+  k_neighbors: 15          # from GIMAN patient similarity graph
+  similarity_metric: "cosine"
+  alpha: 0.5               # graph shrinkage parameter
+  sigma_0:                  # population-level prior std per parameter
+    k_death: 0.02
+    k_n: 5.0e-8
+    k_e: 5.0e-4
+
+identifiability:
+  method: "differential_algebra"  # via StructuralIdentifiability.jl
+  check_before_calibration: true
+
+solver:
+  algorithm: "CVODE_BDF"   # for stiff systems
+  reltol: 1.0e-8
+  abstol: 1.0e-10
+  maxiters: 100000
+
+population_calibration:
+  n_patients: 2000         # PPMI cohort size
+  min_dat_scans: 2         # minimum serial DaT-SPECT for calibration
+  parallel_workers: 8      # Julia worker processes

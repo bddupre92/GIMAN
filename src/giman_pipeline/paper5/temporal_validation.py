@@ -1,5 +1,4 @@
-"""
-Temporal Validation — Expanding-Window Splits for NSD-ISS Transition Models.
+"""Temporal Validation — Expanding-Window Splits for NSD-ISS Transition Models.
 
 Implements enrollment-date-ordered temporal splits to assess deployment
 readiness of Dynamic-DeepHit and Graph-DT survival models.
@@ -20,28 +19,28 @@ Window definitions:
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-
 # ── Window Definitions ────────────────────────────────────────────────
 
 WINDOW_DEFS = [
     # (train_start_frac, train_end_frac, test_start_frac, test_end_frac)
-    (0.0, 0.4, 0.4, 0.6),   # W1: 40% train, next 20% test
-    (0.0, 0.6, 0.6, 0.8),   # W2: 60% train, next 20% test
-    (0.0, 0.8, 0.8, 1.0),   # W3: 80% train, final 20% test
-    (0.0, 0.5, 0.5, 1.0),   # W4: 50% train, final 50% test
+    (0.0, 0.4, 0.4, 0.6),  # W1: 40% train, next 20% test
+    (0.0, 0.6, 0.6, 0.8),  # W2: 60% train, next 20% test
+    (0.0, 0.8, 0.8, 1.0),  # W3: 80% train, final 20% test
+    (0.0, 0.5, 0.5, 1.0),  # W4: 50% train, final 50% test
 ]
 
 
 @dataclass
 class WindowSplit:
     """Result of a temporal window split."""
+
     window_idx: int
     train_patnos: list[int]
     test_patnos: list[int]
@@ -54,6 +53,7 @@ class WindowSplit:
 @dataclass
 class ShiftResult:
     """Covariate shift test results for one feature in one window."""
+
     feature: str
     window_idx: int
     ks_statistic: float
@@ -63,6 +63,7 @@ class ShiftResult:
 
 
 # ── Temporal Splitter ─────────────────────────────────────────────────
+
 
 class TemporalSplitter:
     """Enrollment-date-ordered temporal splits for PPMI patients.
@@ -104,22 +105,22 @@ class TemporalSplitter:
         self._validate_ordering(features_df)
 
     def _parse_enrollment_dates(
-        self, demographics_path: Path, feature_patnos: set[int],
+        self,
+        demographics_path: Path,
+        feature_patnos: set[int],
     ) -> pd.DataFrame:
         """Extract earliest INFODT per patient from Demographics CSV."""
         demo = pd.read_csv(demographics_path)
 
         # INFODT is MM/YYYY format (e.g., "01/2011")
         demo["enrollment_date"] = pd.to_datetime(
-            demo["INFODT"], format="%m/%Y", errors="coerce",
+            demo["INFODT"],
+            format="%m/%Y",
+            errors="coerce",
         )
 
         # Take earliest date per patient (screening or transformed visit)
-        earliest = (
-            demo.groupby("PATNO")["enrollment_date"]
-            .min()
-            .reset_index()
-        )
+        earliest = demo.groupby("PATNO")["enrollment_date"].min().reset_index()
 
         # Filter to patients in features data
         earliest = earliest[earliest["PATNO"].isin(feature_patnos)]
@@ -184,13 +185,15 @@ class TemporalSplitter:
             WindowSplit with train and test patient ID lists.
         """
         if window_idx < 0 or window_idx >= len(WINDOW_DEFS):
-            raise ValueError(f"window_idx must be 0-{len(WINDOW_DEFS)-1}, got {window_idx}")
+            raise ValueError(
+                f"window_idx must be 0-{len(WINDOW_DEFS) - 1}, got {window_idx}"
+            )
 
         tr_start, tr_end, te_start, te_end = WINDOW_DEFS[window_idx]
         n = self.n_patients
 
-        train_slice = self.ordered_patnos[int(tr_start * n):int(tr_end * n)]
-        test_slice = self.ordered_patnos[int(te_start * n):int(te_end * n)]
+        train_slice = self.ordered_patnos[int(tr_start * n) : int(tr_end * n)]
+        test_slice = self.ordered_patnos[int(te_start * n) : int(te_end * n)]
 
         train_dates = self.enrollment_dates[train_slice]
         test_dates = self.enrollment_dates[test_slice]
@@ -240,6 +243,7 @@ class TemporalSplitter:
 
 
 # ── Covariate Shift Detection ────────────────────────────────────────
+
 
 def compute_psi(
     train_values: np.ndarray,
@@ -370,8 +374,10 @@ def compute_covariate_shift(
     test_base = baseline.loc[baseline.index.isin(test_patnos), feature_columns]
 
     if verbose:
-        print(f"  Shift analysis: {len(train_base)} train, {len(test_base)} test, "
-              f"{len(feature_columns)} features")
+        print(
+            f"  Shift analysis: {len(train_base)} train, {len(test_base)} test, "
+            f"{len(feature_columns)} features"
+        )
 
     # Per-feature KS + PSI
     per_feature = []
@@ -381,22 +387,32 @@ def compute_covariate_shift(
         te_vals = test_base[col].dropna().values
 
         if len(tr_vals) < 5 or len(te_vals) < 5:
-            per_feature.append(ShiftResult(
-                feature=col, window_idx=-1,
-                ks_statistic=float("nan"), ks_pvalue=float("nan"),
-                psi=float("nan"), shifted=False,
-            ))
+            per_feature.append(
+                ShiftResult(
+                    feature=col,
+                    window_idx=-1,
+                    ks_statistic=float("nan"),
+                    ks_pvalue=float("nan"),
+                    psi=float("nan"),
+                    shifted=False,
+                )
+            )
             continue
 
         ks_stat, ks_pval = stats.ks_2samp(tr_vals, te_vals)
         psi = compute_psi(tr_vals, te_vals)
         shifted = ks_pval < 0.001 or psi > 0.25
 
-        per_feature.append(ShiftResult(
-            feature=col, window_idx=-1,
-            ks_statistic=float(ks_stat), ks_pvalue=float(ks_pval),
-            psi=float(psi), shifted=shifted,
-        ))
+        per_feature.append(
+            ShiftResult(
+                feature=col,
+                window_idx=-1,
+                ks_statistic=float(ks_stat),
+                ks_pvalue=float(ks_pval),
+                psi=float(psi),
+                shifted=shifted,
+            )
+        )
         if shifted:
             n_shifted += 1
 
@@ -425,7 +441,9 @@ def compute_covariate_shift(
     }
 
     if verbose:
-        print(f"  Shift severity: {severity} ({n_shifted}/{n_features} features shifted)")
+        print(
+            f"  Shift severity: {severity} ({n_shifted}/{n_features} features shifted)"
+        )
         print(f"  MMD: {mmd_stat:.6f} (p={mmd_pval:.4f})")
 
     return per_feature, summary

@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +26,6 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.metrics import (
-    accuracy_score,
     balanced_accuracy_score,
     cohen_kappa_score,
     f1_score,
@@ -43,6 +42,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Result dataclasses
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class MetricSet:
@@ -94,6 +94,7 @@ class ModelResult:
 # Metric computation
 # ---------------------------------------------------------------------------
 
+
 def _compute_metrics(
     y_true: np.ndarray,
     y_pred: np.ndarray,
@@ -121,7 +122,9 @@ def _compute_metrics(
     # Probability-based metrics
     if y_prob is not None:
         try:
-            m.log_loss_value = float(log_loss(y_true, y_prob, labels=list(range(n_classes))))
+            m.log_loss_value = float(
+                log_loss(y_true, y_prob, labels=list(range(n_classes)))
+            )
         except ValueError:
             m.log_loss_value = float("nan")
 
@@ -132,6 +135,7 @@ def _compute_metrics(
                 prob_pos = y_prob[:, 1] if y_prob.ndim == 2 else y_prob
                 m.auc_roc = float(roc_auc_score(y_true, prob_pos))
                 from sklearn.metrics import average_precision_score
+
                 m.pr_auc = float(average_precision_score(y_true, prob_pos))
         else:
             # Multi-class OVR AUC
@@ -139,10 +143,14 @@ def _compute_metrics(
             if len(unique_true) >= 2 and y_prob.ndim == 2:
                 try:
                     m.macro_auc_ovr = float(
-                        roc_auc_score(y_true, y_prob, multi_class="ovr", average="macro")
+                        roc_auc_score(
+                            y_true, y_prob, multi_class="ovr", average="macro"
+                        )
                     )
                     m.weighted_auc_ovr = float(
-                        roc_auc_score(y_true, y_prob, multi_class="ovr", average="weighted")
+                        roc_auc_score(
+                            y_true, y_prob, multi_class="ovr", average="weighted"
+                        )
                     )
                 except ValueError:
                     pass
@@ -170,17 +178,21 @@ def _bootstrap_aggregate_ci(
     # Metrics to bootstrap
     metric_fns = {
         "balanced_accuracy": lambda yt, yp, yprob: balanced_accuracy_score(yt, yp),
-        "weighted_f1": lambda yt, yp, yprob: f1_score(yt, yp, average="weighted", zero_division=0),
+        "weighted_f1": lambda yt, yp, yprob: f1_score(
+            yt, yp, average="weighted", zero_division=0
+        ),
         "cohen_kappa": lambda yt, yp, yprob: cohen_kappa_score(yt, yp),
         "qwk": lambda yt, yp, yprob: cohen_kappa_score(yt, yp, weights="quadratic"),
     }
 
     if n_classes == 2 and y_prob is not None:
+
         def _auc(yt, yp, yprob):
             if len(np.unique(yt)) < 2:
                 return 0.5
             pp = yprob[:, 1] if yprob.ndim == 2 else yprob
             return roc_auc_score(yt, pp)
+
         metric_fns["auc_roc"] = _auc
 
     if is_ordinal:
@@ -232,6 +244,7 @@ def _bootstrap_aggregate_ci(
 # Model builders
 # ---------------------------------------------------------------------------
 
+
 def _build_model_factories(
     n_classes: int,
     class_weights: np.ndarray | None = None,
@@ -242,9 +255,9 @@ def _build_model_factories(
     Returns dict of model_name -> callable that creates a fresh model instance.
     Using factories avoids sklearn clone() issues with CatBoost.
     """
-    import xgboost as xgb
     import catboost as cb
     import lightgbm as lgb
+    import xgboost as xgb
 
     weight_dict = None
     if class_weights is not None:
@@ -354,6 +367,7 @@ def _compute_sample_weights(
 # Main benchmark runner
 # ---------------------------------------------------------------------------
 
+
 def run_nsd_iss_benchmark(
     X: np.ndarray | pd.DataFrame,
     y: np.ndarray | pd.Series,
@@ -403,7 +417,9 @@ def run_nsd_iss_benchmark(
     # Build model factories
     model_factories = _build_model_factories(n_classes, class_weights, random_state)
     if models_to_run:
-        model_factories = {k: v for k, v in model_factories.items() if k in models_to_run}
+        model_factories = {
+            k: v for k, v in model_factories.items() if k in models_to_run
+        }
 
     # Stratified k-fold
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=random_state)
@@ -434,7 +450,11 @@ def run_nsd_iss_benchmark(
             # Fit with sample weights for gradient boosters that need it
             t0 = time.time()
             sample_weights = _compute_sample_weights(y_train, class_weights)
-            if model_name in ("xgboost",) and n_classes > 2 and sample_weights is not None:
+            if (
+                model_name in ("xgboost",)
+                and n_classes > 2
+                and sample_weights is not None
+            ):
                 model.fit(X_train_s, y_train, sample_weight=sample_weights)
             else:
                 model.fit(X_train_s, y_train)
@@ -470,13 +490,19 @@ def run_nsd_iss_benchmark(
         cat_y_pred = np.concatenate(all_y_pred)
         cat_y_prob = np.concatenate(all_y_prob) if all_y_prob else None
 
-        aggregate = _compute_metrics(cat_y_true, cat_y_pred, cat_y_prob, n_classes, is_ordinal)
+        aggregate = _compute_metrics(
+            cat_y_true, cat_y_pred, cat_y_prob, n_classes, is_ordinal
+        )
 
         # Bootstrap CIs on aggregate
         bootstrap_cis = _bootstrap_aggregate_ci(
-            cat_y_true, cat_y_pred, cat_y_prob,
-            n_classes, is_ordinal,
-            n_bootstrap=n_bootstrap, seed=random_state,
+            cat_y_true,
+            cat_y_pred,
+            cat_y_prob,
+            n_classes,
+            is_ordinal,
+            n_bootstrap=n_bootstrap,
+            seed=random_state,
         )
 
         results[model_name] = ModelResult(
@@ -509,6 +535,7 @@ def run_nsd_iss_benchmark(
 # ---------------------------------------------------------------------------
 # Results serialization
 # ---------------------------------------------------------------------------
+
 
 def _serialize_metric_set(m: MetricSet) -> dict[str, Any]:
     """Convert MetricSet to JSON-safe dict."""
@@ -598,7 +625,11 @@ def format_results_table(
         for name, mr in results.items():
             agg = mr.aggregate
             mauc = f"{agg.macro_auc_ovr:.4f}" if agg.macro_auc_ovr else "N/A"
-            mae = f"{agg.mean_absolute_error:.4f}" if agg.mean_absolute_error is not None else "N/A"
+            mae = (
+                f"{agg.mean_absolute_error:.4f}"
+                if agg.mean_absolute_error is not None
+                else "N/A"
+            )
             ci = mr.bootstrap_cis.get("balanced_accuracy")
             bacc_str = f"{agg.balanced_accuracy:.4f}"
             if ci:
@@ -617,7 +648,9 @@ def format_results_table(
     class_sep = "|---" + "|---" * len(class_ids) + "|"
     lines.extend([class_header, class_sep])
     for name, mr in results.items():
-        recalls = [f"{mr.aggregate.per_class_recall.get(c, 0.0):.4f}" for c in class_ids]
+        recalls = [
+            f"{mr.aggregate.per_class_recall.get(c, 0.0):.4f}" for c in class_ids
+        ]
         lines.append(f"| {name} | " + " | ".join(recalls) + " |")
 
     return "\n".join(lines)

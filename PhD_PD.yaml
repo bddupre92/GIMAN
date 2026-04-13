@@ -1,0 +1,2771 @@
+schemaVersion: 3
+meta:
+  sourceVersionId: 019d5c03-f32e-7ccc-a4c4-e170e9923303 # DO NOT CHANGE - Hex uses this to match up project versions when reimporting the file
+  description: null
+  projectId: 019d5b44-81a8-7116-99c4-4129352106c8 # DO NOT CHANGE - Unique ID of the project from which this file was generated
+  title: PhD_PD
+  timezone: null
+  appTheme: SYS_PREF
+  codeLanguage: PYTHON
+  status: null
+  categories: []
+  castDecimalsDefault: true
+  hexType: PROJECT
+  allowExecutionReordering: true
+  prerunApp: false
+  autoRerunApp: true
+  cachePublishedAppState: true
+  logicQueryCacheTimeout: null
+  publishedQueryCacheTimeout: null
+  refreshStalePublishedApp: true
+projectAssets:
+  dataConnections: []
+  envVars: []
+  secrets: []
+sharedAssets:
+  secrets: []
+  vcsPackages: []
+  dataConnections:
+    - dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340 # PD_PhD (postgres)
+  externalFileIntegrations: []
+cells:
+  - cellType: MARKDOWN
+    cellId: 019d5b49-522c-7116-8b37-7e4f94967fcc # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: Title
+    config:
+      source: |-
+        # PD_PhD Database — Deep Exploratory Analysis
+
+        **171 tables** across **13 schemas** | **7 cohorts** | **~10,000+ unique patients** | Proteomics, metabolomics, genetics, imaging, clinical assessments
+
+        This notebook provides a comprehensive exploration of the **PD_PhD** Supabase Postgres database:
+
+        ### Core PPMI Analysis (Sections 1–8)
+        - **Cohort Overview** — PPMI cohorts: PD (n=1,440), Healthy Control (n=321), SWEDD (n=79), Prodromal (n=60)
+        - **Demographics** — age, sex, handedness distributions
+        - **NSD-ISS Disease Staging** — Neuronal Synuclein Disease Integrated Staging System (stages 0–6)
+        - **Motor Assessments** — MDS-UPDRS subscores (tremor, rigidity, bradykinesia, axial)
+        - **Non-Motor Features** — cognition (MoCA), sleep (RBD, ESS), autonomic (SCOPA-AUT)
+        - **DaTscan Imaging** — striatal binding ratios (caudate, putamen)
+        - **Genetic Risk Factors** — LRRK2, GBA, APOE ε4 carrier status
+        - **Longitudinal Progression** — disease stage transitions over time
+        - **Feature Correlations** — inter-feature relationships across clinical & imaging domains
+
+        ### Expanded Database (Sections 9–14)
+        - **Full Database Inventory** — 171 tables, 13 schemas, all column counts
+        - **New Cohorts: LCC, LBD, SURE-PD3** — demographics & diagnosis distributions (n=5,478 additional patients)
+        - **PPMI LONI** — Olink proteomics (plasma & CSF), metabolomics (LRRK2), biospecimen analysis, brain imaging (FreeSurfer, DTI, grey matter), neurological exam
+        - **LCC Deep Dive** — DaTscan SBR + MoCA for 638 LCC participants (264 PD, 374 controls)
+        - **SURE-PD3 Clinical Trial** — 261 PD patients with full UPDRS + MoCA + Schwab-England
+        - **Paper3 Longitudinal Features** — 48-column enriched longitudinal dataset with delta scores and full NSD-ISS 0→6 spectrum
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b49-7bd1-7115-b612-10f0f139413a # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 1. Cohort Overview & Demographics
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b49-a0f1-7003-97a4-6449a65c4aec
+          cellLabel: Cohort Summary
+          config:
+            source: |
+              SELECT
+                cohort,
+                count(DISTINCT patno) AS n_patients,
+                count(*) AS n_visits,
+                round(avg(age_at_visit)::numeric, 1) AS mean_age,
+                round(min(age_at_visit)::numeric, 1) AS min_age,
+                round(max(age_at_visit)::numeric, 1) AS max_age,
+                round(max(months_from_baseline)::numeric, 0) AS max_follow_up_months
+              FROM postgres.longitudinal.longitudinal_nsd_iss
+              GROUP BY cohort
+              ORDER BY n_patients DESC
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: cohort_summary
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: max_age
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: max_follow_up_months
+                  renameTo: null
+                  size: 186
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_age
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: min_age
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_patients
+                  renameTo: null
+                  size: 110
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_visits
+                  renameTo: null
+                  size: 92
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 39
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: SQL
+          cellId: 019d5b49-dac0-7dda-9e72-decbf6eb87a9
+          cellLabel: All Baseline Features
+          config:
+            source: |
+              WITH l AS (
+                  SELECT DISTINCT
+                      patno,
+                      cohort
+                  FROM postgres.longitudinal.longitudinal_nsd_iss
+              )
+              SELECT
+                  f.patno,
+                  l.cohort,
+                  f.nsd_iss_stage,
+                  f.nsd_iss_stage_numeric,
+                  f.sex,
+                  f.handed,
+                  f.age_at_baseline,
+                  f.updrs1_total,
+                  f.updrs2_total,
+                  f.updrs3_tremor,
+                  f.updrs3_rigidity,
+                  f.updrs3_bradykinesia,
+                  f.updrs3_axial,
+                  f.updrs4_total,
+                  f.moca_total,
+                  f.rbd_total,
+                  f.ess_total,
+                  f.scopa_aut_total,
+                  f.caudate_mean_sbr,
+                  f.caudate_asymmetry,
+                  f.caudate_putamen_ratio,
+                  f.lrrk2_carrier,
+                  f.gba_carrier,
+                  f.apoe_e4_carrier,
+                  f.staging_confidence,
+                  f.functional_impairment_level,
+                  f.s_positive,
+                  f.d_positive
+              FROM postgres.features.paper1_features_with_targets AS f
+              LEFT JOIN l ON f.patno = l.patno
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: baseline_features
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: age_at_baseline
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: handed
+                  renameTo: null
+                  size: 92
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage_numeric
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: patno
+                  renameTo: null
+                  size: 84
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sex
+                  renameTo: null
+                  size: 70
+                  wrapText: null
+                  displayFormat: null
+                - originalName: updrs1_total
+                  renameTo: null
+                  size: 121
+                  wrapText: null
+                  displayFormat: null
+                - originalName: updrs2_total
+                  renameTo: null
+                  size: 121
+                  wrapText: null
+                  displayFormat: null
+                - originalName: updrs3_bradykinesia
+                  renameTo: null
+                  size: 165
+                  wrapText: null
+                  displayFormat: null
+                - originalName: updrs3_rigidity
+                  renameTo: null
+                  size: 134
+                  wrapText: null
+                  displayFormat: null
+                - originalName: updrs3_tremor
+                  renameTo: null
+                  size: 133
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: SQL
+          cellId: 019d5b4a-10a5-7551-9a04-c7f1e90fc26c
+          cellLabel: Demographics by Cohort
+          config:
+            source: |-
+              SELECT
+                cohort,
+                count(*) AS n,
+                round(avg(age_at_baseline)::numeric, 1) AS mean_age,
+                round(stddev(age_at_baseline)::numeric, 1) AS sd_age,
+                round(min(age_at_baseline)::numeric, 1) AS min_age,
+                round(max(age_at_baseline)::numeric, 1) AS max_age,
+                sum(CASE WHEN sex = 0 THEN 1 ELSE 0 END) AS n_sex_0,
+                sum(CASE WHEN sex IS NULL THEN 1 ELSE 0 END) AS n_sex_missing,
+                round(avg(CASE WHEN handed = 0 THEN 1 WHEN handed = 1 THEN 0 ELSE NULL END)::numeric * 100, 1) AS pct_right_handed
+              FROM baseline_features
+              GROUP BY cohort
+              ORDER BY n DESC
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: demographics_by_cohort
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: max_age
+                  renameTo: null
+                  size: 150
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_age
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: min_age
+                  renameTo: null
+                  size: 98
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n
+                  renameTo: null
+                  size: 61
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_sex_0
+                  renameTo: null
+                  size: 98
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_male
+                  renameTo: null
+                  size: 103
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_right_handed
+                  renameTo: null
+                  size: 150
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 39
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sd_age
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: EXPLORE
+          cellId: 019d5b50-f052-744b-8f61-5603326f3b25
+          cellLabel: Average Age at Baseline by Cohort
+          config:
+            semanticProjectId: null
+            dataframe: baseline_features
+            colorMappings: {}
+            spec:
+              fields:
+                - id: 019d5b50-f04f-744b-8f60-e3974ed31cee
+                  axis:
+                    grid:
+                      style: solid
+                    ticks: {}
+                    hideTitle: true
+                    labelAngle: 0
+                    maxTickLabelLimit: 180
+                  sort:
+                    mode: cross-axis-descending
+                  value: cohort
+                  channel: base-axis
+                  dataType: VARCHAR
+                  seriesId: 019d5b50-f04d-744b-8f60-d92eda239bea
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b50-f050-744b-8f60-ea44df578334
+                  axis:
+                    grid:
+                      style: solid
+                    zero: false
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                    maxTickLabelLimit: 180
+                  title: Average Age at Baseline
+                  value: age_at_baseline
+                  channel: cross-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b50-f04d-744b-8f60-d92eda239bea
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: Avg
+                  displayFormat:
+                    format: NUMBER
+                    currency: USD
+                    columnType: NUMBER
+                    showSeparators: false
+                    numDecimalDigits: 1
+                    abbreviateLargeNumbers: false
+                - id: 019d5b50-f050-744b-8f60-f442754eef1d
+                  value: age_at_baseline
+                  channel: tooltip
+                  dataType: FLOAT
+                  seriesId: 019d5b50-f04d-744b-8f60-d92eda239bea
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: Min
+                - id: 019d5b50-f050-744b-8f60-fb8035b8022b
+                  value: age_at_baseline
+                  channel: tooltip
+                  dataType: FLOAT
+                  seriesId: 019d5b50-f04d-744b-8f60-d92eda239bea
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: Max
+                - id: 019d5b50-f050-744b-8f61-0465c91f6273
+                  value: age_at_baseline
+                  channel: tooltip
+                  dataType: FLOAT
+                  seriesId: 019d5b50-f04d-744b-8f60-d92eda239bea
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: StdDev
+                - id: 019d5b50-f051-744b-8f61-0924711a1750
+                  title: Count of Records
+                  value: _HEX_COUNT_STAR_ARG_
+                  channel: tooltip
+                  dataType: FLOAT
+                  seriesId: 019d5b50-f04d-744b-8f60-d92eda239bea
+                  fieldType: MEASURE
+                  queryPath: []
+              details:
+                fields:
+                  - value: cohort
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: age_at_baseline
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: age_at_baseline
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: age_at_baseline
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: age_at_baseline
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                enabled: false
+                showAllBaseTableDetailFields: false
+              viewType: visualization
+              rowTotals: true
+              chartConfig:
+                series:
+                  - id: 019d5b50-f04d-744b-8f60-d92eda239bea
+                    text:
+                      source: cross-axis
+                      dataLabels:
+                        angle: 0
+                        position: inside-end
+                    type: bar
+                    barGrouped: true
+                settings:
+                  legend:
+                    position: right
+                orientation: horizontal
+                seriesGroups:
+                  - - 019d5b50-f04d-744b-8f60-d92eda239bea
+              columnTotals: true
+              visualizationType: chart
+            displayTableConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+            resultVariables: []
+            resultIncludeDetailColumns: false
+            height: null
+        - cellType: EXPLORE
+          cellId: 019d5b50-e86d-7441-ac23-52a201ef29d2
+          cellLabel: Age Distribution by Cohort
+          config:
+            semanticProjectId: null
+            dataframe: baseline_features
+            colorMappings: {}
+            spec:
+              fields:
+                - id: 019d5b50-e86b-7441-ac23-0be1c700d0e9
+                  axis:
+                    grid:
+                      style: solid
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                    maxTickLabelLimit: 180
+                  title: Age at Baseline
+                  value: age_at_baseline
+                  channel: base-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b50-e869-7441-ac23-068c8662c6c0
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b50-e86b-7441-ac23-142391d93e2f
+                  sort:
+                    mode: cross-axis-descending
+                  value: cohort
+                  channel: v-facet
+                  dataType: VARCHAR
+                  seriesId: 019d5b50-e869-7441-ac23-068c8662c6c0
+                  fieldType: DIMENSION
+                  queryPath: []
+              details:
+                fields:
+                  - value: age_at_baseline
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: cohort
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                enabled: false
+                showAllBaseTableDetailFields: true
+              viewType: visualization
+              rowTotals: true
+              chartConfig:
+                series:
+                  - id: 019d5b50-e869-7441-ac23-068c8662c6c0
+                    type: histogram
+                settings:
+                  legend:
+                    position: right
+                orientation: vertical
+                seriesGroups:
+                  - - 019d5b50-e869-7441-ac23-068c8662c6c0
+              columnTotals: true
+              visualizationType: chart
+            displayTableConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+            resultVariables: []
+            resultIncludeDetailColumns: false
+            height: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b4b-4bb1-7006-9758-36245c580e17 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 2. NSD-ISS Disease Staging
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b4b-71fa-7117-8e1d-71743b87d5d1
+          cellLabel: NSD-ISS Stage Distribution
+          config:
+            source: |
+              SELECT
+                  nsd_iss_stage,
+                  nsd_iss_stage_numeric,
+                  staging_confidence,
+                  count(*) AS n_patients,
+                  round(100.0 * count(*) / sum(count(*)) OVER (), 1) AS pct,
+                  round(avg(age_at_baseline)::numeric, 1) AS mean_age,
+                  sum(CASE WHEN s_positive THEN 1 ELSE 0 END) AS n_synuclein_pos,
+                  sum(CASE WHEN d_positive THEN 1 ELSE 0 END) AS n_dopamine_pos,
+                  round(
+                      avg(
+                          updrs3_tremor + updrs3_rigidity + updrs3_bradykinesia + updrs3_axial
+                      )::numeric,
+                      1
+                  ) AS mean_updrs3_total
+              FROM baseline_features
+              WHERE cohort IS NOT NULL
+              GROUP BY nsd_iss_stage, nsd_iss_stage_numeric, staging_confidence
+              ORDER BY nsd_iss_stage_numeric
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: stage_distribution
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: mean_age
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_dopamine_pos
+                  renameTo: null
+                  size: 144
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_patients
+                  renameTo: null
+                  size: 110
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_synuclein_pos
+                  renameTo: null
+                  size: 142
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage
+                  renameTo: null
+                  size: 129
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage_numeric
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct
+                  renameTo: null
+                  size: 69
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 39
+                  wrapText: null
+                  displayFormat: null
+                - originalName: staging_confidence
+                  renameTo: null
+                  size: 157
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: EXPLORE
+          cellId: 019d5b4d-6be5-7002-811e-63937b94aaf9
+          cellLabel: NSD-ISS Stage Distribution by Cohort
+          config:
+            semanticProjectId: null
+            dataframe: baseline_features
+            colorMappings:
+              "null": "#E45756"
+              SWEDD: "#F58518"
+              Prodromal: "#4C78A8"
+              Healthy Control: "#72B7B2"
+              Parkinson's Disease: "#54A24B"
+            spec:
+              fields:
+                - id: 019d5b4d-6be3-7002-811e-080b9913bd45
+                  axis:
+                    grid:
+                      style: none
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                  sort:
+                    mode: value-ascending
+                  title: NSD-ISS Stage
+                  value: nsd_iss_stage
+                  channel: base-axis
+                  dataType: VARCHAR
+                  seriesId: 019d5b4d-6be1-7002-811e-01f0da1e60f0
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b4d-6be4-7002-811e-15626ec95414
+                  axis:
+                    grid:
+                      style: solid
+                    ticks: {}
+                    hideTitle: false
+                  title: Number of Patients
+                  value: _HEX_COUNT_STAR_ARG_
+                  channel: cross-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b4d-6be1-7002-811e-01f0da1e60f0
+                  fieldType: MEASURE
+                  queryPath: []
+                  displayFormat:
+                    format: NUMBER
+                    currency: USD
+                    columnType: NUMBER
+                    showSeparators: true
+                    numDecimalDigits: 0
+                    abbreviateLargeNumbers: true
+                - id: 019d5b4d-6be4-7002-811e-192b7ba28dd9
+                  axis:
+                    ticks: {}
+                    hideTitle: false
+                  sort:
+                    mode: cross-axis-descending
+                  title: Cohort
+                  value: cohort
+                  channel: color
+                  dataType: VARCHAR
+                  seriesId: 019d5b4d-6be1-7002-811e-01f0da1e60f0
+                  fieldType: DIMENSION
+                  queryPath: []
+              details:
+                fields:
+                  - value: nsd_iss_stage
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: cohort
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                enabled: false
+                showAllBaseTableDetailFields: false
+              viewType: visualization
+              rowTotals: true
+              chartConfig:
+                series:
+                  - id: 019d5b4d-6be1-7002-811e-01f0da1e60f0
+                    text:
+                      source: cross-axis
+                      dataLabels: {}
+                      totalDataLabels:
+                        angle: 0
+                        position: outside-end
+                    type: bar
+                    barGrouped: false
+                settings:
+                  legend:
+                    position: right
+                orientation: vertical
+                seriesGroups:
+                  - - 019d5b4d-6be1-7002-811e-01f0da1e60f0
+              columnTotals: true
+              visualizationType: chart
+            displayTableConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+            resultVariables: []
+            resultIncludeDetailColumns: false
+            height: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b4b-8ca2-7117-a3f7-97a047719417 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 3. Motor Assessments (MDS-UPDRS)
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b4b-b595-7115-b035-45eafe4ce109
+          cellLabel: Motor Scores by Cohort & Stage
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  nsd_iss_stage,
+                  count(*) AS n,
+                  round(avg(updrs1_total)::numeric, 1) AS mean_updrs1,
+                  round(avg(updrs2_total)::numeric, 1) AS mean_updrs2,
+                  round(avg(updrs3_tremor)::numeric, 1) AS mean_tremor,
+                  round(avg(updrs3_rigidity)::numeric, 1) AS mean_rigidity,
+                  round(avg(updrs3_bradykinesia)::numeric, 1) AS mean_brady,
+                  round(avg(updrs3_axial)::numeric, 1) AS mean_axial,
+                  round(
+                      avg(
+                          updrs3_tremor + updrs3_rigidity + updrs3_bradykinesia + updrs3_axial
+                      )::numeric,
+                      1
+                  ) AS mean_updrs3_total,
+                  round(avg(updrs4_total)::numeric, 1) AS mean_updrs4
+              FROM baseline_features
+              WHERE cohort IS NOT NULL
+              GROUP BY cohort, nsd_iss_stage
+              ORDER BY cohort, nsd_iss_stage
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: motor_by_stage
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_axial
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_brady
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_rigidity
+                  renameTo: null
+                  size: 165
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_tremor
+                  renameTo: null
+                  size: 165
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs1
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs2
+                  renameTo: null
+                  size: 165
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n
+                  renameTo: null
+                  size: 59
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: SQL
+          cellId: 019d5b4e-206b-700d-8dca-3ab8d58e8c0a
+          cellLabel: Motor subscores by stage (PD only)
+          config:
+            source: |-
+              SELECT
+                nsd_iss_stage,
+                nsd_iss_stage_numeric,
+                subscore,
+                AVG(value) AS avg_score
+              FROM (
+                SELECT nsd_iss_stage, nsd_iss_stage_numeric, 'Tremor' AS subscore, updrs3_tremor AS value FROM baseline_features WHERE cohort = 'Parkinson''s Disease'
+                UNION ALL
+                SELECT nsd_iss_stage, nsd_iss_stage_numeric, 'Rigidity' AS subscore, updrs3_rigidity AS value FROM baseline_features WHERE cohort = 'Parkinson''s Disease'
+                UNION ALL
+                SELECT nsd_iss_stage, nsd_iss_stage_numeric, 'Bradykinesia' AS subscore, updrs3_bradykinesia AS value FROM baseline_features WHERE cohort = 'Parkinson''s Disease'
+                UNION ALL
+                SELECT nsd_iss_stage, nsd_iss_stage_numeric, 'Axial' AS subscore, updrs3_axial AS value FROM baseline_features WHERE cohort = 'Parkinson''s Disease'
+              ) unpivoted
+              WHERE nsd_iss_stage IS NOT NULL
+              GROUP BY nsd_iss_stage, nsd_iss_stage_numeric, subscore
+              ORDER BY nsd_iss_stage_numeric, subscore
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: motor_subscores_by_stage
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: avg_score
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage
+                  renameTo: null
+                  size: 129
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage_numeric
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: subscore
+                  renameTo: null
+                  size: 102
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: EXPLORE
+          cellId: 019d5b4e-8a2d-7115-99c4-d8b006808de7
+          cellLabel: Motor Subscore Profile by Disease Stage
+          config:
+            semanticProjectId: null
+            dataframe: motor_subscores_by_stage
+            colorMappings:
+              Axial: "#72B7B2"
+              Tremor: "#4C78A8"
+              Rigidity: "#F58518"
+              Bradykinesia: "#E45756"
+            spec:
+              fields:
+                - id: 019d5b4e-8a2a-7115-99c4-8650680bc28c
+                  axis:
+                    grid:
+                      style: none
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                    maxTickLabelLimit: 180
+                  sort:
+                    mode: custom-order
+                    customOrder:
+                      - "0"
+                      - 2B
+                      - "3"
+                      - "4"
+                  title: NSD-ISS Disease Stage
+                  value: nsd_iss_stage
+                  channel: base-axis
+                  dataType: VARCHAR
+                  seriesId: 019d5b4e-8a29-7115-99c4-78bdee4c465f
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b4e-8a2b-7115-99c4-8d73e997a286
+                  axis:
+                    grid:
+                      style: dash
+                    zero: true
+                    ticks: {}
+                    hideTitle: false
+                    maxTickLabelLimit: 180
+                  title: Mean UPDRS-III Subscore
+                  value: avg_score
+                  channel: cross-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b4e-8a29-7115-99c4-78bdee4c465f
+                  fieldType: DIMENSION
+                  queryPath: []
+                  displayFormat:
+                    format: NUMBER
+                    currency: USD
+                    columnType: NUMBER
+                    showSeparators: false
+                    numDecimalDigits: 1
+                    abbreviateLargeNumbers: false
+                - id: 019d5b4e-8a2b-7115-99c4-952118e087a9
+                  axis:
+                    ticks: {}
+                    hideTitle: false
+                  sort:
+                    mode: custom-order
+                    customOrder:
+                      - Tremor
+                      - Rigidity
+                      - Bradykinesia
+                      - Axial
+                  title: Motor Subscore
+                  value: subscore
+                  channel: color
+                  dataType: VARCHAR
+                  seriesId: 019d5b4e-8a29-7115-99c4-78bdee4c465f
+                  fieldType: DIMENSION
+                  queryPath: []
+              details:
+                fields:
+                  - value: nsd_iss_stage
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: avg_score
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: subscore
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                enabled: false
+                showAllBaseTableDetailFields: true
+              viewType: visualization
+              rowTotals: true
+              chartConfig:
+                series:
+                  - id: 019d5b4e-8a29-7115-99c4-78bdee4c465f
+                    text:
+                      source: cross-axis
+                      dataLabels:
+                        angle: 0
+                        fontSize: 11
+                        position: above
+                    type: bar
+                    barGrouped: true
+                settings:
+                  legend:
+                    position: right
+                orientation: vertical
+                seriesGroups:
+                  - - 019d5b4e-8a29-7115-99c4-78bdee4c465f
+              columnTotals: true
+              visualizationType: chart
+            displayTableConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+            resultVariables: []
+            resultIncludeDetailColumns: false
+            height: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b4b-ce4e-7115-b088-cf83c4f1f23d # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 4. Non-Motor Features
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b4b-ee44-7113-b9be-b479dd37b897
+          cellLabel: Non-Motor Scores by Cohort & Stage
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  nsd_iss_stage,
+                  count(*) AS n,
+                  round(avg(moca_total)::numeric, 1) AS mean_moca,
+                  round(avg(rbd_total)::numeric, 1) AS mean_rbd,
+                  round(avg(ess_total)::numeric, 1) AS mean_ess,
+                  round(avg(scopa_aut_total)::numeric, 1) AS mean_scopa_aut,
+                  round(stddev(moca_total)::numeric, 1) AS sd_moca,
+                  round(stddev(scopa_aut_total)::numeric, 1) AS sd_scopa_aut
+              FROM baseline_features
+              WHERE cohort IS NOT NULL
+              GROUP BY cohort, nsd_iss_stage
+              ORDER BY cohort, nsd_iss_stage
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: nonmotor_by_stage
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_ess
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_moca
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_rbd
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_scopa_aut
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n
+                  renameTo: null
+                  size: 59
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sd_moca
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sd_scopa_aut
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b4c-06d5-7117-9a33-f160a1a962ce # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 5. DaTscan Imaging Biomarkers
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b4c-305a-7776-a029-b4d179c3e90b
+          cellLabel: DaTscan by Cohort & Stage
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  nsd_iss_stage,
+                  count(*) AS n,
+                  round(avg(caudate_mean_sbr)::numeric, 2) AS mean_caudate_sbr,
+                  round(stddev(caudate_mean_sbr)::numeric, 2) AS sd_caudate_sbr,
+                  round(avg(caudate_asymmetry)::numeric, 3) AS mean_asymmetry,
+                  round(avg(caudate_putamen_ratio)::numeric, 2) AS mean_cp_ratio,
+                  round(stddev(caudate_putamen_ratio)::numeric, 2) AS sd_cp_ratio
+              FROM baseline_features
+              WHERE
+                  cohort IS NOT NULL
+                  AND caudate_mean_sbr IS NOT NULL
+              GROUP BY cohort, nsd_iss_stage
+              ORDER BY cohort, nsd_iss_stage
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: datscan_by_stage
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_asymmetry
+                  renameTo: null
+                  size: 149
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_caudate_sbr
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_cp_ratio
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n
+                  renameTo: null
+                  size: 59
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_iss_stage
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 39
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sd_caudate_sbr
+                  renameTo: null
+                  size: 165
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sd_cp_ratio
+                  renameTo: null
+                  size: 158
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: EXPLORE
+          cellId: 019d5b4f-498d-7119-a6fe-d974ec2c7303
+          cellLabel: Caudate SBR Declines With Disease Stage — PD Cohort Shows Steepest Dopaminergic Loss
+          config:
+            semanticProjectId: null
+            dataframe: baseline_features
+            colorMappings:
+              "null": "#72B7B2"
+              SWEDD: "#F58518"
+              Prodromal: "#54A24B"
+              Healthy Control: "#E45756"
+              Parkinson's Disease: "#4C78A8"
+            spec:
+              fields:
+                - id: 019d5b4f-c404-7ccb-b449-9ffe98836ae0
+                  axis:
+                    grid:
+                      style: none
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                    maxTickLabelLimit: 180
+                  sort:
+                    mode: custom-order
+                    customOrder:
+                      - "0"
+                      - "1"
+                      - 2B
+                      - "3"
+                      - "4"
+                      - unclassified
+                  title: ISS Disease Stage
+                  value: nsd_iss_stage
+                  channel: base-axis
+                  dataType: VARCHAR
+                  seriesId: 019d5b4f-c402-7ccb-b449-930ffaecce66
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b4f-c405-7ccb-b449-a1d3572c8d32
+                  axis:
+                    grid:
+                      style: dash
+                    zero: true
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                    maxTickLabelLimit: 180
+                  title: Mean Caudate SBR
+                  value: caudate_mean_sbr
+                  channel: cross-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b4f-c402-7ccb-b449-930ffaecce66
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: Avg
+                  displayFormat:
+                    format: NUMBER
+                    currency: USD
+                    columnType: NUMBER
+                    showSeparators: true
+                    numDecimalDigits: 2
+                    abbreviateLargeNumbers: false
+                - id: 019d5b4f-c405-7ccb-b449-ab07426b0a4d
+                  axis:
+                    ticks: {}
+                    hideTitle: false
+                  sort:
+                    mode: cross-axis-descending
+                  title: Cohort
+                  value: cohort
+                  channel: color
+                  dataType: VARCHAR
+                  seriesId: 019d5b4f-c402-7ccb-b449-930ffaecce66
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b4f-c405-7ccb-b449-b70b61461d7f
+                  value: caudate_mean_sbr
+                  channel: tooltip
+                  dataType: FLOAT
+                  seriesId: 019d5b4f-c402-7ccb-b449-930ffaecce66
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: Median
+              details:
+                fields:
+                  - value: nsd_iss_stage
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: caudate_mean_sbr
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: cohort
+                    dataType: VARCHAR
+                    fieldType: DIMENSION
+                    queryPath: []
+                  - value: caudate_mean_sbr
+                    dataType: FLOAT
+                    fieldType: DIMENSION
+                    queryPath: []
+                enabled: false
+                showAllBaseTableDetailFields: true
+              viewType: visualization
+              rowTotals: true
+              chartConfig:
+                series:
+                  - id: 019d5b4f-c402-7ccb-b449-930ffaecce66
+                    text:
+                      source: cross-axis
+                      dataLabels:
+                        angle: 0
+                        position: outside-end
+                    type: bar
+                    barGrouped: true
+                settings:
+                  legend:
+                    position: right
+                orientation: horizontal
+                seriesGroups:
+                  - - 019d5b4f-c402-7ccb-b449-930ffaecce66
+              columnTotals: true
+              visualizationType: chart
+            displayTableConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: []
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+            resultVariables: []
+            resultIncludeDetailColumns: false
+            height: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b4c-46ec-7771-84c4-3e0d6ed65e7f # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 6. Genetic Risk Factors
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b4c-7642-7115-aa07-68b4b60f8eac
+          cellLabel: Genetic Carrier Status by Cohort
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  count(*) AS n_total,
+                  sum(CASE WHEN lrrk2_carrier = 1 THEN 1 ELSE 0 END) AS n_lrrk2,
+                  round(
+                      100.0
+                      * sum(CASE WHEN lrrk2_carrier = 1 THEN 1 ELSE 0 END)
+                      / count(CASE WHEN lrrk2_carrier IS NOT NULL THEN 1 END),
+                      1
+                  ) AS pct_lrrk2,
+                  sum(CASE WHEN gba_carrier = 1 THEN 1 ELSE 0 END) AS n_gba,
+                  round(
+                      100.0
+                      * sum(CASE WHEN gba_carrier = 1 THEN 1 ELSE 0 END)
+                      / count(CASE WHEN gba_carrier IS NOT NULL THEN 1 END),
+                      1
+                  ) AS pct_gba,
+                  sum(CASE WHEN apoe_e4_carrier = 1 THEN 1 ELSE 0 END) AS n_apoe_e4,
+                  round(
+                      100.0
+                      * sum(CASE WHEN apoe_e4_carrier = 1 THEN 1 ELSE 0 END)
+                      / count(CASE WHEN apoe_e4_carrier IS NOT NULL THEN 1 END),
+                      1
+                  ) AS pct_apoe_e4
+              FROM baseline_features
+              WHERE cohort IS NOT NULL
+              GROUP BY cohort
+              ORDER BY n_total DESC
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: genetics_by_cohort
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_apoe_e4
+                  renameTo: null
+                  size: 111
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_gba
+                  renameTo: null
+                  size: 85
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_lrrk2
+                  renameTo: null
+                  size: 91
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_total
+                  renameTo: null
+                  size: 90
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_apoe_e4
+                  renameTo: null
+                  size: 122
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_gba
+                  renameTo: null
+                  size: 96
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_lrrk2
+                  renameTo: null
+                  size: 101
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 39
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b4c-9b63-700c-813e-8188069c0b03 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 7. Longitudinal Disease Progression
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5b4c-be60-7114-981d-77fa5899ceac
+          cellLabel: Longitudinal Stage Progression
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  nsd_stage,
+                  round(months_from_baseline / 12.0) * 12 AS visit_year_months,
+                  count(*) AS n_visits,
+                  count(DISTINCT patno) AS n_patients,
+                  round(avg(updrs3_total)::numeric, 1) AS mean_updrs3,
+                  round(avg(updrs2_total)::numeric, 1) AS mean_updrs2
+              FROM postgres.longitudinal.longitudinal_nsd_iss
+              WHERE cohort IN ('Parkinson''s Disease', 'Healthy Control')
+              GROUP BY cohort, visit_year_months, nsd_stage
+              ORDER BY cohort, visit_year_months, nsd_stage
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: longitudinal_progression
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 116
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs2
+                  renameTo: null
+                  size: 172
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs3
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_patients
+                  renameTo: null
+                  size: 110
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_visits
+                  renameTo: null
+                  size: 92
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_stage
+                  renameTo: null
+                  size: 107
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: visit_year_months
+                  renameTo: null
+                  size: 151
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: SQL
+          cellId: 019d5b52-4105-7bbc-bc20-0b9f72484d6e
+          cellLabel: PD Longitudinal Progression
+          config:
+            source: |
+              SELECT
+                  nsd_stage,
+                  visit_year_months,
+                  n_patients
+              FROM longitudinal_progression
+              WHERE
+                  cohort = 'Parkinson''s Disease'
+                  AND visit_year_months >= 0
+              ORDER BY visit_year_months, nsd_stage
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: pd_longitudinal
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: n_patients
+                  renameTo: null
+                  size: 110
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_stage
+                  renameTo: null
+                  size: 108
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: visit_year_months
+                  renameTo: null
+                  size: 151
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: EXPLORE
+          cellId: 019d5b51-b548-7115-be05-f608d2c59f68
+          cellLabel: PD Patients Progress to Higher NSD-ISS Stages Over Time
+          config:
+            semanticProjectId: null
+            dataframe: pd_longitudinal
+            colorMappings:
+              "0": "#4C78A8"
+              "1": "#F58518"
+              "3": "#E45756"
+              "4": "#72B7B2"
+              "5": "#54A24B"
+              "6": "#EECA3B"
+              2B: "#F58518"
+            spec:
+              fields:
+                - id: 019d5b52-65dc-7000-accc-eb84bb526811
+                  axis:
+                    grid:
+                      style: solid
+                    ticks:
+                      minStep: 12
+                    hideTitle: false
+                    labelAngle: 0
+                  title: Months from Baseline
+                  value: visit_year_months
+                  channel: base-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b52-65da-7000-accc-e5a2d7ad18c4
+                  fieldType: DIMENSION
+                  queryPath: []
+                - id: 019d5b52-65dd-7000-accc-f02fa7efc184
+                  axis:
+                    grid:
+                      style: solid
+                    ticks: {}
+                    hideTitle: false
+                    labelAngle: 0
+                  title: "% of Patients"
+                  value: n_patients
+                  channel: cross-axis
+                  dataType: FLOAT
+                  seriesId: 019d5b52-65da-7000-accc-e5a2d7ad18c4
+                  fieldType: DIMENSION
+                  queryPath: []
+                  aggregation: Sum
+                - id: 019d5b52-65dd-7000-accc-feb60d81ee93
+                  axis:
+                    ticks: {}
+                    hideTitle: false
+                  sort:
+                    mode: custom-order
+                    customOrder:
+                      - "0"
+                      - 2B
+                      - "3"
+                      - "4"
+                      - "5"
+                      - "6"
+                  title: NSD-ISS Stage
+                  value: nsd_stage
+                  channel: color
+                  dataType: VARCHAR
+                  seriesId: 019d5b52-65da-7000-accc-e5a2d7ad18c4
+                  fieldType: DIMENSION
+                  queryPath: []
+              details:
+                fields:
+                  - value: nsd_stage
+                    dataType: VARCHAR
+                    fieldType: COLUMN
+                    queryPath: []
+                  - value: visit_year_months
+                    dataType: FLOAT
+                    fieldType: COLUMN
+                    queryPath: []
+                  - value: n_patients
+                    dataType: FLOAT
+                    fieldType: COLUMN
+                    queryPath: []
+                enabled: false
+                showAllBaseTableDetailFields: false
+              viewType: visualization
+              rowTotals: true
+              chartConfig:
+                series:
+                  - id: 019d5b52-65da-7000-accc-e5a2d7ad18c4
+                    type: area
+                    areaLine: true
+                    lineShape: monotone
+                    normalize: base-axis
+                settings:
+                  legend:
+                    position: right
+                orientation: vertical
+                seriesGroups:
+                  - - 019d5b52-65da-7000-accc-e5a2d7ad18c4
+              columnTotals: true
+              visualizationType: chart
+            displayTableConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: []
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+            resultVariables: []
+            resultIncludeDetailColumns: false
+            height: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5b50-2e7d-7117-9659-b73312fc2710 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 8. Feature Correlations & Distributions
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: CODE
+          cellId: 019d5b50-56f5-7116-8157-3a241f3068a7
+          cellLabel: Correlation Heatmap
+          config:
+            source: |-
+              import pandas as pd
+              import numpy as np
+              import matplotlib.pyplot as plt
+              import seaborn as sns
+
+              df = baseline_features.copy()
+
+              numeric_cols = [
+                  'age_at_baseline', 'updrs1_total', 'updrs2_total',
+                  'updrs3_tremor', 'updrs3_rigidity', 'updrs3_bradykinesia', 'updrs3_axial',
+                  'moca_total', 'rbd_total', 'ess_total', 'scopa_aut_total',
+                  'caudate_mean_sbr', 'caudate_asymmetry', 'caudate_putamen_ratio'
+              ]
+
+              corr = df[numeric_cols].corr()
+
+              fig, ax = plt.subplots(figsize=(14, 11))
+              mask = np.triu(np.ones_like(corr, dtype=bool))
+              sns.heatmap(
+                  corr, mask=mask, annot=True, fmt='.2f', cmap='RdBu_r',
+                  center=0, vmin=-1, vmax=1, square=True,
+                  linewidths=0.5, ax=ax,
+                  annot_kws={'size': 8}
+              )
+              ax.set_title('Correlation Matrix — Clinical Features & Biomarkers', fontsize=14, fontweight='bold')
+              plt.tight_layout()
+              plt.show()
+  - cellType: COLLAPSIBLE
+    cellId: 019d5bdf-904e-7114-bc6e-1cd2fad00a02 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: "10. New Cohorts: LCC, LBD, SURE-PD3"
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5bdf-b9f1-700b-9e71-9bec7bc2478c
+          cellLabel: New Cohort Demographics
+          config:
+            source: |-
+              SELECT 'LCC' AS cohort, d.participant_id, cc.case_control_other_at_baseline AS diagnosis,
+                d.age_at_baseline::text AS age_at_baseline, d.sex, d.race, d.ethnicity::text AS ethnicity, d.education_level_years
+              FROM postgres.lcc_raw.demographics d
+              JOIN postgres.lcc_raw.amp_pd_case_control cc ON d.participant_id = cc.participant_id
+              WHERE d.visit_name = 'M0'
+
+              UNION ALL
+
+              SELECT 'LBD' AS cohort, d.participant_id, cc.diagnosis_at_baseline AS diagnosis,
+                d.age_at_baseline::text, d.sex, d.race, d.ethnicity::text, d.education_level_years::text
+              FROM postgres.lbd_raw.demographics d
+              JOIN postgres.lbd_raw.amp_pd_case_control cc ON d.participant_id = cc.participant_id
+              WHERE d.visit_name = 'M0'
+
+              UNION ALL
+
+              SELECT 'SURE-PD3' AS cohort, d.participant_id, cc.diagnosis_at_baseline AS diagnosis,
+                d.age_at_baseline::text, d.sex, d.race, d.ethnicity::text, d.education_level_years
+              FROM postgres.sure_pd3_raw.demographics d
+              JOIN postgres.sure_pd3_raw.amp_pd_case_control cc ON d.participant_id = cc.participant_id
+              WHERE d.visit_name = 'M0'
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: new_cohort_demographics
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: age_at_baseline
+                  renameTo: null
+                  size: 140
+                  wrapText: null
+                  displayFormat: null
+                - originalName: cohort
+                  renameTo: null
+                  size: 88
+                  wrapText: null
+                  displayFormat: null
+                - originalName: diagnosis
+                  renameTo: null
+                  size: 103
+                  wrapText: null
+                  displayFormat: null
+                - originalName: education_level_years
+                  renameTo: null
+                  size: 173
+                  wrapText: null
+                  displayFormat: null
+                - originalName: ethnicity
+                  renameTo: null
+                  size: 151
+                  wrapText: null
+                  displayFormat: null
+                - originalName: participant_id
+                  renameTo: null
+                  size: 127
+                  wrapText: null
+                  displayFormat: null
+                - originalName: race
+                  renameTo: null
+                  size: 75
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sex
+                  renameTo: null
+                  size: 72
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: SQL
+          cellId: 019d5be0-177c-7116-9a14-b6ac78124f00
+          cellLabel: New Cohort Summary Stats
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  diagnosis,
+                  count(*) AS n_patients,
+                  round(avg(age_at_baseline::numeric), 1) AS mean_age,
+                  round(stddev(age_at_baseline::numeric), 1) AS sd_age,
+                  round(
+                      100.0 * sum(CASE WHEN sex = 'Male' THEN 1 ELSE 0 END) / count(*), 1
+                  ) AS pct_male,
+                  round(
+                      100.0 * sum(CASE WHEN race = 'White' THEN 1 ELSE 0 END) / count(*), 1
+                  ) AS pct_white
+              FROM new_cohort_demographics
+              GROUP BY cohort, diagnosis
+              ORDER BY cohort ASC, n_patients DESC
+            dataFrameCell: true
+            dataConnectionId: null
+            resultVariableName: new_cohort_summary
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 89
+                  wrapText: null
+                  displayFormat: null
+                - originalName: diagnosis
+                  renameTo: null
+                  size: 241
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_age
+                  renameTo: null
+                  size: 108
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_patients
+                  renameTo: null
+                  size: 110
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_male
+                  renameTo: null
+                  size: 103
+                  wrapText: null
+                  displayFormat: null
+                - originalName: pct_white
+                  renameTo: null
+                  size: 105
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 39
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sd_age
+                  renameTo: null
+                  size: 90
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5be1-742c-777b-8a68-10611d8686bb # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 12. LCC Cohort Deep Dive (DaTscan + Clinical)
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5be1-a227-7116-ad78-99ddc6ebdb78
+          cellLabel: LCC Clinical + DaTscan
+          config:
+            source: |-
+              SELECT
+                d.participant_id,
+                cc.case_control_other_at_baseline AS diagnosis,
+                d.age_at_baseline::int AS age,
+                d.sex,
+                d.race,
+                ds.sbr_caudate_r,
+                ds.sbr_caudate_l,
+                ds.sbr_putamen_r,
+                ds.sbr_putamen_l,
+                (ds.sbr_caudate_r + ds.sbr_caudate_l) / 2.0 AS caudate_mean_sbr,
+                (ds.sbr_putamen_r + ds.sbr_putamen_l) / 2.0 AS putamen_mean_sbr,
+                m.moca_total_score
+              FROM postgres.lcc_raw.demographics d
+              JOIN postgres.lcc_raw.amp_pd_case_control cc ON d.participant_id = cc.participant_id
+              LEFT JOIN postgres.lcc_raw.datscan_sbr ds
+                ON d.participant_id = ds.participant_id AND ds.visit_month = 0
+              LEFT JOIN postgres.lcc_raw.moca m
+                ON d.participant_id = m.participant_id AND m.visit_month = 0
+              WHERE d.visit_name = 'M0'
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: lcc_clinical
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: age
+                  renameTo: null
+                  size: 71
+                  wrapText: null
+                  displayFormat: null
+                - originalName: caudate_mean_sbr
+                  renameTo: null
+                  size: 155
+                  wrapText: null
+                  displayFormat: null
+                - originalName: diagnosis
+                  renameTo: null
+                  size: 103
+                  wrapText: null
+                  displayFormat: null
+                - originalName: moca_total_score
+                  renameTo: null
+                  size: 149
+                  wrapText: null
+                  displayFormat: null
+                - originalName: participant_id
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+                - originalName: putamen_mean_sbr
+                  renameTo: null
+                  size: 161
+                  wrapText: null
+                  displayFormat: null
+                - originalName: race
+                  renameTo: null
+                  size: 75
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sbr_caudate_l
+                  renameTo: null
+                  size: 127
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sbr_caudate_r
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sbr_putamen_l
+                  renameTo: null
+                  size: 133
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sbr_putamen_r
+                  renameTo: null
+                  size: 134
+                  wrapText: null
+                  displayFormat: null
+                - originalName: sex
+                  renameTo: null
+                  size: 72
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5be2-434c-700d-9614-6e622b6d0211 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 13. SURE-PD3 Clinical Trial
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5be2-71ed-7116-9c9f-9c524148ccbb
+          cellLabel: SURE-PD3 Baseline Clinical
+          config:
+            source: |-
+              SELECT
+                d.participant_id,
+                d.age_at_baseline::int AS age,
+                d.sex,
+                d.race,
+                u3.visit_name,
+                u3.visit_month,
+                u3.mds_updrs_part_iii_summary_score AS updrs3_total,
+                u2.mds_updrs_part_ii_summary_score AS updrs2_total,
+                u1.mds_updrs_part_i_summary_score AS updrs1_total,
+                m.moca_total_score,
+                se.mod_schwab_england_pct_adl_score AS schwab_england
+              FROM postgres.sure_pd3_raw.demographics d
+              LEFT JOIN postgres.sure_pd3_raw.mds_updrs_part_iii u3
+                ON d.participant_id = u3.participant_id AND u3.visit_month = 0
+              LEFT JOIN postgres.sure_pd3_raw.mds_updrs_part_ii u2
+                ON d.participant_id = u2.participant_id AND u2.visit_month = 0
+              LEFT JOIN postgres.sure_pd3_raw.mds_updrs_part_i u1
+                ON d.participant_id = u1.participant_id AND u1.visit_month = 0
+              LEFT JOIN postgres.sure_pd3_raw.moca m
+                ON d.participant_id = m.participant_id AND m.visit_month = 0
+              LEFT JOIN postgres.sure_pd3_raw.modified_schwab_england_adl se
+                ON d.participant_id = se.participant_id AND se.visit_month = 0
+              WHERE d.visit_name = 'M0'
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: sure_pd3_clinical
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5be0-4acc-7110-9def-a21432366d66 # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 11. PPMI LONI — Omics, Imaging & Neuro Exam
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5be0-76ec-7116-9a16-8c0a261849b1
+          cellLabel: LONI Omics Inventory
+          config:
+            source: |-
+              SELECT 'Plasma Proteomics (P222)' AS dataset,
+                count(*) AS n_records,
+                count(DISTINCT patno) AS n_patients,
+                count(DISTINCT assay) AS n_analytes,
+                count(DISTINCT event_id) AS n_timepoints
+              FROM postgres.ppmi_loni.ppmi_project_222_plasma_neuro_npx
+
+              UNION ALL
+
+              SELECT 'CSF Proteomics (P222)',
+                count(*), count(DISTINCT patno), count(DISTINCT assay), count(DISTINCT event_id)
+              FROM postgres.ppmi_loni.ppmi_project_222_csf_neu_npx
+
+              UNION ALL
+
+              SELECT 'Plasma Proteomics (P9000)',
+                count(*), count(DISTINCT patno), count(DISTINCT assay), count(DISTINCT event_id)
+              FROM postgres.ppmi_loni.ppmi_project_9000_plasma_neuro_npx
+
+              UNION ALL
+
+              SELECT 'CSF Proteomics (P9000)',
+                count(*), count(DISTINCT patno), count(DISTINCT assay), count(DISTINCT event_id)
+              FROM postgres.ppmi_loni.ppmi_project_9000_csf_neu_npx
+
+              UNION ALL
+
+              SELECT 'Biospecimen Analysis',
+                count(*), count(DISTINCT patno), count(DISTINCT testname), count(DISTINCT clinical_event)
+              FROM postgres.ppmi_loni.current_biospecimen_analysis_results 
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: loni_omics_inventory
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+        - cellType: SQL
+          cellId: 019d5be1-0b7d-7117-a21e-d7c37cc04b45
+          cellLabel: Biospecimen Assay Summary
+          config:
+            source: |-
+              SELECT
+                testname,
+                count(*) AS n_records,
+                count(DISTINCT patno) AS n_patients,
+                count(DISTINCT clinical_event) AS n_visits,
+                max(units) AS units
+              FROM postgres.ppmi_loni.current_biospecimen_analysis_results
+              GROUP BY testname
+              ORDER BY n_patients DESC
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: biospecimen_assays
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties: []
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5be3-b90b-7116-9de3-de8ca60cc53a # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 14. Paper3 Longitudinal Features (48-col)
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5be3-e3b7-7116-9a4d-af988aea2917
+          cellLabel: Paper3 Longitudinal Summary
+          config:
+            source: |
+              SELECT
+                  cohort,
+                  nsd_stage,
+                  count(*) AS n_visits,
+                  count(DISTINCT patno) AS n_patients,
+                  round(avg(updrs3_total)::numeric, 1) AS mean_updrs3,
+                  round(avg(updrs2_total)::numeric, 1) AS mean_updrs2,
+                  round(avg(updrs1_total)::numeric, 1) AS mean_updrs1,
+                  round(avg(moca_total)::numeric, 1) AS mean_moca,
+                  round(avg(scopa_aut_total)::numeric, 1) AS mean_scopa_aut,
+                  round(avg(caudate_mean_sbr)::numeric, 2) AS mean_caudate_sbr,
+                  round(avg(putamen_mean_sbr)::numeric, 2) AS mean_putamen_sbr,
+                  round(avg(delta_updrs3_total)::numeric, 2) AS mean_delta_updrs3,
+                  round(avg(delta_moca_total)::numeric, 2) AS mean_delta_moca
+              FROM postgres.paper3.longitudinal_features
+              GROUP BY cohort, nsd_stage
+              ORDER BY cohort, nsd_stage
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: paper3_summary
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: cohort
+                  renameTo: null
+                  size: 139
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_caudate_sbr
+                  renameTo: null
+                  size: 172
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_moca
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_scopa_aut
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs1
+                  renameTo: null
+                  size: 172
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs2
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: mean_updrs3
+                  renameTo: null
+                  size: 179
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_patients
+                  renameTo: null
+                  size: 110
+                  wrapText: null
+                  displayFormat: null
+                - originalName: n_visits
+                  renameTo: null
+                  size: 92
+                  wrapText: null
+                  displayFormat: null
+                - originalName: nsd_stage
+                  renameTo: null
+                  size: 107
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+  - cellType: COLLAPSIBLE
+    cellId: 019d5bde-f227-7116-8bfa-df2f441240af # DO NOT CHANGE - Hex uses this to match up cells when reimporting the file, and detect any changes to existing cells
+    cellLabel: 9. Full Database Inventory
+    config:
+      labelStyle: AUTO
+      cells:
+        - cellType: SQL
+          cellId: 019d5bdf-499b-7000-8b27-1f2bf2cd529a
+          cellLabel: Full Table Inventory
+          config:
+            source: |-
+              SELECT
+                t.table_schema,
+                t.table_name,
+                count(c.column_name) AS n_columns
+              FROM information_schema.tables t
+              JOIN information_schema.columns c
+                ON c.table_schema = t.table_schema AND c.table_name = t.table_name
+              WHERE t.table_schema IN (
+                'ppmi_raw','ppmi_loni','ppmi_supplemental',
+                'biofind_raw','pdbp_raw','hbs_raw',
+                'lcc_raw','lbd_raw','sure_pd3_raw',
+                'staging','features','longitudinal','paper3'
+              )
+              AND t.table_type = 'BASE TABLE'
+              GROUP BY t.table_schema, t.table_name
+              ORDER BY t.table_schema, t.table_name
+            dataFrameCell: false
+            dataConnectionId: 019d5b44-2a3c-7115-b5f4-43722a8ff340
+            resultVariableName: full_inventory
+            useRichDisplay: true
+            enablePreview: true
+            sqlCellOutputType: PANDAS
+            useQueryMode: false
+            castDecimals: true
+            useNativeDates: true
+            outputFilteredResult: true
+            allowDuplicateColumns: false
+            tableDisplayConfig:
+              pageSize: 50
+              height: null
+              hideIcons: false
+              defaultColumnWidth: null
+              hideIndex: false
+              defaultSortColumn: null
+              defaultSortIndexColumn: null
+              defaultSortDirection: ASC
+              conditionalFormatting: null
+              calcs: null
+              filters: null
+              columnProperties:
+                - originalName: n_columns
+                  renameTo: null
+                  size: 111
+                  wrapText: null
+                  displayFormat: null
+                - originalName: row-index-0
+                  renameTo: null
+                  size: 46
+                  wrapText: null
+                  displayFormat: null
+                - originalName: table_name
+                  renameTo: null
+                  size: 339
+                  wrapText: null
+                  displayFormat: null
+                - originalName: table_schema
+                  renameTo: null
+                  size: 128
+                  wrapText: null
+                  displayFormat: null
+              columnOrdering: null
+              customColumnOrdering: null
+              pinnedColumns: null
+              hiddenColumns: null
+              pinIndexColumns: false
+              showAggregations: false
+              columnAggregations: null
+appLayout:
+  visibleMetadataFields:
+    - NAME
+    - DESCRIPTION
+    - AUTHOR
+    - LAST_EDITED
+    - LAST_RUN
+    - CATEGORIES
+    - STATUS
+    - TABLE_OF_CONTENTS
+  fullWidth: true
+  tabs:
+    - name: Tab 1
+      rows:
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b49-522c-7116-8b37-7e4f94967fcc
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b50-f052-744b-8f61-5603326f3b25
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b50-e86d-7441-ac23-52a201ef29d2
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b4d-6be5-7002-811e-63937b94aaf9
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b4e-8a2d-7115-99c4-d8b006808de7
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b4f-498d-7119-a6fe-d974ec2c7303
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b51-b548-7115-be05-f608d2c59f68
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+        - columns:
+            - start: 0
+              end: 120
+              elements:
+                - showSource: false
+                  hideOutput: false
+                  type: CELL
+                  cellId: 019d5b50-56f5-7116-8157-3a241f3068a7
+                  sharedFilterId: null
+                  height: null
+                  showLabel: true
+                  explorable: null
+sharedFilters: []

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Paper 5: Covariate Shift Detection across Temporal Windows.
+"""Paper 5: Covariate Shift Detection across Temporal Windows.
 
 For each temporal window, compares train vs test feature distributions:
     1. Per-feature KS test (20 features, baseline values)
@@ -61,14 +60,18 @@ def run_covariate_shift_analysis(verbose: bool = True):
 
     for wi in range(splitter.n_windows):
         ws = splitter.get_window(wi)
-        wname = f"W{wi+1}"
-        print(f"\n{'='*60}")
+        wname = f"W{wi + 1}"
+        print(f"\n{'=' * 60}")
         print(f"  Covariate Shift Analysis — {wname}")
-        print(f"  Train: {ws.n_train} ({ws.train_enrollment_range[0]} to "
-              f"{ws.train_enrollment_range[1]})")
-        print(f"  Test: {ws.n_test} ({ws.test_enrollment_range[0]} to "
-              f"{ws.test_enrollment_range[1]})")
-        print(f"{'='*60}")
+        print(
+            f"  Train: {ws.n_train} ({ws.train_enrollment_range[0]} to "
+            f"{ws.train_enrollment_range[1]})"
+        )
+        print(
+            f"  Test: {ws.n_test} ({ws.test_enrollment_range[0]} to "
+            f"{ws.test_enrollment_range[1]})"
+        )
+        print(f"{'=' * 60}")
 
         per_feature, summary = compute_covariate_shift(
             features_df=features_df,
@@ -89,11 +92,13 @@ def run_covariate_shift_analysis(verbose: bool = True):
                 "shifted": sr.shifted,
             }
             ks_results.append(sr_dict)
-            psi_results.append({
-                "feature": sr.feature,
-                "psi": sr.psi,
-                "shifted_psi": sr.psi > 0.25 if not np.isnan(sr.psi) else False,
-            })
+            psi_results.append(
+                {
+                    "feature": sr.feature,
+                    "psi": sr.psi,
+                    "shifted_psi": sr.psi > 0.25 if not np.isnan(sr.psi) else False,
+                }
+            )
 
         all_ks[wname] = ks_results
         all_psi[wname] = psi_results
@@ -119,8 +124,10 @@ def run_covariate_shift_analysis(verbose: bool = True):
         if shifted:
             print(f"\n  Shifted features ({len(shifted)}):")
             for sr in shifted:
-                print(f"    {sr.feature}: KS={sr.ks_statistic:.3f} "
-                      f"(p={sr.ks_pvalue:.2e}), PSI={sr.psi:.3f}")
+                print(
+                    f"    {sr.feature}: KS={sr.ks_statistic:.3f} "
+                    f"(p={sr.ks_pvalue:.2e}), PSI={sr.psi:.3f}"
+                )
 
     # 4. Save results
     def _save_json(data, filename):
@@ -159,9 +166,9 @@ def _json_convert(obj):
 
 def _print_summary(summaries: dict):
     """Print formatted summary table."""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("  COVARIATE SHIFT SUMMARY")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     header = f"{'Window':<8} {'N_train':>8} {'N_test':>7} {'Shifted':>8} {'Frac':>7} {'Severity':>10} {'MMD':>10} {'MMD p':>8}"
     print(header)
@@ -169,15 +176,19 @@ def _print_summary(summaries: dict):
 
     for wname in sorted(summaries):
         s = summaries[wname]
-        mmd_str = f"{s['mmd_statistic']:.6f}" if s['mmd_statistic'] is not None else "N/A"
-        mmd_p_str = f"{s['mmd_pvalue']:.4f}" if s['mmd_pvalue'] is not None else "N/A"
-        print(f"{wname:<8} {s['n_train']:>8} {s['n_test']:>7} "
-              f"{s['n_shifted']:>4}/{s['n_features_tested']:<3} "
-              f"{s['fraction_shifted']:>6.1%} {s['severity']:>10} "
-              f"{mmd_str:>10} {mmd_p_str:>8}")
+        mmd_str = (
+            f"{s['mmd_statistic']:.6f}" if s["mmd_statistic"] is not None else "N/A"
+        )
+        mmd_p_str = f"{s['mmd_pvalue']:.4f}" if s["mmd_pvalue"] is not None else "N/A"
+        print(
+            f"{wname:<8} {s['n_train']:>8} {s['n_test']:>7} "
+            f"{s['n_shifted']:>4}/{s['n_features_tested']:<3} "
+            f"{s['fraction_shifted']:>6.1%} {s['severity']:>10} "
+            f"{mmd_str:>10} {mmd_p_str:>8}"
+        )
 
-    print(f"\n  Shift thresholds: KS p<0.001 OR PSI>0.25 = shifted feature")
-    print(f"  Severity: <10% mild, 10-30% moderate, >30% severe")
+    print("\n  Shift thresholds: KS p<0.001 OR PSI>0.25 = shifted feature")
+    print("  Severity: <10% mild, 10-30% moderate, >30% severe")
 
 
 def main():

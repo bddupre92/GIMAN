@@ -1,5 +1,4 @@
-"""
-Generate Figure 14: Feature Expansion Comparison
+"""Generate Figure 14: Feature Expansion Comparison
 
 Creates a publication-quality grouped bar chart comparing AUC and PR-AUC
 across 4 feature configurations of the Fuzzy GIMAN model, with 95%
@@ -21,32 +20,50 @@ Date: February 2026
 import json
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 
-matplotlib.rcParams.update({
-    "font.family": "serif",
-    "font.size": 11,
-    "axes.titlesize": 13,
-    "axes.labelsize": 12,
-    "xtick.labelsize": 10,
-    "ytick.labelsize": 10,
-    "legend.fontsize": 10,
-    "figure.dpi": 300,
-    "savefig.dpi": 300,
-    "savefig.bbox": "tight",
-})
+matplotlib.rcParams.update(
+    {
+        "font.family": "serif",
+        "font.size": 11,
+        "axes.titlesize": 13,
+        "axes.labelsize": 12,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "legend.fontsize": 10,
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+    }
+)
 
 # Project root
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 # Result file paths
 RESULT_PATHS = {
-    "Baseline\n(32 features)": PROJECT_ROOT / "outputs" / "phase9_neuro_fuzzy" / "PREP_20260208_SAA_COHORT3_full" / "full_training_results.json",
-    "+Demographics\n(34 features)": PROJECT_ROOT / "outputs" / "phase9_expanded" / "demographics_run" / "full_training_results.json",
-    "+Full Clinical\n(38 features)": PROJECT_ROOT / "outputs" / "phase9_expanded" / "clinical_run" / "full_training_results.json",
-    "Expanded\n(40 features)": PROJECT_ROOT / "outputs" / "phase9_expanded" / "expanded_run" / "full_training_results.json",
+    "Baseline\n(32 features)": PROJECT_ROOT
+    / "outputs"
+    / "phase9_neuro_fuzzy"
+    / "PREP_20260208_SAA_COHORT3_full"
+    / "full_training_results.json",
+    "+Demographics\n(34 features)": PROJECT_ROOT
+    / "outputs"
+    / "phase9_expanded"
+    / "demographics_run"
+    / "full_training_results.json",
+    "+Full Clinical\n(38 features)": PROJECT_ROOT
+    / "outputs"
+    / "phase9_expanded"
+    / "clinical_run"
+    / "full_training_results.json",
+    "Expanded\n(40 features)": PROJECT_ROOT
+    / "outputs"
+    / "phase9_expanded"
+    / "expanded_run"
+    / "full_training_results.json",
 }
 
 OUTPUT_DIR = PROJECT_ROOT / "visualizations" / "publication_New"
@@ -91,19 +108,23 @@ def generate_figure(results: dict):
 
     # AUC bars
     bars1 = ax.bar(
-        x - width / 2, aucs, width,
+        x - width / 2,
+        aucs,
+        width,
         label="AUC-ROC",
         color=colors_auc,
         edgecolor="black",
         linewidth=0.8,
         yerr=[auc_err_low, auc_err_high],
         capsize=5,
-        error_kw={"linewidth": 1.2, "capthick": 1.2}
+        error_kw={"linewidth": 1.2, "capthick": 1.2},
     )
 
     # PR-AUC bars
     bars2 = ax.bar(
-        x + width / 2, pr_aucs, width,
+        x + width / 2,
+        pr_aucs,
+        width,
         label="PR-AUC",
         color=colors_prauc,
         edgecolor="black",
@@ -126,11 +147,7 @@ def generate_figure(results: dict):
     ax.set_axisbelow(True)
 
     # Legend
-    ax.legend(
-        loc="upper left",
-        framealpha=0.9,
-        edgecolor="gray"
-    )
+    ax.legend(loc="upper left", framealpha=0.9, edgecolor="gray")
 
     # Annotate values on bars
     for i in range(n):
@@ -138,15 +155,19 @@ def generate_figure(results: dict):
         ax.annotate(
             f"{aucs[i]:.3f}",
             xy=(x[i] - width / 2, aucs[i] + auc_err_high[i] + 0.02),
-            ha="center", va="bottom",
-            fontsize=9, fontweight="bold",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            fontweight="bold",
         )
         # PR-AUC value
         ax.annotate(
             f"{pr_aucs[i]:.3f}",
             xy=(x[i] + width / 2, pr_aucs[i] + 0.02),
-            ha="center", va="bottom",
-            fontsize=9, fontweight="bold",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            fontweight="bold",
         )
 
     # Highlight best config
@@ -154,8 +175,11 @@ def generate_figure(results: dict):
     ax.annotate(
         "Best",
         xy=(x[best_idx] - width / 2, aucs[best_idx] + auc_err_high[best_idx] + 0.06),
-        ha="center", va="bottom",
-        fontsize=10, fontweight="bold", color="#FF5722",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+        fontweight="bold",
+        color="#FF5722",
         arrowprops=dict(arrowstyle="->", color="#FF5722", lw=1.5),
     )
 
@@ -181,7 +205,7 @@ def print_table(results: dict):
     print("-" * 80)
 
     for name, r in results.items():
-        name_short = name.replace('\n', ' ')
+        name_short = name.replace("\n", " ")
         auc = r["best_test_auc"]
         ci = r["auc_ci_95"]
         prauc = r["test_pr_auc"]

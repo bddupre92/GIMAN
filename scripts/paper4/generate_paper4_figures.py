@@ -22,33 +22,34 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from giman_pipeline.paper3.multistate_markov import STAGE_LABELS, N_STATES
-from giman_pipeline.paper3.dynamic_deephit import TIME_BIN_ENDS
+from giman_pipeline.paper3.multistate_markov import N_STATES, STAGE_LABELS
 
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "paper4" / "figures"
 DATA_DIR = PROJECT_ROOT / "outputs" / "paper4"
 
 # Publication style
-plt.rcParams.update({
-    "font.size": 10,
-    "axes.titlesize": 11,
-    "axes.labelsize": 10,
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 9,
-    "legend.fontsize": 8,
-    "figure.dpi": 300,
-    "savefig.dpi": 300,
-    "savefig.bbox": "tight",
-})
+plt.rcParams.update(
+    {
+        "font.size": 10,
+        "axes.titlesize": 11,
+        "axes.labelsize": 10,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "legend.fontsize": 8,
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+    }
+)
 
 COLORS = {
     "DeepHit": "#2196F3",
@@ -67,6 +68,7 @@ def save_fig(fig, name):
 
 
 # --- Figure 1: Conformal CIF bands for example patient ---
+
 
 def fig1_conformal_cif_bands():
     """Example patient CIF curves with 90% conformal prediction bands.
@@ -124,39 +126,92 @@ def fig1_conformal_cif_bands():
         hi_plot = np.concatenate([[0], hi])
 
         # Conformal band (shaded region)
-        ax.fill_between(t_plot, lo_plot, hi_plot, alpha=0.25, color=color,
-                        label="90% conformal band")
+        ax.fill_between(
+            t_plot,
+            lo_plot,
+            hi_plot,
+            alpha=0.25,
+            color=color,
+            label="90% conformal band",
+        )
 
         # CIF curve
-        ax.plot(t_plot, cif_plot, "-o", color=color, markersize=3,
-                linewidth=1.8, label=f"CIF: {src} $\\to$ {dst}", zorder=3)
+        ax.plot(
+            t_plot,
+            cif_plot,
+            "-o",
+            color=color,
+            markersize=3,
+            linewidth=1.8,
+            label=f"CIF: {src} $\\to$ {dst}",
+            zorder=3,
+        )
 
         # Actual transition time (vertical dashed line)
         if actual_t > 0:
-            ax.axvline(actual_t, ls="--", color="red", alpha=0.7, linewidth=1.2,
-                       label=f"Actual: {actual_t:.0f} mo")
+            ax.axvline(
+                actual_t,
+                ls="--",
+                color="red",
+                alpha=0.7,
+                linewidth=1.2,
+                label=f"Actual: {actual_t:.0f} mo",
+            )
         else:
             # Transition at baseline — mark with arrow at x=0
-            ax.annotate("Actual\n(baseline)", xy=(1, 0.5),
-                        fontsize=7, color="red", ha="left", va="center")
+            ax.annotate(
+                "Actual\n(baseline)",
+                xy=(1, 0.5),
+                fontsize=7,
+                color="red",
+                ha="left",
+                va="center",
+            )
 
         # Timing interval (horizontal bracket)
         ti_lo = ti["lower_months"]
         ti_hi = ti["upper_months"]
         bracket_y = 0.08
-        ax.plot([ti_lo, ti_hi], [bracket_y, bracket_y], "-", color="darkred",
-                linewidth=2.5, alpha=0.6, solid_capstyle="butt")
-        ax.plot([ti_lo, ti_lo], [bracket_y - 0.03, bracket_y + 0.03],
-                "-", color="darkred", linewidth=1.5, alpha=0.6)
-        ax.plot([ti_hi, ti_hi], [bracket_y - 0.03, bracket_y + 0.03],
-                "-", color="darkred", linewidth=1.5, alpha=0.6)
-        ax.text((ti_lo + ti_hi) / 2, bracket_y + 0.06,
-                f"TI: [{ti_lo:.0f}, {ti_hi:.0f}] mo",
-                ha="center", va="bottom", fontsize=7, color="darkred")
+        ax.plot(
+            [ti_lo, ti_hi],
+            [bracket_y, bracket_y],
+            "-",
+            color="darkred",
+            linewidth=2.5,
+            alpha=0.6,
+            solid_capstyle="butt",
+        )
+        ax.plot(
+            [ti_lo, ti_lo],
+            [bracket_y - 0.03, bracket_y + 0.03],
+            "-",
+            color="darkred",
+            linewidth=1.5,
+            alpha=0.6,
+        )
+        ax.plot(
+            [ti_hi, ti_hi],
+            [bracket_y - 0.03, bracket_y + 0.03],
+            "-",
+            color="darkred",
+            linewidth=1.5,
+            alpha=0.6,
+        )
+        ax.text(
+            (ti_lo + ti_hi) / 2,
+            bracket_y + 0.06,
+            f"TI: [{ti_lo:.0f}, {ti_hi:.0f}] mo",
+            ha="center",
+            va="bottom",
+            fontsize=7,
+            color="darkred",
+        )
 
-        ax.set_title(f"{panel_labels[ax_idx]} Patient {patno}: "
-                     f"Stage {src} $\\to$ {dst}",
-                     fontsize=10, fontweight="bold")
+        ax.set_title(
+            f"{panel_labels[ax_idx]} Patient {patno}: Stage {src} $\\to$ {dst}",
+            fontsize=10,
+            fontweight="bold",
+        )
         ax.set_xlabel("Months since baseline")
         if ax_idx == 0:
             ax.set_ylabel("Cumulative Incidence")
@@ -165,13 +220,18 @@ def fig1_conformal_cif_bands():
         ax.legend(fontsize=7, loc="center right")
         ax.grid(True, alpha=0.2)
 
-    fig.suptitle("Conformal CIF Prediction Bands (90% Confidence Level)",
-                 fontsize=12, fontweight="bold", y=1.02)
+    fig.suptitle(
+        "Conformal CIF Prediction Bands (90% Confidence Level)",
+        fontsize=12,
+        fontweight="bold",
+        y=1.02,
+    )
     fig.tight_layout()
     save_fig(fig, "fig1_conformal_cif_bands")
 
 
 # --- Figure 2: Coverage calibration across confidence levels ---
+
 
 def fig2_coverage_calibration():
     """Predicted vs actual coverage across alpha levels."""
@@ -197,8 +257,16 @@ def fig2_coverage_calibration():
             means.append(vals["mean"])
             stds.append(vals["std"])
 
-        ax.errorbar(targets, means, yerr=stds, fmt="o-", color=color,
-                     label=model_name, capsize=4, markersize=6)
+        ax.errorbar(
+            targets,
+            means,
+            yerr=stds,
+            fmt="o-",
+            color=color,
+            label=model_name,
+            capsize=4,
+            markersize=6,
+        )
 
     ax.plot([0.75, 1.0], [0.75, 1.0], "k--", alpha=0.5, label="Ideal")
     ax.set_xlabel("Target Coverage (1 - α)")
@@ -214,6 +282,7 @@ def fig2_coverage_calibration():
 
 
 # --- Figure 3: Interval width by transition ---
+
 
 def fig3_interval_width_by_transition():
     """Box plot of conformal band widths per destination stage."""
@@ -252,8 +321,16 @@ def fig3_interval_width_by_transition():
         means = [np.mean(widths_per_cause[k]) for k in causes]
         stds = [np.std(widths_per_cause[k]) for k in causes]
 
-        ax.bar(x + offset, means, 0.35, yerr=stds, label=model_name,
-               color=COLORS[model_name], alpha=0.8, capsize=3)
+        ax.bar(
+            x + offset,
+            means,
+            0.35,
+            yerr=stds,
+            label=model_name,
+            color=COLORS[model_name],
+            alpha=0.8,
+            capsize=3,
+        )
 
     ax.set_xticks(range(len(causes)))
     ax.set_xticklabels([STAGE_LABELS[k] for k in causes])
@@ -267,6 +344,7 @@ def fig3_interval_width_by_transition():
 
 
 # --- Figure 4: Timing intervals per cause ---
+
 
 def fig4_timing_intervals():
     """Per-cause timing interval coverage and width for major transitions."""
@@ -306,8 +384,11 @@ def fig4_timing_intervals():
                 n_per_cause.setdefault(k, []).append(n)
 
         # Only plot causes with sufficient events
-        major = [k for k in sorted(cov_per_cause.keys())
-                 if k in n_per_cause and np.mean(n_per_cause[k]) >= 10]
+        major = [
+            k
+            for k in sorted(cov_per_cause.keys())
+            if k in n_per_cause and np.mean(n_per_cause[k]) >= 10
+        ]
         if not major:
             continue
 
@@ -317,14 +398,30 @@ def fig4_timing_intervals():
         # Coverage panel
         covs = [np.mean(cov_per_cause[k]) for k in major]
         cov_stds = [np.std(cov_per_cause[k]) for k in major]
-        axes[0].bar(x + offset, covs, 0.32, yerr=cov_stds, color=COLORS[model_name],
-                    alpha=0.8, capsize=3, label=model_name)
+        axes[0].bar(
+            x + offset,
+            covs,
+            0.32,
+            yerr=cov_stds,
+            color=COLORS[model_name],
+            alpha=0.8,
+            capsize=3,
+            label=model_name,
+        )
 
         # Width panel
         widths = [np.mean(width_per_cause.get(k, [0])) for k in major]
         width_stds = [np.std(width_per_cause.get(k, [0])) for k in major]
-        axes[1].bar(x + offset, widths, 0.32, yerr=width_stds, color=COLORS[model_name],
-                    alpha=0.8, capsize=3, label=model_name)
+        axes[1].bar(
+            x + offset,
+            widths,
+            0.32,
+            yerr=width_stds,
+            color=COLORS[model_name],
+            alpha=0.8,
+            capsize=3,
+            label=model_name,
+        )
 
     if not major:
         plt.close(fig)
@@ -350,6 +447,7 @@ def fig4_timing_intervals():
 
 
 # --- Figure 5: Reliability diagram ---
+
 
 def fig5_reliability_diagram():
     """Predicted CIF vs observed proportion at 1, 3, 5 years."""
@@ -387,13 +485,23 @@ def fig5_reliability_diagram():
 
             # Plot per major cause
             for k in [2, 3, 4]:
-                bins = [(bc, np.mean(v["preds"]), np.mean(v["obs"]))
-                        for (cause, bc), v in sorted(all_bins.items()) if cause == k]
+                bins = [
+                    (bc, np.mean(v["preds"]), np.mean(v["obs"]))
+                    for (cause, bc), v in sorted(all_bins.items())
+                    if cause == k
+                ]
                 if not bins:
                     continue
-                bcs, preds, obs = zip(*bins)
-                ax.plot(preds, obs, "o-", color=STAGE_COLORS[k],
-                        label=STAGE_LABELS[k], markersize=4, alpha=0.8)
+                bcs, preds, obs = zip(*bins, strict=False)
+                ax.plot(
+                    preds,
+                    obs,
+                    "o-",
+                    color=STAGE_COLORS[k],
+                    label=STAGE_LABELS[k],
+                    markersize=4,
+                    alpha=0.8,
+                )
 
             ax.plot([0, 1], [0, 1], "k--", alpha=0.4, linewidth=0.8)
             ax.set_xlabel("Predicted CIF")
@@ -407,10 +515,13 @@ def fig5_reliability_diagram():
 
         fig.suptitle(f"Reliability Diagrams — {model_name}", fontsize=12, y=1.02)
         fig.tight_layout()
-        save_fig(fig, f"fig5_reliability_diagram_{model_name.lower().replace('-', '_')}")
+        save_fig(
+            fig, f"fig5_reliability_diagram_{model_name.lower().replace('-', '_')}"
+        )
 
 
 # --- Figure 6: ECE comparison ---
+
 
 def fig6_ece_comparison():
     """Bar chart: DeepHit vs Graph-DT ECE per cause."""
@@ -432,8 +543,14 @@ def fig6_ece_comparison():
             if model_name not in agg or h not in agg[model_name]:
                 continue
             val = agg[model_name][h]
-            ax.bar(model_name, val["mean"], yerr=val["std"],
-                   color=color, alpha=0.8, capsize=4)
+            ax.bar(
+                model_name,
+                val["mean"],
+                yerr=val["std"],
+                color=color,
+                alpha=0.8,
+                capsize=4,
+            )
 
         ax.set_title(f"{h} Horizon")
         ax.set_ylabel("ECE")
@@ -444,6 +561,7 @@ def fig6_ece_comparison():
 
 
 # --- Figure 7: Subgroup forest plot ---
+
 
 def fig7_subgroup_forest_plot():
     """Per-subgroup C-td with error bars for both models."""
@@ -482,9 +600,16 @@ def fig7_subgroup_forest_plot():
                     vals = agg[key]
                     mean = np.mean(vals)
                     ci = 1.96 * np.std(vals) / max(np.sqrt(len(vals)), 1)
-                    ax.errorbar(mean, g_idx + offset, xerr=ci, fmt="o",
-                                color=color, capsize=3, markersize=5,
-                                label=model_name if g_idx == 0 else "")
+                    ax.errorbar(
+                        mean,
+                        g_idx + offset,
+                        xerr=ci,
+                        fmt="o",
+                        color=color,
+                        capsize=3,
+                        markersize=5,
+                        label=model_name if g_idx == 0 else "",
+                    )
 
         ax.set_yticks(y_pos)
         ax.set_yticklabels(groups)
@@ -500,6 +625,7 @@ def fig7_subgroup_forest_plot():
 
 
 # --- Figure 8: Subgroup interaction (delta C-td) ---
+
 
 def fig8_subgroup_interaction():
     """Delta C-td (Graph-DT minus DeepHit) by subgroup."""
@@ -537,7 +663,9 @@ def fig8_subgroup_interaction():
             mean = np.mean(vals)
             ci = 1.96 * np.std(vals) / max(np.sqrt(len(vals)), 1)
             color = "#4CAF50" if mean > 0 else "#F44336"
-            ax.errorbar(mean, pos, xerr=ci, fmt="o", color=color, capsize=4, markersize=6)
+            ax.errorbar(
+                mean, pos, xerr=ci, fmt="o", color=color, capsize=4, markersize=6
+            )
             y_labels.append(f"{var_name}: {group}")
             y_pos.append(pos)
             pos += 1
@@ -556,6 +684,7 @@ def fig8_subgroup_interaction():
 
 # --- Figure 9: Gate activation by subgroup ---
 
+
 def fig9_gate_activation():
     """Gate activation distribution from Graph-DT by subgroup."""
     # Gate activations need checkpoint loading — use subgroup C-td as proxy
@@ -563,7 +692,9 @@ def fig9_gate_activation():
     import torch
 
     CHECKPOINT_DIR = PROJECT_ROOT / "outputs" / "paper3_checkpoints"
-    FEATURES_PATH = PROJECT_ROOT / "data" / "07_paper3_features" / "longitudinal_features.csv"
+    FEATURES_PATH = (
+        PROJECT_ROOT / "data" / "07_paper3_features" / "longitudinal_features.csv"
+    )
 
     gdt_path = CHECKPOINT_DIR / "graph_dt" / "fold0_graph_dt.pt"
     if not gdt_path.exists():
@@ -571,9 +702,13 @@ def fig9_gate_activation():
         return
 
     try:
-        from giman_pipeline.paper3.dynamic_deephit import extract_episodes, build_patient_arrays
+        from giman_pipeline.paper3.dynamic_deephit import (
+            build_patient_arrays,
+            extract_episodes,
+        )
         from giman_pipeline.paper3.graph_digital_twin import (
-            GraphDeepHitDataset, load_graph_dt_checkpoint,
+            GraphDeepHitDataset,
+            load_graph_dt_checkpoint,
         )
         from giman_pipeline.paper4.subgroup import assign_subgroups
 
@@ -587,18 +722,23 @@ def fig9_gate_activation():
         pat_to_gidx = cp["pat_to_gidx"]
 
         test_eps = [e for e in episodes if e.patno in test_pats]
-        test_ds = GraphDeepHitDataset(test_eps, patient_arrays, means, stds, pat_to_gidx)
+        test_ds = GraphDeepHitDataset(
+            test_eps, patient_arrays, means, stds, pat_to_gidx
+        )
 
         # Extract gate activations
         device = next(model.parameters()).device
         gate_vals = []
         pat_ids = []
 
-        from torch.utils.data import DataLoader
-        from giman_pipeline.paper3.graph_digital_twin import graph_collate_fn
         from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+        from torch.utils.data import DataLoader
 
-        loader = DataLoader(test_ds, batch_size=64, shuffle=False, collate_fn=graph_collate_fn)
+        from giman_pipeline.paper3.graph_digital_twin import graph_collate_fn
+
+        loader = DataLoader(
+            test_ds, batch_size=64, shuffle=False, collate_fn=graph_collate_fn
+        )
 
         # Pre-compute GAT graph features once (same as model.compute_graph_features)
         node_baseline = cp["node_baseline"].to(device)
@@ -608,7 +748,9 @@ def fig9_gate_activation():
         model.eval()
         with torch.no_grad():
             graph_node_features = model.compute_graph_features(
-                node_baseline, edge_index, edge_weight,
+                node_baseline,
+                edge_index,
+                edge_weight,
             )  # (N_patients, hidden_dim)
 
             for batch in loader:
@@ -621,7 +763,9 @@ def fig9_gate_activation():
                 sorted_seqs = sequences[sort_idx]
                 sorted_lens_clamped = sorted_lens.clamp(min=1)
                 packed = pack_padded_sequence(
-                    sorted_seqs, sorted_lens_clamped.cpu(), batch_first=True,
+                    sorted_seqs,
+                    sorted_lens_clamped.cpu(),
+                    batch_first=True,
                 )
                 gru_out, h_n = model.gru(packed)
                 gru_out_padded, _ = pad_packed_sequence(gru_out, batch_first=True)
@@ -657,15 +801,22 @@ def fig9_gate_activation():
             data_per_group = []
             labels = []
             for group in groups:
-                g_vals = [gate_vals[i] for i, p in enumerate(pat_ids)
-                          if pat_groups.get(p) == group]
+                g_vals = [
+                    gate_vals[i]
+                    for i, p in enumerate(pat_ids)
+                    if pat_groups.get(p) == group
+                ]
                 if g_vals:
                     data_per_group.append(g_vals)
                     labels.append(group)
 
             if data_per_group:
-                parts = ax.violinplot(data_per_group, positions=range(len(labels)),
-                                     showmedians=True, showextrema=False)
+                parts = ax.violinplot(
+                    data_per_group,
+                    positions=range(len(labels)),
+                    showmedians=True,
+                    showextrema=False,
+                )
                 for pc in parts["bodies"]:
                     pc.set_facecolor(COLORS["Graph-DT"])
                     pc.set_alpha(0.6)
@@ -674,7 +825,9 @@ def fig9_gate_activation():
                 ax.set_ylabel("Gate Activation (σ)")
                 ax.set_title(f"Gate by {var_name.upper()}")
 
-        fig.suptitle("Graph-DT Gate Activation by Subgroup (Fold 0)", fontsize=12, y=1.02)
+        fig.suptitle(
+            "Graph-DT Gate Activation by Subgroup (Fold 0)", fontsize=12, y=1.02
+        )
         fig.tight_layout()
         save_fig(fig, "fig9_gate_activation")
 
@@ -683,6 +836,7 @@ def fig9_gate_activation():
 
 
 # --- Figure 10: Conditional coverage by subgroup ---
+
 
 def fig10_conditional_coverage():
     """Conditional conformal coverage per subgroup (equity analysis)."""
@@ -731,10 +885,22 @@ def fig10_conditional_coverage():
                     means.append(np.mean(agg[key]))
                 else:
                     means.append(0)
-            ax.bar(x + offset, means, 0.25, color=color, alpha=0.8,
-                   label=model_name if ax_idx == 0 else "")
+            ax.bar(
+                x + offset,
+                means,
+                0.25,
+                color=color,
+                alpha=0.8,
+                label=model_name if ax_idx == 0 else "",
+            )
 
-        ax.axhline(y=0.90, color="red", linestyle="--", alpha=0.5, label="Target" if ax_idx == 0 else "")
+        ax.axhline(
+            y=0.90,
+            color="red",
+            linestyle="--",
+            alpha=0.5,
+            label="Target" if ax_idx == 0 else "",
+        )
         ax.set_xticks(x)
         ax.set_xticklabels(groups, rotation=30, ha="right")
         ax.set_ylabel("Coverage")
@@ -750,6 +916,7 @@ def fig10_conditional_coverage():
 
 
 # --- Figure 11: Conformal Baselines Comparison ---
+
 
 def fig11_conformal_baselines():
     """Bar chart comparing 4 conformal methods: coverage vs band width."""
@@ -790,12 +957,21 @@ def fig11_conformal_baselines():
         bars = ax.bar(x, covs, yerr=cov_stds, color=bar_colors, alpha=0.8, capsize=4)
 
         # Add width annotation below each bar
-        for i, (w, ws) in enumerate(zip(widths, width_stds)):
-            ax.text(i, covs[i] - cov_stds[i] - 0.035, f"w={w:.4f}",
-                    ha="center", va="top", fontsize=7, style="italic")
+        for i, (w, ws) in enumerate(zip(widths, width_stds, strict=False)):
+            ax.text(
+                i,
+                covs[i] - cov_stds[i] - 0.035,
+                f"w={w:.4f}",
+                ha="center",
+                va="top",
+                fontsize=7,
+                style="italic",
+            )
 
         cl_val = float(cl_key.split("=")[1])
-        ax.axhline(y=cl_val, color="red", linestyle="--", alpha=0.5, label=f"Target ({cl_val})")
+        ax.axhline(
+            y=cl_val, color="red", linestyle="--", alpha=0.5, label=f"Target ({cl_val})"
+        )
         ax.set_xticks(x)
         ax.set_xticklabels([short_names.get(m, m) for m in methods], fontsize=8)
         ax.set_ylabel("Marginal Coverage")
@@ -803,12 +979,15 @@ def fig11_conformal_baselines():
         ax.set_ylim(0.65, 1.05)
         ax.legend(fontsize=7)
 
-    fig.suptitle("Conformal Method Comparison: Coverage vs Band Width", fontsize=12, y=1.02)
+    fig.suptitle(
+        "Conformal Method Comparison: Coverage vs Band Width", fontsize=12, y=1.02
+    )
     fig.tight_layout()
     save_fig(fig, "fig11_conformal_baselines")
 
 
 # --- Figure 12: Directional Coverage (Forward vs Backward) ---
+
 
 def fig12_directional_coverage():
     """Coverage comparison for forward vs backward transitions."""
@@ -827,13 +1006,23 @@ def fig12_directional_coverage():
     # Panel A: Coverage by direction and model
     for model_idx, model_name in enumerate(["DeepHit", "Graph-DT"]):
         for dir_idx, direction in enumerate(["forward", "backward"]):
-            vals = [r["coverage"] for r in per_fold
-                    if r["model"] == model_name and r["direction"] == direction]
+            vals = [
+                r["coverage"]
+                for r in per_fold
+                if r["model"] == model_name and r["direction"] == direction
+            ]
             x_pos = model_idx + dir_idx * 0.35 - 0.15
             color = "#4CAF50" if direction == "forward" else "#FF5722"
-            axes[0].bar(x_pos, np.mean(vals), 0.30, yerr=np.std(vals),
-                       color=color, alpha=0.8, capsize=4,
-                       label=f"{direction.capitalize()}" if model_idx == 0 else "")
+            axes[0].bar(
+                x_pos,
+                np.mean(vals),
+                0.30,
+                yerr=np.std(vals),
+                color=color,
+                alpha=0.8,
+                capsize=4,
+                label=f"{direction.capitalize()}" if model_idx == 0 else "",
+            )
 
     axes[0].axhline(y=0.90, color="red", linestyle="--", alpha=0.5)
     axes[0].set_xticks([0, 1])
@@ -864,6 +1053,7 @@ def fig12_directional_coverage():
 
 # --- Figure 13: Patient Case Studies ---
 
+
 def fig13_patient_case_studies():
     """Individual patient CIF curves with conformal bands."""
     path = DATA_DIR / "expanded" / "patient_case_studies.json"
@@ -892,31 +1082,53 @@ def fig13_patient_case_studies():
         hi = case["band_upper"]
         actual = case["actual_duration_months"]
 
-        ax.fill_between(time_bins, lo, hi, alpha=0.25, color=COLORS["DeepHit"],
-                        label="90% CI band")
-        ax.plot(time_bins, cif, "-o", color=COLORS["DeepHit"], markersize=3,
-                label=f"CIF → {case['dest_stage']}")
-        ax.axvline(x=actual, color="red", linestyle="--", alpha=0.7,
-                   label=f"Actual: {actual:.0f}mo")
+        ax.fill_between(
+            time_bins, lo, hi, alpha=0.25, color=COLORS["DeepHit"], label="90% CI band"
+        )
+        ax.plot(
+            time_bins,
+            cif,
+            "-o",
+            color=COLORS["DeepHit"],
+            markersize=3,
+            label=f"CIF → {case['dest_stage']}",
+        )
+        ax.axvline(
+            x=actual,
+            color="red",
+            linestyle="--",
+            alpha=0.7,
+            label=f"Actual: {actual:.0f}mo",
+        )
 
         # Timing interval
         ti = case.get("timing_interval")
         if ti and ti.get("lower_months") is not None:
-            ax.axvspan(ti["lower_months"], ti["upper_months"],
-                       alpha=0.1, color="green", label="Timing CI")
+            ax.axvspan(
+                ti["lower_months"],
+                ti["upper_months"],
+                alpha=0.1,
+                color="green",
+                label="Timing CI",
+            )
 
         ax.set_xlabel("Months")
         ax.set_ylabel("CIF")
-        ax.set_title(f"Pt {case['patno']}\n"
-                     f"{case['source_stage']}→{case['dest_stage']}, "
-                     f"{case['sex']}, {case['age_at_baseline']:.0f}yr",
-                     fontsize=9)
+        ax.set_title(
+            f"Pt {case['patno']}\n"
+            f"{case['source_stage']}→{case['dest_stage']}, "
+            f"{case['sex']}, {case['age_at_baseline']:.0f}yr",
+            fontsize=9,
+        )
         ax.set_ylim(-0.05, 1.05)
         if ax_idx == 0:
             ax.legend(fontsize=6, loc="upper left")
 
-    fig.suptitle("Individual Patient CIF with Conformal Bands (DeepHit, 90% CL)",
-                 fontsize=11, y=1.04)
+    fig.suptitle(
+        "Individual Patient CIF with Conformal Bands (DeepHit, 90% CL)",
+        fontsize=11,
+        y=1.04,
+    )
     fig.tight_layout()
     save_fig(fig, "fig13_patient_case_studies")
 

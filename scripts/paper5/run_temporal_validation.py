@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Paper 5: Temporal Validation — Expanding-Window Training & Evaluation.
+"""Paper 5: Temporal Validation — Expanding-Window Training & Evaluation.
 
 For each of 4 temporal windows:
     1. Build temporal train/test split via TemporalSplitter
@@ -35,7 +34,6 @@ from giman_pipeline.paper5.train_per_window import (
     train_deephit_on_window,
     train_graph_dt_on_window,
 )
-
 
 # ── Paths ────────────────────────────────────────────────────────────
 
@@ -90,10 +88,12 @@ def run_temporal_validation(
         validation = splitter.validate_split(wi)
         leakage_ok = "PASS" if validation["no_temporal_leakage"] else "FAIL"
         overlap_ok = "PASS" if validation["patient_overlap"] == 0 else "FAIL"
-        print(f"  W{wi+1}: {validation['n_train']} train, {validation['n_test']} test | "
-              f"Leakage: {leakage_ok} | Overlap: {overlap_ok} | "
-              f"Train: {validation['train_date_range'][0]}-{validation['train_date_range'][1]} | "
-              f"Test: {validation['test_date_range'][0]}-{validation['test_date_range'][1]}")
+        print(
+            f"  W{wi + 1}: {validation['n_train']} train, {validation['n_test']} test | "
+            f"Leakage: {leakage_ok} | Overlap: {overlap_ok} | "
+            f"Train: {validation['train_date_range'][0]}-{validation['train_date_range'][1]} | "
+            f"Test: {validation['test_date_range'][0]}-{validation['test_date_range'][1]}"
+        )
 
     # 5. Run per-window training (load existing results to merge)
     results_path = OUTPUT_DIR / "temporal_validation_results.json"
@@ -111,17 +111,21 @@ def run_temporal_validation(
     for wi in windows:
         window_start = time.time()
         ws = splitter.get_window(wi)
-        print(f"\n{'#'*60}")
-        print(f"  WINDOW {wi+1} (W{wi+1})")
-        print(f"  Train: {ws.n_train} patients ({ws.train_enrollment_range[0]} to "
-              f"{ws.train_enrollment_range[1]})")
-        print(f"  Test: {ws.n_test} patients ({ws.test_enrollment_range[0]} to "
-              f"{ws.test_enrollment_range[1]})")
-        print(f"{'#'*60}")
+        print(f"\n{'#' * 60}")
+        print(f"  WINDOW {wi + 1} (W{wi + 1})")
+        print(
+            f"  Train: {ws.n_train} patients ({ws.train_enrollment_range[0]} to "
+            f"{ws.train_enrollment_range[1]})"
+        )
+        print(
+            f"  Test: {ws.n_test} patients ({ws.test_enrollment_range[0]} to "
+            f"{ws.test_enrollment_range[1]})"
+        )
+        print(f"{'#' * 60}")
 
         window_results = {
             "window_idx": wi,
-            "window_name": f"W{wi+1}",
+            "window_name": f"W{wi + 1}",
             "n_train": ws.n_train,
             "n_test": ws.n_test,
             "train_enrollment_range": list(ws.train_enrollment_range),
@@ -129,8 +133,8 @@ def run_temporal_validation(
         }
 
         # --- DeepHit ---
-        print(f"\n--- DeepHit (W{wi+1}) ---")
-        dh_ckpt = CHECKPOINT_DIR / f"window{wi+1}_deephit.pt"
+        print(f"\n--- DeepHit (W{wi + 1}) ---")
+        dh_ckpt = CHECKPOINT_DIR / f"window{wi + 1}_deephit.pt"
         dh_results = train_deephit_on_window(
             features_df=features_df,
             train_patnos=ws.train_patnos,
@@ -151,8 +155,8 @@ def run_temporal_validation(
 
         # --- Graph-DT ---
         if not skip_graphdt:
-            print(f"\n--- Graph-DT (W{wi+1}) ---")
-            gdt_ckpt = CHECKPOINT_DIR / f"window{wi+1}_graph_dt.pt"
+            print(f"\n--- Graph-DT (W{wi + 1}) ---")
+            gdt_ckpt = CHECKPOINT_DIR / f"window{wi + 1}_graph_dt.pt"
             gdt_results = train_graph_dt_on_window(
                 features_df=features_df,
                 train_patnos=ws.train_patnos,
@@ -174,12 +178,12 @@ def run_temporal_validation(
 
         window_elapsed = time.time() - window_start
         window_results["elapsed_seconds"] = round(window_elapsed, 1)
-        all_results[f"W{wi+1}"] = window_results
+        all_results[f"W{wi + 1}"] = window_results
 
         # Save incrementally after each window
         _save_results(all_results)
 
-        print(f"\n  Window {wi+1} complete in {window_elapsed / 60:.1f} minutes")
+        print(f"\n  Window {wi + 1} complete in {window_elapsed / 60:.1f} minutes")
 
     total_elapsed = time.time() - total_start
 
@@ -231,7 +235,9 @@ def _build_summary(results: dict, skip_graphdt: bool) -> dict:
             "min_ctd": float(min(dh_ctds)) if dh_ctds else None,
             "max_ctd": float(max(dh_ctds)) if dh_ctds else None,
             "paper3_cv_ctd": PAPER3_DEEPHIT_CTD,
-            "mean_degradation": float(PAPER3_DEEPHIT_CTD - sum(dh_ctds) / len(dh_ctds)) if dh_ctds else None,
+            "mean_degradation": float(PAPER3_DEEPHIT_CTD - sum(dh_ctds) / len(dh_ctds))
+            if dh_ctds
+            else None,
         },
     }
 
@@ -241,7 +247,9 @@ def _build_summary(results: dict, skip_graphdt: bool) -> dict:
             "min_ctd": float(min(gdt_ctds)),
             "max_ctd": float(max(gdt_ctds)),
             "paper3_cv_ctd": PAPER3_GRAPHDT_CTD,
-            "mean_degradation": float(PAPER3_GRAPHDT_CTD - sum(gdt_ctds) / len(gdt_ctds)),
+            "mean_degradation": float(
+                PAPER3_GRAPHDT_CTD - sum(gdt_ctds) / len(gdt_ctds)
+            ),
         }
 
     return summary
@@ -249,9 +257,9 @@ def _build_summary(results: dict, skip_graphdt: bool) -> dict:
 
 def _print_summary(results: dict, skip_graphdt: bool):
     """Print formatted summary table."""
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print("  TEMPORAL VALIDATION SUMMARY")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
 
     header = f"{'Window':<8} {'N_train':>8} {'N_test':>7} {'DH C-td':>9}"
     if not skip_graphdt:
@@ -288,28 +296,43 @@ def _print_summary(results: dict, skip_graphdt: bool):
         s = results["summary"]
         mean_dh = s["deephit"]["mean_ctd"]
         if mean_dh is not None:
-            print(f"\n  DeepHit mean temporal C-td: {mean_dh:.4f} "
-                  f"(Δ = {s['deephit']['mean_degradation']:+.4f} from random CV)")
-        if not skip_graphdt and "graph_dt" in s and s["graph_dt"]["mean_ctd"] is not None:
+            print(
+                f"\n  DeepHit mean temporal C-td: {mean_dh:.4f} "
+                f"(Δ = {s['deephit']['mean_degradation']:+.4f} from random CV)"
+            )
+        if (
+            not skip_graphdt
+            and "graph_dt" in s
+            and s["graph_dt"]["mean_ctd"] is not None
+        ):
             mean_gdt = s["graph_dt"]["mean_ctd"]
-            print(f"  Graph-DT mean temporal C-td: {mean_gdt:.4f} "
-                  f"(Δ = {s['graph_dt']['mean_degradation']:+.4f} from random CV)")
+            print(
+                f"  Graph-DT mean temporal C-td: {mean_gdt:.4f} "
+                f"(Δ = {s['graph_dt']['mean_degradation']:+.4f} from random CV)"
+            )
 
-    print(f"\n  Total elapsed: {results.get('summary', {}).get('total_elapsed_seconds', 0) / 60:.1f} minutes")
+    print(
+        f"\n  Total elapsed: {results.get('summary', {}).get('total_elapsed_seconds', 0) / 60:.1f} minutes"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(description="Paper 5: Temporal Validation")
     parser.add_argument(
-        "--windows", type=int, nargs="+", default=None,
+        "--windows",
+        type=int,
+        nargs="+",
+        default=None,
         help="Which windows to run (0-3). Default: all.",
     )
     parser.add_argument(
-        "--skip-graphdt", action="store_true",
+        "--skip-graphdt",
+        action="store_true",
         help="Skip Graph-DT training (faster, DeepHit only).",
     )
     parser.add_argument(
-        "--quiet", action="store_true",
+        "--quiet",
+        action="store_true",
         help="Reduce output verbosity.",
     )
     args = parser.parse_args()

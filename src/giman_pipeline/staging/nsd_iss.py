@@ -40,9 +40,8 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -59,10 +58,10 @@ PUTAMEN_SBR_DEFICIT_THRESHOLD = 0.80  # Below this = dopaminergic deficit (D+)
 
 # Hoehn & Yahr stage thresholds for functional impairment levels
 HY_STAGE_THRESHOLDS = {
-    "no_impairment": (0, 2.0),    # H&Y 0-2: Stages 1, 2A, 2B
+    "no_impairment": (0, 2.0),  # H&Y 0-2: Stages 1, 2A, 2B
     "mild_impairment": (2.0, 3.0),  # H&Y 2-3: Stage 3
     "moderate_impairment": (3.0, 4.0),  # H&Y 3-4: Stage 4
-    "severe_impairment": (4.0, 5.0),    # H&Y 4-5: Stage 5
+    "severe_impairment": (4.0, 5.0),  # H&Y 4-5: Stage 5
     "complete_dependency": (5.0, float("inf")),  # H&Y 5: Stage 6
 }
 
@@ -80,8 +79,8 @@ class NSDISSResult:
     patno: int
     stage: str  # "0", "1", "2A", "2B", "3", "4", "5", "6", or "unclassified"
     stage_numeric: float  # 0.0, 1.0, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0
-    s_positive: Optional[bool]  # SAA result
-    d_positive: Optional[bool]  # DaT-SPECT deficit
+    s_positive: bool | None  # SAA result
+    d_positive: bool | None  # DaT-SPECT deficit
     has_clinical_signs: bool
     has_functional_impairment: bool
     functional_impairment_level: str  # "none", "mild", "moderate", "severe", "complete"
@@ -118,9 +117,9 @@ STAGE_ORDINAL_MAP = {
 
 
 def compute_s_anchor(
-    saa_label: Optional[float],
-    saa_positive_rate: Optional[float] = None,
-) -> Optional[bool]:
+    saa_label: float | None,
+    saa_positive_rate: float | None = None,
+) -> bool | None:
     """Determine S anchor (alpha-synuclein pathology) from SAA results.
 
     Args:
@@ -136,12 +135,12 @@ def compute_s_anchor(
 
 
 def compute_d_anchor(
-    putamen_mean_sbr: Optional[float] = None,
-    caudate_mean_sbr: Optional[float] = None,
-    putamen_l_sbr: Optional[float] = None,
-    putamen_r_sbr: Optional[float] = None,
+    putamen_mean_sbr: float | None = None,
+    caudate_mean_sbr: float | None = None,
+    putamen_l_sbr: float | None = None,
+    putamen_r_sbr: float | None = None,
     threshold: float = PUTAMEN_SBR_DEFICIT_THRESHOLD,
-) -> Optional[bool]:
+) -> bool | None:
     """Determine D anchor (dopaminergic dysfunction) from DaT-SPECT.
 
     Uses the lowest putamen SBR (left or right) as the primary indicator.
@@ -180,9 +179,9 @@ def compute_d_anchor(
 
 
 def compute_functional_impairment(
-    hy_stage: Optional[float] = None,
-    updrs3_total: Optional[float] = None,
-    updrs2_total: Optional[float] = None,
+    hy_stage: float | None = None,
+    updrs3_total: float | None = None,
+    updrs2_total: float | None = None,
 ) -> tuple[str, bool]:
     """Determine functional impairment level from clinical assessments.
 
@@ -227,9 +226,9 @@ def compute_functional_impairment(
 
 
 def has_clinical_parkinsonism(
-    updrs3_total: Optional[float] = None,
-    hy_stage: Optional[float] = None,
-    primary_diagnosis: Optional[int] = None,
+    updrs3_total: float | None = None,
+    hy_stage: float | None = None,
+    primary_diagnosis: int | None = None,
 ) -> bool:
     """Determine if patient shows clinical signs of parkinsonism.
 
@@ -260,8 +259,8 @@ def has_clinical_parkinsonism(
 
 
 def compute_nsd_iss_stage(
-    s_positive: Optional[bool],
-    d_positive: Optional[bool],
+    s_positive: bool | None,
+    d_positive: bool | None,
     has_clinical: bool,
     impairment_level: str,
     has_impairment: bool,
@@ -318,16 +317,16 @@ def compute_nsd_iss_stage(
 
 def stage_single_patient(
     patno: int,
-    saa_label: Optional[float] = None,
-    saa_positive_rate: Optional[float] = None,
-    putamen_mean_sbr: Optional[float] = None,
-    caudate_mean_sbr: Optional[float] = None,
-    putamen_l_sbr: Optional[float] = None,
-    putamen_r_sbr: Optional[float] = None,
-    hy_stage: Optional[float] = None,
-    updrs3_total: Optional[float] = None,
-    updrs2_total: Optional[float] = None,
-    primary_diagnosis: Optional[int] = None,
+    saa_label: float | None = None,
+    saa_positive_rate: float | None = None,
+    putamen_mean_sbr: float | None = None,
+    caudate_mean_sbr: float | None = None,
+    putamen_l_sbr: float | None = None,
+    putamen_r_sbr: float | None = None,
+    hy_stage: float | None = None,
+    updrs3_total: float | None = None,
+    updrs2_total: float | None = None,
+    primary_diagnosis: int | None = None,
     has_lrrk2: bool = False,
     has_gba: bool = False,
     has_snca: bool = False,
@@ -372,8 +371,12 @@ def stage_single_patient(
 
     # Compute stage
     stage, stage_numeric = compute_nsd_iss_stage(
-        s_positive, d_positive, has_clinical, impairment_level,
-        has_impairment, has_genetic_risk,
+        s_positive,
+        d_positive,
+        has_clinical,
+        impairment_level,
+        has_impairment,
+        has_genetic_risk,
     )
 
     # Determine confidence based on data completeness
@@ -419,11 +422,11 @@ def stage_single_patient(
 
 def stage_cohort(
     cohort_df: pd.DataFrame,
-    saa_df: Optional[pd.DataFrame] = None,
-    dat_df: Optional[pd.DataFrame] = None,
-    clinical_df: Optional[pd.DataFrame] = None,
-    genetic_df: Optional[pd.DataFrame] = None,
-    diagnosis_df: Optional[pd.DataFrame] = None,
+    saa_df: pd.DataFrame | None = None,
+    dat_df: pd.DataFrame | None = None,
+    clinical_df: pd.DataFrame | None = None,
+    genetic_df: pd.DataFrame | None = None,
+    diagnosis_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Compute NSD-ISS stages for an entire cohort.
 
@@ -569,23 +572,27 @@ def stage_cohort(
         results.append(result)
 
     # Convert to DataFrame
-    stage_df = pd.DataFrame([
-        {
-            "PATNO": r.patno,
-            "nsd_iss_stage": r.stage,
-            "nsd_iss_stage_numeric": r.stage_numeric,
-            "nsd_iss_stage_ordinal": STAGE_ORDINAL_MAP.get(r.stage, -1),
-            "s_positive": r.s_positive,
-            "d_positive": r.d_positive,
-            "has_clinical_signs": r.has_clinical_signs,
-            "has_functional_impairment": r.has_functional_impairment,
-            "functional_impairment_level": r.functional_impairment_level,
-            "staging_confidence": r.confidence,
-            "n_missing_anchors": len(r.missing_anchors),
-            "missing_anchors": ",".join(r.missing_anchors) if r.missing_anchors else "",
-        }
-        for r in results
-    ])
+    stage_df = pd.DataFrame(
+        [
+            {
+                "PATNO": r.patno,
+                "nsd_iss_stage": r.stage,
+                "nsd_iss_stage_numeric": r.stage_numeric,
+                "nsd_iss_stage_ordinal": STAGE_ORDINAL_MAP.get(r.stage, -1),
+                "s_positive": r.s_positive,
+                "d_positive": r.d_positive,
+                "has_clinical_signs": r.has_clinical_signs,
+                "has_functional_impairment": r.has_functional_impairment,
+                "functional_impairment_level": r.functional_impairment_level,
+                "staging_confidence": r.confidence,
+                "n_missing_anchors": len(r.missing_anchors),
+                "missing_anchors": ",".join(r.missing_anchors)
+                if r.missing_anchors
+                else "",
+            }
+            for r in results
+        ]
+    )
 
     # Summary statistics
     n_staged = stage_df["nsd_iss_stage"].ne("unclassified").sum()
@@ -631,13 +638,19 @@ def save_staging_results(
         "n_staged": int(stage_df["nsd_iss_stage"].ne("unclassified").sum()),
         "n_unclassified": int(stage_df["nsd_iss_stage"].eq("unclassified").sum()),
         "stage_distribution": stage_df["nsd_iss_stage"].value_counts().to_dict(),
-        "confidence_distribution": stage_df["staging_confidence"].value_counts().to_dict(),
+        "confidence_distribution": stage_df["staging_confidence"]
+        .value_counts()
+        .to_dict(),
         "s_positive_rate": float(
             stage_df["s_positive"].eq(True).sum() / stage_df["s_positive"].notna().sum()
-        ) if stage_df["s_positive"].notna().any() else None,
+        )
+        if stage_df["s_positive"].notna().any()
+        else None,
         "d_positive_rate": float(
             stage_df["d_positive"].eq(True).sum() / stage_df["d_positive"].notna().sum()
-        ) if stage_df["d_positive"].notna().any() else None,
+        )
+        if stage_df["d_positive"].notna().any()
+        else None,
         "thresholds": {
             "putamen_sbr_deficit": PUTAMEN_SBR_DEFICIT_THRESHOLD,
             "updrs3_clinical": UPDRS3_CLINICAL_THRESHOLD,

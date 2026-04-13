@@ -151,13 +151,21 @@ class ConformalImputation:
             )
         elif self.mode == "normalized":
             return self._calibrate_normalized(
-                predicted_means, true_values, residuals, mask, imputed_mask,
+                predicted_means,
+                true_values,
+                residuals,
+                mask,
+                imputed_mask,
                 predicted_stds,
             )
         else:
             # Global mode (legacy)
             return self._calibrate_global(
-                predicted_means, true_values, residuals, mask, imputed_mask,
+                predicted_means,
+                true_values,
+                residuals,
+                mask,
+                imputed_mask,
                 predicted_stds,
             )
 
@@ -199,9 +207,8 @@ class ConformalImputation:
             # Coverage for this feature
             lower_j = predicted_means[feat_imputed, j] - q_j
             upper_j = predicted_means[feat_imputed, j] + q_j
-            covered_j = (
-                (true_values[feat_imputed, j] >= lower_j) &
-                (true_values[feat_imputed, j] <= upper_j)
+            covered_j = (true_values[feat_imputed, j] >= lower_j) & (
+                true_values[feat_imputed, j] <= upper_j
             )
             per_feature_cov[j] = float(covered_j.mean())
             per_feature_width[j] = 2 * q_j
@@ -364,8 +371,12 @@ class ConformalImputation:
         """
         if stage_names is None:
             stage_names = {
-                0: "Stage 0", 1: "Stage 1", 2: "Stage 2B",
-                3: "Stage 3", 4: "Stage 4", 5: "Unknown",
+                0: "Stage 0",
+                1: "Stage 1",
+                2: "Stage 2B",
+                3: "Stage 3",
+                4: "Stage 4",
+                5: "Unknown",
             }
 
         # First compute marginal
@@ -441,9 +452,7 @@ class ConformalImputation:
         N, F = predicted_means.shape
 
         if self.mode == "per_feature":
-            return self._predict_per_feature(
-                predicted_means, stages, use_per_stage
-            )
+            return self._predict_per_feature(predicted_means, stages, use_per_stage)
         elif self.mode == "normalized":
             return self._predict_normalized(
                 predicted_means, predicted_stds, stages, use_per_stage
@@ -462,11 +471,7 @@ class ConformalImputation:
         """Generate per-feature intervals."""
         N, F = predicted_means.shape
 
-        if (
-            use_per_stage
-            and stages is not None
-            and self._stage_quantiles
-        ):
+        if use_per_stage and stages is not None and self._stage_quantiles:
             # Per-stage, per-feature
             half_widths = np.zeros_like(predicted_means)
             for i in range(N):
@@ -503,7 +508,11 @@ class ConformalImputation:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Generate normalized (locally adaptive) intervals."""
         N, F = predicted_means.shape
-        safe_stds = np.maximum(predicted_stds, 1e-8) if predicted_stds is not None else np.ones((N, F))
+        safe_stds = (
+            np.maximum(predicted_stds, 1e-8)
+            if predicted_stds is not None
+            else np.ones((N, F))
+        )
 
         if use_per_stage and stages is not None and self._stage_quantiles:
             quantiles = np.zeros(N)
@@ -567,9 +576,7 @@ class ConformalImputation:
         unique_stages = np.unique(stages)
 
         for coverage in coverages:
-            cal = ConformalImputation(
-                coverage_target=coverage, mode=self.mode
-            )
+            cal = ConformalImputation(coverage_target=coverage, mode=self.mode)
 
             # Marginal
             marginal = cal.calibrate_marginal(

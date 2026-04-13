@@ -40,19 +40,33 @@ OUTPUT_DIR = ROOT / "outputs" / "paper6" / "pipeline_results"
 
 # Model checkpoints
 DEEPHIT_CKPT = ROOT / "outputs" / "paper3_checkpoints" / "deephit" / "fold0_deephit.pt"
-GRAPHDT_CKPT = ROOT / "outputs" / "paper3_checkpoints" / "graph_dt" / "fold0_graph_dt.pt"
+GRAPHDT_CKPT = (
+    ROOT / "outputs" / "paper3_checkpoints" / "graph_dt" / "fold0_graph_dt.pt"
+)
 GIMIN_CKPT = (
-    ROOT / "outputs" / "paper2_benchmark" / "runs"
-    / "full_benchmark_20260222_160247" / "checkpoints"
+    ROOT
+    / "outputs"
+    / "paper2_benchmark"
+    / "runs"
+    / "full_benchmark_20260222_160247"
+    / "checkpoints"
     / "frac0.1_run0_GIMIN_StageDecoderOnly.pt"
 )
 
 # Paper 1 CatBoost 12-feature model features (cross-cohort clinical)
 CATBOOST_12_FEATURES = [
-    "AGE_AT_BASELINE", "SEX",
-    "UPDRS1_TOTAL", "UPDRS2_TOTAL",
-    "UPDRS3_TREMOR", "UPDRS3_RIGIDITY", "UPDRS3_BRADYKINESIA", "UPDRS3_AXIAL",
-    "UPDRS4_TOTAL", "MOCA_TOTAL", "ESS_TOTAL", "RBD_TOTAL",
+    "AGE_AT_BASELINE",
+    "SEX",
+    "UPDRS1_TOTAL",
+    "UPDRS2_TOTAL",
+    "UPDRS3_TREMOR",
+    "UPDRS3_RIGIDITY",
+    "UPDRS3_BRADYKINESIA",
+    "UPDRS3_AXIAL",
+    "UPDRS4_TOTAL",
+    "MOCA_TOTAL",
+    "ESS_TOTAL",
+    "RBD_TOTAL",
 ]
 
 # Mapping from Paper 3 longitudinal feature names to Paper 1 feature names
@@ -80,6 +94,7 @@ def _get_device() -> torch.device:
 
 
 # ── Step 1: Train CatBoost Staging Model ─────────────────────────────
+
 
 def train_catboost_staging() -> tuple:
     """Train Paper 1 CatBoost on NSD-positive target (12 clinical features).
@@ -109,7 +124,9 @@ def train_catboost_staging() -> tuple:
         X[mask, j] = col_medians[j]
 
     print(f"  Training data: {X.shape[0]} patients, {X.shape[1]} features")
-    print(f"  Class distribution: {dict(zip(*np.unique(y, return_counts=True)))}")
+    print(
+        f"  Class distribution: {dict(zip(*np.unique(y, return_counts=True), strict=False))}"
+    )
 
     model = CatBoostClassifier(
         iterations=500,
@@ -136,6 +153,7 @@ def train_catboost_staging() -> tuple:
 
 # ── Step 2: Load Survival Models ──────────────────────────────────────
 
+
 def load_survival_models(device: torch.device):
     """Load DeepHit and Graph-DT fold 0 checkpoints."""
     from giman_pipeline.paper3.dynamic_deephit import load_deephit_checkpoint
@@ -146,17 +164,21 @@ def load_survival_models(device: torch.device):
     print("=" * 60)
 
     dh_model, dh_ckpt = load_deephit_checkpoint(DEEPHIT_CKPT, device=device)
-    print(f"  DeepHit: C-td={dh_ckpt['fold_ctd']:.4f}, "
-          f"input_dim={dh_ckpt['input_dim']}")
+    print(
+        f"  DeepHit: C-td={dh_ckpt['fold_ctd']:.4f}, input_dim={dh_ckpt['input_dim']}"
+    )
 
     gdt_model, gdt_ckpt = load_graph_dt_checkpoint(GRAPHDT_CKPT, device=device)
-    print(f"  Graph-DT: C-td={gdt_ckpt['fold_ctd']:.4f}, "
-          f"n_baseline_features={gdt_ckpt['n_baseline_features']}")
+    print(
+        f"  Graph-DT: C-td={gdt_ckpt['fold_ctd']:.4f}, "
+        f"n_baseline_features={gdt_ckpt['n_baseline_features']}"
+    )
 
     return dh_model, dh_ckpt, gdt_model, gdt_ckpt
 
 
 # ── Step 3: Run Pipeline Per Patient ──────────────────────────────────
+
 
 def run_patient_pipeline(
     patno: int,
@@ -178,19 +200,21 @@ def run_patient_pipeline(
         4. Generate conformal CIF bands
     """
     from giman_pipeline.paper3.dynamic_deephit import (
-        TIME_BIN_ENDS, N_TIME_BINS, N_STATES,
-        TIME_VARYING_FEATURES, STATIC_FEATURES, FEATURES_WITH_MISSING,
-        extract_episodes, build_patient_arrays,
+        FEATURES_WITH_MISSING,
+        N_STATES,
+        N_TIME_BINS,
+        STATIC_FEATURES,
+        TIME_BIN_ENDS,
+        TIME_VARYING_FEATURES,
     )
     from giman_pipeline.paper3.multistate_markov import STAGE_TO_IDX
-    from giman_pipeline.paper4.conformal_survival import (
-        CauseSpecificConformal, TIME_BIN_ENDS as CONF_TIME_BINS,
-    )
 
     print(f"\n--- Patient {patno} ---")
 
     # 1. Extract visit history
-    pat_visits = features_df[features_df["PATNO"] == patno].sort_values("months_from_baseline")
+    pat_visits = features_df[features_df["PATNO"] == patno].sort_values(
+        "months_from_baseline"
+    )
     n_visits = len(pat_visits)
     stages = pat_visits["nsd_stage"].tolist()
     times = pat_visits["months_from_baseline"].tolist()
@@ -199,11 +223,21 @@ def run_patient_pipeline(
 
     # Track missingness
     missing_info = {}
-    for feat in ["updrs3_total", "moca_total", "ess_total", "rbd_total",
-                  "scopa_aut_total", "updrs1_total", "updrs2_total"]:
+    for feat in [
+        "updrs3_total",
+        "moca_total",
+        "ess_total",
+        "rbd_total",
+        "scopa_aut_total",
+        "updrs1_total",
+        "updrs2_total",
+    ]:
         n_miss = pat_visits[feat].isna().sum()
-        missing_info[feat] = {"n_missing": int(n_miss), "n_total": n_visits,
-                              "pct": round(100 * n_miss / n_visits, 1)}
+        missing_info[feat] = {
+            "n_missing": int(n_miss),
+            "n_total": n_visits,
+            "pct": round(100 * n_miss / n_visits, 1),
+        }
 
     # 2. CatBoost staging at latest visit
     latest = pat_visits.iloc[-1]
@@ -215,8 +249,13 @@ def run_patient_pipeline(
     # UPDRS3 subscales not directly in longitudinal — use Paper 1 if available
     p1_df = pd.read_csv(PAPER1_PATH)
     p1_row = p1_df[p1_df["PATNO"] == patno]
-    for feat in ["UPDRS3_TREMOR", "UPDRS3_RIGIDITY", "UPDRS3_BRADYKINESIA",
-                  "UPDRS3_AXIAL", "UPDRS4_TOTAL"]:
+    for feat in [
+        "UPDRS3_TREMOR",
+        "UPDRS3_RIGIDITY",
+        "UPDRS3_BRADYKINESIA",
+        "UPDRS3_AXIAL",
+        "UPDRS4_TOTAL",
+    ]:
         if len(p1_row) > 0 and pd.notna(p1_row.iloc[0].get(feat)):
             staging_features[feat] = float(p1_row.iloc[0][feat])
         else:
@@ -249,8 +288,10 @@ def run_patient_pipeline(
             for j, feat in enumerate(CATBOOST_12_FEATURES)
         },
     }
-    print(f"  CatBoost staging: predicted={staging_result['predicted_stage']}, "
-          f"actual={staging_result['actual_stage']}")
+    print(
+        f"  CatBoost staging: predicted={staging_result['predicted_stage']}, "
+        f"actual={staging_result['actual_stage']}"
+    )
 
     # 3. Survival prediction using DeepHit
     # Build patient arrays for the full feature set
@@ -301,7 +342,7 @@ def run_patient_pipeline(
     pmf_np = dh_pmf.cpu().numpy()[0]  # (n_causes * n_tbins + 1,)
 
     # Reshape to (n_causes, n_tbins) — exclude the no-event bin
-    cause_pmf = pmf_np[:n_causes * n_tbins].reshape(n_causes, n_tbins)
+    cause_pmf = pmf_np[: n_causes * n_tbins].reshape(n_causes, n_tbins)
     cif = np.cumsum(cause_pmf, axis=1)  # CIF = cumulative sum over time
 
     dh_cif = cif  # (7, 11)
@@ -327,10 +368,12 @@ def run_patient_pipeline(
     graph_idx_tensor = torch.tensor([graph_idx], dtype=torch.long).to(device)
 
     with torch.no_grad():
-        gdt_pmf = gdt_model(seq_tensor, seq_len, stage_tensor, graph_idx_tensor, node_enc)
+        gdt_pmf = gdt_model(
+            seq_tensor, seq_len, stage_tensor, graph_idx_tensor, node_enc
+        )
 
     gdt_pmf_np = gdt_pmf.cpu().numpy()[0]
-    gdt_cause_pmf = gdt_pmf_np[:n_causes * n_tbins].reshape(n_causes, n_tbins)
+    gdt_cause_pmf = gdt_pmf_np[: n_causes * n_tbins].reshape(n_causes, n_tbins)
     gdt_cif = np.cumsum(gdt_cause_pmf, axis=1)
 
     # 5. Conformal CIF bands (using calibrated quantiles from Paper 4)
@@ -344,32 +387,46 @@ def run_patient_pipeline(
             conf_data = json.load(f)
         # Extract fold 0 quantiles at 90% CL for timing intervals
         for entry in conf_data:
-            if entry.get("fold_idx") == 0 and abs(entry.get("confidence_level", 0) - 0.90) < 0.01:
+            if (
+                entry.get("fold_idx") == 0
+                and abs(entry.get("confidence_level", 0) - 0.90) < 0.01
+            ):
                 timing_results = entry
                 break
 
     # Compute simple conformal bands using Paper 4 aggregate summary
-    aggregate_path = ROOT / "outputs" / "paper4" / "conformal" / "aggregate_summary.json"
+    aggregate_path = (
+        ROOT / "outputs" / "paper4" / "conformal" / "aggregate_summary.json"
+    )
     band_width = 0.037  # Default: 95% CL mean band width from Paper 4
     if aggregate_path.exists():
         with open(aggregate_path) as f:
             agg = json.load(f)
         # Use the DeepHit 90% CL band width
         for entry in agg.get("per_model", []):
-            if entry.get("model") == "deephit" and abs(entry.get("confidence_level", 0) - 0.90) < 0.01:
+            if (
+                entry.get("model") == "deephit"
+                and abs(entry.get("confidence_level", 0) - 0.90) < 0.01
+            ):
                 band_width = entry.get("mean_band_width", 0.037)
                 break
 
     # Apply uniform conformal band
-    dh_cif_bands = np.stack([
-        np.clip(dh_cif - band_width, 0, 1),
-        np.clip(dh_cif + band_width, 0, 1),
-    ], axis=-1)  # (7, 11, 2)
+    dh_cif_bands = np.stack(
+        [
+            np.clip(dh_cif - band_width, 0, 1),
+            np.clip(dh_cif + band_width, 0, 1),
+        ],
+        axis=-1,
+    )  # (7, 11, 2)
 
-    gdt_cif_bands = np.stack([
-        np.clip(gdt_cif - band_width, 0, 1),
-        np.clip(gdt_cif + band_width, 0, 1),
-    ], axis=-1)
+    gdt_cif_bands = np.stack(
+        [
+            np.clip(gdt_cif - band_width, 0, 1),
+            np.clip(gdt_cif + band_width, 0, 1),
+        ],
+        axis=-1,
+    )
 
     # 6. Identify most likely transitions (use max of DeepHit and Graph-DT)
     top_transitions = []
@@ -379,19 +436,21 @@ def run_patient_pipeline(
         max_cif = max(dh_max, gdt_max)
         if max_cif > 0.005:
             stage_label = STAGE_LABELS.get(k, str(k))
-            top_transitions.append({
-                "destination_stage": stage_label,
-                "cause_idx": int(k),
-                "max_cif_deephit": round(dh_max, 4),
-                "max_cif_graphdt": round(gdt_max, 4),
-                "max_cif": round(max_cif, 4),
-                "cif_at_12mo": round(float(dh_cif[k, 2]), 4),  # bin 2 = 12mo
-                "cif_at_36mo": round(float(dh_cif[k, 5]), 4),  # bin 5 = 36mo
-                "cif_at_60mo": round(float(dh_cif[k, 7]), 4),  # bin 7 = 60mo
-                "gdt_cif_at_12mo": round(float(gdt_cif[k, 2]), 4),
-                "gdt_cif_at_36mo": round(float(gdt_cif[k, 5]), 4),
-                "gdt_cif_at_60mo": round(float(gdt_cif[k, 7]), 4),
-            })
+            top_transitions.append(
+                {
+                    "destination_stage": stage_label,
+                    "cause_idx": int(k),
+                    "max_cif_deephit": round(dh_max, 4),
+                    "max_cif_graphdt": round(gdt_max, 4),
+                    "max_cif": round(max_cif, 4),
+                    "cif_at_12mo": round(float(dh_cif[k, 2]), 4),  # bin 2 = 12mo
+                    "cif_at_36mo": round(float(dh_cif[k, 5]), 4),  # bin 5 = 36mo
+                    "cif_at_60mo": round(float(dh_cif[k, 7]), 4),  # bin 7 = 60mo
+                    "gdt_cif_at_12mo": round(float(gdt_cif[k, 2]), 4),
+                    "gdt_cif_at_36mo": round(float(gdt_cif[k, 5]), 4),
+                    "gdt_cif_at_60mo": round(float(gdt_cif[k, 7]), 4),
+                }
+            )
 
     top_transitions.sort(key=lambda x: x["max_cif"], reverse=True)
 
@@ -425,8 +484,10 @@ def run_patient_pipeline(
             f"At 12 months: CIF={top['cif_at_12mo']:.3f}, "
             f"at 36 months: CIF={top['cif_at_36mo']:.3f}."
         )
-        print(f"  Top transition: →Stage {top['destination_stage']} "
-              f"(CIF@12mo={top['cif_at_12mo']:.3f}, @36mo={top['cif_at_36mo']:.3f})")
+        print(
+            f"  Top transition: →Stage {top['destination_stage']} "
+            f"(CIF@12mo={top['cif_at_12mo']:.3f}, @36mo={top['cif_at_36mo']:.3f})"
+        )
     else:
         result["clinical_summary"] = (
             f"Patient {patno} at Stage {current_stage_str} — "
@@ -437,6 +498,7 @@ def run_patient_pipeline(
 
 
 # ── Main Pipeline ────────────────────────────────────────────────────
+
 
 def run_unified_pipeline():
     """Run the full unified pipeline for all selected patients."""
@@ -486,6 +548,7 @@ def run_unified_pipeline():
         except Exception as e:
             print(f"  ERROR for patient {patno}: {e}")
             import traceback
+
             traceback.print_exc()
             all_results[str(patno)] = {"patno": patno, "error": str(e)}
 
@@ -508,20 +571,26 @@ def run_unified_pipeline():
     for patno in selected_patnos:
         r = all_results.get(str(patno), {})
         if "error" in r:
-            summary["per_patient_summary"].append({
-                "patno": patno, "error": r["error"]
-            })
+            summary["per_patient_summary"].append({"patno": patno, "error": r["error"]})
         else:
             top_trans = r.get("top_transitions", [{}])
-            summary["per_patient_summary"].append({
-                "patno": patno,
-                "current_stage": r.get("current_stage", "?"),
-                "n_visits": r.get("n_visits", 0),
-                "follow_up_months": r.get("follow_up_months", 0),
-                "catboost_predicted_stage": r.get("staging", {}).get("predicted_stage", "?"),
-                "top_transition": top_trans[0].get("destination_stage", "none") if top_trans else "none",
-                "top_cif_12mo": top_trans[0].get("cif_at_12mo", 0) if top_trans else 0,
-            })
+            summary["per_patient_summary"].append(
+                {
+                    "patno": patno,
+                    "current_stage": r.get("current_stage", "?"),
+                    "n_visits": r.get("n_visits", 0),
+                    "follow_up_months": r.get("follow_up_months", 0),
+                    "catboost_predicted_stage": r.get("staging", {}).get(
+                        "predicted_stage", "?"
+                    ),
+                    "top_transition": top_trans[0].get("destination_stage", "none")
+                    if top_trans
+                    else "none",
+                    "top_cif_12mo": top_trans[0].get("cif_at_12mo", 0)
+                    if top_trans
+                    else 0,
+                }
+            )
 
     all_results["summary"] = summary
 
@@ -530,24 +599,28 @@ def run_unified_pipeline():
     with open(summary_path, "w") as f:
         json.dump(all_results, f, indent=2, default=_convert)
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  PIPELINE COMPLETE")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Patients processed: {len(selected_patnos)}")
     print(f"  Total elapsed: {total_elapsed:.1f}s")
     print(f"  Results saved to: {OUTPUT_DIR}")
 
     # Print summary table
-    print(f"\n{'Patient':>8} {'Stage':>6} {'CatBoost':>10} {'Top →':>8} {'CIF@12mo':>10}")
+    print(
+        f"\n{'Patient':>8} {'Stage':>6} {'CatBoost':>10} {'Top →':>8} {'CIF@12mo':>10}"
+    )
     print("-" * 50)
     for ps in summary["per_patient_summary"]:
         if "error" in ps:
             print(f"  {ps['patno']:>6} ERROR: {ps['error']}")
         else:
-            print(f"  {ps['patno']:>6} {ps['current_stage']:>6} "
-                  f"{ps['catboost_predicted_stage']:>10} "
-                  f"→{ps['top_transition']:>6} "
-                  f"{ps['top_cif_12mo']:>10.4f}")
+            print(
+                f"  {ps['patno']:>6} {ps['current_stage']:>6} "
+                f"{ps['catboost_predicted_stage']:>10} "
+                f"→{ps['top_transition']:>6} "
+                f"{ps['top_cif_12mo']:>10.4f}"
+            )
 
     return all_results
 

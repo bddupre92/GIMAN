@@ -1,0 +1,54 @@
+# Default parameter values from literature
+# Sources: Knowles 2009, Cohen 2013, Meisl 2016, Dear 2020, Ursino 2020
+
+aggregation:
+  k_prod: 0.1           # nM/hr — monomer production
+  k_n: 1.0e-7           # nM^(1-n_c)/hr — primary nucleation
+  n_c: 2                # critical nucleus size
+  k_e: 1.0e-3           # nM^-1/hr — fibril elongation
+  k_conv: 1.0e-2        # hr^-1 — oligomer-to-fibril conversion
+  k_frag: 1.0e-5        # hr^-1 — fibril fragmentation
+  k_clear_M: 0.05       # hr^-1 — monomer clearance
+  k_clear_O: 0.02       # hr^-1 — oligomer clearance
+  k_clear_F: 0.005      # hr^-1 — fibril clearance
+
+neuron_death:
+  N_0: 400000            # neurons — initial count at birth
+  k_death: 0.04          # yr^-1 — disease-driven death rate
+  alpha_tox: 0.01        # nM^-1 — oligomer toxicity coefficient
+  beta_tox: 0.001        # nM^-1 — fibril toxicity coefficient
+  k_age: 0.005           # yr^-1 — age-related attrition (~5%/decade)
+  gamma: 0.7             # SBR-to-neuron power exponent
+  SBR_0: 3.2             # healthy baseline SBR
+  sigma_SBR: 0.15        # SBR measurement noise std
+
+propagation:
+  R: 82                  # brain regions (Desikan-Killiany atlas)
+  k_spread: 0.1          # yr^-1 — trans-synaptic spreading
+  k_clear: 0.05          # yr^-1 — regional clearance
+  k_local: 0.01          # yr^-1 — local amplification
+  K_m: 0.5               # Hill constant (a.u.)
+  seed_regions: [1, 2]   # Braak Stage 1: olfactory, dorsal motor nucleus
+
+pkpd:
+  k_a: 1.5              # hr^-1 — absorption rate
+  k_el: 0.7             # hr^-1 — plasma elimination
+  k_12: 0.3             # hr^-1 — plasma-to-brain
+  k_21: 0.2             # hr^-1 — brain-to-plasma
+  k_met: 0.5            # hr^-1 — brain metabolism
+  k_AADC: 1.0           # AADC activity
+  h: 2.5                # Hill coefficient
+  EC50: 50.0            # nM — half-maximal effective dopamine
+  UPDRS3_max: 132.0     # maximum UPDRS-III score
+
+# Prasinezumab intervention parameters
+prasinezumab:
+  eta: 0.25             # maximal fractional inhibition of k_e
+  K_d: 0.5              # nM — antibody-fibril dissociation constant
+
+# GIMAN calibration targets (from Paper 3 Markov sojourn times)
+calibration_targets:
+  sojourn_stage_0: 13.3   # years
+  sojourn_stage_2B: 0.68  # years
+  sojourn_stage_3: 1.85   # years
+  sojourn_stage_4: 1.42   # years

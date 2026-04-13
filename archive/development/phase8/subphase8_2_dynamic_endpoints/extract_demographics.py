@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Expansion: Demographics Feature Extraction
+"""Phase 8.2 Expansion: Demographics Feature Extraction
 
 Purpose:
     Extract demographic features (SEX, AGE_AT_VISIT) from PPMI raw data
@@ -28,15 +27,13 @@ Phase: 8.2 Feature Expansion
 
 import json
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
 
 
 def load_sex(data_dir: Path) -> pd.DataFrame:
-    """
-    Load SEX from Demographics file.
+    """Load SEX from Demographics file.
 
     SEX encoding in PPMI: 0 = Female, 1 = Male.
     This is a time-invariant feature (one record per patient).
@@ -62,8 +59,7 @@ def load_sex(data_dir: Path) -> pd.DataFrame:
     # Validate binary encoding
     valid_values = sex_df["SEX"].dropna().unique()
     print(f"  SEX values found: {sorted(valid_values)}")
-    assert set(valid_values).issubset({0, 1, 0.0, 1.0}), \
-        f"Unexpected SEX values: {valid_values}"
+    assert set(valid_values).issubset({0, 1}), f"Unexpected SEX values: {valid_values}"
 
     sex_df["SEX"] = sex_df["SEX"].astype(float)
     print(f"  SEX: {sex_df['SEX'].notna().sum()}/{len(sex_df)} non-null")
@@ -72,8 +68,7 @@ def load_sex(data_dir: Path) -> pd.DataFrame:
 
 
 def load_age_at_visit(data_dir: Path) -> pd.DataFrame:
-    """
-    Load AGE_AT_VISIT at baseline from the Age_at_visit file.
+    """Load AGE_AT_VISIT at baseline from the Age_at_visit file.
 
     Args:
         data_dir: Base data directory
@@ -98,9 +93,11 @@ def load_age_at_visit(data_dir: Path) -> pd.DataFrame:
         print("  WARNING: No EVENT_ID column, using all records")
         df_bl = df.copy()
 
-    age_df = df_bl[["PATNO", "AGE_AT_VISIT"]].drop_duplicates(
-        subset=["PATNO"], keep="first"
-    ).copy()
+    age_df = (
+        df_bl[["PATNO", "AGE_AT_VISIT"]]
+        .drop_duplicates(subset=["PATNO"], keep="first")
+        .copy()
+    )
 
     age_df["AGE_AT_VISIT"] = pd.to_numeric(age_df["AGE_AT_VISIT"], errors="coerce")
 
@@ -110,18 +107,17 @@ def load_age_at_visit(data_dir: Path) -> pd.DataFrame:
         print(f"  Age range: {valid_ages.min():.1f} - {valid_ages.max():.1f} years")
         print(f"  Age mean: {valid_ages.mean():.1f}, std: {valid_ages.std():.1f}")
 
-    print(f"  AGE_AT_VISIT: {age_df['AGE_AT_VISIT'].notna().sum()}/{len(age_df)} non-null")
+    print(
+        f"  AGE_AT_VISIT: {age_df['AGE_AT_VISIT'].notna().sum()}/{len(age_df)} non-null"
+    )
 
     return age_df
 
 
 def merge_demographics(
-    sex_df: pd.DataFrame,
-    age_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge demographic features with prodromal cohort.
+    sex_df: pd.DataFrame, age_df: pd.DataFrame, data_dir: Path
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge demographic features with prodromal cohort.
 
     Args:
         sex_df: SEX DataFrame
@@ -169,12 +165,9 @@ def merge_demographics(
 
 
 def save_demographics(
-    demo_df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    demo_df: pd.DataFrame, coverage_stats: dict[str, float], output_dir: Path
 ) -> None:
-    """
-    Save demographic features and metadata.
+    """Save demographic features and metadata.
 
     Args:
         demo_df: DataFrame with PATNO, SEX, AGE_AT_VISIT
@@ -198,14 +191,11 @@ def save_demographics(
         "coverage": coverage_stats,
         "average_coverage": float(np.mean(list(coverage_stats.values()))),
         "target_coverage": 100.0,
-        "source_files": [
-            "Demographics_08Feb2026.csv",
-            "Age_at_visit_07Feb2026.csv"
-        ],
+        "source_files": ["Demographics_08Feb2026.csv", "Age_at_visit_07Feb2026.csv"],
         "clinical_relevance": {
             "SEX": "Biological sex; PD has 1.5x male predominance; affects progression rate",
-            "AGE_AT_VISIT": "Age at baseline; strongest non-genetic risk factor for PD"
-        }
+            "AGE_AT_VISIT": "Age at baseline; strongest non-genetic risk factor for PD",
+        },
     }
 
     metadata_file = output_dir / "demographics_metadata.json"
@@ -254,7 +244,7 @@ def main() -> None:
     print("\n" + "=" * 70)
     print("DEMOGRAPHICS EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"  Extracted 2 demographic features")
+    print("  Extracted 2 demographic features")
     print(f"  Cohort size: {len(merged_df)} patients")
     print(f"  Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"  Output: {output_dir / 'demographics.csv'}")

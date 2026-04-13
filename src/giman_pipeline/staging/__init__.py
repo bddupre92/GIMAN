@@ -5,6 +5,8 @@ Staging System (NSD-ISS) for computational PD research.
 """
 
 from .nsd_iss import (
+    STAGE_NUMERIC_MAP,
+    STAGE_ORDINAL_MAP,
     NSDISSResult,
     compute_d_anchor,
     compute_nsd_iss_stage,
@@ -12,18 +14,16 @@ from .nsd_iss import (
     save_staging_results,
     stage_cohort,
     stage_single_patient,
-    STAGE_NUMERIC_MAP,
-    STAGE_ORDINAL_MAP,
 )
 from .target_encoding import (
     TargetSpec,
     encode_binary,
-    encode_three_class,
     encode_full_ordinal,
     encode_nsd_positive_ordinal,
+    encode_three_class,
     enrich_staging_with_targets,
-    save_enriched_targets,
     load_enriched_targets,
+    save_enriched_targets,
 )
 
 __all__ = [

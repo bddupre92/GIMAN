@@ -1,5 +1,4 @@
-"""
-Inductive Graph Extension for Temporal Validation.
+"""Inductive Graph Extension for Temporal Validation.
 
 When Graph-DT is trained on a temporal window, the kNN patient similarity
 graph only contains training patients. Test patients (enrolled later) are
@@ -42,13 +41,12 @@ class InductiveGraphExtender:
         train_pat_to_gidx: dict[int, int],
         k_neighbors: int = 15,
     ):
-        """
-        Args:
-            train_node_baseline: (N_train, n_features) standardized baseline features
-            train_edge_index: (2, E_train) edge indices for training graph
-            train_edge_weight: (E_train,) cosine similarity weights
-            train_pat_to_gidx: {patno: node_index} for training patients
-            k_neighbors: Number of training neighbors per test node
+        """Args:
+        train_node_baseline: (N_train, n_features) standardized baseline features
+        train_edge_index: (2, E_train) edge indices for training graph
+        train_edge_weight: (E_train,) cosine similarity weights
+        train_pat_to_gidx: {patno: node_index} for training patients
+        k_neighbors: Number of training neighbors per test node
         """
         self.train_node_baseline = train_node_baseline
         self.train_edge_index = train_edge_index
@@ -79,7 +77,8 @@ class InductiveGraphExtender:
 
         # 1. Concatenate node features: training first, then test
         extended_baseline = torch.cat(
-            [self.train_node_baseline, test_baseline_features], dim=0,
+            [self.train_node_baseline, test_baseline_features],
+            dim=0,
         )
 
         # 2. Build pat_to_gidx for all patients
@@ -134,10 +133,12 @@ class InductiveGraphExtender:
             new_edge_weight = torch.tensor(new_weights, dtype=torch.float32)
 
             extended_edge_index = torch.cat(
-                [self.train_edge_index, new_edge_index], dim=1,
+                [self.train_edge_index, new_edge_index],
+                dim=1,
             )
             extended_edge_weight = torch.cat(
-                [self.train_edge_weight, new_edge_weight], dim=0,
+                [self.train_edge_weight, new_edge_weight],
+                dim=0,
             )
         else:
             extended_edge_index = self.train_edge_index
@@ -158,7 +159,8 @@ class InductiveGraphExtender:
             "n_total_nodes": self.n_train + n_test,
             "n_train_edges": int(self.train_edge_index.size(1)),
             "k_neighbors": self.k_neighbors,
-            "max_new_edges_per_test": 2 * self.k_neighbors + 1,  # bidirectional + self-loop
+            "max_new_edges_per_test": 2 * self.k_neighbors
+            + 1,  # bidirectional + self-loop
         }
 
 
@@ -180,11 +182,12 @@ def build_inductive_extender(
     Returns:
         InductiveGraphExtender with training graph pre-built
     """
-    import pandas as pd
     from giman_pipeline.paper3.graph_digital_twin import build_patient_graph
 
     edge_index, edge_weight, node_baseline = build_patient_graph(
-        features_df, train_patnos, k_neighbors=k_neighbors,
+        features_df,
+        train_patnos,
+        k_neighbors=k_neighbors,
     )
     pat_to_gidx = {p: i for i, p in enumerate(train_patnos)}
 
@@ -241,7 +244,9 @@ def extract_test_baseline_features(
     if train_means is not None and train_stds is not None:
         for ci in range(len(cols)):
             if train_stds[ci] > 1e-8:
-                feat_matrix[:, ci] = (feat_matrix[:, ci] - train_means[ci]) / train_stds[ci]
+                feat_matrix[:, ci] = (
+                    feat_matrix[:, ci] - train_means[ci]
+                ) / train_stds[ci]
             else:
                 feat_matrix[:, ci] = 0.0
     else:

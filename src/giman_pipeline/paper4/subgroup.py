@@ -20,13 +20,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any
 
 import numpy as np
-from scipy import stats
 
-from giman_pipeline.paper3.multistate_markov import N_STATES
 from giman_pipeline.paper3.dynamic_deephit import compute_ctd
+from giman_pipeline.paper3.multistate_markov import N_STATES
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +33,12 @@ SUBGROUP_VARS = {
     "lrrk2": {"column": "lrrk2_carrier", "groups": {0: "Non-carrier", 1: "Carrier"}},
     "gba": {"column": "gba_carrier", "groups": {0: "Non-carrier", 1: "Carrier"}},
     "sex": {"column": "sex", "groups": {0: "Male", 1: "Female"}},
-    "age": {"column": "age_at_baseline", "type": "continuous",
-            "bins": [0, 60, 70, 200], "labels": ["<60", "60-70", ">70"]},
+    "age": {
+        "column": "age_at_baseline",
+        "type": "continuous",
+        "bins": [0, 60, 70, 200],
+        "labels": ["<60", "60-70", ">70"],
+    },
 }
 
 MIN_SUBGROUP_SIZE = 10  # Skip subgroups with fewer patients
@@ -45,6 +47,7 @@ MIN_SUBGROUP_SIZE = 10  # Skip subgroups with fewer patients
 # ---------------------------------------------------------------------------
 # Result dataclasses
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class SubgroupCTDResult:
@@ -74,9 +77,10 @@ class InteractionTestResult:
 # Subgroup assignment
 # ---------------------------------------------------------------------------
 
+
 def assign_subgroups(
     patnos: list[int],
-    features_df: "pd.DataFrame",
+    features_df: pd.DataFrame,
 ) -> dict[str, dict[int, str]]:
     """Assign patients to subgroups.
 
@@ -130,6 +134,7 @@ def assign_subgroups(
 # Per-subgroup C-td
 # ---------------------------------------------------------------------------
 
+
 def compute_subgroup_ctd(
     preds: dict,
     patnos: list[int],
@@ -149,8 +154,6 @@ def compute_subgroup_ctd(
     Returns:
         SubgroupCTDResult with per-group C-td.
     """
-    import torch
-
     result = SubgroupCTDResult(model_name=model_name, subgroup_var=subgroup_var)
 
     # Get unique groups
@@ -159,8 +162,7 @@ def compute_subgroup_ctd(
     for group in groups:
         # Find indices of patients in this group
         indices = [
-            i for i, p in enumerate(patnos)
-            if subgroup_assignments.get(p) == group
+            i for i, p in enumerate(patnos) if subgroup_assignments.get(p) == group
         ]
 
         if len(indices) < MIN_SUBGROUP_SIZE:
@@ -187,6 +189,7 @@ def compute_subgroup_ctd(
 # ---------------------------------------------------------------------------
 # Bootstrap interaction test
 # ---------------------------------------------------------------------------
+
 
 def bootstrap_interaction_test(
     preds_a: dict,
@@ -216,12 +219,12 @@ def bootstrap_interaction_test(
     Returns:
         InteractionTestResult.
     """
-    import torch
-
     groups = sorted(set(subgroup_assignments.values()))
     group_indices = {}
     for group in groups:
-        indices = [i for i, p in enumerate(patnos) if subgroup_assignments.get(p) == group]
+        indices = [
+            i for i, p in enumerate(patnos) if subgroup_assignments.get(p) == group
+        ]
         if len(indices) >= MIN_SUBGROUP_SIZE:
             group_indices[group] = np.array(indices)
 
@@ -231,8 +234,12 @@ def bootstrap_interaction_test(
     # Observed delta per group
     observed_deltas = {}
     for group, idx in group_indices.items():
-        sub_a = {k: preds_a[k][idx] for k in ("cif", "event_idxs", "time_bins", "censored")}
-        sub_b = {k: preds_b[k][idx] for k in ("cif", "event_idxs", "time_bins", "censored")}
+        sub_a = {
+            k: preds_a[k][idx] for k in ("cif", "event_idxs", "time_bins", "censored")
+        }
+        sub_b = {
+            k: preds_b[k][idx] for k in ("cif", "event_idxs", "time_bins", "censored")
+        }
         ctd_a = compute_ctd(sub_a)
         ctd_b = compute_ctd(sub_b)
         observed_deltas[group] = ctd_b - ctd_a
@@ -257,8 +264,14 @@ def bootstrap_interaction_test(
                 valid = False
                 break
             boot_group = np.array(boot_group)
-            sub_a = {k: preds_a[k][boot_group] for k in ("cif", "event_idxs", "time_bins", "censored")}
-            sub_b = {k: preds_b[k][boot_group] for k in ("cif", "event_idxs", "time_bins", "censored")}
+            sub_a = {
+                k: preds_a[k][boot_group]
+                for k in ("cif", "event_idxs", "time_bins", "censored")
+            }
+            sub_b = {
+                k: preds_b[k][boot_group]
+                for k in ("cif", "event_idxs", "time_bins", "censored")
+            }
             ctd_a = compute_ctd(sub_a)
             ctd_b = compute_ctd(sub_b)
             boot_deltas[group] = ctd_b - ctd_a
@@ -285,6 +298,7 @@ def bootstrap_interaction_test(
 # ---------------------------------------------------------------------------
 # Benjamini-Hochberg FDR correction
 # ---------------------------------------------------------------------------
+
 
 def apply_fdr_correction(
     results: list[InteractionTestResult],
@@ -335,6 +349,7 @@ def apply_fdr_correction(
 # Conditional conformal coverage per subgroup
 # ---------------------------------------------------------------------------
 
+
 def compute_conditional_coverage(
     cif_pred: np.ndarray,
     bands: np.ndarray,
@@ -366,8 +381,7 @@ def compute_conditional_coverage(
 
     for group in groups:
         indices = [
-            i for i, p in enumerate(patnos)
-            if subgroup_assignments.get(p) == group
+            i for i, p in enumerate(patnos) if subgroup_assignments.get(p) == group
         ]
 
         if len(indices) < MIN_SUBGROUP_SIZE:
@@ -384,9 +398,17 @@ def compute_conditional_coverage(
                     if censored[i] and durations[i] < t_months:
                         continue
 
-                    if not censored[i] and event_idxs[i] == k and durations[i] <= t_months:
+                    if (
+                        not censored[i]
+                        and event_idxs[i] == k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 1.0
-                    elif not censored[i] and event_idxs[i] != k and durations[i] <= t_months:
+                    elif (
+                        not censored[i]
+                        and event_idxs[i] != k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 0.0
                     else:
                         cif_obs = 0.0
@@ -405,6 +427,7 @@ def compute_conditional_coverage(
 # ---------------------------------------------------------------------------
 # Serialization
 # ---------------------------------------------------------------------------
+
 
 def subgroup_ctd_to_dict(r: SubgroupCTDResult) -> dict:
     return {

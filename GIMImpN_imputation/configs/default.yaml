@@ -34,9 +34,7 @@ training:
   num_epochs: 200
   batch_mask_fraction: 0.2
   lambda_dist: 0.1
-  lambda_cross: 0.10
-  lambda_cal: 0.01
-  cal_warmup_epochs: 50
+  lambda_cross: 0.05
   early_stopping_patience: 30
 
 evaluation:
@@ -130,27 +128,7 @@ binary_feature_indices: [0]
 #  7-12: structural_imaging  13-18: spect_sbr
 #  19-22: csf_biomarkers  23-26: clinical_biomarkers  27-32: cortical_thickness
 cross_modal_pairs:
-  # Structure-function (VOL <-> SBR)
   - [7, 13]   # CAUDATE_L_VOL <-> CAUDATE_L_SBR
   - [8, 14]   # CAUDATE_R_VOL <-> CAUDATE_R_SBR
   - [9, 15]   # PUTAMEN_L_VOL <-> PUTAMEN_L_SBR
   - [10, 16]  # PUTAMEN_R_VOL <-> PUTAMEN_R_SBR
-  # Bilateral symmetry: structural volumes
-  - [7, 8]    # CAUDATE_L_VOL <-> CAUDATE_R_VOL
-  - [9, 10]   # PUTAMEN_L_VOL <-> PUTAMEN_R_VOL
-  - [11, 12]  # HIPPOCAMPUS_L_VOL <-> HIPPOCAMPUS_R_VOL
-  # Bilateral symmetry: SPECT SBR
-  - [13, 14]  # CAUDATE_L_SBR <-> CAUDATE_R_SBR
-  - [15, 16]  # PUTAMEN_L_SBR <-> PUTAMEN_R_SBR
-  # Bilateral symmetry: cortical thickness
-  - [27, 28]  # ENTORHINAL_L_CTH <-> ENTORHINAL_R_CTH
-  - [29, 30]  # CINGULATE_L_CTH <-> CINGULATE_R_CTH
-  - [31, 32]  # PRECENTRAL_L_CTH <-> PRECENTRAL_R_CTH
-  # Biochemical relationship
-  - [20, 22]  # TOTAL_TAU <-> PTAU181
-  # Anatomical adjacency
-  - [11, 27]  # HIPPOCAMPUS_L_VOL <-> ENTORHINAL_L_CTH
-  - [12, 28]  # HIPPOCAMPUS_R_VOL <-> ENTORHINAL_R_CTH
-  # Motor-imaging (disease severity <-> dopamine)
-  - [3, 15]   # NHY <-> PUTAMEN_L_SBR
-  - [3, 16]   # NHY <-> PUTAMEN_R_SBR

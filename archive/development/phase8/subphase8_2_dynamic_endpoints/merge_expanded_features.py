@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Expansion: Merge All Feature Groups (Original + New)
+"""Phase 8.2 Expansion: Merge All Feature Groups (Original + New)
 
 Purpose:
     Merge all 10 feature groups (7 original + 3 new) into a single
@@ -31,11 +30,9 @@ Phase: 8.2 Feature Expansion
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-
 
 # Feature group definitions (for coverage analysis)
 FEATURE_GROUPS = {
@@ -45,20 +42,34 @@ FEATURE_GROUPS = {
     },
     "expanded_clinical": {
         "file": "expanded_clinical_features.csv",
-        "expected_features": ["UPDRS_I", "UPDRS_II", "SCHWAB_ENGLAND", "PIGD_SCORE", "TREMOR_SCORE"],
+        "expected_features": [
+            "UPDRS_I",
+            "UPDRS_II",
+            "SCHWAB_ENGLAND",
+            "PIGD_SCORE",
+            "TREMOR_SCORE",
+        ],
     },
     "freesurfer_volumes": {
         "file": "freesurfer_volumes.csv",
         "expected_features": [
-            "CAUDATE_L_VOL", "CAUDATE_R_VOL", "PUTAMEN_L_VOL",
-            "PUTAMEN_R_VOL", "HIPPOCAMPUS_L_VOL", "HIPPOCAMPUS_R_VOL"
+            "CAUDATE_L_VOL",
+            "CAUDATE_R_VOL",
+            "PUTAMEN_L_VOL",
+            "PUTAMEN_R_VOL",
+            "HIPPOCAMPUS_L_VOL",
+            "HIPPOCAMPUS_R_VOL",
         ],
     },
     "dat_spect_sbr": {
         "file": "dat_spect_sbr.csv",
         "expected_features": [
-            "CAUDATE_L_SBR", "CAUDATE_R_SBR", "PUTAMEN_L_SBR",
-            "PUTAMEN_R_SBR", "CAUDATE_ASYMMETRY", "PUTAMEN_ASYMMETRY"
+            "CAUDATE_L_SBR",
+            "CAUDATE_R_SBR",
+            "PUTAMEN_L_SBR",
+            "PUTAMEN_R_SBR",
+            "CAUDATE_ASYMMETRY",
+            "PUTAMEN_ASYMMETRY",
         ],
     },
     "csf_biomarkers": {
@@ -67,14 +78,22 @@ FEATURE_GROUPS = {
     },
     "clinical_biomarkers": {
         "file": "clinical_biomarkers.csv",
-        "expected_features": ["UPSIT_TOTAL", "RBD_TOTAL", "SCOPA_AUT_TOTAL", "ESS_TOTAL"],
+        "expected_features": [
+            "UPSIT_TOTAL",
+            "RBD_TOTAL",
+            "SCOPA_AUT_TOTAL",
+            "ESS_TOTAL",
+        ],
     },
     "cortical_thickness": {
         "file": "cortical_thickness.csv",
         "expected_features": [
-            "ENTORHINAL_L_CTH", "ENTORHINAL_R_CTH",
-            "CINGULATE_L_CTH", "CINGULATE_R_CTH",
-            "PRECENTRAL_L_CTH", "PRECENTRAL_R_CTH"
+            "ENTORHINAL_L_CTH",
+            "ENTORHINAL_R_CTH",
+            "CINGULATE_L_CTH",
+            "CINGULATE_R_CTH",
+            "PRECENTRAL_L_CTH",
+            "PRECENTRAL_R_CTH",
         ],
     },
     "demographics": {
@@ -93,11 +112,9 @@ FEATURE_GROUPS = {
 
 
 def load_feature_files(
-    enhanced_dir: Path,
-    groups: Optional[List[str]] = None
-) -> Dict[str, pd.DataFrame]:
-    """
-    Load specified feature group files.
+    enhanced_dir: Path, groups: list[str] | None = None
+) -> dict[str, pd.DataFrame]:
+    """Load specified feature group files.
 
     Args:
         enhanced_dir: Directory containing feature CSV files
@@ -143,11 +160,9 @@ def load_feature_files(
 
 
 def merge_features(
-    feature_dfs: Dict[str, pd.DataFrame],
-    prodromal_file: Path
+    feature_dfs: dict[str, pd.DataFrame], prodromal_file: Path
 ) -> pd.DataFrame:
-    """
-    Merge all feature groups into single DataFrame on PATNO.
+    """Merge all feature groups into single DataFrame on PATNO.
 
     Args:
         feature_dfs: Dict of group_name -> DataFrame (each has PATNO + features)
@@ -174,9 +189,8 @@ def merge_features(
     return merged
 
 
-def compute_coverage(merged_df: pd.DataFrame) -> Dict:
-    """
-    Compute per-feature and per-group coverage statistics.
+def compute_coverage(merged_df: pd.DataFrame) -> dict:
+    """Compute per-feature and per-group coverage statistics.
 
     Args:
         merged_df: Merged DataFrame
@@ -195,7 +209,7 @@ def compute_coverage(merged_df: pd.DataFrame) -> Dict:
         feature_coverage[col] = {
             "n_available": n_avail,
             "n_missing": int(n_patients - n_avail),
-            "coverage_pct": round(pct, 2)
+            "coverage_pct": round(pct, 2),
         }
 
     # Per-group
@@ -231,24 +245,31 @@ def compute_coverage(merged_df: pd.DataFrame) -> Dict:
     print(f"  Patients: {overall['n_patients']}")
     print(f"  Total features: {overall['n_features']}")
     print(f"  Average coverage: {overall['avg_coverage']:.1f}%")
-    print(f"  Features >= 75%: {overall['features_above_75pct']}/{overall['n_features']}")
+    print(
+        f"  Features >= 75%: {overall['features_above_75pct']}/{overall['n_features']}"
+    )
 
-    print(f"\n  Group-level:")
+    print("\n  Group-level:")
     for gn, gs in group_coverage.items():
-        tag = " [NEW]" if gn in ("demographics", "updrs_moca", "sociodemographic") else ""
+        tag = (
+            " [NEW]" if gn in ("demographics", "updrs_moca", "sociodemographic") else ""
+        )
         print(f"    {gn}{tag}: {gs['avg_coverage']:.1f}% ({gs['n_features']} feats)")
 
-    return {"overall": overall, "by_group": group_coverage, "by_feature": feature_coverage}
+    return {
+        "overall": overall,
+        "by_group": group_coverage,
+        "by_feature": feature_coverage,
+    }
 
 
 def save_merged(
     merged_df: pd.DataFrame,
-    coverage: Dict,
+    coverage: dict,
     output_dir: Path,
-    filename: str = "prodromal_multimodal_features_expanded.csv"
+    filename: str = "prodromal_multimodal_features_expanded.csv",
 ) -> Path:
-    """
-    Save merged features and metadata.
+    """Save merged features and metadata.
 
     Args:
         merged_df: Merged DataFrame
@@ -272,13 +293,22 @@ def save_merged(
         "n_patients": len(merged_df),
         "n_features": len(merged_df.columns) - 1,
         "feature_list": list(merged_df.columns.drop("PATNO")),
-        "n_groups": len([g for g in FEATURE_GROUPS if g in coverage.get("by_group", {})]),
+        "n_groups": len(
+            [g for g in FEATURE_GROUPS if g in coverage.get("by_group", {})]
+        ),
         "coverage_statistics": coverage,
-        "source_groups": {
-            gn: info["file"] for gn, info in FEATURE_GROUPS.items()
-        },
+        "source_groups": {gn: info["file"] for gn, info in FEATURE_GROUPS.items()},
         "new_feature_groups": ["demographics", "updrs_moca", "sociodemographic"],
-        "new_features": ["SEX", "AGE_AT_VISIT", "NP3TOT", "NP1RTOT", "NHY", "MCATOT", "EDUCYRS", "ANYFAMPD"],
+        "new_features": [
+            "SEX",
+            "AGE_AT_VISIT",
+            "NP3TOT",
+            "NP1RTOT",
+            "NHY",
+            "MCATOT",
+            "EDUCYRS",
+            "ANYFAMPD",
+        ],
     }
 
     meta_file = output_dir / filename.replace(".csv", "_metadata.json")
@@ -292,12 +322,11 @@ def save_merged(
 
 def build_subset_csv(
     merged_df: pd.DataFrame,
-    feature_groups_to_include: List[str],
+    feature_groups_to_include: list[str],
     output_dir: Path,
-    filename: str
+    filename: str,
 ) -> Path:
-    """
-    Build a subset CSV containing only features from specified groups.
+    """Build a subset CSV containing only features from specified groups.
 
     This is used by the orchestrator to create the 4 config variants
     (baseline, +demographics, +clinical, expanded).
@@ -321,7 +350,7 @@ def build_subset_csv(
     subset = merged_df[cols_to_keep].copy()
     output_file = output_dir / filename
     subset.to_csv(output_file, index=False)
-    print(f"  Saved subset ({len(cols_to_keep)-1} features): {output_file}")
+    print(f"  Saved subset ({len(cols_to_keep) - 1} features): {output_file}")
 
     return output_file
 
@@ -374,7 +403,8 @@ def main() -> None:
     print("=" * 70)
     n_orig = sum(
         len(FEATURE_GROUPS[g]["expected_features"])
-        for g in FEATURE_GROUPS if g not in ("demographics", "updrs_moca", "sociodemographic")
+        for g in FEATURE_GROUPS
+        if g not in ("demographics", "updrs_moca", "sociodemographic")
     )
     n_new = sum(
         len(FEATURE_GROUPS[g]["expected_features"])

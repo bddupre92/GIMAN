@@ -45,6 +45,7 @@ class TargetSpec:
 # Binary target: NSD-positive vs NSD-negative
 # ---------------------------------------------------------------------------
 
+
 def encode_binary(stage_df: pd.DataFrame) -> pd.Series:
     """Encode NSD-ISS stages as binary: NSD-positive (1) vs NSD-negative (0).
 
@@ -54,9 +55,11 @@ def encode_binary(stage_df: pd.DataFrame) -> pd.Series:
     This is the most balanced formulation (783 positive vs 1418 negative
     in our PPMI staging).
     """
-    binary = stage_df["nsd_iss_stage"].map(
-        lambda s: 1 if s not in ("0", "unclassified") else 0
-    ).astype(int)
+    binary = (
+        stage_df["nsd_iss_stage"]
+        .map(lambda s: 1 if s not in ("0", "unclassified") else 0)
+        .astype(int)
+    )
     return binary
 
 
@@ -65,14 +68,14 @@ def encode_binary(stage_df: pd.DataFrame) -> pd.Series:
 # ---------------------------------------------------------------------------
 
 _THREE_CLASS_MAP = {
-    "0": 0,           # Early / no biological markers
-    "1": 0,           # Early / biological markers, no clinical signs
-    "2A": 1,          # Mild clinical
-    "2B": 1,          # Mild clinical
-    "3": 2,           # Functionally impaired
-    "4": 2,           # Functionally impaired
-    "5": 2,           # Functionally impaired
-    "6": 2,           # Functionally impaired
+    "0": 0,  # Early / no biological markers
+    "1": 0,  # Early / biological markers, no clinical signs
+    "2A": 1,  # Mild clinical
+    "2B": 1,  # Mild clinical
+    "3": 2,  # Functionally impaired
+    "4": 2,  # Functionally impaired
+    "5": 2,  # Functionally impaired
+    "6": 2,  # Functionally impaired
     "unclassified": -1,
 }
 
@@ -159,6 +162,7 @@ def encode_nsd_positive_ordinal(stage_df: pd.DataFrame) -> pd.Series:
 # Class weight computation
 # ---------------------------------------------------------------------------
 
+
 def compute_balanced_weights(labels: np.ndarray) -> np.ndarray:
     """Compute balanced class weights for a label array.
 
@@ -176,6 +180,7 @@ def compute_balanced_weights(labels: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Main enrichment function
 # ---------------------------------------------------------------------------
+
 
 def enrich_staging_with_targets(
     stage_df: pd.DataFrame,

@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Expansion: Build All Feature Configuration PyG Datasets
+"""Phase 8.2 Expansion: Build All Feature Configuration PyG Datasets
 
 Purpose:
     Orchestrate the creation of 4 PyG dataset configurations from the
@@ -34,11 +33,8 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
-import numpy as np
 import pandas as pd
-
 
 # Project root (4 levels up from this script)
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
@@ -46,7 +42,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[4]
 # Key paths
 DATA_DIR = PROJECT_ROOT / "data"
 ENHANCED_DIR = DATA_DIR / "03_prodromal" / "enhanced"
-BASELINE_CSV = DATA_DIR / "03_prodromal" / "final_training_dataset" / "unified_longitudinal_early_pd.csv"
+BASELINE_CSV = (
+    DATA_DIR
+    / "03_prodromal"
+    / "final_training_dataset"
+    / "unified_longitudinal_early_pd.csv"
+)
 SAA_LABEL_CSV = ENHANCED_DIR / "saa_labels.csv"
 PYG_BUILDER = Path(__file__).resolve().parent / "prepare_final_pyg_data.py"
 
@@ -76,9 +77,14 @@ CONFIGS = {
     "expanded": {
         "description": "All features: baseline + demographics + UPDRS/MoCA + sociodemographic",
         "new_features": [
-            "SEX", "AGE_AT_VISIT",
-            "NP3TOT", "NP1RTOT", "NHY", "MCATOT",
-            "EDUCYRS", "ANYFAMPD"
+            "SEX",
+            "AGE_AT_VISIT",
+            "NP3TOT",
+            "NP1RTOT",
+            "NHY",
+            "MCATOT",
+            "EDUCYRS",
+            "ANYFAMPD",
         ],
         "source_files": ["demographics.csv", "updrs_moca.csv", "sociodemographic.csv"],
         "output_dir": DATA_DIR / "03_prodromal" / "final_pyg_data_expanded",
@@ -102,8 +108,7 @@ def load_baseline_csv() -> pd.DataFrame:
 
 
 def extract_new_features_from_raw(target_patnos: set) -> pd.DataFrame:
-    """
-    Extract new features directly from raw PPMI data files for the target patients.
+    """Extract new features directly from raw PPMI data files for the target patients.
 
     The enhanced/ CSVs are keyed to the broader prodromal cohort (381 patients),
     which has different PATNOs than the 99 SAA-modeling cohort in the unified CSV.
@@ -131,17 +136,25 @@ def extract_new_features_from_raw(target_patnos: set) -> pd.DataFrame:
     age = pd.read_csv(age_file)
     age_bl = age[age["EVENT_ID"] == "BL"]
     age_sc = age[age["EVENT_ID"] == "SC"]
-    age_combined = pd.concat([age_bl, age_sc]).drop_duplicates(subset="PATNO", keep="first")
+    age_combined = pd.concat([age_bl, age_sc]).drop_duplicates(
+        subset="PATNO", keep="first"
+    )
     age_df = age_combined[["PATNO", "AGE_AT_VISIT"]].copy()
     age_df["AGE_AT_VISIT"] = pd.to_numeric(age_df["AGE_AT_VISIT"], errors="coerce")
     result = result.merge(age_df, on="PATNO", how="left")
-    print(f"    AGE_AT_VISIT: {result['AGE_AT_VISIT'].notna().sum()}/{len(result)} non-null")
+    print(
+        f"    AGE_AT_VISIT: {result['AGE_AT_VISIT'].notna().sum()}/{len(result)} non-null"
+    )
 
     # --- NP3TOT, NHY (from UPDRS Part III, BL) ---
     u3_file = RAW_DIR / "GIMAN" / "ppmi_data_csv" / "MDS-UPDRS_Part_III_30Sep2025.csv"
     u3 = pd.read_csv(u3_file, low_memory=False)
     u3_bl = u3[u3["EVENT_ID"] == "BL"]
-    u3_df = u3_bl[["PATNO", "NP3TOT", "NHY"]].drop_duplicates(subset="PATNO", keep="first").copy()
+    u3_df = (
+        u3_bl[["PATNO", "NP3TOT", "NHY"]]
+        .drop_duplicates(subset="PATNO", keep="first")
+        .copy()
+    )
     u3_df["NP3TOT"] = pd.to_numeric(u3_df["NP3TOT"], errors="coerce")
     u3_df["NHY"] = pd.to_numeric(u3_df["NHY"], errors="coerce")
     result = result.merge(u3_df, on="PATNO", how="left")
@@ -152,7 +165,9 @@ def extract_new_features_from_raw(target_patnos: set) -> pd.DataFrame:
     u1_file = RAW_DIR / "GIMAN" / "ppmi_data_csv" / "MDS-UPDRS_Part_I_30Sep2025.csv"
     u1 = pd.read_csv(u1_file)
     u1_bl = u1[u1["EVENT_ID"] == "BL"]
-    u1_df = u1_bl[["PATNO", "NP1RTOT"]].drop_duplicates(subset="PATNO", keep="first").copy()
+    u1_df = (
+        u1_bl[["PATNO", "NP1RTOT"]].drop_duplicates(subset="PATNO", keep="first").copy()
+    )
     u1_df["NP1RTOT"] = pd.to_numeric(u1_df["NP1RTOT"], errors="coerce")
     result = result.merge(u1_df, on="PATNO", how="left")
     print(f"    NP1RTOT: {result['NP1RTOT'].notna().sum()}/{len(result)} non-null")
@@ -162,7 +177,9 @@ def extract_new_features_from_raw(target_patnos: set) -> pd.DataFrame:
     moca = pd.read_csv(moca_file)
     moca_bl = moca[moca["EVENT_ID"] == "BL"]
     moca_sc = moca[moca["EVENT_ID"] == "SC"]
-    moca_combined = pd.concat([moca_bl, moca_sc]).drop_duplicates(subset="PATNO", keep="first")
+    moca_combined = pd.concat([moca_bl, moca_sc]).drop_duplicates(
+        subset="PATNO", keep="first"
+    )
     moca_df = moca_combined[["PATNO", "MCATOT"]].copy()
     moca_df["MCATOT"] = pd.to_numeric(moca_df["MCATOT"], errors="coerce")
     result = result.merge(moca_df, on="PATNO", how="left")
@@ -173,7 +190,9 @@ def extract_new_features_from_raw(target_patnos: set) -> pd.DataFrame:
     se = pd.read_csv(se_file)
     se_bl = se[se["EVENT_ID"] == "BL"]
     se_sc = se[se["EVENT_ID"] == "SC"]
-    se_combined = pd.concat([se_bl, se_sc]).drop_duplicates(subset="PATNO", keep="first")
+    se_combined = pd.concat([se_bl, se_sc]).drop_duplicates(
+        subset="PATNO", keep="first"
+    )
     edu_df = se_combined[["PATNO", "EDUCYRS"]].copy()
     edu_df["EDUCYRS"] = pd.to_numeric(edu_df["EDUCYRS"], errors="coerce")
     result = result.merge(edu_df, on="PATNO", how="left")
@@ -198,11 +217,10 @@ def extract_new_features_from_raw(target_patnos: set) -> pd.DataFrame:
 def build_config_csv(
     baseline_df: pd.DataFrame,
     config_name: str,
-    config: Dict,
+    config: dict,
     new_feat_df: pd.DataFrame = None,
-) -> Optional[Path]:
-    """
-    Build a unified CSV for a specific config by merging new features.
+) -> Path | None:
+    """Build a unified CSV for a specific config by merging new features.
 
     Args:
         baseline_df: Baseline unified DataFrame
@@ -259,11 +277,10 @@ def build_config_csv(
 
 def build_pyg_dataset(
     config_name: str,
-    config: Dict,
+    config: dict,
     input_csv: Path,
 ) -> bool:
-    """
-    Call prepare_final_pyg_data.py to build PyG .pt files.
+    """Call prepare_final_pyg_data.py to build PyG .pt files.
 
     Args:
         config_name: Config name
@@ -279,12 +296,18 @@ def build_pyg_dataset(
     cmd = [
         sys.executable,
         str(PYG_BUILDER),
-        "--input-csv", str(input_csv),
-        "--output-dir", str(output_dir),
-        "--seed", str(SEED),
-        "--test-size", "0.15",
-        "--knn-k", "10",
-        "--saa-label-csv", str(SAA_LABEL_CSV),
+        "--input-csv",
+        str(input_csv),
+        "--output-dir",
+        str(output_dir),
+        "--seed",
+        str(SEED),
+        "--test-size",
+        "0.15",
+        "--knn-k",
+        "10",
+        "--saa-label-csv",
+        str(SAA_LABEL_CSV),
         "--drop-unlabeled-saa",
     ]
 
@@ -301,7 +324,7 @@ def build_pyg_dataset(
         )
 
         if result.returncode == 0:
-            print(f"    PyG build successful!")
+            print("    PyG build successful!")
 
             # Verify outputs
             train_pt = output_dir / "train_data.pt"
@@ -316,24 +339,28 @@ def build_pyg_dataset(
                     with open(meta_json) as f:
                         meta = json.load(f)
                     print(f"    Features: {meta.get('n_features', '?')}")
-                    print(f"    Train: {meta.get('train_size', '?')} obs, {meta.get('n_patients_train', '?')} patients")
-                    print(f"    Test: {meta.get('test_size', '?')} obs, {meta.get('n_patients_test', '?')} patients")
+                    print(
+                        f"    Train: {meta.get('train_size', '?')} obs, {meta.get('n_patients_train', '?')} patients"
+                    )
+                    print(
+                        f"    Test: {meta.get('test_size', '?')} obs, {meta.get('n_patients_test', '?')} patients"
+                    )
 
                 return True
             else:
-                print(f"    ERROR: Expected output files not found!")
+                print("    ERROR: Expected output files not found!")
                 return False
         else:
             print(f"    ERROR: PyG build failed (returncode={result.returncode})")
             if result.stderr:
                 # Print last 20 lines of stderr
-                lines = result.stderr.strip().split('\n')
+                lines = result.stderr.strip().split("\n")
                 for line in lines[-20:]:
                     print(f"      {line}")
             return False
 
     except subprocess.TimeoutExpired:
-        print(f"    ERROR: PyG build timed out (300s)")
+        print("    ERROR: PyG build timed out (300s)")
         return False
     except Exception as e:
         print(f"    ERROR: {e}")
@@ -354,7 +381,7 @@ def verify_baseline():
     with open(meta_json) as f:
         meta = json.load(f)
 
-    print(f"  Baseline SOTA run verified:")
+    print("  Baseline SOTA run verified:")
     print(f"    Features: {meta.get('n_features', '?')}")
     print(f"    Train: {meta.get('train_size', '?')} obs")
     print(f"    Test: {meta.get('test_size', '?')} obs")
@@ -419,7 +446,7 @@ def main():
     print("BUILD SUMMARY")
     print("=" * 72)
     print(f"  {'Config':<20} {'Status':<12} {'Features':<10} {'Output Dir'}")
-    print(f"  {'-'*20} {'-'*12} {'-'*10} {'-'*40}")
+    print(f"  {'-' * 20} {'-' * 12} {'-' * 10} {'-' * 40}")
 
     for config_name, config in CONFIGS.items():
         if config["skip_build"]:
@@ -432,7 +459,9 @@ def main():
             status = "SKIPPED"
             n_feat = "-"
 
-        print(f"  {config_name:<20} {status:<12} {n_feat:<10} {config['output_dir'].name}")
+        print(
+            f"  {config_name:<20} {status:<12} {n_feat:<10} {config['output_dir'].name}"
+        )
 
     # Save build manifest
     manifest = {
@@ -446,9 +475,9 @@ def main():
             "description": config["description"],
             "new_features": config["new_features"],
             "output_dir": str(config["output_dir"]),
-            "status": "exists" if config["skip_build"] else (
-                "success" if results.get(config_name) else "failed"
-            ),
+            "status": "exists"
+            if config["skip_build"]
+            else ("success" if results.get(config_name) else "failed"),
         }
 
     manifest_path = DATA_DIR / "03_prodromal" / "feature_config_manifest.json"

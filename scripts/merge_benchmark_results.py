@@ -21,9 +21,15 @@ OUTPUT = BENCHMARK_DIR / "imputation_benchmark_results_combined.json"
 
 # Models to take from each source
 OLD_MODELS = {
-    "Mean", "Median", "KNN", "MICE", "MissForest",
-    "GIMIN_Vanilla", "GIMIN_StageConditioned",
-    "GIMIN_StageGraphOnly", "GIMIN_StageDecoderOnly",
+    "Mean",
+    "Median",
+    "KNN",
+    "MICE",
+    "MissForest",
+    "GIMIN_Vanilla",
+    "GIMIN_StageConditioned",
+    "GIMIN_StageGraphOnly",
+    "GIMIN_StageDecoderOnly",
 }
 NEW_MODELS = {"GAIN", "SAITS", "MIWAE"}
 
@@ -51,7 +57,9 @@ def merge_section(old_section: dict, new_section: dict, section_name: str) -> di
             if model in new_frac:
                 merged[frac_key][model] = new_frac[model]
             else:
-                print(f"  WARNING: {model} missing from {section_name}/{frac_key} in new run")
+                print(
+                    f"  WARNING: {model} missing from {section_name}/{frac_key} in new run"
+                )
 
     return merged
 
@@ -68,7 +76,9 @@ def main():
     new_results = load_json(NEW_RUN / "imputation_benchmark_results.json")
 
     combined = {
-        "summary": merge_section(old_results["summary"], new_results["summary"], "summary"),
+        "summary": merge_section(
+            old_results["summary"], new_results["summary"], "summary"
+        ),
         "raw": merge_section(old_results["raw"], new_results["raw"], "raw"),
     }
 
@@ -87,7 +97,9 @@ def main():
         json.dump(combined, f, indent=2)
 
     print(f"\nCombined results saved to: {OUTPUT}")
-    print(f"Total models: {len(combined['summary'][list(combined['summary'].keys())[0]])}")
+    print(
+        f"Total models: {len(combined['summary'][list(combined['summary'].keys())[0]])}"
+    )
 
     # Print summary table
     print("\n" + "=" * 70)

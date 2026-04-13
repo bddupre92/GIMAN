@@ -1,31 +1,30 @@
+"""Generate supplementary publication figures:
+- Figure 2: Accurate Neuro-Fuzzy Architecture Diagram
+- Appendix: ROC & PR Curves
+- Appendix: Confusion Matrix at Optimal Threshold
+- Appendix: Permutation Importance Ranking
+- Appendix: Training Convergence Curves (re-train short run to capture history)
 """
-Generate supplementary publication figures:
-  - Figure 2: Accurate Neuro-Fuzzy Architecture Diagram
-  - Appendix: ROC & PR Curves
-  - Appendix: Confusion Matrix at Optimal Threshold
-  - Appendix: Permutation Importance Ranking
-  - Appendix: Training Convergence Curves (re-train short run to capture history)
-"""
+
 from __future__ import annotations
 
 import json
 import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn.functional as F
+from matplotlib.patches import FancyBboxPatch
 from sklearn.metrics import (
-    roc_curve,
-    precision_recall_curve,
     average_precision_score,
-    roc_auc_score,
     confusion_matrix,
-    classification_report,
+    precision_recall_curve,
+    roc_auc_score,
+    roc_curve,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,11 +54,13 @@ PERM_IMP_CSV = (
 
 
 def _setup_style():
-    plt.rcParams.update({
-        "font.family": "serif",
-        "font.size": 10,
-        "figure.dpi": 300,
-    })
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "font.size": 10,
+            "figure.dpi": 300,
+        }
+    )
 
 
 # =========================================================================
@@ -79,42 +80,66 @@ def generate_figure2():
     )
 
     # Color scheme
-    c_input = "#E8D5F5"      # lavender - input
-    c_gat = "#B39DDB"        # purple - GAT
-    c_fuzz = "#FFE0B2"       # orange - fuzzy
-    c_rule = "#FFCC80"       # darker orange - rules
-    c_ts = "#C8E6C9"         # green - Takagi-Sugeno
-    c_out = "#FFCDD2"        # red - output
+    c_input = "#E8D5F5"  # lavender - input
+    c_gat = "#B39DDB"  # purple - GAT
+    c_fuzz = "#FFE0B2"  # orange - fuzzy
+    c_rule = "#FFCC80"  # darker orange - rules
+    c_ts = "#C8E6C9"  # green - Takagi-Sugeno
+    c_out = "#FFCDD2"  # red - output
     edge = "black"
 
     def box(x, y, w, h, color, label, sublabel="", fontsize=10):
         rect = FancyBboxPatch(
-            (x, y), w, h,
+            (x, y),
+            w,
+            h,
             boxstyle="round,pad=0.1",
-            facecolor=color, edgecolor=edge, linewidth=1.5,
+            facecolor=color,
+            edgecolor=edge,
+            linewidth=1.5,
         )
         ax.add_patch(rect)
         ax.text(
-            x + w / 2, y + h / 2 + (0.12 if sublabel else 0),
-            label, ha="center", va="center",
-            fontsize=fontsize, fontweight="bold",
+            x + w / 2,
+            y + h / 2 + (0.12 if sublabel else 0),
+            label,
+            ha="center",
+            va="center",
+            fontsize=fontsize,
+            fontweight="bold",
         )
         if sublabel:
             ax.text(
-                x + w / 2, y + h / 2 - 0.22,
-                sublabel, ha="center", va="center",
-                fontsize=8, fontstyle="italic", color="#555555",
+                x + w / 2,
+                y + h / 2 - 0.22,
+                sublabel,
+                ha="center",
+                va="center",
+                fontsize=8,
+                fontstyle="italic",
+                color="#555555",
             )
 
     def arrow(x1, y1, x2, y2):
         ax.annotate(
-            "", xy=(x2, y2), xytext=(x1, y1),
+            "",
+            xy=(x2, y2),
+            xytext=(x1, y1),
             arrowprops=dict(arrowstyle="->", lw=1.8, color="#333333"),
         )
 
     # Layout: left to right
     # 1. Input features
-    box(0.3, 1.8, 1.8, 1.4, c_input, "Input\nFeatures", "x \u2208 \u211d\u00b3\u2077", 11)
+    box(
+        0.3,
+        1.8,
+        1.8,
+        1.4,
+        c_input,
+        "Input\nFeatures",
+        "x \u2208 \u211d\u00b3\u2077",
+        11,
+    )
 
     # 2. Patient Similarity Graph
     box(2.6, 1.8, 1.6, 1.4, c_input, "kNN Graph", "k=10, cosine", 10)
@@ -143,19 +168,43 @@ def generate_figure2():
     arrow(12.5, 1.8, 13.0, 1.0)
 
     # Annotations
-    ax.text(5.7, 4.2, "Embedding: h\u1d62 \u2208 \u211d\u00b9\u00b2\u2078",
-            fontsize=9, ha="center", color="#6A1B9A",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#6A1B9A", alpha=0.9))
+    ax.text(
+        5.7,
+        4.2,
+        "Embedding: h\u1d62 \u2208 \u211d\u00b9\u00b2\u2078",
+        fontsize=9,
+        ha="center",
+        color="#6A1B9A",
+        bbox=dict(
+            boxstyle="round,pad=0.3", facecolor="white", edgecolor="#6A1B9A", alpha=0.9
+        ),
+    )
     arrow(5.7, 4.0, 5.7, 3.2)
 
-    ax.text(8.1, 4.2, "Membership:\n\u03bc \u2208 [0,1]\u00b9\u00b2\u2078\u02e3\u00b3\u00b2",
-            fontsize=8, ha="center", color="#E65100",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#E65100", alpha=0.9))
+    ax.text(
+        8.1,
+        4.2,
+        "Membership:\n\u03bc \u2208 [0,1]\u00b9\u00b2\u2078\u02e3\u00b3\u00b2",
+        fontsize=8,
+        ha="center",
+        color="#E65100",
+        bbox=dict(
+            boxstyle="round,pad=0.3", facecolor="white", edgecolor="#E65100", alpha=0.9
+        ),
+    )
     arrow(8.1, 3.8, 8.1, 3.2)
 
-    ax.text(10.3, 4.2, "Normalized\nfiring strengths",
-            fontsize=8, ha="center", color="#BF360C",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#BF360C", alpha=0.9))
+    ax.text(
+        10.3,
+        4.2,
+        "Normalized\nfiring strengths",
+        fontsize=8,
+        ha="center",
+        color="#BF360C",
+        bbox=dict(
+            boxstyle="round,pad=0.3", facecolor="white", edgecolor="#BF360C", alpha=0.9
+        ),
+    )
     arrow(10.3, 3.8, 10.3, 3.2)
 
     # Legend
@@ -166,8 +215,14 @@ def generate_figure2():
         mpatches.Patch(facecolor=c_ts, edgecolor=edge, label="Defuzzification"),
         mpatches.Patch(facecolor=c_out, edgecolor=edge, label="Output"),
     ]
-    ax.legend(handles=legend_items, loc="lower left", fontsize=9, ncol=5,
-              frameon=True, fancybox=True)
+    ax.legend(
+        handles=legend_items,
+        loc="lower left",
+        fontsize=9,
+        ncol=5,
+        frameon=True,
+        fancybox=True,
+    )
 
     plt.tight_layout()
     path = OUT / "Figure2_Neuro_Fuzzy_Enhancement.png"
@@ -182,13 +237,19 @@ def generate_figure2():
 def generate_roc_pr_curves(model, test_data, y_test, probs):
     """Two-panel: ROC curve + PR curve for main model."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
-    fig.suptitle("Classification Performance Curves (Neuro-Fuzzy GIMAN)",
-                 fontsize=13, fontweight="bold", y=0.98)
+    fig.suptitle(
+        "Classification Performance Curves (Neuro-Fuzzy GIMAN)",
+        fontsize=13,
+        fontweight="bold",
+        y=0.98,
+    )
 
     # ROC
     fpr, tpr, thresholds_roc = roc_curve(y_test, probs)
     auc_val = roc_auc_score(y_test, probs)
-    ax1.plot(fpr, tpr, lw=2.5, color="#1f77b4", label=f"Fuzzy GIMAN (AUC = {auc_val:.3f})")
+    ax1.plot(
+        fpr, tpr, lw=2.5, color="#1f77b4", label=f"Fuzzy GIMAN (AUC = {auc_val:.3f})"
+    )
     ax1.plot([0, 1], [0, 1], "k--", lw=1.2, alpha=0.5, label="Random (AUC = 0.500)")
     ax1.fill_between(fpr, tpr, alpha=0.15, color="#1f77b4")
 
@@ -196,15 +257,25 @@ def generate_roc_pr_curves(model, test_data, y_test, probs):
     j_scores = tpr - fpr
     best_idx = np.argmax(j_scores)
     best_thresh = thresholds_roc[best_idx]
-    ax1.scatter(fpr[best_idx], tpr[best_idx], s=120, c="red", zorder=5,
-                edgecolor="black", linewidth=1.5)
+    ax1.scatter(
+        fpr[best_idx],
+        tpr[best_idx],
+        s=120,
+        c="red",
+        zorder=5,
+        edgecolor="black",
+        linewidth=1.5,
+    )
     ax1.annotate(
         f"Optimal\n(t={best_thresh:.2f})",
         xy=(fpr[best_idx], tpr[best_idx]),
         xytext=(fpr[best_idx] + 0.15, tpr[best_idx] - 0.15),
-        fontsize=9, fontweight="bold",
+        fontsize=9,
+        fontweight="bold",
         arrowprops=dict(arrowstyle="->", color="red", lw=1.5),
-        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="red", alpha=0.9),
+        bbox=dict(
+            boxstyle="round,pad=0.3", facecolor="white", edgecolor="red", alpha=0.9
+        ),
     )
 
     ax1.set_xlabel("False Positive Rate", fontsize=11, fontweight="bold")
@@ -219,14 +290,24 @@ def generate_roc_pr_curves(model, test_data, y_test, probs):
     precision, recall, thresholds_pr = precision_recall_curve(y_test, probs)
     ap = average_precision_score(y_test, probs)
     prevalence = y_test.mean()
-    ax2.plot(recall, precision, lw=2.5, color="#2ca02c", label=f"Fuzzy GIMAN (AP = {ap:.3f})")
-    ax2.axhline(y=prevalence, color="gray", linestyle="--", lw=1.2, alpha=0.6,
-                label=f"Baseline (prevalence = {prevalence:.2f})")
+    ax2.plot(
+        recall, precision, lw=2.5, color="#2ca02c", label=f"Fuzzy GIMAN (AP = {ap:.3f})"
+    )
+    ax2.axhline(
+        y=prevalence,
+        color="gray",
+        linestyle="--",
+        lw=1.2,
+        alpha=0.6,
+        label=f"Baseline (prevalence = {prevalence:.2f})",
+    )
     ax2.fill_between(recall, precision, alpha=0.15, color="#2ca02c")
 
     ax2.set_xlabel("Recall", fontsize=11, fontweight="bold")
     ax2.set_ylabel("Precision", fontsize=11, fontweight="bold")
-    ax2.set_title("Panel B: Precision-Recall Curve", fontsize=11, fontweight="bold", pad=10)
+    ax2.set_title(
+        "Panel B: Precision-Recall Curve", fontsize=11, fontweight="bold", pad=10
+    )
     ax2.set_xlim(-0.02, 1.02)
     ax2.set_ylim(-0.02, 1.05)
     ax2.grid(True, alpha=0.25, linestyle="--")
@@ -249,10 +330,15 @@ def generate_confusion_matrix(y_test, probs, threshold):
     cm = confusion_matrix(y_test, y_pred)
     tn, fp, fn, tp = cm.ravel()
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5),
-                                    gridspec_kw={"width_ratios": [1, 1.3]})
-    fig.suptitle(f"Classification at Optimal Threshold (t = {threshold:.3f})",
-                 fontsize=13, fontweight="bold", y=0.98)
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(13, 5.5), gridspec_kw={"width_ratios": [1, 1.3]}
+    )
+    fig.suptitle(
+        f"Classification at Optimal Threshold (t = {threshold:.3f})",
+        fontsize=13,
+        fontweight="bold",
+        y=0.98,
+    )
 
     # Heatmap
     im = ax1.imshow(cm, interpolation="nearest", cmap="Blues")
@@ -268,8 +354,16 @@ def generate_confusion_matrix(y_test, probs, threshold):
     for i in range(2):
         for j in range(2):
             color = "white" if cm[i, j] > cm.max() / 2 else "black"
-            ax1.text(j, i, f"{cm[i, j]}", ha="center", va="center",
-                     fontsize=18, fontweight="bold", color=color)
+            ax1.text(
+                j,
+                i,
+                f"{cm[i, j]}",
+                ha="center",
+                va="center",
+                fontsize=18,
+                fontweight="bold",
+                color=color,
+            )
 
     fig.colorbar(im, ax=ax1, shrink=0.7)
 
@@ -296,7 +390,9 @@ def generate_confusion_matrix(y_test, probs, threshold):
     ]
 
     ax2.axis("off")
-    ax2.set_title("Panel B: Classification Metrics", fontsize=11, fontweight="bold", pad=10)
+    ax2.set_title(
+        "Panel B: Classification Metrics", fontsize=11, fontweight="bold", pad=10
+    )
     table = ax2.table(
         cellText=[[m, v] for m, v in metrics],
         colLabels=["Metric", "Value"],
@@ -334,12 +430,23 @@ def generate_permutation_importance():
 
     fig, ax = plt.subplots(figsize=(10, 8))
     y_pos = np.arange(len(df))
-    ax.barh(y_pos, df["auc_drop"], color=colors, alpha=0.85, edgecolor="black", linewidth=0.5)
+    ax.barh(
+        y_pos,
+        df["auc_drop"],
+        color=colors,
+        alpha=0.85,
+        edgecolor="black",
+        linewidth=0.5,
+    )
     ax.set_yticks(y_pos)
     ax.set_yticklabels(df["feature"], fontsize=9)
     ax.set_xlabel("AUC Drop When Feature Permuted", fontsize=11, fontweight="bold")
-    ax.set_title("Permutation Feature Importance (Neuro-Fuzzy GIMAN)",
-                 fontsize=13, fontweight="bold", pad=10)
+    ax.set_title(
+        "Permutation Feature Importance (Neuro-Fuzzy GIMAN)",
+        fontsize=13,
+        fontweight="bold",
+        pad=10,
+    )
     ax.axvline(x=0, color="black", linestyle="-", linewidth=1)
     ax.grid(True, axis="x", alpha=0.25, linestyle="--")
 
@@ -348,16 +455,28 @@ def generate_permutation_importance():
     ax.annotate(
         f"  {top_feat['auc_drop']:.3f}",
         xy=(top_feat["auc_drop"], len(df) - 1),
-        fontsize=9, fontweight="bold", color="#2ca02c", va="center",
+        fontsize=9,
+        fontweight="bold",
+        color="#2ca02c",
+        va="center",
     )
 
     # Legend
     from matplotlib.patches import Patch
+
     legend_elements = [
-        Patch(facecolor="#2ca02c", edgecolor="black", linewidth=0.5,
-              label="Positive importance (AUC drops)"),
-        Patch(facecolor="#d62728", edgecolor="black", linewidth=0.5,
-              label="Negative (AUC improves when permuted)"),
+        Patch(
+            facecolor="#2ca02c",
+            edgecolor="black",
+            linewidth=0.5,
+            label="Positive importance (AUC drops)",
+        ),
+        Patch(
+            facecolor="#d62728",
+            edgecolor="black",
+            linewidth=0.5,
+            label="Negative (AUC improves when permuted)",
+        ),
     ]
     ax.legend(handles=legend_elements, loc="lower right", fontsize=9, frameon=True)
 
@@ -372,8 +491,7 @@ def generate_permutation_importance():
 # Training Convergence Curves
 # =========================================================================
 def generate_convergence_curves(model, train_data, test_data, y_train, y_test):
-    """
-    Run a short re-training (50 epochs) from checkpoint to capture
+    """Run a short re-training (50 epochs) from checkpoint to capture
     loss/AUC convergence curves for illustration.
     Instead of full 220 epochs, we show the characteristic convergence shape.
     """
@@ -385,6 +503,7 @@ def generate_convergence_curves(model, train_data, test_data, y_train, y_test):
     # (to show the characteristic convergence)
     # Load a fresh model and train briefly
     from train_final_giman_survival import GIMANSurvivalGAT
+
     from archive.development.phase9.neuro_fuzzy import NeuroFuzzyGIMAN
 
     gat = GIMANSurvivalGAT(in_features=int(train_data.x.shape[1]), hidden_dim=128)
@@ -423,7 +542,9 @@ def generate_convergence_curves(model, train_data, test_data, y_train, y_test):
             test_logits, _ = fresh_model(test_data)
             test_probs = F.softmax(test_logits, dim=1)[:, 1].cpu().numpy()
 
-        t_auc = roc_auc_score(y_train, train_probs) if len(np.unique(y_train)) > 1 else 0.5
+        t_auc = (
+            roc_auc_score(y_train, train_probs) if len(np.unique(y_train)) > 1 else 0.5
+        )
         e_auc = roc_auc_score(y_test, test_probs) if len(np.unique(y_test)) > 1 else 0.5
 
         epochs_list.append(epoch)
@@ -433,8 +554,12 @@ def generate_convergence_curves(model, train_data, test_data, y_train, y_test):
 
     # Plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
-    fig.suptitle("Training Convergence (Neuro-Fuzzy GIMAN, from checkpoint)",
-                 fontsize=13, fontweight="bold", y=0.98)
+    fig.suptitle(
+        "Training Convergence (Neuro-Fuzzy GIMAN, from checkpoint)",
+        fontsize=13,
+        fontweight="bold",
+        y=0.98,
+    )
 
     ax1.plot(epochs_list, train_losses, lw=2.0, color="#1f77b4", label="Focal Loss")
     ax1.set_xlabel("Epoch", fontsize=11, fontweight="bold")
@@ -443,10 +568,20 @@ def generate_convergence_curves(model, train_data, test_data, y_train, y_test):
     ax1.grid(True, alpha=0.25, linestyle="--")
     ax1.legend(fontsize=9)
 
-    ax2.plot(epochs_list, train_aucs, lw=2.0, color="#2ca02c", label="Train AUC", alpha=0.8)
-    ax2.plot(epochs_list, test_aucs, lw=2.0, color="#d62728", label="Test AUC", alpha=0.8)
-    ax2.axhline(y=0.8646, color="gray", linestyle="--", lw=1.2, alpha=0.6,
-                label="Reported Best (0.865)")
+    ax2.plot(
+        epochs_list, train_aucs, lw=2.0, color="#2ca02c", label="Train AUC", alpha=0.8
+    )
+    ax2.plot(
+        epochs_list, test_aucs, lw=2.0, color="#d62728", label="Test AUC", alpha=0.8
+    )
+    ax2.axhline(
+        y=0.8646,
+        color="gray",
+        linestyle="--",
+        lw=1.2,
+        alpha=0.6,
+        label="Reported Best (0.865)",
+    )
     ax2.set_xlabel("Epoch", fontsize=11, fontweight="bold")
     ax2.set_ylabel("AUC-ROC", fontsize=11, fontweight="bold")
     ax2.set_title("Panel B: AUC Convergence", fontsize=11, fontweight="bold", pad=10)

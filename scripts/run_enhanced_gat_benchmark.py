@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Run Enhanced Multimodal GAT benchmark on NSD-ISS stage prediction targets.
+"""Run Enhanced Multimodal GAT benchmark on NSD-ISS stage prediction targets.
 
 Uses the EXISTING GIMAN codebase architecture:
   - PyG GATConv layers (from graph_attention_network.py)
@@ -17,7 +16,6 @@ Targets: binary, three_class, full_ordinal, nsd_positive
 """
 
 import json
-import sys
 import time
 import warnings
 from pathlib import Path
@@ -30,14 +28,13 @@ import torch.nn.functional as F
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import (
     balanced_accuracy_score,
-    roc_auc_score,
     cohen_kappa_score,
+    roc_auc_score,
 )
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-from torch_geometric.data import Data
 from torch_geometric.nn import GATConv
-from torch_geometric.utils import to_undirected, add_self_loops
+from torch_geometric.utils import add_self_loops, to_undirected
 
 warnings.filterwarnings("ignore")
 
@@ -52,16 +49,31 @@ print(f"Device: {DEVICE}")
 # ── Modality-split feature sets ──
 # Modality 1: Clinical (demographics + motor + cognitive + sleep + autonomic)
 CLINICAL_FEATURES = [
-    "SEX", "HANDED", "AGE_AT_BASELINE",
-    "UPDRS1_TOTAL", "UPDRS2_TOTAL", "UPDRS3_TOTAL", "UPDRS4_TOTAL",
-    "UPDRS3_RIGIDITY", "UPDRS3_BRADYKINESIA", "UPDRS3_TREMOR", "UPDRS3_POSTURE_GAIT",
-    "MOCA_TOTAL", "ESS_TOTAL", "RBD_TOTAL", "SCOPA_AUT_TOTAL",
+    "SEX",
+    "HANDED",
+    "AGE_AT_BASELINE",
+    "UPDRS1_TOTAL",
+    "UPDRS2_TOTAL",
+    "UPDRS3_TOTAL",
+    "UPDRS4_TOTAL",
+    "UPDRS3_RIGIDITY",
+    "UPDRS3_BRADYKINESIA",
+    "UPDRS3_TREMOR",
+    "UPDRS3_POSTURE_GAIT",
+    "MOCA_TOTAL",
+    "ESS_TOTAL",
+    "RBD_TOTAL",
+    "SCOPA_AUT_TOTAL",
 ]
 
 # Modality 2: Biomarker (DaT-SPECT + olfaction + genetics)
 BIOMARKER_FEATURES = [
-    "CAUDATE_LEFT_SBR", "CAUDATE_RIGHT_SBR", "CAUDATE_MEAN_SBR",
-    "PUTAMEN_LEFT_SBR", "PUTAMEN_RIGHT_SBR", "PUTAMEN_MEAN_SBR",
+    "CAUDATE_LEFT_SBR",
+    "CAUDATE_RIGHT_SBR",
+    "CAUDATE_MEAN_SBR",
+    "PUTAMEN_LEFT_SBR",
+    "PUTAMEN_RIGHT_SBR",
+    "PUTAMEN_MEAN_SBR",
     "UPSIT_TOTAL",
     # "GBA_CARRIER", "LRRK2_CARRIER", "APOE_GENOTYPE",
     # ^ commented out — these are in the 22-feature set but have very low variance
@@ -126,8 +138,7 @@ class ModalityEncoder(nn.Module):
 
 
 class MultiModalGATClassifier(nn.Module):
-    """
-    Adapted from GIMAN's MultiModalGraphAttention + CrossModalTransformer.
+    """Adapted from GIMAN's MultiModalGraphAttention + CrossModalTransformer.
 
     Architecture:
       1. Modality-specific encoders (raw features → embeddings)
@@ -168,10 +179,22 @@ class MultiModalGATClassifier(nn.Module):
             if i < num_gat_layers - 1:
                 out_per_head = hidden_dim // num_heads
                 self.clinical_gat_layers.append(
-                    GATConv(in_dim, out_per_head, heads=num_heads, dropout=dropout, concat=True)
+                    GATConv(
+                        in_dim,
+                        out_per_head,
+                        heads=num_heads,
+                        dropout=dropout,
+                        concat=True,
+                    )
                 )
                 self.biomarker_gat_layers.append(
-                    GATConv(in_dim, out_per_head, heads=num_heads, dropout=dropout, concat=True)
+                    GATConv(
+                        in_dim,
+                        out_per_head,
+                        heads=num_heads,
+                        dropout=dropout,
+                        concat=True,
+                    )
                 )
                 self.clinical_norms.append(nn.LayerNorm(hidden_dim))
                 self.biomarker_norms.append(nn.LayerNorm(hidden_dim))
@@ -224,7 +247,7 @@ class MultiModalGATClassifier(nn.Module):
 
     def _apply_gat_layers(self, x, edge_index, gat_layers, norms):
         """Apply GAT layers with residual connections."""
-        for i, (gat, norm) in enumerate(zip(gat_layers, norms)):
+        for i, (gat, norm) in enumerate(zip(gat_layers, norms, strict=False)):
             h = gat(x, edge_index)
             h = norm(h)
             if i < len(gat_layers) - 1:
@@ -237,8 +260,7 @@ class MultiModalGATClassifier(nn.Module):
         return x
 
     def forward(self, x_clinical, x_biomarker, edge_index):
-        """
-        Forward pass.
+        """Forward pass.
 
         Args:
             x_clinical: [N, clinical_dim] raw clinical features
@@ -250,8 +272,12 @@ class MultiModalGATClassifier(nn.Module):
         h_bio = self.biomarker_encoder(x_biomarker)
 
         # 2. Per-modality GAT
-        h_clin = self._apply_gat_layers(h_clin, edge_index, self.clinical_gat_layers, self.clinical_norms)
-        h_bio = self._apply_gat_layers(h_bio, edge_index, self.biomarker_gat_layers, self.biomarker_norms)
+        h_clin = self._apply_gat_layers(
+            h_clin, edge_index, self.clinical_gat_layers, self.clinical_norms
+        )
+        h_bio = self._apply_gat_layers(
+            h_bio, edge_index, self.biomarker_gat_layers, self.biomarker_norms
+        )
 
         # 3. Cross-modal attention
         stacked = torch.stack([h_clin, h_bio], dim=1)  # [N, 2, embed_dim]
@@ -290,7 +316,13 @@ class SingleModalGATClassifier(nn.Module):
             if i < num_gat_layers - 1:
                 out_per_head = hidden_dim // num_heads
                 self.gat_layers.append(
-                    GATConv(in_dim, out_per_head, heads=num_heads, dropout=dropout, concat=True)
+                    GATConv(
+                        in_dim,
+                        out_per_head,
+                        heads=num_heads,
+                        dropout=dropout,
+                        concat=True,
+                    )
                 )
                 self.norms.append(nn.LayerNorm(hidden_dim))
             else:
@@ -317,7 +349,7 @@ class SingleModalGATClassifier(nn.Module):
 
     def forward(self, x, edge_index):
         h = self.encoder(x)
-        for i, (gat, norm) in enumerate(zip(self.gat_layers, self.norms)):
+        for i, (gat, norm) in enumerate(zip(self.gat_layers, self.norms, strict=False)):
             h_new = gat(h, edge_index)
             h_new = norm(h_new)
             if i < len(self.gat_layers) - 1:
@@ -332,9 +364,22 @@ class SingleModalGATClassifier(nn.Module):
 # ═══════════════════════════════════════════════════════════════════════
 # Training
 # ═══════════════════════════════════════════════════════════════════════
-def train_model(model, X_clin_tr, X_bio_tr, y_tr, edge_index_tr,
-                X_clin_val, X_bio_val, y_val, edge_index_val,
-                num_classes, epochs=300, lr=5e-4, patience=40, is_multimodal=True):
+def train_model(
+    model,
+    X_clin_tr,
+    X_bio_tr,
+    y_tr,
+    edge_index_tr,
+    X_clin_val,
+    X_bio_val,
+    y_val,
+    edge_index_val,
+    num_classes,
+    epochs=300,
+    lr=5e-4,
+    patience=40,
+    is_multimodal=True,
+):
     """Train with early stopping."""
     model = model.to(DEVICE)
 
@@ -346,7 +391,9 @@ def train_model(model, X_clin_tr, X_bio_tr, y_tr, edge_index_tr,
 
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=5e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=15, factor=0.5)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, patience=15, factor=0.5
+    )
 
     y_tr_t = torch.LongTensor(y_tr.astype(int)).to(DEVICE)
     y_val_t = torch.LongTensor(y_val.astype(int)).to(DEVICE)
@@ -423,8 +470,9 @@ def predict_model(model, X_clin, X_bio, edge_index, is_multimodal=True):
 # ═══════════════════════════════════════════════════════════════════════
 # Benchmark Runner
 # ═══════════════════════════════════════════════════════════════════════
-def run_benchmark(df, y, target_name, n_classes, model_type, feature_config,
-                  n_folds=5, k_neighbors=10):
+def run_benchmark(
+    df, y, target_name, n_classes, model_type, feature_config, n_folds=5, k_neighbors=10
+):
     """Run 5-fold CV for a given model configuration."""
     is_multimodal = model_type == "multimodal"
     feat_label = feature_config["label"]
@@ -474,11 +522,17 @@ def run_benchmark(df, y, target_name, n_classes, model_type, feature_config,
             X_bio_test = scaler_bio.transform(X_bio_test)
 
         # Build per-fold k-NN graphs
-        X_graph_train = np.hstack([X_clin_train, X_bio_train]) if is_multimodal else X_clin_train
-        X_graph_test = np.hstack([X_clin_test, X_bio_test]) if is_multimodal else X_clin_test
+        X_graph_train = (
+            np.hstack([X_clin_train, X_bio_train]) if is_multimodal else X_clin_train
+        )
+        X_graph_test = (
+            np.hstack([X_clin_test, X_bio_test]) if is_multimodal else X_clin_test
+        )
 
         edge_index_train = build_knn_graph_pyg(X_graph_train, k=k_neighbors)
-        edge_index_test = build_knn_graph_pyg(X_graph_test, k=min(k_neighbors, len(X_graph_test) - 1))
+        edge_index_test = build_knn_graph_pyg(
+            X_graph_test, k=min(k_neighbors, len(X_graph_test) - 1)
+        )
 
         # Train/val split within training fold
         n_val = max(int(len(X_clin_train) * 0.2), 1)
@@ -520,18 +574,32 @@ def run_benchmark(df, y, target_name, n_classes, model_type, feature_config,
 
         t0 = time.time()
         model = train_model(
-            model, X_clin_tr, X_bio_tr, y_tr, ei_tr,
-            X_clin_v, X_bio_v, y_v, ei_v,
-            num_classes=n_classes, epochs=300, lr=5e-4, patience=40,
+            model,
+            X_clin_tr,
+            X_bio_tr,
+            y_tr,
+            ei_tr,
+            X_clin_v,
+            X_bio_v,
+            y_v,
+            ei_v,
+            num_classes=n_classes,
+            epochs=300,
+            lr=5e-4,
+            patience=40,
             is_multimodal=is_multimodal,
         )
         train_time = time.time() - t0
 
         # Predict on test fold
         if is_multimodal:
-            preds, probs = predict_model(model, X_clin_test, X_bio_test, edge_index_test, True)
+            preds, probs = predict_model(
+                model, X_clin_test, X_bio_test, edge_index_test, True
+            )
         else:
-            preds, probs = predict_model(model, X_clin_test, None, edge_index_test, False)
+            preds, probs = predict_model(
+                model, X_clin_test, None, edge_index_test, False
+            )
 
         ba = balanced_accuracy_score(y_test, preds)
         try:
@@ -543,11 +611,18 @@ def run_benchmark(df, y, target_name, n_classes, model_type, feature_config,
             auc = float("nan")
         qwk = cohen_kappa_score(y_test, preds, weights="quadratic")
 
-        fold_metrics.append({
-            "fold": fold, "bal_acc": ba, "auc": auc, "qwk": qwk,
-            "train_time": train_time,
-        })
-        print(f"  Fold {fold}: bal_acc={ba:.4f}, AUC={auc:.4f}, QWK={qwk:.4f} ({train_time:.1f}s)")
+        fold_metrics.append(
+            {
+                "fold": fold,
+                "bal_acc": ba,
+                "auc": auc,
+                "qwk": qwk,
+                "train_time": train_time,
+            }
+        )
+        print(
+            f"  Fold {fold}: bal_acc={ba:.4f}, AUC={auc:.4f}, QWK={qwk:.4f} ({train_time:.1f}s)"
+        )
 
     mean_ba = np.mean([m["bal_acc"] for m in fold_metrics])
     mean_auc = np.nanmean([m["auc"] for m in fold_metrics])
@@ -564,7 +639,9 @@ def run_benchmark(df, y, target_name, n_classes, model_type, feature_config,
         "n_total_features": len(clin_cols) + (len(bio_cols) if is_multimodal else 0),
         "n_patients": len(y),
         "n_classes": n_classes,
-        "architecture": "MultiModalGATClassifier" if is_multimodal else "SingleModalGATClassifier",
+        "architecture": "MultiModalGATClassifier"
+        if is_multimodal
+        else "SingleModalGATClassifier",
         "pyg_gatconv_layers": 3,
         "num_heads": 4,
         "embed_dim": 128,
@@ -576,7 +653,9 @@ def run_benchmark(df, y, target_name, n_classes, model_type, feature_config,
         "qwk": round(mean_qwk, 4),
         "fold_metrics": fold_metrics,
     }
-    print(f"  MEAN: bal_acc={mean_ba:.4f}±{std_ba:.4f}, AUC={mean_auc:.4f}±{std_auc:.4f}, QWK={mean_qwk:.4f}")
+    print(
+        f"  MEAN: bal_acc={mean_ba:.4f}±{std_ba:.4f}, AUC={mean_auc:.4f}±{std_auc:.4f}, QWK={mean_qwk:.4f}"
+    )
     return result
 
 
@@ -611,7 +690,9 @@ def main():
 
         print(f"\n{'=' * 60}")
         print(f"Target: {target_name} | N={len(df)} | Classes={n_classes}")
-        print(f"Class dist: {dict(zip(*np.unique(y, return_counts=True)))}")
+        print(
+            f"Class dist: {dict(zip(*np.unique(y, return_counts=True), strict=False))}"
+        )
         print(f"Label map: {label_map}")
         print(f"{'=' * 60}")
 
@@ -624,8 +705,12 @@ def main():
             "biomarker": BIOMARKER_FEATURES,
         }
         result = run_benchmark(
-            df, y, target_name, n_classes,
-            model_type="multimodal", feature_config=config_mm,
+            df,
+            y,
+            target_name,
+            n_classes,
+            model_type="multimodal",
+            feature_config=config_mm,
         )
         target_results.append(result)
 
@@ -636,8 +721,12 @@ def main():
             "biomarker": [],
         }
         result = run_benchmark(
-            df, y, target_name, n_classes,
-            model_type="single", feature_config=config_clin,
+            df,
+            y,
+            target_name,
+            n_classes,
+            model_type="single",
+            feature_config=config_clin,
         )
         target_results.append(result)
 
@@ -656,7 +745,9 @@ def main():
     print("\n" + "=" * 80)
     print("ENHANCED MULTIMODAL GAT BENCHMARK SUMMARY")
     print("=" * 80)
-    print(f"{'Target':<16} {'Model':<20} {'Features':<18} {'Bal Acc':<14} {'AUC':<14} {'QWK':<10}")
+    print(
+        f"{'Target':<16} {'Model':<20} {'Features':<18} {'Bal Acc':<14} {'AUC':<14} {'QWK':<10}"
+    )
     print("-" * 92)
     for target, results in all_results.items():
         for r in results:

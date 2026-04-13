@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Step 7: Comprehensive Benchmark Suite for Paper 3.
+"""Step 7: Comprehensive Benchmark Suite for Paper 3.
 
 Consolidates results from all three stage transition models:
     1. Multi-State Markov (interpretable baseline)
@@ -43,6 +42,7 @@ OUTPUT_DIR = PROJECT_ROOT / "outputs" / "paper3_benchmark"
 
 # ── Load Results ──────────────────────────────────────────────────────
 
+
 def load_results():
     """Load results from all three models."""
     results = {}
@@ -79,6 +79,7 @@ def load_results():
 
 # ── Model Comparison Table ────────────────────────────────────────────
 
+
 def build_comparison_table(results):
     """Table I: Overall model comparison."""
     rows = []
@@ -86,20 +87,25 @@ def build_comparison_table(results):
     # Markov — no C-td/IBS (not a survival model, but has transition probs)
     if "markov" in results:
         m = results["markov"]
-        rows.append({
-            "Model": "Multi-State Markov",
-            "C-td": "—",
-            "C-td (95% CI)": "—",
-            "IBS": "—",
-            "IBS (95% CI)": "—",
-            "Brier 1yr": "—",
-            "Brier 5yr": "—",
-            "Brier 10yr": "—",
-            "Parameters": "Q matrix (20 intensities)",
-            "Training Time": "< 1 min",
-        })
+        rows.append(
+            {
+                "Model": "Multi-State Markov",
+                "C-td": "—",
+                "C-td (95% CI)": "—",
+                "IBS": "—",
+                "IBS (95% CI)": "—",
+                "Brier 1yr": "—",
+                "Brier 5yr": "—",
+                "Brier 10yr": "—",
+                "Parameters": "Q matrix (20 intensities)",
+                "Training Time": "< 1 min",
+            }
+        )
 
-    for name, key in [("Dynamic-DeepHit", "deephit"), ("Graph Digital Twin", "graph_dt")]:
+    for name, key in [
+        ("Dynamic-DeepHit", "deephit"),
+        ("Graph Digital Twin", "graph_dt"),
+    ]:
         if key not in results:
             continue
         r = results[key]
@@ -109,25 +115,27 @@ def build_comparison_table(results):
 
         # Bootstrap-style CI from folds (mean ± 1.96 * SE)
         se_ctd = np.std(folds) / np.sqrt(len(folds))
-        ci_ctd = f"[{np.mean(folds) - 1.96*se_ctd:.3f}–{np.mean(folds) + 1.96*se_ctd:.3f}]"
+        ci_ctd = f"[{np.mean(folds) - 1.96 * se_ctd:.3f}–{np.mean(folds) + 1.96 * se_ctd:.3f}]"
         se_ibs = np.std(ibs_folds) / np.sqrt(len(ibs_folds))
-        ci_ibs = f"[{np.mean(ibs_folds) - 1.96*se_ibs:.4f}–{np.mean(ibs_folds) + 1.96*se_ibs:.4f}]"
+        ci_ibs = f"[{np.mean(ibs_folds) - 1.96 * se_ibs:.4f}–{np.mean(ibs_folds) + 1.96 * se_ibs:.4f}]"
 
         hp = r.get("hyperparams", {})
         n_params = _estimate_params(hp, key)
 
-        rows.append({
-            "Model": name,
-            "C-td": f"{r['c_td']:.4f} ± {r['c_td_std']:.4f}",
-            "C-td (95% CI)": ci_ctd,
-            "IBS": f"{r['ibs']:.4f} ± {r['ibs_std']:.4f}",
-            "IBS (95% CI)": ci_ibs,
-            "Brier 1yr": f"{bh.get('1yr', float('nan')):.4f}",
-            "Brier 5yr": f"{bh.get('5yr', float('nan')):.4f}",
-            "Brier 10yr": f"{bh.get('10yr', float('nan')):.4f}",
-            "Parameters": n_params,
-            "Training Time": _format_time(r),
-        })
+        rows.append(
+            {
+                "Model": name,
+                "C-td": f"{r['c_td']:.4f} ± {r['c_td_std']:.4f}",
+                "C-td (95% CI)": ci_ctd,
+                "IBS": f"{r['ibs']:.4f} ± {r['ibs_std']:.4f}",
+                "IBS (95% CI)": ci_ibs,
+                "Brier 1yr": f"{bh.get('1yr', float('nan')):.4f}",
+                "Brier 5yr": f"{bh.get('5yr', float('nan')):.4f}",
+                "Brier 10yr": f"{bh.get('10yr', float('nan')):.4f}",
+                "Parameters": n_params,
+                "Training Time": _format_time(r),
+            }
+        )
 
     return pd.DataFrame(rows)
 
@@ -161,6 +169,7 @@ def _format_time(r):
 
 # ── Per-Transition C-td Table ─────────────────────────────────────────
 
+
 def build_transition_table(results):
     """Table II: Per-transition discriminative performance."""
     transitions = ["→0", "→1", "→2B", "→3", "→4", "→5", "→6"]
@@ -190,6 +199,7 @@ def build_transition_table(results):
 
 # ── Brier Scores at Horizons ─────────────────────────────────────────
 
+
 def build_brier_table(results):
     """Table III: Calibration at clinical horizons."""
     horizons = ["1yr", "2yr", "5yr", "10yr"]
@@ -209,6 +219,7 @@ def build_brier_table(results):
 
 # ── Statistical Tests ─────────────────────────────────────────────────
 
+
 def paired_tests(results):
     """Paired statistical comparisons across folds."""
     tests = []
@@ -220,28 +231,32 @@ def paired_tests(results):
         if len(dh) == len(gd):
             # Paired t-test
             t_stat, p_val = stats.ttest_rel(dh, gd)
-            tests.append({
-                "Comparison": "DeepHit vs Graph-DT (C-td)",
-                "Test": "Paired t-test",
-                "Statistic": f"{t_stat:.4f}",
-                "p-value": f"{p_val:.4f}",
-                "Significant (α=0.05)": "Yes" if p_val < 0.05 else "No",
-                "Mean Diff": f"{np.mean(dh) - np.mean(gd):+.4f}",
-                "Interpretation": _interpret_ctd_test(dh, gd, p_val),
-            })
+            tests.append(
+                {
+                    "Comparison": "DeepHit vs Graph-DT (C-td)",
+                    "Test": "Paired t-test",
+                    "Statistic": f"{t_stat:.4f}",
+                    "p-value": f"{p_val:.4f}",
+                    "Significant (α=0.05)": "Yes" if p_val < 0.05 else "No",
+                    "Mean Diff": f"{np.mean(dh) - np.mean(gd):+.4f}",
+                    "Interpretation": _interpret_ctd_test(dh, gd, p_val),
+                }
+            )
 
             # Wilcoxon signed-rank (non-parametric)
             try:
                 w_stat, w_p = stats.wilcoxon(dh, gd)
-                tests.append({
-                    "Comparison": "DeepHit vs Graph-DT (C-td)",
-                    "Test": "Wilcoxon signed-rank",
-                    "Statistic": f"{w_stat:.4f}",
-                    "p-value": f"{w_p:.4f}",
-                    "Significant (α=0.05)": "Yes" if w_p < 0.05 else "No",
-                    "Mean Diff": f"{np.mean(dh) - np.mean(gd):+.4f}",
-                    "Interpretation": _interpret_ctd_test(dh, gd, w_p),
-                })
+                tests.append(
+                    {
+                        "Comparison": "DeepHit vs Graph-DT (C-td)",
+                        "Test": "Wilcoxon signed-rank",
+                        "Statistic": f"{w_stat:.4f}",
+                        "p-value": f"{w_p:.4f}",
+                        "Significant (α=0.05)": "Yes" if w_p < 0.05 else "No",
+                        "Mean Diff": f"{np.mean(dh) - np.mean(gd):+.4f}",
+                        "Interpretation": _interpret_ctd_test(dh, gd, w_p),
+                    }
+                )
             except ValueError:
                 pass  # All differences are zero
 
@@ -249,15 +264,19 @@ def paired_tests(results):
             dh_ibs = results["deephit"]["ibs_per_fold"]
             gd_ibs = results["graph_dt"]["ibs_per_fold"]
             t_ibs, p_ibs = stats.ttest_rel(dh_ibs, gd_ibs)
-            tests.append({
-                "Comparison": "DeepHit vs Graph-DT (IBS)",
-                "Test": "Paired t-test",
-                "Statistic": f"{t_ibs:.4f}",
-                "p-value": f"{p_ibs:.4f}",
-                "Significant (α=0.05)": "Yes" if p_ibs < 0.05 else "No",
-                "Mean Diff": f"{np.mean(dh_ibs) - np.mean(gd_ibs):+.4f}",
-                "Interpretation": "Lower IBS is better (better calibration)" if np.mean(dh_ibs) < np.mean(gd_ibs) else "Models have comparable calibration",
-            })
+            tests.append(
+                {
+                    "Comparison": "DeepHit vs Graph-DT (IBS)",
+                    "Test": "Paired t-test",
+                    "Statistic": f"{t_ibs:.4f}",
+                    "p-value": f"{p_ibs:.4f}",
+                    "Significant (α=0.05)": "Yes" if p_ibs < 0.05 else "No",
+                    "Mean Diff": f"{np.mean(dh_ibs) - np.mean(gd_ibs):+.4f}",
+                    "Interpretation": "Lower IBS is better (better calibration)"
+                    if np.mean(dh_ibs) < np.mean(gd_ibs)
+                    else "Models have comparable calibration",
+                }
+            )
 
     return pd.DataFrame(tests) if tests else pd.DataFrame()
 
@@ -273,6 +292,7 @@ def _interpret_ctd_test(dh_folds, gd_folds, p_val):
 
 
 # ── Sojourn Time Comparison ──────────────────────────────────────────
+
 
 def build_sojourn_comparison(results):
     """Compare Markov sojourn times with Simuni et al. (2025) KM estimates."""
@@ -325,17 +345,28 @@ def build_sojourn_comparison(results):
 
 # ── Cohort Summary ───────────────────────────────────────────────────
 
+
 def build_cohort_summary(results):
     """Data characteristics for the Methods section."""
     summary = {}
 
     # Load transition events for cohort stats
-    trans_path = PROJECT_ROOT / "data" / "06_longitudinal_staging" / "transition_events.csv"
+    trans_path = (
+        PROJECT_ROOT / "data" / "06_longitudinal_staging" / "transition_events.csv"
+    )
     if trans_path.exists():
         trans = pd.read_csv(trans_path)
         summary["n_transitions"] = len(trans)
-        summary["forward_transitions"] = int((trans["direction"] == "forward").sum()) if "direction" in trans.columns else "—"
-        summary["backward_transitions"] = int((trans["direction"] == "backward").sum()) if "direction" in trans.columns else "—"
+        summary["forward_transitions"] = (
+            int((trans["direction"] == "forward").sum())
+            if "direction" in trans.columns
+            else "—"
+        )
+        summary["backward_transitions"] = (
+            int((trans["direction"] == "backward").sum())
+            if "direction" in trans.columns
+            else "—"
+        )
 
     # From model results
     for key in ["deephit", "graph_dt"]:
@@ -361,13 +392,17 @@ def build_cohort_summary(results):
         summary["graph_baseline_features"] = gs.get("n_baseline_features", "—")
 
     # Load longitudinal features for more stats
-    feat_path = PROJECT_ROOT / "data" / "07_paper3_features" / "longitudinal_features.csv"
+    feat_path = (
+        PROJECT_ROOT / "data" / "07_paper3_features" / "longitudinal_features.csv"
+    )
     if feat_path.exists():
         feat = pd.read_csv(feat_path, nrows=5)
         summary["n_features"] = len(feat.columns)
 
     # Load cohort summary if exists
-    cohort_path = PROJECT_ROOT / "data" / "06_longitudinal_staging" / "cohort_summary.json"
+    cohort_path = (
+        PROJECT_ROOT / "data" / "06_longitudinal_staging" / "cohort_summary.json"
+    )
     if cohort_path.exists():
         with open(cohort_path) as f:
             cs = json.load(f)
@@ -377,6 +412,7 @@ def build_cohort_summary(results):
 
 
 # ── Main ──────────────────────────────────────────────────────────────
+
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -438,7 +474,11 @@ def main():
         "models": {},
         "cohort": cohort,
     }
-    for name, key in [("markov", "markov"), ("deephit", "deephit"), ("graph_dt", "graph_dt")]:
+    for name, key in [
+        ("markov", "markov"),
+        ("deephit", "deephit"),
+        ("graph_dt", "graph_dt"),
+    ]:
         if key in results:
             r = results[key]
             benchmark_summary["models"][name] = {
@@ -476,7 +516,7 @@ def main():
         # Fold-by-fold comparison
         dh_folds = dh["c_td_per_fold"]
         gd_folds = gd["c_td_per_fold"]
-        n_gd_wins = sum(1 for d, g in zip(dh_folds, gd_folds) if g > d)
+        n_gd_wins = sum(1 for d, g in zip(dh_folds, gd_folds, strict=False) if g > d)
         print(f"\n  Graph-DT wins {n_gd_wins}/{len(dh_folds)} folds")
 
         _, p_val = stats.ttest_rel(dh_folds, gd_folds)
@@ -497,18 +537,24 @@ def main():
             if dh_v is not None and gd_v is not None:
                 delta = gd_v - dh_v
                 winner = "Graph-DT" if delta > 0 else "DeepHit"
-                print(f"    {trans}: DeepHit={dh_v:.3f}, Graph-DT={gd_v:.3f} "
-                      f"(Δ={delta:+.3f}, {winner})")
+                print(
+                    f"    {trans}: DeepHit={dh_v:.3f}, Graph-DT={gd_v:.3f} "
+                    f"(Δ={delta:+.3f}, {winner})"
+                )
 
     if "markov" in results:
         m = results["markov"]
-        print(f"\n  Markov model: {m['n_transitions']} transitions across "
-              f"{m['n_patients']} patients")
-        print(f"  Sojourn times (years): "
-              f"2B={m['sojourn_times']['2B']:.2f}, "
-              f"3={m['sojourn_times']['3']:.2f}, "
-              f"4={m['sojourn_times']['4']:.2f}")
-        print(f"  vs Simuni 2025: 2B→3: 1.19yr, 3→4: 4.98yr, 4→5: 9.83yr")
+        print(
+            f"\n  Markov model: {m['n_transitions']} transitions across "
+            f"{m['n_patients']} patients"
+        )
+        print(
+            f"  Sojourn times (years): "
+            f"2B={m['sojourn_times']['2B']:.2f}, "
+            f"3={m['sojourn_times']['3']:.2f}, "
+            f"4={m['sojourn_times']['4']:.2f}"
+        )
+        print("  vs Simuni 2025: 2B→3: 1.19yr, 3→4: 4.98yr, 4→5: 9.83yr")
 
     print("\nDone!")
 

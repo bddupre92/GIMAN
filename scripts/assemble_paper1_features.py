@@ -42,7 +42,9 @@ OUTPUT_DIR = ROOT / "data" / "05_features"
 
 def _latest_file(pattern: str, directory: Path = RAW_PPMI) -> Path | None:
     """Find the most recent file matching a glob pattern."""
-    matches = sorted(directory.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
+    matches = sorted(
+        directory.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True
+    )
     return matches[0] if matches else None
 
 
@@ -69,6 +71,7 @@ def _get_baseline(df: pd.DataFrame, patno_col: str = "PATNO") -> pd.DataFrame:
 # Feature extractors (one per modality)
 # ---------------------------------------------------------------------------
 
+
 def extract_demographics(staged_patnos: set[int]) -> pd.DataFrame:
     """Extract SEX, AGE, HANDEDNESS, EDUCATION from demographics."""
     path = _latest_file("Demographics_*")
@@ -91,7 +94,9 @@ def extract_demographics(staged_patnos: set[int]) -> pd.DataFrame:
         age_days = (visit.values - birth.values).astype("timedelta64[D]").astype(float)
         features["AGE_AT_BASELINE"] = age_days / 365.25
 
-    logger.info(f"Demographics: {len(features)} patients, {len(features.columns)-1} features")
+    logger.info(
+        f"Demographics: {len(features)} patients, {len(features.columns) - 1} features"
+    )
     return features
 
 
@@ -135,7 +140,9 @@ def extract_updrs_subscales(staged_patnos: set[int]) -> pd.DataFrame:
             if features.empty:
                 features = part2[["PATNO", "UPDRS2_TOTAL"]]
             else:
-                features = features.merge(part2[["PATNO", "UPDRS2_TOTAL"]], on="PATNO", how="outer")
+                features = features.merge(
+                    part2[["PATNO", "UPDRS2_TOTAL"]], on="PATNO", how="outer"
+                )
             logger.info(f"UPDRS-II: {len(part2)} patients")
 
     # UPDRS Part III — extract SUBSCALE scores (not total)
@@ -147,17 +154,48 @@ def extract_updrs_subscales(staged_patnos: set[int]) -> pd.DataFrame:
 
         # Define UPDRS-III subscales (Goetz et al. 2008)
         subscales = {
-            "UPDRS3_TREMOR": ["NP3TRMR", "NP3PTRMR", "NP3KTRMR", "NP3RTARU",
-                              "NP3RTALU", "NP3RTARL", "NP3RTALL", "NP3RTALJ",
-                              "NP3RTCON"],
-            "UPDRS3_RIGIDITY": ["NP3RIGRU", "NP3RIGLU", "NP3RIGRL", "NP3RIGLL",
-                                "NP3RIGN"],
-            "UPDRS3_BRADYKINESIA": ["NP3FTAPR", "NP3FTAPL", "NP3HMOVR", "NP3HMOVL",
-                                    "NP3PRSPR", "NP3PRSPL", "NP3TTAPR", "NP3TTAPL",
-                                    "NP3LGAGR", "NP3LGAGL", "NP3RISNG", "NP3GAIT",
-                                    "NP3FRZGT", "NP3BRADY"],
-            "UPDRS3_AXIAL": ["NP3SPCH", "NP3FACXP", "NP3RISNG", "NP3GAIT",
-                             "NP3FRZGT", "NP3PSTBL"],
+            "UPDRS3_TREMOR": [
+                "NP3TRMR",
+                "NP3PTRMR",
+                "NP3KTRMR",
+                "NP3RTARU",
+                "NP3RTALU",
+                "NP3RTARL",
+                "NP3RTALL",
+                "NP3RTALJ",
+                "NP3RTCON",
+            ],
+            "UPDRS3_RIGIDITY": [
+                "NP3RIGRU",
+                "NP3RIGLU",
+                "NP3RIGRL",
+                "NP3RIGLL",
+                "NP3RIGN",
+            ],
+            "UPDRS3_BRADYKINESIA": [
+                "NP3FTAPR",
+                "NP3FTAPL",
+                "NP3HMOVR",
+                "NP3HMOVL",
+                "NP3PRSPR",
+                "NP3PRSPL",
+                "NP3TTAPR",
+                "NP3TTAPL",
+                "NP3LGAGR",
+                "NP3LGAGL",
+                "NP3RISNG",
+                "NP3GAIT",
+                "NP3FRZGT",
+                "NP3BRADY",
+            ],
+            "UPDRS3_AXIAL": [
+                "NP3SPCH",
+                "NP3FACXP",
+                "NP3RISNG",
+                "NP3GAIT",
+                "NP3FRZGT",
+                "NP3PSTBL",
+            ],
         }
 
         part3 = bl[["PATNO"]].copy()
@@ -173,7 +211,9 @@ def extract_updrs_subscales(staged_patnos: set[int]) -> pd.DataFrame:
             features = part3
         else:
             features = features.merge(part3, on="PATNO", how="outer")
-        logger.info(f"UPDRS-III subscales: {len(part3)} patients, {len(subscales)} subscales")
+        logger.info(
+            f"UPDRS-III subscales: {len(part3)} patients, {len(subscales)} subscales"
+        )
 
     # UPDRS Part IV (motor complications)
     path = _latest_file("MDS-UPDRS_Part_IV__Motor_Complications_30Sep*")
@@ -255,13 +295,23 @@ def extract_sleep(staged_patnos: set[int]) -> pd.DataFrame:
         df = pd.read_csv(path, low_memory=False)
         df = df[df["PATNO"].isin(staged_patnos)]
         bl = _get_baseline(df)
-        rbd_items = [c for c in bl.columns if c.startswith("DRMVIVID") or c.startswith("DRMAGRAC")
-                     or c.startswith("DRMNOCTB") or c.startswith("SLPLMBMV")
-                     or c.startswith("SLPINJUR") or c.startswith("DRMVERBL")
-                     or c.startswith("DRMFIGHT") or c.startswith("DRMUMV")
-                     or c.startswith("DRMOBJFL") or c.startswith("MVAWAKEN")
-                     or c.startswith("DRMREMEM") or c.startswith("SLPDSTRB")
-                     or c.startswith("STROKE")]
+        rbd_items = [
+            c
+            for c in bl.columns
+            if c.startswith("DRMVIVID")
+            or c.startswith("DRMAGRAC")
+            or c.startswith("DRMNOCTB")
+            or c.startswith("SLPLMBMV")
+            or c.startswith("SLPINJUR")
+            or c.startswith("DRMVERBL")
+            or c.startswith("DRMFIGHT")
+            or c.startswith("DRMUMV")
+            or c.startswith("DRMOBJFL")
+            or c.startswith("MVAWAKEN")
+            or c.startswith("DRMREMEM")
+            or c.startswith("SLPDSTRB")
+            or c.startswith("STROKE")
+        ]
         rbd_score_items = [c for c in bl.columns if c.startswith("RBD") and "Q" in c]
         all_rbd = rbd_items + rbd_score_items
 
@@ -355,7 +405,9 @@ def extract_dat_imaging(staged_patnos: set[int]) -> pd.DataFrame:
             putamen_mean > 0, features["CAUDATE_MEAN_SBR"].values / putamen_mean, np.nan
         )
 
-    logger.info(f"DaT imaging: {len(features)} patients, {len(features.columns)-1} features")
+    logger.info(
+        f"DaT imaging: {len(features)} patients, {len(features.columns) - 1} features"
+    )
     return features
 
 
@@ -375,27 +427,40 @@ def extract_genetics(staged_patnos: set[int]) -> pd.DataFrame:
     # LRRK2 mutation carrier status
     if "LRRK2" in bl.columns:
         features["LRRK2_CARRIER"] = (
-            bl["LRRK2"].str.upper().str.contains("CARRIER|POSITIVE|YES", na=False).astype(int).values
+            bl["LRRK2"]
+            .str.upper()
+            .str.contains("CARRIER|POSITIVE|YES", na=False)
+            .astype(int)
+            .values
         )
 
     # GBA mutation carrier status
     if "GBA" in bl.columns:
         features["GBA_CARRIER"] = (
-            bl["GBA"].str.upper().str.contains("CARRIER|POSITIVE|YES", na=False).astype(int).values
+            bl["GBA"]
+            .str.upper()
+            .str.contains("CARRIER|POSITIVE|YES", na=False)
+            .astype(int)
+            .values
         )
 
     # APOE status
     if "APOE" in bl.columns:
         apoe = bl["APOE"].astype(str)
-        features["APOE_E4_CARRIER"] = apoe.str.contains("4", na=False).astype(int).values
+        features["APOE_E4_CARRIER"] = (
+            apoe.str.contains("4", na=False).astype(int).values
+        )
 
-    logger.info(f"Genetics: {len(features)} patients, {len(features.columns)-1} features")
+    logger.info(
+        f"Genetics: {len(features)} patients, {len(features.columns) - 1} features"
+    )
     return features
 
 
 # ---------------------------------------------------------------------------
 # Main assembly
 # ---------------------------------------------------------------------------
+
 
 def assemble_features(
     staging_path: Path = STAGING_PATH,
@@ -421,7 +486,16 @@ def assemble_features(
     genetics = extract_genetics(staged_patnos)
 
     # Merge all features on PATNO
-    modalities = [demographics, updrs, cognitive, olfaction, sleep, autonomic, imaging, genetics]
+    modalities = [
+        demographics,
+        updrs,
+        cognitive,
+        olfaction,
+        sleep,
+        autonomic,
+        imaging,
+        genetics,
+    ]
     merged = staging.copy()
     for mod_df in modalities:
         if mod_df.empty or len(mod_df.columns) <= 1:
@@ -432,7 +506,9 @@ def assemble_features(
     staging_cols = set(staging.columns)
     feature_cols = [c for c in merged.columns if c not in staging_cols and c != "PATNO"]
 
-    logger.info(f"Assembled {len(feature_cols)} features across {len(modalities)} modalities")
+    logger.info(
+        f"Assembled {len(feature_cols)} features across {len(modalities)} modalities"
+    )
     logger.info(f"Feature columns: {feature_cols}")
 
     # Report missing rates
@@ -452,23 +528,44 @@ def assemble_features(
         "n_features": len(feature_cols),
         "feature_columns": feature_cols,
         "modality_coverage": {
-            "demographics": len([c for c in feature_cols if c in ("SEX", "AGE_AT_BASELINE", "HANDED")]),
+            "demographics": len(
+                [c for c in feature_cols if c in ("SEX", "AGE_AT_BASELINE", "HANDED")]
+            ),
             "motor_subscales": len([c for c in feature_cols if "UPDRS3" in c]),
-            "non_motor": len([c for c in feature_cols if "UPDRS1" in c or "UPDRS2" in c or "UPDRS4" in c]),
+            "non_motor": len(
+                [
+                    c
+                    for c in feature_cols
+                    if "UPDRS1" in c or "UPDRS2" in c or "UPDRS4" in c
+                ]
+            ),
             "cognitive": len([c for c in feature_cols if "MOCA" in c]),
             "olfaction": len([c for c in feature_cols if "UPSIT" in c]),
             "sleep": len([c for c in feature_cols if "RBD" in c or "ESS" in c]),
             "autonomic": len([c for c in feature_cols if "SCOPA" in c]),
-            "imaging": len([c for c in feature_cols if "CAUDATE" in c or "PUTAMEN" in c]),
-            "genetics": len([c for c in feature_cols if c in ("LRRK2_CARRIER", "GBA_CARRIER", "APOE_E4_CARRIER")]),
+            "imaging": len(
+                [c for c in feature_cols if "CAUDATE" in c or "PUTAMEN" in c]
+            ),
+            "genetics": len(
+                [
+                    c
+                    for c in feature_cols
+                    if c in ("LRRK2_CARRIER", "GBA_CARRIER", "APOE_E4_CARRIER")
+                ]
+            ),
         },
-        "missing_rates": {col: float(merged[col].isna().mean()) for col in feature_cols},
+        "missing_rates": {
+            col: float(merged[col].isna().mean()) for col in feature_cols
+        },
     }
 
     import json
+
     meta_path = output_dir / "paper1_features_metadata.json"
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
-    logger.info(f"Saved to {output_path} ({len(merged)} rows, {len(merged.columns)} cols)")
+    logger.info(
+        f"Saved to {output_path} ({len(merged)} rows, {len(merged.columns)} cols)"
+    )
 
     return merged, output_path
 
@@ -483,4 +580,4 @@ if __name__ == "__main__":
     print(f"Feature columns ({len(feature_cols)}):")
     for col in feature_cols:
         n_valid = df[col].notna().sum()
-        print(f"  {col}: {n_valid}/{len(df)} ({n_valid/len(df):.1%})")
+        print(f"  {col}: {n_valid}/{len(df)} ({n_valid / len(df):.1%})")

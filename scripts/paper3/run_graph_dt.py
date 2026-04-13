@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Step 6: Graph-Informed Digital Twin for NSD-ISS Stage Transitions.
+"""Step 6: Graph-Informed Digital Twin for NSD-ISS Stage Transitions.
 
 Runs 5-fold stratified CV of the spatio-temporal Graph-DT model
 (GRU temporal encoder + GAT graph attention).
@@ -20,7 +19,6 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -51,8 +49,12 @@ def main():
     parser.add_argument("--patience", type=int, default=15)
     parser.add_argument("--n-folds", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--checkpoint-dir", type=str, default=None,
-                        help="Save per-fold checkpoints to this directory")
+    parser.add_argument(
+        "--checkpoint-dir",
+        type=str,
+        default=None,
+        help="Save per-fold checkpoints to this directory",
+    )
     args = parser.parse_args()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

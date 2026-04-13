@@ -32,8 +32,14 @@ OUTPUT_DIR = ROOT / "outputs" / "paper6"
 
 # Key clinical features to check completeness
 CLINICAL_FEATURES = [
-    "updrs1_total", "updrs2_total", "updrs3_total", "hy_stage",
-    "moca_total", "ess_total", "rbd_total", "scopa_aut_total",
+    "updrs1_total",
+    "updrs2_total",
+    "updrs3_total",
+    "hy_stage",
+    "moca_total",
+    "ess_total",
+    "rbd_total",
+    "scopa_aut_total",
 ]
 
 
@@ -46,8 +52,10 @@ def select_patients() -> dict:
     transitions_df = pd.read_csv(TRANSITIONS_PATH)
     paper1_df = pd.read_csv(PAPER1_PATH)
 
-    print(f"Loaded: {features_df['PATNO'].nunique()} patients, "
-          f"{len(features_df)} visits, {len(transitions_df)} transitions")
+    print(
+        f"Loaded: {features_df['PATNO'].nunique()} patients, "
+        f"{len(features_df)} visits, {len(transitions_df)} transitions"
+    )
 
     # Patients with transitions (922 unique)
     trans_pats = set(transitions_df["PATNO"].unique())
@@ -83,40 +91,42 @@ def select_patients() -> dict:
         has_backward = (pt_trans["direction"] == "backward").any()
         has_forward = (pt_trans["direction"] == "forward").any()
         transition_types = [
-            f"{r['source_stage']}→{r['dest_stage']}"
-            for _, r in pt_trans.iterrows()
+            f"{r['source_stage']}→{r['dest_stage']}" for _, r in pt_trans.iterrows()
         ]
 
         # Genetics
         is_lrrk2 = bool(bl_row.get("lrrk2_carrier", 0))
         is_gba = bool(bl_row.get("gba_carrier", 0))
 
-        pat_stats.append({
-            "patno": int(patno),
-            "n_visits": n_visits,
-            "initial_stage": str(initial_stage),
-            "stages_visited": [str(s) for s in stages_visited],
-            "n_transitions": n_transitions,
-            "has_backward": has_backward,
-            "has_forward": has_forward,
-            "transition_types": transition_types,
-            "completeness": completeness,
-            "is_lrrk2": is_lrrk2,
-            "is_gba": is_gba,
-            "follow_up_months": float(grp["months_from_baseline"].max()),
-        })
+        pat_stats.append(
+            {
+                "patno": int(patno),
+                "n_visits": n_visits,
+                "initial_stage": str(initial_stage),
+                "stages_visited": [str(s) for s in stages_visited],
+                "n_transitions": n_transitions,
+                "has_backward": has_backward,
+                "has_forward": has_forward,
+                "transition_types": transition_types,
+                "completeness": completeness,
+                "is_lrrk2": is_lrrk2,
+                "is_gba": is_gba,
+                "follow_up_months": float(grp["months_from_baseline"].max()),
+            }
+        )
 
     df_candidates = pd.DataFrame(pat_stats)
-    print(f"\nCandidates: {len(df_candidates)} patients with ≥3 visits, "
-          f"≥1 transition, ≥60% baseline completeness")
+    print(
+        f"\nCandidates: {len(df_candidates)} patients with ≥3 visits, "
+        f"≥1 transition, ≥60% baseline completeness"
+    )
 
     # Selection strategy: pick 5 diverse patients
     selected = []
 
     # 1. Patient starting at Stage 0 with forward progression
     stage0 = df_candidates[
-        (df_candidates["initial_stage"] == "0") &
-        (df_candidates["has_forward"])
+        (df_candidates["initial_stage"] == "0") & (df_candidates["has_forward"])
     ].sort_values("n_transitions", ascending=False)
     if len(stage0) > 0:
         selected.append(stage0.iloc[0]["patno"])
@@ -124,9 +134,9 @@ def select_patients() -> dict:
 
     # 2. Patient starting at Stage 2B with forward progression to 3+
     stage2b = df_candidates[
-        (df_candidates["initial_stage"] == "2B") &
-        (df_candidates["has_forward"]) &
-        (~df_candidates["patno"].isin(selected))
+        (df_candidates["initial_stage"] == "2B")
+        & (df_candidates["has_forward"])
+        & (~df_candidates["patno"].isin(selected))
     ].sort_values("n_transitions", ascending=False)
     if len(stage2b) > 0:
         selected.append(stage2b.iloc[0]["patno"])
@@ -134,8 +144,7 @@ def select_patients() -> dict:
 
     # 3. Patient with backward transition (regression)
     backward = df_candidates[
-        (df_candidates["has_backward"]) &
-        (~df_candidates["patno"].isin(selected))
+        (df_candidates["has_backward"]) & (~df_candidates["patno"].isin(selected))
     ].sort_values("n_transitions", ascending=False)
     if len(backward) > 0:
         selected.append(backward.iloc[0]["patno"])
@@ -143,8 +152,8 @@ def select_patients() -> dict:
 
     # 4. Patient starting at Stage 3 or 4 (advanced)
     advanced = df_candidates[
-        (df_candidates["initial_stage"].isin(["3", "4"])) &
-        (~df_candidates["patno"].isin(selected))
+        (df_candidates["initial_stage"].isin(["3", "4"]))
+        & (~df_candidates["patno"].isin(selected))
     ].sort_values("n_transitions", ascending=False)
     if len(advanced) > 0:
         selected.append(advanced.iloc[0]["patno"])
@@ -152,16 +161,16 @@ def select_patients() -> dict:
 
     # 5. Genetic carrier if available, else longest follow-up
     carriers = df_candidates[
-        ((df_candidates["is_lrrk2"]) | (df_candidates["is_gba"])) &
-        (~df_candidates["patno"].isin(selected))
+        ((df_candidates["is_lrrk2"]) | (df_candidates["is_gba"]))
+        & (~df_candidates["patno"].isin(selected))
     ].sort_values("n_transitions", ascending=False)
     if len(carriers) > 0:
         selected.append(carriers.iloc[0]["patno"])
         print(f"  Genetic carrier: PATNO {selected[-1]}")
     else:
-        remaining = df_candidates[
-            ~df_candidates["patno"].isin(selected)
-        ].sort_values("follow_up_months", ascending=False)
+        remaining = df_candidates[~df_candidates["patno"].isin(selected)].sort_values(
+            "follow_up_months", ascending=False
+        )
         if len(remaining) > 0:
             selected.append(remaining.iloc[0]["patno"])
             print(f"  Longest follow-up: PATNO {selected[-1]}")
@@ -214,9 +223,11 @@ def select_patients() -> dict:
     print(f"\nSelected {len(selected)} patients:")
     for i, patno in enumerate(selected):
         info = df_candidates[df_candidates["patno"] == patno].iloc[0]
-        print(f"  {i+1}. PATNO {patno}: Stage {info['initial_stage']}, "
-              f"{info['n_visits']} visits, {info['n_transitions']} transitions, "
-              f"{info['follow_up_months']:.0f}mo follow-up")
+        print(
+            f"  {i + 1}. PATNO {patno}: Stage {info['initial_stage']}, "
+            f"{info['n_visits']} visits, {info['n_transitions']} transitions, "
+            f"{info['follow_up_months']:.0f}mo follow-up"
+        )
         print(f"     Transitions: {', '.join(info['transition_types'])}")
 
     return result

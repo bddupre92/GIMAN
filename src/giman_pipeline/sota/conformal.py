@@ -17,23 +17,18 @@ Phase: PhD Paper 1 — Conformal Prediction for NSD-ISS Stages
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import json
 import numpy as np
 import pandas as pd
+from mapie.classification import CrossConformalClassifier, SplitConformalClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-
-from mapie.classification import SplitConformalClassifier, CrossConformalClassifier
-from mapie.metrics.classification import (
-    classification_coverage_score,
-    classification_mean_width_score,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +36,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Result dataclasses
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ConformalResult:
@@ -85,6 +81,7 @@ class ConformalBenchmarkResult:
 # ---------------------------------------------------------------------------
 # Conformal evaluation
 # ---------------------------------------------------------------------------
+
 
 def _evaluate_conformal_predictions(
     y_true: np.ndarray,
@@ -211,7 +208,7 @@ def run_split_conformal(
         results.append(cr)
 
         logger.info(
-            f"  Split CP {model_name} α={1-cl:.2f}: "
+            f"  Split CP {model_name} α={1 - cl:.2f}: "
             f"coverage={cr.marginal_coverage:.4f} (target={cl:.2f}), "
             f"mean_set_size={cr.mean_set_size:.2f}, "
             f"singleton={cr.singleton_rate:.2f}"
@@ -279,7 +276,7 @@ def run_cross_conformal(
         results.append(cr)
 
         logger.info(
-            f"  Cross CP {model_name} α={1-cl:.2f}: "
+            f"  Cross CP {model_name} α={1 - cl:.2f}: "
             f"coverage={cr.marginal_coverage:.4f} (target={cl:.2f}), "
             f"mean_set_size={cr.mean_set_size:.2f}, "
             f"singleton={cr.singleton_rate:.2f}"
@@ -291,6 +288,7 @@ def run_cross_conformal(
 # ---------------------------------------------------------------------------
 # Full conformal benchmark
 # ---------------------------------------------------------------------------
+
 
 def run_conformal_benchmark(
     X: np.ndarray | pd.DataFrame,
@@ -399,6 +397,7 @@ def run_conformal_benchmark(
 # Serialization
 # ---------------------------------------------------------------------------
 
+
 def save_conformal_results(
     results: dict[str, list[ConformalResult]],
     output_path: Path,
@@ -419,9 +418,15 @@ def save_conformal_results(
                 "singleton_rate": cr.singleton_rate,
                 "empty_set_rate": cr.empty_set_rate,
                 "full_set_rate": cr.full_set_rate,
-                "per_class_coverage": {str(k): v for k, v in cr.per_class_coverage.items()},
-                "per_class_set_size": {str(k): v for k, v in cr.per_class_set_size.items()},
-                "set_size_distribution": {str(k): v for k, v in cr.set_size_distribution.items()},
+                "per_class_coverage": {
+                    str(k): v for k, v in cr.per_class_coverage.items()
+                },
+                "per_class_set_size": {
+                    str(k): v for k, v in cr.per_class_set_size.items()
+                },
+                "set_size_distribution": {
+                    str(k): v for k, v in cr.set_size_distribution.items()
+                },
                 "fit_time_seconds": cr.fit_time_seconds,
                 "predict_time_seconds": cr.predict_time_seconds,
             }
@@ -441,16 +446,19 @@ def format_conformal_table(
 ) -> str:
     """Format conformal results as markdown table."""
     lines = [
-        f"## Conformal Prediction Results (α={1-confidence_level:.2f}, method={method})",
+        f"## Conformal Prediction Results (α={1 - confidence_level:.2f}, method={method})",
         "",
-        "| Model | Coverage (target={:.0f}%) | Mean Set Size | Singleton % | Empty % |".format(confidence_level * 100),
+        f"| Model | Coverage (target={confidence_level * 100:.0f}%) | Mean Set Size | Singleton % | Empty % |",
         "|---|---|---|---|---|",
     ]
 
     for model_name, cr_list in results.items():
         # Find matching result
         for cr in cr_list:
-            if abs(cr.confidence_level - confidence_level) < 0.01 and cr.conformal_method == method:
+            if (
+                abs(cr.confidence_level - confidence_level) < 0.01
+                and cr.conformal_method == method
+            ):
                 cov_ok = "**" if cr.marginal_coverage >= confidence_level else ""
                 lines.append(
                     f"| {model_name} | {cov_ok}{cr.marginal_coverage:.4f}{cov_ok} | "
@@ -463,7 +471,10 @@ def format_conformal_table(
     sample_cr = None
     for cr_list in results.values():
         for cr in cr_list:
-            if abs(cr.confidence_level - confidence_level) < 0.01 and cr.conformal_method == method:
+            if (
+                abs(cr.confidence_level - confidence_level) < 0.01
+                and cr.conformal_method == method
+            ):
                 sample_cr = cr
                 break
         if sample_cr:
@@ -476,8 +487,13 @@ def format_conformal_table(
         lines.extend([header, sep])
         for model_name, cr_list in results.items():
             for cr in cr_list:
-                if abs(cr.confidence_level - confidence_level) < 0.01 and cr.conformal_method == method:
-                    coverages = [f"{cr.per_class_coverage.get(c, 0.0):.4f}" for c in class_ids]
+                if (
+                    abs(cr.confidence_level - confidence_level) < 0.01
+                    and cr.conformal_method == method
+                ):
+                    coverages = [
+                        f"{cr.per_class_coverage.get(c, 0.0):.4f}" for c in class_ids
+                    ]
                     lines.append(f"| {model_name} | " + " | ".join(coverages) + " |")
                     break
 

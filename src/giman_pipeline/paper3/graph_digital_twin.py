@@ -1,5 +1,4 @@
-"""
-Graph-Informed Digital Twin for NSD-ISS Stage Transitions.
+"""Graph-Informed Digital Twin for NSD-ISS Stage Transitions.
 
 Combines patient similarity graphs with temporal sequence modeling to predict
 stage transition timing. The graph provides population-level context about
@@ -25,7 +24,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -37,22 +35,17 @@ from torch.utils.data import DataLoader, Dataset
 from torch_geometric.nn import GATConv
 from tqdm import tqdm
 
-from giman_pipeline.paper3.multistate_markov import STAGE_LABELS, STAGE_TO_IDX, N_STATES
 from giman_pipeline.paper3.dynamic_deephit import (
-    ALL_FEATURES,
-    FEATURES_WITH_MISSING,
-    TIME_BIN_ENDS,
     N_TIME_BINS,
-    Episode,
-    extract_episodes,
-    build_patient_arrays,
-    compute_feature_stats,
-    compute_ctd,
-    compute_brier_score,
-    compute_ibs,
     _get_time_bin,
+    build_patient_arrays,
+    compute_brier_score,
+    compute_ctd,
+    compute_feature_stats,
+    compute_ibs,
+    extract_episodes,
 )
-
+from giman_pipeline.paper3.multistate_markov import N_STATES, STAGE_LABELS
 
 # ── Graph Construction ─────────────────────────────────────────────────
 
@@ -156,6 +149,7 @@ def build_patient_graph(
 
 # ── Dataset ────────────────────────────────────────────────────────────
 
+
 class GraphDeepHitDataset(Dataset):
     def __init__(self, episodes, patient_arrays, means, stds, pat_to_graph_idx):
         self.episodes = episodes
@@ -181,7 +175,9 @@ class GraphDeepHitDataset(Dataset):
             "time_bin": _get_time_bin(ep.duration_months),
             "event_idx": ep.event_stage_idx,
             "censored": ep.censored,
-            "graph_idx": self.pat_to_graph_idx[ep.patno],  # KeyError if missing = correct behavior
+            "graph_idx": self.pat_to_graph_idx[
+                ep.patno
+            ],  # KeyError if missing = correct behavior
             "patno": ep.patno,
         }
 
@@ -204,6 +200,7 @@ def graph_collate_fn(batch):
 
 # ── Temporal Attention ─────────────────────────────────────────────────
 
+
 class TemporalAttentionPool(nn.Module):
     """Attention-weighted pooling over GRU hidden states.
 
@@ -221,8 +218,7 @@ class TemporalAttentionPool(nn.Module):
         )
 
     def forward(self, gru_output: torch.Tensor, seq_lens: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
+        """Args:
             gru_output: (batch, max_seq, hidden_dim) padded GRU outputs
             seq_lens: (batch,) actual sequence lengths
         Returns:
@@ -240,6 +236,7 @@ class TemporalAttentionPool(nn.Module):
 
 
 # ── Model ──────────────────────────────────────────────────────────────
+
 
 class GraphDigitalTwin(nn.Module):
     """GRU (temporal) + GAT (population graph) with gated fusion.
@@ -295,8 +292,9 @@ class GraphDigitalTwin(nn.Module):
         for _ in range(gat_layers):
             out_per_head = hidden_dim // gat_heads
             self.gat_layers_list.append(
-                GATConv(gat_in, out_per_head, heads=gat_heads,
-                        dropout=dropout, concat=True)
+                GATConv(
+                    gat_in, out_per_head, heads=gat_heads, dropout=dropout, concat=True
+                )
             )
             gat_in = out_per_head * gat_heads
         self.gat_proj = nn.Linear(gat_in, hidden_dim)
@@ -332,15 +330,13 @@ class GraphDigitalTwin(nn.Module):
         x = self.gat_norm(x)
         return x  # (N_patients, hidden_dim)
 
-    def forward(self, sequences, seq_lens, stage_idxs, graph_idxs,
-                graph_node_features):
-        """
-        Args:
-            sequences: (batch, max_seq, input_dim)
-            seq_lens: (batch,)
-            stage_idxs: (batch,)
-            graph_idxs: (batch,) indices into graph_node_features
-            graph_node_features: (N_patients, hidden_dim) pre-computed GAT output
+    def forward(self, sequences, seq_lens, stage_idxs, graph_idxs, graph_node_features):
+        """Args:
+        sequences: (batch, max_seq, input_dim)
+        seq_lens: (batch,)
+        stage_idxs: (batch,)
+        graph_idxs: (batch,) indices into graph_node_features
+        graph_node_features: (N_patients, hidden_dim) pre-computed GAT output
         """
         # 1. Temporal encoding with attention pooling
         sorted_lens, sort_idx = seq_lens.sort(descending=True)
@@ -376,15 +372,18 @@ class GraphDigitalTwin(nn.Module):
         logits = self.output_head(combined)
         return F.softmax(logits, dim=-1)
 
-    def predict_cif(self, sequences, seq_lens, stage_idxs, graph_idxs,
-                    graph_node_features):
-        pmf = self.forward(sequences, seq_lens, stage_idxs, graph_idxs,
-                           graph_node_features)
+    def predict_cif(
+        self, sequences, seq_lens, stage_idxs, graph_idxs, graph_node_features
+    ):
+        pmf = self.forward(
+            sequences, seq_lens, stage_idxs, graph_idxs, graph_node_features
+        )
         event_pmf = pmf[:, :-1].view(-1, self.n_causes, self.n_time_bins)
         return torch.cumsum(event_pmf, dim=-1)
 
 
 # ── Loss ───────────────────────────────────────────────────────────────
+
 
 def _graph_loss(pmf, time_bins, event_idxs, censored, alpha=0.1):
     """Efficient GPU loss (NLL + ranking)."""
@@ -437,7 +436,7 @@ def _graph_smoothing_loss(
     graph_node_features: torch.Tensor,
     edge_index: torch.Tensor,
     edge_weight: torch.Tensor,
-    stage_idxs_per_node: Optional[torch.Tensor] = None,
+    stage_idxs_per_node: torch.Tensor | None = None,
     n_sample: int = 512,
 ) -> torch.Tensor:
     """Graph smoothing: similar connected patients → similar representations.
@@ -470,21 +469,46 @@ def _graph_smoothing_loss(
 
 # ── Training ───────────────────────────────────────────────────────────
 
+
 def train_graph_model(
-    model, train_ds, val_ds, device,
-    node_baseline, edge_index, edge_weight,
-    n_epochs=100, batch_size=64, lr=1e-3,
-    weight_decay=1e-4, patience=15, alpha=0.1,
-    graph_smooth_weight=0.01, verbose=True,
+    model,
+    train_ds,
+    val_ds,
+    device,
+    node_baseline,
+    edge_index,
+    edge_weight,
+    n_epochs=100,
+    batch_size=64,
+    lr=1e-3,
+    weight_decay=1e-4,
+    patience=15,
+    alpha=0.1,
+    graph_smooth_weight=0.01,
+    verbose=True,
 ):
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
-                              collate_fn=graph_collate_fn, num_workers=0)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
-                            collate_fn=graph_collate_fn, num_workers=0)
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=graph_collate_fn,
+        num_workers=0,
+    )
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=graph_collate_fn,
+        num_workers=0,
+    )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", patience=10, factor=0.5, min_lr=1e-6,
+        optimizer,
+        mode="min",
+        patience=10,
+        factor=0.5,
+        min_lr=1e-6,
     )
 
     nb = node_baseline.to(device)
@@ -496,7 +520,11 @@ def train_graph_model(
     wait = 0
     history = {"train_loss": [], "val_loss": []}
 
-    it = tqdm(range(n_epochs), desc="Training", unit="epoch") if verbose else range(n_epochs)
+    it = (
+        tqdm(range(n_epochs), desc="Training", unit="epoch")
+        if verbose
+        else range(n_epochs)
+    )
 
     for epoch in it:
         # Train
@@ -567,8 +595,11 @@ def train_graph_model(
         history["val_loss"].append(vl)
 
         if verbose and hasattr(it, "set_postfix"):
-            it.set_postfix(tr=f"{tl:.4f}", va=f"{vl:.4f}",
-                           lr=f"{optimizer.param_groups[0]['lr']:.1e}")
+            it.set_postfix(
+                tr=f"{tl:.4f}",
+                va=f"{vl:.4f}",
+                lr=f"{optimizer.param_groups[0]['lr']:.1e}",
+            )
 
         if vl < best_val:
             best_val = vl
@@ -590,17 +621,24 @@ def train_graph_model(
 
 # ── Evaluation ─────────────────────────────────────────────────────────
 
+
 @torch.no_grad()
-def predict_all_graph(model, dataset, device, node_baseline, edge_index,
-                      edge_weight, batch_size=128):
+def predict_all_graph(
+    model, dataset, device, node_baseline, edge_index, edge_weight, batch_size=128
+):
     model.eval()
     nb = node_baseline.to(device)
     ei = edge_index.to(device)
     ew = edge_weight.to(device) if edge_weight is not None else None
     graph_feats = model.compute_graph_features(nb, ei, ew)
 
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False,
-                        collate_fn=graph_collate_fn, num_workers=0)
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=graph_collate_fn,
+        num_workers=0,
+    )
     out = {k: [] for k in ("cif", "event_idxs", "time_bins", "censored", "stage_idxs")}
 
     for batch in loader:
@@ -619,6 +657,7 @@ def predict_all_graph(model, dataset, device, node_baseline, edge_index,
 
 
 # ── Cross-Validation ──────────────────────────────────────────────────
+
 
 @dataclass
 class GraphDTResult:
@@ -659,8 +698,13 @@ def cross_validate(
     """Stratified K-fold CV for Graph Digital Twin."""
     from sklearn.model_selection import StratifiedKFold
 
-    device = torch.device("mps") if torch.backends.mps.is_available() else (
-        torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+    device = (
+        torch.device("mps")
+        if torch.backends.mps.is_available()
+        else (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
+    )
     if verbose:
         print(f"  Device: {device}")
 
@@ -670,14 +714,18 @@ def cross_validate(
     n_events_total = sum(1 for e in episodes if not e.censored)
 
     if verbose:
-        print(f"  Episodes: {len(episodes)} ({n_events_total} events, "
-              f"{len(episodes) - n_events_total} censored)")
+        print(
+            f"  Episodes: {len(episodes)} ({n_events_total} events, "
+            f"{len(episodes) - n_events_total} censored)"
+        )
         print(f"  Input dim: {input_dim}")
 
     # Build graph on ALL patients (baseline features only, no label leakage)
     all_patient_ids = sorted(set(e.patno for e in episodes))
     edge_index, edge_weight, node_baseline = build_patient_graph(
-        features_df, all_patient_ids, k_neighbors=k_neighbors,
+        features_df,
+        all_patient_ids,
+        k_neighbors=k_neighbors,
     )
     pat_to_gidx = {p: i for i, p in enumerate(all_patient_ids)}
     n_baseline_features = node_baseline.size(1)
@@ -690,9 +738,11 @@ def cross_validate(
         "n_baseline_features": n_baseline_features,
     }
     if verbose:
-        print(f"  Graph: {graph_stats['n_nodes']} nodes, "
-              f"{graph_stats['n_edges']} edges, "
-              f"avg degree {graph_stats['avg_degree']:.1f}")
+        print(
+            f"  Graph: {graph_stats['n_nodes']} nodes, "
+            f"{graph_stats['n_edges']} edges, "
+            f"avg degree {graph_stats['avg_degree']:.1f}"
+        )
 
     # Patient stratification
     pat_info: dict[int, tuple[int, bool]] = {}
@@ -731,9 +781,13 @@ def cross_validate(
 
         means, stds = compute_feature_stats(patient_arrays, atrain_pats)
 
-        train_ds = GraphDeepHitDataset(train_eps, patient_arrays, means, stds, pat_to_gidx)
+        train_ds = GraphDeepHitDataset(
+            train_eps, patient_arrays, means, stds, pat_to_gidx
+        )
         val_ds = GraphDeepHitDataset(val_eps, patient_arrays, means, stds, pat_to_gidx)
-        test_ds = GraphDeepHitDataset(test_eps, patient_arrays, means, stds, pat_to_gidx)
+        test_ds = GraphDeepHitDataset(
+            test_eps, patient_arrays, means, stds, pat_to_gidx
+        )
 
         torch.manual_seed(seed + fi)
         model = GraphDigitalTwin(
@@ -747,15 +801,28 @@ def cross_validate(
         ).to(device)
 
         history, best_val, best_state = train_graph_model(
-            model, train_ds, val_ds, device,
-            node_baseline, edge_index, edge_weight,
-            n_epochs=n_epochs, batch_size=batch_size, lr=lr,
-            patience=patience, alpha=alpha, verbose=False,
+            model,
+            train_ds,
+            val_ds,
+            device,
+            node_baseline,
+            edge_index,
+            edge_weight,
+            n_epochs=n_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            patience=patience,
+            alpha=alpha,
+            verbose=False,
         )
 
         preds = predict_all_graph(
-            model, test_ds, device,
-            node_baseline, edge_index, edge_weight,
+            model,
+            test_ds,
+            device,
+            node_baseline,
+            edge_index,
+            edge_weight,
         )
         ctd = compute_ctd(preds)
         ibs_val = compute_ibs(preds)
@@ -768,39 +835,46 @@ def cross_validate(
         # Save per-fold checkpoint for downstream papers (4, 5, Ch.5)
         if checkpoint_dir is not None:
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
-            torch.save({
-                "model_state_dict": best_state,
-                "input_dim": input_dim,
-                "hidden_dim": hidden_dim,
-                "n_gru_layers": n_gru_layers,
-                "n_baseline_features": n_baseline_features,
-                "gat_heads": gat_heads,
-                "gat_layers": gat_layers,
-                "dropout": dropout,
-                "n_causes": N_STATES,
-                "n_time_bins": N_TIME_BINS,
-                "means": means,
-                "stds": stds,
-                "train_pats": sorted(atrain_pats),
-                "val_pats": sorted(val_pats),
-                "test_pats": sorted(test_pats),
-                "col_names": col_names,
-                "edge_index": edge_index.cpu(),
-                "edge_weight": edge_weight.cpu(),
-                "node_baseline": node_baseline.cpu(),
-                "pat_to_gidx": pat_to_gidx,
-                "k_neighbors": k_neighbors,
-                "fold_idx": fi,
-                "fold_ctd": ctd,
-                "fold_ibs": ibs_val,
-                "seed": seed,
-            }, checkpoint_dir / f"fold{fi}_graph_dt.pt")
+            torch.save(
+                {
+                    "model_state_dict": best_state,
+                    "input_dim": input_dim,
+                    "hidden_dim": hidden_dim,
+                    "n_gru_layers": n_gru_layers,
+                    "n_baseline_features": n_baseline_features,
+                    "gat_heads": gat_heads,
+                    "gat_layers": gat_layers,
+                    "dropout": dropout,
+                    "n_causes": N_STATES,
+                    "n_time_bins": N_TIME_BINS,
+                    "means": means,
+                    "stds": stds,
+                    "train_pats": sorted(atrain_pats),
+                    "val_pats": sorted(val_pats),
+                    "test_pats": sorted(test_pats),
+                    "col_names": col_names,
+                    "edge_index": edge_index.cpu(),
+                    "edge_weight": edge_weight.cpu(),
+                    "node_baseline": node_baseline.cpu(),
+                    "pat_to_gidx": pat_to_gidx,
+                    "k_neighbors": k_neighbors,
+                    "fold_idx": fi,
+                    "fold_ctd": ctd,
+                    "fold_ibs": ibs_val,
+                    "seed": seed,
+                },
+                checkpoint_dir / f"fold{fi}_graph_dt.pt",
+            )
             if verbose:
-                tqdm.write(f"  Checkpoint saved: {checkpoint_dir / f'fold{fi}_graph_dt.pt'}")
+                tqdm.write(
+                    f"  Checkpoint saved: {checkpoint_dir / f'fold{fi}_graph_dt.pt'}"
+                )
 
         if verbose:
-            tqdm.write(f"  Fold {fi+1}: C-td={ctd:.4f}  IBS={ibs_val:.4f}  "
-                       f"val_loss={best_val:.4f}  epochs={len(history['train_loss'])}")
+            tqdm.write(
+                f"  Fold {fi + 1}: C-td={ctd:.4f}  IBS={ibs_val:.4f}  "
+                f"val_loss={best_val:.4f}  epochs={len(history['train_loss'])}"
+            )
 
     # Aggregate
     eval_horizons = {"1yr": 12, "2yr": 24, "5yr": 60, "10yr": 120}
@@ -828,11 +902,18 @@ def cross_validate(
         n_censored=len(episodes) - n_events_total,
         graph_stats=graph_stats,
         hyperparams={
-            "hidden_dim": hidden_dim, "n_gru_layers": n_gru_layers,
-            "gat_heads": gat_heads, "gat_layers": gat_layers,
-            "k_neighbors": k_neighbors, "n_epochs": n_epochs,
-            "batch_size": batch_size, "lr": lr, "dropout": dropout,
-            "alpha": alpha, "patience": patience, "n_folds": n_folds,
+            "hidden_dim": hidden_dim,
+            "n_gru_layers": n_gru_layers,
+            "gat_heads": gat_heads,
+            "gat_layers": gat_layers,
+            "k_neighbors": k_neighbors,
+            "n_epochs": n_epochs,
+            "batch_size": batch_size,
+            "lr": lr,
+            "dropout": dropout,
+            "alpha": alpha,
+            "patience": patience,
+            "n_folds": n_folds,
             "input_dim": input_dim,
         },
     )
@@ -876,10 +957,11 @@ def _per_transition_ctd(all_preds: list[dict]) -> dict[str, float]:
 
 # ── Checkpoint Loading ─────────────────────────────────────────────────
 
+
 def load_graph_dt_checkpoint(
     path: Path,
     device: torch.device | None = None,
-) -> tuple["GraphDigitalTwin", dict]:
+) -> tuple[GraphDigitalTwin, dict]:
     """Load a per-fold Graph-DT checkpoint saved by cross_validate().
 
     Args:
@@ -892,8 +974,15 @@ def load_graph_dt_checkpoint(
         and pat_to_gidx needed for graph-aware inference.
     """
     if device is None:
-        device = torch.device("mps") if torch.backends.mps.is_available() else (
-            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+        device = (
+            torch.device("mps")
+            if torch.backends.mps.is_available()
+            else (
+                torch.device("cuda")
+                if torch.cuda.is_available()
+                else torch.device("cpu")
+            )
+        )
     cp = torch.load(path, weights_only=False, map_location=device)
     model = GraphDigitalTwin(
         input_dim=cp["input_dim"],
@@ -912,12 +1001,15 @@ def load_graph_dt_checkpoint(
 
 # ── Save ──────────────────────────────────────────────────────────────
 
+
 def save_graph_dt_results(result: GraphDTResult, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
     d = {
-        "c_td": result.c_td, "c_td_std": result.c_td_std,
+        "c_td": result.c_td,
+        "c_td_std": result.c_td_std,
         "c_td_per_fold": result.c_td_per_fold,
-        "ibs": result.ibs, "ibs_std": result.ibs_std,
+        "ibs": result.ibs,
+        "ibs_std": result.ibs_std,
         "ibs_per_fold": result.ibs_per_fold,
         "brier_at_horizons": result.brier_at_horizons,
         "per_transition_ctd": result.per_transition_ctd,
@@ -932,9 +1024,8 @@ def save_graph_dt_results(result: GraphDTResult, output_dir: Path):
         json.dump(d, f, indent=2, default=str)
 
     if result.per_transition_ctd:
-        pd.DataFrame([
-            {"transition": k, "c_td": v}
-            for k, v in result.per_transition_ctd.items()
-        ]).to_csv(output_dir / "per_transition_ctd.csv", index=False)
+        pd.DataFrame(
+            [{"transition": k, "c_td": v} for k, v in result.per_transition_ctd.items()]
+        ).to_csv(output_dir / "per_transition_ctd.csv", index=False)
 
     print(f"  Results saved to {output_dir}")

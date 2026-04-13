@@ -1,5 +1,4 @@
-"""
-Dynamic-DeepHit for NSD-ISS Stage Transitions.
+"""Dynamic-DeepHit for NSD-ISS Stage Transitions.
 
 Implements a GRU-based deep survival model for competing-risks stage transition
 prediction, adapted from Lee et al. (2019) "Dynamic-DeepHit".
@@ -18,10 +17,8 @@ Key adaptations for NSD-ISS:
 from __future__ import annotations
 
 import json
-import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -32,7 +29,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from giman_pipeline.paper3.multistate_markov import STAGE_LABELS, STAGE_TO_IDX, N_STATES
+from giman_pipeline.paper3.multistate_markov import N_STATES, STAGE_LABELS, STAGE_TO_IDX
 
 # ── Feature Configuration ──────────────────────────────────────────────
 
@@ -77,9 +74,11 @@ N_TIME_BINS = len(TIME_BIN_ENDS)
 
 # ── Data Preparation ───────────────────────────────────────────────────
 
+
 @dataclass
 class Episode:
     """A stage-occupancy episode for one patient."""
+
     patno: int
     current_stage_idx: int
     event_stage_idx: int  # destination stage; -1 if censored
@@ -100,7 +99,11 @@ def extract_episodes(features_df: pd.DataFrame, verbose: bool = True) -> list[Ep
     """Extract stage-occupancy episodes from longitudinal data."""
     episodes = []
     grouped = features_df.groupby("PATNO")
-    iterator = tqdm(grouped, desc="Extracting episodes", unit="patient") if verbose else grouped
+    iterator = (
+        tqdm(grouped, desc="Extracting episodes", unit="patient")
+        if verbose
+        else grouped
+    )
 
     for patno, pdf in iterator:
         pdf = pdf.sort_values("months_from_baseline").reset_index(drop=True)
@@ -115,28 +118,32 @@ def extract_episodes(features_df: pd.DataFrame, verbose: bool = True) -> list[Ep
             new_stage = pdf.iloc[i]["nsd_stage"]
             if new_stage != current_stage:
                 duration = pdf.iloc[i]["months_from_baseline"] - ep_start_time
-                episodes.append(Episode(
-                    patno=patno,
-                    current_stage_idx=current_stage_idx,
-                    event_stage_idx=STAGE_TO_IDX.get(new_stage, 0),
-                    duration_months=max(duration, 0.01),
-                    censored=False,
-                    max_visit_idx=i,
-                ))
+                episodes.append(
+                    Episode(
+                        patno=patno,
+                        current_stage_idx=current_stage_idx,
+                        event_stage_idx=STAGE_TO_IDX.get(new_stage, 0),
+                        duration_months=max(duration, 0.01),
+                        censored=False,
+                        max_visit_idx=i,
+                    )
+                )
                 current_stage = new_stage
                 current_stage_idx = STAGE_TO_IDX.get(new_stage, 0)
                 ep_start_time = pdf.iloc[i]["months_from_baseline"]
 
         # Last episode is censored
         duration = pdf.iloc[-1]["months_from_baseline"] - ep_start_time
-        episodes.append(Episode(
-            patno=patno,
-            current_stage_idx=current_stage_idx,
-            event_stage_idx=-1,
-            duration_months=max(duration, 0.01),
-            censored=True,
-            max_visit_idx=len(pdf) - 1,
-        ))
+        episodes.append(
+            Episode(
+                patno=patno,
+                current_stage_idx=current_stage_idx,
+                event_stage_idx=-1,
+                duration_months=max(duration, 0.01),
+                censored=True,
+                max_visit_idx=len(pdf) - 1,
+            )
+        )
 
     return episodes
 
@@ -193,6 +200,7 @@ def compute_feature_stats(
 
 # ── Dataset / DataLoader ───────────────────────────────────────────────
 
+
 class DeepHitDataset(Dataset):
     def __init__(
         self,
@@ -243,6 +251,7 @@ def collate_fn(batch):
 
 
 # ── Model ──────────────────────────────────────────────────────────────
+
 
 class DynamicDeepHit(nn.Module):
     """GRU encoder + cause-specific discrete-time hazard heads."""
@@ -314,6 +323,7 @@ class DynamicDeepHit(nn.Module):
 
 # ── Loss ───────────────────────────────────────────────────────────────
 
+
 def _nll_loss(pmf, time_bins, event_idxs, censored):
     """Vectorized NLL: -log P(observed outcome)."""
     batch = pmf.size(0)
@@ -364,8 +374,8 @@ def _ranking_loss(pmf, time_bins, event_idxs, censored, sigma=0.1):
     perm = torch.randperm(len(uncensored), device=pmf.device)[:n_sample]
     sampled = uncensored[perm]
 
-    s_events = event_idxs[sampled]   # (N,)
-    s_tbins = time_bins[sampled]     # (N,)
+    s_events = event_idxs[sampled]  # (N,)
+    s_tbins = time_bins[sampled]  # (N,)
 
     # All pairs (i, j) with i < j
     ii = torch.arange(n_sample, device=pmf.device)
@@ -477,6 +487,7 @@ def _gpu_loss(pmf, time_bins, event_idxs, censored, alpha=0.1, sigma=0.1):
 
 # ── Training ───────────────────────────────────────────────────────────
 
+
 def _get_device():
     if torch.cuda.is_available():
         return torch.device("cuda")
@@ -522,18 +533,40 @@ def _run_epoch(model, loader, device, optimizer=None, alpha=0.1):
 
 
 def train_model(
-    model, train_ds, val_ds, device,
-    n_epochs=100, batch_size=64, lr=1e-3, weight_decay=1e-4,
-    patience=15, alpha=0.1, verbose=True,
+    model,
+    train_ds,
+    val_ds,
+    device,
+    n_epochs=100,
+    batch_size=64,
+    lr=1e-3,
+    weight_decay=1e-4,
+    patience=15,
+    alpha=0.1,
+    verbose=True,
 ):
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
-                              collate_fn=collate_fn, num_workers=0)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
-                            collate_fn=collate_fn, num_workers=0)
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_fn,
+        num_workers=0,
+    )
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_fn,
+        num_workers=0,
+    )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", patience=7, factor=0.5, min_lr=1e-6,
+        optimizer,
+        mode="min",
+        patience=7,
+        factor=0.5,
+        min_lr=1e-6,
     )
 
     best_val = float("inf")
@@ -541,7 +574,11 @@ def train_model(
     wait = 0
     history = {"train_loss": [], "val_loss": []}
 
-    it = tqdm(range(n_epochs), desc="Training", unit="epoch") if verbose else range(n_epochs)
+    it = (
+        tqdm(range(n_epochs), desc="Training", unit="epoch")
+        if verbose
+        else range(n_epochs)
+    )
 
     for epoch in it:
         train_m = _run_epoch(model, train_loader, device, optimizer, alpha)
@@ -552,8 +589,11 @@ def train_model(
         history["val_loss"].append(val_m["loss"])
 
         if verbose and hasattr(it, "set_postfix"):
-            it.set_postfix(tr=f"{train_m['loss']:.4f}", va=f"{val_m['loss']:.4f}",
-                           lr=f"{optimizer.param_groups[0]['lr']:.1e}")
+            it.set_postfix(
+                tr=f"{train_m['loss']:.4f}",
+                va=f"{val_m['loss']:.4f}",
+                lr=f"{optimizer.param_groups[0]['lr']:.1e}",
+            )
 
         if val_m["loss"] < best_val:
             best_val = val_m["loss"]
@@ -575,11 +615,17 @@ def train_model(
 
 # ── Evaluation ─────────────────────────────────────────────────────────
 
+
 @torch.no_grad()
 def predict_all(model, dataset, device, batch_size=128):
     model.eval()
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False,
-                        collate_fn=collate_fn, num_workers=0)
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_fn,
+        num_workers=0,
+    )
     out = {k: [] for k in ("cif", "event_idxs", "time_bins", "censored", "stage_idxs")}
 
     for batch in loader:
@@ -645,7 +691,11 @@ def compute_brier_score(preds: dict, eval_bin: int) -> float:
             continue  # censored before horizon
         n += 1
         for k in range(N_STATES):
-            indicator = 1.0 if (not cens[i] and events[i] == k and tbins[i] <= eval_bin) else 0.0
+            indicator = (
+                1.0
+                if (not cens[i] and events[i] == k and tbins[i] <= eval_bin)
+                else 0.0
+            )
             pred = cif[i, k, min(eval_bin, N_TIME_BINS - 1)]
             bs += (indicator - pred) ** 2
 
@@ -667,6 +717,7 @@ def compute_ibs(preds: dict) -> float:
 
 
 # ── Cross-Validation ──────────────────────────────────────────────────
+
 
 @dataclass
 class DeepHitResult:
@@ -714,10 +765,14 @@ def cross_validate(
     n_events_total = sum(1 for e in episodes if not e.censored)
 
     if verbose:
-        print(f"  Episodes: {len(episodes)} ({n_events_total} events, "
-              f"{len(episodes) - n_events_total} censored)")
-        print(f"  Input dim: {input_dim} ({len(ALL_FEATURES)} features "
-              f"+ {len(FEATURES_WITH_MISSING)} masks)")
+        print(
+            f"  Episodes: {len(episodes)} ({n_events_total} events, "
+            f"{len(episodes) - n_events_total} censored)"
+        )
+        print(
+            f"  Input dim: {input_dim} ({len(ALL_FEATURES)} features "
+            f"+ {len(FEATURES_WITH_MISSING)} masks)"
+        )
 
     # Patient-level stratification
     pat_info: dict[int, tuple[int, bool]] = {}
@@ -764,14 +819,23 @@ def cross_validate(
 
         torch.manual_seed(seed + fi)
         model = DynamicDeepHit(
-            input_dim=input_dim, hidden_dim=hidden_dim,
-            n_gru_layers=n_gru_layers, dropout=dropout,
+            input_dim=input_dim,
+            hidden_dim=hidden_dim,
+            n_gru_layers=n_gru_layers,
+            dropout=dropout,
         ).to(device)
 
         history, best_val, best_state = train_model(
-            model, train_ds, val_ds, device,
-            n_epochs=n_epochs, batch_size=batch_size, lr=lr,
-            patience=patience, alpha=alpha, verbose=False,
+            model,
+            train_ds,
+            val_ds,
+            device,
+            n_epochs=n_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            patience=patience,
+            alpha=alpha,
+            verbose=False,
         )
 
         preds = predict_all(model, test_ds, device)
@@ -786,31 +850,38 @@ def cross_validate(
         # Save per-fold checkpoint for downstream papers (4, 5, Ch.5)
         if checkpoint_dir is not None:
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
-            torch.save({
-                "model_state_dict": best_state,
-                "input_dim": input_dim,
-                "hidden_dim": hidden_dim,
-                "n_gru_layers": n_gru_layers,
-                "dropout": dropout,
-                "n_causes": N_STATES,
-                "n_time_bins": N_TIME_BINS,
-                "means": means,
-                "stds": stds,
-                "train_pats": sorted(atrain_pats),
-                "val_pats": sorted(val_pats),
-                "test_pats": sorted(test_pats),
-                "col_names": col_names,
-                "fold_idx": fi,
-                "fold_ctd": ctd,
-                "fold_ibs": ibs,
-                "seed": seed,
-            }, checkpoint_dir / f"fold{fi}_deephit.pt")
+            torch.save(
+                {
+                    "model_state_dict": best_state,
+                    "input_dim": input_dim,
+                    "hidden_dim": hidden_dim,
+                    "n_gru_layers": n_gru_layers,
+                    "dropout": dropout,
+                    "n_causes": N_STATES,
+                    "n_time_bins": N_TIME_BINS,
+                    "means": means,
+                    "stds": stds,
+                    "train_pats": sorted(atrain_pats),
+                    "val_pats": sorted(val_pats),
+                    "test_pats": sorted(test_pats),
+                    "col_names": col_names,
+                    "fold_idx": fi,
+                    "fold_ctd": ctd,
+                    "fold_ibs": ibs,
+                    "seed": seed,
+                },
+                checkpoint_dir / f"fold{fi}_deephit.pt",
+            )
             if verbose:
-                tqdm.write(f"  Checkpoint saved: {checkpoint_dir / f'fold{fi}_deephit.pt'}")
+                tqdm.write(
+                    f"  Checkpoint saved: {checkpoint_dir / f'fold{fi}_deephit.pt'}"
+                )
 
         if verbose:
-            tqdm.write(f"  Fold {fi+1}: C-td={ctd:.4f}  IBS={ibs:.4f}  "
-                       f"val_loss={best_val:.4f}  epochs={len(history['train_loss'])}")
+            tqdm.write(
+                f"  Fold {fi + 1}: C-td={ctd:.4f}  IBS={ibs:.4f}  "
+                f"val_loss={best_val:.4f}  epochs={len(history['train_loss'])}"
+            )
 
     # Aggregate metrics
     eval_horizons = {"1yr": 12, "2yr": 24, "5yr": 60, "10yr": 120}
@@ -837,10 +908,16 @@ def cross_validate(
         n_events=n_events_total,
         n_censored=len(episodes) - n_events_total,
         hyperparams={
-            "hidden_dim": hidden_dim, "n_gru_layers": n_gru_layers,
-            "n_epochs": n_epochs, "batch_size": batch_size,
-            "lr": lr, "dropout": dropout, "alpha": alpha,
-            "patience": patience, "n_folds": n_folds, "input_dim": input_dim,
+            "hidden_dim": hidden_dim,
+            "n_gru_layers": n_gru_layers,
+            "n_epochs": n_epochs,
+            "batch_size": batch_size,
+            "lr": lr,
+            "dropout": dropout,
+            "alpha": alpha,
+            "patience": patience,
+            "n_folds": n_folds,
+            "input_dim": input_dim,
         },
     )
 
@@ -884,10 +961,11 @@ def _per_transition_ctd(all_preds: list[dict]) -> dict[str, float]:
 
 # ── Checkpoint Loading ─────────────────────────────────────────────────
 
+
 def load_deephit_checkpoint(
     path: Path,
     device: torch.device | None = None,
-) -> tuple["DynamicDeepHit", dict]:
+) -> tuple[DynamicDeepHit, dict]:
     """Load a per-fold DeepHit checkpoint saved by cross_validate().
 
     Args:
@@ -914,13 +992,16 @@ def load_deephit_checkpoint(
 
 # ── Save ──────────────────────────────────────────────────────────────
 
+
 def save_deephit_results(result: DeepHitResult, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     d = {
-        "c_td": result.c_td, "c_td_std": result.c_td_std,
+        "c_td": result.c_td,
+        "c_td_std": result.c_td_std,
         "c_td_per_fold": result.c_td_per_fold,
-        "ibs": result.ibs, "ibs_std": result.ibs_std,
+        "ibs": result.ibs,
+        "ibs_std": result.ibs_std,
         "ibs_per_fold": result.ibs_per_fold,
         "brier_at_horizons": result.brier_at_horizons,
         "per_transition_ctd": result.per_transition_ctd,
@@ -935,9 +1016,8 @@ def save_deephit_results(result: DeepHitResult, output_dir: Path):
         json.dump(d, f, indent=2, default=str)
 
     if result.per_transition_ctd:
-        pd.DataFrame([
-            {"transition": k, "c_td": v}
-            for k, v in result.per_transition_ctd.items()
-        ]).to_csv(output_dir / "per_transition_ctd.csv", index=False)
+        pd.DataFrame(
+            [{"transition": k, "c_td": v} for k, v in result.per_transition_ctd.items()]
+        ).to_csv(output_dir / "per_transition_ctd.csv", index=False)
 
     print(f"  Results saved to {output_dir}")

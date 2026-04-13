@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Paper 3, Step 3: Assemble per-visit longitudinal features for temporal modeling.
+"""Paper 3, Step 3: Assemble per-visit longitudinal features for temporal modeling.
 
 Creates time-varying feature vectors for each patient at each visit, combining:
   - Static features: demographics (age, sex), genetics (LRRK2, GBA, SNCA)
@@ -41,11 +40,50 @@ STAGING_CSV = DATA_ROOT / "06_longitudinal_staging" / "longitudinal_nsd_iss.csv"
 OUTPUT_DIR = DATA_ROOT / "07_paper3_features"
 
 VALID_EVENTS = {
-    "SC", "BL", "V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08",
-    "V09", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18",
-    "V19", "V20", "V21", "V22", "ST", "U01", "U02",
-    "R01", "R04", "R06", "R08", "R10", "R12", "R13", "R14", "R15",
-    "R16", "R17", "R18", "R19", "R20", "RS1", "SC99", "PW",
+    "SC",
+    "BL",
+    "V01",
+    "V02",
+    "V03",
+    "V04",
+    "V05",
+    "V06",
+    "V07",
+    "V08",
+    "V09",
+    "V10",
+    "V11",
+    "V12",
+    "V13",
+    "V14",
+    "V15",
+    "V16",
+    "V17",
+    "V18",
+    "V19",
+    "V20",
+    "V21",
+    "V22",
+    "ST",
+    "U01",
+    "U02",
+    "R01",
+    "R04",
+    "R06",
+    "R08",
+    "R10",
+    "R12",
+    "R13",
+    "R14",
+    "R15",
+    "R16",
+    "R17",
+    "R18",
+    "R19",
+    "R20",
+    "RS1",
+    "SC99",
+    "PW",
 }
 
 
@@ -54,8 +92,12 @@ def find_latest(pattern: str) -> Path | None:
     return candidates[-1] if candidates else None
 
 
-def load_assessment(pattern: str, total_col: str | None, item_cols: list[str] | None,
-                    compute_total_name: str | None = None) -> pd.DataFrame:
+def load_assessment(
+    pattern: str,
+    total_col: str | None,
+    item_cols: list[str] | None,
+    compute_total_name: str | None = None,
+) -> pd.DataFrame:
     """Generic loader for per-visit clinical assessments.
 
     Args:
@@ -107,68 +149,110 @@ def load_all_assessments() -> dict[str, pd.DataFrame]:
 
     # UPDRS Part I (non-motor) — avoid matching the "Online" version
     # Try specific date-pattern first, fall back to item-sum
-    np1_items = ["NP1COG", "NP1HALL", "NP1DPRS", "NP1ANXS", "NP1APAT", "NP1DDS",
-                 "NP1SLPN", "NP1SLPD", "NP1PAIN", "NP1URIN", "NP1CNST", "NP1LTHD", "NP1FATG"]
+    np1_items = [
+        "NP1COG",
+        "NP1HALL",
+        "NP1DPRS",
+        "NP1ANXS",
+        "NP1APAT",
+        "NP1DDS",
+        "NP1SLPN",
+        "NP1SLPD",
+        "NP1PAIN",
+        "NP1URIN",
+        "NP1CNST",
+        "NP1LTHD",
+        "NP1FATG",
+    ]
     assessments["updrs1"] = load_assessment(
-        "MDS-UPDRS_Part_I_[0-9]*.csv", total_col="NP1RTOT",
-        item_cols=np1_items, compute_total_name="updrs1_total"
+        "MDS-UPDRS_Part_I_[0-9]*.csv",
+        total_col="NP1RTOT",
+        item_cols=np1_items,
+        compute_total_name="updrs1_total",
     )
     if not assessments["updrs1"].empty:
         if "NP1RTOT" in assessments["updrs1"].columns:
-            assessments["updrs1"] = assessments["updrs1"].rename(columns={"NP1RTOT": "updrs1_total"})
+            assessments["updrs1"] = assessments["updrs1"].rename(
+                columns={"NP1RTOT": "updrs1_total"}
+            )
 
     # UPDRS Part II (ADL/motor) — already loaded in staging, but get it independently
     assessments["updrs2"] = load_assessment(
         "MDS_UPDRS_Part_II*Patient*.csv", total_col="NP2PTOT", item_cols=None
     )
     if not assessments["updrs2"].empty:
-        assessments["updrs2"] = assessments["updrs2"].rename(columns={"NP2PTOT": "updrs2_total"})
+        assessments["updrs2"] = assessments["updrs2"].rename(
+            columns={"NP2PTOT": "updrs2_total"}
+        )
 
     # UPDRS Part IV (motor complications)
     assessments["updrs4"] = load_assessment(
         "MDS-UPDRS_Part_IV*Motor*.csv", total_col="NP4TOT", item_cols=None
     )
     if not assessments["updrs4"].empty:
-        assessments["updrs4"] = assessments["updrs4"].rename(columns={"NP4TOT": "updrs4_total"})
+        assessments["updrs4"] = assessments["updrs4"].rename(
+            columns={"NP4TOT": "updrs4_total"}
+        )
 
     # MoCA (cognitive)
     assessments["moca"] = load_assessment(
         "Montreal_Cognitive*MoCA*.csv", total_col="MCATOT", item_cols=None
     )
     if not assessments["moca"].empty:
-        assessments["moca"] = assessments["moca"].rename(columns={"MCATOT": "moca_total"})
+        assessments["moca"] = assessments["moca"].rename(
+            columns={"MCATOT": "moca_total"}
+        )
 
     # Epworth Sleepiness Scale
     ess_items = [f"ESS{i}" for i in range(1, 9)]
     assessments["ess"] = load_assessment(
-        "Epworth_Sleepiness*.csv", total_col=None,
-        item_cols=ess_items, compute_total_name="ess_total"
+        "Epworth_Sleepiness*.csv",
+        total_col=None,
+        item_cols=ess_items,
+        compute_total_name="ess_total",
     )
 
     # REM Sleep Behavior Disorder
     rbd_items = [
-        "DRMVIVID", "DRMAGRAC", "DRMNOCTB", "SLPLMBMV", "SLPINJUR",
-        "DRMVERBL", "DRMFIGHT", "DRMUMV", "DRMOBJFL", "MVAWAKEN",
-        "DRMREMEM", "SLPDSTRB",
+        "DRMVIVID",
+        "DRMAGRAC",
+        "DRMNOCTB",
+        "SLPLMBMV",
+        "SLPINJUR",
+        "DRMVERBL",
+        "DRMFIGHT",
+        "DRMUMV",
+        "DRMOBJFL",
+        "MVAWAKEN",
+        "DRMREMEM",
+        "SLPDSTRB",
     ]
     assessments["rbd"] = load_assessment(
-        "REM_Sleep_Behavior_Disorder_Questionnaire_*.csv", total_col=None,
-        item_cols=rbd_items, compute_total_name="rbd_total"
+        "REM_Sleep_Behavior_Disorder_Questionnaire_*.csv",
+        total_col=None,
+        item_cols=rbd_items,
+        compute_total_name="rbd_total",
     )
 
     # SCOPA-AUT (autonomic)
     scau_items = [f"SCAU{i}" for i in range(1, 23)]  # SCAU1-SCAU22
     assessments["scopa"] = load_assessment(
-        "SCOPA-AUT_*.csv", total_col=None,
-        item_cols=scau_items, compute_total_name="scopa_aut_total"
+        "SCOPA-AUT_*.csv",
+        total_col=None,
+        item_cols=scau_items,
+        compute_total_name="scopa_aut_total",
     )
 
     # UPSIT (olfaction)
     assessments["upsit"] = load_assessment(
-        "University_of_Pennsylvania*UPSIT*.csv", total_col="TOTAL_CORRECT", item_cols=None
+        "University_of_Pennsylvania*UPSIT*.csv",
+        total_col="TOTAL_CORRECT",
+        item_cols=None,
     )
     if not assessments["upsit"].empty:
-        assessments["upsit"] = assessments["upsit"].rename(columns={"TOTAL_CORRECT": "upsit_total"})
+        assessments["upsit"] = assessments["upsit"].rename(
+            columns={"TOTAL_CORRECT": "upsit_total"}
+        )
 
     return assessments
 
@@ -180,11 +264,15 @@ def load_demographics() -> pd.DataFrame:
         return pd.DataFrame(columns=["PATNO", "sex", "handed"])
 
     df = pd.read_csv(path, low_memory=False)
-    out = pd.DataFrame({
-        "PATNO": df["PATNO"].astype(int),
-        "sex": pd.to_numeric(df.get("SEX", df.get("GENDER")), errors="coerce"),
-        "handed": pd.to_numeric(df.get("HANDED", df.get("HANDEDNESS")), errors="coerce"),
-    })
+    out = pd.DataFrame(
+        {
+            "PATNO": df["PATNO"].astype(int),
+            "sex": pd.to_numeric(df.get("SEX", df.get("GENDER")), errors="coerce"),
+            "handed": pd.to_numeric(
+                df.get("HANDED", df.get("HANDEDNESS")), errors="coerce"
+            ),
+        }
+    )
     out = out.drop_duplicates("PATNO", keep="first")
     logger.info(f"Demographics: {len(out)} patients")
     return out
@@ -194,17 +282,27 @@ def load_genetics() -> pd.DataFrame:
     """Load genetic carrier status (static, patient-level)."""
     path = find_latest("iu_genetic_consensus_*.csv")
     if path is None:
-        return pd.DataFrame(columns=["PATNO", "lrrk2_carrier", "gba_carrier", "snca_carrier"])
+        return pd.DataFrame(
+            columns=["PATNO", "lrrk2_carrier", "gba_carrier", "snca_carrier"]
+        )
 
     df = pd.read_csv(path, low_memory=False)
-    out = pd.DataFrame({
-        "PATNO": df["PATNO"].astype(int),
-    })
+    out = pd.DataFrame(
+        {
+            "PATNO": df["PATNO"].astype(int),
+        }
+    )
 
-    for gene, col_name in [("LRRK2", "lrrk2_carrier"), ("GBA", "gba_carrier"),
-                           ("SNCA", "snca_carrier"), ("APOE", "apoe_e4")]:
+    for gene, col_name in [
+        ("LRRK2", "lrrk2_carrier"),
+        ("GBA", "gba_carrier"),
+        ("SNCA", "snca_carrier"),
+        ("APOE", "apoe_e4"),
+    ]:
         if gene in df.columns:
-            out[col_name] = pd.to_numeric(df[gene], errors="coerce").fillna(0).astype(int)
+            out[col_name] = (
+                pd.to_numeric(df[gene], errors="coerce").fillna(0).astype(int)
+            )
 
     out = out.drop_duplicates("PATNO", keep="first")
     logger.info(f"Genetics: {len(out)} patients")
@@ -220,14 +318,16 @@ def load_datscan_features() -> pd.DataFrame:
     df = pd.read_csv(path, low_memory=False)
     df = df[df["EVENT_ID"].isin(VALID_EVENTS)].copy()
 
-    out = pd.DataFrame({
-        "PATNO": df["PATNO"].astype(int),
-        "EVENT_ID": df["EVENT_ID"],
-        "caudate_r_sbr": pd.to_numeric(df["DATSCAN_CAUDATE_R"], errors="coerce"),
-        "caudate_l_sbr": pd.to_numeric(df["DATSCAN_CAUDATE_L"], errors="coerce"),
-        "putamen_r_sbr": pd.to_numeric(df["DATSCAN_PUTAMEN_R"], errors="coerce"),
-        "putamen_l_sbr": pd.to_numeric(df["DATSCAN_PUTAMEN_L"], errors="coerce"),
-    })
+    out = pd.DataFrame(
+        {
+            "PATNO": df["PATNO"].astype(int),
+            "EVENT_ID": df["EVENT_ID"],
+            "caudate_r_sbr": pd.to_numeric(df["DATSCAN_CAUDATE_R"], errors="coerce"),
+            "caudate_l_sbr": pd.to_numeric(df["DATSCAN_CAUDATE_L"], errors="coerce"),
+            "putamen_r_sbr": pd.to_numeric(df["DATSCAN_PUTAMEN_R"], errors="coerce"),
+            "putamen_l_sbr": pd.to_numeric(df["DATSCAN_PUTAMEN_L"], errors="coerce"),
+        }
+    )
 
     out["caudate_mean_sbr"] = (out["caudate_r_sbr"] + out["caudate_l_sbr"]) / 2
     out["putamen_mean_sbr"] = (out["putamen_r_sbr"] + out["putamen_l_sbr"]) / 2
@@ -236,13 +336,19 @@ def load_datscan_features() -> pd.DataFrame:
     )
 
     out = out.drop_duplicates(subset=["PATNO", "EVENT_ID"], keep="last")
-    logger.info(f"DaTScan features: {len(out)} scans, {out['PATNO'].nunique()} patients")
+    logger.info(
+        f"DaTScan features: {len(out)} scans, {out['PATNO'].nunique()} patients"
+    )
     return out
 
 
-def merge_features(staging_df: pd.DataFrame, assessments: dict,
-                   demographics: pd.DataFrame, genetics: pd.DataFrame,
-                   datscan: pd.DataFrame) -> pd.DataFrame:
+def merge_features(
+    staging_df: pd.DataFrame,
+    assessments: dict,
+    demographics: pd.DataFrame,
+    genetics: pd.DataFrame,
+    datscan: pd.DataFrame,
+) -> pd.DataFrame:
     """Merge all features onto the staging backbone (patient x visit)."""
     df = staging_df.copy()
     n_start = len(df)
@@ -257,7 +363,12 @@ def merge_features(staging_df: pd.DataFrame, assessments: dict,
             logger.info(f"  Skipping {name} (empty)")
             continue
         n_before = df.shape[1]
-        df = df.merge(assess_df, on=["PATNO", "EVENT_ID"], how="left", suffixes=("", f"_{name}_dup"))
+        df = df.merge(
+            assess_df,
+            on=["PATNO", "EVENT_ID"],
+            how="left",
+            suffixes=("", f"_{name}_dup"),
+        )
         n_after = df.shape[1]
         # Drop any duplicate columns from merge
         dup_cols = [c for c in df.columns if c.endswith("_dup")]
@@ -268,7 +379,7 @@ def merge_features(staging_df: pd.DataFrame, assessments: dict,
     # Merge DaTScan features (sparse — only at scan visits)
     if not datscan.empty:
         df = df.merge(datscan, on=["PATNO", "EVENT_ID"], how="left")
-        logger.info(f"  Merged DaTScan features")
+        logger.info("  Merged DaTScan features")
 
     assert len(df) == n_start, f"Row count changed: {n_start} -> {len(df)}"
     return df
@@ -293,16 +404,26 @@ def compute_derived_features(df: pd.DataFrame) -> pd.DataFrame:
                 stage_start_month = months[i]
             durations[i] = months[i] - stage_start_month
 
-        for idx, dur in zip(group.index, durations):
+        for idx, dur in zip(group.index, durations, strict=False):
             time_in_stage.append((idx, dur))
 
-    tis_df = pd.DataFrame(time_in_stage, columns=["idx", "time_in_current_stage_months"])
+    tis_df = pd.DataFrame(
+        time_in_stage, columns=["idx", "time_in_current_stage_months"]
+    )
     tis_df = tis_df.set_index("idx")
     df["time_in_current_stage_months"] = tis_df["time_in_current_stage_months"]
 
     # --- Delta features (change from prior visit) ---
-    score_cols = ["updrs3_total", "updrs2_total", "updrs1_total", "updrs4_total",
-                  "moca_total", "ess_total", "hy_stage", "scopa_aut_total"]
+    score_cols = [
+        "updrs3_total",
+        "updrs2_total",
+        "updrs1_total",
+        "updrs4_total",
+        "moca_total",
+        "ess_total",
+        "hy_stage",
+        "scopa_aut_total",
+    ]
     for col in score_cols:
         if col in df.columns:
             df[f"delta_{col}"] = df.groupby("PATNO")[col].diff()
@@ -311,7 +432,9 @@ def compute_derived_features(df: pd.DataFrame) -> pd.DataFrame:
     df["visit_number"] = df.groupby("PATNO").cumcount()
 
     # --- Age at baseline (static) ---
-    bl_ages = df[df["months_from_baseline"] == 0].groupby("PATNO")["age_at_visit"].first()
+    bl_ages = (
+        df[df["months_from_baseline"] == 0].groupby("PATNO")["age_at_visit"].first()
+    )
     df["age_at_baseline"] = df["PATNO"].map(bl_ages)
 
     # --- Disease duration proxy (months from baseline) ---
@@ -329,7 +452,9 @@ def main():
     staging = pd.read_csv(STAGING_CSV)
     staging["nsd_stage"] = staging["nsd_stage"].astype(str)
     staging["PATNO"] = staging["PATNO"].astype(int)
-    print(f"Staging backbone: {len(staging)} observations, {staging['PATNO'].nunique()} patients")
+    print(
+        f"Staging backbone: {len(staging)} observations, {staging['PATNO'].nunique()} patients"
+    )
 
     # Load all data sources
     print("\n--- Loading Clinical Assessments ---")
@@ -352,10 +477,20 @@ def main():
 
     # Summary
     print("\n--- Feature Summary ---")
-    feature_cols = [c for c in df.columns if c not in [
-        "PATNO", "EVENT_ID", "nsd_stage", "nsd_stage_numeric",
-        "datscan_event", "confidence", "cohort",
-    ]]
+    feature_cols = [
+        c
+        for c in df.columns
+        if c
+        not in [
+            "PATNO",
+            "EVENT_ID",
+            "nsd_stage",
+            "nsd_stage_numeric",
+            "datscan_event",
+            "confidence",
+            "cohort",
+        ]
+    ]
     print(f"Total features: {len(feature_cols)}")
     print(f"Total observations: {len(df)}")
     print(f"Unique patients: {df['PATNO'].nunique()}")

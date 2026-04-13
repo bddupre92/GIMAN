@@ -678,10 +678,15 @@ def _figure12_counterfactual(output_path: Path) -> None:
         py = ROOT / ".venv/bin/python"
         if not py.exists():
             py = Path(sys.executable)
-        _run([
-            str(py),
-            str(ROOT / "archive/development/phase8/subphase8_2_dynamic_endpoints/run_counterfactual_analysis.py"),
-        ])
+        _run(
+            [
+                str(py),
+                str(
+                    ROOT
+                    / "archive/development/phase8/subphase8_2_dynamic_endpoints/run_counterfactual_analysis.py"
+                ),
+            ]
+        )
 
 
 def _figure13_tipping(output_path: Path) -> None:

@@ -179,15 +179,17 @@ def download_cohort(client, cohort_key: str) -> dict[str, pd.DataFrame]:
     """
     study_name = COHORT_STUDY_NAMES.get(cohort_key)
     if not study_name:
-        logger.error(f"Unknown cohort: {cohort_key}. Available: {list(COHORT_STUDY_NAMES.keys())}")
+        logger.error(
+            f"Unknown cohort: {cohort_key}. Available: {list(COHORT_STUDY_NAMES.keys())}"
+        )
         return {}
 
     cohort_dir = OUTPUT_BASE / cohort_key
     cohort_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info(f"\n{'='*50}")
+    logger.info(f"\n{'=' * 50}")
     logger.info(f"Downloading {study_name} ({cohort_key})")
-    logger.info(f"{'='*50}")
+    logger.info(f"{'=' * 50}")
 
     results = {}
     for table_name in TABLES:
@@ -247,6 +249,7 @@ def main():
 
     try:
         from google.cloud import bigquery
+
         client = bigquery.Client(project=BQ_PROJECT)
     except ImportError:
         logger.error(

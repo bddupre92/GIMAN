@@ -46,28 +46,55 @@ logger = logging.getLogger("paper2")
 
 # ── Normalization / loss imports (from GIMIN codebase) ──────────────
 from gimin.config import GIMINConfig
-from gimin.data.scaler import ModalityAwareScaler, build_scaler_from_config
+from gimin.data.scaler import build_scaler_from_config
 from gimin.training.losses import GIMINLoss
-
 
 # ── NSD-ISS stage encoding ──────────────────────────────────────────
 STAGE_MAP = {"0": 0, "1": 1, "2B": 2, "3": 3, "4": 4, "unclassified": 5}
-STAGE_NAMES = {0: "Stage 0", 1: "Stage 1", 2: "Stage 2B", 3: "Stage 3",
-               4: "Stage 4", 5: "Unknown"}
+STAGE_NAMES = {
+    0: "Stage 0",
+    1: "Stage 1",
+    2: "Stage 2B",
+    3: "Stage 3",
+    4: "Stage 4",
+    5: "Unknown",
+}
 
 # GIMIN config: 33 features after dropping zero-variance columns
 KEEP_FEATURES = [
-    "SEX", "AGE_AT_VISIT",
-    "NP3TOT", "NHY", "PIGD_SCORE", "TREMOR_SCORE", "MCATOT",
-    "CAUDATE_L_VOL", "CAUDATE_R_VOL", "PUTAMEN_L_VOL", "PUTAMEN_R_VOL",
-    "HIPPOCAMPUS_L_VOL", "HIPPOCAMPUS_R_VOL",
-    "CAUDATE_L_SBR", "CAUDATE_R_SBR", "PUTAMEN_L_SBR", "PUTAMEN_R_SBR",
-    "CAUDATE_ASYMMETRY", "PUTAMEN_ASYMMETRY",
-    "ALPHA_SYNUCLEIN", "TOTAL_TAU", "ABETA42", "PTAU181",
-    "UPSIT_TOTAL", "RBD_TOTAL", "SCOPA_AUT_TOTAL", "ESS_TOTAL",
-    "ENTORHINAL_L_CTH", "ENTORHINAL_R_CTH",
-    "CINGULATE_L_CTH", "CINGULATE_R_CTH",
-    "PRECENTRAL_L_CTH", "PRECENTRAL_R_CTH",
+    "SEX",
+    "AGE_AT_VISIT",
+    "NP3TOT",
+    "NHY",
+    "PIGD_SCORE",
+    "TREMOR_SCORE",
+    "MCATOT",
+    "CAUDATE_L_VOL",
+    "CAUDATE_R_VOL",
+    "PUTAMEN_L_VOL",
+    "PUTAMEN_R_VOL",
+    "HIPPOCAMPUS_L_VOL",
+    "HIPPOCAMPUS_R_VOL",
+    "CAUDATE_L_SBR",
+    "CAUDATE_R_SBR",
+    "PUTAMEN_L_SBR",
+    "PUTAMEN_R_SBR",
+    "CAUDATE_ASYMMETRY",
+    "PUTAMEN_ASYMMETRY",
+    "ALPHA_SYNUCLEIN",
+    "TOTAL_TAU",
+    "ABETA42",
+    "PTAU181",
+    "UPSIT_TOTAL",
+    "RBD_TOTAL",
+    "SCOPA_AUT_TOTAL",
+    "ESS_TOTAL",
+    "ENTORHINAL_L_CTH",
+    "ENTORHINAL_R_CTH",
+    "CINGULATE_L_CTH",
+    "CINGULATE_R_CTH",
+    "PRECENTRAL_L_CTH",
+    "PRECENTRAL_R_CTH",
 ]
 
 MODALITY_DIMS = [2, 5, 6, 6, 4, 4, 6]  # 33 total
@@ -76,7 +103,9 @@ MODALITY_DIMS = [2, 5, 6, 6, 4, 4, 6]  # 33 total
 def parse_args():
     parser = argparse.ArgumentParser(description="Paper 2 imputation benchmark")
     parser.add_argument(
-        "--mask-fractions", nargs="+", type=float,
+        "--mask-fractions",
+        nargs="+",
+        type=float,
         default=[0.1, 0.2, 0.3, 0.5],
         help="Artificial missingness fractions for evaluation",
     )
@@ -85,23 +114,31 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
-        "--skip-baselines", action="store_true",
+        "--skip-baselines",
+        action="store_true",
         help="Skip classical baselines (Mean, Median, KNN, MICE, MissForest)",
     )
     parser.add_argument(
-        "--skip-gimin", action="store_true",
+        "--skip-gimin",
+        action="store_true",
         help="Skip GIMIN models (for fast baseline-only runs)",
     )
     parser.add_argument(
-        "--run-name", type=str, default=None,
+        "--run-name",
+        type=str,
+        default=None,
         help="Name for this run (default: auto-generated timestamp)",
     )
     parser.add_argument(
-        "--save-checkpoints", action="store_true", default=True,
+        "--save-checkpoints",
+        action="store_true",
+        default=True,
         help="Save model checkpoints after training (default: True)",
     )
     parser.add_argument(
-        "--no-save-checkpoints", dest="save_checkpoints", action="store_false",
+        "--no-save-checkpoints",
+        dest="save_checkpoints",
+        action="store_false",
         help="Disable model checkpoint saving",
     )
     return parser.parse_args()
@@ -133,8 +170,11 @@ def load_data():
     staged_patnos = set(staging_valid["PATNO"].values)
 
     logger.info("Full cohort: %d patients", len(features_df))
-    logger.info("Staged patients: %d (excluding %d unclassified)",
-                len(staging_valid), len(staging_df) - len(staging_valid))
+    logger.info(
+        "Staged patients: %d (excluding %d unclassified)",
+        len(staging_valid),
+        len(staging_df) - len(staging_valid),
+    )
 
     # Filter features and mask to staged patients
     staged_mask = features_df.index.isin(staged_patnos)
@@ -145,12 +185,15 @@ def load_data():
     features_staged = features_staged.reset_index()
     features_staged = features_staged.merge(
         staging_valid[["PATNO", "stage_encoded", "nsd_iss_stage"]],
-        on="PATNO", how="inner",
+        on="PATNO",
+        how="inner",
     )
 
     logger.info("Matched: %d patients with stages", len(features_staged))
-    logger.info("Stage distribution:\n%s",
-                features_staged["stage_encoded"].value_counts().sort_index())
+    logger.info(
+        "Stage distribution:\n%s",
+        features_staged["stage_encoded"].value_counts().sort_index(),
+    )
 
     # Filter to KEEP_FEATURES only
     available = [f for f in KEEP_FEATURES if f in features_staged.columns]
@@ -164,7 +207,9 @@ def load_data():
     mask_staged_reindexed = mask_staged.reset_index()
     # Merge to align mask with features_staged order
     mask_merged = features_staged[["PATNO"]].merge(
-        mask_staged_reindexed, on="PATNO", how="inner",
+        mask_staged_reindexed,
+        on="PATNO",
+        how="inner",
     )
     mask_np = mask_merged[available].values.astype(np.float32)
 
@@ -172,7 +217,8 @@ def load_data():
 
     logger.info(
         "Data loaded: %d patients, %d features, %.1f%% missing",
-        features_np.shape[0], features_np.shape[1],
+        features_np.shape[0],
+        features_np.shape[1],
         100 * (1 - mask_np.mean()),
     )
 
@@ -202,11 +248,13 @@ def evaluate_imputation(
         return {"rmse": float("nan"), "mae": float("nan"), "r2": float("nan")}
 
     errors = imputed[eval_positions] - true_values[eval_positions]
-    rmse = float(np.sqrt(np.mean(errors ** 2)))
+    rmse = float(np.sqrt(np.mean(errors**2)))
     mae = float(np.mean(np.abs(errors)))
 
-    ss_res = np.sum(errors ** 2)
-    ss_tot = np.sum((true_values[eval_positions] - true_values[eval_positions].mean()) ** 2)
+    ss_res = np.sum(errors**2)
+    ss_tot = np.sum(
+        (true_values[eval_positions] - true_values[eval_positions].mean()) ** 2
+    )
     r2 = float(1 - ss_res / max(ss_tot, 1e-10))
 
     # Per-feature RMSE
@@ -216,7 +264,7 @@ def evaluate_imputation(
         f_mask = eval_mask[:, f] > 0
         if f_mask.sum() > 0:
             f_err = imputed[f_mask, f] - true_values[f_mask, f]
-            per_feature_rmse.append(float(np.sqrt(np.mean(f_err ** 2))))
+            per_feature_rmse.append(float(np.sqrt(np.mean(f_err**2))))
         else:
             per_feature_rmse.append(float("nan"))
 
@@ -227,7 +275,7 @@ def evaluate_imputation(
         s_eval = eval_mask[s_mask]
         if s_eval.sum() > 0:
             s_err = imputed[s_mask][s_eval > 0] - true_values[s_mask][s_eval > 0]
-            per_stage_rmse[int(stage_id)] = float(np.sqrt(np.mean(s_err ** 2)))
+            per_stage_rmse[int(stage_id)] = float(np.sqrt(np.mean(s_err**2)))
 
     return {
         "rmse": rmse,
@@ -277,6 +325,7 @@ def create_artificial_mask(
 
 # ── Baseline imputation methods ────────────────────────────────────
 
+
 def run_baselines(
     features: np.ndarray,
     mask: np.ndarray,
@@ -291,8 +340,8 @@ def run_baselines(
         MeanBaseline,
         MedianBaseline,
         MICEBaseline,
-        MIWAEBaseline,
         MissForestBaseline,
+        MIWAEBaseline,
         SAITSBaseline,
     )
 
@@ -311,7 +360,12 @@ def run_baselines(
         ("MissForest", MissForestBaseline(max_iter=10, n_estimators=100)),
         # Deep learning baselines
         ("GAIN", GAINBaseline(n_epochs=100, batch_size=128, hint_rate=0.9)),
-        ("SAITS", SAITSBaseline(n_layers=2, d_model=64, n_heads=4, d_ffn=64, epochs=50, patience=5)),
+        (
+            "SAITS",
+            SAITSBaseline(
+                n_layers=2, d_model=64, n_heads=4, d_ffn=64, epochs=50, patience=5
+            ),
+        ),
         ("MIWAE", MIWAEBaseline(n_epochs=100, batch_size=128)),
     ]:
         logger.info("Running baseline: %s", name)
@@ -324,7 +378,11 @@ def run_baselines(
             results[name] = metrics
             logger.info(
                 "  %s: RMSE=%.4f, MAE=%.4f, R²=%.4f (%.1fs)",
-                name, metrics["rmse"], metrics["mae"], metrics["r2"], elapsed,
+                name,
+                metrics["rmse"],
+                metrics["mae"],
+                metrics["r2"],
+                elapsed,
             )
         except Exception as e:
             logger.error("  %s failed: %s", name, e)
@@ -334,6 +392,7 @@ def run_baselines(
 
 
 # ── GIMIN training helpers ──────────────────────────────────────────
+
 
 def build_gimin_config():
     """Build a GIMINConfig matching the Paper 2 feature set.
@@ -380,7 +439,10 @@ def train_gimin_model(
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.5, patience=20,
+        optimizer,
+        mode="min",
+        factor=0.5,
+        patience=20,
     )
 
     # Build composite loss with all 4 terms
@@ -447,14 +509,16 @@ def train_gimin_model(
         optimizer.step()
         scheduler.step(loss.item())
 
-        history.append({
-            "epoch": epoch,
-            "loss": round(loss.item(), 6),
-            "recon": round(losses["reconstruction"].item(), 6),
-            "dist": round(losses["distribution"].item(), 6),
-            "cross": round(losses["cross_modal"].item(), 6),
-            "cal": round(losses["calibration"].item(), 6),
-        })
+        history.append(
+            {
+                "epoch": epoch,
+                "loss": round(loss.item(), 6),
+                "recon": round(losses["reconstruction"].item(), 6),
+                "dist": round(losses["distribution"].item(), 6),
+                "cross": round(losses["cross_modal"].item(), 6),
+                "cal": round(losses["calibration"].item(), 6),
+            }
+        )
 
         if loss.item() < best_loss:
             best_loss = loss.item()
@@ -463,13 +527,17 @@ def train_gimin_model(
             patience_counter += 1
 
         if patience_counter >= 40:
-            logger.info("Early stopping at epoch %d (best loss: %.6f)", epoch, best_loss)
+            logger.info(
+                "Early stopping at epoch %d (best loss: %.6f)", epoch, best_loss
+            )
             break
 
         if (epoch + 1) % 50 == 0:
             logger.info(
                 "  Epoch %d/%d: loss=%.4f (recon=%.4f, dist=%.4f, cross=%.4f, cal=%.4f)",
-                epoch + 1, epochs, loss.item(),
+                epoch + 1,
+                epochs,
+                loss.item(),
                 losses["reconstruction"].item(),
                 losses["distribution"].item(),
                 losses["cross_modal"].item(),
@@ -568,19 +636,20 @@ def evaluate_gimin_model(
     # Blend in normalized space: keep observed values, fill missing
     corrupted_np = corrupted_mask_t.cpu().numpy()
     features_norm_np = features_norm_t.cpu().numpy()
-    imputed_norm = features_norm_np * corrupted_np + mean_for_blend * (1.0 - corrupted_np)
+    imputed_norm = features_norm_np * corrupted_np + mean_for_blend * (
+        1.0 - corrupted_np
+    )
 
     # ── Inverse-transform predictions to original scale ──────────
     if scaler is not None:
         mask_np = mask_t.cpu().numpy()
         # Inverse-transform the imputed values back to original scale
         imputed_original = scaler.inverse_transform(
-            imputed_norm, mask=None  # transform ALL positions
+            imputed_norm,
+            mask=None,  # transform ALL positions
         ).numpy()
         # Inverse-transform the mean predictions for conformal calibration
-        mean_pred_original = scaler.inverse_transform(
-            mean_pred_norm, mask=None
-        ).numpy()
+        mean_pred_original = scaler.inverse_transform(mean_pred_norm, mask=None).numpy()
         # Inverse-transform variance to original scale
         total_var_norm = epistemic_var_norm + aleatoric_var_norm
         total_var_original = scaler.inverse_transform_variance(
@@ -609,8 +678,12 @@ def evaluate_gimin_model(
     metrics = evaluate_imputation(
         imputed_original, features_original, eval_mask, stages
     )
-    metrics["epistemic_std_mean"] = float(np.sqrt(np.maximum(epistemic_var_orig, 0)).mean())
-    metrics["aleatoric_std_mean"] = float(np.sqrt(np.maximum(aleatoric_var_orig, 0)).mean())
+    metrics["epistemic_std_mean"] = float(
+        np.sqrt(np.maximum(epistemic_var_orig, 0)).mean()
+    )
+    metrics["aleatoric_std_mean"] = float(
+        np.sqrt(np.maximum(aleatoric_var_orig, 0)).mean()
+    )
     metrics["total_std_mean"] = float(total_std_original.mean())
 
     return metrics, imputed_original, mean_pred_original, total_std_original
@@ -675,6 +748,7 @@ def _save_incremental_results(all_results, summary, run_dir, output_dir):
 
 def main():
     import datetime
+
     args = parse_args()
     np.random.seed(args.seed)
 
@@ -718,7 +792,9 @@ def main():
     print(f"\n  Patients (visits): {N}")
     print(f"  Features: {F}")
     print(f"  Missing: {100 * (1 - mask.mean()):.1f}%")
-    print(f"  Stages: {dict(zip(*np.unique(stages, return_counts=True)))}")
+    print(
+        f"  Stages: {dict(zip(*np.unique(stages, return_counts=True), strict=False))}"
+    )
 
     # ── 2. Data is already filtered to staged patients ──────────────
     # load_data() filtered to 2,197 patients with known NSD-ISS stages.
@@ -728,7 +804,7 @@ def main():
     stages_bl = stages
     N_bl = N
 
-    print(f"\n  Stage distribution:")
+    print("\n  Stage distribution:")
     for s, name in STAGE_NAMES.items():
         count = (stages_bl == s).sum()
         if count > 0:
@@ -747,7 +823,9 @@ def main():
         for run in range(args.num_runs):
             seed = args.seed + run
             corrupted_mask, eval_mask = create_artificial_mask(
-                mask_bl, frac, seed=seed,
+                mask_bl,
+                frac,
+                seed=seed,
             )
 
             run_results = {}
@@ -756,7 +834,11 @@ def main():
             if not args.skip_baselines:
                 logger.info("Run %d/%d: Classical baselines", run + 1, args.num_runs)
                 baseline_results = run_baselines(
-                    features_bl, mask_bl, corrupted_mask, eval_mask, stages_bl,
+                    features_bl,
+                    mask_bl,
+                    corrupted_mask,
+                    eval_mask,
+                    stages_bl,
                 )
                 for name, metrics in baseline_results.items():
                     run_results[name] = metrics
@@ -764,6 +846,7 @@ def main():
             # ── 3b. GIMIN models ──────────────────────────────────
             if not args.skip_gimin:
                 import torch
+
                 from giman_pipeline.imputation.stage_conditioned_gimin import (
                     StageConditionedGIMIN,
                     VanillaGIMIN,
@@ -804,7 +887,9 @@ def main():
 
                 logger.info("Building vanilla graph (on normalized features)...")
                 vanilla_builder = StageAwareGraphBuilder(
-                    k_neighbors=15, min_overlap=3, stage_affinity_beta=0.0,
+                    k_neighbors=15,
+                    min_overlap=3,
+                    stage_affinity_beta=0.0,
                 )
                 vanilla_graph = vanilla_builder.build_full_graph(
                     features_norm_np * corrupted_mask.astype(np.float32),
@@ -814,7 +899,9 @@ def main():
 
                 logger.info("Building stage-aware graph (on normalized features)...")
                 stage_builder = StageAwareGraphBuilder(
-                    k_neighbors=15, min_overlap=3, stage_affinity_beta=0.3,
+                    k_neighbors=15,
+                    min_overlap=3,
+                    stage_affinity_beta=0.3,
                 )
                 stage_graph = stage_builder.build_full_graph(
                     features_norm_np * corrupted_mask.astype(np.float32),
@@ -841,17 +928,24 @@ def main():
                     mc_dropout=0.1,
                 )
                 vanilla_model, v_history = train_gimin_model(
-                    vanilla_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    vanilla_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     vanilla_graph["edge_index"],
                     vanilla_graph["edge_weight"],
                     vanilla_graph["overlap_frac"],
-                    epochs=args.epochs, lr=args.lr,
+                    epochs=args.epochs,
+                    lr=args.lr,
                     is_stage_conditioned=False,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
                 )
                 v_metrics, v_imputed, v_mean, v_std = evaluate_gimin_model(
-                    vanilla_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    vanilla_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     eval_mask,
                     vanilla_graph["edge_index"],
                     vanilla_graph["edge_weight"],
@@ -866,12 +960,16 @@ def main():
                 run_results["GIMIN_Vanilla"] = v_metrics
                 logger.info(
                     "  GIMIN_Vanilla: RMSE=%.4f, R²=%.4f (%.1fs, %d epochs)",
-                    v_metrics["rmse"], v_metrics["r2"],
-                    v_metrics["time_seconds"], len(v_history),
+                    v_metrics["rmse"],
+                    v_metrics["r2"],
+                    v_metrics["time_seconds"],
+                    len(v_history),
                 )
                 if args.save_checkpoints:
                     _save_checkpoint(vanilla_model, run_dir, frac, run, "GIMIN_Vanilla")
-                    _save_training_history(v_history, run_dir, frac, run, "GIMIN_Vanilla")
+                    _save_training_history(
+                        v_history, run_dir, frac, run, "GIMIN_Vanilla"
+                    )
 
                 # ── Model B: Stage-Conditioned GIMIN (full) ───────
                 logger.info("Training Stage-Conditioned GIMIN (with normalization)...")
@@ -887,18 +985,25 @@ def main():
                     use_stage_attention_bias=True,
                 )
                 stage_model, s_history = train_gimin_model(
-                    stage_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    stage_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     stage_graph["edge_index"],
                     stage_graph["edge_weight"],
                     stage_graph["overlap_frac"],
                     stages_t=stages_t,
-                    epochs=args.epochs, lr=args.lr,
+                    epochs=args.epochs,
+                    lr=args.lr,
                     is_stage_conditioned=True,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
                 )
                 s_metrics, s_imputed, s_mean, s_std = evaluate_gimin_model(
-                    stage_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    stage_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     eval_mask,
                     stage_graph["edge_index"],
                     stage_graph["edge_weight"],
@@ -915,15 +1020,23 @@ def main():
                 run_results["GIMIN_StageConditioned"] = s_metrics
                 logger.info(
                     "  GIMIN_StageConditioned: RMSE=%.4f, R²=%.4f (%.1fs, %d epochs)",
-                    s_metrics["rmse"], s_metrics["r2"],
-                    s_metrics["time_seconds"], len(s_history),
+                    s_metrics["rmse"],
+                    s_metrics["r2"],
+                    s_metrics["time_seconds"],
+                    len(s_history),
                 )
                 if args.save_checkpoints:
-                    _save_checkpoint(stage_model, run_dir, frac, run, "GIMIN_StageConditioned")
-                    _save_training_history(s_history, run_dir, frac, run, "GIMIN_StageConditioned")
+                    _save_checkpoint(
+                        stage_model, run_dir, frac, run, "GIMIN_StageConditioned"
+                    )
+                    _save_training_history(
+                        s_history, run_dir, frac, run, "GIMIN_StageConditioned"
+                    )
 
                 # ── Model C: Stage Graph Only (ablation) ──────────
-                logger.info("Training GIMIN + Stage Graph only (ablation, normalized)...")
+                logger.info(
+                    "Training GIMIN + Stage Graph only (ablation, normalized)..."
+                )
                 t0 = time.time()
                 ablation_graph_model = VanillaGIMIN(
                     modality_dims=MODALITY_DIMS,
@@ -933,17 +1046,24 @@ def main():
                     mc_dropout=0.1,
                 )
                 ablation_graph_model, ag_history = train_gimin_model(
-                    ablation_graph_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    ablation_graph_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     stage_graph["edge_index"],  # Use STAGE graph
                     stage_graph["edge_weight"],
                     stage_graph["overlap_frac"],
-                    epochs=args.epochs, lr=args.lr,
+                    epochs=args.epochs,
+                    lr=args.lr,
                     is_stage_conditioned=False,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
                 )
                 ag_metrics, _, _, _ = evaluate_gimin_model(
-                    ablation_graph_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    ablation_graph_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     eval_mask,
                     stage_graph["edge_index"],
                     stage_graph["edge_weight"],
@@ -957,14 +1077,21 @@ def main():
                 run_results["GIMIN_StageGraphOnly"] = ag_metrics
                 logger.info(
                     "  GIMIN_StageGraphOnly: RMSE=%.4f, R²=%.4f",
-                    ag_metrics["rmse"], ag_metrics["r2"],
+                    ag_metrics["rmse"],
+                    ag_metrics["r2"],
                 )
                 if args.save_checkpoints:
-                    _save_checkpoint(ablation_graph_model, run_dir, frac, run, "GIMIN_StageGraphOnly")
-                    _save_training_history(ag_history, run_dir, frac, run, "GIMIN_StageGraphOnly")
+                    _save_checkpoint(
+                        ablation_graph_model, run_dir, frac, run, "GIMIN_StageGraphOnly"
+                    )
+                    _save_training_history(
+                        ag_history, run_dir, frac, run, "GIMIN_StageGraphOnly"
+                    )
 
                 # ── Model D: Stage Decoder Only (ablation) ────────
-                logger.info("Training GIMIN + Stage Decoder only (ablation, normalized)...")
+                logger.info(
+                    "Training GIMIN + Stage Decoder only (ablation, normalized)..."
+                )
                 t0 = time.time()
                 ablation_decoder_model = StageConditionedGIMIN(
                     modality_dims=MODALITY_DIMS,
@@ -977,18 +1104,25 @@ def main():
                     use_stage_attention_bias=True,
                 )
                 ablation_decoder_model, ad_history = train_gimin_model(
-                    ablation_decoder_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    ablation_decoder_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     vanilla_graph["edge_index"],  # Use VANILLA graph
                     vanilla_graph["edge_weight"],
                     vanilla_graph["overlap_frac"],
                     stages_t=stages_t,
-                    epochs=args.epochs, lr=args.lr,
+                    epochs=args.epochs,
+                    lr=args.lr,
                     is_stage_conditioned=True,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
                 )
                 ad_metrics, _, _, _ = evaluate_gimin_model(
-                    ablation_decoder_model, features_norm_t, mask_norm_t, corrupted_mask_t,
+                    ablation_decoder_model,
+                    features_norm_t,
+                    mask_norm_t,
+                    corrupted_mask_t,
                     eval_mask,
                     vanilla_graph["edge_index"],
                     vanilla_graph["edge_weight"],
@@ -1003,11 +1137,20 @@ def main():
                 run_results["GIMIN_StageDecoderOnly"] = ad_metrics
                 logger.info(
                     "  GIMIN_StageDecoderOnly: RMSE=%.4f, R²=%.4f",
-                    ad_metrics["rmse"], ad_metrics["r2"],
+                    ad_metrics["rmse"],
+                    ad_metrics["r2"],
                 )
                 if args.save_checkpoints:
-                    _save_checkpoint(ablation_decoder_model, run_dir, frac, run, "GIMIN_StageDecoderOnly")
-                    _save_training_history(ad_history, run_dir, frac, run, "GIMIN_StageDecoderOnly")
+                    _save_checkpoint(
+                        ablation_decoder_model,
+                        run_dir,
+                        frac,
+                        run,
+                        "GIMIN_StageDecoderOnly",
+                    )
+                    _save_training_history(
+                        ad_history, run_dir, frac, run, "GIMIN_StageDecoderOnly"
+                    )
 
                 # ── Conformal calibration ─────────────────────────
                 # Per-feature conformal: each feature gets its own quantile
@@ -1019,11 +1162,14 @@ def main():
                         ConformalImputation,
                     )
 
-                    logger.info("Running per-feature stage-conditioned conformal calibration...")
+                    logger.info(
+                        "Running per-feature stage-conditioned conformal calibration..."
+                    )
 
                     # --- Per-feature conformal (recommended) ---
                     conformal_pf = ConformalImputation(
-                        coverage_target=0.90, mode="per_feature",
+                        coverage_target=0.90,
+                        mode="per_feature",
                     )
                     conformal_result_pf = conformal_pf.calibrate_per_stage(
                         predicted_means=s_mean,
@@ -1036,7 +1182,8 @@ def main():
 
                     # --- Also try normalized conformal in original space ---
                     conformal_norm = ConformalImputation(
-                        coverage_target=0.90, mode="normalized",
+                        coverage_target=0.90,
+                        mode="normalized",
                     )
                     conformal_result_norm = conformal_norm.calibrate_per_stage(
                         predicted_means=s_mean,
@@ -1093,8 +1240,12 @@ def main():
                         return d
 
                     conformal_dict = {
-                        "per_feature": _serialize_conformal(conformal_result_pf, "per_feature"),
-                        "normalized": _serialize_conformal(conformal_result_norm, "normalized"),
+                        "per_feature": _serialize_conformal(
+                            conformal_result_pf, "per_feature"
+                        ),
+                        "normalized": _serialize_conformal(
+                            conformal_result_norm, "normalized"
+                        ),
                         "calibration_curves": {
                             str(k): {str(kk): vv for kk, vv in v.items()}
                             for k, v in cal_curves.items()
@@ -1104,19 +1255,33 @@ def main():
                     # Save to BOTH timestamped run dir AND legacy location
                     conformal_dir = run_dir / "conformal"
                     conformal_dir.mkdir(parents=True, exist_ok=True)
-                    conformal_serializer = lambda x: float(x) if isinstance(x, (np.floating, np.integer)) else str(x)  # noqa: E731
+                    conformal_serializer = (
+                        lambda x: float(x)
+                        if isinstance(x, (np.floating, np.integer))
+                        else str(x)
+                    )  # noqa: E731
 
                     # Authoritative copy in timestamped run dir
-                    conformal_run_path = conformal_dir / f"conformal_frac{frac:.1f}.json"
+                    conformal_run_path = (
+                        conformal_dir / f"conformal_frac{frac:.1f}.json"
+                    )
                     with open(conformal_run_path, "w") as f:
-                        json.dump(conformal_dict, f, indent=2, default=conformal_serializer)
+                        json.dump(
+                            conformal_dict, f, indent=2, default=conformal_serializer
+                        )
 
                     # Legacy copy for backward compatibility
-                    conformal_legacy_path = output_dir / f"conformal_frac{frac:.1f}.json"
+                    conformal_legacy_path = (
+                        output_dir / f"conformal_frac{frac:.1f}.json"
+                    )
                     with open(conformal_legacy_path, "w") as f:
-                        json.dump(conformal_dict, f, indent=2, default=conformal_serializer)
+                        json.dump(
+                            conformal_dict, f, indent=2, default=conformal_serializer
+                        )
 
-                    logger.info("Conformal results saved to %s (+ legacy)", conformal_run_path)
+                    logger.info(
+                        "Conformal results saved to %s (+ legacy)", conformal_run_path
+                    )
 
             # Store run results
             frac_key = f"frac_{frac:.1f}"
@@ -1136,8 +1301,16 @@ def main():
         for fk, fd in all_results.items():
             _incremental_summary[fk] = {}
             for mn, rns in fd.items():
-                rmses = [r["rmse"] for r in rns if "rmse" in r and not np.isnan(r.get("rmse", float("nan")))]
-                r2s = [r["r2"] for r in rns if "r2" in r and not np.isnan(r.get("r2", float("nan")))]
+                rmses = [
+                    r["rmse"]
+                    for r in rns
+                    if "rmse" in r and not np.isnan(r.get("rmse", float("nan")))
+                ]
+                r2s = [
+                    r["r2"]
+                    for r in rns
+                    if "r2" in r and not np.isnan(r.get("r2", float("nan")))
+                ]
                 if rmses:
                     _incremental_summary[fk][mn] = {
                         "rmse_mean": round(float(np.mean(rmses)), 4),
@@ -1146,7 +1319,9 @@ def main():
                         "r2_std": round(float(np.std(r2s)), 4),
                         "n_runs": len(rmses),
                     }
-        _save_incremental_results(all_results, _incremental_summary, run_dir, output_dir)
+        _save_incremental_results(
+            all_results, _incremental_summary, run_dir, output_dir
+        )
         logger.info("Incremental save after frac=%.1f complete", frac)
 
     # ── 4. Final aggregation & summary ─────────────────────────────
@@ -1159,14 +1334,24 @@ def main():
         print(f"\n{frac_key}:")
         summary[frac_key] = {}
         for model_name, runs in frac_data.items():
-            rmses = [r["rmse"] for r in runs if "rmse" in r and not np.isnan(r.get("rmse", float("nan")))]
-            r2s = [r["r2"] for r in runs if "r2" in r and not np.isnan(r.get("r2", float("nan")))]
+            rmses = [
+                r["rmse"]
+                for r in runs
+                if "rmse" in r and not np.isnan(r.get("rmse", float("nan")))
+            ]
+            r2s = [
+                r["r2"]
+                for r in runs
+                if "r2" in r and not np.isnan(r.get("r2", float("nan")))
+            ]
             if rmses:
                 mean_rmse = np.mean(rmses)
                 std_rmse = np.std(rmses)
                 mean_r2 = np.mean(r2s)
                 std_r2 = np.std(r2s)
-                print(f"  {model_name:30s}: RMSE={mean_rmse:.4f}±{std_rmse:.4f}, R²={mean_r2:.4f}±{std_r2:.4f}")
+                print(
+                    f"  {model_name:30s}: RMSE={mean_rmse:.4f}±{std_rmse:.4f}, R²={mean_r2:.4f}±{std_r2:.4f}"
+                )
                 summary[frac_key][model_name] = {
                     "rmse_mean": round(float(mean_rmse), 4),
                     "rmse_std": round(float(std_rmse), 4),
@@ -1180,6 +1365,7 @@ def main():
 
     # Also save a copy of the run config alongside final results
     import datetime as _dt
+
     run_config_final = run_config.copy()
     run_config_final["completed_at"] = _dt.datetime.now().isoformat()
     run_config_final["status"] = "completed"

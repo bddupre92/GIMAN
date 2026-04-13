@@ -22,13 +22,14 @@ from typing import Any
 
 import numpy as np
 from scipy import stats
-from lifelines import KaplanMeierFitter
 
+from giman_pipeline.paper3.dynamic_deephit import (
+    _get_time_bin,
+)
 from giman_pipeline.paper3.multistate_markov import N_STATES, STAGE_LABELS
-from giman_pipeline.paper3.dynamic_deephit import TIME_BIN_ENDS, N_TIME_BINS, _get_time_bin
 from giman_pipeline.paper4.conformal_survival import (
-    estimate_censoring_survival,
     IPCW_MIN_G,
+    estimate_censoring_survival,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ DEFAULT_HORIZONS = {"1yr": 12, "3yr": 36, "5yr": 60}
 # ---------------------------------------------------------------------------
 # Result dataclasses
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class CalibrationResult:
@@ -63,6 +65,7 @@ class CalibrationResult:
 # ---------------------------------------------------------------------------
 # IPCW-weighted observed CIF
 # ---------------------------------------------------------------------------
+
 
 def _compute_observed_status(
     durations: np.ndarray,
@@ -103,7 +106,11 @@ def _compute_observed_status(
             valid_mask[i] = False
             continue
 
-        if not censored[i] and event_idxs[i] == cause_k and durations[i] <= horizon_months:
+        if (
+            not censored[i]
+            and event_idxs[i] == cause_k
+            and durations[i] <= horizon_months
+        ):
             observed[i] = 1.0
         else:
             observed[i] = 0.0
@@ -119,6 +126,7 @@ def _compute_observed_status(
 # ---------------------------------------------------------------------------
 # Expected Calibration Error
 # ---------------------------------------------------------------------------
+
 
 def compute_cause_specific_ece(
     cif_pred: np.ndarray,
@@ -157,7 +165,11 @@ def compute_cause_specific_ece(
         for k in range(N_STATES):
             predicted = cif_pred[:, k, t_idx]
             observed, weights, valid = _compute_observed_status(
-                durations, event_idxs, censored, k, h_months,
+                durations,
+                event_idxs,
+                censored,
+                k,
+                h_months,
             )
 
             # Filter to valid observations
@@ -220,6 +232,7 @@ def compute_aggregate_ece(
 # Reliability Diagrams
 # ---------------------------------------------------------------------------
 
+
 def build_reliability_data(
     cif_pred: np.ndarray,
     durations: np.ndarray,
@@ -248,7 +261,11 @@ def build_reliability_data(
         for k in range(N_STATES):
             predicted = cif_pred[:, k, t_idx]
             observed, weights, valid = _compute_observed_status(
-                durations, event_idxs, censored, k, h_months,
+                durations,
+                event_idxs,
+                censored,
+                k,
+                h_months,
             )
 
             pred_valid = predicted[valid]
@@ -287,16 +304,18 @@ def build_reliability_data(
                 ci_lo = max(0.0, float(p_tilde - margin))
                 ci_hi = min(1.0, float(p_tilde + margin))
 
-                rows.append({
-                    "cause": k,
-                    "cause_label": STAGE_LABELS[k],
-                    "bin_center": float((lo + hi) / 2),
-                    "predicted": avg_pred,
-                    "observed": avg_obs,
-                    "n_samples": n_bin,
-                    "ci_lower": ci_lo,
-                    "ci_upper": ci_hi,
-                })
+                rows.append(
+                    {
+                        "cause": k,
+                        "cause_label": STAGE_LABELS[k],
+                        "bin_center": float((lo + hi) / 2),
+                        "predicted": avg_pred,
+                        "observed": avg_obs,
+                        "n_samples": n_bin,
+                        "ci_lower": ci_lo,
+                        "ci_upper": ci_hi,
+                    }
+                )
 
         results[h_label] = rows
 
@@ -306,6 +325,7 @@ def build_reliability_data(
 # ---------------------------------------------------------------------------
 # Hosmer-Lemeshow Test
 # ---------------------------------------------------------------------------
+
 
 def hosmer_lemeshow_test(
     cif_pred: np.ndarray,
@@ -328,7 +348,11 @@ def hosmer_lemeshow_test(
     predicted = cif_pred[:, cause_k, t_idx]
 
     observed, weights, valid = _compute_observed_status(
-        durations, event_idxs, censored, cause_k, horizon_months,
+        durations,
+        event_idxs,
+        censored,
+        cause_k,
+        horizon_months,
     )
 
     pred_valid = predicted[valid]
@@ -336,16 +360,24 @@ def hosmer_lemeshow_test(
     w_valid = weights[valid]
 
     if len(pred_valid) < n_groups * 2:
-        return {"chi2_stat": float("nan"), "p_value": float("nan"),
-                "n_groups_used": 0, "df": 0}
+        return {
+            "chi2_stat": float("nan"),
+            "p_value": float("nan"),
+            "n_groups_used": 0,
+            "df": 0,
+        }
 
     # Equal-count groups (deciles of predicted)
     try:
         group_edges = np.percentile(pred_valid, np.linspace(0, 100, n_groups + 1))
         group_edges[-1] += 1e-8  # Include max
     except Exception:
-        return {"chi2_stat": float("nan"), "p_value": float("nan"),
-                "n_groups_used": 0, "df": 0}
+        return {
+            "chi2_stat": float("nan"),
+            "p_value": float("nan"),
+            "n_groups_used": 0,
+            "df": 0,
+        }
 
     chi2 = 0.0
     groups_used = 0
@@ -361,14 +393,16 @@ def hosmer_lemeshow_test(
         if n_g < 2:
             continue
 
-        expected_g = np.average(pred_valid[mask], weights=w_valid[mask]) * w_valid[mask].sum()
+        expected_g = (
+            np.average(pred_valid[mask], weights=w_valid[mask]) * w_valid[mask].sum()
+        )
         observed_g = (obs_valid[mask] * w_valid[mask]).sum()
 
         if expected_g > 0 and (w_valid[mask].sum() - expected_g) > 0:
             chi2 += (observed_g - expected_g) ** 2 / expected_g
-            chi2 += ((w_valid[mask].sum() - observed_g) - (w_valid[mask].sum() - expected_g)) ** 2 / (
-                w_valid[mask].sum() - expected_g
-            )
+            chi2 += (
+                (w_valid[mask].sum() - observed_g) - (w_valid[mask].sum() - expected_g)
+            ) ** 2 / (w_valid[mask].sum() - expected_g)
             groups_used += 1
 
     df = max(groups_used - 2, 1)
@@ -385,6 +419,7 @@ def hosmer_lemeshow_test(
 # ---------------------------------------------------------------------------
 # Full calibration evaluation
 # ---------------------------------------------------------------------------
+
 
 def evaluate_calibration(
     cif_pred: np.ndarray,
@@ -414,13 +449,23 @@ def evaluate_calibration(
 
     # ECE
     ece_by_cause = compute_cause_specific_ece(
-        cif_pred, durations, event_idxs, censored, horizons, n_bins,
+        cif_pred,
+        durations,
+        event_idxs,
+        censored,
+        horizons,
+        n_bins,
     )
     agg_ece = compute_aggregate_ece(ece_by_cause)
 
     # Reliability
     rel_data = build_reliability_data(
-        cif_pred, durations, event_idxs, censored, horizons, n_bins,
+        cif_pred,
+        durations,
+        event_idxs,
+        censored,
+        horizons,
+        n_bins,
     )
 
     # Hosmer-Lemeshow
@@ -429,7 +474,12 @@ def evaluate_calibration(
         hl_results[h_label] = {}
         for k in range(N_STATES):
             hl_results[h_label][k] = hosmer_lemeshow_test(
-                cif_pred, durations, event_idxs, censored, k, h_months,
+                cif_pred,
+                durations,
+                event_idxs,
+                censored,
+                k,
+                h_months,
             )
 
     result = CalibrationResult(
@@ -451,6 +501,7 @@ def evaluate_calibration(
 # ---------------------------------------------------------------------------
 # Serialization
 # ---------------------------------------------------------------------------
+
 
 def calibration_result_to_dict(r: CalibrationResult) -> dict:
     """Convert CalibrationResult to JSON-serializable dict."""

@@ -140,7 +140,7 @@ class StageAwareGraphBuilder:
             overlap_counts = batch_mask @ mask_f32.T
             raw_dots = batch_X @ X.T
 
-            X_sq = X ** 2
+            X_sq = X**2
             batch_X_sq = X_sq[i_start:i_end]
             norm_i_sq = batch_X_sq @ mask_f32.T
             norm_j_sq = batch_mask @ X_sq.T
@@ -214,7 +214,7 @@ class StageAwareGraphBuilder:
 
         # Symmetrize
         edge_dict: dict[tuple[int, int], float] = {}
-        for s, d, w in zip(src_list, dst_list, weight_list):
+        for s, d, w in zip(src_list, dst_list, weight_list, strict=False):
             key = (min(s, d), max(s, d))
             if key not in edge_dict or w > edge_dict[key]:
                 edge_dict[key] = w
@@ -265,7 +265,8 @@ class StageAwareGraphBuilder:
         N = features.shape[0]
         logger.info(
             "Building stage-aware graph for %d patients, %d features.",
-            N, features.shape[1],
+            N,
+            features.shape[1],
         )
 
         self.fit_scaler(features, mask)
@@ -307,7 +308,10 @@ class StageAwareGraphBuilder:
 
         logger.info(
             "Graph built: %d nodes, %d directed edges, %d isolated, mean degree %.1f.",
-            N, num_edges, num_isolated, num_edges / max(N, 1),
+            N,
+            num_edges,
+            num_isolated,
+            num_edges / max(N, 1),
         )
 
         return {

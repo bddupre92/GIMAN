@@ -43,6 +43,7 @@ OUTPUT_DIR = ROOT / "data" / "04_staging"
 
 # ── NSD-ISS Staging Functions (from Russo et al. 2025) ──────────────────
 
+
 def compute_nsd_iss_stage(row: pd.Series) -> int:
     """Assign NSD-ISS stage based on Russo et al. (2025) thresholds.
 
@@ -69,53 +70,53 @@ def compute_nsd_iss_stage(row: pd.Series) -> int:
     rbd_status = int(rbd_status) if not pd.isna(rbd_status) else 0
 
     # Stage 6: Severe
-    if (np1cog == 4 and not pd.isna(mcatot) and mcatot <= 24):
+    if np1cog == 4 and not pd.isna(mcatot) and mcatot <= 24:
         return 6
-    if (not pd.isna(p2tot) and p2tot >= 40):
+    if not pd.isna(p2tot) and p2tot >= 40:
         return 6
-    if (not pd.isna(p1tot) and p1tot >= 37):
+    if not pd.isna(p1tot) and p1tot >= 37:
         return 6
 
     # Stage 5: Severe functional impairment
-    if (np1cog == 3 and not pd.isna(mcatot) and mcatot <= 24):
+    if np1cog == 3 and not pd.isna(mcatot) and mcatot <= 24:
         return 5
-    if (np1cog == 4 and not pd.isna(mcatot) and mcatot >= 25):
+    if np1cog == 4 and not pd.isna(mcatot) and mcatot >= 25:
         return 5
-    if (not pd.isna(p2tot) and 27 <= p2tot <= 39):
+    if not pd.isna(p2tot) and 27 <= p2tot <= 39:
         return 5
-    if (not pd.isna(p1tot) and 25 <= p1tot <= 36):
+    if not pd.isna(p1tot) and 25 <= p1tot <= 36:
         return 5
 
     # Stage 4: Moderate functional impairment
-    if (np1cog == 2 and not pd.isna(mcatot) and mcatot <= 24):
+    if np1cog == 2 and not pd.isna(mcatot) and mcatot <= 24:
         return 4
-    if (np1cog == 3 and not pd.isna(mcatot) and mcatot >= 25):
+    if np1cog == 3 and not pd.isna(mcatot) and mcatot >= 25:
         return 4
-    if (not pd.isna(p2tot) and 14 <= p2tot <= 26):
+    if not pd.isna(p2tot) and 14 <= p2tot <= 26:
         return 4
-    if (not pd.isna(p1tot) and 13 <= p1tot <= 24):
+    if not pd.isna(p1tot) and 13 <= p1tot <= 24:
         return 4
-    if (not pd.isna(p1tot) and p1tot >= 13 and pdmedyn == 1 and rbd_status == 1):
+    if not pd.isna(p1tot) and p1tot >= 13 and pdmedyn == 1 and rbd_status == 1:
         return 4
 
     # Stage 3: Mild functional impairment
-    if (np1cog == 1 and not pd.isna(mcatot) and mcatot <= 24):
+    if np1cog == 1 and not pd.isna(mcatot) and mcatot <= 24:
         return 3
-    if (np1cog == 2 and not pd.isna(mcatot) and mcatot >= 25):
+    if np1cog == 2 and not pd.isna(mcatot) and mcatot >= 25:
         return 3
-    if (not pd.isna(p2tot) and 3 <= p2tot <= 13 and (p3tot >= 5 or pdmedyn == 1)):
+    if not pd.isna(p2tot) and 3 <= p2tot <= 13 and (p3tot >= 5 or pdmedyn == 1):
         return 3
 
     # Stage 2: Clinical motor signs, no functional impairment
-    if (np1cog == 1 and not pd.isna(mcatot) and mcatot >= 25):
+    if np1cog == 1 and not pd.isna(mcatot) and mcatot >= 25:
         return 2
-    if (p3tot >= 5 or pdmedyn == 1):
+    if p3tot >= 5 or pdmedyn == 1:
         return 2
     if rbd_status == 1:
         return 2
 
     # Stage 1: No clinical signs
-    if (np1cog == 0 and p3tot < 5 and pdmedyn == 0 and rbd_status == 0):
+    if np1cog == 0 and p3tot < 5 and pdmedyn == 0 and rbd_status == 0:
         return 1
 
     return 0  # Unclassifiable
@@ -140,14 +141,17 @@ def compute_domain_stages(row: pd.Series) -> dict:
             cog_stage = 1
         elif np1cog == 1 and not pd.isna(mc) and mc >= 25:
             cog_stage = 2
-        elif (np1cog == 1 and not pd.isna(mc) and mc <= 24) or \
-             (np1cog == 2 and not pd.isna(mc) and mc >= 25):
+        elif (np1cog == 1 and not pd.isna(mc) and mc <= 24) or (
+            np1cog == 2 and not pd.isna(mc) and mc >= 25
+        ):
             cog_stage = 3
-        elif (np1cog == 2 and not pd.isna(mc) and mc <= 24) or \
-             (np1cog == 3 and not pd.isna(mc) and mc >= 25):
+        elif (np1cog == 2 and not pd.isna(mc) and mc <= 24) or (
+            np1cog == 3 and not pd.isna(mc) and mc >= 25
+        ):
             cog_stage = 4
-        elif (np1cog == 3 and not pd.isna(mc) and mc <= 24) or \
-             (np1cog == 4 and not pd.isna(mc) and mc >= 25):
+        elif (np1cog == 3 and not pd.isna(mc) and mc <= 24) or (
+            np1cog == 4 and not pd.isna(mc) and mc >= 25
+        ):
             cog_stage = 5
         elif np1cog == 4 and not pd.isna(mc) and mc <= 24:
             cog_stage = 6
@@ -192,13 +196,18 @@ def compute_domain_stages(row: pd.Series) -> dict:
 
 # ── Data Loading ─────────────────────────────────────────────────────────
 
+
 def load_biofind_staging_variables() -> pd.DataFrame:
     """Load and merge all BioFIND variables needed for NSD-ISS staging."""
-
     # 1. Case-control (filter to PD)
     cc = pd.read_csv(BIOFIND_DIR / "amp_pd_case_control.csv", low_memory=False)
     cc_bl = cc.drop_duplicates(subset=["participant_id"], keep="first")
-    pd_ids = set(cc_bl.loc[cc_bl["case_control_other_at_baseline"].str.lower() == "case", "participant_id"])
+    pd_ids = set(
+        cc_bl.loc[
+            cc_bl["case_control_other_at_baseline"].str.lower() == "case",
+            "participant_id",
+        ]
+    )
     logger.info(f"PD patients: {len(pd_ids)}")
 
     # 2. SAA consensus
@@ -225,14 +234,18 @@ def load_biofind_staging_variables() -> pd.DataFrame:
 
     # NP1COG = code_upd2101_cognitive_impairment (0-4 numeric)
     u1_bl_data = u1_bl.set_index("participant_id")
-    staging["NP1COG"] = staging["participant_id"].map(
-        u1_bl_data["code_upd2101_cognitive_impairment"]
-    ).astype(float)
+    staging["NP1COG"] = (
+        staging["participant_id"]
+        .map(u1_bl_data["code_upd2101_cognitive_impairment"])
+        .astype(float)
+    )
 
     # P1TOT = Part I summary score MINUS NP1COG
-    staging["P1TOT_RAW"] = staging["participant_id"].map(
-        u1_bl_data["mds_updrs_part_i_summary_score"]
-    ).astype(float)
+    staging["P1TOT_RAW"] = (
+        staging["participant_id"]
+        .map(u1_bl_data["mds_updrs_part_i_summary_score"])
+        .astype(float)
+    )
     staging["P1TOT"] = staging["P1TOT_RAW"] - staging["NP1COG"]
 
     # 4. UPDRS Part II → P2TOT
@@ -243,9 +256,11 @@ def load_biofind_staging_variables() -> pd.DataFrame:
         u2_bl = u2_pd[u2_pd["visit_name"] == "M0"]
     u2_bl = u2_bl.drop_duplicates(subset=["participant_id"], keep="first")
     u2_bl_data = u2_bl.set_index("participant_id")
-    staging["P2TOT"] = staging["participant_id"].map(
-        u2_bl_data["mds_updrs_part_ii_summary_score"]
-    ).astype(float)
+    staging["P2TOT"] = (
+        staging["participant_id"]
+        .map(u2_bl_data["mds_updrs_part_ii_summary_score"])
+        .astype(float)
+    )
 
     # 5. UPDRS Part III → P3TOT
     u3 = pd.read_csv(BIOFIND_DIR / "MDS_UPDRS_Part_III.csv", low_memory=False)
@@ -255,9 +270,11 @@ def load_biofind_staging_variables() -> pd.DataFrame:
         u3_bl = u3_pd[u3_pd["visit_name"] == "M0"]
     u3_bl = u3_bl.drop_duplicates(subset=["participant_id"], keep="first")
     u3_bl_data = u3_bl.set_index("participant_id")
-    staging["P3TOT"] = staging["participant_id"].map(
-        u3_bl_data["mds_updrs_part_iii_summary_score"]
-    ).astype(float)
+    staging["P3TOT"] = (
+        staging["participant_id"]
+        .map(u3_bl_data["mds_updrs_part_iii_summary_score"])
+        .astype(float)
+    )
 
     # 6. MoCA → MCATOT
     moca = pd.read_csv(BIOFIND_DIR / "MOCA.csv", low_memory=False)
@@ -267,9 +284,9 @@ def load_biofind_staging_variables() -> pd.DataFrame:
         moca_bl = moca_pd[moca_pd["visit_name"] == "M0"]
     moca_bl = moca_bl.drop_duplicates(subset=["participant_id"], keep="first")
     moca_bl_data = moca_bl.set_index("participant_id")
-    staging["MCATOT"] = staging["participant_id"].map(
-        moca_bl_data["moca_total_score"]
-    ).astype(float)
+    staging["MCATOT"] = (
+        staging["participant_id"].map(moca_bl_data["moca_total_score"]).astype(float)
+    )
 
     # 7. PD Medication → PDMEDYN
     # Prefer LONI IDA file (Use_of_PD_Medication_*) which has PDMEDYN directly
@@ -281,14 +298,18 @@ def load_biofind_staging_variables() -> pd.DataFrame:
         # Filter to baseline (BL event)
         pdmed_bl = pdmed_loni[pdmed_loni["EVENT_ID"] == "BL"]
         if len(pdmed_bl) == 0:
-            pdmed_bl = pdmed_loni.drop_duplicates(subset=["participant_id"], keep="first")
+            pdmed_bl = pdmed_loni.drop_duplicates(
+                subset=["participant_id"], keep="first"
+            )
         else:
             pdmed_bl = pdmed_bl.drop_duplicates(subset=["participant_id"], keep="first")
         pdmed_bl_data = pdmed_bl.set_index("participant_id")
-        staging["PDMEDYN"] = staging["participant_id"].map(
-            pdmed_bl_data["PDMEDYN"]
-        ).astype(float)
-        logger.info(f"  PD Medication from LONI IDA: {staging['PDMEDYN'].notna().sum()}/{len(staging)}")
+        staging["PDMEDYN"] = (
+            staging["participant_id"].map(pdmed_bl_data["PDMEDYN"]).astype(float)
+        )
+        logger.info(
+            f"  PD Medication from LONI IDA: {staging['PDMEDYN'].notna().sum()}/{len(staging)}"
+        )
     else:
         # Fallback: AMP-PD BigQuery PD_Medical_History
         pdmed = pd.read_csv(BIOFIND_DIR / "PD_Medical_History.csv", low_memory=False)
@@ -299,8 +320,11 @@ def load_biofind_staging_variables() -> pd.DataFrame:
             med_map = pdmed_bl_data["use_of_pd_medication"]
             staging["PDMEDYN"] = staging["participant_id"].map(med_map)
             staging["PDMEDYN"] = staging["PDMEDYN"].map(
-                lambda x: 1 if str(x).lower() in ("yes", "true", "1", "1.0") else 0
-                if not pd.isna(x) else np.nan
+                lambda x: 1
+                if str(x).lower() in ("yes", "true", "1", "1.0")
+                else 0
+                if not pd.isna(x)
+                else np.nan
             )
         else:
             staging["PDMEDYN"] = np.nan
@@ -313,21 +337,22 @@ def load_biofind_staging_variables() -> pd.DataFrame:
         rbd_bl = rbd_pd[rbd_pd["visit_name"] == "M0"]
     rbd_bl = rbd_bl.drop_duplicates(subset=["participant_id"], keep="first")
     rbd_bl_data = rbd_bl.set_index("participant_id")
-    staging["RBDSQ_TOTAL"] = staging["participant_id"].map(
-        rbd_bl_data["rbd_summary_score"]
-    ).astype(float)
+    staging["RBDSQ_TOTAL"] = (
+        staging["participant_id"].map(rbd_bl_data["rbd_summary_score"]).astype(float)
+    )
     staging["RBD_STATUS"] = (staging["RBDSQ_TOTAL"] >= 6).astype(int)
 
     logger.info(f"Staging variables assembled for {len(staging)} S+ PD patients")
-    logger.info(f"Variable coverage:")
+    logger.info("Variable coverage:")
     for col in ["NP1COG", "MCATOT", "P1TOT", "P2TOT", "P3TOT", "PDMEDYN", "RBD_STATUS"]:
         n = staging[col].notna().sum()
-        logger.info(f"  {col}: {n}/{len(staging)} ({n/len(staging)*100:.1f}%)")
+        logger.info(f"  {col}: {n}/{len(staging)} ({n / len(staging) * 100:.1f}%)")
 
     return staging
 
 
 # ── Main Pipeline ────────────────────────────────────────────────────────
+
 
 def stage_biofind():
     """Compute NSD-ISS stages for BioFIND S+ PD patients."""
@@ -341,18 +366,18 @@ def stage_biofind():
     staging = pd.concat([staging, domain_stages], axis=1)
 
     # Summary
-    print(f"\n{'='*60}")
-    print(f"BioFIND NSD-ISS Staging Results (Russo et al. 2025 method)")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print("BioFIND NSD-ISS Staging Results (Russo et al. 2025 method)")
+    print(f"{'=' * 60}")
     print(f"S+ PD patients staged: {len(staging)}")
-    print(f"\nStage Distribution:")
+    print("\nStage Distribution:")
     for stage in sorted(staging["nsd_iss_stage"].unique()):
         n = (staging["nsd_iss_stage"] == stage).sum()
         pct = n / len(staging) * 100
         print(f"  Stage {stage}: {n:4d} ({pct:5.1f}%)")
 
     # Compare to Russo et al. published distribution
-    print(f"\nComparison to Russo et al. (2025) published results (N=104):")
+    print("\nComparison to Russo et al. (2025) published results (N=104):")
     russo_dist = {1: 0, 2: 9, 3: 58, 4: 35, 5: 2, 6: 0}
     print(f"{'Stage':>8s} {'Ours':>8s} {'Russo':>8s} {'Published %':>12s}")
     print("-" * 40)
@@ -363,7 +388,7 @@ def stage_biofind():
         print(f"  {stage:>5d} {ours:>8d} {theirs:>8d} {pct:>11.1f}%")
 
     # Domain stage distribution
-    print(f"\nDomain-Specific Stages:")
+    print("\nDomain-Specific Stages:")
     for domain in ["cognitive_stage", "motor_stage", "nonmotor_stage"]:
         print(f"\n  {domain}:")
         vals = staging[domain].dropna()
@@ -391,7 +416,7 @@ def stage_biofind():
     out_path = OUTPUT_DIR / "biofind_nsd_iss_staging.csv"
     staging.to_csv(out_path, index=False)
     print(f"\nSaved to {out_path}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     return staging
 

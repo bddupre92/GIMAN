@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Step 4: Fit Multi-State Markov Model for NSD-ISS Stage Transitions.
+"""Step 4: Fit Multi-State Markov Model for NSD-ISS Stage Transitions.
 
 Fits both a homogeneous (no covariates) and a covariate-adjusted continuous-time
 Markov chain to the longitudinal NSD-ISS staging data.
@@ -46,7 +45,6 @@ from giman_pipeline.paper3.multistate_markov import (
     save_results,
 )
 
-
 DATA_DIR = PROJECT_ROOT / "data"
 FEATURES_PATH = DATA_DIR / "07_paper3_features" / "longitudinal_features.csv"
 COHORT_PATH = DATA_DIR / "06_longitudinal_staging" / "cohort_summary.json"
@@ -57,8 +55,10 @@ def load_data(nsd_only: bool = False) -> tuple[pd.DataFrame, dict]:
     """Load longitudinal features and cohort summary."""
     print("Loading data...")
     features = pd.read_csv(FEATURES_PATH, low_memory=False)
-    print(f"  Loaded {len(features)} observations from "
-          f"{features['PATNO'].nunique()} patients")
+    print(
+        f"  Loaded {len(features)} observations from "
+        f"{features['PATNO'].nunique()} patients"
+    )
 
     with open(COHORT_PATH) as f:
         cohort = json.load(f)
@@ -70,8 +70,10 @@ def load_data(nsd_only: bool = False) -> tuple[pd.DataFrame, dict]:
             baseline["nsd_stage"].isin(["1", "2B", "3", "4", "5", "6"])
         ]["PATNO"].unique()
         features = features[features["PATNO"].isin(nsd_patients)]
-        print(f"  NSD+ filter: {len(features)} observations from "
-              f"{features['PATNO'].nunique()} patients")
+        print(
+            f"  NSD+ filter: {len(features)} observations from "
+            f"{features['PATNO'].nunique()} patients"
+        )
 
     stage_dist = features["nsd_stage"].value_counts()
     print(f"  Stage distribution:\n{stage_dist.to_string()}")
@@ -86,7 +88,7 @@ def run_homogeneous_model(features: pd.DataFrame, cohort: dict) -> dict:
     print("=" * 70)
 
     # Build allowed transitions from empirical data
-    trans_matrix = cohort.get("transition_matrix", None)
+    trans_matrix = cohort.get("transition_matrix")
     allowed = build_allowed_transitions(trans_matrix, min_count=5)
 
     t0 = time.time()
@@ -100,8 +102,9 @@ def run_homogeneous_model(features: pd.DataFrame, cohort: dict) -> dict:
     print(f"\n{format_Q_matrix(result.Q)}")
 
     print("\nMean Sojourn Times (years in each stage before any transition):")
-    for stage, t in sorted(result.sojourn_times.items(),
-                           key=lambda x: STAGE_TO_IDX.get(x[0], 99)):
+    for stage, t in sorted(
+        result.sojourn_times.items(), key=lambda x: STAGE_TO_IDX.get(x[0], 99)
+    ):
         if np.isfinite(t):
             print(f"  Stage {stage}: {t:.2f} years")
         else:
@@ -114,14 +117,17 @@ def run_homogeneous_model(features: pd.DataFrame, cohort: dict) -> dict:
     print("\nExpected First-Passage Times:")
     key_transitions = [("2B", "3"), ("3", "4"), ("4", "5"), ("2B", "4")]
     fpt_results = []
-    for from_s, to_s in tqdm(key_transitions, desc="Computing first-passage times",
-                              unit="transition"):
+    for from_s, to_s in tqdm(
+        key_transitions, desc="Computing first-passage times", unit="transition"
+    ):
         fpt = compute_expected_transition_times(result.Q, from_s, to_s)
         fpt_results.append(fpt)
-        tqdm.write(f"  {from_s} -> {to_s}: median {fpt['median_years']:.2f}yr, "
-                   f"mean {fpt['mean_years']:.2f}yr, "
-                   f"P(5yr)={fpt['prob_at_5yr']:.3f}, "
-                   f"P(10yr)={fpt['prob_at_10yr']:.3f}")
+        tqdm.write(
+            f"  {from_s} -> {to_s}: median {fpt['median_years']:.2f}yr, "
+            f"mean {fpt['mean_years']:.2f}yr, "
+            f"P(5yr)={fpt['prob_at_5yr']:.3f}, "
+            f"P(10yr)={fpt['prob_at_10yr']:.3f}"
+        )
 
     # Compare to Simuni reference
     simuni_ref = cohort.get("simuni_2025_reference", {})
@@ -131,12 +137,15 @@ def run_homogeneous_model(features: pd.DataFrame, cohort: dict) -> dict:
         ("3", "4", simuni_ref.get("3_to_4_median_years")),
         ("4", "5", simuni_ref.get("4_to_5_median_years")),
     ]
-    for from_s, to_s, simuni_val in tqdm(comparisons, desc="Simuni comparison",
-                                          unit="transition"):
+    for from_s, to_s, simuni_val in tqdm(
+        comparisons, desc="Simuni comparison", unit="transition"
+    ):
         fpt = compute_expected_transition_times(result.Q, from_s, to_s)
         if simuni_val:
-            tqdm.write(f"  {from_s}->{to_s}: Markov median={fpt['median_years']:.2f}yr, "
-                       f"Simuni KM={simuni_val:.2f}yr")
+            tqdm.write(
+                f"  {from_s}->{to_s}: Markov median={fpt['median_years']:.2f}yr, "
+                f"Simuni KM={simuni_val:.2f}yr"
+            )
 
     return {
         "result": result,
@@ -179,8 +188,10 @@ def run_covariate_model(features: pd.DataFrame, cohort: dict) -> dict:
         return {}
 
     df_cov = features.dropna(subset=covariate_names).copy()
-    print(f"\n  After dropping missing covariates: {len(df_cov)} observations "
-          f"from {df_cov['PATNO'].nunique()} patients")
+    print(
+        f"\n  After dropping missing covariates: {len(df_cov)} observations "
+        f"from {df_cov['PATNO'].nunique()} patients"
+    )
 
     # Use 6 core transitions only (3 forward + 3 backward)
     allowed = list(CORE_TRANSITIONS)
@@ -206,13 +217,15 @@ def run_covariate_model(features: pd.DataFrame, cohort: dict) -> dict:
             desc = dict(available_covariates).get(cov_name, cov_name)
             sig = "*" if abs(np.log(hr_val)) > 0.1 else ""
             print(f"  {trans_label}: {desc} HR={hr_val:.4f}{sig}")
-            hr_rows.append({
-                "transition": trans_label,
-                "covariate": cov_name,
-                "description": desc,
-                "hazard_ratio": hr_val,
-                "log_hr": np.log(hr_val),
-            })
+            hr_rows.append(
+                {
+                    "transition": trans_label,
+                    "covariate": cov_name,
+                    "description": desc,
+                    "hazard_ratio": hr_val,
+                    "log_hr": np.log(hr_val),
+                }
+            )
 
     return {
         "result": result,
@@ -235,14 +248,18 @@ def run_bootstrap(features: pd.DataFrame, allowed: list, n_bootstrap: int = 200)
     if ci.get("intensity_ci"):
         print("\nIntensity Parameter 95% CIs:")
         for trans, vals in ci["intensity_ci"].items():
-            print(f"  {trans}: {vals['mean']:.5f} "
-                  f"[{vals['ci_lower']:.5f}, {vals['ci_upper']:.5f}]")
+            print(
+                f"  {trans}: {vals['mean']:.5f} "
+                f"[{vals['ci_lower']:.5f}, {vals['ci_upper']:.5f}]"
+            )
 
     if ci.get("sojourn_ci"):
         print("\nSojourn Time 95% CIs (years):")
         for stage, vals in ci["sojourn_ci"].items():
-            print(f"  Stage {stage}: {vals['mean_years']:.2f} "
-                  f"[{vals['ci_lower']:.2f}, {vals['ci_upper']:.2f}]")
+            print(
+                f"  Stage {stage}: {vals['mean_years']:.2f} "
+                f"[{vals['ci_lower']:.2f}, {vals['ci_upper']:.2f}]"
+            )
 
     return ci
 
@@ -253,8 +270,9 @@ def generate_trajectory_predictions(Q, output_dir: Path):
     horizons = list(range(0, 181, 3))  # 0 to 15 years in 3-month steps
 
     all_preds = []
-    for start_stage in tqdm(["2B", "3", "4"], desc="Predicting trajectories",
-                            unit="stage"):
+    for start_stage in tqdm(
+        ["2B", "3", "4"], desc="Predicting trajectories", unit="stage"
+    ):
         preds = predict_trajectory(Q, start_stage, horizons)
         preds["start_stage"] = start_stage
         all_preds.append(preds)
@@ -281,13 +299,17 @@ def generate_trajectory_predictions(Q, output_dir: Path):
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Fit Multi-State Markov Model")
-    parser.add_argument("--no-bootstrap", action="store_true",
-                        help="Skip bootstrap CIs (faster)")
-    parser.add_argument("--nsd-only", action="store_true",
-                        help="Restrict to NSD+ patients only")
-    parser.add_argument("--n-bootstrap", type=int, default=200,
-                        help="Number of bootstrap resamples")
+    parser.add_argument(
+        "--no-bootstrap", action="store_true", help="Skip bootstrap CIs (faster)"
+    )
+    parser.add_argument(
+        "--nsd-only", action="store_true", help="Restrict to NSD+ patients only"
+    )
+    parser.add_argument(
+        "--n-bootstrap", type=int, default=200, help="Number of bootstrap resamples"
+    )
     args = parser.parse_args()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -333,7 +355,9 @@ def main():
     print("\n" + "=" * 70)
     print("SUMMARY")
     print("=" * 70)
-    print(f"Homogeneous model: {'CONVERGED' if homo_result.converged else 'DID NOT CONVERGE'}")
+    print(
+        f"Homogeneous model: {'CONVERGED' if homo_result.converged else 'DID NOT CONVERGE'}"
+    )
     print(f"  Log-likelihood: {homo_result.log_likelihood:.1f}")
     print(f"  Observations: {homo_result.n_observations}")
     print(f"  Transitions: {homo_result.n_transitions}")
@@ -347,7 +371,9 @@ def main():
 
     if cov_results:
         cov_result = cov_results["result"]
-        print(f"\nCovariate model: {'CONVERGED' if cov_result.converged else 'DID NOT CONVERGE'}")
+        print(
+            f"\nCovariate model: {'CONVERGED' if cov_result.converged else 'DID NOT CONVERGE'}"
+        )
         print(f"  Log-likelihood: {cov_result.log_likelihood:.1f}")
 
     print(f"\nResults saved to: {OUTPUT_DIR}")

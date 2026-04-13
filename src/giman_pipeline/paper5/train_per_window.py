@@ -1,5 +1,4 @@
-"""
-Per-Window Training Wrappers for Temporal Validation.
+"""Per-Window Training Wrappers for Temporal Validation.
 
 Wraps Paper 3's training functions for single-window (non-CV) training:
     - train_deephit_on_window(): Train DeepHit on one temporal window
@@ -14,14 +13,12 @@ Key differences from Paper 3's cross_validate():
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
 import torch
 
 from giman_pipeline.paper3.dynamic_deephit import (
-    ALL_FEATURES,
     N_STATES,
     N_TIME_BINS,
     DeepHitDataset,
@@ -35,7 +32,6 @@ from giman_pipeline.paper3.dynamic_deephit import (
     train_model,
 )
 from giman_pipeline.paper3.graph_digital_twin import (
-    GRAPH_FEATURES,
     GraphDeepHitDataset,
     GraphDigitalTwin,
     build_patient_graph,
@@ -43,7 +39,6 @@ from giman_pipeline.paper3.graph_digital_twin import (
     train_graph_model,
 )
 from giman_pipeline.paper3.multistate_markov import STAGE_LABELS
-
 from giman_pipeline.paper5.inductive_graph import (
     InductiveGraphExtender,
     extract_test_baseline_features,
@@ -156,18 +151,20 @@ def train_deephit_on_window(
         n_test_episodes, best_val_loss, training_history.
     """
     if device is None:
-        device = "mps" if torch.backends.mps.is_available() else (
-            "cuda" if torch.cuda.is_available() else "cpu"
+        device = (
+            "mps"
+            if torch.backends.mps.is_available()
+            else ("cuda" if torch.cuda.is_available() else "cpu")
         )
 
     torch.manual_seed(seed)
     np.random.seed(seed)
 
     if verbose:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  DeepHit — {len(train_patnos)} train, {len(test_patnos)} test")
         print(f"  Device: {device}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
     # 1. Extract episodes from all patients (filter by set membership later)
     all_patnos = set(train_patnos) | set(test_patnos)
@@ -189,8 +186,10 @@ def train_deephit_on_window(
     test_episodes = [e for e in episodes if e.patno in test_set]
 
     if verbose:
-        print(f"  Episodes: {len(train_episodes)} train, {len(val_episodes)} val, "
-              f"{len(test_episodes)} test")
+        print(
+            f"  Episodes: {len(train_episodes)} train, {len(val_episodes)} val, "
+            f"{len(test_episodes)} test"
+        )
 
     # 4. Compute feature stats from TRAINING patients only
     means, stds = compute_feature_stats(patient_arrays, train_set)
@@ -210,9 +209,16 @@ def train_deephit_on_window(
 
     # 7. Train
     history, best_val, best_state = train_model(
-        model, train_ds, val_ds, device,
-        n_epochs=n_epochs, batch_size=batch_size, lr=lr,
-        weight_decay=weight_decay, patience=patience, alpha=alpha,
+        model,
+        train_ds,
+        val_ds,
+        device,
+        n_epochs=n_epochs,
+        batch_size=batch_size,
+        lr=lr,
+        weight_decay=weight_decay,
+        patience=patience,
+        alpha=alpha,
         verbose=verbose,
     )
 
@@ -324,32 +330,38 @@ def train_graph_dt_on_window(
         n_train_episodes, n_test_episodes, best_val_loss, training_history.
     """
     if device is None:
-        device = "mps" if torch.backends.mps.is_available() else (
-            "cuda" if torch.cuda.is_available() else "cpu"
+        device = (
+            "mps"
+            if torch.backends.mps.is_available()
+            else ("cuda" if torch.cuda.is_available() else "cpu")
         )
 
     torch.manual_seed(seed)
     np.random.seed(seed)
 
     if verbose:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  Graph-DT — {len(train_patnos)} train, {len(test_patnos)} test")
         print(f"  Device: {device}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
     # 1. Build training-only graph
     if verbose:
         print("  Building training-only kNN graph...")
 
     edge_index, edge_weight, node_baseline = build_patient_graph(
-        features_df, train_patnos, k_neighbors=k_neighbors,
+        features_df,
+        train_patnos,
+        k_neighbors=k_neighbors,
     )
     train_pat_to_gidx = {p: i for i, p in enumerate(train_patnos)}
     n_baseline_features = node_baseline.size(1)
 
     if verbose:
-        print(f"  Training graph: {len(train_patnos)} nodes, "
-              f"{edge_index.size(1)} edges, {n_baseline_features} features")
+        print(
+            f"  Training graph: {len(train_patnos)} nodes, "
+            f"{edge_index.size(1)} edges, {n_baseline_features} features"
+        )
 
     # 2. Inductively extend graph for test patients
     if verbose:
@@ -373,7 +385,8 @@ def train_graph_dt_on_window(
     # But since training node_baseline is already standardized, we need raw stats.
     # Simpler: use extract_test_baseline_features with training stats from raw features.
     test_baseline = extract_test_baseline_features(
-        features_df, test_patnos,
+        features_df,
+        test_patnos,
         # Pass None to use test-internal standardization — not ideal but functional.
         # The inductive extension uses cosine similarity, which is scale-invariant.
         train_means=None,
@@ -386,8 +399,10 @@ def train_graph_dt_on_window(
 
     ext_stats = extender.get_stats(len(test_patnos))
     if verbose:
-        print(f"  Extended graph: {ext_stats['n_total_nodes']} nodes, "
-              f"{ext_edge_index.size(1)} edges")
+        print(
+            f"  Extended graph: {ext_stats['n_total_nodes']} nodes, "
+            f"{ext_edge_index.size(1)} edges"
+        )
 
     # 3. Extract episodes and patient arrays
     all_patnos = set(train_patnos) | set(test_patnos)
@@ -407,8 +422,10 @@ def train_graph_dt_on_window(
     test_episodes = [e for e in episodes if e.patno in test_set]
 
     if verbose:
-        print(f"  Episodes: {len(train_episodes)} train, {len(val_episodes)} val, "
-              f"{len(test_episodes)} test")
+        print(
+            f"  Episodes: {len(train_episodes)} train, {len(val_episodes)} val, "
+            f"{len(test_episodes)} test"
+        )
 
     # 5. Feature stats from training patients
     means, stds = compute_feature_stats(patient_arrays, train_set)
@@ -416,14 +433,26 @@ def train_graph_dt_on_window(
     # 6. Build datasets
     # Training + val use training-only graph (train_pat_to_gidx)
     train_ds = GraphDeepHitDataset(
-        train_episodes, patient_arrays, means, stds, train_pat_to_gidx,
+        train_episodes,
+        patient_arrays,
+        means,
+        stds,
+        train_pat_to_gidx,
     )
     val_ds = GraphDeepHitDataset(
-        val_episodes, patient_arrays, means, stds, train_pat_to_gidx,
+        val_episodes,
+        patient_arrays,
+        means,
+        stds,
+        train_pat_to_gidx,
     )
     # Test uses extended graph (full_pat_to_gidx)
     test_ds = GraphDeepHitDataset(
-        test_episodes, patient_arrays, means, stds, full_pat_to_gidx,
+        test_episodes,
+        patient_arrays,
+        means,
+        stds,
+        full_pat_to_gidx,
     )
 
     # 7. Build model
@@ -439,18 +468,28 @@ def train_graph_dt_on_window(
 
     # 8. Train on training-only graph
     history, best_val, best_state = train_graph_model(
-        model, train_ds, val_ds, device,
+        model,
+        train_ds,
+        val_ds,
+        device,
         node_baseline=node_baseline,
         edge_index=edge_index,
         edge_weight=edge_weight,
-        n_epochs=n_epochs, batch_size=batch_size, lr=lr,
-        weight_decay=weight_decay, patience=patience, alpha=alpha,
-        graph_smooth_weight=graph_smooth_weight, verbose=verbose,
+        n_epochs=n_epochs,
+        batch_size=batch_size,
+        lr=lr,
+        weight_decay=weight_decay,
+        patience=patience,
+        alpha=alpha,
+        graph_smooth_weight=graph_smooth_weight,
+        verbose=verbose,
     )
 
     # 9. Evaluate on test set using EXTENDED graph
     test_preds = predict_all_graph(
-        model, test_ds, device,
+        model,
+        test_ds,
+        device,
         node_baseline=ext_baseline,
         edge_index=ext_edge_index,
         edge_weight=ext_edge_weight,

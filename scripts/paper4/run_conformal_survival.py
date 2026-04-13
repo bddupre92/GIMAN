@@ -21,27 +21,25 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from giman_pipeline.paper3.dynamic_deephit import (
-    extract_episodes,
-    build_patient_arrays,
     DeepHitDataset,
-    predict_all,
+    build_patient_arrays,
+    extract_episodes,
     load_deephit_checkpoint,
+    predict_all,
 )
 from giman_pipeline.paper3.graph_digital_twin import (
     GraphDeepHitDataset,
-    predict_all_graph,
     load_graph_dt_checkpoint,
+    predict_all_graph,
 )
-from giman_pipeline.paper3.multistate_markov import STAGE_LABELS
 from giman_pipeline.paper4.conformal_survival import (
-    evaluate_conformal_on_fold,
     conformal_result_to_dict,
+    evaluate_conformal_on_fold,
     timing_result_to_dict,
 )
 
@@ -60,7 +58,6 @@ def run_model_conformal(
     n_folds: int = 5,
 ) -> dict:
     """Run conformal evaluation for one model type across all folds."""
-
     all_cif_results = []
     all_timing_results = []
 
@@ -87,10 +84,17 @@ def run_model_conformal(
             node_baseline = cp["node_baseline"]
 
             test_eps = [e for e in episodes if e.patno in test_pats]
-            test_ds = GraphDeepHitDataset(test_eps, patient_arrays, means, stds, pat_to_gidx)
+            test_ds = GraphDeepHitDataset(
+                test_eps, patient_arrays, means, stds, pat_to_gidx
+            )
             device = next(model.parameters()).device
             preds = predict_all_graph(
-                model, test_ds, device, node_baseline, edge_index, edge_weight,
+                model,
+                test_ds,
+                device,
+                node_baseline,
+                edge_index,
+                edge_weight,
             )
         else:
             raise ValueError(f"Unknown model type: {model_type}")
@@ -115,8 +119,10 @@ def run_model_conformal(
             all_cif_results.append(cif_result)
             all_timing_results.append(timing_result)
 
-        print(f"  Fold {fi}: {len(test_eps)} test episodes, "
-              f"marginal coverage (90%)={[r for r in all_cif_results if r.fold_idx == fi and abs(r.confidence_level - 0.90) < 0.01][0].marginal_coverage:.4f}")
+        print(
+            f"  Fold {fi}: {len(test_eps)} test episodes, "
+            f"marginal coverage (90%)={[r for r in all_cif_results if r.fold_idx == fi and abs(r.confidence_level - 0.90) < 0.01][0].marginal_coverage:.4f}"
+        )
 
     return {
         "cif_results": all_cif_results,
@@ -129,8 +135,7 @@ def aggregate_results(results: list, key: str = "marginal_coverage") -> dict:
     agg = {}
     for cl in CONFIDENCE_LEVELS:
         fold_values = [
-            getattr(r, key) for r in results
-            if abs(r.confidence_level - cl) < 0.01
+            getattr(r, key) for r in results if abs(r.confidence_level - cl) < 0.01
         ]
         if fold_values:
             agg[f"{cl:.2f}"] = {
@@ -174,20 +179,28 @@ def main():
         with open(OUTPUT_DIR / f"conformal_results_{model_type}.json", "w") as f:
             json.dump(
                 [conformal_result_to_dict(r) for r in results["cif_results"]],
-                f, indent=2, default=str,
+                f,
+                indent=2,
+                default=str,
             )
         with open(OUTPUT_DIR / f"timing_intervals_{model_type}.json", "w") as f:
             json.dump(
                 [timing_result_to_dict(r) for r in results["timing_results"]],
-                f, indent=2, default=str,
+                f,
+                indent=2,
+                default=str,
             )
 
     # Aggregate summary
     summary = {}
     for model_type, results in [("DeepHit", dh_results), ("Graph-DT", gdt_results)]:
         summary[model_type] = {
-            "marginal_coverage": aggregate_results(results["cif_results"], "marginal_coverage"),
-            "mean_band_width": aggregate_results(results["cif_results"], "mean_band_width"),
+            "marginal_coverage": aggregate_results(
+                results["cif_results"], "marginal_coverage"
+            ),
+            "mean_band_width": aggregate_results(
+                results["cif_results"], "mean_band_width"
+            ),
         }
 
     with open(OUTPUT_DIR / "aggregate_summary.json", "w") as f:
@@ -204,7 +217,9 @@ def main():
         for cl_key, vals in summary[model_name]["marginal_coverage"].items():
             print(f"    Coverage (CL={cl_key}): {vals['mean']:.4f} ± {vals['std']:.4f}")
         for cl_key, vals in summary[model_name]["mean_band_width"].items():
-            print(f"    Band width (CL={cl_key}): {vals['mean']:.4f} ± {vals['std']:.4f}")
+            print(
+                f"    Band width (CL={cl_key}): {vals['mean']:.4f} ± {vals['std']:.4f}"
+            )
 
     print(f"\n  Total time: {elapsed:.1f}s")
     print(f"  Results saved to: {OUTPUT_DIR}")

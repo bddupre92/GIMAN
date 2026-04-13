@@ -23,20 +23,20 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from giman_pipeline.paper3.dynamic_deephit import (
-    extract_episodes,
-    build_patient_arrays,
     DeepHitDataset,
-    predict_all,
+    build_patient_arrays,
+    extract_episodes,
     load_deephit_checkpoint,
+    predict_all,
 )
 from giman_pipeline.paper3.graph_digital_twin import (
     GraphDeepHitDataset,
-    predict_all_graph,
     load_graph_dt_checkpoint,
+    predict_all_graph,
 )
 from giman_pipeline.paper4.calibration import (
-    evaluate_calibration,
     calibration_result_to_dict,
+    evaluate_calibration,
 )
 
 DATA_DIR = PROJECT_ROOT / "data"
@@ -66,11 +66,17 @@ def run_model_calibration(model_type, episodes, patient_arrays, n_folds=5):
             means, stds = cp["means"], cp["stds"]
             pat_to_gidx = cp["pat_to_gidx"]
             test_eps = [e for e in episodes if e.patno in test_pats]
-            test_ds = GraphDeepHitDataset(test_eps, patient_arrays, means, stds, pat_to_gidx)
+            test_ds = GraphDeepHitDataset(
+                test_eps, patient_arrays, means, stds, pat_to_gidx
+            )
             device = next(model.parameters()).device
             preds = predict_all_graph(
-                model, test_ds, device,
-                cp["node_baseline"], cp["edge_index"], cp["edge_weight"],
+                model,
+                test_ds,
+                device,
+                cp["node_baseline"],
+                cp["edge_index"],
+                cp["edge_weight"],
             )
 
         cif = preds["cif"].numpy()
@@ -80,13 +86,20 @@ def run_model_calibration(model_type, episodes, patient_arrays, n_folds=5):
 
         model_name = "DeepHit" if model_type == "deephit" else "Graph-DT"
         cal_result = evaluate_calibration(
-            cif, durations, event_idxs, censored, f"{model_name}_fold{fi}",
+            cif,
+            durations,
+            event_idxs,
+            censored,
+            f"{model_name}_fold{fi}",
         )
         all_results.append(cal_result)
 
-        print(f"  Fold {fi}: " + ", ".join(
-            f"{h}={v:.4f}" for h, v in cal_result.aggregate_ece_by_horizon.items()
-        ))
+        print(
+            f"  Fold {fi}: "
+            + ", ".join(
+                f"{h}={v:.4f}" for h, v in cal_result.aggregate_ece_by_horizon.items()
+            )
+        )
 
     return all_results
 
@@ -116,7 +129,9 @@ def main():
         with open(OUTPUT_DIR / f"calibration_results_{model_type}.json", "w") as f:
             json.dump(
                 [calibration_result_to_dict(r) for r in results],
-                f, indent=2, default=str,
+                f,
+                indent=2,
+                default=str,
             )
 
     # Aggregate ECE across folds
@@ -124,7 +139,9 @@ def main():
     for model_name, results in [("DeepHit", dh_results), ("Graph-DT", gdt_results)]:
         agg = {}
         for h in ["1yr", "3yr", "5yr"]:
-            fold_eces = [r.aggregate_ece_by_horizon.get(h, float("nan")) for r in results]
+            fold_eces = [
+                r.aggregate_ece_by_horizon.get(h, float("nan")) for r in results
+            ]
             valid = [v for v in fold_eces if not np.isnan(v)]
             agg[h] = {
                 "mean": float(np.mean(valid)) if valid else float("nan"),

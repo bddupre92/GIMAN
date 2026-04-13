@@ -519,4 +519,14 @@ def main():
     print("GIMAN-PROGRESSION TRAINING ON REAL PPMI DATA")
     print("=" * 70)
     print("Week 3: Training Implementation")
-    print("Cohort: 127 real PPMI patients (88 trai
+    print("Cohort: 127 real PPMI patients (88 train, 19 val, 20 test)")
+    print("=" * 70 + "\n")
+    
+    trainer = GIMANProgressionTrainer(
+        config_path="configs/real_ppmi_dual_model.yaml"
+    )
+    trainer.train()
+
+
+if __name__ == '__main__':
+    main()

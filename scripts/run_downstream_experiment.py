@@ -60,22 +60,48 @@ logger = logging.getLogger("downstream")
 # ── Configuration ────────────────────────────────────────────────────
 STAGE_MAP = {"0": 0, "1": 1, "2B": 2, "3": 3, "4": 4, "unclassified": 5}
 STAGE_NAMES = {
-    0: "Stage 0", 1: "Stage 1", 2: "Stage 2B",
-    3: "Stage 3", 4: "Stage 4", 5: "Unknown",
+    0: "Stage 0",
+    1: "Stage 1",
+    2: "Stage 2B",
+    3: "Stage 3",
+    4: "Stage 4",
+    5: "Unknown",
 }
 
 KEEP_FEATURES = [
-    "SEX", "AGE_AT_VISIT",
-    "NP3TOT", "NHY", "PIGD_SCORE", "TREMOR_SCORE", "MCATOT",
-    "CAUDATE_L_VOL", "CAUDATE_R_VOL", "PUTAMEN_L_VOL", "PUTAMEN_R_VOL",
-    "HIPPOCAMPUS_L_VOL", "HIPPOCAMPUS_R_VOL",
-    "CAUDATE_L_SBR", "CAUDATE_R_SBR", "PUTAMEN_L_SBR", "PUTAMEN_R_SBR",
-    "CAUDATE_ASYMMETRY", "PUTAMEN_ASYMMETRY",
-    "ALPHA_SYNUCLEIN", "TOTAL_TAU", "ABETA42", "PTAU181",
-    "UPSIT_TOTAL", "RBD_TOTAL", "SCOPA_AUT_TOTAL", "ESS_TOTAL",
-    "ENTORHINAL_L_CTH", "ENTORHINAL_R_CTH",
-    "CINGULATE_L_CTH", "CINGULATE_R_CTH",
-    "PRECENTRAL_L_CTH", "PRECENTRAL_R_CTH",
+    "SEX",
+    "AGE_AT_VISIT",
+    "NP3TOT",
+    "NHY",
+    "PIGD_SCORE",
+    "TREMOR_SCORE",
+    "MCATOT",
+    "CAUDATE_L_VOL",
+    "CAUDATE_R_VOL",
+    "PUTAMEN_L_VOL",
+    "PUTAMEN_R_VOL",
+    "HIPPOCAMPUS_L_VOL",
+    "HIPPOCAMPUS_R_VOL",
+    "CAUDATE_L_SBR",
+    "CAUDATE_R_SBR",
+    "PUTAMEN_L_SBR",
+    "PUTAMEN_R_SBR",
+    "CAUDATE_ASYMMETRY",
+    "PUTAMEN_ASYMMETRY",
+    "ALPHA_SYNUCLEIN",
+    "TOTAL_TAU",
+    "ABETA42",
+    "PTAU181",
+    "UPSIT_TOTAL",
+    "RBD_TOTAL",
+    "SCOPA_AUT_TOTAL",
+    "ESS_TOTAL",
+    "ENTORHINAL_L_CTH",
+    "ENTORHINAL_R_CTH",
+    "CINGULATE_L_CTH",
+    "CINGULATE_R_CTH",
+    "PRECENTRAL_L_CTH",
+    "PRECENTRAL_R_CTH",
 ]
 
 MODALITY_DIMS = [2, 5, 6, 6, 4, 4, 6]  # 33 total
@@ -87,16 +113,20 @@ def parse_args():
     parser.add_argument("--num-folds", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
-        "--target", type=str, default="three_class",
+        "--target",
+        type=str,
+        default="three_class",
         choices=["binary", "three_class", "full_ordinal", "nsd_positive"],
         help="Target encoding for downstream classification",
     )
     parser.add_argument(
-        "--all-targets", action="store_true",
+        "--all-targets",
+        action="store_true",
         help="Run all 4 target types (overrides --target)",
     )
     parser.add_argument(
-        "--skip-gimin", action="store_true",
+        "--skip-gimin",
+        action="store_true",
         help="Skip GIMIN imputation (use cached if available)",
     )
     return parser.parse_args()
@@ -126,8 +156,11 @@ def load_data():
     staged_patnos = set(staging_valid["PATNO"].values)
 
     logger.info("Full cohort: %d patients", len(features_df))
-    logger.info("Staged patients: %d (excluding %d unclassified)",
-                len(staging_valid), len(staging_df) - len(staging_valid))
+    logger.info(
+        "Staged patients: %d (excluding %d unclassified)",
+        len(staging_valid),
+        len(staging_df) - len(staging_valid),
+    )
 
     # Filter features and mask to staged patients
     staged_mask_idx = features_df.index.isin(staged_patnos)
@@ -138,7 +171,8 @@ def load_data():
     features_staged = features_staged.reset_index()
     features_staged = features_staged.merge(
         staging_valid[["PATNO", "stage_encoded", "nsd_iss_stage"]],
-        on="PATNO", how="inner",
+        on="PATNO",
+        how="inner",
     )
 
     logger.info("Matched: %d patients with stages", len(features_staged))
@@ -154,7 +188,9 @@ def load_data():
     # Re-index mask to match filtered patients
     mask_staged_reindexed = mask_staged.reset_index()
     mask_merged = features_staged[["PATNO"]].merge(
-        mask_staged_reindexed, on="PATNO", how="inner",
+        mask_staged_reindexed,
+        on="PATNO",
+        how="inner",
     )
     mask_np = mask_merged[available].values.astype(np.float32)
 
@@ -162,9 +198,10 @@ def load_data():
 
     logger.info(
         "Data loaded: %d patients, %d features, %.1f%% missing, stages: %s",
-        features_np.shape[0], features_np.shape[1],
+        features_np.shape[0],
+        features_np.shape[1],
         100 * (1 - mask_np.mean()),
-        dict(zip(*np.unique(stages_np, return_counts=True))),
+        dict(zip(*np.unique(stages_np, return_counts=True), strict=False)),
     )
 
     return features_np, mask_np, stages_np, available
@@ -211,20 +248,29 @@ def impute_mice(features: np.ndarray, mask: np.ndarray) -> np.ndarray:
     data[mask == 0] = np.nan
 
     imputer = IterativeImputer(
-        max_iter=20, random_state=42, sample_posterior=False,
+        max_iter=20,
+        random_state=42,
+        sample_posterior=False,
     )
     imputed = imputer.fit_transform(data)
     return imputed.astype(np.float32)
 
 
-def impute_dl_baseline(features: np.ndarray, mask: np.ndarray, method: str) -> np.ndarray:
+def impute_dl_baseline(
+    features: np.ndarray, mask: np.ndarray, method: str
+) -> np.ndarray:
     """Impute using a deep learning baseline (GAIN, SAITS, or MIWAE)."""
     from gimin.evaluation.baselines import GAINBaseline, MIWAEBaseline, SAITSBaseline
 
     baselines = {
         "GAIN": lambda: GAINBaseline(n_epochs=100, batch_size=128, hint_rate=0.9),
         "SAITS": lambda: SAITSBaseline(
-            n_layers=2, d_model=64, n_heads=4, d_ffn=128, epochs=50, patience=5,
+            n_layers=2,
+            d_model=64,
+            n_heads=4,
+            d_ffn=128,
+            epochs=50,
+            patience=5,
         ),
         "MIWAE": lambda: MIWAEBaseline(n_epochs=100, batch_size=128),
     }
@@ -244,9 +290,9 @@ def impute_gimin(
     Returns imputed features in original scale.
     """
     import torch
-    from gimin.config import GIMINConfig
     from gimin.data.scaler import build_scaler_from_config
     from gimin.training.losses import GIMINLoss
+
     from giman_pipeline.imputation.stage_graph_builder import StageAwareGraphBuilder
 
     if is_stage_conditioned:
@@ -274,7 +320,9 @@ def impute_gimin(
     features_norm_np = features_norm.numpy()
     beta = 0.3 if is_stage_conditioned else 0.0
     builder = StageAwareGraphBuilder(
-        k_neighbors=15, min_overlap=3, stage_affinity_beta=beta,
+        k_neighbors=15,
+        min_overlap=3,
+        stage_affinity_beta=beta,
     )
     graph = builder.build_full_graph(
         features_norm_np * mask.astype(np.float32),
@@ -289,20 +337,29 @@ def impute_gimin(
     # Build model
     if is_stage_conditioned:
         model = StageConditionedGIMIN(
-            modality_dims=MODALITY_DIMS, embed_dim=64,
-            num_gnn_layers=3, num_heads=4, mc_dropout=0.1,
-            num_stages=6, stage_embed_dim=16,
+            modality_dims=MODALITY_DIMS,
+            embed_dim=64,
+            num_gnn_layers=3,
+            num_heads=4,
+            mc_dropout=0.1,
+            num_stages=6,
+            stage_embed_dim=16,
             use_stage_attention_bias=False,  # Decoder only
         )
     else:
         model = VanillaGIMIN(
-            modality_dims=MODALITY_DIMS, embed_dim=64,
-            num_gnn_layers=3, num_heads=4, mc_dropout=0.1,
+            modality_dims=MODALITY_DIMS,
+            embed_dim=64,
+            num_gnn_layers=3,
+            num_heads=4,
+            mc_dropout=0.1,
         )
 
     # Loss function
     loss_fn = GIMINLoss(
-        lambda_dist=0.1, lambda_cross=0.10, lambda_cal=0.01,
+        lambda_dist=0.1,
+        lambda_cross=0.10,
+        lambda_cal=0.01,
         cal_warmup_epochs=50,
         cross_modal_pairs=cfg.cross_modal_pairs,
         binary_feature_indices=cfg.binary_feature_indices or [0],
@@ -311,7 +368,11 @@ def impute_gimin(
     # Train
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", patience=15, factor=0.5, min_lr=1e-6,
+        optimizer,
+        mode="min",
+        patience=15,
+        factor=0.5,
+        min_lr=1e-6,
     )
 
     model.train()
@@ -320,12 +381,20 @@ def impute_gimin(
 
         if is_stage_conditioned:
             out = model(
-                features_norm, mask_t, edge_index, edge_weight, overlap_frac,
+                features_norm,
+                mask_t,
+                edge_index,
+                edge_weight,
+                overlap_frac,
                 stage_ids=stages_t,
             )
         else:
             out = model(
-                features_norm, mask_t, edge_index, edge_weight, overlap_frac,
+                features_norm,
+                mask_t,
+                edge_index,
+                edge_weight,
+                overlap_frac,
             )
 
         # GIMINLoss.forward(model_output, true_values, target_mask, observed_mask, epoch)
@@ -351,12 +420,19 @@ def impute_gimin(
         for _ in range(20):
             if is_stage_conditioned:
                 out = model(
-                    features_norm, mask_t, edge_index, edge_weight,
-                    overlap_frac, stage_ids=stages_t,
+                    features_norm,
+                    mask_t,
+                    edge_index,
+                    edge_weight,
+                    overlap_frac,
+                    stage_ids=stages_t,
                 )
             else:
                 out = model(
-                    features_norm, mask_t, edge_index, edge_weight,
+                    features_norm,
+                    mask_t,
+                    edge_index,
+                    edge_weight,
                     overlap_frac,
                 )
             mc_preds.append(out["imputed_values"].detach())
@@ -378,6 +454,7 @@ def _build_gimin_config():
     with correct normalization strategies and cross-modal pairs.
     """
     from gimin.config import GIMINConfig
+
     return GIMINConfig()
 
 
@@ -393,9 +470,12 @@ def train_catboost_classifier(
     except ImportError:
         # Fallback to gradient boosting
         from sklearn.ensemble import GradientBoostingClassifier
+
         logger.warning("CatBoost not available, using sklearn GradientBoosting")
         model = GradientBoostingClassifier(
-            n_estimators=500, max_depth=5, learning_rate=0.05,
+            n_estimators=500,
+            max_depth=5,
+            learning_rate=0.05,
             random_state=42,
         )
         model.fit(X_train, y_train)
@@ -414,7 +494,8 @@ def train_catboost_classifier(
     # Use a small eval set from train for early stopping
     n_train = int(0.85 * len(X_train))
     model.fit(
-        X_train[:n_train], y_train[:n_train],
+        X_train[:n_train],
+        y_train[:n_train],
         eval_set=(X_train[n_train:], y_train[n_train:]),
     )
     return model.predict_proba(X_test)
@@ -474,7 +555,9 @@ def run_downstream_cv(
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
     fold_metrics = []
 
-    for fold_i, (train_idx, test_idx) in enumerate(skf.split(features_imputed, targets_enc)):
+    for fold_i, (train_idx, test_idx) in enumerate(
+        skf.split(features_imputed, targets_enc)
+    ):
         X_train = features_imputed[train_idx]
         y_train = targets_enc[train_idx]
         X_test = features_imputed[test_idx]
@@ -526,8 +609,11 @@ def run_single_target(
 
         t0 = time.time()
         method_results = run_downstream_cv(
-            imputed_data, stages, target_type,
-            n_folds=n_folds, seed=seed,
+            imputed_data,
+            stages,
+            target_type,
+            n_folds=n_folds,
+            seed=seed,
         )
         method_results["imputation_time"] = round(time.time() - t0, 2)
         results[method_name] = method_results
@@ -553,7 +639,8 @@ def main():
 
     target_types = (
         ["binary", "three_class", "full_ordinal", "nsd_positive"]
-        if args.all_targets else [args.target]
+        if args.all_targets
+        else [args.target]
     )
 
     print("=" * 70)
@@ -623,7 +710,11 @@ def main():
         print(f"[{i}/{n_methods}] GIMIN Vanilla imputation...")
         t0 = time.time()
         imputation_methods["GIMIN_Vanilla"] = impute_gimin(
-            features, mask, stages, epochs=args.epochs, is_stage_conditioned=False,
+            features,
+            mask,
+            stages,
+            epochs=args.epochs,
+            is_stage_conditioned=False,
         )
         print(f"  Done in {time.time() - t0:.1f}s")
 
@@ -632,7 +723,11 @@ def main():
         print(f"[{i}/{n_methods}] GIMIN StageDecoder imputation...")
         t0 = time.time()
         imputation_methods["GIMIN_StageDecoder"] = impute_gimin(
-            features, mask, stages, epochs=args.epochs, is_stage_conditioned=True,
+            features,
+            mask,
+            stages,
+            epochs=args.epochs,
+            is_stage_conditioned=True,
         )
         print(f"  Done in {time.time() - t0:.1f}s")
 
@@ -644,8 +739,13 @@ def main():
         print(f"{'=' * 70}")
 
         target_results = run_single_target(
-            features, mask, stages, imputation_methods,
-            target_type, args.num_folds, args.seed,
+            features,
+            mask,
+            stages,
+            imputation_methods,
+            target_type,
+            args.num_folds,
+            args.seed,
         )
         all_results[target_type] = target_results
 
@@ -668,9 +768,7 @@ def main():
         for name, res in results_dict.items():
             save_res = {}
             for k, v in res.items():
-                if k == "fold_metrics":
-                    save_res[k] = v
-                elif isinstance(v, (int, float, str)):
+                if k == "fold_metrics" or isinstance(v, (int, float, str)):
                     save_res[k] = v
                 else:
                     save_res[k] = float(v)
@@ -692,7 +790,7 @@ def main():
         "timestamp": datetime.datetime.now().isoformat(),
     }
 
-    serializer = lambda x: float(x) if hasattr(x, '__float__') else str(x)  # noqa: E731
+    serializer = lambda x: float(x) if hasattr(x, "__float__") else str(x)  # noqa: E731
 
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     ts_dir = output_dir / "runs"

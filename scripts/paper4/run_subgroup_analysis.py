@@ -18,34 +18,33 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from giman_pipeline.paper3.dynamic_deephit import (
-    extract_episodes,
-    build_patient_arrays,
     DeepHitDataset,
-    predict_all,
+    build_patient_arrays,
+    extract_episodes,
     load_deephit_checkpoint,
+    predict_all,
 )
 from giman_pipeline.paper3.graph_digital_twin import (
     GraphDeepHitDataset,
-    predict_all_graph,
     load_graph_dt_checkpoint,
-)
-from giman_pipeline.paper4.subgroup import (
-    SUBGROUP_VARS,
-    assign_subgroups,
-    compute_subgroup_ctd,
-    bootstrap_interaction_test,
-    apply_fdr_correction,
-    compute_conditional_coverage,
-    subgroup_ctd_to_dict,
-    interaction_test_to_dict,
+    predict_all_graph,
 )
 from giman_pipeline.paper4.conformal_survival import CauseSpecificConformal
+from giman_pipeline.paper4.subgroup import (
+    SUBGROUP_VARS,
+    apply_fdr_correction,
+    assign_subgroups,
+    bootstrap_interaction_test,
+    compute_conditional_coverage,
+    compute_subgroup_ctd,
+    interaction_test_to_dict,
+    subgroup_ctd_to_dict,
+)
 
 DATA_DIR = PROJECT_ROOT / "data"
 FEATURES_PATH = DATA_DIR / "07_paper3_features" / "longitudinal_features.csv"
@@ -71,11 +70,17 @@ def get_test_predictions(model_type, fi, episodes, patient_arrays):
         means, stds = cp["means"], cp["stds"]
         pat_to_gidx = cp["pat_to_gidx"]
         test_eps = [e for e in episodes if e.patno in test_pats]
-        test_ds = GraphDeepHitDataset(test_eps, patient_arrays, means, stds, pat_to_gidx)
+        test_ds = GraphDeepHitDataset(
+            test_eps, patient_arrays, means, stds, pat_to_gidx
+        )
         device = next(model.parameters()).device
         preds = predict_all_graph(
-            model, test_ds, device,
-            cp["node_baseline"], cp["edge_index"], cp["edge_weight"],
+            model,
+            test_ds,
+            device,
+            cp["node_baseline"],
+            cp["edge_index"],
+            cp["edge_weight"],
         )
 
     patnos = [ep.patno for ep in test_eps]
@@ -101,16 +106,26 @@ def main():
     all_ctd_results = []
 
     for fi in range(5):
-        for model_type, model_name in [("deephit", "DeepHit"), ("graph_dt", "Graph-DT")]:
+        for model_type, model_name in [
+            ("deephit", "DeepHit"),
+            ("graph_dt", "Graph-DT"),
+        ]:
             preds, patnos, test_eps = get_test_predictions(
-                model_type, fi, episodes, patient_arrays,
+                model_type,
+                fi,
+                episodes,
+                patient_arrays,
             )
 
             subgroup_assignments = assign_subgroups(patnos, features_df)
 
             for var_name, pat_groups in subgroup_assignments.items():
                 ctd_result = compute_subgroup_ctd(
-                    preds, patnos, pat_groups, model_name, var_name,
+                    preds,
+                    patnos,
+                    pat_groups,
+                    model_name,
+                    var_name,
                 )
                 all_ctd_results.append(ctd_result)
 
@@ -120,7 +135,9 @@ def main():
     with open(OUTPUT_DIR / "subgroup_ctd.json", "w") as f:
         json.dump(
             [subgroup_ctd_to_dict(r) for r in all_ctd_results],
-            f, indent=2, default=str,
+            f,
+            indent=2,
+            default=str,
         )
 
     # Print summary
@@ -129,7 +146,8 @@ def main():
         print(f"\n  {var_name}:")
         for model_name in ["DeepHit", "Graph-DT"]:
             fold_results = [
-                r for r in all_ctd_results
+                r
+                for r in all_ctd_results
                 if r.model_name == model_name and r.subgroup_var == var_name
             ]
             if not fold_results:
@@ -142,15 +160,21 @@ def main():
                 vals = [r.per_group_ctd.get(group, float("nan")) for r in fold_results]
                 valid = [v for v in vals if not np.isnan(v)]
                 if valid:
-                    print(f"    {model_name} [{group}]: C-td={np.mean(valid):.4f} ± {np.std(valid):.4f}")
+                    print(
+                        f"    {model_name} [{group}]: C-td={np.mean(valid):.4f} ± {np.std(valid):.4f}"
+                    )
 
     # --- Bootstrap interaction tests ---
     print("\n--- BOOTSTRAP INTERACTION TESTS ---")
     interaction_results = []
 
     for fi in range(5):
-        dh_preds, dh_patnos, _ = get_test_predictions("deephit", fi, episodes, patient_arrays)
-        gdt_preds, gdt_patnos, _ = get_test_predictions("graph_dt", fi, episodes, patient_arrays)
+        dh_preds, dh_patnos, _ = get_test_predictions(
+            "deephit", fi, episodes, patient_arrays
+        )
+        gdt_preds, gdt_patnos, _ = get_test_predictions(
+            "graph_dt", fi, episodes, patient_arrays
+        )
 
         # Align predictions (same patients, same order)
         assert dh_patnos == gdt_patnos, f"Patient mismatch in fold {fi}"
@@ -159,8 +183,13 @@ def main():
 
         for var_name, pat_groups in subgroup_assignments.items():
             result = bootstrap_interaction_test(
-                dh_preds, gdt_preds, dh_patnos, pat_groups,
-                var_name, n_bootstrap=500, random_state=42 + fi,
+                dh_preds,
+                gdt_preds,
+                dh_patnos,
+                pat_groups,
+                var_name,
+                n_bootstrap=500,
+                random_state=42 + fi,
             )
             interaction_results.append(result)
 
@@ -172,25 +201,39 @@ def main():
     with open(OUTPUT_DIR / "interaction_tests.json", "w") as f:
         json.dump(
             [interaction_test_to_dict(r) for r in interaction_results],
-            f, indent=2, default=str,
+            f,
+            indent=2,
+            default=str,
         )
 
     print("\n  Interaction test results:")
     for var_name in SUBGROUP_VARS:
         fold_results = [r for r in interaction_results if r.subgroup_var == var_name]
-        p_values = [r.interaction_p_value for r in fold_results if not np.isnan(r.interaction_p_value)]
+        p_values = [
+            r.interaction_p_value
+            for r in fold_results
+            if not np.isnan(r.interaction_p_value)
+        ]
         if p_values:
-            print(f"    {var_name}: avg p={np.mean(p_values):.4f}, "
-                  f"range=[{min(p_values):.4f}, {max(p_values):.4f}]")
+            print(
+                f"    {var_name}: avg p={np.mean(p_values):.4f}, "
+                f"range=[{min(p_values):.4f}, {max(p_values):.4f}]"
+            )
 
     # --- Conditional coverage ---
     print("\n--- CONDITIONAL CONFORMAL COVERAGE ---")
     cond_coverage = {}
 
     for fi in range(5):
-        for model_type, model_name in [("deephit", "DeepHit"), ("graph_dt", "Graph-DT")]:
+        for model_type, model_name in [
+            ("deephit", "DeepHit"),
+            ("graph_dt", "Graph-DT"),
+        ]:
             preds, patnos, test_eps = get_test_predictions(
-                model_type, fi, episodes, patient_arrays,
+                model_type,
+                fi,
+                episodes,
+                patient_arrays,
             )
 
             cif = preds["cif"].numpy()
@@ -206,8 +249,10 @@ def main():
 
             csc = CauseSpecificConformal(confidence_level=0.90)
             csc.calibrate(
-                cif[idx[:n_cal]], durations[idx[:n_cal]],
-                event_idxs[idx[:n_cal]], censored[idx[:n_cal]],
+                cif[idx[:n_cal]],
+                durations[idx[:n_cal]],
+                event_idxs[idx[:n_cal]],
+                censored[idx[:n_cal]],
             )
             bands = csc.predict_bands(cif[idx[n_cal:]])
 
@@ -216,9 +261,13 @@ def main():
 
             for var_name, pat_groups in subgroup_assignments.items():
                 cc = compute_conditional_coverage(
-                    cif[idx[n_cal:]], bands,
-                    durations[idx[n_cal:]], event_idxs[idx[n_cal:]],
-                    censored[idx[n_cal:]], eval_patnos, pat_groups,
+                    cif[idx[n_cal:]],
+                    bands,
+                    durations[idx[n_cal:]],
+                    event_idxs[idx[n_cal:]],
+                    censored[idx[n_cal:]],
+                    eval_patnos,
+                    pat_groups,
                 )
                 key = f"{model_name}_{var_name}_fold{fi}"
                 cond_coverage[key] = cc

@@ -31,21 +31,18 @@ Phase: PhD Paper 1 - NSD-ISS Stage Prediction
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from giman_pipeline.staging.nsd_iss import (
-    stage_cohort,
     save_staging_results,
-    STAGE_ORDINAL_MAP,
+    stage_cohort,
 )
 
 logging.basicConfig(
@@ -81,10 +78,13 @@ def load_saa_data(data_root: Path) -> pd.DataFrame | None:
     to maximize S anchor coverage.
     """
     # Try pre-extracted SAA labels first
-    path = find_file(data_root, [
-        "03_prodromal/enhanced/saa_labels.csv",
-        "prodromal_cohort/saa_labels.csv",
-    ])
+    path = find_file(
+        data_root,
+        [
+            "03_prodromal/enhanced/saa_labels.csv",
+            "prodromal_cohort/saa_labels.csv",
+        ],
+    )
 
     saa_dfs = []
     if path is not None:
@@ -187,7 +187,9 @@ def _extract_saa_from_biospecimen(data_root: Path) -> pd.DataFrame | None:
         subset=["PATNO"], keep="first"
     )
 
-    logger.info(f"  Extracted SAA labels for {len(saa_df)} patients from biospecimen files")
+    logger.info(
+        f"  Extracted SAA labels for {len(saa_df)} patients from biospecimen files"
+    )
     return saa_df[["PATNO", "saa_label"]].copy()
 
 
@@ -198,25 +200,33 @@ def load_dat_spect_data(data_root: Path) -> pd.DataFrame | None:
     over pre-processed files which may be limited to a specific subcohort.
     """
     # Prefer raw SBR analysis file — has the most comprehensive coverage
-    raw_path = find_file(data_root, [
-        "00_raw/DaTScan_SBR_Analysis_*.csv",
-        "00_raw/GIMAN/ppmi_data_csv/DaTScan_SBR_Analysis_*.csv",
-        "00_raw/GIMAN/ppmi_data_csv/DaTscan_Imaging_*.csv",
-    ])
+    raw_path = find_file(
+        data_root,
+        [
+            "00_raw/DaTScan_SBR_Analysis_*.csv",
+            "00_raw/GIMAN/ppmi_data_csv/DaTScan_SBR_Analysis_*.csv",
+            "00_raw/GIMAN/ppmi_data_csv/DaTscan_Imaging_*.csv",
+        ],
+    )
     if raw_path is not None:
         df = _extract_dat_from_raw(raw_path)
         if len(df) > 0:
             return df
 
     # Fallback to pre-processed files
-    path = find_file(data_root, [
-        "01_processed/dat_spect_sbr_values.csv",
-        "03_prodromal/enhanced/dat_spect_sbr.csv",
-    ])
+    path = find_file(
+        data_root,
+        [
+            "01_processed/dat_spect_sbr_values.csv",
+            "03_prodromal/enhanced/dat_spect_sbr.csv",
+        ],
+    )
     if path is not None:
         df = pd.read_csv(path)
         # Check if it has actual non-NaN SBR values
-        sbr_cols = [c for c in df.columns if "SBR" in c or "PUTAMEN" in c or "CAUDATE" in c]
+        sbr_cols = [
+            c for c in df.columns if "SBR" in c or "PUTAMEN" in c or "CAUDATE" in c
+        ]
         if sbr_cols and df[sbr_cols].notna().any().any():
             logger.info(f"Loaded DaT-SPECT data: {len(df)} records from {path}")
             return df
@@ -263,7 +273,9 @@ def _extract_dat_from_raw(raw_path: Path) -> pd.DataFrame:
     if "EVENT_ID" in df.columns:
         # Merge event info
         out["EVENT_ID"] = df.loc[out.index, "EVENT_ID"]
-        out = out.sort_values(["PATNO", "EVENT_ID"]).drop_duplicates("PATNO", keep="first")
+        out = out.sort_values(["PATNO", "EVENT_ID"]).drop_duplicates(
+            "PATNO", keep="first"
+        )
     else:
         out = out.drop_duplicates("PATNO", keep="first")
 
@@ -279,19 +291,25 @@ def load_clinical_data(data_root: Path) -> pd.DataFrame | None:
     Falls back to pre-processed cohort file.
     """
     # First try loading from raw UPDRS-III files (broader coverage)
-    updrs3_path = find_file(data_root, [
-        "00_raw/GIMAN/ppmi_data_csv/MDS-UPDRS_Part_III_*.csv",
-    ])
+    updrs3_path = find_file(
+        data_root,
+        [
+            "00_raw/GIMAN/ppmi_data_csv/MDS-UPDRS_Part_III_*.csv",
+        ],
+    )
     if updrs3_path is not None:
         df = _extract_clinical_from_updrs(updrs3_path)
         if df is not None and len(df) > 0:
             return df
 
     # Fallback to pre-processed cohort
-    path = find_file(data_root, [
-        "02_processed/enhanced_real_ppmi_cohort.csv",
-        "03_prodromal/final_training_dataset/unified_longitudinal_early_pd.csv",
-    ])
+    path = find_file(
+        data_root,
+        [
+            "02_processed/enhanced_real_ppmi_cohort.csv",
+            "03_prodromal/final_training_dataset/unified_longitudinal_early_pd.csv",
+        ],
+    )
     if path is not None:
         df = pd.read_csv(path, low_memory=False)
         logger.info(f"Loaded clinical data from cohort: {len(df)} records")
@@ -324,7 +342,9 @@ def _extract_clinical_from_updrs(updrs3_path: Path) -> pd.DataFrame | None:
     if np3tot_col is None:
         np3_items = [c for c in df.columns if c.startswith("NP3") and c != "NP3TOT"]
         if np3_items:
-            df["NP3TOT"] = df[np3_items].apply(pd.to_numeric, errors="coerce").sum(axis=1)
+            df["NP3TOT"] = (
+                df[np3_items].apply(pd.to_numeric, errors="coerce").sum(axis=1)
+            )
             np3tot_col = "NP3TOT"
             logger.info(f"  Computed NP3TOT from {len(np3_items)} individual items")
 
@@ -372,10 +392,13 @@ def _extract_clinical_from_updrs(updrs3_path: Path) -> pd.DataFrame | None:
 
 def load_genetic_data(data_root: Path) -> pd.DataFrame | None:
     """Load genetic risk factor data."""
-    path = find_file(data_root, [
-        "03_prodromal/enhanced/genetic_features.csv",
-        "00_raw/GIMAN/ppmi_data_csv/iu_genetic_consensus_*.csv",
-    ])
+    path = find_file(
+        data_root,
+        [
+            "03_prodromal/enhanced/genetic_features.csv",
+            "00_raw/GIMAN/ppmi_data_csv/iu_genetic_consensus_*.csv",
+        ],
+    )
     if path is None:
         logger.warning("Genetic data not found.")
         return None
@@ -391,9 +414,12 @@ def load_diagnosis_data(data_root: Path) -> pd.DataFrame | None:
     Extracts PRIMDIAG (1=PD, 17=Prodromal, etc.) per patient from the
     raw Primary_Clinical_Diagnosis file. Takes baseline diagnosis.
     """
-    path = find_file(data_root, [
-        "00_raw/Primary_Clinical_Diagnosis_*.csv",
-    ])
+    path = find_file(
+        data_root,
+        [
+            "00_raw/Primary_Clinical_Diagnosis_*.csv",
+        ],
+    )
     if path is None:
         logger.warning("Diagnosis data not found.")
         return None
@@ -440,10 +466,13 @@ def build_cohort_patnos(data_root: Path) -> pd.DataFrame:
         logger.info(f"  SAA labels: {len(saa)} patients")
 
     # From DaT-SPECT (D anchor source) — this gives us ~2000+ patients
-    dat_path = find_file(data_root, [
-        "00_raw/DaTScan_SBR_Analysis_*.csv",
-        "00_raw/GIMAN/ppmi_data_csv/DaTScan_SBR_Analysis_*.csv",
-    ])
+    dat_path = find_file(
+        data_root,
+        [
+            "00_raw/DaTScan_SBR_Analysis_*.csv",
+            "00_raw/GIMAN/ppmi_data_csv/DaTScan_SBR_Analysis_*.csv",
+        ],
+    )
     if dat_path:
         dat = pd.read_csv(dat_path, usecols=["PATNO"], low_memory=False)
         dat_patnos = pd.to_numeric(dat["PATNO"], errors="coerce").dropna().astype(int)
@@ -451,10 +480,13 @@ def build_cohort_patnos(data_root: Path) -> pd.DataFrame:
         logger.info(f"  DaT-SPECT SBR: {dat_patnos.nunique()} patients")
 
     # From processed cohort
-    cohort_path = find_file(data_root, [
-        "02_processed/enhanced_real_ppmi_cohort.csv",
-        "03_prodromal/final_training_dataset/unified_longitudinal_early_pd.csv",
-    ])
+    cohort_path = find_file(
+        data_root,
+        [
+            "02_processed/enhanced_real_ppmi_cohort.csv",
+            "03_prodromal/final_training_dataset/unified_longitudinal_early_pd.csv",
+        ],
+    )
     if cohort_path:
         cohort = pd.read_csv(cohort_path, usecols=["PATNO"], low_memory=False)
         all_patnos.update(cohort["PATNO"].astype(int).tolist())
@@ -462,17 +494,18 @@ def build_cohort_patnos(data_root: Path) -> pd.DataFrame:
 
     # From participant status (only if we don't have enough from above)
     if len(all_patnos) < 500:
-        status_path = find_file(data_root, [
-            "00_raw/Participant_Status_*.csv",
-            "00_raw/GIMAN/ppmi_data_csv/Participant_Status_*.csv",
-        ])
+        status_path = find_file(
+            data_root,
+            [
+                "00_raw/Participant_Status_*.csv",
+                "00_raw/GIMAN/ppmi_data_csv/Participant_Status_*.csv",
+            ],
+        )
         if status_path:
             status = pd.read_csv(status_path, low_memory=False)
             if "PATNO" in status.columns:
                 status_patnos = (
-                    pd.to_numeric(status["PATNO"], errors="coerce")
-                    .dropna()
-                    .astype(int)
+                    pd.to_numeric(status["PATNO"], errors="coerce").dropna().astype(int)
                 )
                 all_patnos.update(status_patnos.unique().tolist())
                 logger.info(f"  Participant status: {status_patnos.nunique()} patients")
@@ -578,21 +611,25 @@ def main() -> None:
     print()
     print("Confidence Distribution:")
     for conf, count in stage_df["staging_confidence"].value_counts().items():
-        print(f"  {conf:>8s}: {count:>5d} ({count/len(stage_df)*100:.1f}%)")
+        print(f"  {conf:>8s}: {count:>5d} ({count / len(stage_df) * 100:.1f}%)")
     print()
 
     # Biological anchor coverage
     s_available = stage_df["s_positive"].notna().sum()
     d_available = stage_df["d_positive"].notna().sum()
     print("Biological Anchor Coverage:")
-    print(f"  S anchor (SAA):        {s_available:>5d} ({s_available/len(stage_df)*100:.1f}%)")
-    print(f"  D anchor (DaT-SPECT):  {d_available:>5d} ({d_available/len(stage_df)*100:.1f}%)")
+    print(
+        f"  S anchor (SAA):        {s_available:>5d} ({s_available / len(stage_df) * 100:.1f}%)"
+    )
+    print(
+        f"  D anchor (DaT-SPECT):  {d_available:>5d} ({d_available / len(stage_df) * 100:.1f}%)"
+    )
     if s_available > 0:
         s_pos = stage_df["s_positive"].eq(True).sum()
-        print(f"  S+ rate:               {s_pos/s_available*100:.1f}%")
+        print(f"  S+ rate:               {s_pos / s_available * 100:.1f}%")
     if d_available > 0:
         d_pos = stage_df["d_positive"].eq(True).sum()
-        print(f"  D+ rate:               {d_pos/d_available*100:.1f}%")
+        print(f"  D+ rate:               {d_pos / d_available * 100:.1f}%")
 
     print()
     print(f"Output: {paths['csv']}")

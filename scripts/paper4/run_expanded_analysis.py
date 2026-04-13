@@ -20,31 +20,30 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from giman_pipeline.paper3.dynamic_deephit import (
-    extract_episodes,
-    build_patient_arrays,
-    DeepHitDataset,
-    predict_all,
-    load_deephit_checkpoint,
     TIME_BIN_ENDS,
+    DeepHitDataset,
+    build_patient_arrays,
+    extract_episodes,
+    load_deephit_checkpoint,
+    predict_all,
 )
 from giman_pipeline.paper3.graph_digital_twin import (
     GraphDeepHitDataset,
-    predict_all_graph,
     load_graph_dt_checkpoint,
+    predict_all_graph,
 )
-from giman_pipeline.paper3.multistate_markov import STAGE_LABELS, N_STATES
+from giman_pipeline.paper3.multistate_markov import STAGE_LABELS
 from giman_pipeline.paper4.conformal_survival import (
+    BonferroniConformal,
     CauseSpecificConformal,
+    ConformalTransitionTiming,
     MarginalConformal,
     NaiveConformal,
-    BonferroniConformal,
-    ConformalTransitionTiming,
     evaluate_directional_conformal,
 )
 
@@ -72,11 +71,17 @@ def get_test_predictions(model_type, fi, episodes, patient_arrays):
         means, stds = cp["means"], cp["stds"]
         pat_to_gidx = cp["pat_to_gidx"]
         test_eps = [e for e in episodes if e.patno in test_pats]
-        test_ds = GraphDeepHitDataset(test_eps, patient_arrays, means, stds, pat_to_gidx)
+        test_ds = GraphDeepHitDataset(
+            test_eps, patient_arrays, means, stds, pat_to_gidx
+        )
         device = next(model.parameters()).device
         preds = predict_all_graph(
-            model, test_ds, device,
-            cp["node_baseline"], cp["edge_index"], cp["edge_weight"],
+            model,
+            test_ds,
+            device,
+            cp["node_baseline"],
+            cp["edge_index"],
+            cp["edge_weight"],
         )
 
     return preds, test_eps
@@ -85,6 +90,7 @@ def get_test_predictions(model_type, fi, episodes, patient_arrays):
 # =========================================================================
 # 1. Conformal Baselines Comparison
 # =========================================================================
+
 
 def run_conformal_baselines(episodes, patient_arrays):
     """Compare 4 conformal methods across all folds."""
@@ -107,9 +113,15 @@ def run_conformal_baselines(episodes, patient_arrays):
             fold_results = []
 
             for fi in range(5):
-                for model_type, model_name in [("deephit", "DeepHit"), ("graph_dt", "Graph-DT")]:
+                for model_type, model_name in [
+                    ("deephit", "DeepHit"),
+                    ("graph_dt", "Graph-DT"),
+                ]:
                     preds, test_eps = get_test_predictions(
-                        model_type, fi, episodes, patient_arrays,
+                        model_type,
+                        fi,
+                        episodes,
+                        patient_arrays,
                     )
 
                     cif = preds["cif"].numpy()
@@ -125,20 +137,26 @@ def run_conformal_baselines(episodes, patient_arrays):
 
                     method = MethodClass(confidence_level=cl)
                     method.calibrate(
-                        cif[idx[:n_cal]], durations[idx[:n_cal]],
-                        event_idxs[idx[:n_cal]], censored[idx[:n_cal]],
+                        cif[idx[:n_cal]],
+                        durations[idx[:n_cal]],
+                        event_idxs[idx[:n_cal]],
+                        censored[idx[:n_cal]],
                     )
                     report = method.coverage_report(
-                        cif[idx[n_cal:]], durations[idx[n_cal:]],
-                        event_idxs[idx[n_cal:]], censored[idx[n_cal:]],
+                        cif[idx[n_cal:]],
+                        durations[idx[n_cal:]],
+                        event_idxs[idx[n_cal:]],
+                        censored[idx[n_cal:]],
                     )
 
-                    fold_results.append({
-                        "model": model_name,
-                        "fold": fi,
-                        "marginal_coverage": report["marginal_coverage"],
-                        "mean_band_width": report["mean_band_width"],
-                    })
+                    fold_results.append(
+                        {
+                            "model": model_name,
+                            "fold": fi,
+                            "marginal_coverage": report["marginal_coverage"],
+                            "mean_band_width": report["mean_band_width"],
+                        }
+                    )
 
             # Aggregate
             coverages = [r["marginal_coverage"] for r in fold_results]
@@ -151,9 +169,11 @@ def run_conformal_baselines(episodes, patient_arrays):
                 "per_fold": fold_results,
             }
 
-            print(f"  {method_name} (CL={cl}): "
-                  f"coverage={np.mean(coverages):.4f}±{np.std(coverages):.4f}, "
-                  f"width={np.mean(widths):.6f}±{np.std(widths):.6f}")
+            print(
+                f"  {method_name} (CL={cl}): "
+                f"coverage={np.mean(coverages):.4f}±{np.std(coverages):.4f}, "
+                f"width={np.mean(widths):.6f}±{np.std(widths):.6f}"
+            )
 
     return results
 
@@ -161,6 +181,7 @@ def run_conformal_baselines(episodes, patient_arrays):
 # =========================================================================
 # 2. Forward vs Backward Directional Analysis
 # =========================================================================
+
 
 def run_directional_analysis(episodes, patient_arrays, features_df):
     """Evaluate conformal coverage separately for forward/backward transitions."""
@@ -170,9 +191,15 @@ def run_directional_analysis(episodes, patient_arrays, features_df):
 
     results = []
     for fi in range(5):
-        for model_type, model_name in [("deephit", "DeepHit"), ("graph_dt", "Graph-DT")]:
+        for model_type, model_name in [
+            ("deephit", "DeepHit"),
+            ("graph_dt", "Graph-DT"),
+        ]:
             preds, test_eps = get_test_predictions(
-                model_type, fi, episodes, patient_arrays,
+                model_type,
+                fi,
+                episodes,
+                patient_arrays,
             )
 
             cif = preds["cif"].numpy()
@@ -184,19 +211,27 @@ def run_directional_analysis(episodes, patient_arrays, features_df):
             source_stages = np.array([ep.current_stage_idx for ep in test_eps])
 
             dir_result = evaluate_directional_conformal(
-                cif, durations, event_idxs, censored, source_stages,
-                model_name, fi, confidence_level=0.90,
+                cif,
+                durations,
+                event_idxs,
+                censored,
+                source_stages,
+                model_name,
+                fi,
+                confidence_level=0.90,
             )
 
             for direction, info in dir_result.items():
-                results.append({
-                    "model": model_name,
-                    "fold": fi,
-                    "direction": direction,
-                    "coverage": info["coverage"],
-                    "mean_band_width": info["mean_band_width"],
-                    "n_patients": info["n_patients"],
-                })
+                results.append(
+                    {
+                        "model": model_name,
+                        "fold": fi,
+                        "direction": direction,
+                        "coverage": info["coverage"],
+                        "mean_band_width": info["mean_band_width"],
+                        "n_patients": info["n_patients"],
+                    }
+                )
 
         print(f"  Fold {fi} done")
 
@@ -213,8 +248,10 @@ def run_directional_analysis(episodes, patient_arrays, features_df):
             "std_width": float(np.std(widths)),
             "total_patients": sum(r["n_patients"] for r in dir_results),
         }
-        print(f"\n  {direction.upper()}: coverage={np.mean(covs):.4f}±{np.std(covs):.4f}, "
-              f"n={summary[direction]['total_patients']}")
+        print(
+            f"\n  {direction.upper()}: coverage={np.mean(covs):.4f}±{np.std(covs):.4f}, "
+            f"n={summary[direction]['total_patients']}"
+        )
 
     return {"per_fold": results, "summary": summary}
 
@@ -222,6 +259,7 @@ def run_directional_analysis(episodes, patient_arrays, features_df):
 # =========================================================================
 # 3. Individual Patient Case Studies
 # =========================================================================
+
 
 def run_patient_case_studies(episodes, patient_arrays, features_df):
     """Generate 3-5 patient case vignettes with conformal bands."""
@@ -245,11 +283,15 @@ def run_patient_case_studies(episodes, patient_arrays, features_df):
     cal_idx, eval_idx = idx[:n_cal], idx[n_cal:]
 
     csc = CauseSpecificConformal(confidence_level=0.90)
-    csc.calibrate(cif[cal_idx], durations[cal_idx], event_idxs[cal_idx], censored[cal_idx])
+    csc.calibrate(
+        cif[cal_idx], durations[cal_idx], event_idxs[cal_idx], censored[cal_idx]
+    )
     bands = csc.predict_bands(cif[eval_idx])
 
     ctt = ConformalTransitionTiming(confidence_level=0.90)
-    ctt.calibrate(cif[cal_idx], durations[cal_idx], event_idxs[cal_idx], censored[cal_idx])
+    ctt.calibrate(
+        cif[cal_idx], durations[cal_idx], event_idxs[cal_idx], censored[cal_idx]
+    )
     timing_intervals = ctt.predict_intervals(cif[eval_idx])
 
     # Select interesting patients from evaluation set
@@ -268,14 +310,16 @@ def run_patient_case_studies(episodes, patient_arrays, features_df):
             continue
         if event_idxs[i_global] not in [3, 4]:  # Stage 3 or 4 destinations
             continue
-        candidates.append({
-            "local_idx": i_local,
-            "global_idx": i_global,
-            "patno": ep.patno,
-            "source_stage": ep.current_stage_idx,
-            "dest_stage": int(event_idxs[i_global]),
-            "duration_months": float(durations[i_global]),
-        })
+        candidates.append(
+            {
+                "local_idx": i_local,
+                "global_idx": i_global,
+                "patno": ep.patno,
+                "source_stage": ep.current_stage_idx,
+                "dest_stage": int(event_idxs[i_global]),
+                "duration_months": float(durations[i_global]),
+            }
+        )
 
     # Select up to 5 diverse cases
     selected = []
@@ -308,7 +352,11 @@ def run_patient_case_studies(episodes, patient_arrays, features_df):
         dest_k = case["dest_stage"]
 
         # Get patient demographics
-        baseline = features_df[features_df["PATNO"] == case["patno"]].sort_values("visit_number").iloc[0]
+        baseline = (
+            features_df[features_df["PATNO"] == case["patno"]]
+            .sort_values("visit_number")
+            .iloc[0]
+        )
 
         # CIF curves for destination stage
         cif_curve = cif[eval_idx[i_local], dest_k, :].tolist()
@@ -332,17 +380,28 @@ def run_patient_case_studies(episodes, patient_arrays, features_df):
             "timing_interval": {
                 "lower_months": timing[0] if timing else None,
                 "upper_months": timing[1] if timing else None,
-            } if timing else None,
+            }
+            if timing
+            else None,
             "clinical_interpretation": _generate_interpretation(
-                case, cif_curve, timing, time_bins,
+                case,
+                cif_curve,
+                timing,
+                time_bins,
             ),
         }
         cases.append(case_data)
 
-        print(f"  Patient {case['patno']}: "
-              f"{STAGE_LABELS[case['source_stage']]} → {STAGE_LABELS[dest_k]} "
-              f"at {case['duration_months']:.0f} months"
-              + (f", timing CI: [{timing[0]:.0f}, {timing[1]:.0f}] months" if timing else ""))
+        print(
+            f"  Patient {case['patno']}: "
+            f"{STAGE_LABELS[case['source_stage']]} → {STAGE_LABELS[dest_k]} "
+            f"at {case['duration_months']:.0f} months"
+            + (
+                f", timing CI: [{timing[0]:.0f}, {timing[1]:.0f}] months"
+                if timing
+                else ""
+            )
+        )
 
     return {"cases": cases, "n_cases": len(cases)}
 
@@ -354,8 +413,7 @@ def _generate_interpretation(case, cif_curve, timing, time_bins):
     dur = case["duration_months"]
 
     lines = [
-        f"Patient transitioned from Stage {src} to Stage {dest} "
-        f"at {dur:.0f} months.",
+        f"Patient transitioned from Stage {src} to Stage {dest} at {dur:.0f} months.",
     ]
 
     if timing:
@@ -374,9 +432,7 @@ def _generate_interpretation(case, cif_curve, timing, time_bins):
     t_idx = np.searchsorted(time_bins, dur)
     t_idx = min(t_idx, len(cif_curve) - 1)
     pred_cif = cif_curve[t_idx]
-    lines.append(
-        f"At the transition time, the predicted CIF was {pred_cif:.3f}."
-    )
+    lines.append(f"At the transition time, the predicted CIF was {pred_cif:.3f}.")
 
     return " ".join(lines)
 
@@ -384,6 +440,7 @@ def _generate_interpretation(case, cif_curve, timing, time_bins):
 # =========================================================================
 # Main
 # =========================================================================
+
 
 def main():
     t0 = time.time()
@@ -405,7 +462,9 @@ def main():
         json.dump(baseline_results, f, indent=2, default=str)
 
     # 2. Directional analysis
-    directional_results = run_directional_analysis(episodes, patient_arrays, features_df)
+    directional_results = run_directional_analysis(
+        episodes, patient_arrays, features_df
+    )
     with open(OUTPUT_DIR / "directional_analysis.json", "w") as f:
         json.dump(directional_results, f, indent=2, default=str)
 

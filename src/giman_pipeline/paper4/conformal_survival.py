@@ -25,8 +25,8 @@ from typing import Any
 import numpy as np
 from lifelines import KaplanMeierFitter
 
-from giman_pipeline.paper3.multistate_markov import STAGE_LABELS, N_STATES
-from giman_pipeline.paper3.dynamic_deephit import TIME_BIN_ENDS, N_TIME_BINS
+from giman_pipeline.paper3.dynamic_deephit import N_TIME_BINS, TIME_BIN_ENDS
+from giman_pipeline.paper3.multistate_markov import N_STATES
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ IPCW_MIN_G = 0.01  # Floor for censoring survival to prevent weight explosion
 # ---------------------------------------------------------------------------
 # Result dataclasses
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ConformalSurvivalResult:
@@ -84,6 +85,7 @@ class TimingIntervalResult:
 # IPCW utilities
 # ---------------------------------------------------------------------------
 
+
 def estimate_censoring_survival(
     durations: np.ndarray,
     events: np.ndarray,
@@ -127,9 +129,7 @@ def compute_ipcw_weights(
         Weights array, shape (n,). Clamped so max weight = 1/min_g.
     """
     # Get G(T_i) for each observation time
-    g_values = np.array([
-        censoring_kmf.predict(t) for t in durations
-    ]).flatten()
+    g_values = np.array([censoring_kmf.predict(t) for t in durations]).flatten()
 
     # Clamp to prevent explosion
     g_values = np.maximum(g_values, min_g)
@@ -140,6 +140,7 @@ def compute_ipcw_weights(
 # ---------------------------------------------------------------------------
 # CIF Prediction Bands (Track A: CONFIDE-inspired with IPCW)
 # ---------------------------------------------------------------------------
+
 
 class CauseSpecificConformal:
     """Cause-specific conformal prediction bands for CIF curves.
@@ -249,13 +250,12 @@ class CauseSpecificConformal:
 
                 # Compute weighted quantile at level ceil((n+1)(1-alpha))/n
                 q_level = min(1.0, (1.0 - self.alpha) * (1.0 + 1.0 / len(scores)))
-                self.quantiles[k, t_idx] = _weighted_quantile(
-                    scores, weights, q_level
-                )
+                self.quantiles[k, t_idx] = _weighted_quantile(scores, weights, q_level)
 
             # Track calibration size per cause
             self._per_cause_n_cal[k] = sum(
-                1 for i in range(n_cal)
+                1
+                for i in range(n_cal)
                 if not (censored[i] and durations[i] < time_bins_months[0])
             )
 
@@ -317,9 +317,17 @@ class CauseSpecificConformal:
                         continue  # Cannot evaluate
 
                     # Compute observed CIF
-                    if not censored[i] and event_idxs[i] == k and durations[i] <= t_months:
+                    if (
+                        not censored[i]
+                        and event_idxs[i] == k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 1.0
-                    elif not censored[i] and event_idxs[i] != k and durations[i] <= t_months:
+                    elif (
+                        not censored[i]
+                        and event_idxs[i] != k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 0.0
                     else:
                         cif_obs = 0.0
@@ -377,6 +385,7 @@ class CauseSpecificConformal:
 # ---------------------------------------------------------------------------
 # Conformal Transition Timing Intervals
 # ---------------------------------------------------------------------------
+
 
 class ConformalTransitionTiming:
     """Conformal intervals for WHEN a transition occurs.
@@ -461,7 +470,9 @@ class ConformalTransitionTiming:
             self.timing_quantiles[k] = float(np.quantile(scores, q_level))
 
         self._calibrated = True
-        logger.info(f"Calibrated timing intervals for {len(self.timing_quantiles)} causes")
+        logger.info(
+            f"Calibrated timing intervals for {len(self.timing_quantiles)} causes"
+        )
 
     def predict_intervals(
         self,
@@ -540,7 +551,9 @@ class ConformalTransitionTiming:
             if total > 0:
                 results[k] = {
                     "coverage": covered / total,
-                    "median_width_months": float(np.median(widths)) if widths else float("inf"),
+                    "median_width_months": float(np.median(widths))
+                    if widths
+                    else float("inf"),
                     "n_evaluated": total,
                 }
 
@@ -550,6 +563,7 @@ class ConformalTransitionTiming:
 # ---------------------------------------------------------------------------
 # Utility: weighted quantile
 # ---------------------------------------------------------------------------
+
 
 def _weighted_quantile(
     values: np.ndarray,
@@ -581,6 +595,7 @@ def _weighted_quantile(
 # ---------------------------------------------------------------------------
 # High-level evaluation function
 # ---------------------------------------------------------------------------
+
 
 def evaluate_conformal_on_fold(
     cif_pred: np.ndarray,
@@ -675,6 +690,7 @@ def evaluate_conformal_on_fold(
 # Conformal Baselines for Ablation
 # ---------------------------------------------------------------------------
 
+
 class MarginalConformal:
     """Baseline: single quantile pooled across ALL (cause, time_bin) pairs.
 
@@ -703,7 +719,11 @@ class MarginalConformal:
                     t_months = time_bins_months[t_idx]
                     if censored[i] and durations[i] < t_months:
                         continue
-                    if not censored[i] and event_idxs[i] == k and durations[i] <= t_months:
+                    if (
+                        not censored[i]
+                        and event_idxs[i] == k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 1.0
                     else:
                         cif_obs = 0.0
@@ -723,7 +743,11 @@ class MarginalConformal:
         return bands
 
     def coverage_report(
-        self, cif_pred, durations, event_idxs, censored,
+        self,
+        cif_pred,
+        durations,
+        event_idxs,
+        censored,
     ) -> dict:
         """Same interface as CauseSpecificConformal.coverage_report."""
         bands = self.predict_bands(cif_pred)
@@ -735,7 +759,11 @@ class MarginalConformal:
                     t_months = time_bins_months[t_idx]
                     if censored[i] and durations[i] < t_months:
                         continue
-                    if not censored[i] and event_idxs[i] == k and durations[i] <= t_months:
+                    if (
+                        not censored[i]
+                        and event_idxs[i] == k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 1.0
                     else:
                         cif_obs = 0.0
@@ -781,7 +809,11 @@ class NaiveConformal:
                 for i in range(len(durations)):
                     if censored[i] and durations[i] < t_months:
                         continue
-                    if not censored[i] and event_idxs[i] == k and durations[i] <= t_months:
+                    if (
+                        not censored[i]
+                        and event_idxs[i] == k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 1.0
                     else:
                         cif_obs = 0.0
@@ -813,7 +845,11 @@ class NaiveConformal:
                     t_months = time_bins_months[t_idx]
                     if censored[i] and durations[i] < t_months:
                         continue
-                    if not censored[i] and event_idxs[i] == k and durations[i] <= t_months:
+                    if (
+                        not censored[i]
+                        and event_idxs[i] == k
+                        and durations[i] <= t_months
+                    ):
                         cif_obs = 1.0
                     else:
                         cif_obs = 0.0
@@ -936,13 +972,17 @@ def evaluate_directional_conformal(
     # Calibrate on ALL calibration data
     csc = CauseSpecificConformal(confidence_level=confidence_level)
     csc.calibrate(
-        cif_pred[cal_idx], durations[cal_idx],
-        event_idxs[cal_idx], censored[cal_idx],
+        cif_pred[cal_idx],
+        durations[cal_idx],
+        event_idxs[cal_idx],
+        censored[cal_idx],
     )
 
     # Classify evaluation transitions
     eval_directions = classify_transition_direction(
-        event_idxs[eval_idx], source_stages[eval_idx], censored[eval_idx],
+        event_idxs[eval_idx],
+        source_stages[eval_idx],
+        censored[eval_idx],
     )
 
     bands = csc.predict_bands(cif_pred[eval_idx])
@@ -960,16 +1000,25 @@ def evaluate_directional_conformal(
             for k in range(N_STATES):
                 for t_idx in range(N_TIME_BINS):
                     t_months = time_bins_months[t_idx]
-                    if censored[eval_idx[i_local]] and durations[eval_idx[i_local]] < t_months:
+                    if (
+                        censored[eval_idx[i_local]]
+                        and durations[eval_idx[i_local]] < t_months
+                    ):
                         continue
-                    if (not censored[eval_idx[i_local]]
-                            and event_idxs[eval_idx[i_local]] == k
-                            and durations[eval_idx[i_local]] <= t_months):
+                    if (
+                        not censored[eval_idx[i_local]]
+                        and event_idxs[eval_idx[i_local]] == k
+                        and durations[eval_idx[i_local]] <= t_months
+                    ):
                         cif_obs = 1.0
                     else:
                         cif_obs = 0.0
                     total += 1
-                    if bands[i_local, k, t_idx, 0] <= cif_obs <= bands[i_local, k, t_idx, 1]:
+                    if (
+                        bands[i_local, k, t_idx, 0]
+                        <= cif_obs
+                        <= bands[i_local, k, t_idx, 1]
+                    ):
                         covered += 1
 
         widths = bands[dir_mask, :, :, 1] - bands[dir_mask, :, :, 0]
@@ -985,6 +1034,7 @@ def evaluate_directional_conformal(
 # ---------------------------------------------------------------------------
 # Serialization
 # ---------------------------------------------------------------------------
+
 
 def conformal_result_to_dict(r: ConformalSurvivalResult) -> dict:
     """Convert ConformalSurvivalResult to JSON-serializable dict."""

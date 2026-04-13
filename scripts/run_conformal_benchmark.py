@@ -13,7 +13,6 @@ import logging
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
 
@@ -21,9 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from giman_pipeline.sota.conformal import (
+    format_conformal_table,
     run_conformal_benchmark,
     save_conformal_results,
-    format_conformal_table,
 )
 
 logging.basicConfig(
@@ -38,45 +37,74 @@ FEATURES_PATH = ROOT / "data" / "05_features" / "paper1_features_with_targets.cs
 OUTPUT_DIR = ROOT / "outputs" / "paper1_conformal"
 
 STAGING_COLS = {
-    "PATNO", "nsd_iss_stage", "nsd_iss_stage_numeric", "nsd_iss_stage_ordinal",
-    "s_positive", "d_positive", "has_clinical_signs", "has_functional_impairment",
-    "functional_impairment_level", "staging_confidence", "n_missing_anchors",
-    "missing_anchors", "target_binary", "target_3class", "target_full_ordinal",
+    "PATNO",
+    "nsd_iss_stage",
+    "nsd_iss_stage_numeric",
+    "nsd_iss_stage_ordinal",
+    "s_positive",
+    "d_positive",
+    "has_clinical_signs",
+    "has_functional_impairment",
+    "functional_impairment_level",
+    "staging_confidence",
+    "n_missing_anchors",
+    "missing_anchors",
+    "target_binary",
+    "target_3class",
+    "target_full_ordinal",
     "target_nsd_positive",
 }
 HIGH_MISS_COLS = {"UPDRS4_TOTAL", "MOCA_TOTAL"}
 
 
-def _build_top3_factories(n_classes: int, random_state: int = 42) -> dict[str, callable]:
+def _build_top3_factories(
+    n_classes: int, random_state: int = 42
+) -> dict[str, callable]:
     """Build factories for the top 3 performing models."""
-    import xgboost as xgb
     import catboost as cb
+    import xgboost as xgb
     from sklearn.ensemble import RandomForestClassifier
 
     factories = {}
 
     factories["catboost"] = lambda: cb.CatBoostClassifier(
-        iterations=500, depth=6, learning_rate=0.05,
-        random_seed=random_state, auto_class_weights="Balanced", verbose=0,
+        iterations=500,
+        depth=6,
+        learning_rate=0.05,
+        random_seed=random_state,
+        auto_class_weights="Balanced",
+        verbose=0,
     )
 
     if n_classes == 2:
         factories["xgboost"] = lambda: xgb.XGBClassifier(
-            n_estimators=500, max_depth=6, learning_rate=0.05,
-            random_state=random_state, eval_metric="logloss",
-            n_jobs=-1, verbosity=0,
+            n_estimators=500,
+            max_depth=6,
+            learning_rate=0.05,
+            random_state=random_state,
+            eval_metric="logloss",
+            n_jobs=-1,
+            verbosity=0,
         )
     else:
         factories["xgboost"] = lambda: xgb.XGBClassifier(
-            n_estimators=500, max_depth=6, learning_rate=0.05,
-            random_state=random_state, eval_metric="mlogloss",
-            objective="multi:softprob", num_class=n_classes,
-            n_jobs=-1, verbosity=0,
+            n_estimators=500,
+            max_depth=6,
+            learning_rate=0.05,
+            random_state=random_state,
+            eval_metric="mlogloss",
+            objective="multi:softprob",
+            num_class=n_classes,
+            n_jobs=-1,
+            verbosity=0,
         )
 
     factories["random_forest"] = lambda: RandomForestClassifier(
-        n_estimators=500, random_state=random_state,
-        class_weight="balanced_subsample", min_samples_leaf=5, n_jobs=-1,
+        n_estimators=500,
+        random_state=random_state,
+        class_weight="balanced_subsample",
+        min_samples_leaf=5,
+        n_jobs=-1,
     )
 
     return factories
@@ -84,8 +112,7 @@ def _build_top3_factories(n_classes: int, random_state: int = 42) -> dict[str, c
 
 def prepare_data(df: pd.DataFrame, target_col: str, exclude_stage0: bool = False):
     feature_cols = [
-        c for c in df.columns
-        if c not in STAGING_COLS and c not in HIGH_MISS_COLS
+        c for c in df.columns if c not in STAGING_COLS and c not in HIGH_MISS_COLS
     ]
     mask = df[target_col] >= 0
     if exclude_stage0:
@@ -124,15 +151,16 @@ def main():
     ]
 
     for target_name, target_col, n_classes, exclude_stage0 in targets:
-        logger.info(f"\n{'='*50}")
+        logger.info(f"\n{'=' * 50}")
         logger.info(f"Target: {target_name} ({n_classes} classes)")
-        logger.info(f"{'='*50}")
+        logger.info(f"{'=' * 50}")
 
         X, y = prepare_data(df, target_col, exclude_stage0)
         factories = _build_top3_factories(n_classes)
 
         results = run_conformal_benchmark(
-            X=X, y=y,
+            X=X,
+            y=y,
             model_factories=factories,
             target_name=target_name,
             n_classes=n_classes,
@@ -143,7 +171,7 @@ def main():
         save_conformal_results(results, OUTPUT_DIR / f"{target_name}_conformal.json")
 
         # Add to report
-        report_lines.append(f"---\n")
+        report_lines.append("---\n")
         report_lines.append(format_conformal_table(results, 0.90, "cross"))
         report_lines.append("")
         report_lines.append(format_conformal_table(results, 0.90, "split"))
@@ -161,11 +189,15 @@ def main():
         path = OUTPUT_DIR / f"{target_name}_conformal.json"
         if path.exists():
             import json
+
             data = json.loads(path.read_text())
             print(f"\n--- {target_name} ({n_classes} classes) ---")
             for model_name, cr_list in data.items():
                 for cr in cr_list:
-                    if abs(cr["confidence_level"] - 0.90) < 0.01 and cr["conformal_method"] == "cross":
+                    if (
+                        abs(cr["confidence_level"] - 0.90) < 0.01
+                        and cr["conformal_method"] == "cross"
+                    ):
                         print(
                             f"  {model_name:20s} coverage={cr['marginal_coverage']:.4f} "
                             f"(target=0.90) set_size={cr['mean_set_size']:.2f} "

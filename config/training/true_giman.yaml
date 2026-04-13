@@ -1,0 +1,67 @@
+# Training configuration for True GIMAN
+# Graph-Informed Multimodal Attention Network for Parkinson's Disease Prediction
+
+model:
+  modality_embed_dim: 64
+  cross_modal_heads: 4
+  fused_dim: 128
+  gat_hidden_dim: 64
+  gat_output_dim: 64
+  gat_heads: 4
+  gat_layers: 3
+  dropout: 0.3
+  num_subtypes: 3
+  num_diagnostic_classes: 3
+
+  # Adaptive cross-modal fusion: learns per-patient whether to use
+  # cross-modal attention or simple concatenation, based on modality
+  # availability. observed_threshold hard-masks modalities below this
+  # fraction from attention (0.0 = disabled).
+  adaptive_fusion: true
+  observed_threshold: 0.3
+
+training:
+  lr: 0.001
+  weight_decay: 1e-5
+  optimizer: AdamW
+  max_epochs: 200
+  patience: 20
+  grad_clip: 1.0
+
+  scheduler:
+    type: ReduceLROnPlateau
+    mode: max
+    factor: 0.5
+    patience: 10
+
+multi_task:
+  survival_weight: 1.0
+  subtype_weight: 0.5
+  diagnostic_weight: 0.3
+  # Current data has only survival labels (phenoconversion).
+  # Subtype and diagnostic labels not yet available in clean PPMI extract.
+  # All tasks activate from epoch 0; tasks without labels contribute zero loss.
+  warmup_diagnostic: 0
+  warmup_subtype: 0
+  warmup_survival: 0
+
+data:
+  feature_config: config/feature_configs/baseline_36.yaml
+  graph_k: 10
+  k_folds: 5
+
+  # Tiered imputation strategy based on modality missingness patterns.
+  # Tier 1 (<15% missing): MICE imputation — MAR assumption is reasonable.
+  # Tier 2 (15-50% missing): MICE imputation — still workable.
+  # Tier 3 (>50% missing): No imputation — placeholder fill with column mean.
+  #   Model uses learned "missing modality" embeddings + availability gating.
+  #   Prevents fabricating 69-78% of imaging/CSF values.
+  imputation: tiered
+  # Tier thresholds (fraction missing)
+  tier_1_max: 0.15
+  tier_3_min: 0.50
+
+evaluation:
+  bootstrap_samples: 1000
+  confidence_level: 0.95
+  primary_metric: c_index

@@ -23,41 +23,39 @@ import json
 import logging
 import sys
 import time
-from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import (
     balanced_accuracy_score,
-    roc_auc_score,
-    f1_score,
     cohen_kappa_score,
+    f1_score,
+    roc_auc_score,
 )
+from sklearn.model_selection import StratifiedKFold
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from giman_pipeline.staging.target_encoding import (
-    compute_balanced_weights,
-    THREE_CLASS_NAMES,
-    OBSERVED_STAGE_NAMES,
-    NSD_POSITIVE_NAMES,
-)
-from giman_pipeline.sota.nsd_iss_benchmark import (
-    run_nsd_iss_benchmark,
-    save_benchmark_results,
-    format_results_table,
-)
+from giman_pipeline.models.adamedgraph import AdaMedGraph
 from giman_pipeline.sota.conformal import (
+    format_conformal_table,
     run_conformal_benchmark,
     save_conformal_results,
-    format_conformal_table,
 )
-from giman_pipeline.models.adamedgraph import AdaMedGraph
+from giman_pipeline.sota.nsd_iss_benchmark import (
+    format_results_table,
+    run_nsd_iss_benchmark,
+    save_benchmark_results,
+)
+from giman_pipeline.staging.target_encoding import (
+    NSD_POSITIVE_NAMES,
+    OBSERVED_STAGE_NAMES,
+    THREE_CLASS_NAMES,
+    compute_balanced_weights,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -70,10 +68,21 @@ FEATURES_PATH = ROOT / "data" / "05_features" / "paper1_features_with_targets.cs
 OUTPUT_DIR = ROOT / "outputs" / "paper1_experiments"
 
 STAGING_COLS = {
-    "PATNO", "nsd_iss_stage", "nsd_iss_stage_numeric", "nsd_iss_stage_ordinal",
-    "s_positive", "d_positive", "has_clinical_signs", "has_functional_impairment",
-    "functional_impairment_level", "staging_confidence", "n_missing_anchors",
-    "missing_anchors", "target_binary", "target_3class", "target_full_ordinal",
+    "PATNO",
+    "nsd_iss_stage",
+    "nsd_iss_stage_numeric",
+    "nsd_iss_stage_ordinal",
+    "s_positive",
+    "d_positive",
+    "has_clinical_signs",
+    "has_functional_impairment",
+    "functional_impairment_level",
+    "staging_confidence",
+    "n_missing_anchors",
+    "missing_anchors",
+    "target_binary",
+    "target_3class",
+    "target_full_ordinal",
     "target_nsd_positive",
 }
 HIGH_MISS_COLS = {"UPDRS4_TOTAL", "MOCA_TOTAL"}
@@ -122,8 +131,7 @@ def prepare_data(
 ) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """Prepare features and targets."""
     feature_cols = [
-        c for c in df.columns
-        if c not in STAGING_COLS and c not in HIGH_MISS_COLS
+        c for c in df.columns if c not in STAGING_COLS and c not in HIGH_MISS_COLS
     ]
     mask = df[target_col] >= 0
     if exclude_stage0:
@@ -140,31 +148,47 @@ def prepare_data(
 
 def _build_conformal_factories(n_classes: int, random_state: int = 42) -> dict:
     """Build model factories for conformal prediction (top 3 models)."""
-    import xgboost as xgb
     import catboost as cb
+    import xgboost as xgb
     from sklearn.ensemble import RandomForestClassifier
 
     factories = {}
     factories["catboost"] = lambda: cb.CatBoostClassifier(
-        iterations=500, depth=6, learning_rate=0.05,
-        random_seed=random_state, auto_class_weights="Balanced", verbose=0,
+        iterations=500,
+        depth=6,
+        learning_rate=0.05,
+        random_seed=random_state,
+        auto_class_weights="Balanced",
+        verbose=0,
     )
     if n_classes == 2:
         factories["xgboost"] = lambda: xgb.XGBClassifier(
-            n_estimators=500, max_depth=6, learning_rate=0.05,
-            random_state=random_state, eval_metric="logloss",
-            n_jobs=-1, verbosity=0,
+            n_estimators=500,
+            max_depth=6,
+            learning_rate=0.05,
+            random_state=random_state,
+            eval_metric="logloss",
+            n_jobs=-1,
+            verbosity=0,
         )
     else:
         factories["xgboost"] = lambda: xgb.XGBClassifier(
-            n_estimators=500, max_depth=6, learning_rate=0.05,
-            random_state=random_state, eval_metric="mlogloss",
-            objective="multi:softprob", num_class=n_classes,
-            n_jobs=-1, verbosity=0,
+            n_estimators=500,
+            max_depth=6,
+            learning_rate=0.05,
+            random_state=random_state,
+            eval_metric="mlogloss",
+            objective="multi:softprob",
+            num_class=n_classes,
+            n_jobs=-1,
+            verbosity=0,
         )
     factories["random_forest"] = lambda: RandomForestClassifier(
-        n_estimators=500, random_state=random_state,
-        class_weight="balanced_subsample", min_samples_leaf=5, n_jobs=-1,
+        n_estimators=500,
+        random_state=random_state,
+        class_weight="balanced_subsample",
+        min_samples_leaf=5,
+        n_jobs=-1,
     )
     return factories
 
@@ -188,7 +212,7 @@ def run_adamedgraph_cv(
         X_train, X_test = X[train_idx], X[test_idx]
         y_train, y_test = y[train_idx], y[test_idx]
 
-        logger.info(f"  AdaMedGraph fold {fold_idx+1}/{n_folds}...")
+        logger.info(f"  AdaMedGraph fold {fold_idx + 1}/{n_folds}...")
         t0 = time.time()
 
         model = AdaMedGraph(
@@ -216,8 +240,12 @@ def run_adamedgraph_cv(
         metrics = {
             "fold": fold_idx,
             "balanced_accuracy": float(balanced_accuracy_score(y_test, preds)),
-            "weighted_f1": float(f1_score(y_test, preds, average="weighted", zero_division=0)),
-            "macro_f1": float(f1_score(y_test, preds, average="macro", zero_division=0)),
+            "weighted_f1": float(
+                f1_score(y_test, preds, average="weighted", zero_division=0)
+            ),
+            "macro_f1": float(
+                f1_score(y_test, preds, average="macro", zero_division=0)
+            ),
             "qwk": float(cohen_kappa_score(y_test, preds, weights="quadratic")),
             "time_seconds": elapsed,
             "n_rounds": len(model.rounds_),
@@ -237,14 +265,18 @@ def run_adamedgraph_cv(
 
         fold_metrics.append(metrics)
         logger.info(
-            f"    Fold {fold_idx+1}: bal_acc={metrics['balanced_accuracy']:.4f}, "
+            f"    Fold {fold_idx + 1}: bal_acc={metrics['balanced_accuracy']:.4f}, "
             f"time={elapsed:.1f}s, rounds={metrics['n_rounds']}"
         )
 
     # Aggregate
     agg = {
-        "balanced_accuracy": float(np.mean([m["balanced_accuracy"] for m in fold_metrics])),
-        "balanced_accuracy_std": float(np.std([m["balanced_accuracy"] for m in fold_metrics])),
+        "balanced_accuracy": float(
+            np.mean([m["balanced_accuracy"] for m in fold_metrics])
+        ),
+        "balanced_accuracy_std": float(
+            np.std([m["balanced_accuracy"] for m in fold_metrics])
+        ),
         "weighted_f1": float(np.mean([m["weighted_f1"] for m in fold_metrics])),
         "macro_f1": float(np.mean([m["macro_f1"] for m in fold_metrics])),
         "qwk": float(np.mean([m["qwk"] for m in fold_metrics])),
@@ -252,7 +284,9 @@ def run_adamedgraph_cv(
     if "auc_roc" in fold_metrics[0]:
         agg["auc_roc"] = float(np.mean([m["auc_roc"] for m in fold_metrics]))
     elif fold_metrics[0].get("macro_auc_ovr") is not None:
-        vals = [m["macro_auc_ovr"] for m in fold_metrics if m["macro_auc_ovr"] is not None]
+        vals = [
+            m["macro_auc_ovr"] for m in fold_metrics if m["macro_auc_ovr"] is not None
+        ]
         agg["macro_auc_ovr"] = float(np.mean(vals)) if vals else None
 
     return {"folds": fold_metrics, "aggregate": agg}
@@ -280,9 +314,9 @@ def main() -> None:
 
     for target_cfg in TARGETS:
         tname = target_cfg["name"]
-        logger.info(f"\n{'='*60}")
+        logger.info(f"\n{'=' * 60}")
         logger.info(f"Target: {tname} ({target_cfg['n_classes']} classes)")
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
 
         X, y, feat_names = prepare_data(
             df, target_cfg["target_col"], target_cfg["exclude_stage0"]
@@ -294,10 +328,11 @@ def main() -> None:
         target_dir.mkdir(parents=True, exist_ok=True)
 
         # --- Phase 1: Tabular baselines ---
-        logger.info(f"\n  --- Phase 1: Tabular Baselines ---")
+        logger.info("\n  --- Phase 1: Tabular Baselines ---")
         w = compute_balanced_weights(y)
         bench_results = run_nsd_iss_benchmark(
-            X=X, y=y,
+            X=X,
+            y=y,
             target_name=tname,
             n_classes=target_cfg["n_classes"],
             is_ordinal=target_cfg["is_ordinal"],
@@ -309,9 +344,10 @@ def main() -> None:
         save_benchmark_results(bench_results, target_dir / "tabular_results.json")
 
         # --- Phase 2: AdaMedGraph ---
-        logger.info(f"\n  --- Phase 2: AdaMedGraph ---")
+        logger.info("\n  --- Phase 2: AdaMedGraph ---")
         adamedgraph_results = run_adamedgraph_cv(
-            X=X, y=y,
+            X=X,
+            y=y,
             feature_names=feat_names,
             n_classes=target_cfg["n_classes"],
             n_folds=5,
@@ -320,10 +356,11 @@ def main() -> None:
         adm_path.write_text(json.dumps(adamedgraph_results, indent=2, default=str))
 
         # --- Phase 3: Conformal Prediction ---
-        logger.info(f"\n  --- Phase 3: Conformal Prediction ---")
+        logger.info("\n  --- Phase 3: Conformal Prediction ---")
         conf_factories = _build_conformal_factories(target_cfg["n_classes"])
         conf_results = run_conformal_benchmark(
-            X=X, y=y,
+            X=X,
+            y=y,
             model_factories=conf_factories,
             target_name=tname,
             n_classes=target_cfg["n_classes"],
@@ -340,9 +377,13 @@ def main() -> None:
         }
 
         # Build report section
-        report.append(f"\n---\n")
-        report.append(f"## {tname.replace('_', ' ').title()} ({target_cfg['n_classes']} classes)")
-        report.append(f"N={len(y)}, class distribution: {dict(enumerate(class_dist.tolist()))}")
+        report.append("\n---\n")
+        report.append(
+            f"## {tname.replace('_', ' ').title()} ({target_cfg['n_classes']} classes)"
+        )
+        report.append(
+            f"N={len(y)}, class distribution: {dict(enumerate(class_dist.tolist()))}"
+        )
         report.append("")
 
         # Tabular results table
@@ -353,9 +394,11 @@ def main() -> None:
         # AdaMedGraph results
         adm_agg = adamedgraph_results["aggregate"]
         report.append("### AdaMedGraph (APPNP + AdaBoost SAMME)")
-        report.append(f"| Metric | Value |")
-        report.append(f"|---|---|")
-        report.append(f"| Balanced Accuracy | {adm_agg['balanced_accuracy']:.4f} +/- {adm_agg['balanced_accuracy_std']:.4f} |")
+        report.append("| Metric | Value |")
+        report.append("|---|---|")
+        report.append(
+            f"| Balanced Accuracy | {adm_agg['balanced_accuracy']:.4f} +/- {adm_agg['balanced_accuracy_std']:.4f} |"
+        )
         report.append(f"| Weighted F1 | {adm_agg['weighted_f1']:.4f} |")
         report.append(f"| Macro F1 | {adm_agg['macro_f1']:.4f} |")
         report.append(f"| QWK | {adm_agg['qwk']:.4f} |")
@@ -389,16 +432,23 @@ def main() -> None:
             results["tabular"].items(),
             key=lambda x: x[1].aggregate.balanced_accuracy,
         )
-        print(f"  Best tabular: {best_model[0]} bal_acc={best_model[1].aggregate.balanced_accuracy:.4f}")
+        print(
+            f"  Best tabular: {best_model[0]} bal_acc={best_model[1].aggregate.balanced_accuracy:.4f}"
+        )
 
         # AdaMedGraph
         adm = results["adamedgraph"]["aggregate"]
-        print(f"  AdaMedGraph:   bal_acc={adm['balanced_accuracy']:.4f} +/- {adm['balanced_accuracy_std']:.4f}")
+        print(
+            f"  AdaMedGraph:   bal_acc={adm['balanced_accuracy']:.4f} +/- {adm['balanced_accuracy_std']:.4f}"
+        )
 
         # Conformal coverage (best model, cross, 90%)
         for model_name, cr_list in results["conformal"].items():
             for cr in cr_list:
-                if abs(cr.confidence_level - 0.90) < 0.01 and cr.conformal_method == "cross":
+                if (
+                    abs(cr.confidence_level - 0.90) < 0.01
+                    and cr.conformal_method == "cross"
+                ):
                     print(
                         f"  Conformal {model_name}: coverage={cr.marginal_coverage:.4f} "
                         f"(target=0.90) set_size={cr.mean_set_size:.2f}"

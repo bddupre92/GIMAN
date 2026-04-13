@@ -24,14 +24,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import (
     balanced_accuracy_score,
-    roc_auc_score,
-    cohen_kappa_score,
     classification_report,
+    cohen_kappa_score,
+    roc_auc_score,
 )
-from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import StratifiedKFold
 
 logger = logging.getLogger(__name__)
 
@@ -60,29 +59,41 @@ COMMON_FEATURES = [
 def _build_models():
     """Build model factories for external validation."""
     from catboost import CatBoostClassifier
-    from xgboost import XGBClassifier
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
+    from xgboost import XGBClassifier
 
     return {
         "CatBoost": lambda n_classes: CatBoostClassifier(
-            iterations=500, learning_rate=0.05, depth=6,
-            auto_class_weights="Balanced", verbose=0,
-            random_seed=42, eval_metric="TotalF1",
+            iterations=500,
+            learning_rate=0.05,
+            depth=6,
+            auto_class_weights="Balanced",
+            verbose=0,
+            random_seed=42,
+            eval_metric="TotalF1",
         ),
         "XGBoost": lambda n_classes: XGBClassifier(
-            n_estimators=500, learning_rate=0.05, max_depth=6,
+            n_estimators=500,
+            learning_rate=0.05,
+            max_depth=6,
             use_label_encoder=False,
             eval_metric="mlogloss" if n_classes > 2 else "logloss",
-            random_state=42, verbosity=0,
+            random_state=42,
+            verbosity=0,
         ),
         "RandomForest": lambda n_classes: RandomForestClassifier(
-            n_estimators=500, max_depth=None, class_weight="balanced",
-            random_state=42, n_jobs=-1,
+            n_estimators=500,
+            max_depth=None,
+            class_weight="balanced",
+            random_state=42,
+            n_jobs=-1,
         ),
         "LogisticRegression": lambda n_classes: LogisticRegression(
-            max_iter=2000, class_weight="balanced",
-            random_state=42, solver="lbfgs",
+            max_iter=2000,
+            class_weight="balanced",
+            random_state=42,
+            solver="lbfgs",
         ),
     }
 
@@ -95,7 +106,13 @@ def _bootstrap_metric(y_true, y_pred, y_proba, metric_fn, n_boot=1000, seed=42):
     for _ in range(n_boot):
         idx = rng.choice(n, n, replace=True)
         try:
-            scores.append(metric_fn(y_true[idx], y_pred[idx], y_proba[idx] if y_proba is not None else None))
+            scores.append(
+                metric_fn(
+                    y_true[idx],
+                    y_pred[idx],
+                    y_proba[idx] if y_proba is not None else None,
+                )
+            )
         except Exception:
             continue
     if not scores:
@@ -136,7 +153,9 @@ def load_ppmi_data(target_type: str = "binary"):
 
 def load_external_cohort(cohort_name: str):
     """Load external cohort features."""
-    features_path = ROOT / "data" / "05_features" / f"{cohort_name.lower()}_features.csv"
+    features_path = (
+        ROOT / "data" / "05_features" / f"{cohort_name.lower()}_features.csv"
+    )
     if not features_path.exists():
         logger.error(f"Features not found: {features_path}")
         return None
@@ -224,8 +243,12 @@ def run_external_validation(
     X_ppmi = ppmi[available_common].values
     y_ppmi = ppmi["target"].values
     n_classes = len(np.unique(y_ppmi))
-    logger.info(f"PPMI: {len(ppmi)} patients, {n_classes} classes, target={target_type}")
-    logger.info(f"Class distribution: {dict(zip(*np.unique(y_ppmi, return_counts=True)))}")
+    logger.info(
+        f"PPMI: {len(ppmi)} patients, {n_classes} classes, target={target_type}"
+    )
+    logger.info(
+        f"Class distribution: {dict(zip(*np.unique(y_ppmi, return_counts=True), strict=False))}"
+    )
 
     # Impute NaN with median (for features with missing values)
     from sklearn.impute import SimpleImputer
@@ -247,7 +270,9 @@ def run_external_validation(
         fold_preds = np.zeros(len(y_ppmi))
         fold_proba = np.zeros((len(y_ppmi), n_classes))
 
-        for fold_idx, (train_idx, test_idx) in enumerate(skf.split(X_ppmi_scaled, y_ppmi)):
+        for fold_idx, (train_idx, test_idx) in enumerate(
+            skf.split(X_ppmi_scaled, y_ppmi)
+        ):
             model = model_factory(n_classes)
             X_tr, X_te = X_ppmi_scaled[train_idx], X_ppmi_scaled[test_idx]
             y_tr = y_ppmi[train_idx]
@@ -311,7 +336,9 @@ def run_external_validation(
         X_ext_imp = imputer.transform(X_ext)
         X_ext_scaled = scaler.transform(X_ext_imp)
 
-        logger.info(f"  {cohort_name}: {len(ext_df)} patients, {len(ext_available)}/{len(available_common)} features available")
+        logger.info(
+            f"  {cohort_name}: {len(ext_df)} patients, {len(ext_available)}/{len(available_common)} features available"
+        )
 
         # ── Check for ground truth (BioFIND with SAA) ──
         gt = None
@@ -319,15 +346,23 @@ def run_external_validation(
             gt_df = load_biofind_ground_truth(target_type)
             if gt_df is not None:
                 # Merge ground truth with features
-                ext_with_gt = ext_df.merge(gt_df[["participant_id", "target"]], on="participant_id", how="inner")
+                ext_with_gt = ext_df.merge(
+                    gt_df[["participant_id", "target"]],
+                    on="participant_id",
+                    how="inner",
+                )
                 if len(ext_with_gt) > 0:
                     gt = ext_with_gt["target"].values
                     # Re-extract features for ground-truth subset only
                     X_ext_gt = ext_with_gt[available_common].values
                     X_ext_gt_imp = imputer.transform(X_ext_gt)
                     X_ext_gt_scaled = scaler.transform(X_ext_gt_imp)
-                    gt_dist = dict(zip(*np.unique(gt, return_counts=True)))
-                    logger.info(f"  Ground truth available: {len(gt)} patients, class dist: {gt_dist}")
+                    gt_dist = dict(
+                        zip(*np.unique(gt, return_counts=True), strict=False)
+                    )
+                    logger.info(
+                        f"  Ground truth available: {len(gt)} patients, class dist: {gt_dist}"
+                    )
 
         cohort_results = {}
         for model_name, model in trained_models.items():
@@ -340,12 +375,14 @@ def run_external_validation(
             proba = model.predict_proba(X_pred)
 
             # Distribution of predictions
-            pred_dist = dict(zip(*np.unique(preds, return_counts=True)))
+            pred_dist = dict(zip(*np.unique(preds, return_counts=True), strict=False))
             logger.info(f"  {model_name} prediction distribution: {pred_dist}")
 
             result_entry = {
                 "n_patients": int(len(ext_df)),
-                "prediction_distribution": {str(k): int(v) for k, v in pred_dist.items()},
+                "prediction_distribution": {
+                    str(k): int(v) for k, v in pred_dist.items()
+                },
                 "mean_proba": {
                     f"class_{i}": float(proba[:, i].mean())
                     for i in range(proba.shape[1])
@@ -367,7 +404,9 @@ def run_external_validation(
                     if n_classes == 2:
                         ext_auc = roc_auc_score(gt, gt_proba[:, 1])
                     else:
-                        ext_auc = roc_auc_score(gt, gt_proba, multi_class="ovr", average="macro")
+                        ext_auc = roc_auc_score(
+                            gt, gt_proba, multi_class="ovr", average="macro"
+                        )
                 except Exception:
                     ext_auc = float("nan")
                 ext_qwk = cohen_kappa_score(gt, gt_preds, weights="quadratic")
@@ -383,20 +422,41 @@ def run_external_validation(
                         if n_classes == 2:
                             auc_boots.append(roc_auc_score(gt[idx], gt_proba[idx, 1]))
                         else:
-                            auc_boots.append(roc_auc_score(gt[idx], gt_proba[idx], multi_class="ovr", average="macro"))
+                            auc_boots.append(
+                                roc_auc_score(
+                                    gt[idx],
+                                    gt_proba[idx],
+                                    multi_class="ovr",
+                                    average="macro",
+                                )
+                            )
                     except Exception:
                         pass
 
                 result_entry["external_metrics"] = {
                     "n_ground_truth": int(n_gt),
                     "bal_acc": float(ext_bal_acc),
-                    "bal_acc_ci": [float(np.percentile(ba_boots, 2.5)), float(np.percentile(ba_boots, 97.5))] if ba_boots else None,
+                    "bal_acc_ci": [
+                        float(np.percentile(ba_boots, 2.5)),
+                        float(np.percentile(ba_boots, 97.5)),
+                    ]
+                    if ba_boots
+                    else None,
                     "auc": float(ext_auc),
-                    "auc_ci": [float(np.percentile(auc_boots, 2.5)), float(np.percentile(auc_boots, 97.5))] if auc_boots else None,
+                    "auc_ci": [
+                        float(np.percentile(auc_boots, 2.5)),
+                        float(np.percentile(auc_boots, 97.5)),
+                    ]
+                    if auc_boots
+                    else None,
                     "qwk": float(ext_qwk),
-                    "classification_report": classification_report(gt, gt_preds, output_dict=True),
+                    "classification_report": classification_report(
+                        gt, gt_preds, output_dict=True
+                    ),
                 }
-                logger.info(f"    EXTERNAL: bal_acc={ext_bal_acc:.4f}, AUC={ext_auc:.4f}, QWK={ext_qwk:.4f}")
+                logger.info(
+                    f"    EXTERNAL: bal_acc={ext_bal_acc:.4f}, AUC={ext_auc:.4f}, QWK={ext_qwk:.4f}"
+                )
 
             cohort_results[model_name] = result_entry
 
@@ -410,7 +470,10 @@ def run_external_validation(
         "ppmi": {
             "n_patients": int(len(ppmi)),
             "n_classes": int(n_classes),
-            "class_distribution": {str(k): int(v) for k, v in zip(*np.unique(y_ppmi, return_counts=True))},
+            "class_distribution": {
+                str(k): int(v)
+                for k, v in zip(*np.unique(y_ppmi, return_counts=True), strict=False)
+            },
             "internal_cv": internal_results,
         },
         "external": external_results,
@@ -421,21 +484,25 @@ def run_external_validation(
     logger.info(f"\nSaved results to {results_path}")
 
     # ── Print summary report ──
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"External Validation Report — Target: {target_type}")
-    print(f"{'='*70}")
+    print(f"{'=' * 70}")
     print(f"Common features ({len(available_common)}): {', '.join(available_common)}")
-    print(f"\nPPMI Internal CV (common features only):")
+    print("\nPPMI Internal CV (common features only):")
     print(f"{'Model':20s} {'Bal Acc':>10s} {'AUC':>10s} {'QWK':>10s}")
     print("-" * 52)
     for model_name, metrics in internal_results.items():
-        print(f"{model_name:20s} {metrics['bal_acc']:10.4f} {metrics['auc']:10.4f} {metrics['qwk']:10.4f}")
+        print(
+            f"{model_name:20s} {metrics['bal_acc']:10.4f} {metrics['auc']:10.4f} {metrics['qwk']:10.4f}"
+        )
 
     for cohort_name, cohort_res in external_results.items():
         has_metrics = any("external_metrics" in r for r in cohort_res.values())
         if has_metrics:
             print(f"\n{cohort_name} External Validation (with ground truth):")
-            print(f"{'Model':20s} {'N':>5s} {'Bal Acc':>10s} {'AUC':>10s} {'QWK':>10s}   {'95% CI (Bal Acc)':>22s}   {'95% CI (AUC)':>22s}")
+            print(
+                f"{'Model':20s} {'N':>5s} {'Bal Acc':>10s} {'AUC':>10s} {'QWK':>10s}   {'95% CI (Bal Acc)':>22s}   {'95% CI (AUC)':>22s}"
+            )
             print("-" * 100)
             for model_name, res in cohort_res.items():
                 m = res.get("external_metrics", {})
@@ -443,15 +510,19 @@ def run_external_validation(
                     ba_ci = m.get("bal_acc_ci")
                     auc_ci = m.get("auc_ci")
                     ba_ci_str = f"[{ba_ci[0]:.3f}-{ba_ci[1]:.3f}]" if ba_ci else "N/A"
-                    auc_ci_str = f"[{auc_ci[0]:.3f}-{auc_ci[1]:.3f}]" if auc_ci else "N/A"
-                    print(f"{model_name:20s} {m['n_ground_truth']:5d} {m['bal_acc']:10.4f} {m['auc']:10.4f} {m['qwk']:10.4f}   {ba_ci_str:>22s}   {auc_ci_str:>22s}")
+                    auc_ci_str = (
+                        f"[{auc_ci[0]:.3f}-{auc_ci[1]:.3f}]" if auc_ci else "N/A"
+                    )
+                    print(
+                        f"{model_name:20s} {m['n_ground_truth']:5d} {m['bal_acc']:10.4f} {m['auc']:10.4f} {m['qwk']:10.4f}   {ba_ci_str:>22s}   {auc_ci_str:>22s}"
+                    )
         else:
             print(f"\n{cohort_name} Predictions (no ground truth):")
             for model_name, res in cohort_res.items():
                 dist = res["prediction_distribution"]
                 print(f"  {model_name}: {res['n_patients']} pts → {dist}")
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     return results
 
 
@@ -460,11 +531,21 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-    parser = argparse.ArgumentParser(description="External validation of NSD-ISS models")
-    parser.add_argument("--target", choices=["binary", "three_class", "full_ordinal", "nsd_positive"],
-                        default="binary", help="Target type (default: binary)")
-    parser.add_argument("--cohorts", nargs="+", default=["PDBP"],
-                        help="External cohorts to validate on (default: PDBP)")
+    parser = argparse.ArgumentParser(
+        description="External validation of NSD-ISS models"
+    )
+    parser.add_argument(
+        "--target",
+        choices=["binary", "three_class", "full_ordinal", "nsd_positive"],
+        default="binary",
+        help="Target type (default: binary)",
+    )
+    parser.add_argument(
+        "--cohorts",
+        nargs="+",
+        default=["PDBP"],
+        help="External cohorts to validate on (default: PDBP)",
+    )
     args = parser.parse_args()
 
     run_external_validation(

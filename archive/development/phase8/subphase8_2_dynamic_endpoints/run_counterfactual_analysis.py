@@ -1,5 +1,4 @@
-"""
-Counterfactual Analysis: Direct model perturbation for feature sensitivity.
+"""Counterfactual Analysis: Direct model perturbation for feature sensitivity.
 
 Bypasses the Digital Twin v1 simulator (which dilutes single-patient perturbations
 through shared graph attention). Instead, perturbs features directly in sigma-scaled
@@ -9,6 +8,7 @@ Produces:
   - outputs/counterfactual_analysis/counterfactual_results.json
   - visualizations/publication_New/Figure12_Counterfactual_Trajectory.png
 """
+
 from __future__ import annotations
 
 import json
@@ -53,7 +53,9 @@ METADATA = (
     PROJECT_ROOT / "data/03_prodromal/final_pyg_data_sota_run/pyg_data_metadata.json"
 )
 
-OUTPUT_JSON = PROJECT_ROOT / "outputs/counterfactual_analysis/counterfactual_results.json"
+OUTPUT_JSON = (
+    PROJECT_ROOT / "outputs/counterfactual_analysis/counterfactual_results.json"
+)
 OUTPUT_FIGURE = (
     PROJECT_ROOT
     / "visualizations/publication_New/Figure12_Counterfactual_Trajectory.png"
@@ -62,17 +64,34 @@ OUTPUT_FIGURE = (
 # Features to test, grouped by modality for colour-coding
 FEATURE_GROUPS = {
     "CSF": ["ALPHA_SYNUCLEIN", "TOTAL_TAU", "ABETA42", "PTAU181"],
-    "Clinical": ["TREMOR_SCORE", "PIGD_SCORE", "SCOPA_AUT_TOTAL", "ESS_TOTAL",
-                  "UPSIT_TOTAL", "RBD_TOTAL"],
+    "Clinical": [
+        "TREMOR_SCORE",
+        "PIGD_SCORE",
+        "SCOPA_AUT_TOTAL",
+        "ESS_TOTAL",
+        "UPSIT_TOTAL",
+        "RBD_TOTAL",
+    ],
     "Genetic": ["GBA", "SNCA", "LRRK2", "APOE_E4", "GENETIC_RISK_SCORE"],
     "Imaging": [
-        "CAUDATE_L_VOL", "CAUDATE_R_VOL", "PUTAMEN_L_VOL", "PUTAMEN_R_VOL",
-        "HIPPOCAMPUS_L_VOL", "HIPPOCAMPUS_R_VOL",
-        "CAUDATE_L_SBR", "CAUDATE_R_SBR", "PUTAMEN_L_SBR", "PUTAMEN_R_SBR",
-        "CAUDATE_ASYMMETRY", "PUTAMEN_ASYMMETRY",
-        "ENTORHINAL_L_CTH", "ENTORHINAL_R_CTH",
-        "CINGULATE_L_CTH", "CINGULATE_R_CTH",
-        "PRECENTRAL_L_CTH", "PRECENTRAL_R_CTH",
+        "CAUDATE_L_VOL",
+        "CAUDATE_R_VOL",
+        "PUTAMEN_L_VOL",
+        "PUTAMEN_R_VOL",
+        "HIPPOCAMPUS_L_VOL",
+        "HIPPOCAMPUS_R_VOL",
+        "CAUDATE_L_SBR",
+        "CAUDATE_R_SBR",
+        "PUTAMEN_L_SBR",
+        "PUTAMEN_R_SBR",
+        "CAUDATE_ASYMMETRY",
+        "PUTAMEN_ASYMMETRY",
+        "ENTORHINAL_L_CTH",
+        "ENTORHINAL_R_CTH",
+        "CINGULATE_L_CTH",
+        "CINGULATE_R_CTH",
+        "PRECENTRAL_L_CTH",
+        "PRECENTRAL_R_CTH",
     ],
 }
 
@@ -81,10 +100,10 @@ SIGMA_LEVELS = np.array([-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0])
 
 # Modality colours for the bar chart
 MODALITY_COLORS = {
-    "CSF": "#2ca02c",       # green
+    "CSF": "#2ca02c",  # green
     "Clinical": "#ff7f0e",  # orange
-    "Genetic": "#d62728",   # red
-    "Imaging": "#1f77b4",   # blue
+    "Genetic": "#d62728",  # red
+    "Imaging": "#1f77b4",  # blue
 }
 
 
@@ -115,8 +134,7 @@ def run_counterfactual_sweep(
     feature_names: list[str],
     feature_stds: np.ndarray,
 ) -> dict:
-    """
-    For every (feature, sigma_level, patient), perturb and record Δprob.
+    """For every (feature, sigma_level, patient), perturb and record Δprob.
     Returns a structured dict of results.
     """
     device = test_data.x.device
@@ -164,7 +182,9 @@ def run_counterfactual_sweep(
                         x_pert, dtype=torch.float32, device=device
                     )
                     pert_probs = _predict_probs_from_model(model, temp_data)
-                    deltas.append(float(pert_probs[patient_i] - baseline_probs[patient_i]))
+                    deltas.append(
+                        float(pert_probs[patient_i] - baseline_probs[patient_i])
+                    )
 
             sweep[feat_name][sigma_key] = deltas
 
@@ -215,11 +235,13 @@ def run_counterfactual_sweep(
 # ---------------------------------------------------------------------------
 def generate_figure(results: dict) -> None:
     """Two-panel publication figure for counterfactual analysis."""
-    plt.rcParams.update({
-        "font.family": "serif",
-        "font.size": 10,
-        "figure.dpi": 300,
-    })
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "font.size": 10,
+            "figure.dpi": 300,
+        }
+    )
 
     fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(14, 6))
     fig.suptitle(
@@ -299,7 +321,9 @@ def generate_figure(results: dict) -> None:
     # Clip lower error bar so bars don't extend below zero
     bar_errs_lower = np.minimum(bar_errs_raw, bar_vals)
     bar_errs = np.array([bar_errs_lower, bar_errs_raw])
-    bar_colors = [MODALITY_COLORS.get(sensitivity[f]["modality"], "#7f7f7f") for f in top_for_bar]
+    bar_colors = [
+        MODALITY_COLORS.get(sensitivity[f]["modality"], "#7f7f7f") for f in top_for_bar
+    ]
 
     y_pos = np.arange(len(top_for_bar))
     ax_b.barh(
@@ -314,9 +338,7 @@ def generate_figure(results: dict) -> None:
     )
     ax_b.set_yticks(y_pos)
     ax_b.set_yticklabels(top_for_bar, fontsize=9)
-    ax_b.set_xlabel(
-        "Mean |Δ Probability| at ±1σ", fontsize=11, fontweight="bold"
-    )
+    ax_b.set_xlabel("Mean |Δ Probability| at ±1σ", fontsize=11, fontweight="bold")
     ax_b.set_title(
         "Panel B: Population Feature Sensitivity (n=32)",
         fontsize=11,
@@ -328,17 +350,40 @@ def generate_figure(results: dict) -> None:
 
     # Modality legend for Panel B
     from matplotlib.patches import Patch
+
     legend_elements = [
-        Patch(facecolor=MODALITY_COLORS["CSF"], edgecolor="black", linewidth=0.5, label="CSF"),
-        Patch(facecolor=MODALITY_COLORS["Clinical"], edgecolor="black", linewidth=0.5, label="Clinical"),
-        Patch(facecolor=MODALITY_COLORS["Genetic"], edgecolor="black", linewidth=0.5, label="Genetic"),
-        Patch(facecolor=MODALITY_COLORS["Imaging"], edgecolor="black", linewidth=0.5, label="Imaging"),
+        Patch(
+            facecolor=MODALITY_COLORS["CSF"],
+            edgecolor="black",
+            linewidth=0.5,
+            label="CSF",
+        ),
+        Patch(
+            facecolor=MODALITY_COLORS["Clinical"],
+            edgecolor="black",
+            linewidth=0.5,
+            label="Clinical",
+        ),
+        Patch(
+            facecolor=MODALITY_COLORS["Genetic"],
+            edgecolor="black",
+            linewidth=0.5,
+            label="Genetic",
+        ),
+        Patch(
+            facecolor=MODALITY_COLORS["Imaging"],
+            edgecolor="black",
+            linewidth=0.5,
+            label="Imaging",
+        ),
     ]
     ax_b.legend(handles=legend_elements, loc="lower right", fontsize=8, frameon=True)
 
     plt.tight_layout()
     OUTPUT_FIGURE.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUTPUT_FIGURE, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.2)
+    fig.savefig(
+        OUTPUT_FIGURE, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.2
+    )
     plt.close(fig)
     print(f"Saved figure: {OUTPUT_FIGURE}")
 
@@ -363,7 +408,9 @@ def main() -> None:
     # Load data
     train_data = torch.load(TRAIN_DATA, weights_only=False).to(device)
     test_data = torch.load(TEST_DATA, weights_only=False).to(device)
-    print(f"Train: {train_data.x.shape[0]} samples, Test: {test_data.x.shape[0]} samples")
+    print(
+        f"Train: {train_data.x.shape[0]} samples, Test: {test_data.x.shape[0]} samples"
+    )
 
     # Compute feature standard deviations from training data
     x_train = train_data.x.detach().cpu().numpy()
@@ -400,15 +447,15 @@ def main() -> None:
     patient_idx = results["representative_patient_idx"]
     patno = results["representative_patno"]
     baseline_p = results["baseline_probs"][patient_idx]
-    print(f"\nRepresentative patient: PATNO {patno} (idx={patient_idx}, baseline p={baseline_p:.4f})")
+    print(
+        f"\nRepresentative patient: PATNO {patno} (idx={patient_idx}, baseline p={baseline_p:.4f})"
+    )
 
     # Save results JSON
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
 
     # Convert sweep to serializable form (already is, but be safe)
-    serializable = {
-        k: v for k, v in results.items()
-    }
+    serializable = {k: v for k, v in results.items()}
     OUTPUT_JSON.write_text(json.dumps(serializable, indent=2), encoding="utf-8")
     print(f"\nSaved results: {OUTPUT_JSON}")
 

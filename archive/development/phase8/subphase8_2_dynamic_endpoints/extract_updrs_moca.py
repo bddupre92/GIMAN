@@ -1,5 +1,4 @@
-"""
-Phase 8.2 Expansion: UPDRS Totals & MoCA Extraction
+"""Phase 8.2 Expansion: UPDRS Totals & MoCA Extraction
 
 Purpose:
     Extract motor/non-motor total scores and cognitive assessment from PPMI
@@ -31,15 +30,13 @@ Phase: 8.2 Feature Expansion
 
 import json
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
 
 
 def load_updrs_iii_totals(data_dir: Path) -> pd.DataFrame:
-    """
-    Load NP3TOT (motor total) and NHY (Hoehn & Yahr) from UPDRS Part III.
+    """Load NP3TOT (motor total) and NHY (Hoehn & Yahr) from UPDRS Part III.
 
     NP3TOT: Sum of all Part III motor items (0-132 range).
     NHY: Modified Hoehn & Yahr stage (0=asymptomatic to 5=wheelchair/bed).
@@ -55,7 +52,10 @@ def load_updrs_iii_totals(data_dir: Path) -> pd.DataFrame:
         DataFrame with PATNO, NP3TOT, NHY
     """
     updrs_iii_file = (
-        data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv"
+        data_dir
+        / "00_raw"
+        / "GIMAN"
+        / "ppmi_data_csv"
         / "MDS-UPDRS_Part_III_30Sep2025.csv"
     )
 
@@ -78,9 +78,11 @@ def load_updrs_iii_totals(data_dir: Path) -> pd.DataFrame:
     else:
         df_bl = df.copy()
 
-    result = df_bl[["PATNO", "NP3TOT", "NHY"]].drop_duplicates(
-        subset=["PATNO"], keep="first"
-    ).copy()
+    result = (
+        df_bl[["PATNO", "NP3TOT", "NHY"]]
+        .drop_duplicates(subset=["PATNO"], keep="first")
+        .copy()
+    )
 
     # Convert to numeric
     result["NP3TOT"] = pd.to_numeric(result["NP3TOT"], errors="coerce")
@@ -104,8 +106,7 @@ def load_updrs_iii_totals(data_dir: Path) -> pd.DataFrame:
 
 
 def load_updrs_i_total(data_dir: Path) -> pd.DataFrame:
-    """
-    Load NP1RTOT (Part I rater total) from UPDRS Part I.
+    """Load NP1RTOT (Part I rater total) from UPDRS Part I.
 
     NP1RTOT is the pre-computed rater-assessed total for non-motor experiences
     (items 1a through 6a: cognitive impairment, hallucinations, depression,
@@ -121,7 +122,10 @@ def load_updrs_i_total(data_dir: Path) -> pd.DataFrame:
         DataFrame with PATNO and NP1RTOT
     """
     updrs_i_file = (
-        data_dir / "00_raw" / "GIMAN" / "ppmi_data_csv"
+        data_dir
+        / "00_raw"
+        / "GIMAN"
+        / "ppmi_data_csv"
         / "MDS-UPDRS_Part_I_30Sep2025.csv"
     )
 
@@ -142,9 +146,11 @@ def load_updrs_i_total(data_dir: Path) -> pd.DataFrame:
     else:
         df_bl = df.copy()
 
-    result = df_bl[["PATNO", "NP1RTOT"]].drop_duplicates(
-        subset=["PATNO"], keep="first"
-    ).copy()
+    result = (
+        df_bl[["PATNO", "NP1RTOT"]]
+        .drop_duplicates(subset=["PATNO"], keep="first")
+        .copy()
+    )
 
     result["NP1RTOT"] = pd.to_numeric(result["NP1RTOT"], errors="coerce")
 
@@ -159,8 +165,7 @@ def load_updrs_i_total(data_dir: Path) -> pd.DataFrame:
 
 
 def load_moca(data_dir: Path) -> pd.DataFrame:
-    """
-    Load MCATOT (Montreal Cognitive Assessment total) from MoCA file.
+    """Load MCATOT (Montreal Cognitive Assessment total) from MoCA file.
 
     MoCA is a 30-point cognitive screening instrument:
     - 26-30: Normal
@@ -176,8 +181,7 @@ def load_moca(data_dir: Path) -> pd.DataFrame:
         DataFrame with PATNO and MCATOT
     """
     moca_file = (
-        data_dir / "00_raw"
-        / "Montreal_Cognitive_Assessment__MoCA__07Feb2026.csv"
+        data_dir / "00_raw" / "Montreal_Cognitive_Assessment__MoCA__07Feb2026.csv"
     )
 
     if not moca_file.exists():
@@ -205,9 +209,11 @@ def load_moca(data_dir: Path) -> pd.DataFrame:
     else:
         df_combined = df.copy()
 
-    result = df_combined[["PATNO", "MCATOT"]].drop_duplicates(
-        subset=["PATNO"], keep="first"
-    ).copy()
+    result = (
+        df_combined[["PATNO", "MCATOT"]]
+        .drop_duplicates(subset=["PATNO"], keep="first")
+        .copy()
+    )
 
     result["MCATOT"] = pd.to_numeric(result["MCATOT"], errors="coerce")
 
@@ -230,10 +236,9 @@ def merge_updrs_moca(
     updrs_iii_df: pd.DataFrame,
     updrs_i_df: pd.DataFrame,
     moca_df: pd.DataFrame,
-    data_dir: Path
-) -> Tuple[pd.DataFrame, Dict[str, float]]:
-    """
-    Merge UPDRS totals and MoCA with prodromal cohort.
+    data_dir: Path,
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    """Merge UPDRS totals and MoCA with prodromal cohort.
 
     Args:
         updrs_iii_df: DataFrame with PATNO, NP3TOT, NHY
@@ -275,12 +280,9 @@ def merge_updrs_moca(
 
 
 def save_updrs_moca(
-    df: pd.DataFrame,
-    coverage_stats: Dict[str, float],
-    output_dir: Path
+    df: pd.DataFrame, coverage_stats: dict[str, float], output_dir: Path
 ) -> None:
-    """
-    Save UPDRS/MoCA features and metadata.
+    """Save UPDRS/MoCA features and metadata.
 
     Args:
         df: DataFrame with PATNO, NP3TOT, NP1RTOT, NHY, MCATOT
@@ -307,14 +309,14 @@ def save_updrs_moca(
         "source_files": [
             "MDS-UPDRS_Part_III_30Sep2025.csv",
             "MDS-UPDRS_Part_I_30Sep2025.csv",
-            "Montreal_Cognitive_Assessment__MoCA__07Feb2026.csv"
+            "Montreal_Cognitive_Assessment__MoCA__07Feb2026.csv",
         ],
         "clinical_relevance": {
             "NP3TOT": "Total motor severity (0-132); comprehensive motor burden",
             "NP1RTOT": "Non-motor rater total; clinician-assessed non-motor burden",
             "NHY": "Hoehn & Yahr stage (0-5); global disease severity staging",
-            "MCATOT": "Cognitive screening (0-30); MCI is common in prodromal PD"
-        }
+            "MCATOT": "Cognitive screening (0-30); MCI is common in prodromal PD",
+        },
     }
 
     metadata_file = output_dir / "updrs_moca_metadata.json"
@@ -366,7 +368,7 @@ def main() -> None:
     print("\n" + "=" * 70)
     print("UPDRS/MoCA EXTRACTION COMPLETE")
     print("=" * 70)
-    print(f"  Extracted 4 features: NP3TOT, NP1RTOT, NHY, MCATOT")
+    print("  Extracted 4 features: NP3TOT, NP1RTOT, NHY, MCATOT")
     print(f"  Cohort size: {len(merged_df)} patients")
     print(f"  Average coverage: {np.mean(list(coverage_stats.values())):.1f}%")
     print(f"  Output: {output_dir / 'updrs_moca.csv'}")

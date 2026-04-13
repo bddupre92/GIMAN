@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Paper 3 Visualization Suite: Graph-Informed Digital Twins for NSD-ISS Transitions.
+"""Paper 3 Visualization Suite: Graph-Informed Digital Twins for NSD-ISS Transitions.
 
 Generates publication-quality figures demonstrating Graph-DT's novelty:
   1. Patient similarity graph (colored by stage)
@@ -30,10 +29,10 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")  # non-interactive backend
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -45,7 +44,9 @@ DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "paper3_figures"
 FEATURES_PATH = DATA_DIR / "07_paper3_features" / "longitudinal_features.csv"
 TRANSITIONS_PATH = DATA_DIR / "06_longitudinal_staging" / "transition_events.csv"
-BENCHMARK_PATH = PROJECT_ROOT / "outputs" / "paper3_benchmark" / "benchmark_summary.json"
+BENCHMARK_PATH = (
+    PROJECT_ROOT / "outputs" / "paper3_benchmark" / "benchmark_summary.json"
+)
 MARKOV_PATH = PROJECT_ROOT / "outputs" / "paper3_markov" / "markov_results.json"
 DEEPHIT_PATH = PROJECT_ROOT / "outputs" / "paper3_deephit" / "deephit_results.json"
 GRAPHDT_PATH = PROJECT_ROOT / "outputs" / "paper3_graph_dt" / "graph_dt_results.json"
@@ -54,27 +55,29 @@ GRAPHDT_PATH = PROJECT_ROOT / "outputs" / "paper3_graph_dt" / "graph_dt_results.
 STAGE_LABELS = ["0", "1", "2B", "3", "4", "5", "6"]
 STAGE_NUMERIC = [0, 1, 2.5, 3, 4, 5, 6]
 STAGE_COLORS = {
-    "0": "#2ecc71",   # green — no markers
-    "1": "#3498db",   # blue — early biological
+    "0": "#2ecc71",  # green — no markers
+    "1": "#3498db",  # blue — early biological
     "2B": "#f39c12",  # orange — clinical onset
-    "3": "#e74c3c",   # red — mild impairment
-    "4": "#9b59b6",   # purple — moderate
-    "5": "#34495e",   # dark grey — severe
-    "6": "#1a1a2e",   # near-black — very severe
+    "3": "#e74c3c",  # red — mild impairment
+    "4": "#9b59b6",  # purple — moderate
+    "5": "#34495e",  # dark grey — severe
+    "6": "#1a1a2e",  # near-black — very severe
 }
 
 # Matplotlib style for publication
-plt.rcParams.update({
-    "font.family": "serif",
-    "font.size": 11,
-    "axes.labelsize": 12,
-    "axes.titlesize": 13,
-    "legend.fontsize": 10,
-    "figure.dpi": 300,
-    "savefig.dpi": 300,
-    "savefig.bbox": "tight",
-    "savefig.pad_inches": 0.1,
-})
+plt.rcParams.update(
+    {
+        "font.family": "serif",
+        "font.size": 11,
+        "axes.labelsize": 12,
+        "axes.titlesize": 13,
+        "legend.fontsize": 10,
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+        "savefig.pad_inches": 0.1,
+    }
+)
 
 
 def load_data():
@@ -101,6 +104,7 @@ def load_data():
 # FIGURE 1: Patient Similarity Graph
 # =====================================================================
 
+
 def fig_patient_graph(features, output_dir):
     """Visualize the kNN patient similarity graph colored by baseline NSD-ISS stage."""
     import networkx as nx
@@ -113,7 +117,9 @@ def fig_patient_graph(features, output_dir):
     baseline = baseline[baseline["nsd_stage"].notna()]
 
     # Build kNN graph (same logic as model)
-    from giman_pipeline.paper3.graph_digital_twin import GRAPH_FEATURES, build_patient_graph
+    from giman_pipeline.paper3.graph_digital_twin import (
+        build_patient_graph,
+    )
 
     patient_ids = sorted(baseline["PATNO"].unique().tolist())
     edge_index, edge_weight, node_baseline = build_patient_graph(
@@ -139,8 +145,10 @@ def fig_patient_graph(features, output_dir):
             G.add_edge(s, d, weight=float(ew[e]))
 
     # Node colors by stage
-    node_colors = [STAGE_COLORS.get(pat_stages.get(i, "0"), "#cccccc")
-                   for i in range(len(patient_ids))]
+    node_colors = [
+        STAGE_COLORS.get(pat_stages.get(i, "0"), "#cccccc")
+        for i in range(len(patient_ids))
+    ]
 
     # Stage counts
     stage_counts = {}
@@ -154,12 +162,18 @@ def fig_patient_graph(features, output_dir):
     fig, ax = plt.subplots(1, 1, figsize=(12, 10))
 
     # Draw edges (very faint)
-    nx.draw_networkx_edges(G, pos, ax=ax, alpha=0.02, edge_color="#cccccc",
-                           width=0.3)
+    nx.draw_networkx_edges(G, pos, ax=ax, alpha=0.02, edge_color="#cccccc", width=0.3)
 
     # Draw nodes
-    nx.draw_networkx_nodes(G, pos, ax=ax, node_size=15, node_color=node_colors,
-                           edgecolors="none", alpha=0.8)
+    nx.draw_networkx_nodes(
+        G,
+        pos,
+        ax=ax,
+        node_size=15,
+        node_color=node_colors,
+        edgecolors="none",
+        alpha=0.8,
+    )
 
     # Legend
     legend_patches = []
@@ -167,20 +181,30 @@ def fig_patient_graph(features, output_dir):
         n = stage_counts.get(stage, 0)
         if n > 0:
             legend_patches.append(
-                mpatches.Patch(color=STAGE_COLORS[stage],
-                               label=f"Stage {stage} (n={n})")
+                mpatches.Patch(
+                    color=STAGE_COLORS[stage], label=f"Stage {stage} (n={n})"
+                )
             )
-    ax.legend(handles=legend_patches, loc="upper left", framealpha=0.9,
-              fontsize=10, title="NSD-ISS Stage", title_fontsize=11)
+    ax.legend(
+        handles=legend_patches,
+        loc="upper left",
+        framealpha=0.9,
+        fontsize=10,
+        title="NSD-ISS Stage",
+        title_fontsize=11,
+    )
 
-    ax.set_title("Patient Similarity Graph (k=15 Nearest Neighbors)\n"
-                 "Colored by Baseline NSD-ISS Stage", fontsize=14)
+    ax.set_title(
+        "Patient Similarity Graph (k=15 Nearest Neighbors)\n"
+        "Colored by Baseline NSD-ISS Stage",
+        fontsize=14,
+    )
     ax.axis("off")
 
     fig.savefig(output_dir / "fig1_patient_similarity_graph.png")
     fig.savefig(output_dir / "fig1_patient_similarity_graph.pdf")
     plt.close(fig)
-    print(f"  Saved: fig1_patient_similarity_graph.png/pdf")
+    print("  Saved: fig1_patient_similarity_graph.png/pdf")
 
     # Also save a zoomed version showing inter-stage connectivity
     return G, pos, pat_stages, patient_ids
@@ -189,6 +213,7 @@ def fig_patient_graph(features, output_dir):
 # =====================================================================
 # FIGURE 2: Transition Matrix Heatmap
 # =====================================================================
+
 
 def fig_transition_matrix(benchmark, output_dir):
     """Heatmap of observed stage transitions."""
@@ -206,9 +231,16 @@ def fig_transition_matrix(benchmark, output_dir):
     # Use log scale for the colormap since values vary greatly
     mask = matrix == 0
     sns.heatmap(
-        matrix, annot=True, fmt="d", cmap="YlOrRd",
-        xticklabels=stages, yticklabels=stages,
-        ax=ax, mask=mask, linewidths=0.5, linecolor="white",
+        matrix,
+        annot=True,
+        fmt="d",
+        cmap="YlOrRd",
+        xticklabels=stages,
+        yticklabels=stages,
+        ax=ax,
+        mask=mask,
+        linewidths=0.5,
+        linecolor="white",
         cbar_kws={"label": "Number of Transitions"},
         annot_kws={"size": 11},
     )
@@ -216,8 +248,15 @@ def fig_transition_matrix(benchmark, output_dir):
     for i in range(len(stages)):
         for j in range(len(stages)):
             if matrix[i, j] == 0:
-                ax.text(j + 0.5, i + 0.5, "0", ha="center", va="center",
-                        fontsize=9, color="#cccccc")
+                ax.text(
+                    j + 0.5,
+                    i + 0.5,
+                    "0",
+                    ha="center",
+                    va="center",
+                    fontsize=9,
+                    color="#cccccc",
+                )
 
     ax.set_xlabel("Destination Stage", fontsize=12)
     ax.set_ylabel("Source Stage", fontsize=12)
@@ -226,21 +265,27 @@ def fig_transition_matrix(benchmark, output_dir):
     # Add annotations for forward vs backward
     total_fwd = benchmark["cohort"]["forward_transitions"]
     total_bwd = benchmark["cohort"]["backward_transitions"]
-    ax.text(0.02, -0.08,
-            f"Forward: {total_fwd} ({total_fwd/(total_fwd+total_bwd)*100:.1f}%)  |  "
-            f"Backward: {total_bwd} ({total_bwd/(total_fwd+total_bwd)*100:.1f}%)",
-            transform=ax.transAxes, fontsize=10, style="italic")
+    ax.text(
+        0.02,
+        -0.08,
+        f"Forward: {total_fwd} ({total_fwd / (total_fwd + total_bwd) * 100:.1f}%)  |  "
+        f"Backward: {total_bwd} ({total_bwd / (total_fwd + total_bwd) * 100:.1f}%)",
+        transform=ax.transAxes,
+        fontsize=10,
+        style="italic",
+    )
 
     fig.tight_layout()
     fig.savefig(output_dir / "fig2_transition_matrix.png")
     fig.savefig(output_dir / "fig2_transition_matrix.pdf")
     plt.close(fig)
-    print(f"  Saved: fig2_transition_matrix.png/pdf")
+    print("  Saved: fig2_transition_matrix.png/pdf")
 
 
 # =====================================================================
 # FIGURE 3: Individual Patient Trajectories (Spaghetti Plot)
 # =====================================================================
+
 
 def fig_patient_trajectories(features, output_dir):
     """Spaghetti plot of individual patient stage trajectories over time."""
@@ -251,13 +296,17 @@ def fig_patient_trajectories(features, output_dir):
     # Regressive: goes backward (4 → 3 or 3 → 2B)
     # Stable: stays at same stage
 
-    patients = features.groupby("PATNO").agg(
-        n_visits=("EVENT_ID", "count"),
-        stages=("nsd_stage_numeric", lambda x: list(x.dropna())),
-        times=("months_from_baseline", lambda x: list(x)),
-        first_stage=("nsd_stage_numeric", "first"),
-        last_stage=("nsd_stage_numeric", "last"),
-    ).reset_index()
+    patients = (
+        features.groupby("PATNO")
+        .agg(
+            n_visits=("EVENT_ID", "count"),
+            stages=("nsd_stage_numeric", lambda x: list(x.dropna())),
+            times=("months_from_baseline", lambda x: list(x)),
+            first_stage=("nsd_stage_numeric", "first"),
+            last_stage=("nsd_stage_numeric", "last"),
+        )
+        .reset_index()
+    )
 
     # Filter to patients with enough data
     patients = patients[patients["n_visits"] >= 4]
@@ -265,8 +314,12 @@ def fig_patient_trajectories(features, output_dir):
     patients["n_unique_stages"] = patients["stages"].apply(lambda x: len(set(x)))
 
     # Select examples
-    progressors = patients[(patients["stage_change"] > 0) & (patients["n_unique_stages"] >= 3)]
-    regressors = patients[(patients["stage_change"] < 0) & (patients["n_unique_stages"] >= 2)]
+    progressors = patients[
+        (patients["stage_change"] > 0) & (patients["n_unique_stages"] >= 3)
+    ]
+    regressors = patients[
+        (patients["stage_change"] < 0) & (patients["n_unique_stages"] >= 2)
+    ]
     stable = patients[(patients["stage_change"] == 0) & (patients["n_visits"] >= 6)]
     oscillators = patients[patients["n_unique_stages"] >= 3]
 
@@ -275,15 +328,24 @@ def fig_patient_trajectories(features, output_dir):
     # Panel A: All patients (random subset, faded)
     ax = axes[0, 0]
     rng = np.random.RandomState(42)
-    sample_pats = rng.choice(patients["PATNO"].values, size=min(200, len(patients)), replace=False)
+    sample_pats = rng.choice(
+        patients["PATNO"].values, size=min(200, len(patients)), replace=False
+    )
     for pat in sample_pats:
-        pat_data = features[features["PATNO"] == pat].sort_values("months_from_baseline")
+        pat_data = features[features["PATNO"] == pat].sort_values(
+            "months_from_baseline"
+        )
         times = pat_data["months_from_baseline"].values
         stages = pat_data["nsd_stage_numeric"].values
         valid = ~np.isnan(stages)
         if valid.sum() >= 2:
-            ax.plot(times[valid] / 12, stages[valid], alpha=0.08, linewidth=0.5,
-                    color="#3498db")
+            ax.plot(
+                times[valid] / 12,
+                stages[valid],
+                alpha=0.08,
+                linewidth=0.5,
+                color="#3498db",
+            )
     ax.set_ylabel("NSD-ISS Stage")
     ax.set_xlabel("Years from Baseline")
     ax.set_title("A. Population Overview (n=200 random)")
@@ -296,13 +358,21 @@ def fig_patient_trajectories(features, output_dir):
     ax = axes[0, 1]
     if len(progressors) > 0:
         for _, row in progressors.head(8).iterrows():
-            pat_data = features[features["PATNO"] == row["PATNO"]].sort_values("months_from_baseline")
+            pat_data = features[features["PATNO"] == row["PATNO"]].sort_values(
+                "months_from_baseline"
+            )
             times = pat_data["months_from_baseline"].values
             stages = pat_data["nsd_stage_numeric"].values
             valid = ~np.isnan(stages)
             if valid.sum() >= 2:
-                ax.plot(times[valid] / 12, stages[valid], alpha=0.7, linewidth=1.5,
-                        marker="o", markersize=3)
+                ax.plot(
+                    times[valid] / 12,
+                    stages[valid],
+                    alpha=0.7,
+                    linewidth=1.5,
+                    marker="o",
+                    markersize=3,
+                )
     ax.set_ylabel("NSD-ISS Stage")
     ax.set_xlabel("Years from Baseline")
     ax.set_title("B. Progressive Patients")
@@ -315,16 +385,24 @@ def fig_patient_trajectories(features, output_dir):
     ax = axes[1, 0]
     if len(regressors) > 0:
         for _, row in regressors.head(8).iterrows():
-            pat_data = features[features["PATNO"] == row["PATNO"]].sort_values("months_from_baseline")
+            pat_data = features[features["PATNO"] == row["PATNO"]].sort_values(
+                "months_from_baseline"
+            )
             times = pat_data["months_from_baseline"].values
             stages = pat_data["nsd_stage_numeric"].values
             valid = ~np.isnan(stages)
             if valid.sum() >= 2:
-                ax.plot(times[valid] / 12, stages[valid], alpha=0.7, linewidth=1.5,
-                        marker="o", markersize=3)
+                ax.plot(
+                    times[valid] / 12,
+                    stages[valid],
+                    alpha=0.7,
+                    linewidth=1.5,
+                    marker="o",
+                    markersize=3,
+                )
     ax.set_ylabel("NSD-ISS Stage")
     ax.set_xlabel("Years from Baseline")
-    ax.set_title(f"C. Regressive Patients (treatment-driven)")
+    ax.set_title("C. Regressive Patients (treatment-driven)")
     ax.set_yticks(STAGE_NUMERIC)
     ax.set_yticklabels(STAGE_LABELS)
     ax.set_xlim(-0.5, 15)
@@ -332,16 +410,26 @@ def fig_patient_trajectories(features, output_dir):
 
     # Panel D: Oscillating patients (forward + backward)
     ax = axes[1, 1]
-    osc = oscillators[(oscillators["n_unique_stages"] >= 3) & (oscillators["n_visits"] >= 6)]
+    osc = oscillators[
+        (oscillators["n_unique_stages"] >= 3) & (oscillators["n_visits"] >= 6)
+    ]
     if len(osc) > 0:
         for _, row in osc.head(8).iterrows():
-            pat_data = features[features["PATNO"] == row["PATNO"]].sort_values("months_from_baseline")
+            pat_data = features[features["PATNO"] == row["PATNO"]].sort_values(
+                "months_from_baseline"
+            )
             times = pat_data["months_from_baseline"].values
             stages = pat_data["nsd_stage_numeric"].values
             valid = ~np.isnan(stages)
             if valid.sum() >= 2:
-                ax.plot(times[valid] / 12, stages[valid], alpha=0.7, linewidth=1.5,
-                        marker="o", markersize=3)
+                ax.plot(
+                    times[valid] / 12,
+                    stages[valid],
+                    alpha=0.7,
+                    linewidth=1.5,
+                    marker="o",
+                    markersize=3,
+                )
     ax.set_ylabel("NSD-ISS Stage")
     ax.set_xlabel("Years from Baseline")
     ax.set_title("D. Oscillating Patients (bidirectional)")
@@ -350,17 +438,20 @@ def fig_patient_trajectories(features, output_dir):
     ax.set_xlim(-0.5, 15)
     ax.grid(True, alpha=0.3)
 
-    fig.suptitle("NSD-ISS Stage Trajectories in PPMI (N=1,900 Patients)", fontsize=15, y=1.02)
+    fig.suptitle(
+        "NSD-ISS Stage Trajectories in PPMI (N=1,900 Patients)", fontsize=15, y=1.02
+    )
     fig.tight_layout()
     fig.savefig(output_dir / "fig3_patient_trajectories.png")
     fig.savefig(output_dir / "fig3_patient_trajectories.pdf")
     plt.close(fig)
-    print(f"  Saved: fig3_patient_trajectories.png/pdf")
+    print("  Saved: fig3_patient_trajectories.png/pdf")
 
 
 # =====================================================================
 # FIGURE 4: Model Comparison (C-td, IBS with error bars)
 # =====================================================================
+
 
 def fig_model_comparison(deephit, graphdt, output_dir):
     """Bar chart comparing DeepHit vs Graph-DT with per-fold error bars."""
@@ -375,42 +466,89 @@ def fig_model_comparison(deephit, graphdt, output_dir):
     ax = axes[0]
     ctds = [deephit["c_td"], graphdt["c_td"]]
     stds = [deephit["c_td_std"], graphdt["c_td_std"]]
-    bars = ax.bar(models, ctds, yerr=stds, color=colors, alpha=0.85,
-                  capsize=8, edgecolor="black", linewidth=0.5)
+    bars = ax.bar(
+        models,
+        ctds,
+        yerr=stds,
+        color=colors,
+        alpha=0.85,
+        capsize=8,
+        edgecolor="black",
+        linewidth=0.5,
+    )
     ax.set_ylabel("Time-Dependent Concordance (C-td)")
     ax.set_title("A. Discriminative Performance")
     ax.set_ylim(0.88, 0.96)
     # Add fold dots
-    for i, (folds, color) in enumerate(zip(
-        [deephit["c_td_per_fold"], graphdt["c_td_per_fold"]], colors
-    )):
+    for i, (folds, color) in enumerate(
+        zip([deephit["c_td_per_fold"], graphdt["c_td_per_fold"]], colors, strict=False)
+    ):
         x_jitter = np.random.RandomState(42).normal(0, 0.04, len(folds))
-        ax.scatter([i + xj for xj in x_jitter], folds, color=color,
-                   edgecolor="black", linewidth=0.5, s=40, zorder=5, alpha=0.7)
+        ax.scatter(
+            [i + xj for xj in x_jitter],
+            folds,
+            color=color,
+            edgecolor="black",
+            linewidth=0.5,
+            s=40,
+            zorder=5,
+            alpha=0.7,
+        )
     ax.axhline(y=0.5, color="#cccccc", linestyle="--", linewidth=0.5, alpha=0.5)
-    ax.text(0.5, 0.02, "p = 0.108 (paired t-test)\nNot statistically significant",
-            transform=ax.transAxes, ha="center", fontsize=9, style="italic",
-            color="#666666")
+    ax.text(
+        0.5,
+        0.02,
+        "p = 0.108 (paired t-test)\nNot statistically significant",
+        transform=ax.transAxes,
+        ha="center",
+        fontsize=9,
+        style="italic",
+        color="#666666",
+    )
     ax.grid(True, axis="y", alpha=0.3)
 
     # IBS comparison
     ax = axes[1]
     ibs_vals = [deephit["ibs"], graphdt["ibs"]]
     ibs_stds = [deephit["ibs_std"], graphdt["ibs_std"]]
-    bars = ax.bar(models, ibs_vals, yerr=ibs_stds, color=colors, alpha=0.85,
-                  capsize=8, edgecolor="black", linewidth=0.5)
+    bars = ax.bar(
+        models,
+        ibs_vals,
+        yerr=ibs_stds,
+        color=colors,
+        alpha=0.85,
+        capsize=8,
+        edgecolor="black",
+        linewidth=0.5,
+    )
     ax.set_ylabel("Integrated Brier Score (IBS)")
     ax.set_title("B. Calibration Performance")
     ax.set_ylim(0.0, 0.010)
-    for i, (folds, color) in enumerate(zip(
-        [deephit["ibs_per_fold"], graphdt["ibs_per_fold"]], colors
-    )):
+    for i, (folds, color) in enumerate(
+        zip([deephit["ibs_per_fold"], graphdt["ibs_per_fold"]], colors, strict=False)
+    ):
         x_jitter = np.random.RandomState(42).normal(0, 0.04, len(folds))
-        ax.scatter([i + xj for xj in x_jitter], folds, color=color,
-                   edgecolor="black", linewidth=0.5, s=40, zorder=5, alpha=0.7)
-    ax.text(0.5, 0.95, "Lower is better",
-            transform=ax.transAxes, ha="center", fontsize=9, style="italic",
-            va="top", color="#666666")
+        ax.scatter(
+            [i + xj for xj in x_jitter],
+            folds,
+            color=color,
+            edgecolor="black",
+            linewidth=0.5,
+            s=40,
+            zorder=5,
+            alpha=0.7,
+        )
+    ax.text(
+        0.5,
+        0.95,
+        "Lower is better",
+        transform=ax.transAxes,
+        ha="center",
+        fontsize=9,
+        style="italic",
+        va="top",
+        color="#666666",
+    )
     ax.grid(True, axis="y", alpha=0.3)
 
     fig.suptitle("Deep Learning Model Comparison (5-Fold CV)", fontsize=14, y=1.02)
@@ -418,12 +556,13 @@ def fig_model_comparison(deephit, graphdt, output_dir):
     fig.savefig(output_dir / "fig4_model_comparison.png")
     fig.savefig(output_dir / "fig4_model_comparison.pdf")
     plt.close(fig)
-    print(f"  Saved: fig4_model_comparison.png/pdf")
+    print("  Saved: fig4_model_comparison.png/pdf")
 
 
 # =====================================================================
 # FIGURE 5: Per-Transition C-td Comparison
 # =====================================================================
+
 
 def fig_per_transition_ctd(deephit, graphdt, output_dir):
     """Grouped bar chart comparing per-transition C-td."""
@@ -449,18 +588,46 @@ def fig_per_transition_ctd(deephit, graphdt, output_dir):
     width = 0.35
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    bars1 = ax.bar(x - width/2, dh_vals, width, label="DeepHit",
-                   color="#3498db", alpha=0.85, edgecolor="black", linewidth=0.5)
-    bars2 = ax.bar(x + width/2, gdt_vals, width, label="Graph-DT",
-                   color="#e74c3c", alpha=0.85, edgecolor="black", linewidth=0.5)
+    bars1 = ax.bar(
+        x - width / 2,
+        dh_vals,
+        width,
+        label="DeepHit",
+        color="#3498db",
+        alpha=0.85,
+        edgecolor="black",
+        linewidth=0.5,
+    )
+    bars2 = ax.bar(
+        x + width / 2,
+        gdt_vals,
+        width,
+        label="Graph-DT",
+        color="#e74c3c",
+        alpha=0.85,
+        edgecolor="black",
+        linewidth=0.5,
+    )
 
     # Add value labels
     for bar in bars1:
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
-                f"{bar.get_height():.3f}", ha="center", va="bottom", fontsize=9)
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.005,
+            f"{bar.get_height():.3f}",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+        )
     for bar in bars2:
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
-                f"{bar.get_height():.3f}", ha="center", va="bottom", fontsize=9)
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.005,
+            f"{bar.get_height():.3f}",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+        )
 
     ax.set_ylabel("C-td (Time-Dependent Concordance)")
     ax.set_xlabel("Transition Destination")
@@ -482,19 +649,27 @@ def fig_per_transition_ctd(deephit, graphdt, output_dir):
     }
     for i, label in enumerate(labels):
         if label in stage_descriptions:
-            ax.text(i, 0.48, stage_descriptions[label], ha="center",
-                    fontsize=8, style="italic", color="#888888")
+            ax.text(
+                i,
+                0.48,
+                stage_descriptions[label],
+                ha="center",
+                fontsize=8,
+                style="italic",
+                color="#888888",
+            )
 
     fig.tight_layout()
     fig.savefig(output_dir / "fig5_per_transition_ctd.png")
     fig.savefig(output_dir / "fig5_per_transition_ctd.pdf")
     plt.close(fig)
-    print(f"  Saved: fig5_per_transition_ctd.png/pdf")
+    print("  Saved: fig5_per_transition_ctd.png/pdf")
 
 
 # =====================================================================
 # FIGURE 6: Brier Score at Horizons
 # =====================================================================
+
 
 def fig_brier_horizons(deephit, graphdt, output_dir):
     """Line plot of Brier scores at different prediction horizons."""
@@ -508,10 +683,26 @@ def fig_brier_horizons(deephit, graphdt, output_dir):
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 5))
 
-    ax.plot(years, dh_brier, "o-", color="#3498db", linewidth=2, markersize=8,
-            label="DeepHit", alpha=0.85)
-    ax.plot(years, gdt_brier, "s-", color="#e74c3c", linewidth=2, markersize=8,
-            label="Graph-DT", alpha=0.85)
+    ax.plot(
+        years,
+        dh_brier,
+        "o-",
+        color="#3498db",
+        linewidth=2,
+        markersize=8,
+        label="DeepHit",
+        alpha=0.85,
+    )
+    ax.plot(
+        years,
+        gdt_brier,
+        "s-",
+        color="#e74c3c",
+        linewidth=2,
+        markersize=8,
+        label="Graph-DT",
+        alpha=0.85,
+    )
 
     ax.set_xlabel("Prediction Horizon (years)")
     ax.set_ylabel("Brier Score (lower is better)")
@@ -525,12 +716,13 @@ def fig_brier_horizons(deephit, graphdt, output_dir):
     fig.savefig(output_dir / "fig6_brier_horizons.png")
     fig.savefig(output_dir / "fig6_brier_horizons.pdf")
     plt.close(fig)
-    print(f"  Saved: fig6_brier_horizons.png/pdf")
+    print("  Saved: fig6_brier_horizons.png/pdf")
 
 
 # =====================================================================
 # FIGURE 7: Sojourn Time Comparison
 # =====================================================================
+
 
 def fig_sojourn_times(markov, output_dir):
     """Bar chart comparing Markov sojourn times vs Simuni 2025 KM."""
@@ -549,19 +741,49 @@ def fig_sojourn_times(markov, output_dir):
     width = 0.25
 
     fig, ax = plt.subplots(1, 1, figsize=(9, 6))
-    bars1 = ax.bar(x - width, markov_sojourn, width, label="Markov Sojourn Time",
-                   color="#3498db", alpha=0.85, edgecolor="black", linewidth=0.5)
-    bars2 = ax.bar(x, simuni_km, width, label="Simuni 2025 KM Median",
-                   color="#2ecc71", alpha=0.85, edgecolor="black", linewidth=0.5)
-    bars3 = ax.bar(x + width, our_km, width, label="Our KM Median",
-                   color="#e74c3c", alpha=0.85, edgecolor="black", linewidth=0.5)
+    bars1 = ax.bar(
+        x - width,
+        markov_sojourn,
+        width,
+        label="Markov Sojourn Time",
+        color="#3498db",
+        alpha=0.85,
+        edgecolor="black",
+        linewidth=0.5,
+    )
+    bars2 = ax.bar(
+        x,
+        simuni_km,
+        width,
+        label="Simuni 2025 KM Median",
+        color="#2ecc71",
+        alpha=0.85,
+        edgecolor="black",
+        linewidth=0.5,
+    )
+    bars3 = ax.bar(
+        x + width,
+        our_km,
+        width,
+        label="Our KM Median",
+        color="#e74c3c",
+        alpha=0.85,
+        edgecolor="black",
+        linewidth=0.5,
+    )
 
     # Value labels
     for bars in [bars1, bars2, bars3]:
         for bar in bars:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2, h + 0.15,
-                    f"{h:.1f}", ha="center", va="bottom", fontsize=9)
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                h + 0.15,
+                f"{h:.1f}",
+                ha="center",
+                va="bottom",
+                fontsize=9,
+            )
 
     ax.set_ylabel("Time (years)")
     ax.set_xlabel("NSD-ISS Stage Transition")
@@ -577,20 +799,26 @@ def fig_sojourn_times(markov, output_dir):
         for i, s in enumerate(stages):
             lo = ci[s]["ci_lower"]
             hi = ci[s]["ci_upper"]
-            ax.errorbar(x[i] - width, markov_sojourn[i],
-                        yerr=[[markov_sojourn[i] - lo], [hi - markov_sojourn[i]]],
-                        fmt="none", color="black", capsize=4)
+            ax.errorbar(
+                x[i] - width,
+                markov_sojourn[i],
+                yerr=[[markov_sojourn[i] - lo], [hi - markov_sojourn[i]]],
+                fmt="none",
+                color="black",
+                capsize=4,
+            )
 
     fig.tight_layout()
     fig.savefig(output_dir / "fig7_sojourn_comparison.png")
     fig.savefig(output_dir / "fig7_sojourn_comparison.pdf")
     plt.close(fig)
-    print(f"  Saved: fig7_sojourn_comparison.png/pdf")
+    print("  Saved: fig7_sojourn_comparison.png/pdf")
 
 
 # =====================================================================
 # FIGURE 8: Stage Distribution Over Time
 # =====================================================================
+
 
 def fig_stage_distribution(features, output_dir):
     """Stacked area chart of stage distribution over follow-up time."""
@@ -625,8 +853,14 @@ def fig_stage_distribution(features, output_dir):
     bottoms = np.zeros(len(time_years))
     for stage in STAGE_LABELS:
         values = np.array(stage_props[stage])
-        ax.fill_between(time_years, bottoms, bottoms + values,
-                        color=STAGE_COLORS[stage], alpha=0.8, label=f"Stage {stage}")
+        ax.fill_between(
+            time_years,
+            bottoms,
+            bottoms + values,
+            color=STAGE_COLORS[stage],
+            alpha=0.8,
+            label=f"Stage {stage}",
+        )
         bottoms += values
 
     ax.set_xlabel("Years from Baseline", fontsize=12)
@@ -641,12 +875,13 @@ def fig_stage_distribution(features, output_dir):
     fig.savefig(output_dir / "fig8_stage_distribution.png")
     fig.savefig(output_dir / "fig8_stage_distribution.pdf")
     plt.close(fig)
-    print(f"  Saved: fig8_stage_distribution.png/pdf")
+    print("  Saved: fig8_stage_distribution.png/pdf")
 
 
 # =====================================================================
 # FIGURE 9: "Patients Like You" Trajectory Overlay
 # =====================================================================
+
 
 def fig_patients_like_you(features, output_dir):
     """For select patients, show their k=15 graph neighbors' trajectories.
@@ -682,11 +917,15 @@ def fig_patients_like_you(features, output_dir):
     baseline = baseline.drop_duplicates(subset="PATNO", keep="first")
 
     # Select patients from different stages with enough follow-up
-    pat_info = features.groupby("PATNO").agg(
-        n_visits=("EVENT_ID", "count"),
-        max_time=("months_from_baseline", "max"),
-        first_stage=("nsd_stage", "first"),
-    ).reset_index()
+    pat_info = (
+        features.groupby("PATNO")
+        .agg(
+            n_visits=("EVENT_ID", "count"),
+            max_time=("months_from_baseline", "max"),
+            first_stage=("nsd_stage", "first"),
+        )
+        .reset_index()
+    )
     pat_info = pat_info[pat_info["n_visits"] >= 5]
 
     # Pick one from each active stage
@@ -712,22 +951,39 @@ def fig_patients_like_you(features, output_dir):
         # Plot neighbor trajectories (faded)
         for nbr_idx, weight in nbrs:
             nbr_pat = idx_to_pat[nbr_idx]
-            nbr_data = features[features["PATNO"] == nbr_pat].sort_values("months_from_baseline")
+            nbr_data = features[features["PATNO"] == nbr_pat].sort_values(
+                "months_from_baseline"
+            )
             times = nbr_data["months_from_baseline"].values / 12
             stages = nbr_data["nsd_stage_numeric"].values
             valid = ~np.isnan(stages)
             if valid.sum() >= 2:
-                ax.plot(times[valid], stages[valid],
-                        alpha=min(weight * 0.6, 0.5), linewidth=1.2,
-                        color="#3498db", zorder=2)
+                ax.plot(
+                    times[valid],
+                    stages[valid],
+                    alpha=min(weight * 0.6, 0.5),
+                    linewidth=1.2,
+                    color="#3498db",
+                    zorder=2,
+                )
 
         # Plot anchor patient trajectory (bold, on top)
-        anchor_data = features[features["PATNO"] == anchor_pat].sort_values("months_from_baseline")
+        anchor_data = features[features["PATNO"] == anchor_pat].sort_values(
+            "months_from_baseline"
+        )
         times = anchor_data["months_from_baseline"].values / 12
         stages = anchor_data["nsd_stage_numeric"].values
         valid = ~np.isnan(stages)
-        ax.plot(times[valid], stages[valid], linewidth=3, color="#e74c3c",
-                marker="o", markersize=6, zorder=5, label=f"Patient {anchor_pat}")
+        ax.plot(
+            times[valid],
+            stages[valid],
+            linewidth=3,
+            color="#e74c3c",
+            marker="o",
+            markersize=6,
+            zorder=5,
+            label=f"Patient {anchor_pat}",
+        )
 
         # Add neighbor count annotation
         nbr_stages = []
@@ -738,13 +994,15 @@ def fig_patients_like_you(features, output_dir):
                 nbr_stages.append(str(nbr_bl.iloc[0]["nsd_stage"]))
 
         from collections import Counter
+
         stage_dist = Counter(nbr_stages)
         dist_str = ", ".join(f"S{s}: {n}" for s, n in sorted(stage_dist.items()))
 
         ax.set_ylabel("NSD-ISS Stage")
         ax.set_xlabel("Years from Baseline")
-        ax.set_title(f"Anchor: Stage {stage} Patient\n"
-                     f"(15 similar patients shown in blue)")
+        ax.set_title(
+            f"Anchor: Stage {stage} Patient\n(15 similar patients shown in blue)"
+        )
         ax.set_yticks(STAGE_NUMERIC)
         ax.set_yticklabels(STAGE_LABELS)
         ax.set_xlim(-0.5, 15)
@@ -752,23 +1010,33 @@ def fig_patients_like_you(features, output_dir):
 
         # Add text box with neighbor info
         textstr = f"Neighbor stages: {dist_str}"
-        ax.text(0.02, 0.98, textstr, transform=ax.transAxes, fontsize=8,
-                verticalalignment="top", bbox=dict(boxstyle="round", facecolor="wheat",
-                                                   alpha=0.5))
+        ax.text(
+            0.02,
+            0.98,
+            textstr,
+            transform=ax.transAxes,
+            fontsize=8,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+        )
 
-    fig.suptitle("\"Patients Like You\": Graph Neighbors' Trajectories\n"
-                 "(Graph-DT uses these similar patients to enrich predictions)",
-                 fontsize=14, y=1.05)
+    fig.suptitle(
+        '"Patients Like You": Graph Neighbors\' Trajectories\n'
+        "(Graph-DT uses these similar patients to enrich predictions)",
+        fontsize=14,
+        y=1.05,
+    )
     fig.tight_layout()
     fig.savefig(output_dir / "fig9_patients_like_you.png")
     fig.savefig(output_dir / "fig9_patients_like_you.pdf")
     plt.close(fig)
-    print(f"  Saved: fig9_patients_like_you.png/pdf")
+    print("  Saved: fig9_patients_like_you.png/pdf")
 
 
 # =====================================================================
 # FIGURE 10: Cross-Stage Graph Connectivity Analysis
 # =====================================================================
+
 
 def fig_cross_stage_connectivity(features, output_dir):
     """Analyze how the graph connects patients ACROSS stages.
@@ -839,10 +1107,18 @@ def fig_cross_stage_connectivity(features, output_dir):
         if total > 0:
             norm_matrix[i] = cross_matrix[i] / total
 
-    sns.heatmap(norm_matrix, annot=True, fmt=".2f", cmap="Blues",
-                xticklabels=active_stages, yticklabels=active_stages,
-                ax=ax, linewidths=0.5, linecolor="white",
-                cbar_kws={"label": "Proportion of Edges"})
+    sns.heatmap(
+        norm_matrix,
+        annot=True,
+        fmt=".2f",
+        cmap="Blues",
+        xticklabels=active_stages,
+        yticklabels=active_stages,
+        ax=ax,
+        linewidths=0.5,
+        linecolor="white",
+        cbar_kws={"label": "Proportion of Edges"},
+    )
     ax.set_xlabel("Neighbor Stage")
     ax.set_ylabel("Patient Stage")
     ax.set_title("A. Edge Distribution Across Stages\n(row-normalized)")
@@ -850,34 +1126,49 @@ def fig_cross_stage_connectivity(features, output_dir):
     # Panel B: Average similarity weight
     ax = axes[1]
     mask_zero = avg_weight == 0
-    sns.heatmap(avg_weight, annot=True, fmt=".3f", cmap="YlOrRd",
-                xticklabels=active_stages, yticklabels=active_stages,
-                ax=ax, mask=mask_zero, linewidths=0.5, linecolor="white",
-                cbar_kws={"label": "Average Cosine Similarity"})
+    sns.heatmap(
+        avg_weight,
+        annot=True,
+        fmt=".3f",
+        cmap="YlOrRd",
+        xticklabels=active_stages,
+        yticklabels=active_stages,
+        ax=ax,
+        mask=mask_zero,
+        linewidths=0.5,
+        linecolor="white",
+        cbar_kws={"label": "Average Cosine Similarity"},
+    )
     ax.set_xlabel("Neighbor Stage")
     ax.set_ylabel("Patient Stage")
     ax.set_title("B. Average Edge Weight (Similarity)")
 
-    fig.suptitle("Cross-Stage Graph Connectivity\n"
-                 "(How the patient similarity graph connects patients across NSD-ISS stages)",
-                 fontsize=14, y=1.05)
+    fig.suptitle(
+        "Cross-Stage Graph Connectivity\n"
+        "(How the patient similarity graph connects patients across NSD-ISS stages)",
+        fontsize=14,
+        y=1.05,
+    )
     fig.tight_layout()
     fig.savefig(output_dir / "fig10_cross_stage_connectivity.png")
     fig.savefig(output_dir / "fig10_cross_stage_connectivity.pdf")
     plt.close(fig)
-    print(f"  Saved: fig10_cross_stage_connectivity.png/pdf")
+    print("  Saved: fig10_cross_stage_connectivity.png/pdf")
 
 
 # =====================================================================
 # FIGURE 11: Markov Transition Probability Trajectories
 # =====================================================================
 
+
 def fig_markov_trajectories(markov, output_dir):
     """Show Markov model predicted stage occupation probabilities over time."""
     print("\n[Fig 11] Markov transition probability trajectories...")
 
     # Load trajectory predictions
-    traj_path = PROJECT_ROOT / "outputs" / "paper3_markov" / "trajectory_predictions.csv"
+    traj_path = (
+        PROJECT_ROOT / "outputs" / "paper3_markov" / "trajectory_predictions.csv"
+    )
     if not traj_path.exists():
         print("  [SKIP] trajectory_predictions.csv not found")
         return
@@ -900,8 +1191,14 @@ def fig_markov_trajectories(markov, output_dir):
             if col in sub.columns:
                 vals = sub[col].values.astype(float)
                 if vals.max() > 0.01:  # only plot non-trivial stages
-                    ax.plot(years, vals, label=f"Stage {s}",
-                            color=STAGE_COLORS[s], linewidth=2, alpha=0.85)
+                    ax.plot(
+                        years,
+                        vals,
+                        label=f"Stage {s}",
+                        color=STAGE_COLORS[s],
+                        linewidth=2,
+                        alpha=0.85,
+                    )
 
         ax.set_xlabel("Years")
         ax.set_ylabel("Probability")
@@ -911,18 +1208,20 @@ def fig_markov_trajectories(markov, output_dir):
         ax.legend(fontsize=9)
         ax.grid(True, alpha=0.3)
 
-    fig.suptitle("Markov Model: Stage Occupation Probabilities Over Time",
-                 fontsize=14, y=1.02)
+    fig.suptitle(
+        "Markov Model: Stage Occupation Probabilities Over Time", fontsize=14, y=1.02
+    )
     fig.tight_layout()
     fig.savefig(output_dir / "fig11_markov_trajectories.png")
     fig.savefig(output_dir / "fig11_markov_trajectories.pdf")
     plt.close(fig)
-    print(f"  Saved: fig11_markov_trajectories.png/pdf")
+    print("  Saved: fig11_markov_trajectories.png/pdf")
 
 
 # =====================================================================
 # FIGURE 12: Fold-Level Variance Comparison
 # =====================================================================
+
 
 def fig_fold_variance(deephit, graphdt, output_dir):
     """Box plot showing Graph-DT's lower variance across folds."""
@@ -931,45 +1230,66 @@ def fig_fold_variance(deephit, graphdt, output_dir):
     fig, ax = plt.subplots(1, 1, figsize=(8, 5))
 
     data = [deephit["c_td_per_fold"], graphdt["c_td_per_fold"]]
-    bp = ax.boxplot(data, tick_labels=["DeepHit", "Graph-DT"],
-                    patch_artist=True, widths=0.4,
-                    showmeans=True, meanprops={"marker": "D", "markerfacecolor": "black",
-                                                "markersize": 8})
+    bp = ax.boxplot(
+        data,
+        tick_labels=["DeepHit", "Graph-DT"],
+        patch_artist=True,
+        widths=0.4,
+        showmeans=True,
+        meanprops={"marker": "D", "markerfacecolor": "black", "markersize": 8},
+    )
 
     colors = ["#3498db", "#e74c3c"]
-    for patch, color in zip(bp["boxes"], colors):
+    for patch, color in zip(bp["boxes"], colors, strict=False):
         patch.set_facecolor(color)
         patch.set_alpha(0.6)
 
     # Overlay individual fold points
-    for i, (folds, color) in enumerate(zip(data, colors)):
+    for i, (folds, color) in enumerate(zip(data, colors, strict=False)):
         x_jitter = np.random.RandomState(42).normal(i + 1, 0.05, len(folds))
-        ax.scatter(x_jitter, folds, color=color, edgecolor="black",
-                   linewidth=0.5, s=60, zorder=5, alpha=0.8)
+        ax.scatter(
+            x_jitter,
+            folds,
+            color=color,
+            edgecolor="black",
+            linewidth=0.5,
+            s=60,
+            zorder=5,
+            alpha=0.8,
+        )
 
     ax.set_ylabel("C-td (Time-Dependent Concordance)")
-    ax.set_title("Fold-Level Performance Stability\n"
-                 f"DeepHit std={deephit['c_td_std']:.4f} vs "
-                 f"Graph-DT std={graphdt['c_td_std']:.4f}")
+    ax.set_title(
+        "Fold-Level Performance Stability\n"
+        f"DeepHit std={deephit['c_td_std']:.4f} vs "
+        f"Graph-DT std={graphdt['c_td_std']:.4f}"
+    )
     ax.grid(True, axis="y", alpha=0.3)
 
     # Annotate
-    ax.text(0.5, 0.02,
-            "Graph-DT shows lower fold-to-fold variance\n"
-            "(graph regularization provides more stable predictions)",
-            transform=ax.transAxes, ha="center", fontsize=9, style="italic",
-            color="#666666")
+    ax.text(
+        0.5,
+        0.02,
+        "Graph-DT shows lower fold-to-fold variance\n"
+        "(graph regularization provides more stable predictions)",
+        transform=ax.transAxes,
+        ha="center",
+        fontsize=9,
+        style="italic",
+        color="#666666",
+    )
 
     fig.tight_layout()
     fig.savefig(output_dir / "fig12_fold_variance.png")
     fig.savefig(output_dir / "fig12_fold_variance.pdf")
     plt.close(fig)
-    print(f"  Saved: fig12_fold_variance.png/pdf")
+    print("  Saved: fig12_fold_variance.png/pdf")
 
 
 # =====================================================================
 # MODEL-BASED VISUALIZATIONS (require one training fold)
 # =====================================================================
+
 
 def run_training_for_visualizations(features, output_dir):
     """Train ONE fold of Graph-DT and save artifacts for visualization.
@@ -982,20 +1302,31 @@ def run_training_for_visualizations(features, output_dir):
     print("=" * 70)
 
     import torch
-    from giman_pipeline.paper3.graph_digital_twin import (
-        build_patient_graph, GraphDigitalTwin, GraphDeepHitDataset,
-        graph_collate_fn, train_graph_model, predict_all_graph,
-        GRAPH_FEATURES,
-    )
-    from giman_pipeline.paper3.dynamic_deephit import (
-        build_patient_arrays, extract_episodes, compute_feature_stats,
-        _get_time_bin, TIME_BIN_ENDS, N_TIME_BINS,
-    )
-    from giman_pipeline.paper3.multistate_markov import N_STATES
     from sklearn.model_selection import StratifiedKFold
 
-    device = torch.device("mps") if torch.backends.mps.is_available() else (
-        torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
+    from giman_pipeline.paper3.dynamic_deephit import (
+        TIME_BIN_ENDS,
+        build_patient_arrays,
+        compute_feature_stats,
+        extract_episodes,
+    )
+    from giman_pipeline.paper3.graph_digital_twin import (
+        GraphDeepHitDataset,
+        GraphDigitalTwin,
+        build_patient_graph,
+        graph_collate_fn,
+        predict_all_graph,
+        train_graph_model,
+    )
+    from giman_pipeline.paper3.multistate_markov import N_STATES
+
+    device = (
+        torch.device("mps")
+        if torch.backends.mps.is_available()
+        else (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
+    )
     print(f"  Device: {device}")
 
     # Prepare data
@@ -1055,13 +1386,24 @@ def run_training_for_visualizations(features, output_dir):
         dropout=0.3,
     ).to(device)
 
-    print(f"  Training fold 1: {len(train_eps)} train, {len(val_eps)} val, {len(test_eps)} test")
+    print(
+        f"  Training fold 1: {len(train_eps)} train, {len(val_eps)} val, {len(test_eps)} test"
+    )
 
     history, best_val = train_graph_model(
-        model, train_ds, val_ds, device,
-        node_baseline, edge_index, edge_weight,
-        n_epochs=100, batch_size=64, lr=5e-4,
-        patience=20, alpha=0.1, verbose=True,
+        model,
+        train_ds,
+        val_ds,
+        device,
+        node_baseline,
+        edge_index,
+        edge_weight,
+        n_epochs=100,
+        batch_size=64,
+        lr=5e-4,
+        patience=20,
+        alpha=0.1,
+        verbose=True,
     )
 
     # === Save training history ===
@@ -1077,7 +1419,7 @@ def run_training_for_visualizations(features, output_dir):
     fig.savefig(output_dir / "fig13_training_curve.png")
     fig.savefig(output_dir / "fig13_training_curve.pdf")
     plt.close(fig)
-    print(f"  Saved: fig13_training_curve.png/pdf")
+    print("  Saved: fig13_training_curve.png/pdf")
 
     # === Extract gate activations ===
     print("  Extracting gate activations...")
@@ -1092,8 +1434,14 @@ def run_training_for_visualizations(features, output_dir):
     stage_labels_list = []
 
     from torch.utils.data import DataLoader
-    test_loader = DataLoader(test_ds, batch_size=128, shuffle=False,
-                             collate_fn=graph_collate_fn, num_workers=0)
+
+    test_loader = DataLoader(
+        test_ds,
+        batch_size=128,
+        shuffle=False,
+        collate_fn=graph_collate_fn,
+        num_workers=0,
+    )
 
     with torch.no_grad():
         for batch in test_loader:
@@ -1111,6 +1459,7 @@ def run_training_for_visualizations(features, output_dir):
             )
             gru_out, h_n = model.gru(packed)
             from torch.nn.utils.rnn import pad_packed_sequence
+
             gru_out_padded, _ = pad_packed_sequence(gru_out, batch_first=True)
             _, unsort_idx = sort_idx.sort()
             gru_out_unsorted = gru_out_padded[unsort_idx]
@@ -1137,9 +1486,16 @@ def run_training_for_visualizations(features, output_dir):
     # Panel A: Overall gate distribution
     ax = axes[0]
     mean_gate = gate_values.mean(axis=1)  # mean gate per episode
-    ax.hist(mean_gate, bins=50, color="#e74c3c", alpha=0.7, edgecolor="black", linewidth=0.5)
-    ax.axvline(x=mean_gate.mean(), color="black", linestyle="--", linewidth=1.5,
-               label=f"Mean: {mean_gate.mean():.3f}")
+    ax.hist(
+        mean_gate, bins=50, color="#e74c3c", alpha=0.7, edgecolor="black", linewidth=0.5
+    )
+    ax.axvline(
+        x=mean_gate.mean(),
+        color="black",
+        linestyle="--",
+        linewidth=1.5,
+        label=f"Mean: {mean_gate.mean():.3f}",
+    )
     ax.set_xlabel("Mean Gate Activation")
     ax.set_ylabel("Count (episodes)")
     ax.set_title("A. Gate Activation Distribution\n(0 = pure temporal, 1 = full graph)")
@@ -1149,6 +1505,7 @@ def run_training_for_visualizations(features, output_dir):
     # Panel B: Gate by stage
     ax = axes[1]
     from giman_pipeline.paper3.multistate_markov import STAGE_LABELS as SL
+
     stage_gate_means = {}
     for si in range(len(SL)):
         mask = stage_labels_arr == si
@@ -1166,7 +1523,7 @@ def run_training_for_visualizations(features, output_dir):
 
     if bp_data:
         bp = ax.boxplot(bp_data, tick_labels=bp_labels, patch_artist=True, widths=0.5)
-        for patch, color in zip(bp["boxes"], bp_colors):
+        for patch, color in zip(bp["boxes"], bp_colors, strict=False):
             patch.set_facecolor(color)
             patch.set_alpha(0.6)
 
@@ -1174,13 +1531,16 @@ def run_training_for_visualizations(features, output_dir):
     ax.set_title("B. Gate Activation by Current Stage")
     ax.grid(True, axis="y", alpha=0.3)
 
-    fig.suptitle("Warm-Start Gate Analysis: When Does the Model Use Graph Context?",
-                 fontsize=14, y=1.02)
+    fig.suptitle(
+        "Warm-Start Gate Analysis: When Does the Model Use Graph Context?",
+        fontsize=14,
+        y=1.02,
+    )
     fig.tight_layout()
     fig.savefig(output_dir / "fig14_gate_activations.png")
     fig.savefig(output_dir / "fig14_gate_activations.pdf")
     plt.close(fig)
-    print(f"  Saved: fig14_gate_activations.png/pdf")
+    print("  Saved: fig14_gate_activations.png/pdf")
 
     # === Figure 15: Node Embeddings (t-SNE) ===
     print("  Computing t-SNE on node embeddings...")
@@ -1208,31 +1568,38 @@ def run_training_for_visualizations(features, output_dir):
         for stage in STAGE_LABELS:
             mask = np.array(node_stage_labels) == stage
             if mask.sum() > 0:
-                ax.scatter(emb_2d[mask, 0], emb_2d[mask, 1],
-                           c=STAGE_COLORS[stage], s=15, alpha=0.7,
-                           label=f"Stage {stage} (n={mask.sum()})",
-                           edgecolors="none")
+                ax.scatter(
+                    emb_2d[mask, 0],
+                    emb_2d[mask, 1],
+                    c=STAGE_COLORS[stage],
+                    s=15,
+                    alpha=0.7,
+                    label=f"Stage {stage} (n={mask.sum()})",
+                    edgecolors="none",
+                )
 
         ax.set_xlabel("t-SNE 1")
         ax.set_ylabel("t-SNE 2")
-        ax.set_title("GAT Node Embeddings (t-SNE)\n"
-                     "Graph-enriched patient representations colored by NSD-ISS stage")
-        ax.legend(loc="upper right", framealpha=0.9, fontsize=10,
-                  title="NSD-ISS Stage")
+        ax.set_title(
+            "GAT Node Embeddings (t-SNE)\n"
+            "Graph-enriched patient representations colored by NSD-ISS stage"
+        )
+        ax.legend(loc="upper right", framealpha=0.9, fontsize=10, title="NSD-ISS Stage")
         ax.axis("equal")
 
         fig.tight_layout()
         fig.savefig(output_dir / "fig15_node_embeddings_tsne.png")
         fig.savefig(output_dir / "fig15_node_embeddings_tsne.pdf")
         plt.close(fig)
-        print(f"  Saved: fig15_node_embeddings_tsne.png/pdf")
+        print("  Saved: fig15_node_embeddings_tsne.png/pdf")
     except Exception as ex:
         print(f"  [SKIP] t-SNE failed: {ex}")
 
     # === Figure 16: Example CIF Predictions ===
     print("  Generating individual CIF predictions...")
-    preds = predict_all_graph(model, test_ds, device,
-                              node_baseline, edge_index, edge_weight)
+    preds = predict_all_graph(
+        model, test_ds, device, node_baseline, edge_index, edge_weight
+    )
 
     cif = preds["cif"].numpy()  # (n_test, n_causes, n_time_bins)
     event_idxs = preds["event_idxs"].numpy()
@@ -1262,44 +1629,62 @@ def run_training_for_visualizations(features, output_dir):
         # Pick the one with highest predicted CIF (most confident)
         best = candidates[0]
         for c in candidates:
-            if cif[c, target_event, time_bins[c]] > cif[best, target_event, time_bins[best]]:
+            if (
+                cif[c, target_event, time_bins[c]]
+                > cif[best, target_event, time_bins[best]]
+            ):
                 best = c
 
         # Plot CIF curves for each cause
         for k in range(min(N_STATES, 7)):
             if cif[best, k, :].max() > 0.01:
                 label = f"→ Stage {STAGE_LABELS[k]}"
-                ax.plot(time_months / 12, cif[best, k, :],
-                        color=STAGE_COLORS[STAGE_LABELS[k]],
-                        linewidth=2, alpha=0.8, label=label)
+                ax.plot(
+                    time_months / 12,
+                    cif[best, k, :],
+                    color=STAGE_COLORS[STAGE_LABELS[k]],
+                    linewidth=2,
+                    alpha=0.8,
+                    label=label,
+                )
 
         # Mark actual event
         actual_time = time_months[time_bins[best]] / 12
-        ax.axvline(x=actual_time, color="black", linestyle="--", linewidth=1,
-                   alpha=0.5)
-        ax.scatter([actual_time], [cif[best, target_event, time_bins[best]]],
-                   color="black", s=100, zorder=5, marker="*",
-                   label="Actual transition")
+        ax.axvline(x=actual_time, color="black", linestyle="--", linewidth=1, alpha=0.5)
+        ax.scatter(
+            [actual_time],
+            [cif[best, target_event, time_bins[best]]],
+            color="black",
+            s=100,
+            zorder=5,
+            marker="*",
+            label="Actual transition",
+        )
 
         from_stage = STAGE_LABELS[stage_idxs_arr[best]]
         to_stage = STAGE_LABELS[target_event]
         ax.set_xlabel("Years")
         ax.set_ylabel("Cumulative Incidence")
-        ax.set_title(f"{panel_labels[ax_idx]}. From Stage {from_stage}: "
-                     f"Actual → Stage {to_stage}")
+        ax.set_title(
+            f"{panel_labels[ax_idx]}. From Stage {from_stage}: "
+            f"Actual → Stage {to_stage}"
+        )
         ax.legend(fontsize=8, loc="upper left")
         ax.set_xlim(0, 15)
         ax.set_ylim(0, 1)
         ax.grid(True, alpha=0.3)
 
-    fig.suptitle("Graph-DT Individual Predictions: Cumulative Incidence Functions\n"
-                 "(competing risks: probability of transitioning to each stage over time)",
-                 fontsize=14, y=1.02)
+    fig.suptitle(
+        "Graph-DT Individual Predictions: Cumulative Incidence Functions\n"
+        "(competing risks: probability of transitioning to each stage over time)",
+        fontsize=14,
+        y=1.02,
+    )
     fig.tight_layout()
     fig.savefig(output_dir / "fig16_individual_cif.png")
     fig.savefig(output_dir / "fig16_individual_cif.pdf")
     plt.close(fig)
-    print(f"  Saved: fig16_individual_cif.png/pdf")
+    print("  Saved: fig16_individual_cif.png/pdf")
 
     print("\n  Model-based visualization artifacts complete!")
 
@@ -1308,12 +1693,19 @@ def run_training_for_visualizations(features, output_dir):
 # MAIN
 # =====================================================================
 
+
 def main():
     parser = argparse.ArgumentParser(description="Generate Paper 3 figures")
-    parser.add_argument("--skip-training", action="store_true",
-                        help="Skip model-based visualizations (no retraining)")
-    parser.add_argument("--training-only", action="store_true",
-                        help="Only run model-based visualizations")
+    parser.add_argument(
+        "--skip-training",
+        action="store_true",
+        help="Skip model-based visualizations (no retraining)",
+    )
+    parser.add_argument(
+        "--training-only",
+        action="store_true",
+        help="Only run model-based visualizations",
+    )
     args = parser.parse_args()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Paper 5: Generate 6 Publication-Quality Figures.
+"""Paper 5: Generate 6 Publication-Quality Figures.
 
 Reads results from outputs/paper5/ and produces:
     Fig 1 — Temporal learning curve (C-td vs training window size)
@@ -21,9 +20,9 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,18 +37,20 @@ PAPER3_DEEPHIT_CTD = 0.924
 PAPER3_GRAPHDT_CTD = 0.904
 
 # Publication style
-plt.rcParams.update({
-    "font.family": "serif",
-    "font.size": 10,
-    "axes.labelsize": 11,
-    "axes.titlesize": 12,
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 9,
-    "legend.fontsize": 9,
-    "figure.dpi": 300,
-    "savefig.dpi": 300,
-    "savefig.bbox": "tight",
-})
+plt.rcParams.update(
+    {
+        "font.family": "serif",
+        "font.size": 10,
+        "axes.labelsize": 11,
+        "axes.titlesize": 12,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "legend.fontsize": 9,
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+    }
+)
 
 COLORS = {
     "deephit": "#2196F3",
@@ -96,6 +97,7 @@ def _save_figure(fig, name: str):
 
 # ── Figure 1: Temporal Learning Curve ────────────────────────────────
 
+
 def fig1_learning_curve(results: dict):
     """C-td vs temporal window for both models.
 
@@ -117,30 +119,64 @@ def fig1_learning_curve(results: dict):
     stress_idx = [i for i, w in enumerate(windows) if w == "W4"]
 
     # DeepHit
-    ax.plot([x[i] for i in expand_idx], [dh_ctds[i] for i in expand_idx],
-            "o-", color=COLORS["deephit"], linewidth=2, markersize=7,
-            label="Dynamic-DeepHit")
+    ax.plot(
+        [x[i] for i in expand_idx],
+        [dh_ctds[i] for i in expand_idx],
+        "o-",
+        color=COLORS["deephit"],
+        linewidth=2,
+        markersize=7,
+        label="Dynamic-DeepHit",
+    )
     if stress_idx:
-        ax.plot([x[i] for i in stress_idx], [dh_ctds[i] for i in stress_idx],
-                "o", color=COLORS["deephit"], markersize=9, markerfacecolor="white",
-                markeredgewidth=2)
+        ax.plot(
+            [x[i] for i in stress_idx],
+            [dh_ctds[i] for i in stress_idx],
+            "o",
+            color=COLORS["deephit"],
+            markersize=9,
+            markerfacecolor="white",
+            markeredgewidth=2,
+        )
 
     if has_gdt:
         gdt_ctds = [results[w]["graph_dt"]["c_td"] for w in windows]
-        ax.plot([x[i] for i in expand_idx], [gdt_ctds[i] for i in expand_idx],
-                "s-", color=COLORS["graph_dt"], linewidth=2, markersize=7,
-                label="Graph-DT")
+        ax.plot(
+            [x[i] for i in expand_idx],
+            [gdt_ctds[i] for i in expand_idx],
+            "s-",
+            color=COLORS["graph_dt"],
+            linewidth=2,
+            markersize=7,
+            label="Graph-DT",
+        )
         if stress_idx:
-            ax.plot([x[i] for i in stress_idx], [gdt_ctds[i] for i in stress_idx],
-                    "s", color=COLORS["graph_dt"], markersize=9, markerfacecolor="white",
-                    markeredgewidth=2)
+            ax.plot(
+                [x[i] for i in stress_idx],
+                [gdt_ctds[i] for i in stress_idx],
+                "s",
+                color=COLORS["graph_dt"],
+                markersize=9,
+                markerfacecolor="white",
+                markeredgewidth=2,
+            )
 
     # Reference lines (Paper 3 random CV)
-    ax.axhline(PAPER3_DEEPHIT_CTD, color=COLORS["deephit"], linestyle="--",
-               alpha=0.4, label=f"DeepHit 5-CV ({PAPER3_DEEPHIT_CTD:.3f})")
+    ax.axhline(
+        PAPER3_DEEPHIT_CTD,
+        color=COLORS["deephit"],
+        linestyle="--",
+        alpha=0.4,
+        label=f"DeepHit 5-CV ({PAPER3_DEEPHIT_CTD:.3f})",
+    )
     if has_gdt:
-        ax.axhline(PAPER3_GRAPHDT_CTD, color=COLORS["graph_dt"], linestyle="--",
-                    alpha=0.4, label=f"Graph-DT 5-CV ({PAPER3_GRAPHDT_CTD:.3f})")
+        ax.axhline(
+            PAPER3_GRAPHDT_CTD,
+            color=COLORS["graph_dt"],
+            linestyle="--",
+            alpha=0.4,
+            label=f"Graph-DT 5-CV ({PAPER3_GRAPHDT_CTD:.3f})",
+        )
 
     ax.set_xlabel("Temporal Window")
     ax.set_ylabel("Time-Dependent Concordance Index (C-td)")
@@ -155,22 +191,29 @@ def fig1_learning_curve(results: dict):
 
     # Window labels with training size
     ax.set_xticks(x)
-    ax.set_xticklabels([f"{w}\n(n={n_trains[i]})" for i, w in enumerate(windows)],
-                        fontsize=8)
+    ax.set_xticklabels(
+        [f"{w}\n(n={n_trains[i]})" for i, w in enumerate(windows)], fontsize=8
+    )
 
     # Annotate W4 as stress test
     if stress_idx:
         si = stress_idx[0]
-        ax.annotate("50/50\nstress test",
-                    (x[si], min(dh_ctds[si], gdt_ctds[si] if has_gdt else dh_ctds[si])),
-                    textcoords="offset points", xytext=(30, -15),
-                    ha="center", fontsize=7, color="gray",
-                    arrowprops=dict(arrowstyle="->", color="gray", lw=0.8))
+        ax.annotate(
+            "50/50\nstress test",
+            (x[si], min(dh_ctds[si], gdt_ctds[si] if has_gdt else dh_ctds[si])),
+            textcoords="offset points",
+            xytext=(30, -15),
+            ha="center",
+            fontsize=7,
+            color="gray",
+            arrowprops=dict(arrowstyle="->", color="gray", lw=0.8),
+        )
 
     _save_figure(fig, "fig1_temporal_learning_curve")
 
 
 # ── Figure 2: Performance Degradation ────────────────────────────────
+
 
 def fig2_degradation(results: dict):
     """Grouped bar: random CV C-td vs per-window temporal C-td."""
@@ -190,26 +233,56 @@ def fig2_degradation(results: dict):
         dh_vals = dh_temporal + [PAPER3_DEEPHIT_CTD]
         gdt_vals = gdt_temporal + [PAPER3_GRAPHDT_CTD]
 
-        bars1 = ax.bar(x - width / 2, dh_vals, width, color=COLORS["deephit"],
-                        label="Dynamic-DeepHit", alpha=0.85)
-        bars2 = ax.bar(x + width / 2, gdt_vals, width, color=COLORS["graph_dt"],
-                        label="Graph-DT", alpha=0.85)
+        bars1 = ax.bar(
+            x - width / 2,
+            dh_vals,
+            width,
+            color=COLORS["deephit"],
+            label="Dynamic-DeepHit",
+            alpha=0.85,
+        )
+        bars2 = ax.bar(
+            x + width / 2,
+            gdt_vals,
+            width,
+            color=COLORS["graph_dt"],
+            label="Graph-DT",
+            alpha=0.85,
+        )
 
         # Add value labels
         for bar in list(bars1) + list(bars2):
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2., h + 0.003,
-                    f"{h:.3f}", ha="center", va="bottom", fontsize=7)
+            ax.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                h + 0.003,
+                f"{h:.3f}",
+                ha="center",
+                va="bottom",
+                fontsize=7,
+            )
     else:
         width = 0.5
         fig, ax = plt.subplots(figsize=(6, 4.5))
         dh_vals = dh_temporal + [PAPER3_DEEPHIT_CTD]
-        bars1 = ax.bar(x, dh_vals, width, color=COLORS["deephit"],
-                        label="Dynamic-DeepHit", alpha=0.85)
+        bars1 = ax.bar(
+            x,
+            dh_vals,
+            width,
+            color=COLORS["deephit"],
+            label="Dynamic-DeepHit",
+            alpha=0.85,
+        )
         for bar in bars1:
             h = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2., h + 0.003,
-                    f"{h:.3f}", ha="center", va="bottom", fontsize=7)
+            ax.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                h + 0.003,
+                f"{h:.3f}",
+                ha="center",
+                va="bottom",
+                fontsize=7,
+            )
 
     ax.set_xlabel("Temporal Window")
     ax.set_ylabel("C-td")
@@ -231,6 +304,7 @@ def fig2_degradation(results: dict):
 
 # ── Figure 3: Covariate Shift Heatmap ────────────────────────────────
 
+
 def fig3_shift_heatmap(shift_data: dict):
     """KS statistic per feature x 4 temporal windows."""
     ks_data = shift_data["ks"]
@@ -248,7 +322,9 @@ def fig3_shift_heatmap(shift_data: dict):
     for wi, wname in enumerate(windows):
         for fi, feat_result in enumerate(ks_data[wname]):
             ks_val = feat_result["ks_statistic"]
-            ks_matrix[fi, wi] = ks_val if ks_val is not None and not np.isnan(ks_val) else 0.0
+            ks_matrix[fi, wi] = (
+                ks_val if ks_val is not None and not np.isnan(ks_val) else 0.0
+            )
             shifted_matrix[fi, wi] = feat_result["shifted"]
 
     fig, ax = plt.subplots(figsize=(5, max(6, n_features * 0.35)))
@@ -264,8 +340,16 @@ def fig3_shift_heatmap(shift_data: dict):
     for fi in range(n_features):
         for wi in range(n_windows):
             if shifted_matrix[fi, wi]:
-                ax.text(wi, fi, "*", ha="center", va="center",
-                        color="white", fontsize=10, fontweight="bold")
+                ax.text(
+                    wi,
+                    fi,
+                    "*",
+                    ha="center",
+                    va="center",
+                    color="white",
+                    fontsize=10,
+                    fontweight="bold",
+                )
 
     ax.set_xlabel("Temporal Window")
     ax.set_title("Covariate Shift: KS Statistic per Feature")
@@ -278,6 +362,7 @@ def fig3_shift_heatmap(shift_data: dict):
 
 
 # ── Figure 4: Shift-Importance Interaction ───────────────────────────
+
 
 def fig4_shift_importance(shift_data: dict, results: dict):
     """Scatter: mean KS statistic (x) vs feature name, highlighting shifted features.
@@ -321,12 +406,16 @@ def fig4_shift_importance(shift_data: dict, results: dict):
 
     # Legend
     from matplotlib.patches import Patch
+
     ax.legend(
         handles=[
-            Patch(facecolor="#FF5722", alpha=0.8, label="Shifted (p<0.001 or PSI>0.25)"),
+            Patch(
+                facecolor="#FF5722", alpha=0.8, label="Shifted (p<0.001 or PSI>0.25)"
+            ),
             Patch(facecolor="#2196F3", alpha=0.8, label="Not shifted"),
         ],
-        loc="lower right", fontsize=8,
+        loc="lower right",
+        fontsize=8,
     )
 
     ax.invert_yaxis()
@@ -336,6 +425,7 @@ def fig4_shift_importance(shift_data: dict, results: dict):
 
 
 # ── Figure 5: DeepHit vs Graph-DT Degradation ───────────────────────
+
 
 def fig5_model_degradation(results: dict):
     """Compare degradation patterns: DeepHit vs Graph-DT."""
@@ -354,16 +444,34 @@ def fig5_model_degradation(results: dict):
 
     fig, ax = plt.subplots(figsize=(5.5, 4))
 
-    bars1 = ax.bar(x - width / 2, dh_deg, width, color=COLORS["deephit"],
-                    label="Dynamic-DeepHit", alpha=0.85)
-    bars2 = ax.bar(x + width / 2, gdt_deg, width, color=COLORS["graph_dt"],
-                    label="Graph-DT", alpha=0.85)
+    bars1 = ax.bar(
+        x - width / 2,
+        dh_deg,
+        width,
+        color=COLORS["deephit"],
+        label="Dynamic-DeepHit",
+        alpha=0.85,
+    )
+    bars2 = ax.bar(
+        x + width / 2,
+        gdt_deg,
+        width,
+        color=COLORS["graph_dt"],
+        label="Graph-DT",
+        alpha=0.85,
+    )
 
     for bar in list(bars1) + list(bars2):
         h = bar.get_height()
         sign = "+" if h > 0 else ""
-        ax.text(bar.get_x() + bar.get_width() / 2., h + 0.002,
-                f"{sign}{h:.3f}", ha="center", va="bottom", fontsize=7)
+        ax.text(
+            bar.get_x() + bar.get_width() / 2.0,
+            h + 0.002,
+            f"{sign}{h:.3f}",
+            ha="center",
+            va="bottom",
+            fontsize=7,
+        )
 
     ax.set_xlabel("Temporal Window")
     ax.set_ylabel("C-td Degradation from Random CV")
@@ -378,6 +486,7 @@ def fig5_model_degradation(results: dict):
 
 
 # ── Figure 6: Per-Transition Temporal Stability ──────────────────────
+
 
 def fig6_per_transition_stability(results: dict):
     """Per-transition C-td across 4 windows (line plot)."""
@@ -399,10 +508,12 @@ def fig6_per_transition_stability(results: dict):
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.5), sharey=True)
     has_gdt = all("graph_dt" in results[w] for w in windows)
 
-    for ax_idx, (model_key, title) in enumerate([
-        ("deephit", "Dynamic-DeepHit"),
-        ("graph_dt", "Graph-DT"),
-    ]):
+    for ax_idx, (model_key, title) in enumerate(
+        [
+            ("deephit", "Dynamic-DeepHit"),
+            ("graph_dt", "Graph-DT"),
+        ]
+    ):
         if ax_idx == 1 and not has_gdt:
             axes[1].set_visible(False)
             break
@@ -421,8 +532,15 @@ def fig6_per_transition_stability(results: dict):
             if all(np.isnan(c) for c in ctds):
                 continue
 
-            ax.plot(range(len(windows)), ctds, "o-",
-                    color=colors_list[ti], label=trans, linewidth=1.5, markersize=5)
+            ax.plot(
+                range(len(windows)),
+                ctds,
+                "o-",
+                color=colors_list[ti],
+                label=trans,
+                linewidth=1.5,
+                markersize=5,
+            )
 
         ax.set_xlabel("Temporal Window")
         ax.set_xticks(range(len(windows)))
@@ -439,6 +557,7 @@ def fig6_per_transition_stability(results: dict):
 
 
 # ── Main ─────────────────────────────────────────────────────────────
+
 
 def main():
     FIGURE_DIR.mkdir(parents=True, exist_ok=True)

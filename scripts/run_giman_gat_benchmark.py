@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Run GIMAN GAT (Graph Attention Network) on NSD-ISS stage prediction targets.
+"""Run GIMAN GAT (Graph Attention Network) on NSD-ISS stage prediction targets.
 
 This is the graph model novelty layer on top of the tabular baselines.
 Uses patient similarity graphs with multi-head GAT for stage classification.
@@ -28,9 +27,8 @@ import torch.nn.functional as F
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import (
     balanced_accuracy_score,
-    roc_auc_score,
     cohen_kappa_score,
-    classification_report,
+    roc_auc_score,
 )
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
@@ -47,17 +45,43 @@ print(f"Device: {DEVICE}")
 
 # ── Feature sets ──
 FULL_FEATURES = [
-    "SEX", "HANDED", "AGE_AT_BASELINE", "UPDRS1_TOTAL", "UPDRS2_TOTAL",
-    "UPDRS3_TREMOR", "UPDRS3_RIGIDITY", "UPDRS3_BRADYKINESIA", "UPDRS3_AXIAL",
-    "UPDRS4_TOTAL", "MOCA_TOTAL", "RBD_TOTAL", "ESS_TOTAL", "SCOPA_AUT_TOTAL",
-    "CAUDATE_R_SBR", "CAUDATE_L_SBR", "CAUDATE_MEAN_SBR", "CAUDATE_ASYMMETRY",
-    "CAUDATE_PUTAMEN_RATIO", "LRRK2_CARRIER", "GBA_CARRIER", "APOE_E4_CARRIER",
+    "SEX",
+    "HANDED",
+    "AGE_AT_BASELINE",
+    "UPDRS1_TOTAL",
+    "UPDRS2_TOTAL",
+    "UPDRS3_TREMOR",
+    "UPDRS3_RIGIDITY",
+    "UPDRS3_BRADYKINESIA",
+    "UPDRS3_AXIAL",
+    "UPDRS4_TOTAL",
+    "MOCA_TOTAL",
+    "RBD_TOTAL",
+    "ESS_TOTAL",
+    "SCOPA_AUT_TOTAL",
+    "CAUDATE_R_SBR",
+    "CAUDATE_L_SBR",
+    "CAUDATE_MEAN_SBR",
+    "CAUDATE_ASYMMETRY",
+    "CAUDATE_PUTAMEN_RATIO",
+    "LRRK2_CARRIER",
+    "GBA_CARRIER",
+    "APOE_E4_CARRIER",
 ]
 
 COMMON_FEATURES = [
-    "AGE_AT_BASELINE", "SEX", "UPDRS1_TOTAL", "UPDRS2_TOTAL",
-    "UPDRS3_TREMOR", "UPDRS3_RIGIDITY", "UPDRS3_BRADYKINESIA", "UPDRS3_AXIAL",
-    "UPDRS4_TOTAL", "MOCA_TOTAL", "ESS_TOTAL", "RBD_TOTAL",
+    "AGE_AT_BASELINE",
+    "SEX",
+    "UPDRS1_TOTAL",
+    "UPDRS2_TOTAL",
+    "UPDRS3_TREMOR",
+    "UPDRS3_RIGIDITY",
+    "UPDRS3_BRADYKINESIA",
+    "UPDRS3_AXIAL",
+    "UPDRS4_TOTAL",
+    "MOCA_TOTAL",
+    "ESS_TOTAL",
+    "RBD_TOTAL",
 ]
 
 TARGETS = {
@@ -91,8 +115,7 @@ class GATLayer(nn.Module):
         nn.init.xavier_uniform_(self.a_dst)
 
     def forward(self, x, adj):
-        """
-        x: (N, in_dim)
+        """x: (N, in_dim)
         adj: (N, N) adjacency matrix (dense)
         """
         N = x.size(0)
@@ -118,7 +141,7 @@ class GATLayer(nn.Module):
         # (N, N, heads) x (N, heads, out_dim) -> (N, heads, out_dim)
         h_prime = torch.bmm(
             attn.permute(2, 0, 1),  # (heads, N, N)
-            h.permute(1, 0, 2),     # (heads, N, out_dim)
+            h.permute(1, 0, 2),  # (heads, N, out_dim)
         ).permute(1, 0, 2)  # (N, heads, out_dim)
 
         if self.concat:
@@ -130,7 +153,9 @@ class GATLayer(nn.Module):
 class GIMANGAT(nn.Module):
     """GIMAN Graph Attention Network for NSD-ISS stage classification."""
 
-    def __init__(self, input_dim, hidden_dim=64, num_heads=4, num_classes=2, dropout=0.3):
+    def __init__(
+        self, input_dim, hidden_dim=64, num_heads=4, num_classes=2, dropout=0.3
+    ):
         super().__init__()
         self.input_proj = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
@@ -138,9 +163,13 @@ class GIMANGAT(nn.Module):
             nn.ReLU(),
             nn.Dropout(dropout),
         )
-        self.gat1 = GATLayer(hidden_dim, hidden_dim // num_heads, num_heads, dropout, concat=True)
+        self.gat1 = GATLayer(
+            hidden_dim, hidden_dim // num_heads, num_heads, dropout, concat=True
+        )
         self.bn1 = nn.BatchNorm1d(hidden_dim)
-        self.gat2 = GATLayer(hidden_dim, hidden_dim // num_heads, num_heads, dropout, concat=True)
+        self.gat2 = GATLayer(
+            hidden_dim, hidden_dim // num_heads, num_heads, dropout, concat=True
+        )
         self.bn2 = nn.BatchNorm1d(hidden_dim)
 
         self.classifier = nn.Sequential(
@@ -163,6 +192,7 @@ class GIMANGAT(nn.Module):
 def build_knn_graph(X, k=10):
     """Build k-NN graph from feature matrix using cosine similarity."""
     from sklearn.metrics.pairwise import cosine_similarity
+
     sim = cosine_similarity(X)
     np.fill_diagonal(sim, 0)
 
@@ -179,8 +209,19 @@ def build_knn_graph(X, k=10):
 # ═══════════════════════════════════════════════════════════════════════
 # Training
 # ═══════════════════════════════════════════════════════════════════════
-def train_gat(X_train, y_train, X_val, y_val, adj_train, adj_val,
-              input_dim, num_classes, epochs=300, lr=5e-4, patience=40):
+def train_gat(
+    X_train,
+    y_train,
+    X_val,
+    y_val,
+    adj_train,
+    adj_val,
+    input_dim,
+    num_classes,
+    epochs=300,
+    lr=5e-4,
+    patience=40,
+):
     """Train GIMAN-GAT model with early stopping."""
     model = GIMANGAT(
         input_dim=input_dim,
@@ -198,7 +239,9 @@ def train_gat(X_train, y_train, X_val, y_val, adj_train, adj_val,
 
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=5e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=15, factor=0.5)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, patience=15, factor=0.5
+    )
 
     X_tr = torch.FloatTensor(X_train).to(DEVICE)
     y_tr = torch.LongTensor(y_train.astype(int)).to(DEVICE)
@@ -257,9 +300,13 @@ def predict_gat(model, X, adj):
 # ═══════════════════════════════════════════════════════════════════════
 # Benchmark Runner
 # ═══════════════════════════════════════════════════════════════════════
-def run_gat_benchmark(X, y, target_name, n_classes, feature_set_name, n_folds=5, k_neighbors=10):
+def run_gat_benchmark(
+    X, y, target_name, n_classes, feature_set_name, n_folds=5, k_neighbors=10
+):
     """Run GIMAN-GAT with stratified k-fold CV."""
-    print(f"\n--- GIMAN-GAT: {target_name} ({feature_set_name}, {X.shape[1]} features) ---")
+    print(
+        f"\n--- GIMAN-GAT: {target_name} ({feature_set_name}, {X.shape[1]} features) ---"
+    )
 
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=42)
     fold_metrics = []
@@ -285,8 +332,12 @@ def run_gat_benchmark(X, y, target_name, n_classes, feature_set_name, n_folds=5,
         # Train
         t0 = time.time()
         model = train_gat(
-            X_tr_fold, y_tr_fold, X_val_fold, y_val_fold,
-            adj_tr_fold, adj_val_fold,
+            X_tr_fold,
+            y_tr_fold,
+            X_val_fold,
+            y_val_fold,
+            adj_tr_fold,
+            adj_val_fold,
             input_dim=X.shape[1],
             num_classes=n_classes,
             epochs=300,
@@ -309,14 +360,18 @@ def run_gat_benchmark(X, y, target_name, n_classes, feature_set_name, n_folds=5,
             auc = float("nan")
         qwk = cohen_kappa_score(y_test, preds, weights="quadratic")
 
-        fold_metrics.append({
-            "fold": fold,
-            "bal_acc": ba,
-            "auc": auc,
-            "qwk": qwk,
-            "train_time": train_time,
-        })
-        print(f"  Fold {fold}: bal_acc={ba:.4f}, AUC={auc:.4f}, QWK={qwk:.4f} ({train_time:.1f}s)")
+        fold_metrics.append(
+            {
+                "fold": fold,
+                "bal_acc": ba,
+                "auc": auc,
+                "qwk": qwk,
+                "train_time": train_time,
+            }
+        )
+        print(
+            f"  Fold {fold}: bal_acc={ba:.4f}, AUC={auc:.4f}, QWK={qwk:.4f} ({train_time:.1f}s)"
+        )
 
     # Aggregate
     mean_ba = np.mean([m["bal_acc"] for m in fold_metrics])
@@ -341,7 +396,9 @@ def run_gat_benchmark(X, y, target_name, n_classes, feature_set_name, n_folds=5,
         "fold_metrics": fold_metrics,
     }
 
-    print(f"  MEAN: bal_acc={mean_ba:.4f}+-{std_ba:.4f}, AUC={mean_auc:.4f}+-{std_auc:.4f}, QWK={mean_qwk:.4f}")
+    print(
+        f"  MEAN: bal_acc={mean_ba:.4f}+-{std_ba:.4f}, AUC={mean_auc:.4f}+-{std_auc:.4f}, QWK={mean_qwk:.4f}"
+    )
     return result
 
 
@@ -375,15 +432,20 @@ def main():
         n_classes = len(unique_labels)
         print(f"Label mapping: {label_map}")
 
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print(f"Target: {target_name} | N={len(df)} | Classes={n_classes}")
-        print(f"Class distribution: {dict(zip(*np.unique(y, return_counts=True)))}")
-        print(f"{'='*50}")
+        print(
+            f"Class distribution: {dict(zip(*np.unique(y, return_counts=True), strict=False))}"
+        )
+        print(f"{'=' * 50}")
 
         target_results = []
 
         # Run on both feature sets
-        for feat_name, feat_list in [("full_22", FULL_FEATURES), ("clinical_12", COMMON_FEATURES)]:
+        for feat_name, feat_list in [
+            ("full_22", FULL_FEATURES),
+            ("clinical_12", COMMON_FEATURES),
+        ]:
             available = [f for f in feat_list if f in df.columns]
             X_raw = df[available].values
 
@@ -394,7 +456,8 @@ def main():
             X = scaler.fit_transform(X)
 
             result = run_gat_benchmark(
-                X, y,
+                X,
+                y,
                 target_name=target_name,
                 n_classes=n_classes,
                 feature_set_name=feat_name,
@@ -422,8 +485,10 @@ def main():
     print("-" * 64)
     for target, results in all_results.items():
         for r in results:
-            print(f"{target:<16} {r['feature_set']:<14} {r['bal_acc']:.4f}+-{r['bal_acc_std']:.4f} "
-                  f"{r['auc']:.4f}+-{r['auc_std']:.4f} {r['qwk']:.4f}")
+            print(
+                f"{target:<16} {r['feature_set']:<14} {r['bal_acc']:.4f}+-{r['bal_acc_std']:.4f} "
+                f"{r['auc']:.4f}+-{r['auc_std']:.4f} {r['qwk']:.4f}"
+            )
 
     print(f"\nAll results saved to: {OUT}")
 

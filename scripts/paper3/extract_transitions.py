@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Paper 3, Step 2: Extract NSD-ISS stage transition events from longitudinal staging.
+"""Paper 3, Step 2: Extract NSD-ISS stage transition events from longitudinal staging.
 
 Identifies stage changes between consecutive visits, computes time-to-event,
 handles right-censoring, and validates against Simuni et al. (2025) transition times.
@@ -29,7 +28,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 # Paths
-LONGITUDINAL_CSV = PROJECT_ROOT / "data" / "06_longitudinal_staging" / "longitudinal_nsd_iss.csv"
+LONGITUDINAL_CSV = (
+    PROJECT_ROOT / "data" / "06_longitudinal_staging" / "longitudinal_nsd_iss.csv"
+)
 OUTPUT_DIR = PROJECT_ROOT / "data" / "06_longitudinal_staging"
 
 # NSD-ISS stage ordering (numeric values for comparison)
@@ -77,15 +78,16 @@ def load_longitudinal_data() -> pd.DataFrame:
     df = df.sort_values(["PATNO", "months_from_baseline"]).reset_index(drop=True)
 
     n_after = len(df)
-    print(f"Loaded {n_before} observations, deduplicated to {n_after} "
-          f"({n_before - n_after} same-timepoint duplicates removed)")
+    print(
+        f"Loaded {n_before} observations, deduplicated to {n_after} "
+        f"({n_before - n_after} same-timepoint duplicates removed)"
+    )
     print(f"  {df['PATNO'].nunique()} patients")
     return df
 
 
 def extract_transitions(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Extract stage transitions between consecutive visits for each patient.
+    """Extract stage transitions between consecutive visits for each patient.
 
     Returns DataFrame with one row per transition event.
     """
@@ -114,39 +116,42 @@ def extract_transitions(df: pd.DataFrame) -> pd.DataFrame:
                 skip_distance = abs(dst_num - src_num)
                 # Skip transitions are those jumping more than one stage level
                 is_skip = skip_distance > 1.0 and not (
-                    (src_stage == "2B" and dst_stage == "3") or
-                    (src_stage == "3" and dst_stage == "2B")
+                    (src_stage == "2B" and dst_stage == "3")
+                    or (src_stage == "3" and dst_stage == "2B")
                 )
 
                 time_interval = months[i + 1] - months[i]
 
-                transitions.append({
-                    "PATNO": patno,
-                    "cohort": cohort,
-                    "source_stage": src_stage,
-                    "dest_stage": dst_stage,
-                    "source_stage_numeric": src_num,
-                    "dest_stage_numeric": dst_num,
-                    "direction": direction,
-                    "is_skip_transition": is_skip,
-                    "time_interval_months": time_interval,
-                    "time_interval_years": time_interval / 12.0,
-                    "months_from_baseline_src": months[i],
-                    "months_from_baseline_dst": months[i + 1],
-                    "event_id_from": event_ids[i],
-                    "event_id_to": event_ids[i + 1],
-                    "age_at_transition": ages[i + 1],
-                })
+                transitions.append(
+                    {
+                        "PATNO": patno,
+                        "cohort": cohort,
+                        "source_stage": src_stage,
+                        "dest_stage": dst_stage,
+                        "source_stage_numeric": src_num,
+                        "dest_stage_numeric": dst_num,
+                        "direction": direction,
+                        "is_skip_transition": is_skip,
+                        "time_interval_months": time_interval,
+                        "time_interval_years": time_interval / 12.0,
+                        "months_from_baseline_src": months[i],
+                        "months_from_baseline_dst": months[i + 1],
+                        "event_id_from": event_ids[i],
+                        "event_id_to": event_ids[i + 1],
+                        "age_at_transition": ages[i + 1],
+                    }
+                )
 
     trans_df = pd.DataFrame(transitions)
-    print(f"\nExtracted {len(trans_df)} transition events from "
-          f"{trans_df['PATNO'].nunique()} patients")
+    print(
+        f"\nExtracted {len(trans_df)} transition events from "
+        f"{trans_df['PATNO'].nunique()} patients"
+    )
     return trans_df
 
 
 def extract_censored_patients(df: pd.DataFrame, trans_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Identify right-censored patients: those with no observed transition.
+    """Identify right-censored patients: those with no observed transition.
     Also creates per-stage censoring records for KM analysis.
 
     For KM analysis of specific transitions (e.g., 2B->3), a patient is censored
@@ -158,36 +163,66 @@ def extract_censored_patients(df: pd.DataFrame, trans_df: pd.DataFrame) -> pd.Da
         group = group.sort_values("months_from_baseline")
         first_stage = group["nsd_stage"].iloc[0]
         last_stage = group["nsd_stage"].iloc[-1]
-        total_follow_up = group["months_from_baseline"].max() - group["months_from_baseline"].min()
+        total_follow_up = (
+            group["months_from_baseline"].max() - group["months_from_baseline"].min()
+        )
         n_visits = len(group)
         cohort = group["cohort"].iloc[0]
 
         # Check if patient had ANY transition
-        patient_trans = trans_df[trans_df["PATNO"] == patno] if len(trans_df) > 0 else pd.DataFrame()
+        patient_trans = (
+            trans_df[trans_df["PATNO"] == patno]
+            if len(trans_df) > 0
+            else pd.DataFrame()
+        )
         had_transition = len(patient_trans) > 0
-        had_forward = len(patient_trans[patient_trans["direction"] == "forward"]) > 0 if had_transition else False
-        had_backward = len(patient_trans[patient_trans["direction"] == "backward"]) > 0 if had_transition else False
+        had_forward = (
+            len(patient_trans[patient_trans["direction"] == "forward"]) > 0
+            if had_transition
+            else False
+        )
+        had_backward = (
+            len(patient_trans[patient_trans["direction"] == "backward"]) > 0
+            if had_transition
+            else False
+        )
 
-        censored.append({
-            "PATNO": patno,
-            "cohort": cohort,
-            "baseline_stage": first_stage,
-            "last_observed_stage": last_stage,
-            "total_follow_up_months": total_follow_up,
-            "total_follow_up_years": total_follow_up / 12.0,
-            "n_visits": n_visits,
-            "had_any_transition": had_transition,
-            "had_forward_transition": had_forward,
-            "had_backward_transition": had_backward,
-            "n_forward_transitions": len(patient_trans[patient_trans["direction"] == "forward"]) if had_transition else 0,
-            "n_backward_transitions": len(patient_trans[patient_trans["direction"] == "backward"]) if had_transition else 0,
-        })
+        censored.append(
+            {
+                "PATNO": patno,
+                "cohort": cohort,
+                "baseline_stage": first_stage,
+                "last_observed_stage": last_stage,
+                "total_follow_up_months": total_follow_up,
+                "total_follow_up_years": total_follow_up / 12.0,
+                "n_visits": n_visits,
+                "had_any_transition": had_transition,
+                "had_forward_transition": had_forward,
+                "had_backward_transition": had_backward,
+                "n_forward_transitions": len(
+                    patient_trans[patient_trans["direction"] == "forward"]
+                )
+                if had_transition
+                else 0,
+                "n_backward_transitions": len(
+                    patient_trans[patient_trans["direction"] == "backward"]
+                )
+                if had_transition
+                else 0,
+            }
+        )
 
     cens_df = pd.DataFrame(censored)
     print(f"\nPatient-level summary: {len(cens_df)} patients")
-    print(f"  Had any transition: {cens_df['had_any_transition'].sum()} ({cens_df['had_any_transition'].mean():.1%})")
-    print(f"  Had forward transition: {cens_df['had_forward_transition'].sum()} ({cens_df['had_forward_transition'].mean():.1%})")
-    print(f"  Had backward transition: {cens_df['had_backward_transition'].sum()} ({cens_df['had_backward_transition'].mean():.1%})")
+    print(
+        f"  Had any transition: {cens_df['had_any_transition'].sum()} ({cens_df['had_any_transition'].mean():.1%})"
+    )
+    print(
+        f"  Had forward transition: {cens_df['had_forward_transition'].sum()} ({cens_df['had_forward_transition'].mean():.1%})"
+    )
+    print(
+        f"  Had backward transition: {cens_df['had_backward_transition'].sum()} ({cens_df['had_backward_transition'].mean():.1%})"
+    )
     return cens_df
 
 
@@ -205,10 +240,10 @@ def compute_transition_matrix(trans_df: pd.DataFrame) -> pd.DataFrame:
     return matrix
 
 
-def compute_first_transition_km(df: pd.DataFrame, trans_df: pd.DataFrame,
-                                 source_stage: str, dest_stages: list) -> dict:
-    """
-    Compute Kaplan-Meier estimate for time from first observation in source_stage
+def compute_first_transition_km(
+    df: pd.DataFrame, trans_df: pd.DataFrame, source_stage: str, dest_stages: list
+) -> dict:
+    """Compute Kaplan-Meier estimate for time from first observation in source_stage
     to first transition to any of dest_stages.
 
     This mirrors Simuni et al.'s methodology: time from baseline stage assignment
@@ -228,9 +263,9 @@ def compute_first_transition_km(df: pd.DataFrame, trans_df: pd.DataFrame,
 
         # Find first transition from source to any dest stage
         pat_trans = trans_df[
-            (trans_df["PATNO"] == patno) &
-            (trans_df["source_stage"] == source_stage) &
-            (trans_df["dest_stage"].isin(dest_stages))
+            (trans_df["PATNO"] == patno)
+            & (trans_df["source_stage"] == source_stage)
+            & (trans_df["dest_stage"].isin(dest_stages))
         ]
 
         if len(pat_trans) > 0:
@@ -246,12 +281,14 @@ def compute_first_transition_km(df: pd.DataFrame, trans_df: pd.DataFrame,
 
         # Only include if some follow-up time (>0 months)
         if time_to_event > 0:
-            km_data.append({
-                "PATNO": patno,
-                "time_months": time_to_event,
-                "time_years": time_to_event / 12.0,
-                "event": event,
-            })
+            km_data.append(
+                {
+                    "PATNO": patno,
+                    "time_months": time_to_event,
+                    "time_years": time_to_event / 12.0,
+                    "event": event,
+                }
+            )
 
     if not km_data:
         return {"n_patients": 0, "n_events": 0, "median_years": None}
@@ -263,7 +300,7 @@ def compute_first_transition_km(df: pd.DataFrame, trans_df: pd.DataFrame,
     kmf.fit(
         durations=km_df["time_years"],
         event_observed=km_df["event"],
-        label=f"{source_stage} → {'/'.join(dest_stages)}"
+        label=f"{source_stage} → {'/'.join(dest_stages)}",
     )
 
     median = kmf.median_survival_time_
@@ -309,8 +346,7 @@ def compute_first_transition_km(df: pd.DataFrame, trans_df: pd.DataFrame,
 
 
 def compute_regression_analysis(trans_df: pd.DataFrame, cens_df: pd.DataFrame) -> dict:
-    """
-    Analyze stage regression patterns.
+    """Analyze stage regression patterns.
 
     Espay et al. (2025) argued ~50% of stage changes are treatment-driven regression.
     We compute actual regression rates from our data.
@@ -348,11 +384,17 @@ def compute_regression_analysis(trans_df: pd.DataFrame, cens_df: pd.DataFrame) -
         "total_transitions": len(trans_df),
         "forward_transitions": len(forward_trans),
         "backward_transitions": len(backward_trans),
-        "overall_regression_rate": len(backward_trans) / len(trans_df) if len(trans_df) > 0 else 0,
+        "overall_regression_rate": len(backward_trans) / len(trans_df)
+        if len(trans_df) > 0
+        else 0,
         "nsd_positive_patients_total": len(nsd_patients),
         "nsd_positive_with_transition": len(nsd_with_trans),
-        "nsd_forward_rate": nsd_with_trans["had_forward_transition"].mean() if len(nsd_with_trans) > 0 else 0,
-        "nsd_backward_rate": nsd_with_trans["had_backward_transition"].mean() if len(nsd_with_trans) > 0 else 0,
+        "nsd_forward_rate": nsd_with_trans["had_forward_transition"].mean()
+        if len(nsd_with_trans) > 0
+        else 0,
+        "nsd_backward_rate": nsd_with_trans["had_backward_transition"].mean()
+        if len(nsd_with_trans) > 0
+        else 0,
         "regression_by_source_stage": regression_by_stage,
     }
 
@@ -360,17 +402,20 @@ def compute_regression_analysis(trans_df: pd.DataFrame, cens_df: pd.DataFrame) -
 
 
 def analyze_medication_confound(df: pd.DataFrame, trans_df: pd.DataFrame) -> dict:
-    """
-    Analyze the medication confound on stage transitions.
+    """Analyze the medication confound on stage transitions.
 
     Espay et al. (2025) argued that levodopa masks functional impairment,
     causing apparent stage regression. We check medication status at transitions.
     """
     # Join medication status from longitudinal data to transitions
     med_status = df[["PATNO", "EVENT_ID", "pdmedyn"]].copy()
-    med_status = med_status.rename(columns={"EVENT_ID": "event_id_to", "pdmedyn": "pdmedyn_at_transition"})
+    med_status = med_status.rename(
+        columns={"EVENT_ID": "event_id_to", "pdmedyn": "pdmedyn_at_transition"}
+    )
 
-    trans_with_meds = trans_df.merge(med_status, on=["PATNO", "event_id_to"], how="left")
+    trans_with_meds = trans_df.merge(
+        med_status, on=["PATNO", "event_id_to"], how="left"
+    )
 
     forward = trans_with_meds[trans_with_meds["direction"] == "forward"]
     backward = trans_with_meds[trans_with_meds["direction"] == "backward"]
@@ -397,9 +442,14 @@ def analyze_medication_confound(df: pd.DataFrame, trans_df: pd.DataFrame) -> dic
     return result
 
 
-def print_summary(trans_df: pd.DataFrame, cens_df: pd.DataFrame,
-                  trans_matrix: pd.DataFrame, km_results: dict,
-                  regression_analysis: dict, med_analysis: dict):
+def print_summary(
+    trans_df: pd.DataFrame,
+    cens_df: pd.DataFrame,
+    trans_matrix: pd.DataFrame,
+    km_results: dict,
+    regression_analysis: dict,
+    med_analysis: dict,
+):
     """Print comprehensive summary to console."""
     print("\n" + "=" * 80)
     print("PAPER 3 STEP 2: TRANSITION EVENT EXTRACTION SUMMARY")
@@ -410,13 +460,20 @@ def print_summary(trans_df: pd.DataFrame, cens_df: pd.DataFrame,
     print(f"Total transitions: {len(trans_df)}")
     print(f"  Forward (progression):  {regression_analysis['forward_transitions']}")
     print(f"  Backward (regression):  {regression_analysis['backward_transitions']}")
-    print(f"  Overall regression rate: {regression_analysis['overall_regression_rate']:.1%}")
+    print(
+        f"  Overall regression rate: {regression_analysis['overall_regression_rate']:.1%}"
+    )
 
     # Skip transitions
     skip = trans_df[trans_df["is_skip_transition"]]
     print(f"  Skip transitions: {len(skip)}")
     if len(skip) > 0:
-        for _, row in skip.groupby(["source_stage", "dest_stage"]).size().reset_index(name="count").iterrows():
+        for _, row in (
+            skip.groupby(["source_stage", "dest_stage"])
+            .size()
+            .reset_index(name="count")
+            .iterrows()
+        ):
             print(f"    {row['source_stage']} → {row['dest_stage']}: {row['count']}")
 
     # Transition matrix
@@ -426,8 +483,10 @@ def print_summary(trans_df: pd.DataFrame, cens_df: pd.DataFrame,
     # Regression by stage
     print("\n--- Regression Rate by Source Stage ---")
     for stage, data in regression_analysis["regression_by_source_stage"].items():
-        print(f"  Stage {stage}: {data['n_backward']}/{data['n_transitions']} "
-              f"= {data['regression_rate']:.1%} regression")
+        print(
+            f"  Stage {stage}: {data['n_backward']}/{data['n_transitions']} "
+            f"= {data['regression_rate']:.1%} regression"
+        )
 
     # KM results vs Simuni
     print("\n--- Kaplan-Meier Transition Times (vs Simuni 2025) ---")
@@ -440,31 +499,58 @@ def print_summary(trans_df: pd.DataFrame, cens_df: pd.DataFrame,
     for key, result in km_results.items():
         ref = simuni_ref.get(key, {})
         ref_str = f" (Simuni: {ref['median']:.2f}yr [{ref['ci']}])" if ref else ""
-        median_str = f"{result['median_years']:.2f}" if result['median_years'] is not None else "not reached"
+        median_str = (
+            f"{result['median_years']:.2f}"
+            if result["median_years"] is not None
+            else "not reached"
+        )
         ci_str = ""
-        if result.get("median_ci_lower") is not None or result.get("median_ci_upper") is not None:
-            lo = f"{result['median_ci_lower']:.2f}" if result['median_ci_lower'] is not None else "NA"
-            hi = f"{result['median_ci_upper']:.2f}" if result['median_ci_upper'] is not None else "NA"
+        if (
+            result.get("median_ci_lower") is not None
+            or result.get("median_ci_upper") is not None
+        ):
+            lo = (
+                f"{result['median_ci_lower']:.2f}"
+                if result["median_ci_lower"] is not None
+                else "NA"
+            )
+            hi = (
+                f"{result['median_ci_upper']:.2f}"
+                if result["median_ci_upper"] is not None
+                else "NA"
+            )
             ci_str = f" [{lo}-{hi}]"
 
-        print(f"  {key}: n={result['n_patients']}, events={result['n_events']}, "
-              f"median={median_str}yr{ci_str}{ref_str}")
+        print(
+            f"  {key}: n={result['n_patients']}, events={result['n_events']}, "
+            f"median={median_str}yr{ci_str}{ref_str}"
+        )
 
     # Medication confound
     print("\n--- Medication Confound Analysis ---")
-    print(f"  Forward transitions on meds: {med_analysis['forward_on_meds']} "
-          f"(rate: {med_analysis.get('forward_on_meds_rate', 'N/A')})")
-    print(f"  Backward transitions on meds: {med_analysis['backward_on_meds']} "
-          f"(rate: {med_analysis.get('backward_on_meds_rate', 'N/A')})")
+    print(
+        f"  Forward transitions on meds: {med_analysis['forward_on_meds']} "
+        f"(rate: {med_analysis.get('forward_on_meds_rate', 'N/A')})"
+    )
+    print(
+        f"  Backward transitions on meds: {med_analysis['backward_on_meds']} "
+        f"(rate: {med_analysis.get('backward_on_meds_rate', 'N/A')})"
+    )
 
     # Patient-level
     print("\n--- Patient-Level Summary ---")
     nsd_stages = ["1", "2B", "3", "4", "5", "6"]
     nsd = cens_df[cens_df["baseline_stage"].isin(nsd_stages)]
     print(f"  NSD+ patients (baseline): {len(nsd)}")
-    print(f"    With any transition: {nsd['had_any_transition'].sum()} ({nsd['had_any_transition'].mean():.1%})")
-    print(f"    With forward transition: {nsd['had_forward_transition'].sum()} ({nsd['had_forward_transition'].mean():.1%})")
-    print(f"    With backward transition: {nsd['had_backward_transition'].sum()} ({nsd['had_backward_transition'].mean():.1%})")
+    print(
+        f"    With any transition: {nsd['had_any_transition'].sum()} ({nsd['had_any_transition'].mean():.1%})"
+    )
+    print(
+        f"    With forward transition: {nsd['had_forward_transition'].sum()} ({nsd['had_forward_transition'].mean():.1%})"
+    )
+    print(
+        f"    With backward transition: {nsd['had_backward_transition'].sum()} ({nsd['had_backward_transition'].mean():.1%})"
+    )
 
     # By baseline stage
     print("\n  Transition rates by baseline stage:")
@@ -474,9 +560,11 @@ def print_summary(trans_df: pd.DataFrame, cens_df: pd.DataFrame,
             fwd_rate = stage_pats["had_forward_transition"].mean()
             bwd_rate = stage_pats["had_backward_transition"].mean()
             median_fu = stage_pats["total_follow_up_months"].median() / 12
-            print(f"    Stage {stage:>2s}: n={len(stage_pats):>4d}, "
-                  f"fwd={fwd_rate:.1%}, bwd={bwd_rate:.1%}, "
-                  f"median FU={median_fu:.1f}yr")
+            print(
+                f"    Stage {stage:>2s}: n={len(stage_pats):>4d}, "
+                f"fwd={fwd_rate:.1%}, bwd={bwd_rate:.1%}, "
+                f"median FU={median_fu:.1f}yr"
+            )
 
     # Follow-up times
     print("\n--- Follow-up Duration ---")
@@ -486,8 +574,7 @@ def print_summary(trans_df: pd.DataFrame, cens_df: pd.DataFrame,
 
 
 def build_km_survival_data(df: pd.DataFrame, trans_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Build per-patient per-stage KM-ready dataset.
+    """Build per-patient per-stage KM-ready dataset.
 
     For each patient and each stage they occupy, compute:
     - Time spent in that stage
@@ -518,18 +605,20 @@ def build_km_survival_data(df: pd.DataFrame, trans_df: pd.DataFrame) -> pd.DataF
                 dst_num = STAGE_ORDER.get(stages[i], np.nan)
                 direction = "forward" if dst_num > src_num else "backward"
 
-                records.append({
-                    "PATNO": patno,
-                    "cohort": cohort,
-                    "stage": stages[episode_start_idx],
-                    "entry_time_months": entry_time,
-                    "exit_time_months": exit_time,
-                    "duration_months": duration,
-                    "duration_years": duration / 12.0,
-                    "event": 1,  # Transition observed
-                    "exit_to": stages[i],
-                    "exit_direction": direction,
-                })
+                records.append(
+                    {
+                        "PATNO": patno,
+                        "cohort": cohort,
+                        "stage": stages[episode_start_idx],
+                        "entry_time_months": entry_time,
+                        "exit_time_months": exit_time,
+                        "duration_months": duration,
+                        "duration_years": duration / 12.0,
+                        "event": 1,  # Transition observed
+                        "exit_to": stages[i],
+                        "exit_direction": direction,
+                    }
+                )
 
                 episode_start_idx = i
 
@@ -538,30 +627,36 @@ def build_km_survival_data(df: pd.DataFrame, trans_df: pd.DataFrame) -> pd.DataF
         exit_time = months[-1]
         duration = exit_time - entry_time
 
-        records.append({
-            "PATNO": patno,
-            "cohort": cohort,
-            "stage": stages[episode_start_idx],
-            "entry_time_months": entry_time,
-            "exit_time_months": exit_time,
-            "duration_months": duration,
-            "duration_years": duration / 12.0,
-            "event": 0,  # Censored
-            "exit_to": None,
-            "exit_direction": None,
-        })
+        records.append(
+            {
+                "PATNO": patno,
+                "cohort": cohort,
+                "stage": stages[episode_start_idx],
+                "entry_time_months": entry_time,
+                "exit_time_months": exit_time,
+                "duration_months": duration,
+                "duration_years": duration / 12.0,
+                "event": 0,  # Censored
+                "exit_to": None,
+                "exit_direction": None,
+            }
+        )
 
     surv_df = pd.DataFrame(records)
-    print(f"\nBuilt KM survival dataset: {len(surv_df)} stage episodes "
-          f"from {surv_df['PATNO'].nunique()} patients")
-    print(f"  Events: {surv_df['event'].sum()}, Censored: {(surv_df['event'] == 0).sum()}")
+    print(
+        f"\nBuilt KM survival dataset: {len(surv_df)} stage episodes "
+        f"from {surv_df['PATNO'].nunique()} patients"
+    )
+    print(
+        f"  Events: {surv_df['event'].sum()}, Censored: {(surv_df['event'] == 0).sum()}"
+    )
     return surv_df
 
 
-def compute_simuni_aligned_km(df: pd.DataFrame, trans_df: pd.DataFrame,
-                               baseline_stage: str, dest_stages: list) -> dict:
-    """
-    Compute KM estimate matching Simuni et al. (2025) methodology exactly:
+def compute_simuni_aligned_km(
+    df: pd.DataFrame, trans_df: pd.DataFrame, baseline_stage: str, dest_stages: list
+) -> dict:
+    """Compute KM estimate matching Simuni et al. (2025) methodology exactly:
     - Time origin = enrollment (baseline), NOT first observation at stage
     - Only include patients whose BASELINE stage matches baseline_stage
     - Only include NSD-positive patients (Stage 1+)
@@ -596,7 +691,12 @@ def compute_simuni_aligned_km(df: pd.DataFrame, trans_df: pd.DataFrame,
         # Must be NSD-positive (D+ or S+)
         d_pos = baseline_obs["d_positive"].iloc[0]
         s_pos = baseline_obs["s_positive"].iloc[0]
-        if not (d_pos is True or s_pos is True or str(d_pos) == "True" or str(s_pos) == "True"):
+        if not (
+            d_pos is True
+            or s_pos is True
+            or str(d_pos) == "True"
+            or str(s_pos) == "True"
+        ):
             continue
 
         # Time origin = baseline (month 0)
@@ -621,12 +721,14 @@ def compute_simuni_aligned_km(df: pd.DataFrame, trans_df: pd.DataFrame,
             event = False
 
         if time_to_event > 0:
-            km_data.append({
-                "PATNO": patno,
-                "time_months": time_to_event,
-                "time_years": time_to_event / 12.0,
-                "event": event,
-            })
+            km_data.append(
+                {
+                    "PATNO": patno,
+                    "time_months": time_to_event,
+                    "time_years": time_to_event / 12.0,
+                    "event": event,
+                }
+            )
 
     if not km_data:
         return {"n_patients": 0, "n_events": 0, "median_years": None}
@@ -637,7 +739,7 @@ def compute_simuni_aligned_km(df: pd.DataFrame, trans_df: pd.DataFrame,
     kmf.fit(
         durations=km_df["time_years"],
         event_observed=km_df["event"],
-        label=f"Simuni-aligned: {baseline_stage} → {'/'.join(dest_stages)}"
+        label=f"Simuni-aligned: {baseline_stage} → {'/'.join(dest_stages)}",
     )
 
     median = kmf.median_survival_time_
@@ -669,8 +771,7 @@ def compute_simuni_aligned_km(df: pd.DataFrame, trans_df: pd.DataFrame,
 
 
 def compute_updrs2_staging_comparison(df: pd.DataFrame) -> dict:
-    """
-    Compare our H&Y-based staging with Simuni/Dam UPDRS Part II-based staging.
+    """Compare our H&Y-based staging with Simuni/Dam UPDRS Part II-based staging.
 
     Dam et al. (2024) thresholds for functional impairment:
       Stage 2B: UPDRS-II < 3 (no functional impairment)
@@ -743,8 +844,9 @@ def compute_updrs2_staging_comparison(df: pd.DataFrame) -> dict:
         lambda r: dam_stage(
             r[total_col],
             str(r["d_positive"]) == "True" or str(r["s_positive"]) == "True",
-            r["has_clinical_signs"]
-        ), axis=1
+            r["has_clinical_signs"],
+        ),
+        axis=1,
     )
 
     # Compare with our H&Y-based staging
@@ -753,8 +855,10 @@ def compute_updrs2_staging_comparison(df: pd.DataFrame) -> dict:
 
     # Stage-by-stage confusion
     confusion = pd.crosstab(
-        valid["nsd_stage"], valid["dam_stage"],
-        rownames=["Our_HY_stage"], colnames=["Dam_UPDRS2_stage"]
+        valid["nsd_stage"],
+        valid["dam_stage"],
+        rownames=["Our_HY_stage"],
+        colnames=["Dam_UPDRS2_stage"],
     )
 
     # Count key disagreements
@@ -842,12 +946,26 @@ def main():
     }
     for key, result in simuni_km.items():
         ref = simuni_ref[key]
-        median_str = f"{result['median_years']:.2f}" if result['median_years'] is not None else "not reached"
-        ci_lo = f"{result['median_ci_lower']:.2f}" if result.get('median_ci_lower') is not None else "NA"
-        ci_hi = f"{result['median_ci_upper']:.2f}" if result.get('median_ci_upper') is not None else "NA"
-        print(f"  {key}: n={result['n_patients']}, events={result['n_events']}, "
-              f"median={median_str}yr [{ci_lo}-{ci_hi}] "
-              f"(Simuni: {ref['median']:.2f}yr [{ref['ci']}])")
+        median_str = (
+            f"{result['median_years']:.2f}"
+            if result["median_years"] is not None
+            else "not reached"
+        )
+        ci_lo = (
+            f"{result['median_ci_lower']:.2f}"
+            if result.get("median_ci_lower") is not None
+            else "NA"
+        )
+        ci_hi = (
+            f"{result['median_ci_upper']:.2f}"
+            if result.get("median_ci_upper") is not None
+            else "NA"
+        )
+        print(
+            f"  {key}: n={result['n_patients']}, events={result['n_events']}, "
+            f"median={median_str}yr [{ci_lo}-{ci_hi}] "
+            f"(Simuni: {ref['median']:.2f}yr [{ref['ci']}])"
+        )
 
     # UPDRS Part II staging comparison
     print("\n--- UPDRS Part II Staging Comparison (Dam et al. 2024) ---")
@@ -863,8 +981,9 @@ def main():
     surv_df = build_km_survival_data(df, trans_df)
 
     # Print full summary
-    print_summary(trans_df, cens_df, trans_matrix, km_results,
-                  regression_analysis, med_analysis)
+    print_summary(
+        trans_df, cens_df, trans_matrix, km_results, regression_analysis, med_analysis
+    )
 
     # Save outputs
     print("\n--- Saving Outputs ---")
@@ -898,12 +1017,15 @@ def main():
             "forward": int(regression_analysis["forward_transitions"]),
             "backward": int(regression_analysis["backward_transitions"]),
             "regression_rate": float(regression_analysis["overall_regression_rate"]),
-            "unique_patients_with_transitions": int(trans_df["PATNO"].nunique()) if len(trans_df) > 0 else 0,
+            "unique_patients_with_transitions": int(trans_df["PATNO"].nunique())
+            if len(trans_df) > 0
+            else 0,
         },
         "transition_matrix": trans_matrix.to_dict(),
         "kaplan_meier": km_json,
         "regression_analysis": {
-            k: v for k, v in regression_analysis.items()
+            k: v
+            for k, v in regression_analysis.items()
             if k != "regression_by_source_stage"
         },
         "regression_by_stage": regression_analysis["regression_by_source_stage"],
@@ -925,9 +1047,10 @@ def main():
         },
         "simuni_aligned_km": simuni_km,
         "updrs2_staging_comparison": {
-            k: v for k, v in updrs2_comparison.items()
-            if k != "confusion_matrix"
-        } if isinstance(updrs2_comparison, dict) else {},
+            k: v for k, v in updrs2_comparison.items() if k != "confusion_matrix"
+        }
+        if isinstance(updrs2_comparison, dict)
+        else {},
         "staging_methodology_note": (
             "Our staging uses H&Y stage thresholds for functional impairment. "
             "Simuni/Dam et al. use MDS-UPDRS Part II thresholds "

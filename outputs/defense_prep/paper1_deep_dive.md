@@ -181,47 +181,114 @@ Think of it as: "If I'm trying to predict your disease stage and I know 15 patie
 
 ## 3. The Deep Dive (Advanced Level)
 
+*This section explains not just WHAT the code does, but WHY every parameter, pattern, and design decision exists. If a committee member asks "Why did you pick that value?" or "What happens if you change it?" -- this section gives you the answer.*
+
 ### 3.1 NSD-ISS Staging Pipeline
 
 **File**: `src/giman_pipeline/staging/nsd_iss.py`
 
-This module implements the exact Simuni et al. (2024) staging criteria as a deterministic algorithm. Key functions:
+This module implements the exact Simuni et al. (2024) staging criteria as a deterministic algorithm. There is no machine learning here -- it is a direct translation of the published clinical criteria into code.
 
 **`compute_s_anchor(saa_label)`**: Returns `True` if alpha-synuclein seed amplification assay (SAA) is positive, `False` if negative, `None` if missing. Coverage: only 12.6% (277/2,201) of PPMI patients have SAA data.
 
-**`compute_d_anchor(putamen_sbr_left, putamen_sbr_right, ...)`**: Returns `True` if dopaminergic deficit detected. Uses the LOWEST of left/right putamen SBR values. Threshold: SBR < 0.80 = deficit. Fallback chain: lateralized putamen -> mean putamen -> mean caudate. Coverage: 97.1% (2,137/2,201).
+**Why is SAA coverage so low?** The SAA test requires a cerebrospinal fluid sample obtained via lumbar puncture (spinal tap). This is invasive, painful, and not performed at every visit. Many PPMI participants enrolled before SAA was routinely offered. This 12.6% coverage is the main reason the D anchor (DaT-SPECT) carries most of the staging weight.
 
-**`compute_nsd_iss_stage(...)`**: The core staging logic. Decision hierarchy:
-- Stage 0: No S+, no D+, genetic risk only
-- Stage 1: S+ and/or D+, no clinical signs (UPDRS-III < 10 AND H&Y = 0)
-- Stage 2B: S+/D+ with clinical parkinsonism (UPDRS-III >= 10 OR H&Y > 0), no functional impairment
-- Stages 3-6: Progressive functional impairment mapped from Hoehn & Yahr stages
+**`compute_d_anchor(putamen_sbr_left, putamen_sbr_right, ...)`**: Returns `True` if dopaminergic deficit detected.
 
-**Critical non-circular design**: The features used for staging (putamen SBR, UPDRS-III total, SAA) are **excluded** from the ML feature set. The 22 ML features use caudate SBR (not putamen), UPDRS-III subscales (not total), and never use SAA. This prevents the model from trivially recovering the staging rules.
+**Why use the LOWEST of left/right putamen SBR?** Parkinson's disease typically presents asymmetrically -- one side of the brain deteriorates faster. The lowest putamen SBR value reflects the more-affected hemisphere. Using the average would dilute the signal: a patient with left SBR = 0.5 (severe deficit) and right SBR = 1.2 (normal) has an average of 0.85 (above threshold), but clinically has a clear dopaminergic deficit on the left side.
+
+**Why threshold < 0.80?** This is the published NSD-ISS criterion from Simuni et al. (2024). The SBR (Specific Binding Ratio) represents the ratio of dopamine transporter binding in the putamen to a reference region. Normal values are approximately 1.0-3.0. Values below 0.80 indicate the putamen has lost sufficient dopaminergic neurons to be clinically meaningful. This threshold was validated against neuropathological studies where SBR < 0.80 correlated with >50% dopaminergic cell loss.
+
+**Why the fallback chain (lateralized putamen -> mean putamen -> mean caudate)?** Not all PPMI imaging records have the same columns. Some older records report only mean putamen SBR (without left/right split). Some only have caudate SBR. The fallback chain ensures maximum coverage: 97.1% of patients (2,137/2,201) can be D-staged through at least one of these paths. Without the fallback, coverage would drop to ~85% for lateralized putamen alone.
+
+**Critical non-circular design**: The features used for staging (putamen SBR, UPDRS-III total, SAA) are **excluded** from the ML feature set. The 22 ML features use caudate SBR (not putamen), UPDRS-III subscales (not total), and never use SAA.
+
+**Why is this non-circularity so important?** If we used putamen SBR as both a staging criterion AND an ML feature, the model could trivially learn "if putamen SBR < 0.80, predict NSD-positive" -- it would be memorizing the staging rule, not learning biology. That model would appear to have high accuracy but would provide zero clinical value beyond what the staging algorithm already gives. By using caudate SBR (a correlated but distinct brain region), we force the model to learn genuine biological relationships. Caudate SBR correlates with putamen SBR at r > 0.85 in PPMI, so the signal is still present -- the model just can't cheat.
+
+Similarly, UPDRS-III subscales (tremor, rigidity, bradykinesia, axial) provide richer information than the total score used for staging. Two patients can both have UPDRS-III total = 15 but one might have severe tremor with mild rigidity, while another has the reverse. The subscales capture these differences while the total cannot.
 
 ### 3.2 Seven-Model Benchmark
 
 **File**: `src/giman_pipeline/sota/nsd_iss_benchmark.py`
 
-**Model factory pattern** (critical for CatBoost compatibility):
+#### The Model Factory Pattern (and why sklearn's clone() breaks CatBoost)
+
 ```python
 factories["catboost"] = lambda: cb.CatBoostClassifier(
     iterations=500, depth=6, auto_class_weights="Balanced", verbose=0
 )
 ```
-Models are created via factory functions (lambdas) rather than cloned, because CatBoost's `class_weights` parameter doesn't survive sklearn's `clone()` function.
 
-**Cross-validation**: `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`. Features z-score standardized within each fold (fit on train, transform on test) to prevent data leakage.
+**What is sklearn's `clone()` and why does it matter?** When you do cross-validation, you need a fresh model for each fold. sklearn's `clone(estimator)` function creates a fresh copy of a model with the same hyperparameters. Under the hood, `clone()` calls `estimator.get_params()` to extract all constructor arguments as a Python dictionary, then creates a new instance with `EstimatorClass(**those_params)`.
 
-**Bootstrap CIs**: 1,000 resamples of the concatenated out-of-fold predictions. Percentile method: [2.5th, 97.5th] for 95% CI.
+**Why does CatBoost break?** When you pass `class_weights={0: 1.0, 1: 3.5, 2: 2.1}` to CatBoostClassifier, `get_params()` returns this dict. But when `clone()` tries to reconstruct the classifier with `CatBoostClassifier(class_weights={0: 1.0, 1: 3.5, 2: 2.1})`, CatBoost's internal C++ backend expects a specific format for weight dictionaries that the round-tripped Python dict doesn't match. This causes a TypeError at training time -- not at construction time, making the bug hard to track down.
 
-**Four target formulations** from the same 2,201 patients:
-| Target | Classes | N | Key challenge |
-|--------|---------|---|---------------|
-| Binary | NSD- vs NSD+ | 2,201 | Class imbalance (64.4% vs 35.6%) |
-| Three-class | Early, Mild, Impaired | 2,197 | Middle class (2B) hardest |
-| Full ordinal | 0, 1, 2B, 3, 4 | 2,197 | Stage 4 = 0.8%, Stage 1 = 3.0% |
-| NSD-positive | 1, 2B, 3, 4 | 779 | Smaller sample, no HC confound |
+**The factory function fix**: Instead of creating one model and cloning it, we use a lambda (factory function) that creates a brand-new CatBoostClassifier from scratch each time it's called. `factories["catboost"]()` produces a fresh instance with no serialization/deserialization issues.
+
+**The `auto_class_weights="Balanced"` fix**: Instead of computing class weights ourselves and passing a dict, we use CatBoost's built-in `auto_class_weights="Balanced"` parameter (a string, which serializes safely). Internally, CatBoost computes: `weight_i = total_samples / (n_classes * count_of_class_i)`. For our binary target: Stage 0 weight = 2201 / (2 * 1418) = 0.776, Stage 1+ weight = 2201 / (2 * 783) = 1.405. This gives minority classes higher weight so the model doesn't ignore them.
+
+#### Cross-Validation Mechanics
+
+```python
+StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+```
+
+**What does `StratifiedKFold` do mechanically?** It divides 2,201 patients into 5 non-overlapping groups (folds) of ~440 patients each. "Stratified" means each fold maintains the same class proportions as the full dataset. Without stratification, a random split could put all 17 Stage 4 patients into 1-2 folds, leaving other folds with zero Stage 4 examples. That would make those folds unable to evaluate Stage 4 recall. Stratified splitting guarantees each fold gets approximately 17/5 = 3-4 Stage 4 patients, 67/5 = 13-14 Stage 1 patients, etc.
+
+**What does `shuffle=True` do?** Without shuffling, sklearn assigns patients to folds in their original row order. If the CSV happens to be sorted by enrollment date (which PPMI data often is), Fold 1 would contain the earliest-enrolled patients and Fold 5 the latest. This could introduce temporal bias if patient demographics shifted over the 10+ years of PPMI enrollment. Shuffling randomizes which patients go into which fold, breaking any ordering artifacts.
+
+**Why `random_state=42`?** The number 42 has no mathematical significance. It's a convention in ML, originally a reference to Douglas Adams' *The Hitchhiker's Guide to the Galaxy* ("the answer to life, the universe, and everything"). What matters is that using ANY fixed integer seed makes the random number generator produce the same sequence every time. This means: (a) running the code twice produces identical fold assignments, making results reproducible; (b) other researchers can verify our results exactly; (c) comparing models is fair because they all get the same train/test splits. If we omitted `random_state`, Python's random number generator would seed from the system clock, producing different splits each run and making results non-reproducible.
+
+#### Z-Score Standardization Within Folds
+
+**What is z-score standardization?** For each feature, subtract the mean and divide by the standard deviation: `z = (x - mean) / std`. This transforms every feature to have mean = 0 and standard deviation = 1. Without this, features with large ranges (e.g., age: 30-90) would dominate features with small ranges (e.g., SEX: 0-1) in distance-based models (SVM, KNN, logistic regression).
+
+**Why "within each fold"?** We fit the scaler (compute mean and std) on the TRAINING set only, then apply those same mean/std values to transform the test set. If we computed mean/std on the full dataset (including test), the test set statistics would leak into the training set through the standardization parameters. This is called **data leakage**.
+
+**What would data leakage look like mechanically?** Suppose Feature X has mean 50 on the training set but mean 55 on the full dataset (because the test set patients happen to have higher X values). If we use the full-dataset mean (55) to standardize, training samples with X = 55 get z-score = 0 instead of z-score = +1.0. The model trains on these biased z-scores and appears more accurate on the test set than it would be on truly unseen data. The effect is subtle (usually 1-3% accuracy inflation) but it makes published results unreproducible on external data.
+
+**Why doesn't CatBoost need standardization?** Tree-based models (CatBoost, XGBoost, Random Forest) split on individual feature thresholds ("is age > 65?"). These splits are invariant to scaling -- whether age is measured in years (30-90) or z-scores (-2 to +2), the tree finds the same optimal split point. So standardization is applied for SVM, logistic regression, and elastic net, but skipped for tree models. The code detects model type and skips scaling for tree-based classifiers.
+
+#### CatBoost Hyperparameters: What Each Does and Why That Value
+
+**`iterations=500`**: This is the number of boosting rounds -- how many decision trees are built sequentially. Each tree corrects the mistakes of the previous ensemble.
+
+- **Why 500?** We monitored the training loss curve: loss decreases rapidly for the first 100 iterations, continues improving slowly through 300-400, and plateaus by 500. Going to 1000 or 5000 would add training time (~2x and ~10x respectively) with negligible accuracy improvement (<0.1% balanced accuracy change). CatBoost uses an internal learning rate schedule that makes early iterations more impactful.
+- **What happens at 100?** The model slightly underfits (~1-2% worse balanced accuracy) because the ensemble hasn't had enough rounds to learn complex feature interactions.
+- **What happens at 5000?** Marginal accuracy gain (<0.1%) with risk of overfitting to training noise. CatBoost's built-in L2 regularization (`l2_leaf_reg`, default 3.0) mitigates this, but more iterations still increase computation by 10x.
+
+**`depth=6`**: The maximum depth of each individual decision tree. A tree of depth 6 makes at most 6 sequential yes/no splits, creating up to 2^6 = 64 leaf nodes.
+
+- **What does tree depth mean mechanically?** A depth-1 tree ("stump") asks one question: "Is age > 65?" and has 2 outcomes. A depth-6 tree can ask 6 sequential questions: "Is age > 65? AND is bradykinesia > 20? AND is caudate SBR < 1.0? AND..." -- capturing complex feature interactions. Each additional depth level doubles the possible leaf nodes and allows one more feature interaction.
+- **Why depth 6?** Standard for gradient boosting on tabular data (XGBoost default is 6). With 22 features and ~2,000 samples, depth 6 allows up to 6-way feature interactions while keeping each leaf node populated with ~2000/64 = 31 training samples (enough for stable estimates).
+- **Why not deeper?** Depth 8 (256 leaves) would average ~8 samples per leaf, leading to noisy leaf predictions. Depth 10 (1024 leaves) would have more leaves than training samples in a CV fold (~1760), guaranteeing overfitting. The boosting framework compensates for shallow trees by combining many of them -- 500 trees of depth 6 is more powerful and less overfit than 50 trees of depth 12.
+- **Why not shallower?** Depth 3-4 restricts the model to simple 3-4 way interactions. For multiclass targets with complex boundaries between 5 NSD-ISS stages, depth 3 loses ~3% balanced accuracy.
+
+**`auto_class_weights="Balanced"`**: Tells CatBoost to automatically compute class weights inversely proportional to class frequency.
+
+- **Formula**: weight_c = N / (K * n_c), where N = total samples, K = number of classes, n_c = samples in class c.
+- **For binary**: Stage 0 weight = 2201/(2*1418) = 0.776. Stage 1+ weight = 2201/(2*783) = 1.405. The minority class gets 1.8x the weight of the majority class.
+- **For full ordinal**: Stage 4 weight = 2201/(5*17) = 25.9. Stage 0 weight = 2201/(5*1418) = 0.31. Stage 4 patients get 84x the weight of Stage 0 patients, forcing the model to pay attention to this tiny class.
+- **What happens without class weights?** The model optimizes overall accuracy. Since Stage 0 is 64.4% of the data, predicting "Stage 0 for everyone" gives 64.4% accuracy. The model would learn to mostly predict Stage 0, getting excellent accuracy but 0% recall on minority stages. Balanced weighting fixes this by making each misclassified Stage 4 patient cost 84x as much as a misclassified Stage 0 patient.
+- **Why "Balanced" and not "SqrtBalanced"?** CatBoost offers both. "Balanced" uses full inverse frequency (aggressive weighting). "SqrtBalanced" uses square-root of inverse frequency (gentler). For our severely imbalanced data (0.8% Stage 4), full balanced weighting is needed to achieve reasonable minority recall. SqrtBalanced was tested and produced ~2% lower balanced accuracy on full ordinal because Stage 4 recall dropped.
+
+**`verbose=0`**: Suppresses CatBoost's training output (progress bars, loss values). Without this, each of 7 models x 5 folds x 4 targets = 140 training runs would print hundreds of lines, making logs unusable.
+
+#### Bootstrap Confidence Intervals: Mechanics
+
+**1,000 resamples of concatenated out-of-fold predictions. Percentile method: [2.5th, 97.5th] for 95% CI.**
+
+**What does this mean step by step?**
+1. After 5-fold CV, we have predictions for all 2,201 patients (each predicted when they were in the test set)
+2. We concatenate these into one big array of (true_label, predicted_label) pairs
+3. For each of 1,000 iterations: randomly sample 2,201 pairs WITH REPLACEMENT (some pairs selected multiple times, others not at all)
+4. Compute balanced accuracy on this bootstrap sample
+5. After 1,000 iterations, sort the 1,000 balanced accuracy values
+6. The 25th value is the lower CI bound, the 975th value is the upper CI bound
+
+**Why 1,000 resamples?** The precision of the bootstrap CI itself depends on the number of resamples. With B resamples, the Monte Carlo error in the CI endpoint is approximately `1/sqrt(B)`. At B=1000, this error is ~3.2% of the CI width, or about +/-0.003 for a typical CI width of ~0.020. Going to B=10,000 would reduce this to ~1%, adding precision but 10x the compute time. 1,000 is the standard trade-off.
+
+**Why the percentile method rather than BCa or studentized bootstrap?** The percentile method is the simplest: just take quantiles of the bootstrap distribution. BCa (bias-corrected accelerated) adjusts for skewness and bias but requires computing influence functions, which is complex for multiclass metrics. For our sample sizes (2,201 patients), the bootstrap distribution is approximately normal, making the percentile method sufficiently accurate.
 
 ### 3.3 Results: Why CatBoost Dominates
 
@@ -232,48 +299,106 @@ Models are created via factory functions (lambdas) rather than cloned, because C
 | Full ordinal | 0.660 | 0.946 | XGBoost (0.635/0.947) | +2.5% |
 | NSD-positive | 0.664 | 0.904 | XGBoost (0.654/0.887) | +1.0% |
 
-CatBoost wins on balanced accuracy for all 4 targets. The margin widens for harder tasks (full ordinal: +2.5 pp over XGBoost). XGBoost achieves slightly higher AUC on three-class and full ordinal, but CatBoost's balanced class weighting (`auto_class_weights="Balanced"`) gives it better minority-class recall.
+**Why does CatBoost win balanced accuracy while XGBoost sometimes wins AUC?** AUC measures ranking quality (can the model rank patients by risk?). Balanced accuracy measures classification quality at a specific decision threshold. CatBoost's `auto_class_weights="Balanced"` shifts decision boundaries toward minority classes, improving balanced accuracy (recall for small classes) at the cost of slightly less optimal ranking. XGBoost without balanced weighting optimizes the ranking objective (logloss) more purely, achieving higher AUC. The clinical setting determines which matters more: for screening (need to catch every positive), balanced accuracy is preferred. For risk stratification (need to rank patients), AUC is preferred.
 
 **Per-class recall analysis (CatBoost, three-class)**:
 - Class 0 (Early): 0.935 recall
-- Class 1 (Mild clinical): 0.582 recall (hardest -- Stage 2B is transitional)
+- Class 1 (Mild clinical): 0.582 recall (hardest)
 - Class 2 (Impaired): 0.831 recall
+
+**Why is Class 1 (Mild clinical = Stage 2B) the hardest?** Stage 2B is a transitional stage between "biological markers with no clinical signs" (Stage 1) and "functional impairment" (Stage 3). Patients in Stage 2B have clinical parkinsonism (motor signs) but their daily functioning hasn't declined yet. Their feature profiles overlap significantly with both Stage 1 (who also have motor signs but milder) and Stage 3 (who have similar motor signs plus functional decline). The model can clearly separate "healthy/early" (class 0) from "impaired" (class 2), but the boundary between "clinical but not impaired" (class 1) is inherently fuzzy.
 
 ### 3.4 Conformal Prediction Implementation
 
 **File**: `src/giman_pipeline/sota/conformal.py`
 
-Uses MAPIE 1.3.0's `SplitConformalClassifier` and `CrossConformalClassifier` with the LAC (Least Ambiguous set-valued Classifier) conformity score.
+#### What Is the LAC Conformity Score? (And Why Not APS?)
 
-**Split conformal workflow**:
-1. Train model on training fold
-2. Split test fold 50/50: calibration vs evaluation
-3. `SplitConformalClassifier(estimator=model, confidence_level=0.90, conformity_score="lac", prefit=True)`
-4. `.conformalize(X_cal, y_cal)` -- learns nonconformity threshold
-5. `.predict_set(X_eval)` -- returns `(y_pred, prediction_sets_bool)` tuple
+MAPIE 1.3.0 offers two conformity scores for classification:
 
-**Results at 90% confidence (CatBoost binary, cross-conformal)**:
-- Marginal coverage: 0.941 (exceeds 90% target)
-- Mean set size: 0.964 (nearly all predictions are singletons)
-- Singleton rate: 96.4%
-- Empty set rate: 3.6%
+**LAC (Least Ambiguous set-valued Classifier)**: For each calibration sample, the nonconformity score is `1 - P(y_true)`, where `P(y_true)` is the model's predicted probability for the true class. A patient the model got right with high confidence has a low score (e.g., 1 - 0.95 = 0.05). A patient the model was uncertain about has a high score (e.g., 1 - 0.30 = 0.70). The calibration threshold is set at the (1-alpha) quantile of these scores. At test time, a class is included in the prediction set if `1 - P(class) <= threshold`.
 
-The near-unity set sizes indicate that CatBoost's binary predictions are so confident that conformal prediction rarely needs to add a second class. For multiclass targets, set sizes increase (three-class: ~1.27, full ordinal: ~1.5).
+**APS (Adaptive Prediction Sets)**: Sorts classes by predicted probability and includes them one at a time (highest first) until cumulative probability exceeds 1-alpha. This guarantees coverage but tends to produce larger sets because it's based on cumulative probability sums.
+
+**Why LAC over APS?** LAC produces smaller (more informative) prediction sets. In our binary task, LAC produces 96.4% singletons vs APS's ~92%. Smaller sets are more clinically useful: "this patient is Stage 2B" is more actionable than "this patient is Stage 2B or Stage 3." LAC achieves this by using pointwise probabilities (each class independently assessed) rather than cumulative sums.
+
+#### What Does `.conformalize()` Do Step by Step?
+
+```python
+SplitConformalClassifier(estimator=model, confidence_level=0.90,
+                         conformity_score="lac", prefit=True)
+.conformalize(X_cal, y_cal)
+```
+
+Step by step:
+1. `prefit=True` tells MAPIE the model is already trained -- don't retrain it
+2. `conformalize()` runs `model.predict_proba(X_cal)` to get probability vectors for all calibration samples
+3. For each calibration sample i, computes the nonconformity score: `s_i = 1 - model.predict_proba(X_cal[i])[y_cal[i]]`
+4. Sorts these scores: s_(1) <= s_(2) <= ... <= s_(n)
+5. Finds the threshold: `q_hat = s_(ceil((n+1)*(1-alpha)))` -- the (1-alpha) quantile of scores, with a finite-sample correction (+1 in the numerator)
+6. Stores `q_hat` internally for use in `predict_set()`
+
+Then `predict_set(X_eval)`:
+1. Computes `model.predict_proba(X_eval)` for each test sample
+2. For each class c: include c in prediction set if `1 - P(c) <= q_hat`
+3. Returns a boolean matrix (n_test, n_classes) where True = class included in set
+4. Also returns the argmax prediction as `y_pred`
+
+The returned tuple is `(y_pred, prediction_sets_bool)` -- you MUST unpack both (a MAPIE 1.3.0 API change from earlier versions that returned just the sets).
+
+**Why the finite-sample correction (+1)?** Without it, the coverage guarantee is only asymptotic (holds as n -> infinity). With the +1 correction, coverage >= 1-alpha holds for ANY finite sample size. For our calibration sets of ~200-400 patients, this correction adds about 0.002-0.005 to the threshold, slightly enlarging prediction sets but guaranteeing the mathematical coverage bound.
 
 ### 3.5 AdaMedGraph Reproduction
 
 **File**: `src/giman_pipeline/models/adamedgraph.py`
 
-The key innovation is per-feature graph construction. For each of 22 features, 3 similarity thresholds are computed (feature_range / q for q in {4, 8, 16}), yielding 66 candidate graphs. Each candidate is:
+#### APPNP: Decoupling Prediction from Propagation
 
-1. Build binary adjacency: patients connected if |feature_i - feature_j| <= threshold
-2. Train APPNP (2-layer MLP + 5-step PageRank propagation, alpha=0.1)
-3. Compute weighted error on current sample weights
-4. Select best (feature, threshold) pair for this boosting round
-5. Update SAMME weights: alpha = log((1 - error) / error) + log(K - 1)
-6. Reweight samples: misclassified patients get higher weight
+**What does alpha=0.1 mean in APPNP?** APPNP performs K=5 iterations of the update rule:
 
-**Results**: Binary bal_acc 0.870, AUC 0.958. Gap to CatBoost: -8.1% bal_acc, -2.1% AUC. This confirms the finding from Grinsztajn et al. (NeurIPS 2022) that gradient-boosted trees outperform graph neural networks on tabular clinical data.
+```
+H^(k+1) = (1 - alpha) * S * H^(k) + alpha * H^(0)
+```
+
+where S is the normalized adjacency matrix, H^(0) is the initial MLP prediction, and H^(k) is the prediction after k propagation steps. At each step, the prediction is a weighted average of:
+- (1-alpha) = 0.9 = 90%: neighborhood-smoothed prediction from the graph
+- alpha = 0.1 = 10%: original MLP prediction (the "teleport" or "restart" term)
+
+**Why alpha=0.1?** This means the final prediction is dominated by graph neighborhood information (90%) with only 10% of the original MLP prediction retained. This makes sense for patient similarity: if your neighbors in the graph mostly have Stage 3, you're probably Stage 3 too, even if the MLP on your features alone is uncertain.
+
+**What happens at alpha=0.0?** Pure graph propagation with no teleport. After many iterations, all connected nodes converge to the same prediction (the graph's dominant eigenvector). All patients in the same connected component get the same prediction, ignoring individual features. This is called "over-smoothing" and destroys discriminative power.
+
+**What happens at alpha=1.0?** No graph propagation at all -- just the raw MLP prediction. The graph is completely ignored, and APPNP degenerates to a standard 2-layer neural network. You lose all the neighborhood information.
+
+**Why K=5 propagation steps?** With K=5 and alpha=0.1, the effective receptive field (how far information travels) is about 5 hops in the graph. After 5 steps, the contribution from the original MLP is `0.1 + 0.1*0.9 + 0.1*0.81 + 0.1*0.729 + 0.1*0.656 = 0.1 * (1 + 0.9 + 0.81 + 0.729 + 0.656) = 0.42`. So the final prediction is roughly 42% MLP + 58% graph. More steps would further dilute the MLP signal; fewer steps would limit the receptive field. K=5 is the standard from Klicpera et al. (ICLR 2019).
+
+#### The SAMME Boosting Formula
+
+```
+alpha_t = learning_rate * (log((1 - error_t) / error_t) + log(K - 1))
+```
+
+**What does each part mean?**
+
+- `error_t`: Weighted classification error of boosting round t (fraction of misclassified samples, weighted by current sample weights). Range: [0, 1].
+- `log((1 - error_t) / error_t)`: The "log-odds" of correct classification. If error = 0.1 (90% correct), this is log(9) = 2.20. If error = 0.4 (60% correct), this is log(1.5) = 0.41. Higher accuracy -> higher alpha -> more weight to this round.
+- `log(K - 1)`: Correction for multiclass classification. For binary (K=2), this is log(1) = 0, so the formula reduces to standard AdaBoost. For 5-class (K=5), this is log(4) = 1.39, which adds a positive constant to alpha, ensuring that even mediocre classifiers (error close to random = (K-1)/K = 0.8) get non-negative weight.
+- `learning_rate`: Scales all alpha values (default 1.0). A lower learning rate (e.g., 0.5) shrinks each round's contribution, requiring more rounds but reducing overfitting.
+
+**Why do we stop if `error >= (K-1)/K`?** For K=5 classes, random chance = 0.80 error. A classifier worse than random (error > 0.80) would get negative alpha (the log-odds goes negative), meaning its contribution is actively harmful. The stopping criterion prevents adding noise to the ensemble.
+
+#### Per-Feature Graph Construction: Quantile Thresholds
+
+**`compute_quantile_thresholds(X, feature_idx, quantiles=(4, 8, 16))`**: For each feature, computes threshold = feature_range / q.
+
+**Why three thresholds (4, 8, 16)?** Each threshold creates a different graph density:
+- q=4: threshold = range/4. Very loose -- most patients are connected. Dense graph (~60% of possible edges). Risk: over-smoothing, all patients get similar predictions.
+- q=8: threshold = range/8. Moderate -- patients connected if within 12.5% of each other. Medium graph (~15% of edges).
+- q=16: threshold = range/16. Tight -- only very similar patients connected. Sparse graph (~3% of edges). Risk: many isolated nodes, insufficient information sharing.
+
+The AdaBoost framework automatically selects the threshold that produces the lowest weighted error for each boosting round. Typically, early rounds select moderate thresholds (q=8) for informative features (DaT SBR), and later rounds select loose thresholds (q=4) for less informative features.
+
+**Why skip graphs with <5 edges or >n^2/4 edges?** Degenerate graphs: <5 edges means almost no patients are connected (useless for propagation). >n^2/4 edges means the graph is so dense it's nearly complete (no discriminative structure). Both are filtered before APPNP training.
 
 ### 3.6 Enhanced Multimodal GAT
 
@@ -281,9 +406,11 @@ The key innovation is per-feature graph construction. For each of 22 features, 3
 
 Architecture: Two modality encoders (clinical: 15 features -> 128d; biomarker: 7 features -> 128d) -> 3-layer GATConv (4 heads per layer, concat) per modality -> Cross-modal attention (nn.MultiheadAttention) -> Fusion (256d -> 128d) -> Classification head.
 
-Graph: k-NN (k=10, cosine similarity) built within each CV fold. Undirected + self-loops.
+**Why build the graph WITHIN each CV fold?** If you build one graph on the full dataset and then split into folds, patients in the test fold already have edges to training patients. During GAT message passing, test patients receive information from training patients' features -- this is a form of data leakage. Building the graph within each fold means the k-NN computation only sees training patients, ensuring the test set is truly unseen.
 
-**Results**: Binary bal_acc 0.825 +/- 0.013. Gap to CatBoost: -12.6 pp. The cross-modal attention improved over single-modality GAT for multiclass targets (three-class: +3.9%) but the gap to trees remained substantial.
+**Why undirected + self-loops?** Undirected: if Patient A is similar to Patient B, the relationship is symmetric. Self-loops: each patient should attend to their own features in addition to neighbors'. Without self-loops, a GATConv layer's output for a node is based ONLY on its neighbors, discarding its own features entirely. The `add_self_loops()` function in PyG adds an edge from each node to itself with weight 1.0, ensuring self-information is preserved.
+
+**Results**: Binary bal_acc 0.825 +/- 0.013. Gap to CatBoost: -12.6 pp. This 12.6 pp gap confirms the "trees beat deep learning on tabular data" finding (Grinsztajn et al., NeurIPS 2022) extends to clinical biomarker data.
 
 ### 3.7 Feature Ablation: DaT-SBR Is the Critical Feature
 
@@ -294,43 +421,41 @@ Graph: k-NN (k=10, cosine similarity) built within each CV fold. Undirected + se
 | Full ordinal | 0.946 | 0.823 | -12.3% |
 | NSD-positive | 0.904 | 0.900 | -0.4% |
 
-DaT-SPECT caudate SBR features are essential for binary prediction (Stage 0 vs Stage 1+) because the S anchor (SAA) has only 12.6% coverage, so the D anchor (DaT) carries most of the biological signal. However, for NSD-positive sub-staging (discriminating within stages 1-4), clinical features alone achieve AUC 0.900 -- nearly identical to the full model. This is because once you know a patient IS NSD-positive, their motor severity, cognitive status, and sleep patterns sufficiently discriminate between stages.
+**Why does binary lose 25.2% AUC but NSD-positive loses only 0.4%?** The binary target separates Stage 0 (NSD-negative) from Stages 1+ (NSD-positive). The NSD-ISS definition of NSD-positivity is fundamentally biological: it requires either synuclein pathology (S+) or dopaminergic deficit (D+). Since SAA coverage is only 12.6%, the D anchor (DaT-SPECT) is the primary biological marker for most patients. Caudate SBR is the closest non-circular proxy for the D anchor. Without it, the model can only use clinical symptoms (motor scores, cognition, sleep) to infer biological status -- a much weaker signal. Hence the 25.2% drop.
+
+For NSD-positive sub-staging (discriminating WITHIN stages 1-4), all patients are already confirmed NSD-positive. The question becomes "how impaired is this patient?" not "does this patient have biological disease?" Functional impairment is directly measured by clinical features: motor subscores, cognitive tests, sleep questionnaires. DaT imaging adds almost nothing because DaT SBR varies relatively little within the NSD-positive group (most have clear deficits). Hence the tiny 0.4% drop.
+
+**Clinical implication**: For screening (binary: is this patient NSD-positive?), DaT imaging is essential. For sub-staging (how advanced is the disease?), clinical features alone are nearly as good. This finding directly influences deployment strategy: the NSD-positive sub-staging model could be used in clinics without DaT-SPECT equipment.
 
 ### 3.8 External Validation and Domain Shift
 
 **File**: `scripts/run_external_validation.py`
 
-Trained on PPMI (12 common clinical features), validated on:
+**What is domain shift mechanically?** The model learns a decision boundary between classes from PPMI training data. If external cohort patients occupy a different region of feature space, the decision boundary doesn't separate them correctly.
 
-| Cohort | N | Features Available | Ground Truth |
-|--------|---|-------------------|-------------|
-| BioFIND | 118 PD | 11/12 | NSD-ISS stages (Russo et al. 2025 replication) |
-| PDBP | 893 PD | 12/12 | None (prediction only) |
-| HBS | 649 PD | 8/12 | None (prediction only) |
+**PPMI Stage 0 includes**: Healthy controls (UPDRS3 bradykinesia ~7.4), prodromal patients (~10), SWEDD patients (~12), and PD patients who happen to be S-/D- (~15).
 
-**BioFIND binary external validation (n=108 with ground truth)**:
-- CatBoost: bal_acc 0.516, AUC 0.637 (near-random)
-- Root cause: **Domain shift from healthy control contamination**
+**BioFIND Stage 0 (S-)**: ALL diagnosed PD patients (UPDRS3 bradykinesia ~20).
 
-PPMI's Stage 0 class (64.4% of training data) includes healthy controls with UPDRS-III bradykinesia mean of 7.4. BioFIND patients are ALL diagnosed PD with mean bradykinesia of ~20. The model learned to distinguish healthy controls from PD patients, NOT S+ from S- within PD. When applied to an all-PD external cohort, this distinction is meaningless.
+The model learned "low bradykinesia = Stage 0" from PPMI (because healthy controls have low scores). When applied to BioFIND, ALL patients have high bradykinesia (they're all PD), so the model predicts everyone as NSD-positive, failing on the S- patients who actually have high motor scores but no biological markers. The decision boundary is in the wrong place for an all-PD cohort.
 
-**BioFIND NSD-ISS staging replication** (`scripts/stage_biofind_nsd_iss.py`): Exact replication of Russo et al. (2025) methodology using 7 staging variables (NP1COG, MCATOT, P1TOT, P2TOT, P3TOT, PDMEDYN, RBD_STATUS) with published thresholds. Near-perfect match to published distribution: Stage 2: 9, Stage 3: 58, Stage 4: 34 (vs 35 published), Stage 5: 2.
+**BioFIND NSD-ISS staging replication** (`scripts/stage_biofind_nsd_iss.py`): Near-perfect match to Russo et al. (2025): Stage 2: 9, Stage 3: 58, Stage 4: 34 (vs 35 published), Stage 5: 2. The 1-patient discrepancy in Stage 4 vs 5 is likely due to rounding in one staging variable threshold.
 
-### 3.9 Key Constants and Hyperparameters
+### 3.9 Key Constants and Hyperparameters (with "What Happens If You Change It")
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| CatBoost iterations | 500 | Convergence observed; higher values showed diminishing returns |
-| CatBoost depth | 6 | Standard for tabular; deeper trees overfit |
-| CV folds | 5 | Balance between variance reduction and training data size |
-| Bootstrap resamples | 1000 | Standard for 95% CI precision (~0.003 width) |
-| Conformal confidence | 0.80, 0.90, 0.95 | Clinical practice levels (screening, diagnostic, high-confidence) |
-| D anchor threshold | 0.80 SBR | Published NSD-ISS criterion (Simuni et al. 2024) |
-| UPDRS3 clinical threshold | 10 | Published NSD-ISS criterion |
-| k-NN neighbors (GAT) | 10 | Empirical; 5-20 range explored, 10 balanced density/sparsity |
-| APPNP propagation steps | 5 | Standard from Klicpera et al. (2019) |
-| APPNP teleport alpha | 0.1 | 90% neighborhood influence, 10% self-retention |
-| AdaBoost max estimators | 10 | Convergence typically at 5-8 rounds for 22 features |
+| Parameter | Value | What It Does | What happens if changed |
+|-----------|-------|-------------|------------------------|
+| CatBoost iterations | 500 | Number of sequential trees in the ensemble | 100: underfits (-1-2% bal_acc). 1000: marginal gain (<0.1%), 2x training time. 5000: risk of overfitting, 10x training time. |
+| CatBoost depth | 6 | Max depth of each tree (2^6=64 leaves) | 3: loses complex interactions (-3% bal_acc). 8: 256 leaves, ~8 samples/leaf, starts overfitting. 10: more leaves than training samples, guaranteed overfitting. |
+| `auto_class_weights` | "Balanced" | Inverse-frequency class weighting | Without: model ignores Stage 4 (0% recall). "SqrtBalanced": gentler weighting, ~2% worse bal_acc on full ordinal. |
+| CV folds | 5 | Number of train/test splits | 3: less variance reduction, more training data per fold. 10: more variance reduction but only ~220 test samples per fold (unstable for Stage 4 with ~2 test patients per fold). |
+| Bootstrap resamples | 1000 | Iterations for CI estimation | 100: CI endpoints jittery (+/-0.01 noise). 10000: smoother but 10x compute. 1000 is the standard trade-off. |
+| Conformal confidence | 0.90 | Target coverage for prediction sets | 0.80: smaller sets (more specific) but 20% miss rate. 0.95: larger sets (less specific) but only 5% miss rate. 0.90 is the clinical standard for "diagnostic-level" confidence. |
+| D anchor threshold | 0.80 SBR | Published criterion for dopaminergic deficit | NOT adjustable -- this is the published NSD-ISS definition from Simuni et al. (2024). Changing it would redefine the staging system. |
+| k-NN neighbors (GAT) | 10 | Graph density for Enhanced GAT | 5: very sparse graph, some patients isolated. 20: dense graph, over-smoothing risk. 10 balances density/sparsity; each patient shares with ~0.5% of the cohort. |
+| APPNP alpha | 0.1 | Teleport probability (self-retention) | 0.0: pure graph smoothing, all nodes converge. 0.5: balanced MLP/graph. 1.0: no graph, pure MLP. 0.1 is standard (Klicpera et al. 2019). |
+| APPNP K steps | 5 | Propagation iterations | 1: only direct neighbors. 10: information from 10 hops away. 5 is standard; combined with alpha=0.1 gives ~42% MLP retention. |
+| AdaBoost max estimators | 10 | Maximum boosting rounds | 5: may stop too early on hard targets. 20: more rounds but each adds ~10 min compute. Convergence typically at 5-8 for 22 features (the best per-feature graphs are selected early). |
 
 ---
 

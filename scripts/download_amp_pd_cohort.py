@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+
 from google.cloud import bigquery
 
 BILLING_PROJECT = "amp-pdrd-dupre"
@@ -27,49 +28,52 @@ BQ_PRICE_PER_TB = 6.25
 
 # Participant ID prefixes for each cohort (fallback filter)
 COHORT_ID_PREFIXES = {
-    "BioFIND":    "BF-",
-    "PDBP":       "PB-",
-    "HBS":        "HB-",
-    "LCC":        "LC-",
-    "LBD":        "LB-",
+    "BioFIND": "BF-",
+    "PDBP": "PB-",
+    "HBS": "HB-",
+    "LCC": "LC-",
+    "LBD": "LB-",
     "STEADY-PD3": "SP-",
-    "SURE-PD3":   "SU-",
-    "PPMI":       "PP-",
+    "SURE-PD3": "SU-",
+    "PPMI": "PP-",
 }
 
 # BigQuery study names differ from CLI names for some cohorts
 BQ_STUDY_NAMES = {
     "STEADY-PD3": "Steady",
-    "SURE-PD3":   "Sure",
+    "SURE-PD3": "Sure",
 }
 
 # Core clinical tables needed for the 22-feature pipeline
 TABLES_CLINICAL = [
-    ("Demographics",                      "Demographics"),
-    ("Enrollment",                        "Enrollment"),
-    ("amp_pd_case_control",               "amp_pd_case_control"),
-    ("PD_Medical_History",                "PD_Medical_History"),
-    ("MDS_UPDRS_Part_I",                  "MDS_UPDRS_Part_I"),
-    ("MDS_UPDRS_Part_II",                 "MDS_UPDRS_Part_II"),
-    ("MDS_UPDRS_Part_III",                "MDS_UPDRS_Part_III"),
-    ("MDS_UPDRS_Part_IV",                 "MDS_UPDRS_Part_IV"),
-    ("MOCA",                              "MOCA"),
-    ("Modified_Schwab_England_ADL",       "Modified_Schwab___England_ADL"),
-    ("Family_History_PD",                 "Family_History_PD"),
-    ("UPSIT",                             "UPSIT"),
-    ("Epworth_Sleepiness_Scale",          "Epworth_Sleepiness_Scale"),
-    ("REM_Sleep_Behavior_Disorder",       "REM_Sleep_Behavior_Disorder_Questionnaire_Mayo"),
-    ("REM_Sleep_Stiasny_Kolster",         "REM_Sleep_Behavior_Disorder_Questionnaire_Stiasny_Kolster"),
-    ("DaTSCAN_SBR",                       "DaTSCAN_SBR"),
-    ("DaTSCAN_visual_interpretation",     "DaTSCAN_visual_interpretation"),
+    ("Demographics", "Demographics"),
+    ("Enrollment", "Enrollment"),
+    ("amp_pd_case_control", "amp_pd_case_control"),
+    ("PD_Medical_History", "PD_Medical_History"),
+    ("MDS_UPDRS_Part_I", "MDS_UPDRS_Part_I"),
+    ("MDS_UPDRS_Part_II", "MDS_UPDRS_Part_II"),
+    ("MDS_UPDRS_Part_III", "MDS_UPDRS_Part_III"),
+    ("MDS_UPDRS_Part_IV", "MDS_UPDRS_Part_IV"),
+    ("MOCA", "MOCA"),
+    ("Modified_Schwab_England_ADL", "Modified_Schwab___England_ADL"),
+    ("Family_History_PD", "Family_History_PD"),
+    ("UPSIT", "UPSIT"),
+    ("Epworth_Sleepiness_Scale", "Epworth_Sleepiness_Scale"),
+    ("REM_Sleep_Behavior_Disorder", "REM_Sleep_Behavior_Disorder_Questionnaire_Mayo"),
+    (
+        "REM_Sleep_Stiasny_Kolster",
+        "REM_Sleep_Behavior_Disorder_Questionnaire_Stiasny_Kolster",
+    ),
+    ("DaTSCAN_SBR", "DaTSCAN_SBR"),
+    ("DaTSCAN_visual_interpretation", "DaTSCAN_visual_interpretation"),
 ]
 
 # Optional tables (biospecimens, additional assessments)
 TABLES_OPTIONAL = [
-    ("Biospecimen_CSF_abeta_tau",         "Biospecimen_analyses_CSF_abeta_tau_ptau"),
-    ("Biospecimen_other",                 "Biospecimen_analyses_other"),
-    ("PDQ_39",                            "PDQ_39"),
-    ("State_Trait_Anxiety_Inventory",     "State_Trait_Anxiety_Inventory"),
+    ("Biospecimen_CSF_abeta_tau", "Biospecimen_analyses_CSF_abeta_tau_ptau"),
+    ("Biospecimen_other", "Biospecimen_analyses_other"),
+    ("PDQ_39", "PDQ_39"),
+    ("State_Trait_Anxiety_Inventory", "State_Trait_Anxiety_Inventory"),
 ]
 
 
@@ -198,7 +202,7 @@ def download_cohort(
             b = job.total_bytes_processed
             c = (b / 1e12) * BQ_PRICE_PER_TB
             total_cost += c
-            print(f"  {table_name:55s} {b/1e6:8.2f} MB  ${c:.6f}")
+            print(f"  {table_name:55s} {b / 1e6:8.2f} MB  ${c:.6f}")
         except Exception as e:
             if "Not found" in str(e):
                 print(f"  {table_name:55s} NOT FOUND")
@@ -297,24 +301,31 @@ if __name__ == "__main__":
         description="Download AMP-PD v4 cohort data via BigQuery"
     )
     parser.add_argument(
-        "cohort", nargs="?",
+        "cohort",
+        nargs="?",
         choices=list(COHORT_ID_PREFIXES.keys()),
         help="Cohort to download",
     )
     parser.add_argument(
-        "--output-dir", type=str, default=None,
+        "--output-dir",
+        type=str,
+        default=None,
         help="Output directory (default: data/00_raw/{cohort}/)",
     )
     parser.add_argument(
-        "--budget", type=float, default=10.0,
+        "--budget",
+        type=float,
+        default=10.0,
         help="Budget cap in USD (default: $10.00)",
     )
     parser.add_argument(
-        "--include-optional", action="store_true",
+        "--include-optional",
+        action="store_true",
         help="Include optional tables (biospecimens, PDQ-39, etc.)",
     )
     parser.add_argument(
-        "--list-cohorts", action="store_true",
+        "--list-cohorts",
+        action="store_true",
         help="List available cohorts and exit",
     )
     args = parser.parse_args()
@@ -328,7 +339,11 @@ if __name__ == "__main__":
         if args.cohort == "BioFIND":
             dir_name = "BioFind"
 
-        output_dir = Path(args.output_dir) if args.output_dir else ROOT / "data" / "00_raw" / dir_name
+        output_dir = (
+            Path(args.output_dir)
+            if args.output_dir
+            else ROOT / "data" / "00_raw" / dir_name
+        )
 
         download_cohort(
             cohort=args.cohort,

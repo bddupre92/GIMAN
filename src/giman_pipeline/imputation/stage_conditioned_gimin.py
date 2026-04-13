@@ -110,8 +110,8 @@ class StageConditionedDecoder(nn.Module):
         combined = torch.cat([node_embeddings, stage_emb], dim=-1)
 
         decoded = self.decoder(combined)  # (N, 2 * total_features)
-        imputed_mean = decoded[:, :self.total_features]
-        imputed_log_var = decoded[:, self.total_features:]
+        imputed_mean = decoded[:, : self.total_features]
+        imputed_log_var = decoded[:, self.total_features :]
         imputed_log_var = imputed_log_var.clamp(min=-10.0, max=10.0)
 
         return imputed_mean, imputed_log_var
@@ -194,15 +194,17 @@ class StageConditionedGIMIN(nn.Module):
             )
 
         # Component 3: GNN message passing layers
-        self.gnn_layers = nn.ModuleList([
-            GIMINMessagePassingLayer(
-                in_dim=embed_dim,
-                out_dim=embed_dim,
-                heads=num_heads,
-                dropout=mc_dropout,
-            )
-            for _ in range(num_gnn_layers)
-        ])
+        self.gnn_layers = nn.ModuleList(
+            [
+                GIMINMessagePassingLayer(
+                    in_dim=embed_dim,
+                    out_dim=embed_dim,
+                    heads=num_heads,
+                    dropout=mc_dropout,
+                )
+                for _ in range(num_gnn_layers)
+            ]
+        )
 
         # Component 4: Stage-conditioned heteroscedastic decoder
         self.stage_decoder = StageConditionedDecoder(
@@ -296,7 +298,7 @@ class StageConditionedGIMIN(nn.Module):
         splits = []
         start = 0
         for dim in modality_dims:
-            splits.append(tensor[:, start:start + dim])
+            splits.append(tensor[:, start : start + dim])
             start += dim
         return splits
 
@@ -348,15 +350,17 @@ class VanillaGIMIN(nn.Module):
             dropout=mc_dropout,
         )
 
-        self.gnn_layers = nn.ModuleList([
-            GIMINMessagePassingLayer(
-                in_dim=embed_dim,
-                out_dim=embed_dim,
-                heads=num_heads,
-                dropout=mc_dropout,
-            )
-            for _ in range(num_gnn_layers)
-        ])
+        self.gnn_layers = nn.ModuleList(
+            [
+                GIMINMessagePassingLayer(
+                    in_dim=embed_dim,
+                    out_dim=embed_dim,
+                    heads=num_heads,
+                    dropout=mc_dropout,
+                )
+                for _ in range(num_gnn_layers)
+            ]
+        )
 
         # Standard decoder (no stage conditioning)
         self.decoder = nn.Sequential(
@@ -393,8 +397,8 @@ class VanillaGIMIN(nn.Module):
 
         node_embeddings = h
         decoded = self.decoder(node_embeddings)
-        imputed_mean = decoded[:, :self.total_features]
-        imputed_log_var = decoded[:, self.total_features:]
+        imputed_mean = decoded[:, : self.total_features]
+        imputed_log_var = decoded[:, self.total_features :]
         imputed_log_var = imputed_log_var.clamp(min=-10.0, max=10.0)
 
         imputed_mean_for_blend = imputed_mean.clone()

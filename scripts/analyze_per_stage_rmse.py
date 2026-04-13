@@ -15,19 +15,18 @@ Usage:
 """
 
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_PATH = (
-    PROJECT_ROOT / "outputs" / "paper2_benchmark"
+    PROJECT_ROOT
+    / "outputs"
+    / "paper2_benchmark"
     / "imputation_benchmark_results_combined.json"
 )
-OUTPUT_PATH = (
-    PROJECT_ROOT / "outputs" / "paper2_benchmark" / "per_stage_analysis.json"
-)
+OUTPUT_PATH = PROJECT_ROOT / "outputs" / "paper2_benchmark" / "per_stage_analysis.json"
 
 STAGE_NAMES = {
     "0": "Stage 0 (64.4%)",
@@ -106,10 +105,18 @@ def main():
 
         # Print table
         models_order = [
-            "GIMIN_Vanilla", "GIMIN_StageConditioned",
-            "GIMIN_StageGraphOnly", "GIMIN_StageDecoderOnly",
-            "MissForest", "MICE", "KNN", "GAIN", "SAITS", "MIWAE",
-            "Mean", "Median",
+            "GIMIN_Vanilla",
+            "GIMIN_StageConditioned",
+            "GIMIN_StageGraphOnly",
+            "GIMIN_StageDecoderOnly",
+            "MissForest",
+            "MICE",
+            "KNN",
+            "GAIN",
+            "SAITS",
+            "MIWAE",
+            "Mean",
+            "Median",
         ]
         available_models = [m for m in models_order if m in per_stage]
 
@@ -140,7 +147,7 @@ def main():
 
         # Print advantage analysis
         if advantage:
-            print(f"\n  StageConditioned vs Vanilla advantage:")
+            print("\n  StageConditioned vs Vanilla advantage:")
             for stage_id in ["0", "1", "2", "3", "4"]:
                 if stage_id in advantage:
                     a = advantage[stage_id]
@@ -152,18 +159,14 @@ def main():
                     )
 
             # Minority vs majority
-            minority_delta = np.mean([
-                advantage[s]["delta"] for s in MINORITY_STAGES if s in advantage
-            ])
-            majority_delta = np.mean([
-                advantage[s]["delta"] for s in MAJORITY_STAGES if s in advantage
-            ])
-            print(
-                f"\n    Minority stages (1, 2B, 4) avg Δ: {minority_delta:+.1f}"
+            minority_delta = np.mean(
+                [advantage[s]["delta"] for s in MINORITY_STAGES if s in advantage]
             )
-            print(
-                f"    Majority stages (0, 3) avg Δ:     {majority_delta:+.1f}"
+            majority_delta = np.mean(
+                [advantage[s]["delta"] for s in MAJORITY_STAGES if s in advantage]
             )
+            print(f"\n    Minority stages (1, 2B, 4) avg Δ: {minority_delta:+.1f}")
+            print(f"    Majority stages (0, 3) avg Δ:     {majority_delta:+.1f}")
             if minority_delta > 0 and majority_delta < 0:
                 print(
                     "    → CONFIRMED: StageConditioned allocates capacity to "

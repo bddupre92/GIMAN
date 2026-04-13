@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Patient List — NSD-ISS Digital Twin{% endblock %}
+
+{% block content %}
+<!-- Cohort Summary Banner -->
+<div id="cohort-banner" class="bg-white rounded-xl shadow-sm border border-clinical-200 p-5 mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xl font-bold text-clinical-800">PPMI Cohort Overview</h2>
+        <span class="text-xs text-clinical-400" id="cohort-data-label">Loading...</span>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="cohort-stats">
+        <div class="text-center p-3 bg-clinical-50 rounded-lg">
+            <div class="text-2xl font-bold text-clinical-700" id="stat-patients">--</div>
+            <div class="text-xs text-clinical-500 mt-1">Patients</div>
+        </div>
+        <div class="text-center p-3 bg-clinical-50 rounded-lg">
+            <div class="text-2xl font-bold text-clinical-700" id="stat-visits">--</div>
+            <div class="text-xs text-clinical-500 mt-1">Total Visits</div>
+        </div>
+        <div class="text-center p-3 bg-clinical-50 rounded-lg">
+            <div class="text-2xl font-bold text-clinical-700" id="stat-transitions">--</div>
+            <div class="text-xs text-clinical-500 mt-1">Transitions</div>
+        </div>
+        <div class="text-center p-3 bg-clinical-50 rounded-lg">
+            <div class="text-2xl font-bold text-clinical-700" id="stat-stages">--</div>
+            <div class="text-xs text-clinical-500 mt-1">Unique Stages</div>
+        </div>
+    </div>
+    <!-- Stage distribution bar -->
+    <div class="mt-4">
+        <div class="text-xs font-medium text-clinical-600 mb-1">Stage Distribution (Current Stage)</div>
+        <div class="flex h-6 rounded-full overflow-hidden" id="stage-distribution-bar"></div>
+        <div class="flex justify-between mt-1" id="stage-distribution-legend"></div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="bg-white rounded-xl shadow-sm border border-clinical-200 p-4 mb-4">
+    <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex-1">
+            <label class="block text-xs font-medium text-clinical-600 mb-1">Search by Patient ID</label>
+            <input type="text" id="patient-search" placeholder="Enter PATNO (e.g. 3203)"
+                   class="w-full px-3 py-2 border border-clinical-200 rounded-lg text-sm
+                          focus:ring-2 focus:ring-clinical-400 focus:border-clinical-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-clinical-600 mb-1">Filter by Stage</label>
+            <select id="stage-filter"
+                    class="px-3 py-2 border border-clinical-200 rounded-lg text-sm
+                           focus:ring-2 focus:ring-clinical-400 focus:border-clinical-400 outline-none">
+                <option value="">All Stages</option>
+                <option value="0">Stage 0</option>
+                <option value="1">Stage 1</option>
+                <option value="2B">Stage 2B</option>
+                <option value="3">Stage 3</option>
+                <option value="4">Stage 4</option>
+                <option value="5">Stage 5</option>
+                <option value="6">Stage 6</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Patient List -->
+<div class="bg-white rounded-xl shadow-sm border border-clinical-200 overflow-hidden">
+    <div class="px-4 py-3 border-b border-clinical-200 flex justify-between items-center">
+        <h3 class="font-semibold text-clinical-700">Patient List</h3>
+        <span class="text-xs text-clinical-400" id="patient-count">Loading...</span>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-clinical-50 text-clinical-600 text-xs uppercase tracking-wide">
+                <tr>
+                    <th class="px-4 py-3 text-left">PATNO</th>
+                    <th class="px-4 py-3 text-left">Age</th>
+                    <th class="px-4 py-3 text-left">Sex</th>
+                    <th class="px-4 py-3 text-center">Current Stage</th>
+                    <th class="px-4 py-3 text-center">Initial Stage</th>
+                    <th class="px-4 py-3 text-right">Visits</th>
+                    <th class="px-4 py-3 text-right">Follow-up (mo)</th>
+                    <th class="px-4 py-3 text-center">Transitions</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
+            </thead>
+            <tbody id="patient-table-body" class="divide-y divide-clinical-100">
+                <tr>
+                    <td colspan="9" class="px-4 py-8 text-center text-clinical-400">
+                        Loading patient data...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-4 py-3 border-t border-clinical-200 flex justify-between items-center">
+        <button id="prev-page" class="px-3 py-1 text-sm bg-clinical-100 rounded hover:bg-clinical-200 disabled:opacity-40"
+                disabled>Previous</button>
+        <span class="text-xs text-clinical-500" id="page-info">Page 1</span>
+        <button id="next-page" class="px-3 py-1 text-sm bg-clinical-100 rounded hover:bg-clinical-200 disabled:opacity-40"
+                disabled>Next</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/app.js"></script>
+{% endblock %}
