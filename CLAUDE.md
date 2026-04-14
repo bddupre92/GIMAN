@@ -837,7 +837,7 @@ The `GraphDigitalTwin` model uses `gate_linear` (not `gate`), `gat_layers_list` 
 | Phase 2 | **DONE** | Paper 7 | Coupled α-syn + N(t) ODE, T_tox posteriors, 3.29%/yr median |
 | Phase 3 | **DONE** | Papers 8a + 8b | M1 wins (ΔAIC=3,856), spatial propagation NOT detectable |
 | **Phase 4** | **ANALYSIS COMPLETE — manuscript drafted** | **Paper 9** | Three-pathway PK/PD: ON-OFF gap interaction POSITIVE (p=0.044), OFF-UPDRS & wearing-off negative |
-| Phase 5 | PLAN v2 (2026-04-13) | Paper 10 | Bidirectional-ready mechanistic model + external validation (LCC) + NASEM audit — target npj Parkinson's Disease |
+| Phase 5 | IN PROGRESS — Tasks 0-4 complete (2026-04-13), Task 5 next | Paper 10 | Bidirectional-ready mechanistic model + external validation + NASEM audit — target npj Parkinson's Disease |
 | DeNoPa | FUTURE | Paper 11? | External validation (requires PI collaboration) |
 
 ### Phase 4: Three-Pathway PK/PD Analysis (Paper 9) — ANALYSIS COMPLETE
@@ -994,6 +994,68 @@ src/giman_pipeline/mechanistic_twin_v2/
 - Viceconti 2020: In silico trials VVUQ regulatory framework
 - Hicks 2015 (648 cites): V&V best practices — field standard
 - arxiv 2405.05301: NASEM-compliant critical illness DT design
+
+### Phase 5 Task Progress (2026-04-13)
+
+**Tasks 0-4 complete, 5 commits pushed, 46/46 tests passing.**
+
+| Task | Status | Commit | Key Result |
+|---|---|---|---|
+| 0: Canonical parquet | ✅ | 342e52e | 26,364 rows, 4,203 paired (EXACT Phase 4 match) |
+| 1: PosteriorStore HDF5 | ✅ | b5b50fa | 1,065 pts × 5,000 samples, 133MB, bit-exact roundtrip |
+| 2: Shared cohort | ✅ | 888d18f | 672 pts for head-to-head, 574 with ≥3 pairs |
+| 3: External validation | ✅ | 64ff88d | LCC cross-sectional only (double pivot) |
+| 4: Head-to-head wearing-off | ✅ | e5fc46e | Mech 0.472 vs Graph-DT 0.518, p=0.046 |
+| 5: Bidirectional demo | Next | — | THE TWIN PROOF |
+| 6: Observational counterfactual | Pending | — | LEDD escalations ≥200mg |
+| 7: NASEM audit | Pending | — | 7 criteria scored |
+| 8: Figures (9) | Pending | — | |
+| 9: Documentation + manuscript | Pending | — | |
+
+### Phase 5 Key Findings (2026-04-13)
+
+**Data lineage fixed.** Canonical v2 parquet has both ON+OFF rows, reproduces Phase 4 Path B exactly (β=1.370 vs 1.410, within 3%). Corrected plan v2 errata: posteriors file is `phase2_combined_1065.csv` (Wave A+B), NOT `phase2_coupled_is_step26v4.csv` (304 Wave A only).
+
+**Existing chains saved ~2 days of compute.** Phase 2 IS v5 chain parquets at `chains_is_v5{,_waveb}/` are already resampled equal-weight posteriors. Loaded directly into HDF5 without re-running IS.
+
+**Head-to-head on wearing-off confirms Paper 9 Path C.** Both models near C-index 0.5 — wearing-off is PK-driven, not neurodegeneration-driven. Graph-DT marginally better (Δ=-0.047, p=0.046). **Validates complementarity-not-competition framing.**
+
+### Phase 5 Data Availability Findings (External Validation Reality Check)
+
+**No longitudinal external PD DaT-SPECT publicly accessible with current data.**
+
+| Cohort | Status | Reason |
+|---|---|---|
+| PPMI | Primary (have) | 2,137 pts longitudinal |
+| LCC | Unusable for decay | 43 pts, baseline only, all healthy controls |
+| PDBP | Unusable for PD validation | SPECT data only in 2 DLB studies (Leverenz + Kantarci), not standard PD |
+| BioFind | Unusable | No longitudinal DaT-SPECT |
+| HBS | Unusable | No DaT at all |
+| SURE-PD3 | Pending BioSEND DUA | ~300 pts × 2 timepoints, 2-3 week turnaround |
+| DeNoPa | Pending PI collaboration | Mollenhauer, ~150 pts oligomeric α-syn |
+| ICEBERG | Pending direct collaboration | 300 pts × 4yr annual (Paris Brain Institute) |
+
+**Implication:** Paper 10 Task 3 delivers cross-sectional HC-vs-HC + HC-vs-PD validation only. Longitudinal external decay validation explicitly scoped for Paper 11 / DeNoPa future work. Documented honestly in NASEM audit (Task 7).
+
+**PDBP LONI IDA action item:** File ticket with AMP-PDRD support to pull SPECT data via LONI IDA collection-level query (BigQuery scope returns 0 rows). Actual SPECT images may be recoverable.
+
+### Phase 5 Gotchas
+
+#### Posteriors File Choice (v2 Plan Errata)
+
+Plan v2 specified `phase2_coupled_is_step26v4.csv` (304 Wave A) but Phase 4 v1 actually used `phase2_combined_1065.csv` (Wave A+B, 1,065 patients). Task 0 corrected to use combined file, which produces EXACT Phase 4 Path B reproduction. Plan should be updated.
+
+#### Chain Parquets Are Pre-Resampled
+
+`chains_is_v5{,_waveb}/PATNO_*.parquet` files have 5,000 rows (resampled IS output), not 10,000 raw samples. No `weights` column because they're already equal-weight after resampling. PosteriorStore saves with uniform weights and ESS=n.
+
+#### Graph-DT Inference From External Processes
+
+Per `src/giman_pipeline/CLAUDE.md` Known Issue: `load_graph_dt_checkpoint` auto-selects MPS/CUDA device. Always pass `device=torch.device("cpu")` explicitly from inference scripts to avoid tensor pinning to devices the caller doesn't own.
+
+#### PDBP SPECT Is DLB Only
+
+`pdbp.ninds.nih.gov` Query Tool shows "PDBP Imaging SPECT" form exists in only 2 studies: Dementia with Lewy Bodies Consortium (Leverenz, N=259) and Longitudinal Imaging Biomarkers of Disease Progression in DLB (Kantarci, N=167). **PDBP has NO standard-PD DaT-SPECT data.** The PDBP CSV files are genuinely empty (LONI BigQuery scope artifact, but underlying data is DLB-only).
 
 ### Connectome Data (downloaded 2026-04-12)
 

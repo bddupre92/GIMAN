@@ -16,6 +16,54 @@
 
 **v2 (2026-04-13):** Comprehensive revision after deep review (3 parallel research agents + NASEM 2024 report + CPT:PSP credibility framework).
 
+## Execution Progress (2026-04-13)
+
+**Tasks 0-4 complete. 5 commits pushed, 46/46 tests passing.**
+
+| Task | Status | Commit | Key Result |
+|---|---|---|---|
+| 0: Canonical parquet | ✅ COMPLETE | `342e52e` | 26,364 rows, 4,203 paired (EXACT Phase 4 match) |
+| 1: PosteriorStore HDF5 | ✅ COMPLETE | `b5b50fa` | 1,065 pts × 5,000 samples, 133MB, bit-exact roundtrip |
+| 2: Shared cohort | ✅ COMPLETE | `888d18f` | 672 pts for head-to-head, 574 with ≥3 pairs |
+| 3: External validation | ✅ COMPLETE (pivoted) | `64ff88d` | LCC cross-sectional HC-vs-HC + HC-vs-PD |
+| 4: Head-to-head wearing-off | ✅ COMPLETE | `e5fc46e` | Mech 0.472 vs Graph-DT 0.518, p=0.046 |
+| 5: Bidirectional demo | **NEXT** | — | THE TWIN PROOF |
+| 6: Observational counterfactual | Pending | — | LEDD escalations ≥200mg |
+| 7: NASEM audit | Pending | — | 7 criteria scored |
+| 8: Figures (9) | Pending | — | |
+| 9: Documentation + manuscript | Pending | — | |
+
+### Known Plan Errata (Discovered During Execution)
+
+**Task 0 posteriors file:** Plan v2 specified `phase2_coupled_is_step26v4.csv` (304 Wave A), but Phase 4 v1 actually used `phase2_combined_1065.csv` (Wave A+B, 1,065 patients). Corrected during Task 0 execution — using combined file produces EXACT Phase 4 Path B reproduction (β=1.370 vs 1.410, p=0.038 vs 0.044).
+
+### Task 3 Scope Evolution (Documented)
+
+**Original plan:** Re-fit Phase 1 exponential decay on LCC N=638 with ≥2 scans → external decay validation.
+
+**Pivot 1 (discovered during Task 3):** LCC has only 43 patients with SINGLE baseline DaT-SPECT → pivoted to cross-sectional distribution comparison.
+
+**Pivot 2 (discovered during Task 3):** All 43 LCC DaT patients are HEALTHY CONTROLS (amp_pd_case_control: "No PD Nor Other Neurological Disorder") → pivoted to dual HC-vs-HC + HC-vs-PD comparison.
+
+### External Validation Data Constraints (Field-Wide Finding)
+
+**No longitudinal external PD DaT-SPECT publicly accessible with current data.** User verified via `pdbp.ninds.nih.gov` Query Tool that PDBP SPECT data exists ONLY in 2 DLB studies (Leverenz N=259, Kantarci N=167). PDBP has NO standard-PD DaT-SPECT.
+
+| Cohort | Status | Path |
+|---|---|---|
+| PPMI | Primary (have) | 2,137 pts longitudinal |
+| LCC | Cross-sectional only (43 HC) | Used for Task 3 |
+| PDBP | DLB-only SPECT | Unusable for PD |
+| BioFind | No serial DaT | Unusable |
+| HBS | No DaT | Unusable |
+| **SURE-PD3** | **Pending BioSEND DUA** | **Best immediate option (~300 pts × 2)** |
+| DeNoPa | Pending PI collaboration (Mollenhauer) | Paper 11 scope |
+| ICEBERG | Pending direct collaboration (Paris) | Future work |
+
+**Implication for Paper 10:** Longitudinal external decay validation explicitly scoped for Paper 11 / DeNoPa future work. Task 7 NASEM audit will document this as a data-access infrastructure gap (field-wide, not project-specific).
+
+## v2 Revision Details
+
 **Key changes from v1:**
 
 - Dropped "benchmark + counterfactual" framing (critical thinking agent flagged as overclaim — incommensurable metrics, regression extrapolation not mechanism)
