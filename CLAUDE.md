@@ -1006,8 +1006,9 @@ src/giman_pipeline/mechanistic_twin_v2/
 | 2: Shared cohort | ✅ | 888d18f | 672 pts for head-to-head, 574 with ≥3 pairs |
 | 3: External validation | ✅ | 64ff88d | LCC cross-sectional only (double pivot) |
 | 4: Head-to-head wearing-off | ✅ | e5fc46e | Mech 0.472 vs Graph-DT 0.518, p=0.046 |
-| 5: Bidirectional demo | Next | — | THE TWIN PROOF |
-| 6: Observational counterfactual | Pending | — | LEDD escalations ≥200mg |
+| 5: Bidirectional demo | ✅ | edd307f | MAE monotonic 0.149→0.100 (33% reduction), 644 pts ≥3 scans, ESS healthy |
+| 5L: Literature backing | ✅ | (this commit) | 75+ verified citations in `phase5_literature_bibliography.bib` + Methods defense paragraph |
+| 6: Observational counterfactual | Next | — | LEDD escalations ≥200mg |
 | 7: NASEM audit | Pending | — | 7 criteria scored |
 | 8: Figures (9) | Pending | — | |
 | 9: Documentation + manuscript | Pending | — | |
@@ -1019,6 +1020,18 @@ src/giman_pipeline/mechanistic_twin_v2/
 **Existing chains saved ~2 days of compute.** Phase 2 IS v5 chain parquets at `chains_is_v5{,_waveb}/` are already resampled equal-weight posteriors. Loaded directly into HDF5 without re-running IS.
 
 **Head-to-head on wearing-off confirms Paper 9 Path C.** Both models near C-index 0.5 — wearing-off is PK-driven, not neurodegeneration-driven. Graph-DT marginally better (Δ=-0.047, p=0.046). **Validates complementarity-not-competition framing.**
+
+**Task 5 bidirectional demo: monotonic MAE reduction.** Sequential SIR reweighting on 644 patients with ≥3 DaT-SPECT scans: prior MAE 0.149 → 5 informative scans 0.100 (33% relative reduction). ESS stays >60% of N=50k throughout. Empirical: weighted mean outperforms weighted median on held-out MAE under the lognormal-prior regime (reported both; discussed in Methods per Vehtari & Ojanen 2012).
+
+**Task 5 literature defense: genuine methodological gap confirmed.** Systematic 4-agent review (~75 verified citations in `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_literature_bibliography.bib`):
+
+- SIR precedent: Dosne 2016/2017 NONMEM SIR is the field standard; Chopin 2002 + Del Moral 2006 provide theoretical backbone
+- No CPT:PSP/JPKPD 2023-2026 paper does bidirectional Bayesian updating for PD — supports venue pivot to npj PD / J Parkinsons Dis
+- Our 3.29%/yr whole-striatum decay is literature-consistent (between caudate 2-3%/yr and putamen 4-6%/yr per Dzialas 2025) — need sub-region stratification in Paper 10 to avoid apparent contradiction with Dzialas
+- NASEM 2024 bidirectional-flow criterion: Paper 10 exceeds prior PD mechanistic models (Véronneau-Veilleux one-shot fits) and matches cardiac DT episodic-update tier (Corral-Acero 2020, Coorey 2021)
+- Sub-EC50 linear regime (h=0.13) is consistent with Chan-Nutt-Holford 2004/2005 and Fahn ELLDOPA 2005 for de novo PD
+- Defensive citation: Espay 2025 Mov Disord NSD-ISS refutation (preempt reviewer critique)
+- DOI correction: Vehtari 2017 canonical DOI is `10.1007/s11222-016-9696-4` (not -5 erratum)
 
 ### Phase 5 Data Availability Findings (External Validation Reality Check)
 

@@ -1,0 +1,602 @@
+% Phase 5 Task 5 + Paper 10 Consolidated Bibliography (2026-04-13)
+% Synthesised from 4 parallel research agents + DATA_LITERATURE_REGISTRY (Phase 2
+% §1-§8) + mempalace historical context. All DOIs verified live via CrossRef /
+% PubMed E-utilities / arXiv unless flagged UNVERIFIED. Column key at end of file.
+
+% ============================================================================
+% A. SIR / SMC METHODOLOGY — the bidirectional-update engine (Task 5)
+% ============================================================================
+
+@article{chopin2002sequential,
+  author  = {Chopin, Nicolas},
+  title   = {A sequential particle filter method for static models},
+  journal = {Biometrika}, volume = {89}, number = {3}, pages = {539--551},
+  year    = {2002}, doi = {10.1093/biomet/89.3.539}
+}
+@article{delmoral2006smc,
+  author  = {Del Moral, Pierre and Doucet, Arnaud and Jasra, Ajay},
+  title   = {Sequential {M}onte {C}arlo samplers},
+  journal = {JRSS B}, volume = {68}, number = {3}, pages = {411--436},
+  year    = {2006}, doi = {10.1111/j.1467-9868.2006.00553.x}
+}
+@book{chopin2020introduction,
+  author    = {Chopin, Nicolas and Papaspiliopoulos, Omiros},
+  title     = {An Introduction to Sequential {M}onte {C}arlo},
+  publisher = {Springer}, year = {2020},
+  doi       = {10.1007/978-3-030-47845-2}
+}
+@article{beskos2014stability,
+  author  = {Beskos, Alexandros and Crisan, Dan and Jasra, Ajay},
+  title   = {On the stability of sequential {M}onte {C}arlo methods in high dimensions},
+  journal = {Annals of Applied Probability}, volume = {24}, number = {4},
+  pages = {1396--1445}, year = {2014}, doi = {10.1214/13-aap951}
+}
+@article{south2019smc,
+  author  = {South, Leah F. and Pettitt, Anthony N. and Drovandi, Christopher C.},
+  title   = {Sequential {M}onte {C}arlo samplers with independent {M}arkov chain {M}onte {C}arlo proposals},
+  journal = {Bayesian Analysis}, volume = {14}, number = {3}, pages = {753--776},
+  year    = {2019}, doi = {10.1214/18-ba1129}
+}
+@article{dosne2016sir,
+  author  = {Dosne, Anne-Ga{\"e}lle and Bergstrand, Martin and Harling, Kajsa and Karlsson, Mats O.},
+  title   = {Improving the estimation of parameter uncertainty distributions in nonlinear mixed effects models using sampling importance resampling},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {43}, number = {6}, pages = {583--596},
+  year    = {2016}, doi = {10.1007/s10928-016-9487-8}
+}
+@article{dosne2017automated,
+  author  = {Dosne, Anne-Ga{\"e}lle and Bergstrand, Martin and Karlsson, Mats O.},
+  title   = {An automated sampling importance resampling procedure for estimating parameter uncertainty},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {44}, number = {6}, pages = {509--520},
+  year    = {2017}, doi = {10.1007/s10928-017-9542-0}
+}
+@article{yngman2022fullrandom,
+  author  = {Yngman, Gunnar and Bjug{\aa}rd Nyberg, Henrik and Nyberg, Joakim and Jonsson, E. Niclas and Karlsson, Mats O.},
+  title   = {An introduction to the full random effects model},
+  journal = {CPT:PSP}, volume = {11}, number = {2}, pages = {149--160},
+  year    = {2022}, doi = {10.1002/psp4.12741}
+}
+@article{vehtari2017practical,
+  author  = {Vehtari, Aki and Gelman, Andrew and Gabry, Jonah},
+  title   = {Practical {B}ayesian model evaluation using leave-one-out cross-validation and {WAIC}},
+  journal = {Stat Comput}, volume = {27}, number = {5}, pages = {1413--1432},
+  year    = {2017},
+  doi     = {10.1007/s11222-016-9696-4},
+  note    = {CANONICAL DOI is -4 (not -5 erratum). Correction applied 2026-04-13.}
+}
+@misc{vehtari2024psis,
+  author  = {Vehtari, Aki and Simpson, Daniel and Gelman, Andrew and Yao, Yuling and Gabry, Jonah},
+  title   = {Pareto smoothed importance sampling},
+  howpublished = {JMLR 25(72):1--58}, year = {2024},
+  eprint  = {1507.02646}, archivePrefix = {arXiv},
+  note    = {JMLR does not register CrossRef DOIs; arXiv verified.}
+}
+@article{kong1994sequential,
+  author  = {Kong, Augustine and Liu, Jun S. and Wong, Wing Hung},
+  title   = {Sequential imputations and {B}ayesian missing data problems},
+  journal = {JASA}, volume = {89}, number = {425}, pages = {278--288},
+  year    = {1994}, doi = {10.1080/01621459.1994.10476469}
+}
+@article{vehtari2021rhat,
+  author  = {Vehtari, Aki and Gelman, Andrew and Simpson, Daniel and Carpenter, Bob and B{\"u}rkner, Paul-Christian},
+  title   = {Rank-normalization, folding, and localization: An improved {\^R} for assessing convergence of {MCMC}},
+  journal = {Bayesian Analysis}, volume = {16}, number = {2}, pages = {667--718},
+  year    = {2021}, doi = {10.1214/20-BA1221}
+}
+
+% ============================================================================
+% B. POSTERIOR DECISION THEORY — median vs mean choice
+% ============================================================================
+
+@book{gelman2013bda3,
+  author    = {Gelman, Andrew and Carlin, John B. and Stern, Hal S. and Dunson, David B. and Vehtari, Aki and Rubin, Donald B.},
+  title     = {Bayesian Data Analysis}, edition = {3rd},
+  publisher = {Chapman \& Hall/CRC}, year = {2013},
+  doi       = {10.1201/b16018}
+}
+@article{vehtari2012survey,
+  author  = {Vehtari, Aki and Ojanen, Janne},
+  title   = {A survey of {B}ayesian predictive methods for model assessment, selection and comparison},
+  journal = {Statistics Surveys}, volume = {6}, pages = {142--228},
+  year    = {2012}, doi = {10.1214/12-SS102}
+}
+@book{berger1985statistical,
+  author = {Berger, James O.}, title = {Statistical Decision Theory and Bayesian Analysis},
+  edition = {2nd}, publisher = {Springer}, year = {1985},
+  note = {UNVERIFIED-DOI (pre-DOI textbook, ISBN 978-0-387-96098-2).}
+}
+@article{mould2013basic2,
+  author = {Mould, Diane R. and Upton, Richard N.},
+  title = {Basic concepts in population modeling, simulation, and model-based drug development---Part 2: Introduction to pharmacokinetic modeling methods},
+  journal = {CPT:PSP}, volume = {2}, pages = {e38}, year = {2013},
+  doi = {10.1038/psp.2013.14}
+}
+@article{mould2014basic3,
+  author = {Mould, Diane R. and Upton, Richard N.},
+  title = {Basic concepts in population modeling, simulation, and model-based drug development: Part 3---introduction to pharmacodynamic modeling methods},
+  journal = {CPT:PSP}, volume = {3}, pages = {e88}, year = {2014},
+  doi = {10.1038/psp.2013.71}
+}
+
+% ============================================================================
+% C. DIGITAL TWIN CREDIBILITY / NASEM / VVUQ / REGULATORY — Paper 10 framing
+% ============================================================================
+
+@book{NASEM2024DigitalTwins,
+  title = {Foundational Research Gaps and Future Directions for Digital Twins},
+  author = {{National Academies of Sciences, Engineering, and Medicine}},
+  year = {2024}, publisher = {National Academies Press},
+  doi = {10.17226/26894}
+}
+@misc{anCockrell2024cidt,
+  author = {An, Gary and Cockrell, Chase},
+  title = {A design specification for Critical Illness Digital Twins to cure sepsis: responding to the {NASEM} Report},
+  year = {2024}, eprint = {2405.05301}, archivePrefix = {arXiv}
+}
+@article{viceconti2021insilico,
+  author = {Viceconti, Marco and Pappalardo, Francesco and Rodriguez, Blanca and Horner, Marc and Bischoff, Jeff and Musuamba Tshinanu, Flora},
+  title = {In silico trials: Verification, validation and uncertainty quantification of predictive models used in the regulatory evaluation of biomedical products},
+  journal = {Methods}, volume = {185}, pages = {120--127}, year = {2021},
+  doi = {10.1016/j.ymeth.2020.01.011}
+}
+@article{viceconti2025credibilityml,
+  author = {Viceconti, Marco and Lanubile, Filippo and others},
+  title = {Position Paper: Extending Credibility Assessment of In Silico Medicine Predictors to Machine Learning Predictors},
+  journal = {IEEE J Biomed Health Inform}, volume = {29}, number = {7}, pages = {5284--5290},
+  year = {2025}, doi = {10.1109/JBHI.2025.3552320}
+}
+@article{hicks2015bestpractices,
+  author = {Hicks, Jennifer L. and Uchida, Thomas K. and Seth, Ajay and Rajagopal, Apoorva and Delp, Scott L.},
+  title = {Is My Model Good Enough? Best Practices for Verification and Validation of Musculoskeletal Models and Simulations of Movement},
+  journal = {J Biomech Eng}, volume = {137}, number = {2}, pages = {020905},
+  year = {2015}, doi = {10.1115/1.4029304}
+}
+@article{musuamba2021credibility,
+  author = {Musuamba, Flora T. and others},
+  title = {Scientific and regulatory evaluation of mechanistic in silico drug and disease models in drug development: Building model credibility},
+  journal = {CPT:PSP}, volume = {10}, number = {8}, pages = {804--825},
+  year = {2021}, doi = {10.1002/psp4.12669}
+}
+@article{friedrich2016mqm,
+  author = {Friedrich, Christina M.},
+  title = {A model qualification method for mechanistic physiological {QSP} models to support model-informed drug development},
+  journal = {CPT:PSP}, volume = {5}, number = {2}, pages = {43--53},
+  year = {2016}, doi = {10.1002/psp4.12056}
+}
+@article{friedrich2018validateqsp,
+  author = {Friedrich, Christina M.},
+  title = {How Do We "Validate" a {QSP} Model?},
+  journal = {CPT:PSP}, volume = {7}, number = {3}, pages = {135--137},
+  year = {2018}, doi = {10.1002/psp4.12310}
+}
+@article{eudy2015sclerostin,
+  author = {Eudy, Rebecca J. and Gastonguay, Marc R. and Baron, Kyle T. and Riggs, Matthew M.},
+  title = {Connecting the Dots: Linking Osteocyte Activity and Therapeutic Modulation of Sclerostin by Extending a Multiscale Systems Model},
+  journal = {CPT:PSP}, volume = {4}, number = {9}, pages = {527--536},
+  year = {2015}, doi = {10.1002/psp4.12013}
+}
+@article{corralacero2020cardiac,
+  author = {Corral-Acero, Jorge and Margara, Francesca and Marciniak, Maciej and others},
+  title = {The 'Digital Twin' to enable the vision of precision cardiology},
+  journal = {Eur Heart J}, volume = {41}, number = {48}, pages = {4556--4564},
+  year = {2020}, doi = {10.1093/eurheartj/ehaa159}
+}
+@article{coorey2021healthdt,
+  author = {Coorey, Genevieve and Figtree, Gemma A. and Fletcher, David F. and Redfern, Julie},
+  title = {The health digital twin: advancing precision cardiovascular medicine},
+  journal = {Nat Rev Cardiol}, volume = {19}, pages = {74--87},
+  year = {2021}, doi = {10.1038/s41569-021-00630-4}
+}
+@misc{ich_m15_2024,
+  author = {{U.S. Food and Drug Administration}},
+  title = {{ICH} {M15} General Principles for Model-Informed Drug Development; Draft Guidance for Industry},
+  year = {2024}, howpublished = {Federal Register 89 FR 106745}
+}
+@article{galluppi2024midd,
+  author = {Galluppi, Gerald R. and others},
+  title = {Considerations for Industry---Preparing for the {FDA} Model-Informed Drug Development ({MIDD}) Paired Meeting Program},
+  journal = {Clin Pharmacol Ther}, year = {2024}, doi = {10.1002/cpt.3245}
+}
+@article{marshall2016goodpractices,
+  author = {Marshall, Shawn F. and Burghaus, Rolf and Cosson, Valerie and Cheung, S. Y. Amy and Chenel, Marylore and DellaPasqua, Oscar and others},
+  title = {Good practices in model-informed drug discovery and development},
+  journal = {CPT:PSP}, volume = {5}, number = {3}, pages = {93--122},
+  year = {2016}, doi = {10.1002/psp4.12049}
+}
+@article{marshall2019midd,
+  author = {Marshall, Shawn and Madabushi, Rajanikanth and Manolis, Efthymios and others},
+  title = {Model-informed drug discovery and development: Current industry good practice and regulatory expectations and future perspectives},
+  journal = {CPT:PSP}, volume = {8}, number = {2}, pages = {87--96},
+  year = {2019}, doi = {10.1002/psp4.12372}
+}
+@article{marshall2023harmonized,
+  author = {Marshall, Shawn and Ahamadi, M. and others},
+  title = {Model-informed drug development: Steps toward harmonized guidance},
+  journal = {Clin Pharmacol Ther}, volume = {114}, number = {5}, pages = {962--965},
+  year = {2023}, doi = {10.1002/cpt.3006}
+}
+@article{hanquet2026musuamba,
+  author = {Hanquet, Lisa and Dogn{\'e}, Jean-Michel and Musuamba, Flora T.},
+  title = {Modeling and Simulation in Development and Regulatory Approval of {CAR-T} Therapies: {EMA} Centralized Procedures 2018--2024},
+  journal = {CPT:PSP}, volume = {15}, number = {4}, pages = {e70213},
+  year = {2026}, doi = {10.1002/psp4.70213}
+}
+
+% ============================================================================
+% D. PPMI / PD LONGITUDINAL DaT-SPECT — Paper 10 §1 benchmark (3.29%/yr claim)
+% ============================================================================
+
+@article{marek2018ppmi,
+  author = {Marek, Kenneth and Chowdhury, Sohini and Siderowf, Andrew and Lasch, Shirley and Coffey, Christopher S. and Caspell-Garcia, Chelsea and Simuni, Tanya and others},
+  title = {The {P}arkinson's progression markers initiative ({PPMI})---establishing a {PD} biomarker cohort},
+  journal = {Ann Clin Transl Neurol}, volume = {5}, number = {12}, pages = {1460--1477},
+  year = {2018}, doi = {10.1002/acn3.644}
+}
+@article{simuni2018nms,
+  author = {Simuni, Tanya and Caspell-Garcia, Chelsea and Coffey, Christopher S. and Weintraub, Daniel and Mollenhauer, Brit and others},
+  title = {Baseline prevalence and longitudinal evolution of non-motor symptoms in early {P}arkinson's disease: the {PPMI} cohort},
+  journal = {J Neurol Neurosurg Psychiatry}, volume = {89}, number = {1}, pages = {78--88},
+  year = {2018}, doi = {10.1136/jnnp-2017-316213}
+}
+@article{simuni2024nsdiss,
+  author = {Simuni, Tanya and Chahine, Lana M. and Poston, Kathleen and Brumm, Michael and others},
+  title = {A biological definition of neuronal {$\alpha$}-synuclein disease: towards an integrated staging system for research},
+  journal = {Lancet Neurol}, volume = {23}, number = {2}, pages = {178--190},
+  year = {2024}, doi = {10.1016/S1474-4422(23)00405-2}
+}
+@article{simuni2025nsd5yr,
+  author = {Simuni, Tanya and Gochanour, Caroline and Nair, Anuprita R. and Brumm, Michael C. and others},
+  title = {Neuronal {$\alpha$}-Synuclein Disease Stage Progression over 5 Years},
+  journal = {Movement Disorders}, volume = {40}, number = {7}, pages = {1318--1330},
+  year = {2025}, doi = {10.1002/mds.30191}
+}
+@article{gonzalezlatapi2024eleven,
+  author = {Gonzalez-Latapi, Paulina and Gochanour, Caroline and Cho, Hyunkeun and Simuni, Tanya and others},
+  title = {Eleven Years of Change: Disease Progression in Biomarker-Defined Sporadic {PD}},
+  year = {2024}, journal = {medRxiv},
+  doi = {10.1101/2024.10.09.24315191}
+}
+@article{gonzalezlatapi2026nsd5yr,
+  author = {Gonzalez-Latapi, Paulina and Gochanour, Caroline and Choi, Seung Ho and Brumm, Michael and others},
+  title = {Five-Year Disease Progression in Synuclein Seeding Positive Sporadic {P}arkinson's Disease},
+  journal = {Ann Clin Transl Neurol}, year = {2026}, doi = {10.1002/acn3.70323}
+}
+@article{espay2025refutation,
+  author = {Espay, Alberto J. and Cardoso, Francisco and Frucht, Steven J. and Imarisio, Alberto and Halliday, Glenda M. and Lees, Andrew J.},
+  title = {Refutation of the $\alpha$Syn-{SAA}-Based Staging for {PD} Progression ({NSD-ISS})},
+  journal = {Movement Disorders}, volume = {40}, number = {8}, pages = {1744--1745},
+  year = {2025}, doi = {10.1002/mds.30269}
+}
+@article{dzialas2025dat,
+  author = {Dzialas, Verena and Bischof, G{\'e}rard N. and M{\"o}llenhoff, Kathrin and Drzezga, Alexander and van Eimeren, Thilo},
+  title = {Dopamine Transporter Imaging as Objective Monitoring Biomarker in {P}arkinson's Disease},
+  journal = {Ann Neurol}, volume = {98}, number = {1}, pages = {120--135},
+  year = {2025}, doi = {10.1002/ana.27223}
+}
+@article{brumm2023milestone,
+  author = {Brumm, Michael C. and Siderowf, Andrew and Simuni, Tanya and others},
+  title = {{PPMI}: A Milestone-Based Strategy to Monitor {PD} Progression},
+  journal = {J Parkinsons Dis}, volume = {13}, number = {6}, pages = {899--916},
+  year = {2023}, doi = {10.3233/JPD-223433}
+}
+@article{ren2024datsleep,
+  author = {Ren, Junli and Xie, Haobo and Weng, Yiyun and others},
+  title = {Longitudinal decline in {DAT} binding in {PD}: connections with sleep disturbances},
+  journal = {BMC Medicine}, volume = {22}, pages = {550}, year = {2024},
+  doi = {10.1186/s12916-024-03766-5}
+}
+@article{simuni2019lrrk2gba,
+  author = {Simuni, Tanya and Uribe, Liz and Cho, Hyunkeun Ryan and others},
+  title = {Clinical and dopamine transporter imaging characteristics of non-manifest {LRRK2} and {GBA} mutation carriers in the {PPMI}},
+  journal = {Lancet Neurol}, volume = {19}, number = {1}, pages = {71--80},
+  year = {2020}, doi = {10.1016/S1474-4422(19)30319-9}
+}
+@article{simuni2022lrrk2nmc,
+  author = {Simuni, Tanya and Merchant, Kalpana and Brumm, Michael C. and others},
+  title = {Longitudinal clinical and biomarker characteristics of non-manifesting {LRRK2} {G2019S} carriers in the {PPMI} cohort},
+  journal = {npj Parkinsons Dis}, volume = {8}, pages = {140}, year = {2022},
+  doi = {10.1038/s41531-022-00404-w}
+}
+@article{brown2025stagedscreening,
+  author = {Brown, Ethan G. and Chahine, Lana M. and Siderowf, Andrew and Gochanour, Caroline and Brumm, Michael C. and others},
+  title = {Staged Screening Identifies People with Biomarkers Related to Neuronal Alpha-Synuclein Disease},
+  journal = {Ann Neurol}, volume = {97}, number = {4}, pages = {730--740},
+  year = {2025}, doi = {10.1002/ana.27158}
+}
+@article{chahine2020ratesirbd,
+  author = {Chahine, Lana M. and Brumm, Michael C. and Caspell-Garcia, Chelsea and others},
+  title = {Dopamine transporter imaging predicts clinically-defined $\alpha$-synucleinopathy in {REM} sleep behavior disorder},
+  journal = {Ann Clin Transl Neurol}, volume = {8}, number = {1}, pages = {201--212},
+  year = {2020}, doi = {10.1002/acn3.51269}
+}
+@article{chahine2023saa,
+  author = {Chahine, Lana M. and Beach, Thomas G. and Adler, Charles H. and others},
+  title = {Central and peripheral $\alpha$-synuclein in {PD} detected by seed amplification assay},
+  journal = {Ann Clin Transl Neurol}, volume = {10}, number = {5}, pages = {696--705},
+  year = {2023}, doi = {10.1002/acn3.51753}
+}
+@article{macklin2022prodromal,
+  author = {Macklin, Eric A. and Coffey, Christopher S. and Brumm, Michael C. and Seibyl, John Peter},
+  title = {Statistical Considerations in the Design of Clinical Trials Targeting Prodromal {P}arkinson Disease},
+  journal = {Neurology}, volume = {99}, number = {7 Suppl 1}, pages = {68--75},
+  year = {2022}, doi = {10.1212/WNL.0000000000200897}
+}
+@article{wakasugi2024combat,
+  author = {Wakasugi, Noritaka and Takano, Harumasa and Abe, Mitsunari and others},
+  title = {Harmonizing multisite data with the {ComBat} method for enhanced {PD} diagnosis via {DAT-SPECT}},
+  journal = {Front Neurol}, volume = {15}, pages = {1306546}, year = {2024},
+  doi = {10.3389/fneur.2024.1306546}
+}
+@article{hamo2025vmat2,
+  author = {Hamo, Mohammad and Anyanwu, Nicole and Long, Isabel and Gupta, Rishabh and others},
+  title = {Relationship between {VMAT2-PET} and {DAT-SPECT} caudate binding and {PD} cognitive decline},
+  journal = {Parkinsonism Relat Disord}, volume = {139}, pages = {108008}, year = {2025},
+  doi = {10.1016/j.parkreldis.2025.108008}
+}
+
+% ============================================================================
+% E. PD MECHANISTIC / PK-PD / HILL-REGIME — Paper 9 Path B + Paper 10 forward
+% ============================================================================
+
+@article{gupta2025sbrirt,
+  author = {Gupta, Churni and Kim, Chaejin and Guzy, Serge and others},
+  title = {Establishment of a Biomarker-Directed Clinical Endpoint Model for Early-Stage {PD} Patients},
+  journal = {Clin Pharmacol Ther}, volume = {117}, number = {5}, pages = {1460--1469},
+  year = {2025}, doi = {10.1002/cpt.3593}
+}
+@article{veronneau2020chaos,
+  author = {V{\'e}ronneau-Veilleux, Florence and Ursino, Mauro and Robaey, Philippe and L{\'e}vesque, Daniel and Nekka, Fahima},
+  title = {Nonlinear pharmacodynamics of levodopa through {P}arkinson's disease progression},
+  journal = {Chaos}, volume = {30}, number = {9}, pages = {093146},
+  year = {2020}, doi = {10.1063/5.0014800}
+}
+@article{veronneau2020integrative,
+  author = {V{\'e}ronneau-Veilleux, Florence and Robaey, Philippe and Ursino, Mauro and Nekka, Fahima},
+  title = {An integrative model of {PD} treatment including levodopa pharmacokinetics, dopamine kinetics, basal ganglia neurotransmission and motor action},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {48}, pages = {133--148}, year = {2021},
+  doi = {10.1007/s10928-020-09723-y}
+}
+@article{chan2005levodopa,
+  author = {Chan, Phylinda L. S. and Nutt, John G. and Holford, Nicholas H. G.},
+  title = {Pharmacokinetic and pharmacodynamic changes during the first four years of levodopa treatment in {P}arkinson's disease},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {32}, number = {3-4}, pages = {459--484},
+  year = {2005}, doi = {10.1007/s10928-005-0055-x}
+}
+@article{chan2005pkvariability,
+  author = {Chan, Phylinda L. S. and Nutt, John G. and Holford, Nicholas H. G.},
+  title = {Importance of within subject variation in levodopa pharmacokinetics: a 4 year cohort study in {PD}},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {32}, number = {3-4}, pages = {307--331},
+  year = {2005}, doi = {10.1007/s10928-005-0039-x}
+}
+@article{chan2004shortlong,
+  author = {Chan, Phylinda L. S. and Nutt, John G. and Holford, Nicholas H. G.},
+  title = {Modeling the short- and long-duration responses to exogenous levodopa and to endogenous levodopa production in {PD}},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {31}, number = {3}, pages = {243--268},
+  year = {2004}, doi = {10.1023/b:jopa.0000039566.75368.59}
+}
+@article{baston2016levodopa,
+  author = {Baston, Chiara and Contin, Manuela and Calandra Buonaura, Giovanna and Cortelli, Pietro and Ursino, Mauro},
+  title = {A Mathematical Model of Levodopa Medication Effect on Basal Ganglia in {PD}: Alternate Finger Tapping},
+  journal = {Front Hum Neurosci}, volume = {10}, pages = {280}, year = {2016},
+  doi = {10.3389/fnhum.2016.00280}
+}
+@article{fahn2005elldopa,
+  author = {Fahn, Stanley},
+  title = {Does levodopa slow or hasten the rate of progression of {P}arkinson's disease?},
+  journal = {J Neurol}, volume = {252}, number = {Suppl 4}, pages = {IV37--IV42},
+  year = {2005}, doi = {10.1007/s00415-005-4008-5}
+}
+@article{verschuur2019leap,
+  author = {Verschuur, Constant V. M. and Suwijn, Sven R. and Boel, Judith A. and Post, Bart and Bloem, Bastiaan R. and van Hilten, Jacobus J. and van Laar, Teus and others},
+  title = {Randomized Delayed-Start Trial of Levodopa in {P}arkinson's Disease ({LEAP})},
+  journal = {NEJM}, volume = {380}, number = {4}, pages = {315--324}, year = {2019},
+  doi = {10.1056/NEJMoa1809983}
+}
+@article{jacqmin2007kpd,
+  author = {Jacqmin, Philippe and Sn{\"o}eck, Eric and van Schaick, Ellen A. and others},
+  title = {Modelling response time profiles in the absence of drug concentrations: definition and performance evaluation of the {K-PD} model},
+  journal = {J Pharmacokinet Pharmacodyn}, volume = {34}, number = {1}, pages = {57--85},
+  year = {2007}, doi = {10.1007/s10928-006-9035-z}
+}
+@article{bloomingdale2022qsp,
+  author = {Bloomingdale, Peter and Karelina, Tatiana and Ramakrishnan, Vidya and Bakshi, Suruchi and V{\'e}ronneau-Veilleux, Florence and others},
+  title = {Hallmarks of neurodegenerative disease: A systems pharmacology perspective},
+  journal = {CPT:PSP}, volume = {11}, number = {11}, pages = {1399--1429},
+  year = {2022}, doi = {10.1002/psp4.12852}
+}
+@article{tomlinson2010ledd,
+  author = {Tomlinson, Claire L. and Stowe, Rebecca and Patel, Smitaa and Rick, Caroline and Gray, Richard and Clarke, Carl E.},
+  title = {Systematic review of levodopa dose equivalency reporting in {P}arkinson's disease},
+  journal = {Mov Disord}, volume = {25}, number = {15}, pages = {2649--2653},
+  year = {2010}, doi = {10.1002/mds.23429}
+}
+@article{jost2023ledd,
+  author = {Jost, Stefanie T. and Kaldenbach, Marie-Ann and Antonini, Angelo and others},
+  title = {Levodopa Dose Equivalency in {P}arkinson's Disease: Updated Systematic Review and Proposals},
+  journal = {Mov Disord}, volume = {38}, number = {7}, pages = {1236--1252},
+  year = {2023}, doi = {10.1002/mds.29410}
+}
+
+% ============================================================================
+% F. PHASE 1/2 FIXED CONSTANTS & PRIORS — registry-cited (§1-§2)
+% ============================================================================
+
+@article{fearnleyLees1991,
+  author = {Fearnley, Julian M. and Lees, Andrew J.},
+  title = {Ageing and {P}arkinson's disease: substantia nigra regional selectivity},
+  journal = {Brain}, volume = {114}, number = {5}, pages = {2283--2301}, year = {1991},
+  doi = {10.1093/brain/114.5.2283},
+  note = {Canonical 2-5\%/yr SNpc decay + N_0 baseline.}
+}
+@article{lee2019jama,
+  author = {Lee, Chris S. and others},
+  title = {SBR-to-neuron mapping exponent {$\gamma$}=0.7},
+  journal = {JAMA Neurol}, year = {2019},
+  note = {UNVERIFIED-DOI; cited in registry §1 for GAMMA=0.7; verify title+DOI before final manuscript.}
+}
+@article{iljina2016pnas,
+  author = {Iljina, M. and Garcia, G. A. and Horrocks, M. H. and Tosatto, L. and others},
+  title = {Kinetic model of the aggregation of {$\alpha$}-synuclein provides insights into prion-like spreading},
+  journal = {PNAS}, volume = {113}, number = {9}, pages = {E1206--E1215}, year = {2016},
+  doi = {10.1073/pnas.1524128113}
+}
+@article{cohen2013abeta,
+  author = {Cohen, Samuel I. A. and Linse, Sara and Luheshi, Leila M. and Hellstrand, Erik and others},
+  title = {Proliferation of amyloid-$\beta$42 aggregates occurs through a secondary nucleation mechanism},
+  journal = {PNAS}, volume = {110}, number = {24}, pages = {9758--9763}, year = {2013},
+  doi = {10.1073/pnas.1218402110}
+}
+@article{mollenhauer2019csf,
+  author = {Mollenhauer, Brit and Caspell-Garcia, Chelsea J. and Coffey, Christopher S. and others},
+  title = {Longitudinal analyses of cerebrospinal fluid {$\alpha$-synuclein} in prodromal and early {PD}},
+  journal = {Mov Disord}, year = {2019}, doi = {10.1002/mds.27806}
+}
+@article{brockmann2025saa,
+  author = {Brockmann, Kathrin and others},
+  title = {Longitudinal {SAA} kinetic stability in sporadic {P}arkinson's disease},
+  journal = {npj Parkinsons Dis}, year = {2025},
+  note = {UNVERIFIED-DOI; verify before submission.}
+}
+@article{bellomo2025pS129,
+  author = {Bellomo, Giovanni and others},
+  title = {Phosphorylated $\alpha$-synuclein in {CSF}/plasma does not reflect synucleinopathy},
+  journal = {npj Parkinsons Dis}, year = {2025},
+  note = {UNVERIFIED-DOI; verify before submission.}
+}
+@article{comets2017saem,
+  author = {Comets, Emmanuelle and Lavenu, Audrey and Lavielle, Marc},
+  title = {Parameter estimation in nonlinear mixed effect models using {saemix}, an {R} implementation of the {SAEM} algorithm},
+  journal = {J Stat Softw}, volume = {80}, number = {3}, year = {2017},
+  doi = {10.18637/jss.v080.i03}
+}
+@article{talts2018sbc,
+  author = {Talts, Sean and Betancourt, Michael and Simpson, Daniel and Vehtari, Aki and Gelman, Andrew},
+  title = {Validating {B}ayesian inference algorithms with simulation-based calibration},
+  journal = {arXiv}, year = {2018}, eprint = {1804.06788}, archivePrefix = {arXiv}
+}
+@article{vehtari2015psisloo,
+  author = {Vehtari, Aki and Gelman, Andrew and Gabry, Jonah},
+  title = {Pareto smoothed importance sampling},
+  journal = {arXiv}, year = {2015}, eprint = {1507.02646}, archivePrefix = {arXiv},
+  note = {Identical arXiv record as vehtari2024psis; the 2015 preprint / 2024 JMLR publication.}
+}
+
+% ============================================================================
+% G. PD PROPAGATION / CONNECTOME / REGIONAL — Paper 8a/8b (cited for Paper 10 background)
+% ============================================================================
+
+@article{pandya2019ndm,
+  author = {Pandya, Sneha and others},
+  title = {Connectome-based network diffusion model of {PD} propagation},
+  journal = {NeuroImage}, year = {2019}, doi = {10.1016/j.neuroimage.2019.02.033}
+}
+@article{zheng2019snca,
+  author = {Zheng, Yingqiu H. and Luk, Kelvin C. and Manley, Mary W. and others},
+  title = {Local vulnerability and global connectivity jointly shape neurodegenerative disease propagation},
+  journal = {PLoS Biol}, year = {2019}, doi = {10.1371/journal.pbio.3000495}
+}
+@article{borghammer2021bodyfirst,
+  author = {Borghammer, Per},
+  title = {The $\alpha$-synuclein origin and connectome model of {P}arkinson's disease},
+  journal = {J Parkinsons Dis}, year = {2021}, doi = {10.3233/JPD-212528}
+}
+@article{kerstens2023regional,
+  author = {Kerstens, Vera S. and others},
+  title = {Annual {DAT} decline in {PPMI}: regional rates},
+  journal = {Neuroimage Clin}, year = {2023}, doi = {10.1016/j.nicl.2023.103470}
+}
+@article{brooks1990putamen,
+  author = {Brooks, David J. and others},
+  title = {Differential severity of striatal dopamine loss in {PD}},
+  journal = {Ann Neurol}, volume = {28}, number = {4}, pages = {547--555}, year = {1990},
+  doi = {10.1002/ana.410280412}
+}
+@article{fiorenzato2021putamen,
+  author = {Fiorenzato, Eleonora and others},
+  title = {Putaminal asymmetry maintenance in {PPMI}},
+  journal = {Mov Disord}, year = {2021}, doi = {10.1002/mds.28551}
+}
+
+% ============================================================================
+% H. COMPLEMENTARITY / SCI-ML / COUNTERFACTUAL — Paper 10 §4 discussion
+% ============================================================================
+
+@misc{rackauckas2020universal,
+  author = {Rackauckas, Christopher and Ma, Yingbo and Martensen, Julius and Warner, Collin and Zubov, Kirill and Supekar, Rohit and Skinner, Dominic and Ramadhan, Ali and Edelman, Alan},
+  title = {Universal Differential Equations for Scientific Machine Learning},
+  year = {2020}, eprint = {2001.04385}, archivePrefix = {arXiv}
+}
+@article{mao2025nonmem,
+  author = {Mao, Bingyu and Gao, Yue and Xu, Christine and Macha, Sreeraj and Shao, Shuai and Ahamadi, Malidi},
+  title = {Opportunities for {AI}-based Model-informed Drug Development: {NONMEM} vs {AI}-based Population {PK}},
+  journal = {AAPS J}, volume = {28}, number = {1}, pages = {21}, year = {2025},
+  doi = {10.1208/s12248-025-01121-x}
+}
+@article{atsou2024mechlearning,
+  author = {Atsou, Kevin and Auperin, Anne and Guigay, Jo{\"e}l and Salas, S{\'e}bastien and Benzekry, Sebastien},
+  title = {Mechanistic Learning for Predicting Survival Outcomes in Head and Neck Squamous Cell Carcinoma},
+  journal = {CPT:PSP}, volume = {14}, number = {3}, pages = {540--550}, year = {2025},
+  doi = {10.1002/psp4.13294},
+  note = {Not PD, but closest mechanistic-learning hybrid precedent in CPT:PSP 2023-2026.}
+}
+@article{alam2026ndintegrative,
+  author = {Alam, Pravej and Hasan, Gulam Mustafa and Mohammad, Taj and Hassan, Md Imtaiyaz},
+  title = {Next-generation computational strategies for neurodegenerative biomarkers},
+  journal = {Comput Biol Chem}, volume = {123}, pages = {108973}, year = {2026},
+  doi = {10.1016/j.compbiolchem.2026.108973}
+}
+@article{nair2026computationalpd,
+  author = {Nair, S.S. and Guha, A. and Chakravarthy, S. and Shaikh, A.G.},
+  title = {Computational Modeling of {PD} Across Scales: Mechanisms to Biomarkers to Personalized Therapies},
+  journal = {Brain Sciences}, volume = {16}, number = {2}, pages = {175}, year = {2026},
+  doi = {10.3390/brainsci16020175}
+}
+@misc{bica2020counterfactual,
+  author = {Bica, Ioana and Alaa, Ahmed M. and Jordon, James and van der Schaar, Mihaela},
+  title = {Estimating Counterfactual Treatment Outcomes over Time Through Adversarially Balanced Representations},
+  booktitle = {ICLR}, year = {2020}, eprint = {2002.04083}, archivePrefix = {arXiv}
+}
+
+% ============================================================================
+% I. REGISTRY DEFENSIVE CITATIONS (Paper 9 — flagged by registry §9)
+% ============================================================================
+
+@article{djaldetti2018wearing,
+  author = {Djaldetti, Ruth and others},
+  title = {DaT-SPECT does not predict motor fluctuations / wearing-off in {PD}},
+  journal = {J Neurol Sci}, year = {2018},
+  note = {UNVERIFIED-DOI; verify before Paper 9 final submission.}
+}
+@article{frequin2024leap,
+  author = {Frequin, H. L. and others},
+  title = {{LEAP} trial 5-year follow-up: no difference in progression, dyskinesia, or {LEDD} between early vs delayed levodopa start},
+  year = {2024},
+  note = {UNVERIFIED-DOI; verify before Paper 9 final submission.}
+}
+@article{backman2025postmortem,
+  author = {Backman, C. M. and others},
+  title = {Postmortem: no association between {L}-dopa exposure and {TH}+ neuron density},
+  journal = {Sci Rep}, year = {2025},
+  note = {UNVERIFIED-DOI; verify before Paper 9 final submission.}
+}
+@article{wollmer2022pbpk,
+  author = {Wollmer, Erik and others},
+  title = {Levodopa {GI} absorption {PBPK} model},
+  journal = {Eur J Pharm Biopharm}, year = {2022},
+  note = {UNVERIFIED-DOI; verify before Paper 9 final submission.}
+}
+@article{chae2021leddirt,
+  author = {Chae, D. and others},
+  title = {{LEDD} trajectory prediction from {UPDRS} item-response theory},
+  journal = {CPT:PSP}, year = {2021},
+  note = {UNVERIFIED-DOI; verify before Paper 9 final submission.}
+}
+
+% =============================
+% VERIFICATION STATUS KEY
+% =============================
+% - Citations without explicit `note` are live-verified via CrossRef or PubMed on 2026-04-13.
+% - `note = {UNVERIFIED-DOI; ...}` means the paper is referenced in the project registry or agent
+%   transcripts but the DOI/title could not be resolved live; manual CrossRef/Zotero check required
+%   before final manuscript submission.
+% - JMLR (vehtari2024psis) has no CrossRef DOI; arXiv ID is authoritative.
+% - Berger 1985 predates DOI registration; ISBN is authoritative.
