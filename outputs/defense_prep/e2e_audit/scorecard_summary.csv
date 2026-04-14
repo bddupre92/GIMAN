@@ -1,0 +1,17 @@
+chapter_number,title,defensibility_score,total_claims,verified,partial,unverified
+1,Introduction,yellow,39,6,33,0
+2,Systematic Literature Review,yellow,153,5,148,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,99,14,85,0
+4,Paper 2: GIMIN Imputation,yellow,135,2,133,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,55,2,53,0
+6,Paper 4: Conformalized Survival Analysis,yellow,88,9,79,0
+7,Paper 5: Temporal Validation,yellow,55,3,52,0
+8,Paper 6: Unified Clinical Decision Support,yellow,42,2,40,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,59,20,39,0
+10,Paper 8a: Spatial Propagation Identifiability,yellow,69,39,30,0
+11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,63,36,27,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,56,30,26,0
+13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,61,53,8,0
+14,"Discussion (Unified, Papers 1-10)",yellow,28,24,4,0
+15,Conclusion + Future Work Catalog,yellow,14,9,5,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,111,38,73,0
