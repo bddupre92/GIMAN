@@ -1,87 +1,316 @@
 % =============================================================================
-% Chapter 10 — Paper 8a: Regional DaT-SPECT Identifiability
-% Practical identifiability limits of spatial propagation parameters
-% in mechanistic Parkinson's disease digital twins
+% Chapter 10 --- Paper 8a
+% Full manuscript content imported from outputs/mechanistic_twin/paper8a_identifiability/main.tex
+% Preamble, title page, and standalone bibliography stripped; figure filenames
+% remapped with prefix "p8a_"; natbib \citep/\citet converted to \cite.
 % =============================================================================
 
 \chapter{Paper 8a: Practical Identifiability Limits of Spatial Propagation Parameters in Mechanistic PD Digital Twins}
 \label{ch:paper8a}
 
+% ============================================================================
+% ABSTRACT
+% ============================================================================
+
+\begin{abstract}
+Network diffusion models (NDMs) of $\alpha$-synuclein propagation are increasingly used to study the spatiotemporal progression of Parkinson's disease (PD), yet no published study has validated whether the spatial propagation parameters of these models can be reliably recovered from longitudinal neuroimaging data. We address this gap by performing, to our knowledge, the first systematic structural and practical identifiability analysis of connectome-coupled propagation models calibrated from serial dopamine transporter (DaT) SPECT imaging. We formulated seven candidate four-region striatal models (caudate and putamen, bilateral) of increasing complexity, from independent regional decays to coupled propagation with asymmetric seeding, and tested each against 644 Parkinson's Progression Markers Initiative patients with three or more serial DaT-SPECT scans. All seven models passed structural identifiability analysis when the pathology-to-death coupling was fixed from literature. However, simulation-based calibration (SBC) revealed that all four biologically plausible models failed practical parameter recovery: the seeding rate parameter ($s_{\text{put}}$) was fundamentally non-recoverable ($r < 0.5$) even with 11 timepoints, while the spatial propagation rate ($k_{\text{spread}}$) was marginally recoverable ($r = 0.78$) at four timepoints. Fisher Information Matrix analysis confirmed that the Cram\'{e}r-Rao lower bound for $s_{\text{put}}$ exceeded the prior width by a factor of 4.2, indicating that DaT-SPECT data add no information about this parameter. A remediated single-parameter model fixing $s_{\text{put}}$ from literature and fitting only $k_{\text{spread}}$ achieved strong parameter recovery ($r = 0.892$, 200/200 converged, bias $= -4.4$\%) with four or more timepoints. Empirical validation on 304 PPMI patients confirmed the simulation findings: independent per-region decay rates (four parameters) outperformed the single-parameter propagation model by $\Delta$AIC = 5,668, demonstrating that four-region DaT-SPECT resolves per-region decline rates but not the mechanistic coupling between regions. These findings establish minimum data requirements for spatial PD digital twin models, identify a structural-practical identifiability gap that applies broadly to connectome propagation models with hidden pathology states, and provide the first empirical evidence that current DaT-SPECT protocols cannot distinguish spatial propagation from independent regional neurodegeneration.
+\end{abstract}
+
+% ============================================================================
+% INTRODUCTION
+% ============================================================================
 \section{Introduction}
-\label{sec:p8a-intro}
 
-Chapter~\ref{ch:paper7} established that per-patient $\alpha$-synuclein aggregation and neuron-loss parameters are globally identifiable from joint longitudinal DaT-SPECT and CSF $\alpha$-synuclein observations. A natural next question is whether the \emph{spatial} spread of pathology across striatal sub-regions can be similarly recovered from PPMI DaT-SPECT data. Network-diffusion models (NDMs) have shown promise in related neurodegenerative settings (e.g., tau PET in Alzheimer's disease~\cite{vogel2024}, MRI atrophy in PD~\cite{pandya2019}), but no published study has attempted NDM calibration from regional DaT-SPECT SBR to a PD cohort with per-patient identifiability analysis.
+The spatiotemporal progression of Parkinson's disease (PD) follows a characteristic pattern: dopaminergic neurodegeneration begins in the posterior putamen and spreads to the anterior putamen and caudate nucleus over a period of years \cite{brooks1990, kim2022, fearnley1991}. This caudo-rostral gradient, first quantified by \cite{kish1988} using postmortem dopamine measurements and confirmed \textit{in vivo} by serial dopamine transporter (DaT) imaging \cite{fiorenzato2021, sung2016}, has motivated the development of network diffusion models (NDMs) that simulate the trans-synaptic propagation of pathological $\alpha$-synuclein through the brain's structural connectome \cite{raj2012, pandya2019, vogel2023}.
 
-This chapter addresses whether spatial propagation is detectable from the four reliably quantifiable striatal ROIs in PPMI DaT-SPECT (left/right caudate, left/right putamen) and whether a mechanistic connectome-informed propagation model outperforms independent regional decay. The answer establishes the upper bound on spatial resolution for any mechanistic PD twin calibrated from this class of imaging data.
+NDMs have demonstrated explanatory power for the spatial patterning of neurodegeneration in both Alzheimer's disease \cite{schafer2021, fornari2019} and PD \cite{pandya2019, zheng2019, abdelgawad2022}. A key aspiration of this modeling framework is \textit{per-patient} calibration of propagation parameters---the spatial diffusion rate, local amplification rate, and regional seeding intensity---from longitudinal neuroimaging data. Such calibration would enable personalized prediction of disease trajectory and simulation of spatially targeted interventions. However, a critical methodological gap remains: \textbf{no published NDM study has validated whether its fitted parameters can actually be recovered from the available imaging data}.
 
+The distinction between \textit{structural} (also called \textit{a priori}) and \textit{practical} (also called \textit{a posteriori}) identifiability is well established in the systems biology literature \cite{raue2009, villaverde2016, wieland2021}. A model is structurally identifiable if its parameters are theoretically recoverable from noise-free data with infinite observations. A model is practically identifiable if its parameters can be recovered from realistic data with finite observations and measurement noise. Structural identifiability is necessary but not sufficient: a model can be structurally identifiable yet practically non-identifiable when the data quality or quantity is insufficient \cite{wang2025, conte2024}.
+
+This distinction is particularly relevant for NDMs applied to DaT-SPECT data, where: (i) the number of longitudinal timepoints is small (typically 3--5 scans over 5--7 years in the Parkinson's Progression Markers Initiative \cite{ppmi2011}); (ii) the observation noise is substantial (scan-rescan coefficient of variation $\sim$10--15\% \cite{tossicibolt2017}); and (iii) the pathology state driving neuronal death is a hidden variable with no direct observable, creating a coupling between the propagation parameters and the unobserved pathology concentration.
+
+In this study, we present the first systematic identifiability analysis of striatal propagation models calibrated from longitudinal DaT-SPECT imaging. Our contributions are:
+
+\begin{enumerate}
+\item We formulate seven candidate four-region (caudate left/right, putamen left/right) models of increasing complexity and prove that all are structurally identifiable when the pathology-to-death coupling is fixed.
+\item We perform simulation-based calibration (SBC) \cite{talts2018} on each model and demonstrate that spatial propagation parameters are \textit{practically} non-identifiable from PPMI-grade DaT-SPECT data, despite passing structural identifiability.
+\item We characterize the structural-practical identifiability gap using Fisher Information Matrix analysis, identifying the seeding rate as the ``sloppy'' parameter direction \cite{gutenkunst2007} analogous to the nucleation-toxicity degeneracy previously identified in scalar DaT-SPECT models \cite{dupre2026phase2}.
+\item We derive a remediated single-parameter model (propagation rate only, seeding fixed from literature) that achieves strong parameter recovery ($r = 0.892$, $N = 200$) and establish minimum data requirements: at least four serial scans are necessary for reliable spatial propagation estimation.
+\end{enumerate}
+
+% ============================================================================
+% RELATED WORK
+% ============================================================================
+\section{Related Work}
+
+\paragraph{Network diffusion models for neurodegeneration.}
+The network diffusion model (NDM) framework, introduced by \cite{raj2012} for Alzheimer's disease, simulates pathological protein spread as diffusion on the structural connectome. \cite{pandya2019} extended NDM to PD, identifying the substantia nigra as the optimal seed region from MRI deformation data in 232 patients. \cite{zheng2019} developed an SIR epidemic spreading model incorporating both connectivity and SNCA gene expression, demonstrating that both factors significantly influence $\alpha$-synuclein propagation patterns. \cite{abdelgawad2022} validated an agent-based SIR model on 790 PPMI PD scans using a population-average HCP connectome. All of these studies use MRI-derived atrophy as the observable, not DaT-SPECT SBR. \cite{vogel2023} provided the definitive review, proposing three innovation dimensions (biology-modulated, patient-tailored, dynamic), but did not address parameter identifiability. Critically, none of these studies performs simulation-based calibration or parameter recovery validation.
+
+\paragraph{Bayesian parameter estimation in connectome models.}
+\cite{schafer2021} represents the closest methodological precedent: Bayesian MCMC inference of per-subject propagation parameters (diffusion coefficient and production rate) for tau spreading in 76 ADNI subjects using the Budapest Reference Connectome. They report 95\% credible intervals but do not validate these against known ground-truth parameters. \cite{garbarino2021} used Bayesian model evidence via stochastic variational inference to compare three nested dynamical systems for amyloid dynamics, demonstrating formal model comparison for NDMs. More recently, \cite{boelts2023} applied simulation-based inference to connectome models in computational connectomics, and \cite{hashemi2024} demonstrated that virtual brain model parameters can be non-identifiable without targeted stimulation protocols---a finding that parallels our spatial propagation result. \cite{ren2025} proposed a unified evaluation framework for connectome-based biophysical models of pathological protein spreading but did not address practical identifiability from clinical imaging. None of these studies performs SBC validation against known ground-truth parameters for per-patient estimation from longitudinal neuroimaging.
+
+\paragraph{Structural and practical identifiability.}
+The distinction between structural and practical identifiability is well established \cite{villaverde2016, raue2009}. \cite{wieland2021} argued that the Fisher Information Matrix has ``severe shortcomings'' for practical identifiability and recommended profile likelihood as the gold standard. \cite{wang2025} proved that practical identifiability is equivalent to FIM invertibility and proposed optimal experimental design to ensure identifiability. \cite{conte2024} demonstrated in DCE-MRI that structurally identifiable models can be practically non-identifiable depending on data characteristics, with recovery possible through increased data quality---closely paralleling our findings. \cite{simpson2024} showed how to make predictions from poorly identified models using profile-wise analysis, while \cite{casolo2025} proved that sparse ODE systems have a positive probability of practical non-identifiability regardless of regularization.
+
+\paragraph{Putamen-caudate gradient in PD.}
+The spatial ordering of dopaminergic loss in PD---posterior putamen first, then anterior putamen, then caudate---is among the most robustly established findings in the field \cite{kish1988, brooks1990}. \cite{kim2022} established that loss begins 14.4 years before clinical onset in the posterior putamen. \cite{fiorenzato2021} showed that putaminal asymmetry is maintained over four years of follow-up in the PPMI cohort. \cite{pasquini2019} found that 51.6\% of patients had normal caudate DAT binding at diagnosis, rising to 83.9\% with caudate involvement by four years. \cite{sung2016} demonstrated that while absolute annual reduction slows in advanced disease (floor effect), the relative annual reduction remains constant. These findings constrain our model validation: any viable propagation model must reproduce the putamen-first ordering while maintaining (not equalizing) the caudate-putamen differential over time.
+
+% ============================================================================
+% METHODS
+% ============================================================================
 \section{Methods}
-\label{sec:p8a-methods}
 
-\subsection{Regional Cohort}
+\subsection{Data}
 
-The analysis cohort comprised 641 PPMI patients with at least three longitudinal DaT-SPECT scans over a mean 3.31-year follow-up window. Each scan provided left and right SBR for caudate and putamen (100\% coverage, mean $\pm$ SD: caudate mean $2.00 \pm 0.76$; putamen mean $1.00 \pm 0.65$). Full regional inventory is tabulated in~\cite{datavalidation2026}.
+We used longitudinal DaT-SPECT data from the Parkinson's Progression Markers Initiative (PPMI) \cite{ppmi2011}. Regional specific binding ratios (SBR) were extracted for four striatal subregions: left caudate, right caudate, left putamen, and right putamen, from the \texttt{DaTScan\_SBR\_Analysis} dataset (vintage: October 2025). Of 2,137 patients with at least one analyzed scan (4,168 total scans), 644 had three or more serial scans with a mean follow-up of 3.3 years.
 
-\subsection{Candidate Models (M1--M7)}
+At baseline, caudate SBR averaged $1.98 \pm 0.60$ (mean $\pm$ SD) and putamen SBR averaged $0.84 \pm 0.37$, consistent with the established posterior-putamen-first gradient of dopaminergic denervation in PD \cite{brooks1990}. The caudate-to-putamen ratio was $2.12 \pm 0.67$, confirming substantially greater putaminal involvement at diagnosis.
 
-Seven mechanistic candidates were tested, spanning independent regional decay (M1), pure diffusion (M3), connectome-informed propagation from a caudal seed (M6r), and asymmetric seeding with regional sensitivity scaling (M7). All seven were tested for structural identifiability using \texttt{StructuralIdentifiability.jl} v0.5.19 at probability $= 0.99$.
+\subsection{Model formulations}
 
-\subsection{Fitting Procedure}
+We defined seven candidate models, each describing the evolution of regional neuron counts $N_i(t)$ (and, for propagation models, pathology concentrations $L_i(t)$) across four striatal regions $i \in \{1,2,3,4\}$ corresponding to caudate left, caudate right, putamen left, and putamen right.
 
-Per-patient maximum-likelihood fits were computed with region-specific observation noise from the Paper~7 priors. Coupling parameters for all propagation models fixed $\beta_L$ (the L $\to$ N coupling) from literature (Oliveras-Salv\`a~2013~\cite{oliverassalva2013}; Bourdenx~2020~\cite{bourdenx2020}) because $\beta_L$ is non-identifiable when $L$ is a hidden state.
+\paragraph{Model 1 (M1): Independent regional decays.} Each region has its own decay rate:
+\begin{equation}
+\frac{dN_i}{dt} = -T_i \cdot N_i, \quad i = 1,\ldots,4
+\label{eq:m1}
+\end{equation}
+with four fitted parameters $\{T_1, T_2, T_3, T_4\}$. This is the null model with no spatial coupling.
 
-\section{Results}
-\label{sec:p8a-results}
+\paragraph{Model 2 (M2): Shared base rate with putamen offset.}
+\begin{equation}
+\frac{dN_i}{dt} = -(T_{\text{base}} + \delta_{\text{put}} \cdot \mathbb{1}_{i \in \{3,4\}}) \cdot N_i
+\label{eq:m2}
+\end{equation}
+with two fitted parameters $\{T_{\text{base}}, \delta_{\text{put}}\}$, where $\delta_{\text{put}}$ captures the excess putaminal vulnerability.
 
-\subsection{Structural Identifiability}
+\paragraph{Models 3--7: Propagation models.} These couple a pathology propagation equation to the neuron death equation. The pathology dynamics follow a network diffusion model:
+\begin{equation}
+\frac{dL_i}{dt} = -k_{\text{clear}} \cdot L_i + k_{\text{spread}} \sum_{j} A_{ij} L_j + s_i
+\label{eq:propagation}
+\end{equation}
+where $k_{\text{clear}} = 0.5$ yr$^{-1}$ is the clearance rate (fixed from literature \cite{xu2024}), $A_{ij}$ is the structural connectivity matrix (fixed from the Budapest Reference Connectome \cite{schafer2021}), $k_{\text{spread}}$ is the trans-synaptic propagation rate (fitted), and $s_i$ is a regional seeding source. Neuron death is driven by both a base rate and pathology-modulated toxicity:
+\begin{equation}
+\frac{dN_i}{dt} = -(\alpha_{\text{base}} + \beta \cdot L_i) \cdot N_i
+\label{eq:death}
+\end{equation}
+where $\alpha_{\text{base}} = 0.03$ yr$^{-1}$ ($\sim$3\%/yr, consistent with \cite{fearnley1991}) and $\beta = 0.01$ are fixed from literature. Models 3--7 differ in which parameters are fitted versus fixed (Table~\ref{tab:models}).
 
-All seven candidate models are globally identifiable when $\beta_L$ is fixed from literature. When $\beta_L$ is fitted, it and all latent $L$-compartment states trade off and the posterior becomes degenerate --- an expected consequence of $L$ being unobservable from DaT-SPECT alone.
+The observation model maps neuron counts to DaT-SPECT SBR via a power law:
+\begin{equation}
+\text{SBR}_i(t) = \text{SBR}_{i,0} \cdot \left(\frac{N_i(t)}{N_{i,0}}\right)^\gamma
+\label{eq:observation}
+\end{equation}
+where $\gamma = 0.7$ accounts for compensatory dopamine transporter upregulation \cite{lee2019}. The four-region model architecture with connectivity weights and ODE equations is illustrated in Fig.~\ref{fig:schematic}.
 
-\subsection{Practical Identifiability via Model Comparison}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{p8a_fig1_model_schematic.pdf}
+\caption{\textbf{Four-region striatal propagation model.} Caudate (blue) and putamen (red) regions are connected bilaterally (dashed lines) and ipsilaterally (solid lines), with connection weights derived from the Budapest Reference Connectome. Pathology is seeded in the putamen ($s_{\text{put}}$, orange arrows) and propagates via the connectivity matrix at rate $k_{\text{spread}}$. Regional neuron death is driven by both a base rate and pathology-modulated toxicity (Eqs.~\ref{eq:propagation}--\ref{eq:observation}).}
+\label{fig:schematic}
+\end{figure}
 
 \begin{table}[H]
 \centering
-\small
-\caption{Model comparison on 304 Wave~A patients, 4 regional SBR observables. $\Delta$AIC relative to the best model (M1 independent regional decay).}
-\label{tab:p8a-modelcomp}
-\begin{tabular}{lcc}
+\caption{Seven candidate models with fitted and fixed parameters.}
+\label{tab:models}
+\begin{tabular}{@{}llcl@{}}
 \toprule
-Model & Description & $\Delta$AIC \\
+Model & Description & Fitted params & Key feature \\
 \midrule
-M1 & Independent regional decay & 0 (reference) \\
-M3 & Pure diffusion (no seed) & $\gg 10{,}000$ \\
-M6r & Seed $+$ diffusion & $+5{,}668$ \\
-M7 & Asymmetric seed $+$ regional sensitivity & $+9{,}412$ \\
+M1 & Independent decays & $T_1, T_2, T_3, T_4$ (4) & No spatial coupling \\
+M2 & Base + putamen offset & $T_{\text{base}}, \delta_{\text{put}}$ (2) & Simplest asymmetry \\
+M3 & Pure diffusion & $k_{\text{spread}}$ (1) & No seeding source \\
+M4 & Diffusion + amplification & $k_{\text{spread}}, k_{\text{local}}$ (2) & Local amplification \\
+M5 & Base + diffusion & $T_{\text{base}}, k_{\text{spread}}$ (2) & Hybrid \\
+M6 & Diffusion + seeding & $k_{\text{spread}}, s_{\text{put}}$ (2) & Asymmetric putamen seeding \\
+M7 & Full & $T_{\text{base}}, k_{\text{spread}}, s_{\text{put}}$ (3) & Most complex \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-M1 dominates by a very large AIC margin. Neither the connectome-weighted seeded propagation model (M6r, the biologically-principled choice) nor its asymmetric extension (M7) improves fit on PPMI data. The $k_\text{spread}$ population mean for M6r is $1.26$~yr$^{-1}$ --- estimable, but not predictively useful.
+\subsection{Structural identifiability analysis}
 
-\subsection{Regional Decay Rates (M1)}
+Structural identifiability was assessed using \texttt{StructuralIdentifiability.jl} v0.5.19 \cite{dong2023} with a probability threshold of 0.99. Each model was encoded as a system of ordinary differential equations with the four regional SBR values as outputs. Parameters were classified as globally identifiable, locally identifiable, or non-identifiable.
 
-\begin{itemize}
-\item Caudate mean decay: $0.119$~yr$^{-1}$ (median slope $-0.125$ SBR/yr)
-\item Putamen mean decay: $0.142$~yr$^{-1}$ (median slope $-0.059$ SBR/yr)
-\item Putamen declines 19\% faster than caudate in rate terms, consistent with Kerstens~2023~\cite{kerstens2023} (annual DAT decline: caudate $-8.5 \pm 6.6\%$, putamen $-7.1 \pm 6.1\%$). The caudate-wins-on-absolute-rate flip is the standard floor effect.
-\end{itemize}
+An initial analysis revealed that the pathology-to-death coupling parameter $\beta$ (Eq.~\ref{eq:death}) is structurally non-identifiable when fitted jointly with the propagation parameters, because the pathology states $L_i$ are hidden (unobserved) and $\beta$ trades off with $L_i$ values. This motivated fixing $\beta$ from literature for all subsequent analyses.
 
-\section{Discussion}
-\label{sec:p8a-discussion}
+\subsection{Simulation-based calibration}
 
-The headline finding is a publishable negative: \emph{spatial propagation is not detectable from 4-region PPMI DaT-SPECT}. Three convergent lines of evidence support this:
+We followed the SBC protocol of \cite{talts2018} with the log-likelihood test quantity extension of \cite{modrak2022}. For each model, 200 independent simulations were performed (consistent with the $\geq 200$ recommendation of \citealt{talts2018} for reliable SBC):
 
 \begin{enumerate}
-\item AIC comparison strongly favours independent decay (M1 $\Delta$AIC $= 5{,}668$ vs M6r).
-\item Connectome replacement (HCP1065 vs Melbourne Subcortex vs Budapest v3.0) produces no qualitative change in rank ordering.
-\item Pre-registered Simulation-Based Calibration (SBC) on synthetic data with the true M6r propagation structure yielded similarly low model-comparison power, confirming the signal-to-noise issue is intrinsic to the observation dimensionality, not a pipeline bug.
+\item Draw true parameter values from uniform priors spanning the biologically plausible range.
+\item Randomly select an observation schedule matching PPMI visit patterns (3, 4, or 5 scans over 0--6 years).
+\item Simulate regional SBR trajectories from the ODE model with the true parameters.
+\item Add Gaussian observation noise with $\sigma = 0.15$ SBR units (consistent with DaT-SPECT scan-rescan variability \cite{tossicibolt2017}).
+\item Fit the model to the noisy synthetic data via multi-start maximum likelihood estimation (3 random starts, L-BFGS-B optimizer).
+\item Record the correlation between true and estimated parameters across simulations.
 \end{enumerate}
 
-Literature validations are consistent: Kim~2022~\cite{kim2022} (posterior putamen degeneration 14.4~years before onset) and Oh~2012~\cite{oh2012} (putamen-caudate asymmetry maintained into advanced PD) are both compatible with an \emph{already completed} spatial gradient at PPMI enrollment rather than an ongoing propagation process detectable at 4-region resolution. Drori~2022~\cite{drori2022} and Fu~2022~\cite{fu2022} document an anterior-posterior sub-gradient within the putamen itself --- the natural follow-on investigation is a 6-region or 8-region sub-division (see Chapter~\ref{ch:paper8b} and Chapter~\ref{ch:conclusion} future work).
+We defined SBC ``pass'' as: (i) convergence rate $\geq 80$\%, (ii) all parameter correlations $r > 0.7$, and (iii) all relative biases $< 20$\%. The $r > 0.7$ threshold corresponds to $R^2 > 0.49$, meaning the fitted values capture at least half the variance of the true parameters. This is motivated by the minimum correlation required for meaningful prediction in clinical biomarker studies \cite{conte2024} and has been adopted in prior identifiability analyses where rank-histogram uniformity tests are not applicable to MLE-based SBC. We note that our MLE-based SBC provides a conservative (lower bound) test of practical identifiability: hierarchical Bayesian approaches with informative priors would be expected to improve parameter recovery, so failures under MLE represent genuine identifiability limitations rather than estimation-method artifacts.
 
-\subsection{Implications for the Digital Twin Programme}
+\subsection{Fisher Information Matrix analysis}
 
-For the mechanistic twin developed in Chapter~\ref{ch:paper7}, this result justifies focusing computational effort on temporal rather than spatial fidelity. The Phase~4 PK-PD extension in Chapter~\ref{ch:paper9} and the bidirectional architecture in Chapter~\ref{ch:paper10} accordingly treat the striatum as a single compartment parameterised by cohort-average or patient-specific scalar neuron-loss trajectories.
+For Models M6 and M7, we computed the Fisher Information Matrix (FIM) at representative parameter values by numerical differentiation of the model's predicted SBR with respect to each parameter. The FIM was computed as:
+\begin{equation}
+\mathcal{I}(\theta)_{jk} = \frac{1}{\sigma^2} \sum_{i,t} \frac{\partial \text{SBR}_i(t; \theta)}{\partial \theta_j} \cdot \frac{\partial \text{SBR}_i(t; \theta)}{\partial \theta_k}
+\end{equation}
+The eigenvalues of $\mathcal{I}$ indicate the information content along each parameter direction: a small eigenvalue identifies a ``sloppy'' direction \cite{gutenkunst2007} where the data provide minimal constraint. The Cram\'{e}r-Rao lower bound $\sigma(\theta_j) \geq \sqrt{[\mathcal{I}^{-1}]_{jj}}$ provides the minimum achievable estimation uncertainty.
 
-\section{Data and Code Availability}
+\subsection{Sensitivity analysis}
 
-Full results and model-comparison tables in \texttt{outputs/mechanistic\_twin/phase3/}, including the \texttt{StructuralIdentifiability.jl} proof JSONs, per-model AIC/BIC tables, and 16 publication figures. Submitted venue: \emph{PLoS Computational Biology} (Methods/Resources track).
+To characterize the data requirements for practical identifiability, we performed systematic sweeps over: (i) observation noise $\sigma \in \{0.02, 0.05, 0.10, 0.15\}$ SBR units; (ii) number of timepoints $n \in \{3, 4, 5, 7, 11\}$; and (iii) model reduction (fitting $k_{\text{spread}}$ only with $s_{\text{put}}$ fixed).
+
+% ============================================================================
+% RESULTS
+% ============================================================================
+\section{Results}
+
+\subsection{All seven models are structurally identifiable}
+
+With the pathology-to-death coupling $\beta$ fixed from literature, all seven candidate models were classified as globally structurally identifiable by \texttt{StructuralIdentifiability.jl} (Fig.~\ref{fig:structural}). As shown in the figure, each model's fitted parameters and observable states receive ``globally identifiable'' status (green), confirming that the differential-algebraic test finds a unique solution for all parameter values. Notably, all state variables ($N_i$) and fitted parameters were globally identifiable, and for Models 3--7 the hidden pathology states ($L_i$) were also globally identifiable---meaning that in principle, with noise-free continuous observations, all parameters and states could be uniquely recovered.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{p8a_fig2_structural_identifiability.png}
+\caption{\textbf{Structural identifiability of all seven candidate models.} All models are globally identifiable when the pathology-to-death coupling $\beta$ is fixed from literature. The number of fitted parameters ranges from 1 (M3) to 4 (M1). An initial analysis (not shown) revealed that $\beta$ is non-identifiable when fitted, because the pathology states $L_i$ are hidden---motivating the decision to fix $\beta$ from literature for all subsequent analyses.}
+\label{fig:structural}
+\end{figure}
+
+\subsection{All four surviving models fail practical parameter recovery}
+
+Despite passing structural identifiability, all four biologically plausible models (M1, M2, M6, M7) failed the SBC practical identifiability gate (Table~\ref{tab:sbc}). The pattern of failure was consistent:
+
+\textit{Base decay rates are partially recoverable.} Parameters capturing the overall rate of SBR decline ($T_1$ and $T_2$ in M1) achieved moderate correlations ($r = 0.65$--$0.67$) between true and estimated values, approaching but not exceeding the $r > 0.7$ threshold. This is consistent with Phase 2 results showing that the scalar decay rate is identifiable from longitudinal DaT-SPECT \cite{dupre2026phase2}.
+
+\textit{Regional-difference parameters are not recoverable.} Parameters capturing the putamen-caudate differential ($\delta_{\text{put}}$ in M2, $T_3$ and $T_4$ in M1, $s_{\text{put}}$ in M6/M7) showed poor recovery ($r = 0.08$--$0.47$) with substantial relative biases (6--228\%). The putamen-specific signal is below the noise floor at $\sigma = 0.15$.
+
+\textit{The propagation rate is marginally recoverable.} $k_{\text{spread}}$ in M6 achieved $r = 0.49$, above chance but below the $r > 0.7$ threshold. In the three-parameter M7, $k_{\text{spread}}$ improved to $r = 0.33$ but remained insufficient.
+
+\begin{table}[H]
+\centering
+\caption{SBC parameter recovery results (200 simulations per model, $\sigma = 0.15$).}
+\label{tab:sbc}
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Model & Parameter & $r$ (true vs est) & Rel.\ bias & RMSE & Gate \\
+\midrule
+M1 & $T_1$ (caudate L) & 0.670 & 4.1\% & 0.029 & --- \\
+   & $T_2$ (caudate R) & 0.650 & 22.8\% & 0.032 & --- \\
+   & $T_3$ (putamen L) & 0.440 & 38.5\% & 0.065 & --- \\
+   & $T_4$ (putamen R) & 0.470 & 6.2\% & 0.068 & \textbf{FAIL} \\
+\midrule
+M2 & $T_{\text{base}}$ & 0.650 & $-1.5$\% & 0.024 & --- \\
+   & $\delta_{\text{put}}$ & 0.230 & 58.4\% & 0.046 & \textbf{FAIL} \\
+\midrule
+M6 & $k_{\text{spread}}$ & 0.490 & 31.7\% & 0.891 & --- \\
+   & $s_{\text{put}}$ & 0.080 & 228.3\% & 4.120 & \textbf{FAIL} \\
+\midrule
+M7 & $T_{\text{base}}$ & 0.370 & 15.2\% & 0.041 & --- \\
+   & $k_{\text{spread}}$ & 0.330 & $-5.9$\% & 0.952 & --- \\
+   & $s_{\text{put}}$ & 0.110 & 115.4\% & 3.910 & \textbf{FAIL} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The contrast between recoverable and non-recoverable parameters is visually apparent in the SBC scatter plots (Fig.~\ref{fig:sbc}). For $T_{\text{base}}$ in M2, estimated values show moderate clustering along the identity line ($r = 0.65$); for $s_{\text{put}}$ in M6, the scatter is essentially random ($r = 0.08$). The remediated single-parameter model restores tight recovery along the identity line ($r = 0.892$).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{p8a_fig3_sbc_recovery.png}
+\caption{\textbf{SBC parameter recovery: true versus estimated values.} Each point represents one simulation (200 per model, $\sigma = 0.15$). Dashed line = perfect recovery. \textit{Top row:} M1 caudate parameters show moderate recovery ($r = 0.65$--$0.67$), while putamen parameters fail ($r < 0.5$). \textit{Bottom row:} M6 $s_{\text{put}}$ is essentially random ($r = 0.08$); the remediated model (center) fixing $s_{\text{put}}$ from literature achieves strong recovery ($r = 0.892$, 200 simulations). Summary panel (right) shows all results against the $r > 0.7$ threshold.}
+\label{fig:sbc}
+\end{figure}
+
+\subsection{Fisher Information Matrix confirms the sloppy direction}
+
+FIM analysis of Model M6 at representative parameter values ($k_{\text{spread}} = 0.5$, $s_{\text{put}} = 1.0$, 3-scan schedule) revealed a condition number of 12.9, with FIM eigenvalues $\lambda_1 = 6.7 \times 10^{-3}$ and $\lambda_2 = 8.7 \times 10^{-2}$. The small eigenvalue corresponds to a sloppy direction dominated by $s_{\text{put}}$. The Cram\'{e}r-Rao lower bounds were $\sigma(k_{\text{spread}}) = 4.70$ and $\sigma(s_{\text{put}}) = 11.74$, corresponding to 2.47$\times$ and 4.19$\times$ the respective prior widths. For $s_{\text{put}}$, the data provide \textit{less} constraint than the prior alone.
+
+The spatial perturbation signal-to-noise ratio provides the most intuitive explanation: a 10\% change in $k_{\text{spread}}$ produces a maximum between-region SBR shift of 0.007 units---only 4.7\% of the observation noise ($\sigma = 0.15$)---with a mean perturbation across all region-timepoint combinations of just 1.0\% of noise. Over a typical three-year observation window with four scans, the accumulated differential spatial signal is 1.27$\sigma$---barely above the noise floor. The SBR sensitivity to the overall death rate ($\alpha_{\text{base}}$) is 33--68$\times$ larger than to $k_{\text{spread}}$ or $s_{\text{put}}$, confirming that DaT-SPECT is overwhelmingly sensitive to \textit{how fast} neurons die, not \textit{where} they die first.
+
+For the three-parameter Model M7 (4-scan schedule), the FIM condition number increased to 76,506, with strong correlation between $T_{\text{base}}$ and $k_{\text{spread}}$ ($r = -0.78$). This parameter interaction explains the complete failure of $T_{\text{base}}$ recovery ($r = -0.03$) in M7's SBC.
+
+\subsection{Noise and timepoint requirements}
+
+Sensitivity analysis revealed distinct identifiability profiles for $k_{\text{spread}}$ and $s_{\text{put}}$ (Fig.~\ref{fig:sensitivity}):
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{p8a_fig4_sensitivity.png}
+\caption{\textbf{Data requirements for parameter recovery.} \textit{Left:} Effect of observation noise on recovery correlation. $k_{\text{spread}}$ (blue) crosses the $r > 0.7$ threshold at $\sigma \leq 0.10$, while $s_{\text{put}}$ (orange) never reaches the threshold at any tested noise level. \textit{Right:} Effect of number of serial scans. At least 4 scans are required for $k_{\text{spread}}$ recovery; $s_{\text{put}}$ remains non-recoverable regardless of timepoint density. Dashed line = $r = 0.7$ recovery threshold.}
+\label{fig:sensitivity}
+\end{figure}
+
+$k_{\text{spread}}$ is recoverable under improved conditions: reducing noise from $\sigma = 0.15$ to $\sigma = 0.05$ raised recovery from $r = 0.78$ to $r = 0.91$; increasing to four or more timepoints raised recovery from $r = 0.33$ (3 scans) to $r = 0.78$ (4 scans) to $r = 0.88$ (7 scans).
+
+$s_{\text{put}}$ remains non-recoverable regardless: even with 11 timepoints, $r(s_{\text{put}})$ reached only 0.42; at $\sigma = 0.05$, it reached only 0.54. Only at unrealistically low noise ($\sigma = 0.02$, approximately 1.5\% coefficient of variation) did $s_{\text{put}}$ approach the $r > 0.7$ threshold.
+
+\subsection{A remediated single-parameter model achieves strong recovery}
+
+Fixing $s_{\text{put}}$ from the preformed fibril injection literature \cite{chu2019, patterson2019} and fitting only $k_{\text{spread}}$ yielded a dramatic improvement in parameter recovery (Fig.~\ref{fig:remediated}). In a full 200-iteration SBC with observation schedules of four and five timepoints, the remediated model achieved $r(k_{\text{spread}}) = 0.892$ with a relative bias of $-4.4$\%, RMSE of 0.277, and 100\% convergence rate (200/200 simulations). This exceeds the $r > 0.7$ threshold with substantial margin. The minimum requirement of three timepoints remained insufficient ($r < 0.1$), confirming that at least four serial DaT-SPECT scans are necessary for spatial propagation estimation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{p8a_fig5_remediated.png}
+\caption{\textbf{Remediated single-parameter model achieves strong parameter recovery.} \textit{Left:} True versus estimated $k_{\text{spread}}$ for 200 SBC simulations with $s_{\text{put}}$ fixed from literature and $\geq 4$ timepoints ($\sigma = 0.15$). The tight clustering along the identity line ($r = 0.892$) contrasts sharply with the scattered recovery observed for the two-parameter M6 model (Fig.~\ref{fig:sbc}, top-right). \textit{Right:} Residual distribution centered near zero (bias $= -0.025$), confirming unbiased estimation. The green badge indicates SBC gate PASS.}
+\label{fig:remediated}
+\end{figure}
+
+\subsection{Empirical validation on real PPMI data}
+
+To confirm the simulation-based findings on real patient data, we fitted all three model classes to 304 PPMI Wave A patients with four or more serial DaT-SPECT scans. For each patient, per-region SBR trajectories (caudate L/R, putamen L/R) were fitted via multi-start maximum likelihood estimation.
+
+Model M1 (four independent regional decay rates) achieved the lowest AIC (5,035), substantially outperforming both M2 (shared base plus putamen offset; AIC = 6,542; $\Delta$AIC = +1,507) and M6-remediated (single $k_{\text{spread}}$; AIC = 10,703; $\Delta$AIC = +5,668). All 304 patients converged for all three models (100\% convergence rate).
+
+The M1 population-level decay rates were biologically plausible: caudate mean $0.119 \pm 0.081$ yr$^{-1}$ and putamen mean $0.142 \pm 0.100$ yr$^{-1}$, indicating that putamen declines approximately 19\% faster than caudate---consistent with the known rostro-caudal gradient \cite{kish1988, brooks1990}. The M6-remediated model estimated a population mean $k_{\text{spread}} = 1.26 \pm 0.65$ yr$^{-1}$ (median 1.32), but this parameter did not improve model fit over independent regional decays.
+
+This real-data result confirms the SBC prediction: while $k_{\text{spread}}$ is structurally identifiable and recoverable in simulation ($r = 0.892$), the spatial propagation signal in real DaT-SPECT data is insufficient to outperform a simpler model that independently fits each region. The $\Delta$AIC of 5,668 indicates that the propagation model's single degree of freedom cannot capture the patient-specific regional variation that M1's four parameters accommodate. The honest conclusion is that four-region DaT-SPECT data at PPMI-grade temporal resolution resolve \textit{per-region} decline rates but not the \textit{mechanistic coupling} between regions.
+
+% ============================================================================
+% DISCUSSION
+% ============================================================================
+\section{Discussion}
+
+\subsection{The structural-practical identifiability gap in spatial PD models}
+
+Our central finding is that the structural identifiability of a connectome propagation model is necessary but far from sufficient for reliable parameter estimation from clinical DaT-SPECT data. This gap, well characterized in the systems biology literature \cite{raue2009, wieland2021}, has not previously been demonstrated for neuroimaging-based propagation models. The practical non-identifiability we observe arises from the interaction of three factors: (i) the hidden nature of the pathology state $L_i$, which is never directly observed; (ii) the limited number of longitudinal timepoints available in current cohort studies; and (iii) the substantial measurement noise inherent to DaT-SPECT imaging.
+
+\subsection{No published NDM study validates parameter recovery}
+
+Our literature review identified no prior NDM study that performs simulation-based calibration or systematic parameter recovery analysis. \cite{raj2012} reports only population-level correlations between model predictions and observed atrophy. \cite{pandya2019} sweeps a single propagation-time parameter without uncertainty quantification. \cite{schafer2021} uses Bayesian MCMC to report per-subject credible intervals but does not validate these intervals against known ground truth. \cite{vogel2023}, in the most comprehensive review of the field, does not mention identifiability analysis. This gap is concerning because parameters reported without recovery validation may reflect optimizer artifacts rather than biological signal.
+
+\subsection{The seeding rate is the ``sloppy direction''}
+
+The fundamental non-identifiability of $s_{\text{put}}$ parallels our earlier finding that the individual nucleation rate ($k_n$) and toxicity coupling ($\alpha_{\text{tox}}$) are practically non-identifiable from scalar DaT-SPECT trajectories, while their product ($T_{\text{tox}}$) is well identified \cite{dupre2026phase2}. In the spatial model, $s_{\text{put}}$ sets the \textit{amplitude} of regional pathology differences, while $k_{\text{spread}}$ sets the \textit{rate} of spatial equilibration. The DaT-SPECT SBR, which observes neuron counts rather than pathology directly, is primarily sensitive to the temporal dynamics (how fast regions decline) rather than the absolute pathology levels (how much pathology is seeded). This creates a degeneracy: different combinations of $s_{\text{put}}$ and $k_{\text{spread}}$ can produce similar SBR trajectories, with $s_{\text{put}}$ being the sloppy direction in the sense of \cite{gutenkunst2007}.
+
+\subsection{Implications for clinical imaging protocols}
+
+Our timepoint analysis has direct implications for clinical study design. The critical threshold is four serial DaT-SPECT scans: below this, even the propagation rate $k_{\text{spread}}$ is non-recoverable ($r = 0.33$ at 3 scans). This suggests that current clinical protocols with only 2--3 scans are insufficient for spatial propagation modeling, while the PPMI protocol (up to 6 scans over 7 years) is adequate for single-parameter estimation.
+
+The noise analysis indicates that advances in DaT-SPECT quantification could substantially improve parameter recovery. Reducing $\sigma$ from 0.15 to 0.05 SBR units (achievable with improved reconstruction algorithms and harmonized acquisition \cite{tossicibolt2017}) would raise $k_{\text{spread}}$ recovery from $r = 0.78$ to $r = 0.91$.
+
+\subsection{Relationship to putamen-caudate gradient biology}
+
+The non-identifiability of the putamen-specific parameters does \textit{not} imply that the putamen-caudate gradient is absent. The gradient is one of the most robustly established findings in PD neuroimaging, confirmed from \cite{brooks1990} through \cite{fiorenzato2021}. Rather, our finding indicates that while the gradient is clearly \textit{observable} in cross-sectional data, its mechanistic decomposition into propagation rate versus seeding intensity is not \textit{resolvable} from the available longitudinal imaging alone. This distinction between observability and parameter resolution is central to the identifiability framework \cite{villaverde2016}.
+
+\subsection{Limitations and planned extensions}
+
+Several limitations of the current analysis motivate ongoing work. First, our SBC used maximum likelihood estimation rather than full Bayesian inference. Hierarchical Bayesian pooling across patients via SAEM \cite{schafer2021} could improve practical identifiability by sharing population-level parameter distributions across the 644-patient cohort; we are currently implementing this as the next phase of the project and expect it to tighten the $k_{\text{spread}}$ posterior further.
+
+Second, the four-region model is a deliberate simplification of the full 83-region Desikan-Killiany parcellation used in most NDM studies. This choice is motivated by the observation dimensionality of DaT-SPECT, which reliably quantifies only caudate and putamen bilaterally. Scaling to 83 regions would not necessarily improve identifiability: more regions increase the number of hidden pathology states $L_i$ faster than they increase the number of observations (since most cortical regions have no DaT-SPECT signal), potentially worsening the ratio of unobserved to observed states. However, incorporating FreeSurfer ASEG volumetric data (available for 492 of our 644 patients) as a second observable modality could provide the independent spatial information needed to constrain propagation parameters. Future work will explore this multi-modal approach.
+
+Third, we used a literature-derived connectivity matrix rather than patient-specific DTI tractography. While \cite{powell2018} demonstrated that population-average connectomes are sufficient for NDM prediction, individual connectomes from the Budapest Reference Connectome or PPMI DTI data (available for $\sim$140 patients) could reduce inter-patient variability. Our sensitivity analysis across three connectivity variants (anatomy-grounded, equal-weight, putamen-dominant) partially addresses this limitation by showing that model comparison conclusions are robust to connectivity perturbation.
+
+Fourth, our noise model assumes independent Gaussian errors, while real DaT-SPECT noise includes systematic scanner-dependent components \cite{tossicibolt2017}. Scanner harmonization protocols and site-specific noise modeling could further improve parameter recovery beyond the $r = 0.892$ demonstrated here.
+
+Finally, we validated the simulation findings on real PPMI data (Section~4.6), demonstrating that the independent per-region decay model outperforms the spatial propagation model on 304 patients. Future work will examine whether the per-region decay rates estimated by M1 have clinical biomarker value---specifically, whether the caudate-putamen rate differential correlates with motor progression, cognitive decline, or genetic risk factors (LRRK2, GBA).
+
+\section{Conclusion}
+
+We have demonstrated that structural identifiability of a mechanistic PD propagation model does not guarantee practical parameter recovery from clinical neuroimaging data. Through simulation-based calibration of 200 synthetic patients per model and empirical validation on 304 real PPMI patients, we established three key results. First, the seeding rate $s_{\text{put}}$ is fundamentally non-identifiable from DaT-SPECT regardless of temporal sampling density. Second, the spatial propagation rate $k_{\text{spread}}$ is recoverable in simulation with a minimum of four serial scans and a simplified single-parameter model ($r = 0.892$), but on real data, the independent per-region decay model (M1) outperforms the propagation model by $\Delta$AIC = 5,668---demonstrating that four-region DaT-SPECT resolves per-region decline rates but not the mechanistic coupling between regions. Third, the per-region rates estimated by M1 are biologically informative: putamen declines 19\% faster than caudate, consistent with the established rostro-caudal gradient. These findings provide the first combined simulation-and-empirical identifiability analysis for DaT-SPECT-based digital twin models and establish both the minimum data requirements and the fundamental information limits of current clinical imaging protocols for spatial PD modeling.
+
+% ============================================================================
+% REFERENCES
+% ============================================================================
+
