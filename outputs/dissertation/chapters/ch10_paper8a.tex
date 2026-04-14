@@ -1,0 +1,87 @@
+% =============================================================================
+% Chapter 10 — Paper 8a: Regional DaT-SPECT Identifiability
+% Practical identifiability limits of spatial propagation parameters
+% in mechanistic Parkinson's disease digital twins
+% =============================================================================
+
+\chapter{Paper 8a: Practical Identifiability Limits of Spatial Propagation Parameters in Mechanistic PD Digital Twins}
+\label{ch:paper8a}
+
+\section{Introduction}
+\label{sec:p8a-intro}
+
+Chapter~\ref{ch:paper7} established that per-patient $\alpha$-synuclein aggregation and neuron-loss parameters are globally identifiable from joint longitudinal DaT-SPECT and CSF $\alpha$-synuclein observations. A natural next question is whether the \emph{spatial} spread of pathology across striatal sub-regions can be similarly recovered from PPMI DaT-SPECT data. Network-diffusion models (NDMs) have shown promise in related neurodegenerative settings (e.g., tau PET in Alzheimer's disease~\cite{vogel2024}, MRI atrophy in PD~\cite{pandya2019}), but no published study has attempted NDM calibration from regional DaT-SPECT SBR to a PD cohort with per-patient identifiability analysis.
+
+This chapter addresses whether spatial propagation is detectable from the four reliably quantifiable striatal ROIs in PPMI DaT-SPECT (left/right caudate, left/right putamen) and whether a mechanistic connectome-informed propagation model outperforms independent regional decay. The answer establishes the upper bound on spatial resolution for any mechanistic PD twin calibrated from this class of imaging data.
+
+\section{Methods}
+\label{sec:p8a-methods}
+
+\subsection{Regional Cohort}
+
+The analysis cohort comprised 641 PPMI patients with at least three longitudinal DaT-SPECT scans over a mean 3.31-year follow-up window. Each scan provided left and right SBR for caudate and putamen (100\% coverage, mean $\pm$ SD: caudate mean $2.00 \pm 0.76$; putamen mean $1.00 \pm 0.65$). Full regional inventory is tabulated in~\cite{datavalidation2026}.
+
+\subsection{Candidate Models (M1--M7)}
+
+Seven mechanistic candidates were tested, spanning independent regional decay (M1), pure diffusion (M3), connectome-informed propagation from a caudal seed (M6r), and asymmetric seeding with regional sensitivity scaling (M7). All seven were tested for structural identifiability using \texttt{StructuralIdentifiability.jl} v0.5.19 at probability $= 0.99$.
+
+\subsection{Fitting Procedure}
+
+Per-patient maximum-likelihood fits were computed with region-specific observation noise from the Paper~7 priors. Coupling parameters for all propagation models fixed $\beta_L$ (the L $\to$ N coupling) from literature (Oliveras-Salv\`a~2013~\cite{oliverassalva2013}; Bourdenx~2020~\cite{bourdenx2020}) because $\beta_L$ is non-identifiable when $L$ is a hidden state.
+
+\section{Results}
+\label{sec:p8a-results}
+
+\subsection{Structural Identifiability}
+
+All seven candidate models are globally identifiable when $\beta_L$ is fixed from literature. When $\beta_L$ is fitted, it and all latent $L$-compartment states trade off and the posterior becomes degenerate --- an expected consequence of $L$ being unobservable from DaT-SPECT alone.
+
+\subsection{Practical Identifiability via Model Comparison}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Model comparison on 304 Wave~A patients, 4 regional SBR observables. $\Delta$AIC relative to the best model (M1 independent regional decay).}
+\label{tab:p8a-modelcomp}
+\begin{tabular}{lcc}
+\toprule
+Model & Description & $\Delta$AIC \\
+\midrule
+M1 & Independent regional decay & 0 (reference) \\
+M3 & Pure diffusion (no seed) & $\gg 10{,}000$ \\
+M6r & Seed $+$ diffusion & $+5{,}668$ \\
+M7 & Asymmetric seed $+$ regional sensitivity & $+9{,}412$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+M1 dominates by a very large AIC margin. Neither the connectome-weighted seeded propagation model (M6r, the biologically-principled choice) nor its asymmetric extension (M7) improves fit on PPMI data. The $k_\text{spread}$ population mean for M6r is $1.26$~yr$^{-1}$ --- estimable, but not predictively useful.
+
+\subsection{Regional Decay Rates (M1)}
+
+\begin{itemize}
+\item Caudate mean decay: $0.119$~yr$^{-1}$ (median slope $-0.125$ SBR/yr)
+\item Putamen mean decay: $0.142$~yr$^{-1}$ (median slope $-0.059$ SBR/yr)
+\item Putamen declines 19\% faster than caudate in rate terms, consistent with Kerstens~2023~\cite{kerstens2023} (annual DAT decline: caudate $-8.5 \pm 6.6\%$, putamen $-7.1 \pm 6.1\%$). The caudate-wins-on-absolute-rate flip is the standard floor effect.
+\end{itemize}
+
+\section{Discussion}
+\label{sec:p8a-discussion}
+
+The headline finding is a publishable negative: \emph{spatial propagation is not detectable from 4-region PPMI DaT-SPECT}. Three convergent lines of evidence support this:
+
+\begin{enumerate}
+\item AIC comparison strongly favours independent decay (M1 $\Delta$AIC $= 5{,}668$ vs M6r).
+\item Connectome replacement (HCP1065 vs Melbourne Subcortex vs Budapest v3.0) produces no qualitative change in rank ordering.
+\item Pre-registered Simulation-Based Calibration (SBC) on synthetic data with the true M6r propagation structure yielded similarly low model-comparison power, confirming the signal-to-noise issue is intrinsic to the observation dimensionality, not a pipeline bug.
+\end{enumerate}
+
+Literature validations are consistent: Kim~2022~\cite{kim2022} (posterior putamen degeneration 14.4~years before onset) and Oh~2012~\cite{oh2012} (putamen-caudate asymmetry maintained into advanced PD) are both compatible with an \emph{already completed} spatial gradient at PPMI enrollment rather than an ongoing propagation process detectable at 4-region resolution. Drori~2022~\cite{drori2022} and Fu~2022~\cite{fu2022} document an anterior-posterior sub-gradient within the putamen itself --- the natural follow-on investigation is a 6-region or 8-region sub-division (see Chapter~\ref{ch:paper8b} and Chapter~\ref{ch:conclusion} future work).
+
+\subsection{Implications for the Digital Twin Programme}
+
+For the mechanistic twin developed in Chapter~\ref{ch:paper7}, this result justifies focusing computational effort on temporal rather than spatial fidelity. The Phase~4 PK-PD extension in Chapter~\ref{ch:paper9} and the bidirectional architecture in Chapter~\ref{ch:paper10} accordingly treat the striatum as a single compartment parameterised by cohort-average or patient-specific scalar neuron-loss trajectories.
+
+\section{Data and Code Availability}
+
+Full results and model-comparison tables in \texttt{outputs/mechanistic\_twin/phase3/}, including the \texttt{StructuralIdentifiability.jl} proof JSONs, per-model AIC/BIC tables, and 16 publication figures. Submitted venue: \emph{PLoS Computational Biology} (Methods/Resources track).

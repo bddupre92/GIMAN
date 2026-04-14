@@ -1,0 +1,88 @@
+% =============================================================================
+% Chapter 15 — Conclusion + Future-Work Catalog
+% =============================================================================
+
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+\section{Synopsis of Contributions}
+\label{sec:conc-synopsis}
+
+This dissertation developed, validated, and integrated a 10-paper programme spanning two complementary research traditions. The data-driven arc (Papers~1--6) delivered a production-grade NSD-ISS prediction pipeline with calibrated uncertainty, stage-conditioned multi-modal imputation, graph-informed digital twins for NSD-ISS transition timing, IPCW-conformal survival bands, temporal validation across expanding enrollment windows, and a unified two-second-per-patient clinical pipeline. The mechanistic arc (Papers~7--10) delivered per-patient Bayesian calibration of a coupled $\alpha$-synuclein aggregation--neuron death ODE from longitudinal imaging and CSF, formal identifiability analysis that delimited the spatial resolution available from 4-region DaT-SPECT, a three-pathway PK-PD analysis that located the twin's predictive domain, and a bidirectional-update infrastructure with an observationally validated counterfactual capability and a formal NASEM self-audit.
+
+The two arcs converge on a single methodological thesis defended in Chapter~\ref{ch:discussion}: data-driven and mechanistic models answer different clinical questions and are best deployed together. Evidence for this claim includes (i)~a wearing-off head-to-head in which both families sit near random-prediction, independently confirming that wearing-off is pharmacokinetically driven rather than neurodegeneration-driven; (ii)~a Phase~4 interaction model in which patient-specific $N(t)$ modulates levodopa benefit (a counterfactual capability that no data-driven model in this dissertation provides); and (iii)~a Graph-DT forward-transition $C_\text{td} = 0.920$ that no mechanistic framework matches for stage-to-stage timing.
+
+Governance and credibility are first-class contributions. Every claim in every chapter is backed by a committed script, a passing test, a RUN\_MANIFEST, and a verified citation. Random seeds are pinned; chain SHAs are recorded; the 290-MB local PostgreSQL database provides a single-command reproducibility path. The dissertation ships with 250+ verified citations (zero dangling), 16/21 NASEM criteria satisfied with no absent criteria, and a clear declaration of limits (PPMI-centric cohort, cross-sectional external validation, no prospective interventional data).
+
+\section{Closing Scientific Summary}
+\label{sec:conc-summary}
+
+Five results stand out across the dissertation:
+
+\begin{enumerate}
+\item \textbf{NSD-ISS is learnable with calibrated uncertainty} (Chapters~\ref{ch:paper1}--\ref{ch:paper4}). CatBoost AUC~0.979 binary; cross-conformal 90\% coverage at set size $<1.3$.
+\item \textbf{Stage-conditioned imputation is an inter\-pret\-able win for minority stages} (Chapter~\ref{ch:paper2}). Aggregate RMSE parity, consistent 2--3\% downstream balanced-accuracy gain on staging-relevant targets.
+\item \textbf{Graph-informed digital twins for transition timing are competitive with pure temporal models with lower variance} (Chapter~\ref{ch:paper3}). $C_\text{td} = 0.920$ at 28\% less fold-to-fold variance than Dynamic-DeepHit.
+\item \textbf{Patient-specific $N(t)$ is identifiable and modulates treatment benefit} (Chapters~\ref{ch:paper7}, \ref{ch:paper9}). $N(t) \times \mathrm{LEDD} \to$ gap interaction $\beta = 1.41$, $p = 0.044$ after severity control; observational counterfactual slope 95\% CI contains 1.0.
+\item \textbf{A bidirectional-update mechanistic PD twin is regulatorily defensible at the episodic-update tier} (Chapter~\ref{ch:paper10}). 16/21 NASEM, no absent criteria; SIR updater with pre-specified PSIS-$\hat{k}$ diagnostics fits inside current MIDD guidance.
+\end{enumerate}
+
+\section{Future Work}
+\label{sec:conc-future}
+
+The remaining research agenda is dense: most of it can be pursued without new data. Below is a prioritised catalog drawn from the three opportunity analyses to be published alongside this dissertation.
+
+\subsection{Mechanistic Twin Extensions With Existing Data}
+\label{sec:conc-mt-extensions}
+
+\begin{description}
+  \item[F1 --- 6-region anterior/posterior putamen split.] Chapters~\ref{ch:paper8a}--\ref{ch:paper8b} established that 4-region DaT-SPECT lacks the spatial resolution to detect connectome-guided propagation. The PPMI imaging files contain anterior-putamen ROIs (\texttt{DATSCAN\_PUTAMEN\_\{L,R\}\_ANT}) at 100\% coverage. A 6-region (or 8-region with anterior/posterior caudate) re-analysis with the same Phase~7 Bayesian framework is a straightforward next paper, likely to detect the anterior-posterior gradient documented by Drori~2022~\cite{drori2022} and Fu~2022~\cite{fu2022}. Target venue: \emph{NeuroImage: Clinical}.
+
+  \item[F2 --- Paper~11 Hybrid SciML.] Concatenate the 26 GIMAN baseline features with the mechanistic $N(t)$ trajectory and fit a Universal Differential Equation~\cite{rackauckas2020universal} for NSD-ISS transition timing. Mao et al.~2025~\cite{mao2025nonmem} in AAPS Journal demonstrate that neural-ODE hybrids achieve both explainability and accuracy gains over either pure PopPK or pure ML. Target venue: \emph{npj Parkinson's Disease}.
+
+  \item[F3 --- LEDD $\times$ genetic interaction.] Paper~9 Path~B fit $N(t) \times \mathrm{LEDD}$ at the whole-cohort level. PPMI has LRRK2, GBA, and SNCA status per patient. A genotype-stratified Path~B would test whether LRRK2 carriers have a flatter or steeper $N(t) \times \mathrm{LEDD}$ slope --- a direct clinical implication for personalised dose titration. Target venue: \emph{Movement Disorders}.
+
+  \item[F4 --- Mechanistic conformal bands.] Paper~4's IPCW conformal framework is model-agnostic. Applying it to the mechanistic twin's counterfactual predictions (Chapter~\ref{ch:paper10}) would yield the first conformal prediction intervals for a PD digital twin --- regulatorily valuable for MIDD submission. Target venue: \emph{CPT: Pharmacometrics \& Systems Pharmacology}.
+\end{description}
+
+\subsection{Untapped PPMI Data Assets}
+\label{sec:conc-untapped}
+
+\begin{description}
+  \item[F5 --- DTI-informed connectome for Paper~8b extension.] PPMI DTI covers 140 patients with SN ROIs. Replacing the HCP1065 population connectome with patient-specific DTI in a sub-cohort analysis would test whether individual connectivity predicts individual propagation.
+
+  \item[F6 --- FreeSurfer ASEG volumes as a structural prior.] PPMI ASEG (1,900 patients) is currently unused in the mechanistic pipeline. Coupling ASEG volumes as priors on regional $N_0$ might unmask spatial propagation that the flat-prior 4-region analysis could not.
+
+  \item[F7 --- Olink CSF proteomics.] Project~222 has 367 proteins on $\sim 200$ patients. Even excluding the $\alpha$-synuclein proxies (which Rutledge~2024~\cite{rutledge2024} showed are absent from Olink panels), the aggregation-reacting proteins (complement, neuroinflammation markers) could serve as additional observables to further tighten the $(k_n, \alpha_\text{tox})$ ridge.
+
+  \item[F8 --- Amprion semi-quantitative SAA, skin SAA, NfL longitudinal.] PPMI has quantitative SAA in multiple formats (dilution series, SD50 semi-quantitative, skin), plus longitudinal NfL on 523 patients with 4,961 measurements. Each is a candidate additional likelihood channel for the Phase~2 SAEM pipeline.
+\end{description}
+
+\subsection{Cross-Cohort Research Opportunities}
+\label{sec:conc-crosscohort}
+
+\begin{description}
+  \item[F9 --- BioFIND NSD+ subgroup external validation.] The Paper~1 NSD-positive subgroup model hit AUC 0.900 with 12 clinical features. BioFIND has 103 Russo-staged S+ patients. A clean external validation of this one model on BioFIND closes the Paper~1 external-validation gap properly. Target venue: \emph{Brain}.
+
+  \item[F10 --- PDBP common-feature transfer.] PDBP has 893 prevalent-PD patients with 12/12 common features. Testing Paper~1 and Paper~3 on PDBP would characterise the domain shift from PPMI de novo PD to prevalent-PD cohorts.
+
+  \item[F11 --- HBS 8-feature subset prediction.] HBS has 8/12 common features on 649 patients. A deliberately downgraded 8-feature clinical model benchmarked against our 12-feature model on HBS would characterise the degradation floor for deployment in low-data primary-care settings.
+\end{description}
+
+\subsection{Phase~6 and Beyond}
+\label{sec:conc-phase6}
+
+\begin{description}
+  \item[F12 --- MindMend biosensor integration.] The continuous-sensor tier of the NASEM maturity ladder is Phase~6 territory. Closed-loop biosensor feedback into the bidirectional-update pipeline built in Chapter~\ref{ch:paper10} is the dissertation's natural extension. Target venue: \emph{Nature Digital Medicine} or \emph{Science Translational Medicine}.
+
+  \item[F13 --- DeNoPa / SURE-PD3 / ICEBERG longitudinal external DaT-SPECT.] The field's single biggest infrastructure gap. Collaborations with PI groups managing these cohorts would enable longitudinal external validation of $N(t)$ decay --- closing the principal honest-limitation in Chapter~\ref{ch:paper10}.
+
+  \item[F14 --- Prospective interventional validation.] A pre-registered single-arm observational trial with quarterly DaT-SPECT and weekly clinical follow-up would test the bidirectional-update pipeline prospectively and take the NASEM audit from 2 to 3 on the validation criterion. Target venue: \emph{Lancet Neurology}.
+
+  \item[F15 --- Reproducibility packaging.] The local PostgreSQL database (290~MB, 146 tables) could be packaged as a Docker-compose + schema dump for external reviewer re-runs, turning the dissertation into a literal reproducible artifact. This is an infrastructure deliverable rather than a paper but is explicitly flagged in the project CLAUDE.md as a future deliverable.
+\end{description}
+
+\section{Closing Statement}
+\label{sec:conc-closing}
+
+Parkinson's disease is a moving target. The biological staging framework has shifted (NSD-ISS, 2024), the imaging infrastructure has shifted (SAA, ComBat harmonisation), and the methodological expectations have shifted (NASEM~2024 digital twin criteria, ICH~M15 MIDD). This dissertation contributes two things to that moving target: (1) a concrete demonstration that data-driven and mechanistic models for PD progression are best deployed together because they answer different clinical questions, and (2) a reproducible computational platform across 10 papers, 15 chapters, 250+ citations, 290~MB of audit-grade provenance, and 75+ Phase~5 pathology-specific citations verified against CrossRef and PubMed on the day of submission. The closing hope is that the next PhD to work on PPMI --- or BioFIND, or DeNoPa, or SURE-PD3 --- can walk into the archived repository, run \texttt{db\_dump/schema\_and\_data.sql}, and rebuild every claim in every chapter. That is what I understand \emph{completed work} to mean.

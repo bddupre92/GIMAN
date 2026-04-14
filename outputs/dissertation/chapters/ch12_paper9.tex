@@ -1,0 +1,120 @@
+% =============================================================================
+% Chapter 12 — Paper 9: Three-Pathway PK-PD Analysis
+% DaT-SPECT-Calibrated Neurodegeneration Trajectories Predict Declining
+% Levodopa Benefit in Parkinson's Disease
+% =============================================================================
+
+\chapter{Paper 9: Three-Pathway PK--PD Analysis --- N(t)-Calibrated Neurodegeneration Modulates Levodopa Benefit}
+\label{ch:paper9}
+
+\section{Introduction}
+\label{sec:p9-intro}
+
+Chapter~\ref{ch:paper7} calibrated per-patient scalar neuron-loss trajectories $N(t)/N_0$ from longitudinal DaT-SPECT and CSF $\alpha$-synuclein. Chapters~\ref{ch:paper8a}--\ref{ch:paper8b} established that spatial propagation is not detectable from 4-region PPMI DaT-SPECT, so further mechanistic gains must come from the \emph{temporal} dimension and from coupling $N(t)$ to clinical observables beyond imaging.
+
+The natural next step is pharmacodynamics: does the calibrated $N(t)/N_0$ modulate levodopa clinical response? Three distinct pathways connect $N(t)$ to clinical outcomes:
+
+\begin{description}
+  \item[Path A] $N(t) \to$ OFF-state UPDRS-III trajectory (does neuron loss drive motor decline?)
+  \item[Path B] $N(t) \to$ ON--OFF gap (does neuron loss moderate treatment benefit?)
+  \item[Path C] $N(t) \to$ time-to-wearing-off onset (does neuron loss predict PK-driven motor complications?)
+\end{description}
+
+A single large PK-PD fit would conflate these. We analyse them separately as a \emph{three-pathway} dissection and report the headline finding: only Path~B (treatment-benefit modulation) is positive. Paths~A and C are informative negatives that sharpen the biological interpretation.
+
+Existing PD PK-PD literature (Holford~2006~\cite{holford2006}, Chan--Nutt--Holford 2004/2005~\cite{chan2004shortlong,chan2005levodopa,chan2005pkvariability}, V\'eronneau-Veilleux~2020/2021~\cite{veronneau2020chaos,veronneau2020integrative}) uses \emph{population-averaged} $N(t)$ (typically a single decay-rate parameter shared across all patients). The contribution here is \emph{patient-specific} $N(t)$ --- a capability unique to the Phase~2 IS-calibrated posteriors in Chapter~\ref{ch:paper7}.
+
+\section{Methods}
+\label{sec:p9-methods}
+
+\subsection{Level~2.5 Hybrid PK-PD Framework}
+
+Full physiological PK (compartmental absorption + distribution + elimination) is infeasible for PPMI: no plasma levodopa concentrations are measured. We adopt a \emph{Level~2.5 hybrid} --- population-average PK parameters from the literature (Simon~2016~\cite{simon2016}, Contin~1997~\cite{contin1997}) drive a virtual biophase brain compartment, but patient-specific $N(t)/N_0$ scales the dopamine synthesis capacity:
+
+\begin{equation}
+\mathrm{DA}(t) = k_\text{AADC} \cdot C_\text{brain,pop}(\mathrm{LEDD}(t)) \cdot \frac{N(t)}{N_0}
+\label{eq:p9-dahy}
+\end{equation}
+
+UPDRS-III is then modelled as a sigmoid-Hill PD response:
+
+\begin{equation}
+\mathrm{UPDRS3}(t) = \mathrm{UPDRS3}_\text{max} \cdot \left(1 - \frac{\mathrm{DA}(t)^h}{\mathrm{EC50}^h + \mathrm{DA}(t)^h}\right).
+\label{eq:p9-hillresp}
+\end{equation}
+
+Three parameters are fit: $k_\text{AADC}$, $\mathrm{EC50}$, Hill slope $h$. All other PK and ODE constants inherit from Phase~2.
+
+\subsection{Structural Identifiability and Reparameterisation}
+
+A 3-parameter Hill fit to mean UPDRS-III trajectories is structurally non-identifiable: the Jacobian rank is 2 and the Fisher Information Matrix condition number is $\kappa \approx 3.5 \times 10^6$. We reparameterise to $\rho = k_\text{eff}/\mathrm{EC50}$ and fix $h = 2$ for the primary analysis; a free-$h$ variant is reported as sensitivity.
+
+\subsection{Cohort and Data Assembly}
+
+Assembled dataset: \texttt{outputs/mechanistic\_twin/phase4/phase4\_assembled\_data.parquet}, 22,270 OFF-state visits, 1,678 patients with LEDD, 1,065 with Phase~2 posteriors, 4,203 paired ON+OFF visits (Path~B analysis set), 922 patients with observable wearing-off (Path~C).
+
+\subsection{Confounding Control and Centering}
+
+Grand-mean centering is used for all continuous predictors. For Path~B, the primary mixed-effects specification is \texttt{gap $\sim$ n\_frac\_c $*$ ledd\_scaled\_c + (1 | PATNO)}. Confounding by severity is addressed by adding a current OFF-UPDRS-III covariate; a sensitivity analysis with within-patient first-differences is also reported.
+
+\section{Results}
+\label{sec:p9-results}
+
+\subsection{Path A --- $N(t)/N_0 \to$ OFF-UPDRS is an Informative Negative}
+
+Time-only linear mixed-effects beats all $N(t)$-inclusive specifications ($\Delta$AIC $= +803$ against the time-only reference). $N(t)/N_0$ is approximately a monotone transform of time-since-baseline in this cohort, so adding it to a time-in-model specification adds no information. The biological reading is clean: at the \emph{population} level, OFF-state UPDRS-III rises roughly linearly with time from diagnosis regardless of individual $N(t)$ rate --- consistent with Dzialas~2025~\cite{dzialas2025dat} and not in conflict with our model.
+
+\subsection{Path B --- $N(t)/N_0 \times \mathrm{LEDD}$ Interaction is Positive}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Severity-controlled mixed-effects model (model2) from \texttt{phase4\_confounding\_control.json}; $N_\text{obs} = 3{,}058$, 4 groups.}
+\label{tab:p9-pathb}
+\begin{tabular}{lcc}
+\toprule
+Term & Coefficient & $p$ \\
+\midrule
+Intercept & $9.6949$ & $< 10^{-300}$ \\
+$\text{n\_frac\_c}$ & $-2.8371$ & $0.0009$ \\
+$\text{ledd\_c}$ & $0.2579$ & $0.112$ \\
+$\text{n\_frac\_c} \times \text{ledd\_c}$ (interaction) & $\mathbf{1.4096}$ & $\mathbf{0.044}$ \\
+$\text{updrs3\_off\_c}$ (severity) & $0.3714$ & $\ll 0.001$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $N(t) \times \mathrm{LEDD}$ interaction survives severity control ($p = 0.044$) and is the dissertation's headline mechanistic finding at the PD pharmacology level. Clinically: higher $N(t)$ patients get \emph{more} benefit per mg of LEDD; advanced patients get less. The fixed-effects $R^2$ for the whole model is modest ($\sim 0.05$), but the random-intercept conditional $R^2$ is $0.49$, reflecting the expected between-patient heterogeneity absorbed by the random effect.
+
+\subsection{Path C --- Wearing-Off is PK-Driven, not Neurodegeneration-Driven}
+
+Spearman correlation between $N(t)/N_0$ at scan and time-to-wearing-off is $\rho = -0.050$, $p = 0.43$. Cox proportional hazards C-index is $0.515$. Event rate is 90.2\%, so this is not a power issue: wearing-off in the PPMI cohort is dominated by pharmacokinetic factors (dosing intervals, GI absorption variability, COMT activity) rather than by the rate of underlying neurodegeneration. This is independently confirmed in Chapter~\ref{ch:paper10} on a shared cohort with a different endpoint and a different pair of models (Graph-DT vs mechanistic $N(t)$): both models sit near $C = 0.5$ on wearing-off, strongly supporting the complementarity-not-competition framing developed in the discussion of this dissertation.
+
+\subsection{Hill Slope Degenerates in the Sub-EC50 Regime}
+
+Fitting $h$ free returns $h_\text{free} = 0.13$, indicating the PPMI cohort operates in the near-linear sub-EC50 regime of the levodopa-UPDRS dose-response curve. This is consistent with the Chan--Nutt--Holford series~\cite{chan2004shortlong,chan2005levodopa}, which repeatedly noted sigmoid parameters are non-identifiable at population level when patients are below the inflection point, and with the ELLDOPA linear dose-response~\cite{fahn2005elldopa}. The Hill structure is retained for interpretability; its near-linearity is a feature, not a bug.
+
+\section{Discussion}
+\label{sec:p9-discussion}
+
+The three-pathway result is more informative than a single summary F-test would have been:
+
+\begin{itemize}
+\item \emph{Path~A negative} confirms that patient-specific $N(t)$ adds no explanatory power over time-since-diagnosis for OFF-state motor scores. Implication: the mechanistic twin's value is not OFF-state prediction; it is treatment-response prediction.
+\item \emph{Path~B positive} is the mechanistic result. Implication: the twin's value is where imaging and pharmacology meet --- patient-specific $N(t)$ modulates levodopa benefit and can in principle be used to titrate dosing.
+\item \emph{Path~C null} reveals a boundary. Implication: wearing-off prediction requires PK data (dosing schedules, meal timing, COMT genotype), not imaging. A natural future-work target (Chapter~\ref{ch:conclusion}).
+\end{itemize}
+
+The Path~B interaction coefficient ($1.4096$, $p = 0.044$) is the bridge to Chapter~\ref{ch:paper10}'s observational counterfactual: we apply this coefficient \emph{without retuning} to 481 real PPMI LEDD escalation events and obtain a calibration slope whose 95\% confidence interval contains $1.0$.
+
+\subsection{Comparison to the Literature}
+
+\begin{itemize}
+\item Patient-specific $N(t)$: no prior published PD PK-PD study uses per-patient calibrated $N(t)$ from serial DaT-SPECT. The V\'eronneau-Veilleux group and Baston~2016~\cite{baston2016levodopa} work with generic population-average trajectories.
+\item Sub-EC50 regime: the $h_\text{free} = 0.13$ finding is consistent with the Chan--Nutt--Holford longitudinal PK-PD corpus in de novo PD cohorts.
+\item Levodopa is not neurotoxic: the LEAP trial~\cite{verschuur2019} and 5-year follow-up~\cite{frequin2024leap} show no effect of early vs delayed levodopa on progression. Accordingly, $\mathrm{LEDD}$ in our interaction model is interpreted as a severity proxy (sicker patients get more drug), not as a causal modifier of $N(t)$ itself.
+\end{itemize}
+
+\section{Data and Code Availability}
+
+Assembled data, IS posteriors, all three pathway analyses, confounding control, and 10 publication figures in \texttt{outputs/mechanistic\_twin/phase4/}. Submitted venue: \emph{CPT: Pharmacometrics \& Systems Pharmacology}.

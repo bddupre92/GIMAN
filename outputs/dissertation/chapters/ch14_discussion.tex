@@ -1,0 +1,67 @@
+% =============================================================================
+% Chapter 14 — Unified Discussion
+% Cross-cutting integration of Papers 1-10
+% =============================================================================
+
+\chapter{Discussion}
+\label{ch:discussion}
+
+This dissertation comprises two complementary arcs: a data-driven arc (Papers~1--6, Chapters~\ref{ch:paper1}--\ref{ch:paper6}) that builds a production-grade NSD-ISS prediction pipeline from neuroimaging, clinical, and genetic features; and a mechanistic arc (Papers~7--10, Chapters~\ref{ch:paper7}--\ref{ch:paper10}) that starts from the same PPMI DaT-SPECT observations and asks a different question --- not \emph{what stage is this patient in?} but \emph{what underlying biology produced this observation, and how will it respond to intervention?} The two arcs converge in this chapter around a single claim that I believe is the dissertation's central contribution: the two families of models answer different clinical questions and are best deployed together.
+
+\section{The Data-Driven Arc --- What Papers 1--6 Deliver}
+\label{sec:disc-datadriven}
+
+Paper~1 established that the NSD-ISS framework~\cite{simuni2024} is learnable with a modest 12--22 feature set and calibrated uncertainty: CatBoost achieves AUC~0.979 on binary NSD positivity with 22 features and AUC~0.900 on the NSD-positive subgroup ordinal with just 12 clinical-only features. Cross-conformal prediction with MAPIE yields 90\%+ coverage at set sizes under 1.3 on average. Graph neural networks underperform tree-based methods on this tabular problem, consistent with Grinsztajn et al.~\cite{grinsztajn2022trees}.
+
+Paper~2 introduced GIMIN (Graph-Informed Multi-modal Imputation Network) with stage-conditioned graph construction and decoder. GIMIN beat all eight baselines (including MissForest, MICE, GAIN, SAITS, MIWAE) on imputation RMSE across four mask fractions. The clinically more interesting finding was the \emph{imputation-utility paradox}: stage-conditioned variants do not beat the vanilla GIMIN on aggregate RMSE but consistently improve downstream stage-classification balanced accuracy, because they allocate imputation capacity to minority stages at the cost of majority-stage RMSE.
+
+Paper~3 developed graph-informed digital twins for NSD-ISS stage transitions. The Graph-DT achieved $C_\text{td} = 0.920$ with 28\% lower fold-to-fold variance than the pure temporal Dynamic-DeepHit ($C_\text{td} = 0.926$); the two are statistically indistinguishable but Graph-DT is preferable at deployment for its variance stability.
+
+Paper~4 delivered IPCW conformal bands for cause-specific CIF with 91.1\% empirical coverage at 95\% confidence level and 0.037 mean bandwidth --- $2.6\times$ narrower than naive conformal. Subgroup equity was formally assessed with bootstrap interaction tests and BH-FDR correction: no subgroup (sex, age, LRRK2, GBA) interacts significantly with the choice of model.
+
+Paper~5 performed expanding-window temporal validation across four enrollment-ordered windows; $C_\text{td}$ stays above 0.85 across windows with a 9\% degradation floor attributable to covariate shift in the longer-follow-up strata. Paper~6 integrates the pipeline: GIMIN imputation $\to$ CatBoost staging $\to$ Graph-DT transition timing $\to$ conformal bands runs end-to-end in under two seconds per patient.
+
+\section{The Mechanistic Arc --- What Papers 7--10 Deliver}
+\label{sec:disc-mechanistic}
+
+Paper~7 (Chapter~\ref{ch:paper7}) calibrated a per-patient coupled $[M, O, F, N]$ ODE from joint longitudinal DaT-SPECT and CSF $\alpha$-synuclein. The key technical result is that $(k_n, \alpha_\text{tox}, T_\text{tox})$ is globally structurally identifiable once the $L \to N$ coupling is fixed from literature, and joint SBR + CSF observations break the slow-fast-collapse degeneracy that plagues SBR-only fits --- posterior correlation $\text{cor}(\log k_n, \log \alpha_\text{tox}) = -0.113$ on the joint dataset versus $-0.240$ on SBR-only, with posterior concentration 29\% tighter. The cohort-median implied annual neuron loss is 3.29\%/yr, within the Fearnley--Lees canonical range~\cite{fearnleyLees1991}.
+
+Papers~8a and 8b (Chapters~\ref{ch:paper8a}--\ref{ch:paper8b}) tested whether spatial propagation is detectable from 4-region PPMI DaT-SPECT. The answer is negative: independent regional decay (M1) dominates connectome-informed propagation (M6r) by $\Delta\mathrm{AIC} = 5{,}668$, and pre-registered SBC on synthetic ground truth confirms this is a signal-to-noise limit of the observable dimensionality rather than a pipeline bug. Per-patient regional decay rates (putamen $\sim 14\%$/yr, caudate $\sim 12\%$/yr) align with Kerstens~2023~\cite{kerstens2023} and Dzialas~2025~\cite{dzialas2025dat} in the literature.
+
+Paper~9 (Chapter~\ref{ch:paper9}) extended the calibrated scalar $N(t)/N_0$ trajectory to pharmacodynamics through a three-pathway analysis: (A)~$N(t) \to$ OFF-UPDRS is an informative negative (time-only beats $N(t)$-inclusive), (B)~$N(t) \times \mathrm{LEDD} \to$ ON--OFF gap is positive ($p = 0.044$ after severity control), and (C)~$N(t) \to$ time-to-wearing-off is null ($\rho = -0.050$, $p = 0.43$). The three-pathway result is more scientifically informative than a single omnibus fit: it locates the twin's predictive domain (treatment benefit) and its limits (wearing-off is PK-driven).
+
+Paper~10 (Chapter~\ref{ch:paper10}) delivered the bidirectional-update infrastructure and applied the Paper~9 Path~B coefficients to an observational counterfactual on 481 LEDD-escalation events. Sequential SIR reweighting reduces held-out SBR MAE by 33\% monotonically as additional scans are ingested; observed calibration-slope 95\% CI contains 1.0. The NASEM self-audit scores 16/21 with no absent criteria.
+
+\section{Complementarity, Not Competition}
+\label{sec:disc-complementarity}
+
+Three independent pieces of evidence now converge on the dissertation's central methodological claim: the data-driven and mechanistic families answer different clinical questions and are best deployed together.
+
+\textbf{Evidence 1 --- Wearing-off is a null for both.} In Chapter~\ref{ch:paper9} (Path~C), the Spearman correlation between $N(t)/N_0$ and time-to-wearing-off is $-0.050$ ($p = 0.43$, $C$-index $= 0.515$). In Chapter~\ref{ch:paper10} (head-to-head), the mechanistic $C$-index is $0.472$ and the Graph-DT $C$-index is $0.518$ on a different shared cohort with a different endpoint ($p_\text{paired} = 0.046$, $\Delta = -0.047$). Both analyses independently confirm that wearing-off in PPMI is dominated by pharmacokinetic factors (dosing intervals, GI absorption, COMT activity) rather than by either the rate of underlying neurodegeneration or the integrated clinical feature set. This is a boundary condition: neither model family is at fault, and neither should be expected to close the gap without additional PK data.
+
+\textbf{Evidence 2 --- Treatment-benefit modulation is a win for the mechanistic twin.} The Phase~4 Path~B $N(t) \times \mathrm{LEDD}$ interaction ($\beta = 1.41$, $p = 0.044$ after severity control) is a capability that the Graph-DT cannot provide: the Graph-DT's LEDD feature is a static regressor, not a patient-specific mechanistic modifier. The observational counterfactual in Chapter~\ref{ch:paper10} confirms this distinction translates to \emph{observational counterfactual validity}: calibration slope 95\% CI contains 1.0 on 481 unseen LEDD escalations. The mechanistic twin's added value is precisely in the counterfactual simulation regime.
+
+\textbf{Evidence 3 --- Forward-transition timing is a win for Graph-DT.} Paper~3 reports $C_\text{td} = 0.920$ on forward stage transitions with IPCW conformal bands at 91.1\% coverage. No mechanistic framework in this dissertation comes close to that accuracy on transition timing, for the simple reason that stage transitions aggregate information across all available observables (imaging, clinical, staging, $k$NN graph) that a scalar mechanistic state cannot concentrate. This is a domain-specific advantage for Graph-DT, not a defeat for the mechanistic twin.
+
+Together these three pieces of evidence argue strongly for \emph{role specialisation}: deploy Graph-DT for stage-transition forecasting, conformal-band construction, and trial-enrichment enrollment; deploy the mechanistic twin for treatment-response counterfactuals, dose-titration decisions, and NASEM-grade bidirectional-update scenarios. A hybrid that concatenates mechanistic $N(t)$ features into the Graph-DT feature set (the Paper~11 Hybrid SciML direction sketched in Chapter~\ref{ch:conclusion}) is a natural next step.
+
+\section{Credibility, Governance, and Regulatory Context}
+\label{sec:disc-credibility}
+
+The dissertation's code-and-data discipline is a substantive contribution in its own right. The Closed-Loop Methodology v1.5 (6 stages plus 6.5 documentation) and Documentation Lifecycle Protocol v1.0 were designed specifically for this project and have been applied uniformly across 10 papers. Every computational claim is backed by a committed script, a passing test, and a RUN\_MANIFEST. Random seeds are pinned, chain SHAs recorded, and the 290-MB local PostgreSQL database provides a single-command reproducibility path for external reviewers. All 75+ Phase~5 citations were verified against CrossRef or PubMed E-utilities before inclusion; the aggregated bibliography (now 250+ entries) has zero dangling citations across all 15 chapters.
+
+On credibility, the Paper~10 NASEM self-audit scored 16/21 with no absent or partial-only criteria --- substantial on virtual representation, bidirectional flow, predictive capability, validation, and fitness-for-purpose; complete on uncertainty quantification and governance. Regulatorily, the SIR-with-pre-specified-diagnostics protocol fits inside the current harmonised MIDD guidance (Marshall et al.~\cite{marshall2016goodpractices,marshall2019midd,marshall2023harmonized}; ICH~M15~\cite{ich_m15_2024}; Galluppi~\cite{galluppi2024midd}), placing the dissertation's methodology inside --- not outside --- the accepted pharmacometric frame.
+
+\section{Honest Limitations and the Field-Wide Data Gap}
+\label{sec:disc-limitations}
+
+Two limitations are worth emphasising because they delimit what this dissertation can and cannot claim.
+
+\textbf{PPMI is not diverse.} All training and most validation cohorts are North American, predominantly white, and disproportionately male. External validation in the NSD-positive subgroup (Paper~1 external validation) confirmed a sharp domain shift when the external cohort's non-PD class is not HC-padded. Any clinical deployment beyond a PPMI-like cohort must be preceded by explicit domain-adaptation validation.
+
+\textbf{No longitudinal external PD DaT-SPECT cohort is publicly accessible.} Our exhaustive audit (Chapter~\ref{ch:paper10} Appendix) confirmed that LCC has HC-only DaT at baseline, PDBP's SPECT module is DLB-only, BioFIND has no longitudinal DaT, and HBS has no DaT at all. SURE-PD3 has $\sim 300$ patients $\times 2$ timepoints pending BioSEND DUA. DeNoPa and ICEBERG require direct PI collaboration. This is a field-wide infrastructure gap, not a project-specific oversight, and it places a hard ceiling on what any external longitudinal validation in PD can currently look like. Paper~10 therefore claims \emph{cross-sectional} external validation honestly; a longitudinal external-decay validation is Paper~11 / DeNoPa future work, and the Chapter~\ref{ch:conclusion} future-work catalog prioritises this.
+
+\section{Bridges to the Conclusion}
+\label{sec:disc-bridges}
+
+The remaining scientific agenda breaks naturally into three directions: (i)~extensions of the mechanistic twin that do not require new data (6-region anterior/posterior putamen split, LEDD $\times$ genetic interaction, hybrid SciML); (ii)~untapped PPMI assets (DTI, FreeSurfer ASEG, Olink proteomics, skin SAA, NfL); (iii)~the cohort and sensor-continuous upgrades that are Phase~6 MindMend territory. These are catalogued in Chapter~\ref{ch:conclusion} with explicit venue targets.

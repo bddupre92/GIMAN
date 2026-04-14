@@ -1,0 +1,296 @@
+% =============================================================================
+% GIMAN Dissertation — Master File
+% Blair Dupre, University of Louisiana at Lafayette, 2026
+% =============================================================================
+\documentclass[12pt,oneside]{report}
+
+% --- Page Setup ---
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Encoding and Fonts ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- Mathematics ---
+\usepackage{amsmath,amssymb,amsfonts}
+
+% --- Graphics and Figures ---
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{caption}
+
+% --- Tables ---
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{tabularx}
+
+% --- TikZ and PGFPlots ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit,
+                 backgrounds, calc, decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% --- Colors (union from all papers) ---
+\usepackage{xcolor}
+\definecolor{nsdblue}{RGB}{0,67,147}
+\definecolor{nsdorange}{RGB}{230,120,30}
+\definecolor{nsdgreen}{RGB}{34,139,34}
+\definecolor{nsdred}{RGB}{200,50,50}
+\definecolor{nsdgray}{RGB}{128,128,128}
+\definecolor{nsdpurple}{RGB}{128,0,128}
+\definecolor{lightblue}{RGB}{220,235,255}
+\definecolor{lightorange}{RGB}{255,240,220}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,225,225}
+\definecolor{lightpurple}{RGB}{240,220,255}
+\definecolor{verylightgray}{RGB}{245,245,245}
+\definecolor{npjblue}{HTML}{0066CC}
+\definecolor{lowrisk}{HTML}{4CAF50}
+\definecolor{modrisk}{HTML}{FF9800}
+\definecolor{highrisk}{HTML}{F44336}
+
+% --- Algorithms ---
+\usepackage{algorithmic}
+
+% --- Miscellaneous ---
+\usepackage{textcomp}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{soul}
+\usepackage{pdflscape}
+\usepackage{cite}
+
+% --- Hyperlinks (load last among standard packages) ---
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=nsdblue,
+  citecolor=nsdblue,
+  urlcolor=nsdblue
+}
+
+% --- Figure/Table/Equation numbering by chapter ---
+\usepackage{chngcntr}
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+\counterwithin{equation}{chapter}
+
+% =============================================================================
+% DOCUMENT
+% =============================================================================
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+  \centering
+  \vspace*{1in}
+  {\Large\bfseries GIMAN: Graph-Informed Multimodal Attention Network\\[6pt]
+   for NSD-ISS Biological Stage Prediction\\[6pt]
+   in Parkinson's Disease}\\[1.5in]
+  {\large A Dissertation}\\[0.3in]
+  {\large Submitted to the Graduate Faculty of the\\
+   University of Louisiana at Lafayette\\
+   in partial fulfillment of the\\
+   requirements for the degree of}\\[0.3in]
+  {\large\bfseries Doctor of Philosophy}\\[0.5in]
+  {\large Blair Dupre}\\[0.3in]
+  {\large School of Computing and Informatics}\\[0.3in]
+  {\large Spring 2026}\\[1in]
+  \begin{tabular}{rl}
+    Dissertation Advisor: & \textit{(To be completed)} \\
+    Committee Member:     & \textit{(To be completed)} \\
+    Committee Member:     & \textit{(To be completed)} \\
+    Committee Member:     & \textit{(To be completed)} \\
+  \end{tabular}
+\end{titlepage}
+
+% --- Abstract ---
+\begin{abstract}
+\noindent
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS)
+redefines Parkinson's disease through biological anchors---alpha-synuclein
+seeding activity and dopaminergic neuroimaging---yet no computational framework
+exists to predict, impute missing data for, quantify uncertainty over, or
+simulate patient trajectories through these stages. This dissertation presents
+seven studies that collectively build the first such framework using data from the
+Parkinson's Progression Markers Initiative (PPMI; $n{=}2{,}201$) and three
+external cohorts (BioFIND, PDBP, HBS).
+
+Paper~1 benchmarks eight models for cross-sectional NSD-ISS stage prediction,
+finding that CatBoost achieves 0.951 balanced accuracy (AUC 0.979) for binary
+classification while cross-conformal prediction guarantees ${\geq}90\%$ coverage.
+Paper~2 introduces GIMIN, a graph-informed multimodal imputation network with
+stage-conditioned uncertainty, reducing RMSE by 22--49\% over eight baselines
+and improving downstream stage prediction by up to 5.6\%.
+Paper~3 develops the first temporal models for NSD-ISS transition timing,
+including a Graph-Informed Digital Twin that achieves time-dependent concordance
+$C_\text{td}{=}0.920$ with 28\% lower variance than Dynamic-DeepHit.
+Paper~4 provides conformalized survival analysis with distribution-free CIF
+prediction bands (91.3\% coverage at 95\% confidence) and demonstrates
+equitable performance across sex and age subgroups.
+Paper~5 conducts temporal validation via expanding-window enrollment splits,
+quantifying a realistic 9\% performance degradation under covariate shift.
+Paper~6 unifies the full pipeline---imputation, staging, transition prediction,
+and conformal uncertainty---into a clinical decision support framework
+demonstrated on individual patient vignettes.
+Paper~7 calibrates a coupled $\alpha$-synuclein aggregation--neuron death ODE
+to 304 individual patients via importance sampling from joint longitudinal
+DaT-SPECT and CSF $\alpha$-synuclein, producing per-patient toxicity flux
+posteriors consistent with the canonical 2--5\%/yr neuron loss range and
+counterfactual treatment predictions consistent with PASADENA trial outcomes.
+
+Together, these contributions span cross-sectional classification, missing-data
+imputation, competing-risks survival modeling, uncertainty quantification,
+deployment validation, clinical integration, and mechanistic modeling for
+NSD-ISS biological staging.
+\end{abstract}
+
+% --- Acknowledgments ---
+\chapter*{Acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
+\textit{(To be completed.)}
+
+% --- Table of Contents ---
+\tableofcontents
+\listoffigures
+\listoftables
+
+% =============================================================================
+% MAIN CHAPTERS
+% =============================================================================
+\input{chapters/ch01_introduction}
+\input{chapters/ch02_systematic_review}
+\input{chapters/ch03_paper1}
+\input{chapters/ch04_paper2}
+\input{chapters/ch05_paper3}
+\input{chapters/ch06_paper4}
+\input{chapters/ch07_paper5}
+\input{chapters/ch08_paper6}
+\input{chapters/ch09_paper7}
+\input{chapters/ch10_paper8a}
+\input{chapters/ch11_paper8b}
+\input{chapters/ch12_paper9}
+\input{chapters/ch13_paper10}
+\input{chapters/ch14_discussion}
+\input{chapters/ch15_conclusion}
+
+% =============================================================================
+% BIBLIOGRAPHY
+% =============================================================================
+\input{bibliography}
+
+% =============================================================================
+% APPENDICES
+% =============================================================================
+\appendix
+
+\chapter{TRIPOD+AI Compliance Checklist}
+\label{app:tripod}
+\textit{The complete TRIPOD+AI checklist for each paper is provided in the
+supplementary materials. All six studies were developed following the TRIPOD+AI
+reporting guideline for clinical prediction models that use machine learning
+methods~\cite{collins2024}.}
+
+\chapter{Software and Reproducibility}
+\label{app:software}
+
+All experiments were conducted in Python~3.12 on macOS (Apple Silicon, MPS
+backend). The complete software environment is specified below.
+
+\begin{table}[h]
+\centering
+\caption{Key software dependencies.}
+\label{tab:software}
+\begin{tabular}{ll}
+\toprule
+\textbf{Package} & \textbf{Version} \\
+\midrule
+Python           & 3.12 \\
+PyTorch          & 2.8.0 \\
+PyTorch Geometric & 2.6.1 \\
+scikit-learn     & 1.5+ \\
+CatBoost         & 1.2.10 \\
+XGBoost          & 3.2.0 \\
+LightGBM         & 4.6.0 \\
+MAPIE            & 1.3.0 \\
+HyperImpute      & 0.1.17 \\
+PyPOTS           & 1.1 \\
+pandas           & 2.2+ \\
+NumPy            & 1.26+ \\
+matplotlib       & 3.9+ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{Reproducibility.}
+Model checkpoints for all cross-validation folds are archived in the project
+repository under \texttt{outputs/paper3\_checkpoints/} (Dynamic-DeepHit and
+Graph-DT, 10 files) and
+\texttt{outputs/paper2\_benchmark/runs/.../checkpoints/} (GIMIN, 48 files).
+Each checkpoint stores the full model state dictionary, training/validation
+patient splits, feature column names, normalization parameters, and per-fold
+evaluation metrics, enabling exact reproduction of all reported results.
+Random seeds are fixed per fold (seed = fold index) for NumPy, PyTorch, and
+Python's built-in random module.
+
+\noindent
+\textbf{Computational resources.}
+All training was performed on a single Apple M-series workstation using the
+MPS (Metal Performance Shaders) backend for PyTorch. Typical training times:
+CatBoost benchmark ${\sim}5$~minutes (7 models $\times$ 5 folds $\times$
+4 targets); GIMIN imputation benchmark ${\sim}2$~hours (4 variants $\times$
+4 mask fractions $\times$ 3 runs); Dynamic-DeepHit ${\sim}20$~minutes
+(5 folds); Graph-DT ${\sim}35$~minutes (5 folds).
+
+\chapter{Data Availability}
+\label{app:data-avail}
+
+All clinical data used in this dissertation were obtained from publicly
+available research databases under institutional data use agreements.
+
+\begin{description}[style=nextline]
+
+\item[Parkinson's Progression Markers Initiative (PPMI)]
+Primary training and evaluation cohort ($n{=}2{,}201$ participants for
+cross-sectional analysis; $n{=}1{,}900$ with longitudinal follow-up).
+Data are available from \url{https://www.ppmi-info.org/access-data-specimens/download-data}
+following registration and approval of a data use agreement.
+
+\item[Accelerating Medicines Partnership --- Parkinson's Disease (AMP-PD)]
+Multi-cohort platform providing harmonized clinical data for PPMI, BioFIND,
+PDBP, and HBS cohorts via Google BigQuery (Tier~1 clinical access).
+Available at \url{https://amp-pd.org}.
+
+\item[BioFIND]
+External validation cohort ($n{=}118$ PD patients, of whom 103 are SAA-positive
+with NSD-ISS ground truth staging). Used for Papers~1 and~2.
+Data available through AMP-PD and the LONI Image and Data Archive
+(\url{https://ida.loni.usc.edu}).
+
+\item[Parkinson's Disease Biomarkers Program (PDBP)]
+Prediction-only external cohort ($n{=}893$ PD patients, 12/12 common clinical
+features, no NSD-ISS ground truth). Downloaded via AMP-PD BigQuery.
+
+\item[Harvard Biomarker Study (HBS)]
+Prediction-only external cohort ($n{=}649$ PD patients, 8/12 common clinical
+features). Downloaded via AMP-PD BigQuery.
+
+\end{description}
+
+\noindent
+No individual-level data are redistributed with this dissertation.
+All analyses can be reproduced by obtaining data access through the platforms
+listed above and running the scripts in the project repository.
+
+\input{chapters/mechtwin_review}
+
+\end{document}
