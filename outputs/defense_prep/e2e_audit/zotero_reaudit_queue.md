@@ -32,9 +32,9 @@ Sorted by claim usage (most-used first).
 | `denaro2024` | C.~Denaro | 2024 | [no title] | — | 2 |
 | `diazrincon2025` | A.~Diaz-Rincon \textit{et~al.} | 2025 | [no title] | — | 2 |
 | `dorsey2018` | E.~R.~Dorsey | 2018 | The emerging evidence of the Parkinson pandemic, | — | 2 |
-| `dupre2026paper1` | B.~Dupre | 2026 | [no title] | — | 2 |
-| `dupre2026paper2` | B.~Dupre | 2026 | [no title] | — | 2 |
-| `dupre2026paper4` | B.~Dupre | 2026 | [no title] | — | 2 |
+| `dupre2026paper1` | B.~Dupre | 2026 | Internal dissertation cross-reference | — | 2 |
+| `dupre2026paper2` | B.~Dupre | 2026 | Internal dissertation cross-reference | — | 2 |
+| `dupre2026paper4` | B.~Dupre | 2026 | Internal dissertation cross-reference | — | 2 |
 | `dupre2026phase2` | Dupre | 2026 | [no title] | — | 2 |
 | `espay2025` | A.~J.~Espay \textit{et~al.} | 2025 | [no title] | — | 2 |
 | `espay2025refutation` | A.~J.~Espay \textit{et~al.} | 2025 | [no title] | — | 2 |
@@ -55,7 +55,7 @@ Sorted by claim usage (most-used first).
 | `marshall2019midd` | Marshall | 2019 | Model-informed drug discovery and development: Current indus | 10.1002/psp4.12372 | 2 |
 | `marshall2023harmonized` | Marshall | 2023 | Model-informed drug development: Steps toward harmonized gui | 10.1002/cpt.3006 | 2 |
 | `matsui2026stance` | K.~Matsui | 2026 | Digital twins of upright stance reveal mechanistic bifurcati | — | 2 |
-| `mollenhauer2017csf` | B.~Mollenhauer | 1959 | Longitudinal CSF biomarkers in patients with early Parkinson | 10.1212/WNL | 2 |
+| `mollenhauer2017csf` | B.~Mollenhauer | 1959 | Longitudinal CSF biomarkers in patients with early Parkinson | 10.1212/WNL.0000000000004609 | 2 |
 | `pagano2022` | G.~Pagano \textit{et~al.} | 2022 | [no title] | — | 2 |
 | `pagano2024` | G.~Pagano \textit{et~al.} | 2024 | [no title] | — | 2 |
 | `pandya2019` | S.~Pandya | 2019 | [no title] | — | 2 |
@@ -84,7 +84,7 @@ Sorted by claim usage (most-used first).
 | `austin2020graphical` | P.~C.~Austin and E.~W.~Steyerb | 2020 | Graphical assessment of internal and external calibration of | — | 1 |
 | `baribault2023troubleshoot` | B.~Baribault and M.~D.~Lee | 2023 | Troubleshooting Bayesian cognitive models, | — | 1 |
 | `beskos2014stability` | Beskos | 2014 | On the stability of sequential Monte Carlo methods in high d | 10.1214/13-aap951 | 1 |
-| `bloomingdale2022` | P.~Bloomingdale | 2022 | Hallmarks of neurodegenerative disease: A systems pharmacolo | 10.1002/psp4 | 1 |
+| `bloomingdale2022` | P.~Bloomingdale | 2022 | Hallmarks of neurodegenerative disease: A systems pharmacolo | 10.1002/psp4.12852 | 1 |
 | `boelts2023` | J.~Boelts | 2023 | Simulation-based inference for efficient identification of g | 10.1371/journal | 1 |
 | `booij1997` | J.~Booij | 1997 | [no title] | — | 1 |
 | `braak2003` | H.~Braak | 2003 | [no title] | — | 1 |
@@ -95,7 +95,7 @@ Sorted by claim usage (most-used first).
 | `campbell2020` | M.~Campbell | 2020 | Synthesis without meta-analysis (SWiM) in systematic reviews | — | 1 |
 | `candes2023conformal` | E.~Cand\`{e}s | 2023 | Conformal prediction under censoring, | — | 1 |
 | `casolo2025` | C.~Casolo | 2025 | Identifiability challenges in sparse linear ordinary differe | — | 1 |
-| `chae2021` | D.~Chae | 2021 | [no title] | CPT_PSP_LEDD_IRT | 1 |
+| `chae2021` | D.~Chae | 2021 | [no title] | — | 1 |
 | `chahine2020ratesirbd` | Chahine | 2020 | Dopamine transporter imaging predicts clinically-defined $\a | 10.1002/acn3.51269 | 1 |
 | `chahine2025` | L.~M.~Chahine \textit{et~al.} | 2025 | NSD-ISS in the Systemic Synuclein Sampling Study, | — | 1 |
 | `chopin2002sequential` | Chopin | 2002 | A sequential particle filter method for static models, | 10.1093/biomet/89.3.539 | 1 |

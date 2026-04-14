@@ -1,15 +1,15 @@
 chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excerpt,verdict,verdict_notes,n_citations,n_data_links,n_mempalace_anchors
 1,Introduction,yellow,3,literature,Chapter 1 cites \cite{chahine2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-1,Introduction,yellow,4,literature,Chapter 1 cites \cite{dam2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-1,Introduction,yellow,5,literature,Chapter 1 cites \cite{dorsey2018},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-1,Introduction,yellow,6,literature,Chapter 1 cites \cite{espay2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+1,Introduction,yellow,4,literature,Chapter 1 cites \cite{dam2024},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+1,Introduction,yellow,5,literature,Chapter 1 cites \cite{dorsey2018},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+1,Introduction,yellow,6,literature,Chapter 1 cites \cite{espay2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 1,Introduction,yellow,7,literature,Chapter 1 cites \cite{goetz2008},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 1,Introduction,yellow,8,literature,Chapter 1 cites \cite{greenwell2015},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 1,Introduction,yellow,9,literature,Chapter 1 cites \cite{hoehn1967},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 1,Introduction,yellow,10,literature,Chapter 1 cites \cite{kalia2015},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 1,Introduction,yellow,11,literature,Chapter 1 cites \cite{marras2018},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 1,Introduction,yellow,12,literature,Chapter 1 cites \cite{martinez2015},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-1,Introduction,yellow,13,literature,Chapter 1 cites \cite{russo2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+1,Introduction,yellow,13,literature,Chapter 1 cites \cite{russo2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 1,Introduction,yellow,14,literature,Chapter 1 cites \cite{simuni2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 1,Introduction,yellow,15,literature,Chapter 1 cites \cite{tolosa2021},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 1,Introduction,yellow,16,literature,Chapter 1 cites \cite{yang2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -39,15 +39,15 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 1,Introduction,yellow,341,numerical,"[auc_cindex] C-td 0.926  --  \node[block, below=of p2] (p3)  {Ch.~\ref{ch:paper3}: Transition Timing (Paper~3)\\C-td 0.9",verified,Dynamic-DeepHit C-td = 0.926 (v5 original).,0,1,0
 1,Introduction,yellow,342,numerical,"[percentage] 91.1\%  --  \node[block, below=of p3] (p4)  {Ch.~\ref{ch:paper4}: Conformal Survival (Paper~4)\\91.1\% cove",verified,Paper 4 IPCW conformal coverage 91.1%.,0,1,0
 2,Systematic Literature Review,yellow,17,literature,Chapter 2 cites \cite{asgari2021},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-2,Systematic Literature Review,yellow,18,literature,Chapter 2 cites \cite{bjornsson2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+2,Systematic Literature Review,yellow,18,literature,Chapter 2 cites \cite{bjornsson2020},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 2,Systematic Literature Review,yellow,19,literature,Chapter 2 cites \cite{campbell2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-2,Systematic Literature Review,yellow,20,literature,Chapter 2 cites \cite{dorsey2018},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+2,Systematic Literature Review,yellow,20,literature,Chapter 2 cites \cite{dorsey2018},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 2,Systematic Literature Review,yellow,21,literature,Chapter 2 cites \cite{falciglia2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 2,Systematic Literature Review,yellow,22,literature,Chapter 2 cites \cite{fereshtehnejad2015},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 2,Systematic Literature Review,yellow,23,literature,Chapter 2 cites \cite{hemedan2026},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 2,Systematic Literature Review,yellow,24,literature,Chapter 2 cites \cite{huguet2013},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 2,Systematic Literature Review,yellow,25,literature,Chapter 2 cites \cite{kalia2015},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-2,Systematic Literature Review,yellow,26,literature,Chapter 2 cites \cite{laubenbacher2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+2,Systematic Literature Review,yellow,26,literature,Chapter 2 cites \cite{laubenbacher2024},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 2,Systematic Literature Review,yellow,27,literature,Chapter 2 cites \cite{maetzler2016},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 2,Systematic Literature Review,yellow,28,literature,Chapter 2 cites \cite{matsui2026stance},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 2,Systematic Literature Review,yellow,29,literature,Chapter 2 cites \cite{moons2014},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -191,12 +191,12 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 2,Systematic Literature Review,yellow,472,numerical,[percentage] 87.5\%  --  Dynamic temporal models for PD prognostic prediction demonstrate modest empirical advantages ov,partial,"Generic numeric, manual review during BΩ.",0,0,0
 2,Systematic Literature Review,yellow,473,numerical,[percentage] 17\%  --  Dynamic temporal models for PD prognostic prediction demonstrate modest empirical advantages over,partial,"Generic numeric, manual review during BΩ.",0,0,0
 2,Systematic Literature Review,yellow,474,numerical,[percentage] 7\%  --  Dynamic temporal models for PD prognostic prediction demonstrate modest empirical advantages over ,partial,"Generic numeric, manual review during BΩ.",0,0,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,38,literature,Chapter 3 cites \cite{adamedgraph},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,38,literature,Chapter 3 cites \cite{adamedgraph},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,39,literature,Chapter 3 cites \cite{collins2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,40,literature,Chapter 3 cites \cite{diazrincon2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,41,literature,Chapter 3 cites \cite{grinsztajn2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,42,literature,Chapter 3 cites \cite{huang2023},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,43,literature,Chapter 3 cites \cite{russo2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,40,literature,Chapter 3 cites \cite{diazrincon2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,41,literature,Chapter 3 cites \cite{grinsztajn2022},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,42,literature,Chapter 3 cites \cite{huang2023},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,43,literature,Chapter 3 cites \cite{russo2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,44,literature,Chapter 3 cites \cite{shwartzziv2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,45,literature,Chapter 3 cites \cite{simuni2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,46,literature,Chapter 3 cites \cite{simuni2024val},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -291,15 +291,15 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 3,Paper 1: NSD-ISS Stage Classification,yellow,561,numerical,[auc_cindex] AUC 0.900  --  This study establishes the first comprehensive benchmark for NSD-ISS biological stage predic,verified,Paper 1 NSD+ 12-feature AUC = 0.900.,0,1,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,562,numerical,"[percentage] 90\%  --  This study establishes the first comprehensive benchmark for NSD-ISS biological stage prediction,",partial,"Generic numeric, manual review during BΩ.",0,0,0
 4,Paper 2: GIMIN Imputation,yellow,49,literature,Chapter 4 cites \cite{buuren2011},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-4,Paper 2: GIMIN Imputation,yellow,50,literature,Chapter 4 cites \cite{diazrincon2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+4,Paper 2: GIMIN Imputation,yellow,50,literature,Chapter 4 cites \cite{diazrincon2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 4,Paper 2: GIMIN Imputation,yellow,51,literature,Chapter 4 cites \cite{du2023},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,52,literature,Chapter 4 cites \cite{dupre2025bench},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,53,literature,Chapter 4 cites \cite{dupre2025gimin},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-4,Paper 2: GIMIN Imputation,yellow,54,literature,Chapter 4 cites \cite{grinsztajn2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-4,Paper 2: GIMIN Imputation,yellow,55,literature,Chapter 4 cites \cite{huang2023},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+4,Paper 2: GIMIN Imputation,yellow,54,literature,Chapter 4 cites \cite{grinsztajn2022},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+4,Paper 2: GIMIN Imputation,yellow,55,literature,Chapter 4 cites \cite{huang2023},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 4,Paper 2: GIMIN Imputation,yellow,56,literature,Chapter 4 cites \cite{mattei2019},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,57,literature,Chapter 4 cites \cite{postuma2015},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-4,Paper 2: GIMIN Imputation,yellow,58,literature,Chapter 4 cites \cite{russo2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+4,Paper 2: GIMIN Imputation,yellow,58,literature,Chapter 4 cites \cite{russo2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 4,Paper 2: GIMIN Imputation,yellow,59,literature,Chapter 4 cites \cite{shwartzziv2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,60,literature,Chapter 4 cites \cite{simuni2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,61,literature,Chapter 4 cites \cite{simuni2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -425,18 +425,18 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 4,Paper 2: GIMIN Imputation,yellow,678,numerical,[percentage] 5.8\%  --  \item Stage-conditioned imputation improves downstream NSD-ISS stage prediction by $+5.8\%$ bala,partial,"Generic numeric, manual review during BΩ.",0,0,0
 4,Paper 2: GIMIN Imputation,yellow,679,numerical,[percentage] 5.6\%  --  \item Stage-conditioned imputation improves downstream NSD-ISS stage prediction by $+5.8\%$ bala,partial,"Generic numeric, manual review during BΩ.",0,0,0
 4,Paper 2: GIMIN Imputation,yellow,680,numerical,[percentage] 90\%  --  \item Per-feature conformal prediction with stage-conditional calibration achieves ${>}90\%$ per-,partial,"Generic numeric, manual review during BΩ.",0,0,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,66,literature,Chapter 5 cites \cite{adamedgraph},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,66,literature,Chapter 5 cites \cite{adamedgraph},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,67,literature,Chapter 5 cites \cite{cook2018},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,68,literature,Chapter 5 cites \cite{corralacero2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,69,literature,Chapter 5 cites \cite{dam2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,70,literature,Chapter 5 cites \cite{espay2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,68,literature,Chapter 5 cites \cite{corralacero2020},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,69,literature,Chapter 5 cites \cite{dam2024},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,70,literature,Chapter 5 cites \cite{espay2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,71,literature,Chapter 5 cites \cite{jackson2011},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,72,literature,Chapter 5 cites \cite{kalbfleisch1985},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,73,literature,Chapter 5 cites \cite{lee2018},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,74,literature,Chapter 5 cites \cite{lee2019},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,75,literature,Chapter 5 cites \cite{paper1},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,76,literature,Chapter 5 cites \cite{paper2},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,77,literature,Chapter 5 cites \cite{severson2021},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,77,literature,Chapter 5 cites \cite{severson2021},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,78,literature,Chapter 5 cites \cite{shang2019},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,79,literature,Chapter 5 cites \cite{simuni2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,80,literature,Chapter 5 cites \cite{simuni2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -490,7 +490,7 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 6,Paper 4: Conformalized Survival Analysis,yellow,91,literature,Chapter 6 cites \cite{naeini2015ece},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,92,literature,Chapter 6 cites \cite{rajkomar2018ensuring},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,93,literature,Chapter 6 cites \cite{simuni2024nsdiss},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-6,Paper 4: Conformalized Survival Analysis,yellow,94,literature,Chapter 6 cites \cite{sreenivasan2025},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+6,Paper 4: Conformalized Survival Analysis,yellow,94,literature,Chapter 6 cites \cite{sreenivasan2025},verified,CrossRef DOI resolved successfully.,1,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,95,literature,Chapter 6 cites \cite{vovk2022conformal},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,718,numerical,[percentage] 91.3\%  --  Computational models for predicting Parkinson's disease stage transitions under the Neuronal al,partial,"Generic numeric, manual review during BΩ.",0,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,719,numerical,[percentage] 95\%  --  Computational models for predicting Parkinson's disease stage transitions under the Neuronal alph,partial,"Generic numeric, manual review during BΩ.",0,0,0
@@ -568,10 +568,10 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 6,Paper 4: Conformalized Survival Analysis,yellow,791,numerical,[percentage] 74.5\%  --  The genetic subgroup analysis is limited by insufficient LRRK2 and GBA carrier counts for relia,partial,"Generic numeric, manual review during BΩ.",0,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,792,numerical,[percentage] 90\%  --  The genetic subgroup analysis is limited by insufficient LRRK2 and GBA carrier counts for reliabl,partial,"Generic numeric, manual review during BΩ.",0,0,0
 6,Paper 4: Conformalized Survival Analysis,yellow,793,numerical,[percentage] 95\%  --  We presented the first conformalized survival analysis framework for NSD-ISS stage transition pre,partial,"Generic numeric, manual review during BΩ.",0,0,0
-7,Paper 5: Temporal Validation,yellow,96,literature,Chapter 7 cites \cite{dupre2026paper1},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-7,Paper 5: Temporal Validation,yellow,97,literature,Chapter 7 cites \cite{dupre2026paper2},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+7,Paper 5: Temporal Validation,yellow,96,literature,Chapter 7 cites \cite{dupre2026paper1},verified,Internal dissertation cross-reference; resolves to another chapter in this work.,1,0,0
+7,Paper 5: Temporal Validation,yellow,97,literature,Chapter 7 cites \cite{dupre2026paper2},verified,Internal dissertation cross-reference; resolves to another chapter in this work.,1,0,0
 7,Paper 5: Temporal Validation,yellow,98,literature,Chapter 7 cites \cite{dupre2026paper3},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-7,Paper 5: Temporal Validation,yellow,99,literature,Chapter 7 cites \cite{dupre2026paper4},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+7,Paper 5: Temporal Validation,yellow,99,literature,Chapter 7 cites \cite{dupre2026paper4},verified,Internal dissertation cross-reference; resolves to another chapter in this work.,1,0,0
 7,Paper 5: Temporal Validation,yellow,100,literature,Chapter 7 cites \cite{espay2025refutation},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 7,Paper 5: Temporal Validation,yellow,101,literature,Chapter 7 cites \cite{gilmer2017neural},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 7,Paper 5: Temporal Validation,yellow,102,literature,Chapter 7 cites \cite{gretton2012mmd},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -624,10 +624,10 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 7,Paper 5: Temporal Validation,yellow,831,numerical,"[percentage] 9.3\%  --  This paper presents the first temporal validation of NSD-ISS stage transition prediction models,",partial,"Generic numeric, manual review during BΩ.",0,0,0
 7,Paper 5: Temporal Validation,yellow,832,numerical,"[percentage] 9.0\%  --  This paper presents the first temporal validation of NSD-ISS stage transition prediction models,",partial,"Generic numeric, manual review during BΩ.",0,0,0
 8,Paper 6: Unified Clinical Decision Support,yellow,112,literature,Chapter 8 cites \cite{adams2017pdcds},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-8,Paper 6: Unified Clinical Decision Support,yellow,113,literature,Chapter 8 cites \cite{dupre2026paper1},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-8,Paper 6: Unified Clinical Decision Support,yellow,114,literature,Chapter 8 cites \cite{dupre2026paper2},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+8,Paper 6: Unified Clinical Decision Support,yellow,113,literature,Chapter 8 cites \cite{dupre2026paper1},verified,Internal dissertation cross-reference; resolves to another chapter in this work.,1,0,0
+8,Paper 6: Unified Clinical Decision Support,yellow,114,literature,Chapter 8 cites \cite{dupre2026paper2},verified,Internal dissertation cross-reference; resolves to another chapter in this work.,1,0,0
 8,Paper 6: Unified Clinical Decision Support,yellow,115,literature,Chapter 8 cites \cite{dupre2026paper3},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-8,Paper 6: Unified Clinical Decision Support,yellow,116,literature,Chapter 8 cites \cite{dupre2026paper4},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+8,Paper 6: Unified Clinical Decision Support,yellow,116,literature,Chapter 8 cites \cite{dupre2026paper4},verified,Internal dissertation cross-reference; resolves to another chapter in this work.,1,0,0
 8,Paper 6: Unified Clinical Decision Support,yellow,117,literature,Chapter 8 cites \cite{espay2025refutation},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 8,Paper 6: Unified Clinical Decision Support,yellow,118,literature,Chapter 8 cites \cite{lian2024adamedgraph},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 8,Paper 6: Unified Clinical Decision Support,yellow,119,literature,Chapter 8 cites \cite{simuni2024nsd},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
@@ -667,21 +667,21 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 8,Paper 6: Unified Clinical Decision Support,yellow,864,numerical,[percentage] 98.7\%  --  (B)~CatBoost predicts Stage~3 with 98.7\% probability.,partial,"Generic numeric, manual review during BΩ.",0,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,122,literature,Chapter 9 cites \cite{bakshi2018},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,123,literature,Chapter 9 cites \cite{calabresi2023},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,124,literature,Chapter 9 cites \cite{cohen2012},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,124,literature,Chapter 9 cites \cite{cohen2012},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,125,literature,Chapter 9 cites \cite{denaro2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,126,literature,Chapter 9 cites \cite{fearnley1991},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,127,literature,Chapter 9 cites \cite{gutenkunst2007},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,128,literature,Chapter 9 cites \cite{hemedan2026},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,129,literature,Chapter 9 cites \cite{ivanova2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,130,literature,Chapter 9 cites \cite{jankovic2018},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,131,literature,Chapter 9 cites \cite{knowles2009},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,131,literature,Chapter 9 cites \cite{knowles2009},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,132,literature,Chapter 9 cites \cite{koehler2008},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,133,literature,Chapter 9 cites \cite{liu1998is},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,134,literature,Chapter 9 cites \cite{majbour2016},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,135,literature,Chapter 9 cites \cite{mollenhauer2017csf},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,135,literature,Chapter 9 cites \cite{mollenhauer2017csf},verified,CrossRef DOI resolved successfully.,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,136,literature,Chapter 9 cites \cite{pagano2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,137,literature,Chapter 9 cites \cite{pagano2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,138,literature,Chapter 9 cites \cite{petricca2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,138,literature,Chapter 9 cites \cite{petricca2022},verified,CrossRef DOI resolved successfully.,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,139,literature,Chapter 9 cites \cite{raue2009},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,140,literature,Chapter 9 cites \cite{righetti2025},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,141,literature,Chapter 9 cites \cite{simuni2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
@@ -728,7 +728,7 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 10,Paper 8a: Spatial Propagation Identifiability,yellow,146,literature,Chapter 10 cites \cite{boelts2023},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 10,Paper 8a: Spatial Propagation Identifiability,yellow,147,literature,Chapter 10 cites \cite{brooks1990},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 10,Paper 8a: Spatial Propagation Identifiability,yellow,148,literature,Chapter 10 cites \cite{casolo2025},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-10,Paper 8a: Spatial Propagation Identifiability,yellow,149,literature,Chapter 10 cites \cite{chu2019},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+10,Paper 8a: Spatial Propagation Identifiability,yellow,149,literature,Chapter 10 cites \cite{chu2019},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 10,Paper 8a: Spatial Propagation Identifiability,yellow,150,literature,Chapter 10 cites \cite{conte2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 10,Paper 8a: Spatial Propagation Identifiability,yellow,151,literature,Chapter 10 cites \cite{dong2023},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 10,Paper 8a: Spatial Propagation Identifiability,yellow,152,literature,Chapter 10 cites \cite{dupre2026phase2},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
@@ -796,7 +796,7 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,182,literature,Chapter 11 cites \cite{abdelgawad2022},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,183,literature,Chapter 11 cites \cite{booij1997},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,184,literature,Chapter 11 cites \cite{brooks1990},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,185,literature,Chapter 11 cites \cite{chu2019},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,185,literature,Chapter 11 cites \cite{chu2019},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,186,literature,Chapter 11 cites \cite{dupre2026paper8a},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,187,literature,Chapter 11 cites \cite{dupre2026phase2},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,188,literature,Chapter 11 cites \cite{fearnley1991},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
@@ -808,7 +808,7 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,194,literature,Chapter 11 cites \cite{patterson2019},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,195,literature,Chapter 11 cites \cite{ppmi2011},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,196,literature,Chapter 11 cites \cite{raj2012},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,197,literature,Chapter 11 cites \cite{ren2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,197,literature,Chapter 11 cites \cite{ren2024},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,198,literature,Chapter 11 cites \cite{schafer2021},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,199,literature,Chapter 11 cites \cite{siderowf2020},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,200,literature,Chapter 11 cites \cite{simuni2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
@@ -858,17 +858,17 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,971,numerical,"[delta_aic] AIC = 5,668  --  Independent per-region exponential decay rates provide the most parsimonious and best-fitti",verified,Phase 3 ΔAIC=5668 (M1 vs M6r).,0,1,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,206,literature,Chapter 12 cites \cite{angiolelli2024},partial,Angiolelli 2024 — needs ezproxy verification.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,207,literature,Chapter 12 cites \cite{burnham2002},verified,Burnham & Anderson 2002 textbook on AIC model selection. ISBN-verified canonical.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,208,literature,Chapter 12 cites \cite{chae2021},partial,Phase 4 defensive cite — needs ezproxy verification.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,209,literature,Chapter 12 cites \cite{djaldetti2018},partial,Phase 4 defensive cite — needs ezproxy verification.,1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,208,literature,Chapter 12 cites \cite{chae2021},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,209,literature,Chapter 12 cites \cite{djaldetti2018},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,210,literature,Chapter 12 cites \cite{fearnley1991},verified,Ch 14 audit verified — Fearnley & Lees Brain 1991.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,211,literature,Chapter 12 cites \cite{fernagut2010},partial,Fernagut 2010 dose-dependent SNCA toxicity — needs ezproxy verification.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,212,literature,Chapter 12 cites \cite{frequin2024},partial,Phase 4 defensive cite — needs ezproxy verification.,1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,211,literature,Chapter 12 cites \cite{fernagut2010},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,212,literature,Chapter 12 cites \cite{frequin2024},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,213,literature,Chapter 12 cites \cite{gupta2025},verified,Phase 5 Agent C verified.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,214,literature,Chapter 12 cites \cite{holford2006},verified,Holford 2006 Pop-PK levodopa progression — Phase 4 manuscript reference.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,215,literature,Chapter 12 cites \cite{jacqmin2007},verified,Phase 5 Task 5 verified.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,216,literature,Chapter 12 cites \cite{jost2023},verified,Phase 5 Task 5 verified.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,217,literature,Chapter 12 cites \cite{nakagawa2013},verified,Nakagawa & Schielzeth 2013 marginal/conditional R² for mixed effects — canonical methods cite.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,218,literature,Chapter 12 cites \cite{parkkinen2011},partial,Parkkinen 2011 α-syn pathology — needs ezproxy verification.,1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,217,literature,Chapter 12 cites \cite{nakagawa2013},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,218,literature,Chapter 12 cites \cite{parkkinen2011},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,219,literature,Chapter 12 cites \cite{raue2009},verified,Phase 2 defensive cite — Raue profile-likelihood Bioinformatics 2009.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,220,literature,Chapter 12 cites \cite{rukavina2025},partial,Rukavina 2025 — needs ezproxy verification.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,221,literature,Chapter 12 cites \cite{siderowf2020},verified,Phase 1 DaT-SPECT defensive cite (CLAUDE.md verified).,1,0,0
@@ -878,7 +878,7 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,225,literature,Chapter 12 cites \cite{veronneau2020},verified,Phase 5 Task 5 + Agent C verified — Chaos 2020.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,226,literature,Chapter 12 cites \cite{verschuur2019},verified,Phase 5 Task 5 verified — LEAP trial NEJM 2019.,1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,227,literature,Chapter 12 cites \cite{villaverde2016},verified,Phase 2 defensive cite — Villaverde structural identifiability PLoS CB 2016.,1,0,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,228,literature,Chapter 12 cites \cite{vuong1989},verified,Vuong 1989 Econometrica likelihood ratio test for non-nested models. Canonical.,1,0,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,228,literature,Chapter 12 cites \cite{vuong1989},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,972,numerical,"[large_count] 1,674 patients  --  assessments, 1,674 patients with LEDD data), we conduct a three-pathway",partial,"Generic numeric, manual review recommended.",0,0,0
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,973,numerical,"[percentage] 10\%  --  $p{<}10^{-37}$, conditional $R^2{=}0.491$). Each 10\% decrease in $\Nfrac$",verified,Mixed-effects conditional R² = 0.491.,0,1,1
 12,Paper 9: Three-Pathway PK-PD Analysis,yellow,974,numerical,"[large_count] 5,014 patients  --  \item \textbf{UPDRS-III cohort:} 5,014 patients with 22,270",verified,"22,270 OFF-state visits per Phase 4 assembled data.",0,1,0
@@ -1017,12 +1017,12 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 15,Conclusion + Future Work Catalog,yellow,1056,numerical,[auc_cindex] AUC 0.900  --  \item[F9 --- BioFIND NSD+ subgroup external validation.] The Paper~1 NSD-positive subgroup m,verified,Paper 1 NSD+ 12-feature clinical AUC=0.900 confirmed (see CLAUDE.md benchmark table).,0,1,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,280,literature,Chapter 99 cites \cite{bakshi2018},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,281,literature,Chapter 99 cites \cite{baribault2023troubleshoot},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,282,literature,Chapter 99 cites \cite{bjornsson2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,283,literature,Chapter 99 cites \cite{bloomingdale2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,282,literature,Chapter 99 cites \cite{bjornsson2020},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,283,literature,Chapter 99 cites \cite{bloomingdale2022},verified,CrossRef DOI resolved successfully.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,284,literature,Chapter 99 cites \cite{braak2003},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,285,literature,Chapter 99 cites \cite{brundin2010},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,286,literature,Chapter 99 cites \cite{cohen2012},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,287,literature,Chapter 99 cites \cite{corralacero2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,286,literature,Chapter 99 cites \cite{cohen2012},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,287,literature,Chapter 99 cites \cite{corralacero2020},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,288,literature,Chapter 99 cites \cite{coutinho2023},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,289,literature,Chapter 99 cites \cite{dear2020},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,290,literature,Chapter 99 cites \cite{denaro2024},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
@@ -1032,19 +1032,19 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,294,literature,Chapter 99 cites \cite{hemedan2026},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,295,literature,Chapter 99 cites \cite{jost2023},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,296,literature,Chapter 99 cites \cite{kalia2015},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,297,literature,Chapter 99 cites \cite{knowles2009},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,298,literature,Chapter 99 cites \cite{laubenbacher2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,297,literature,Chapter 99 cites \cite{knowles2009},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,298,literature,Chapter 99 cites \cite{laubenbacher2024},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,299,literature,Chapter 99 cites \cite{liu1998is},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,300,literature,Chapter 99 cites \cite{majbour2016},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,301,literature,Chapter 99 cites \cite{marek2011},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,302,literature,Chapter 99 cites \cite{matsui2026stance},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,303,literature,Chapter 99 cites \cite{meisl2014},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,304,literature,Chapter 99 cites \cite{mollenhauer2011},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,305,literature,Chapter 99 cites \cite{mollenhauer2017csf},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,305,literature,Chapter 99 cites \cite{mollenhauer2017csf},verified,CrossRef DOI resolved successfully.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,306,literature,Chapter 99 cites \cite{pagano2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,307,literature,Chapter 99 cites \cite{pagano2024},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,308,literature,Chapter 99 cites \cite{pagano2024subgroup},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,309,literature,Chapter 99 cites \cite{petricca2022},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,309,literature,Chapter 99 cites \cite{petricca2022},verified,CrossRef DOI resolved successfully.,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,310,literature,Chapter 99 cites \cite{raj2012},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,311,literature,Chapter 99 cites \cite{raue2009},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
 99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,312,literature,Chapter 99 cites \cite{righetti2025},verified,Verified during Phase 1-5 development (Phase 5 Task 5 lit review or earlier defensive citation pipeline).,1,0,0
