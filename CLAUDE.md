@@ -1124,3 +1124,24 @@ All CSV/Parquet data loaded into local PostgreSQL for reproducibility. **290 MB,
 - DATA_LITERATURE_REGISTRY updated with Phase 4 sections (§8-§9)
 - Git: migrated history from Drive to Projects, merged to main, pushed to pd_phd
 - Drive synced with all new files (connectome, LEDD, mechanistic_twin outputs)
+
+## Dissertation Completion Roadmap (2026-04-13 → defense)
+
+**Master mapping:** [`Docs/research_directions/2026-04-13_dissertation_completion_mapping.md`](Docs/research_directions/2026-04-13_dissertation_completion_mapping.md) — maps 30 Phase C catalog items to 1 new chapter (Ch 16 Paper 11 Cross-Cohort) + 1 new appendix (App E Reproducibility) + 23 sub-section additions + 2 deferred to postdoc.
+
+**Execution plan:** [`Docs/superpowers/plans/2026-04-13-dissertation-completion-execution.md`](Docs/superpowers/plans/2026-04-13-dissertation-completion-execution.md) — 17-week task-level timeline.
+
+**Final dissertation structure:** 16 chapters + 2 appendices (App D math reference existing, App E reproducibility new). Paper 11 Cross-Cohort is Ch 16; everything else is sub-section additions to existing chapters.
+
+**Critical path (minimum-defensible defense):**
+
+| Week | Deliverable | Status |
+|---|---|---|
+| 1 | Appendix E §E.1-§E.2 Docker + data dictionary | Next |
+| 2-9 | Ch 16 Paper 11 Cross-Cohort (BioFIND → PDBP → HBS + pooled meta-analysis) | — |
+| 10-13 | Ch 11 §11.7 6-region ROI split (close whole-putamen limitation) | — |
+| 14-15 | Ch 13 §13.8 Mechanistic conformal bands on counterfactuals (NASEM UQ → regulatorily MIDD-ready) | — |
+| 16 | Ch 14/15 narrative refresh (limitations/future work update) | — |
+| 17 | Final PDF compile + presubmit + defense slides | — |
+
+**Deferred to postdoc:** C3-2 Hybrid SciML UDE (→ Paper 12); F12 MindMend Phase 6; F13 DeNoPa external validation; F14 prospective interventional trial.
