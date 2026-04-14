@@ -54,6 +54,100 @@ brew services restart postgresql@17  # restart server
 
 **Migration context:** Migrated from Supabase (out of free-tier storage) on 2026-04-12. Supabase project `forcqcobliklzcfwhjsj` is now deprecated — do not write new data there. Hex.tech visualizations previously connected to Supabase; use local Jupyter with `read_sql()` instead (CLI access requires Hex Team plan).
 
+## Second Brain — Obsidian Vault + Mempalace + Audit DB
+
+**Three complementary memory stores.** Know which one to reach for:
+
+| Store | Path | Best for |
+|-------|------|----------|
+| **Obsidian Vault** | `~/Documents/Obsidian Vault/` | Synthesis layer: concept notes, 170 paper notes, 16 chapter notes, 3 live dashboards. Human-readable graph. |
+| **Mempalace** | `~/Projects/.mempalace/palace/` (~65k drawers) | Semantic memory: past conversations + code files. Use `mempalace_search` MCP or `mempalace search "x"` CLI. |
+| **Audit DB** | `outputs/defense_prep/e2e_audit/claim_lineage.sqlite3` | Structured claim truth: 1,127 claims × 327 citations × 175 data sources across 16 chapters. |
+
+**Vault structure:**
+
+```
+~/Documents/Obsidian Vault/
+├── README.md              L0 identity (mirrors ~/.mempalace/identity.txt)
+├── raw/                   Web clips, paper PDFs, data snapshots
+├── wiki/
+│   ├── Chapters/          Ch01.md...Ch99.md (auto-synced from audit DB)
+│   ├── Papers/            @citekey.md (170 notes from Zotero RT8B9N2J + Review Queue)
+│   ├── Concepts/          NSD-ISS.md, Hill-Model.md, ... (human + Claude authored)
+│   ├── Methods/           Workflow notes
+│   └── Papers-in-Flight/  Paper-N.md working notes
+├── MOCs/                  Maps of Content (Dissertation-Arc, Mechanistic-Twin, PK-PD-Pharmacology)
+├── dashboards/            claim-lineage, citation-coverage, reviewer-flags (auto-synced)
+├── templates/             Templater templates
+└── scripts/               zotero_to_obsidian.py, sync_audit_to_obsidian.py
+```
+
+### Maintenance loop — two commands to rule them all
+
+**Run `stale-check` first to see what needs attention:**
+
+```bash
+.venv/bin/python scripts/stale_check.py
+```
+
+Output:
+- **AUTOMATABLE** — mechanical work that `vault-sync` will handle (mempalace mine, zotero→obsidian, audit→obsidian, vault git)
+- **JUDGMENT** — things needing human decision (CLAUDE.md drift, audit health, orphan concepts, stale registry)
+
+**Run `vault-sync` to fix automatable items:**
+
+```bash
+.venv/bin/python scripts/vault_sync.py             # smart mode (skip unchanged)
+.venv/bin/python scripts/vault_sync.py --force     # re-run every step
+.venv/bin/python scripts/vault_sync.py --dry-run   # preview
+```
+
+Steps (each checks mtimes; only runs if needed):
+1. **MINE** — `mempalace mine` on project files modified since last run
+2. **ZOTERO** — regenerate paper notes if `phase5_literature_bibliography.bib` changed
+3. **AUDIT** — regenerate chapter notes + 3 dashboards if `claim_lineage.sqlite3` changed
+4. **COMMIT** — force vault git commit if pending changes >30 min old
+
+State tracked in `outputs/.vault_sync_state.json` (gitignored).
+
+### Continuous (already automated — no action needed)
+
+| What | Trigger | Config |
+|------|---------|--------|
+| Conversation → mempalace | Stop hook on every conversation end | `~/.claude/settings.json` hooks.Stop |
+| Vault → git | 10-min auto-commit after file change | `~/Documents/Obsidian Vault/.obsidian/plugins/obsidian-git/data.json` |
+| Zotero RT8B9N2J → .bib | BetterBibTeX "Keep updated" auto-export | Right-click RT8B9N2J → Export Collection (once) |
+
+### Cadence recommendation
+
+| When | Action |
+|------|--------|
+| **After every concrete iteration** (script runs, chapter edit, analysis finishes) | `python scripts/vault_sync.py` |
+| **Start of each work session** | `python scripts/stale_check.py` — tells you what to do |
+| **After adding a new gotcha/decision/result** | Edit the relevant CLAUDE.md; commit |
+| **New paper found via `/find`** | Add to Zotero "Dissertation — Review Queue" (key `FPJM5RSS`). Triage later into RT8B9N2J. |
+| **Weekly** | Glance at `dashboards/reviewer-flags.md` — resolve critical/major flags |
+
+### Where each fact lives (single source of truth)
+
+| Fact type | Lives in | Surfaces via |
+|-----------|----------|--------------|
+| ODE parameters + literature anchors | `outputs/mechanistic_twin/phase2/DATA_LITERATURE_REGISTRY.md` | Concept notes link to it |
+| Claims + verdicts + flags | `claim_lineage.sqlite3` | Chapter notes + dashboards (auto-synced) |
+| Verified citations | Zotero collection RT8B9N2J | BBT .bib export → `@paper notes` |
+| Unverified citations (found via /find) | Zotero collection FPJM5RSS (Review Queue) | Review queue paper notes with `status: review` |
+| Conventions / gotchas / phase status | CLAUDE.md files (root + 3 sub-dirs) | Read every session |
+| Past decisions + reasoning | Mempalace | `mempalace_search` |
+| Synthesis / concept definitions | `wiki/Concepts/` in vault | Graph view, MOCs |
+| Tabular research data | PostgreSQL `giman_research` | `read_sql()` |
+
+### CLAUDE.md hygiene
+
+- **Short** — under 200 lines per file. Long files drift and contradict themselves.
+- **Durable conventions, not history** — history belongs in git + mempalace. CLAUDE.md is "how to operate this repo."
+- **Link, don't duplicate** — if a fact lives in the audit DB or Data Literature Registry, link to it.
+- **Stale detection** — `stale_check.py` flags CLAUDE.md files unedited >14d with >10 sibling code changes.
+
 ## Three-Paper Thesis Arc
 
 1. **Paper 1** (COMPLETE): NSD-ISS Stage Prediction with Calibrated Uncertainty — conformal prediction + graph models for biological stage classification
