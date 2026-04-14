@@ -1,0 +1,105 @@
+{
+  "endpoint": "Observational counterfactual calibration (LEDD escalation >= 200mg)",
+  "source_model": "Phase 4 Path B severity-controlled interaction (phase4_confounding_control.json model2)",
+  "coefficients_used": {
+    "intercept": 9.6949,
+    "beta_nfrac_c": -2.8371,
+    "beta_ledd_c": 0.2579,
+    "beta_interaction": 1.4096,
+    "beta_updrs3_off_c": 0.3714
+  },
+  "centering_means": {
+    "n_frac": 0.8339863118076127,
+    "ledd_scaled": 1.2584789341205718,
+    "updrs3_off": 30.977936606587942
+  },
+  "ledd_escalation_threshold_mg": 200.0,
+  "ledd_scale": 500.0,
+  "analysis_set": {
+    "n_events": 481,
+    "n_patients": 335,
+    "mean_delta_ledd_mg": 440.2396465696466,
+    "median_delta_ledd_mg": 325.0,
+    "mean_observed_delta_gap": 1.2993762993762994,
+    "mean_predicted_delta_gap": 1.1913207783096962
+  },
+  "calibration_overall": {
+    "n_events": 481,
+    "slope": 1.0739219024766655,
+    "slope_ci95": [
+      0.8771384981789156,
+      1.2847005312312092
+    ],
+    "intercept": 0.01999082267396919,
+    "intercept_ci95": [
+      -0.6314374238910591,
+      0.6854023871349693
+    ],
+    "r2": 0.245465904475347,
+    "r2_ci95": [
+      0.1721484967620388,
+      0.3317864647697761
+    ],
+    "mae": 5.367028778410856,
+    "mae_ci95": [
+      4.977458413897225,
+      5.769802165899498
+    ],
+    "rmse": 6.931875810837624
+  },
+  "stratified_by_nfrac": {
+    "median_n_frac_cutoff": 0.9399908708219634,
+    "early_stratum": {
+      "n_events": 241,
+      "slope": 0.968090152491523,
+      "slope_ci95": [
+        0.6116335814877258,
+        1.3231888941925722
+      ],
+      "intercept": 0.02524987993258026,
+      "intercept_ci95": [
+        -0.8860479101422795,
+        0.8524759925597367
+      ],
+      "r2": 0.1828833546474099,
+      "r2_ci95": [
+        0.08618370131748018,
+        0.30280486037517185
+      ],
+      "mae": 5.588928034685572,
+      "mae_ci95": [
+        5.001717329216354,
+        6.2077083240119535
+      ],
+      "rmse": 7.263984039456124
+    },
+    "advanced_stratum": {
+      "n_events": 240,
+      "slope": 1.1671606619802848,
+      "slope_ci95": [
+        0.9027704397759636,
+        1.4280738766087921
+      ],
+      "intercept": 0.03792131133658929,
+      "intercept_ci95": [
+        -0.8684587976101994,
+        0.9569835181822329
+      ],
+      "r2": 0.3149226820312967,
+      "r2_ci95": [
+        0.20980946344931464,
+        0.42623823381711917
+      ],
+      "mae": 5.144204941901662,
+      "mae_ci95": [
+        4.655939597641572,
+        5.714006112620815
+      ],
+      "rmse": 6.581542097448927
+    },
+    "observed_delta_gap_early_mean": 1.2157676348547717,
+    "observed_delta_gap_advanced_mean": 1.3833333333333333
+  },
+  "verdict": "Calibration slope 95% CI contains 1.0",
+  "seed": 202604131
+}
