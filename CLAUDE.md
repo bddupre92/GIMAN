@@ -1009,8 +1009,8 @@ src/giman_pipeline/mechanistic_twin_v2/
 | 5: Bidirectional demo | ✅ | edd307f | MAE monotonic 0.149→0.100 (33% reduction), 644 pts ≥3 scans, ESS healthy |
 | 5L: Literature backing | ✅ | 29d64d8 | 75+ verified citations in `phase5_literature_bibliography.bib` + Methods defense paragraph |
 | 6: Observational counterfactual | ✅ | 6477284 | 481 LEDD↑≥200mg events, slope 1.074 [0.88,1.29] contains 1.0, intercept contains 0 — calibration PASS |
-| 7: NASEM audit | ✅ | (this commit) | 16/21 (76.2%), mean 2.29 — UQ + governance complete; bidirectional/predictive/validation substantial; zero absent |
-| 8: Figures (9) | Pending | — | |
+| 7: NASEM audit | ✅ | 121f952 | 16/21 (76.2%), mean 2.29 — UQ + governance complete; bidirectional/predictive/validation substantial; zero absent |
+| 8: Figures (9) | ✅ | (this commit) | 9 figures PNG+PDF at 300 DPI — architecture, NASEM radar, bidirectional MAE, LCC external, h2h C-index, counterfactual scatter, patient cases, calibration bins, dissertation arc |
 | 9: Documentation + manuscript | Pending | — | |
 
 ### Phase 5 Key Findings (2026-04-13)
