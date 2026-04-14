@@ -1,1476 +1,820 @@
-# Phase 5: Mechanistic vs GIMAN Head-to-Head Benchmark + Counterfactual Simulation (Paper 10) Implementation Plan
+# Phase 5: Bidirectional-Ready Mechanistic Model + External Validation (Paper 10) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Benchmark a mechanistic ODE-based PK/PD model (per-patient DaT-SPECT-calibrated N(t) coupled to levodopa pharmacodynamics) against data-driven Graph Neural Network models (Graph-DT, Dynamic-DeepHit) for Parkinson's disease management, and demonstrate that only the mechanistic model enables counterfactual treatment simulation.
+**Goal:** Build a bidirectional-ready mechanistic patient-specific model for Parkinson's disease that (1) updates Bayesian posteriors when new observations arrive, (2) externally validates the SBR decay finding on LCC cohort, (3) benchmarks against GIMAN Graph-DT on a common clinical endpoint, and (4) honestly audits NASEM digital twin criteria.
 
-**Architecture:** Three-dimension comparison (prediction accuracy, interpretability, counterfactual simulation) using existing checkpoints from Papers 3-4 and fitted coefficients from Phase 4 Paper 9. No model retraining — load pretrained models and evaluate on shared patient cohort. Counterfactual engine simulates LEDD dose changes and neuroprotective interventions by modifying mechanistic model parameters.
+**Architecture:** Persistent posterior sample storage (HDF5), `update_posterior()` API via SIR/IS reweighting with MCMC rejuvenation, patient state versioning, prediction logging + validation loop. Forward simulation uses Phase 4 interaction model coefficients. External validation on LCC DaT-SPECT data. Head-to-head on time-to-wearing-off endpoint.
 
-**Tech Stack:** Python 3.12, PyTorch 2.8 (checkpoint loading), pandas, numpy, scipy, statsmodels, matplotlib/seaborn, lifelines (survival), existing `_reproducibility.py` helper.
+**Tech Stack:** Python 3.12, PyTorch 2.8 (checkpoint loading), PyMC/scipy (SIR reweighting), h5py (posterior storage), lifelines (survival), pandas, numpy, statsmodels, matplotlib/seaborn, existing `_reproducibility.py` helper.
 
 ---
 
-## Literature Validation (Closed-Loop Stage 1 — COMPLETE 2026-04-12)
+## Revision History
 
-| Search Source | Query | Result |
-|---|---|---|
-| Consensus MCP | "mechanistic vs ML comparison Parkinson progression" | 20 papers, ALL pure ML — no mechanistic comparison |
-| PubMed | "digital twin Parkinson counterfactual simulation" | 0 results |
-| WebSearch | CPT:PSP mechanistic vs ML 2024-2025 | Atsou 2025, Valderrama 2024 (hybrid SciML trend) |
-| GitHub | mechanistic vs ML benchmark disease | Hybrid-ODE-NeurIPS-2021 (closest framework) |
-| Mempalace | Phase 5 roadmap context | Counterfactual = value proposition over GIMAN |
+**v1 (original):** Archived in git history at commit `7dfb7e6` ([GitHub link](https://github.com/bddupre92/PD_PHD/blob/7dfb7e6/Docs/superpowers/plans/2026-04-12-phase5-mechanistic-vs-giman-benchmark.md)). Contains full code blocks for data assembly, GIMAN prediction loading, shared cohort identification — referenced throughout this v2 for boilerplate reuse. Run `git show 7dfb7e6:Docs/superpowers/plans/2026-04-12-phase5-mechanistic-vs-giman-benchmark.md` to view.
 
-**Novelty confirmed:** No published mechanistic vs ML benchmark for PD. No counterfactual simulation of levodopa response using calibrated N(t). CPT:PSP actively publishing mechanistic+ML hybrid papers.
+**v2 (2026-04-13):** Comprehensive revision after deep review (3 parallel research agents + NASEM 2024 report + CPT:PSP credibility framework).
+
+**Key changes from v1:**
+
+- Dropped "benchmark + counterfactual" framing (critical thinking agent flagged as overclaim — incommensurable metrics, regression extrapolation not mechanism)
+- Added **bidirectional architecture** as primary contribution (NASEM-aligned)
+- Replaced synthetic 50-patient counterfactual with **observational LEDD-escalation validation**
+- Added **external validation on LCC** (addresses "only works on PPMI" critique)
+- Added **NASEM criteria audit** (owns partial implementation honestly)
+- Fixed data lineage: canonical parquet with ON+OFF rows (Path B inherits from main assembly)
+- Target venue shift: **npj Parkinson's Disease** or **Journal of Parkinson's Disease** (from CPT:PSP — better fit for methodological emphasis)
+
+**Rationale:** Papers 10+11 cannot deliver a full NASEM-compliant digital twin with current observational data (no continuous sensors, no intervention ground truth, no prospective re-imaging). But they CAN deliver a bidirectional-ready architecture + external validation + honest NASEM audit — a defense-grade PhD contribution.
+
+## Literature Validation (Closed-Loop Stage 1 — COMPLETE 2026-04-13)
+
+| Search | Finding |
+|---|---|
+| NASEM 2024 Report | VVUQ is the critical gap; bidirectional flow is defining criterion |
+| Musuamba 2021 (CPT:PSP) | Risk-informed model credibility framework (ASME V&V 40) |
+| Friedrich 2016 (CPT:PSP) | QSP model qualification method (MQM) |
+| Viceconti 2020 | In silico trials VVUQ regulatory framework |
+| npj Digital Medicine 2025 | VVUQ for precision medicine digital twins |
+| arxiv 2405.05301 | NASEM-compliant critical illness DT design reference |
+| Hicks 2015 (648 cites) | V&V best practices — field standard |
+| GitHub research | Hybrid-ODE-NeurIPS-2021, AlaaLab/med-real2sim, auton-survival — reusable patterns |
+
+## Data Lineage Fix (Task 0 — CRITICAL)
+
+**Issue discovered:** The main `phase4_assembled_data.parquet` has only 40 ON-state rows because Task 1 of Phase 4 filtered to OFF during assembly. Path B re-extracts from raw Part III CSV to get the 4,203 paired ON-OFF visits. This creates **two data pipelines** — violates canonical-source principle.
+
+**Fix:** Rebuild the assembled parquet to include BOTH ON and OFF rows with added columns `updrs3_on`, `updrs3_off`, `gap` (where paired). Path A filters in-memory. Path B uses paired rows directly. Paper 10 uses ONE canonical source.
+
+## NASEM Criteria Self-Audit (Honest Scope)
+
+| Criterion | Current State | After Paper 10 | Gap |
+|---|---|---|---|
+| Physiological constraints | Partial (N(t) ODE + Hill PD) | Same | Simplified vs full 5-module coupled ODE |
+| Bidirectional data flow | NO | **YES (episodic)** | Continuous updating requires sensors |
+| Continuous updating | NO | Episodic (per-visit) | True continuous = Phase 6 MindMend |
+| Patient-level validation | Partial | **External (LCC) + replay harness** | No prospective interventional validation |
+
+**Honest framing:** Paper 10 delivers a **bidirectional-ready mechanistic patient-specific model**, NOT a full NASEM-compliant digital twin. Phase 6 is acknowledged future work.
 
 ---
 
 ## File Structure
 
 ```
-scripts/mechanistic_twin/
-├── phase5_identify_shared_cohort.py       # Task 1: Find patients with both models' data
-├── phase5_load_giman_predictions.py       # Task 2: Load Graph-DT + DeepHit predictions
-├── phase5_complementarity_analysis.py     # Task 3: Do models capture different variance?
-├── phase5_counterfactual_engine.py        # Task 4: Simulate LEDD + neuroprotective interventions
-├── phase5_scissors_closure.py             # Task 5: OFF-UPDRS floor + ON-UPDRS ceiling converging
-├── phase5_treatment_horizon.py            # Task 6: Time to gap < clinical threshold
-├── phase5_generate_figures.py             # Task 7: Publication figures for Paper 10
+src/giman_pipeline/mechanistic_twin_v2/   # NEW package for bidirectional arch
+├── __init__.py
+├── state.py                # PatientState dataclass (version, samples, weights, ess)
+├── posterior_store.py      # HDF5-backed: /patno/version → datasets
+├── updater.py              # update_posterior() via SIR + MCMC rejuvenation
+├── simulator.py            # Forward simulation with posterior uncertainty
+├── counterfactual.py       # Extends existing src/giman_pipeline/digital_twin/
+├── validation.py           # PredictionLog + calibration_report
+├── forward_model.py        # Ports Phase 2 ODE from Julia module
+└── observations.py         # Per-observation-type likelihoods
 
-tests/mechanistic_twin/
-├── test_phase5_shared_cohort.py           # Task 1 tests
-├── test_phase5_counterfactual.py          # Task 4 tests
+scripts/mechanistic_twin/
+├── phase5_rebuild_canonical_parquet.py     # Task 0: fix data lineage
+├── phase5_persist_full_posteriors.py       # Task 1: rerun IS with full samples
+├── phase5_identify_shared_cohort.py        # Task 2: GIMAN × mechanistic × Phase 4
+├── phase5_external_validation_lcc.py       # Task 3: LCC SBR decay validation
+├── phase5_headtohead_wearing_off.py        # Task 4: common endpoint benchmark
+├── phase5_bidirectional_demo.py            # Task 5: fit scans 1-2, predict scan 3
+├── phase5_observational_counterfactual.py  # Task 6: LEDD escalation validation
+├── phase5_nasem_audit.py                   # Task 7: NASEM criteria scoring
+├── phase5_generate_figures.py              # Task 8: publication figures
+
+tests/mechanistic_twin_v2/
+├── test_state.py
+├── test_posterior_store.py
+├── test_updater.py
+├── test_simulator.py
 
 outputs/mechanistic_twin/paper10_mech_vs_giman/
-├── phase5_shared_cohort.json              # Task 1 output
-├── phase5_giman_predictions.parquet       # Task 2 output
-├── phase5_complementarity.json            # Task 3 output
-├── phase5_counterfactuals.json            # Task 4 output
-├── phase5_scissors_closure.json           # Task 5 output
-├── phase5_treatment_horizons.json         # Task 6 output
-├── figures/                               # Task 7 output
-├── latex/main.tex                         # Paper 10 manuscript
+├── canonical_assembled_v2.parquet          # Task 0 output (ON+OFF)
+├── phase2_posteriors_full_samples.h5       # Task 1 output
+├── shared_cohort.json                      # Task 2 output
+├── external_validation_lcc.json            # Task 3 output
+├── headtohead_wearing_off.json             # Task 4 output
+├── bidirectional_demo.json                 # Task 5 output
+├── observational_counterfactual.json       # Task 6 output
+├── nasem_audit.json                        # Task 7 output
+├── figures/                                # Task 8 output
+├── latex/main.tex                          # Paper 10 manuscript
 ```
 
 ---
 
-### Task 1: Identify Shared Patient Cohort
+### Task 0: Rebuild Canonical Assembled Parquet (Data Lineage Fix)
 
 **Files:**
-- Create: `scripts/mechanistic_twin/phase5_identify_shared_cohort.py`
-- Create: `tests/mechanistic_twin/test_phase5_shared_cohort.py`
-- Read: `outputs/paper3_checkpoints/graph_dt/fold0_graph_dt.pt`
-- Read: `outputs/paper3_checkpoints/deephit/fold0_deephit.pt`
+
+- Create: `scripts/mechanistic_twin/phase5_rebuild_canonical_parquet.py`
+- Read: `data/00_raw/MDS-UPDRS Part IV/MDS-UPDRS_Part_III_12Apr2026.csv`
+- Read: `data/00_raw/MDS-UPDRS Part IV/MDS-UPDRS_Part_IV__Motor_Complications_12Apr2026.csv`
+- Read: `data/00_raw/LEDD_Concomitant_Medication_Log_12Apr2026.csv`
 - Read: `outputs/mechanistic_twin/data/posteriors/phase2_coupled_is_step26v4.csv`
-- Read: `outputs/mechanistic_twin/phase4/phase4_assembled_data.parquet`
-- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_shared_cohort.json`
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet`
 
-**Context for implementer:** We need patients who appear in ALL THREE models' datasets: (1) Graph-DT/DeepHit training or test sets (from checkpoint `train_pats`/`test_pats`), (2) Phase 2 posteriors (have calibrated N(t)), (3) Phase 4 assembled data (have LEDD + UPDRS ON/OFF pairs). The intersection is the shared cohort for the head-to-head benchmark.
+**Context:** Fix the Phase 4 data lineage. Current parquet has only 40 ON rows; Path B rebuilds pairs ad-hoc. New canonical parquet must have ALL UPDRS-III rows (ON + OFF + unstated) with columns for both states paired by PATNO+EVENT_ID.
 
-- [ ] **Step 1: Write failing test for shared cohort identification**
-
-```python
-# tests/mechanistic_twin/test_phase5_shared_cohort.py
-import pytest
-from scripts.mechanistic_twin.phase5_identify_shared_cohort import (
-    load_giman_patnos,
-    load_mechanistic_patnos,
-    identify_shared_cohort,
-)
-
-
-def test_load_giman_patnos_returns_sets():
-    """Loading GIMAN checkpoints should return train/val/test PATNO sets."""
-    result = load_giman_patnos(fold=0)
-    assert "train" in result
-    assert "test" in result
-    assert isinstance(result["train"], set)
-    assert len(result["train"]) > 0
-
-
-def test_load_mechanistic_patnos_returns_set():
-    """Loading mechanistic posteriors should return PATNO set."""
-    patnos = load_mechanistic_patnos()
-    assert isinstance(patnos, set)
-    assert len(patnos) > 0
-
-
-def test_shared_cohort_is_intersection():
-    """Shared cohort should be intersection of GIMAN + mechanistic + Phase 4."""
-    giman = {"train": {1, 2, 3, 4}, "test": {5, 6}}
-    mech = {2, 3, 5, 7}
-    phase4 = {3, 5, 8}
-    shared = identify_shared_cohort(
-        giman_all={1, 2, 3, 4, 5, 6}, mech_patnos=mech, phase4_patnos=phase4
-    )
-    assert shared == {3, 5}
-
-
-def test_shared_cohort_nonempty_on_real_data():
-    """Real data should have substantial overlap."""
-    giman = load_giman_patnos(fold=0)
-    mech = load_mechanistic_patnos()
-    shared = identify_shared_cohort(
-        giman_all=giman["train"] | giman["test"],
-        mech_patnos=mech,
-        phase4_patnos=mech,  # Phase 4 uses same posteriors
-    )
-    assert len(shared) >= 200, f"Expected >=200 shared patients, got {len(shared)}"
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `.venv/bin/python -m pytest tests/mechanistic_twin/test_phase5_shared_cohort.py -v`
-Expected: FAIL with `ModuleNotFoundError`
-
-- [ ] **Step 3: Implement shared cohort identification**
+- [ ] **Step 1: Write failing test for canonical parquet schema**
 
 ```python
-# scripts/mechanistic_twin/phase5_identify_shared_cohort.py
-"""Phase 5 Step 1: Identify patients present in both GIMAN and mechanistic models.
-
-The shared cohort is the intersection of:
-  1. GIMAN Graph-DT/DeepHit checkpoint patient lists
-  2. Phase 2 IS posteriors (calibrated N(t))
-  3. Phase 4 assembled data (LEDD + UPDRS ON/OFF)
-"""
-from __future__ import annotations
-
-import json
-import sys
+# tests/mechanistic_twin_v2/test_canonical_parquet.py
+import pandas as pd
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.mechanistic_twin._reproducibility import capture_provenance
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CHECKPOINTS = PROJECT_ROOT / "outputs" / "paper3_checkpoints"
-POSTERIORS = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "data" / "posteriors"
-PHASE4 = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "phase4"
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "paper10_mech_vs_giman"
+def test_canonical_has_both_on_and_off():
+    """Canonical parquet must have >3000 ON rows AND >7000 OFF rows."""
+    path = Path("outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet")
+    df = pd.read_parquet(path)
+    on_count = df["updrs3_on"].notna().sum()
+    off_count = df["updrs3_off"].notna().sum()
+    assert on_count > 3000, f"Expected >3000 ON rows, got {on_count}"
+    assert off_count > 7000, f"Expected >7000 OFF rows, got {off_count}"
 
 
-def load_giman_patnos(fold: int = 0) -> dict[str, set[int]]:
-    """Load patient lists from Graph-DT and DeepHit checkpoints."""
-    result = {}
-    for model_name in ["graph_dt", "deephit"]:
-        cp_path = CHECKPOINTS / model_name / f"fold{fold}_{model_name}.pt"
-        cp = torch.load(cp_path, map_location="cpu", weights_only=False)
-        for key in ["train_pats", "val_pats", "test_pats"]:
-            pats = set(int(p) for p in cp.get(key, []))
-            result.setdefault(key.replace("_pats", ""), set()).update(pats)
-    return result
+def test_canonical_has_gap_column():
+    """Canonical parquet must have gap column where paired."""
+    df = pd.read_parquet("outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet")
+    assert "gap" in df.columns
+    paired = df.dropna(subset=["updrs3_on", "updrs3_off"])
+    assert (abs(paired["gap"] - (paired["updrs3_off"] - paired["updrs3_on"])) < 0.01).all()
 
 
-def load_mechanistic_patnos() -> set[int]:
-    """Load PATNOs from Phase 2 IS posteriors."""
-    df = pd.read_csv(POSTERIORS / "phase2_coupled_is_step26v4.csv")
-    return set(int(p) for p in df["PATNO"])
-
-
-def identify_shared_cohort(
-    giman_all: set[int],
-    mech_patnos: set[int],
-    phase4_patnos: set[int],
-) -> set[int]:
-    """Return intersection of all three patient sets."""
-    return giman_all & mech_patnos & phase4_patnos
-
-
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    prov = capture_provenance(
-        script_path=Path(__file__),
-        input_files=[
-            CHECKPOINTS / "graph_dt" / "fold0_graph_dt.pt",
-            CHECKPOINTS / "deephit" / "fold0_deephit.pt",
-            POSTERIORS / "phase2_coupled_is_step26v4.csv",
-            PHASE4 / "phase4_assembled_data.parquet",
-        ],
-        output_dir=OUTPUT_DIR,
-        seed=None,
-    )
-
-    # Load from all 5 folds
-    all_giman = set()
-    per_fold = {}
-    for fold in range(5):
-        fold_pats = load_giman_patnos(fold)
-        per_fold[fold] = {
-            "train": len(fold_pats["train"]),
-            "test": len(fold_pats["test"]),
-        }
-        all_giman.update(fold_pats["train"])
-        all_giman.update(fold_pats.get("val", set()))
-        all_giman.update(fold_pats["test"])
-
-    mech_pats = load_mechanistic_patnos()
-
-    # Phase 4 assembled data PATNOs
-    phase4_df = pd.read_parquet(PHASE4 / "phase4_assembled_data.parquet")
-    phase4_pats = set(int(p) for p in phase4_df["PATNO"].unique())
-
-    shared = identify_shared_cohort(all_giman, mech_pats, phase4_pats)
-
-    print(f"GIMAN (all folds): {len(all_giman)} patients")
-    print(f"Mechanistic (Phase 2 posteriors): {len(mech_pats)} patients")
-    print(f"Phase 4 (assembled data): {len(phase4_pats)} patients")
-    print(f"Shared cohort (intersection): {len(shared)} patients")
-
-    # Further filter: patients with ON-OFF paired visits AND LEDD > 0
-    paired_pats = set(
-        int(p)
-        for p in phase4_df[
-            (phase4_df["total_ledd"] > 0) & phase4_df["T_tox_median"].notna()
-        ]["PATNO"].unique()
-    )
-    shared_with_ledd = shared & paired_pats
-    print(f"Shared with LEDD > 0 + posteriors: {len(shared_with_ledd)} patients")
-
-    summary = {
-        "giman_total": len(all_giman),
-        "mechanistic_total": len(mech_pats),
-        "phase4_total": len(phase4_pats),
-        "shared_all_three": len(shared),
-        "shared_with_ledd_and_posteriors": len(shared_with_ledd),
-        "shared_patnos": sorted(shared),
-        "shared_with_ledd_patnos": sorted(shared_with_ledd),
-        "per_fold_giman": per_fold,
-        "_provenance": prov,
-    }
-
-    out_path = OUTPUT_DIR / "phase5_shared_cohort.json"
-    with open(out_path, "w") as f:
-        json.dump(summary, f, indent=2, default=str)
-    print(f"Saved: {out_path}")
-
-
-if __name__ == "__main__":
-    main()
+def test_path_b_pair_count_matches():
+    """Canonical parquet paired count should be ~4,203 (Phase 4 Path B)."""
+    df = pd.read_parquet("outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet")
+    paired_count = df.dropna(subset=["updrs3_on", "updrs3_off"]).shape[0]
+    assert paired_count >= 4000, f"Expected ~4,203 paired visits, got {paired_count}"
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 2: Implement rebuild script** — see v1 plan Task 1 for LEDD computation logic to reuse. Must load UPDRS-III WITHOUT filtering PDSTATE, pair ON-OFF, merge Part IV + LEDD + posteriors, compute n_frac using compound decay `(1 - pct_loss/100)^years`.
 
-Run: `.venv/bin/python -m pytest tests/mechanistic_twin/test_phase5_shared_cohort.py -v`
-Expected: All 4 tests PASS
-
-- [ ] **Step 5: Run the script on real data**
-
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_identify_shared_cohort.py`
-Expected: `phase5_shared_cohort.json` with shared cohort size (expect 200-400 patients)
-
-- [ ] **Step 6: Commit**
+- [ ] **Step 3: Run + verify**
 
 ```bash
-git add scripts/mechanistic_twin/phase5_identify_shared_cohort.py tests/mechanistic_twin/test_phase5_shared_cohort.py
-git commit -m "feat: Phase 5 Step 1 — identify shared GIMAN + mechanistic patient cohort"
+.venv/bin/python scripts/mechanistic_twin/phase5_rebuild_canonical_parquet.py
+.venv/bin/python -m pytest tests/mechanistic_twin_v2/test_canonical_parquet.py -v
 ```
 
----
-
-### Task 2: Load GIMAN Predictions for Shared Cohort
-
-**Files:**
-- Create: `scripts/mechanistic_twin/phase5_load_giman_predictions.py`
-- Read: `outputs/paper3_checkpoints/graph_dt/fold{0-4}_graph_dt.pt`
-- Read: `outputs/paper3_checkpoints/deephit/fold{0-4}_deephit.pt`
-- Read: `data/07_paper3_features/longitudinal_features.csv`
-- Read: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_shared_cohort.json`
-- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_giman_predictions.parquet`
-
-**Context for implementer:** For each shared cohort patient, we need the GIMAN model's predictions (CIF curves from Graph-DT and DeepHit). Load the checkpoint where the patient was in the TEST set (to avoid train-set leakage). If the patient was never in a test set, use the fold where they were in the validation set. Extract per-patient CIF predictions at each time bin for each cause (NSD-ISS stage transition).
-
-Key loading functions:
-- `src/giman_pipeline/paper3/graph_digital_twin.py` → `load_graph_dt_checkpoint(path, device)`
-- `src/giman_pipeline/paper3/dynamic_deephit.py` → `load_deephit_checkpoint(path, device)`
-
-Both return `(model, checkpoint_dict)`. The model's `forward()` requires batched input via `graph_collate_fn` (Graph-DT) or standard collation (DeepHit).
-
-Graph-DT forward pass needs: `sequences` (padded visit features), `seq_lens`, `graph_idxs` (mapping patients to graph nodes), and the graph data (edge_index, node_baseline).
-
-DeepHit forward pass needs: `sequences`, `seq_lens` only.
-
-Both output: `(N, K*J+1)` logits over K causes × J time bins + 1 no-event class.
-
-- [ ] **Step 1: Write the GIMAN prediction loader**
-
-```python
-# scripts/mechanistic_twin/phase5_load_giman_predictions.py
-"""Phase 5 Step 2: Load GIMAN Graph-DT and DeepHit predictions for shared cohort.
-
-For each patient in the shared cohort, loads the checkpoint where they were
-in the TEST set (avoids train leakage) and extracts their CIF predictions.
-"""
-from __future__ import annotations
-
-import json
-import sys
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-import torch
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.mechanistic_twin._reproducibility import capture_provenance
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CHECKPOINTS = PROJECT_ROOT / "outputs" / "paper3_checkpoints"
-FEATURES_PATH = PROJECT_ROOT / "data" / "07_paper3_features" / "longitudinal_features.csv"
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "paper10_mech_vs_giman"
-
-N_CAUSES = 5  # NSD-ISS stages: 0, 2B, 3, 4, 5
-N_TIME_BINS = 11  # [3,6,12,18,24,36,48,60,84,120,180] months
-TIME_BINS = [3, 6, 12, 18, 24, 36, 48, 60, 84, 120, 180]
-
-
-def find_test_fold(patno: int, checkpoints_dir: Path, model_name: str) -> int | None:
-    """Find which fold a patient was in the test set."""
-    for fold in range(5):
-        cp_path = checkpoints_dir / model_name / f"fold{fold}_{model_name}.pt"
-        cp = torch.load(cp_path, map_location="cpu", weights_only=False)
-        if patno in set(int(p) for p in cp.get("test_pats", [])):
-            return fold
-    return None
-
-
-def load_predictions_for_patient(
-    patno: int,
-    model_name: str,
-    fold: int,
-    features_df: pd.DataFrame,
-) -> dict:
-    """Load model and get CIF predictions for a single patient.
-
-    Returns dict with per-cause, per-time-bin CIF values.
-    """
-    cp_path = CHECKPOINTS / model_name / f"fold{fold}_{model_name}.pt"
-    cp = torch.load(cp_path, map_location="cpu", weights_only=False)
-
-    # Get patient's visit sequence from features
-    pat_features = features_df[features_df["PATNO"] == patno].sort_values(
-        "months_from_baseline"
-    )
-
-    if len(pat_features) == 0:
-        return {"patno": patno, "model": model_name, "fold": fold, "error": "no_features"}
-
-    # Extract feature columns matching checkpoint
-    col_names = cp["col_names"]
-    means = cp["means"]
-    stds = cp["stds"]
-
-    # Build feature matrix for this patient
-    available_cols = [c for c in col_names if c in pat_features.columns]
-    if len(available_cols) < len(col_names) * 0.5:
-        return {"patno": patno, "model": model_name, "fold": fold, "error": "insufficient_features"}
-
-    X = pat_features[available_cols].values.astype(np.float32)
-
-    # Standardize using fold-specific means/stds
-    col_idx = [col_names.index(c) for c in available_cols if c in col_names]
-    for i, ci in enumerate(col_idx):
-        if stds[ci] > 0:
-            X[:, i] = (X[:, i] - means[ci]) / stds[ci]
-
-    # Replace NaN with 0 (standardized mean)
-    X = np.nan_to_num(X, nan=0.0)
-
-    # For this plan: extract the fold's test C-td and per-transition metrics
-    # from the checkpoint rather than re-running inference (which requires
-    # reconstructing the full batch collation pipeline)
-    return {
-        "patno": int(patno),
-        "model": model_name,
-        "fold": fold,
-        "fold_ctd": float(cp.get("fold_ctd", np.nan)),
-        "fold_ibs": float(cp.get("fold_ibs", np.nan)),
-        "n_visits": len(pat_features),
-        "months_range": [
-            float(pat_features["months_from_baseline"].min()),
-            float(pat_features["months_from_baseline"].max()),
-        ],
-    }
-
-
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    prov = capture_provenance(
-        script_path=Path(__file__),
-        input_files=[FEATURES_PATH, OUTPUT_DIR / "phase5_shared_cohort.json"],
-        output_dir=OUTPUT_DIR,
-        seed=None,
-    )
-
-    # Load shared cohort
-    with open(OUTPUT_DIR / "phase5_shared_cohort.json") as f:
-        cohort = json.load(f)
-    shared_patnos = cohort["shared_patnos"]
-    print(f"Shared cohort: {len(shared_patnos)} patients")
-
-    # Load features
-    features = pd.read_csv(FEATURES_PATH)
-    features["PATNO"] = features["PATNO"].astype(int)
-
-    results = []
-    for model_name in ["graph_dt", "deephit"]:
-        for patno in shared_patnos:
-            fold = find_test_fold(patno, CHECKPOINTS, model_name)
-            if fold is None:
-                # Patient was never in test set — use fold 0 (note this)
-                fold = 0
-                in_test = False
-            else:
-                in_test = True
-
-            pred = load_predictions_for_patient(patno, model_name, fold, features)
-            pred["in_test_set"] = in_test
-            results.append(pred)
-
-    results_df = pd.DataFrame(results)
-    out_path = OUTPUT_DIR / "phase5_giman_predictions.parquet"
-    results_df.to_parquet(out_path, index=False)
-    print(f"Saved: {out_path} ({len(results_df)} rows)")
-
-    # Summary
-    summary = {
-        "n_patients": len(shared_patnos),
-        "n_predictions": len(results_df),
-        "graph_dt_in_test": int(results_df[
-            (results_df["model"] == "graph_dt") & results_df["in_test_set"]
-        ].shape[0]),
-        "deephit_in_test": int(results_df[
-            (results_df["model"] == "deephit") & results_df["in_test_set"]
-        ].shape[0]),
-        "mean_ctd_graph_dt": float(
-            results_df[results_df["model"] == "graph_dt"]["fold_ctd"].mean()
-        ),
-        "mean_ctd_deephit": float(
-            results_df[results_df["model"] == "deephit"]["fold_ctd"].mean()
-        ),
-        "_provenance": prov,
-    }
-    with open(OUTPUT_DIR / "phase5_giman_summary.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
-    print(f"Saved summary")
-
-
-if __name__ == "__main__":
-    main()
-```
-
-- [ ] **Step 2: Run the script**
-
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_load_giman_predictions.py`
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add scripts/mechanistic_twin/phase5_load_giman_predictions.py
-git commit -m "feat: Phase 5 Step 2 — load GIMAN predictions for shared cohort"
-```
-
----
-
-### Task 3: Complementarity Analysis
-
-**Files:**
-- Create: `scripts/mechanistic_twin/phase5_complementarity_analysis.py`
-- Read: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_shared_cohort.json`
-- Read: `outputs/mechanistic_twin/phase4/phase4_path_b_results.json`
-- Read: `outputs/mechanistic_twin/phase4/phase4_confounding_control.json`
-- Read: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_giman_predictions.parquet`
-- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_complementarity.json`
-
-**Context for implementer:** The key question is: do the mechanistic model and GIMAN capture DIFFERENT variance in patient outcomes? If they're redundant, the benchmark is boring. If they're complementary — one predicts WHEN transitions happen, the other predicts HOW MUCH treatment benefit changes — that's the paper's thesis.
-
-Analysis plan:
-1. **Clinical question mapping:** Tabulate which clinical questions each model answers.
-2. **Shared variance analysis:** For shared patients, correlate mechanistic predictions (gap trajectory) with GIMAN predictions (transition CIF). If correlation is low (<0.3), they capture different signals.
-3. **Information-theoretic analysis:** Compute mutual information between the two model outputs.
-4. **Quadrant analysis:** Classify patients into 4 quadrants: (high/low GIMAN risk) × (high/low mechanistic gap decline). Are there patients where one model flags risk but the other doesn't?
-
-- [ ] **Step 1: Implement complementarity analysis**
-
-```python
-# scripts/mechanistic_twin/phase5_complementarity_analysis.py
-"""Phase 5 Step 3: Analyze complementarity between mechanistic and GIMAN models.
-
-Key question: do the models capture different variance in patient outcomes?
-GIMAN predicts WHEN transitions happen (C-td=0.920).
-Mechanistic predicts HOW MUCH treatment benefit changes (gap interaction p=0.044).
-"""
-from __future__ import annotations
-
-import json
-import sys
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-from scipy.stats import spearmanr, pearsonr
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.mechanistic_twin._reproducibility import capture_provenance
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "paper10_mech_vs_giman"
-PHASE4 = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "phase4"
-POSTERIORS = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "data" / "posteriors"
-
-
-def compute_mechanistic_features(shared_patnos: list[int]) -> pd.DataFrame:
-    """Compute mechanistic model features for shared patients.
-
-    Returns per-patient: pct_loss_per_yr, n_frac_at_5yr, predicted_gap_at_5yr.
-    """
-    posteriors = pd.read_csv(POSTERIORS / "phase2_coupled_is_step26v4.csv")
-    posteriors["PATNO"] = posteriors["PATNO"].astype(int)
-    posteriors = posteriors[posteriors["PATNO"].isin(shared_patnos)]
-
-    # Phase 4 interaction model coefficients (from phase4_path_b_results.json)
-    with open(PHASE4 / "phase4_path_b_results.json") as f:
-        path_b = json.load(f)
-
-    # Extract B3 interaction coefficients
-    b3 = path_b.get("model_b3_interaction", {})
-    intercept = b3.get("intercept", 14.823)
-    beta_nfrac = b3.get("beta_nfrac", -8.345)
-    beta_ledd = b3.get("beta_ledd_scaled", -0.316)
-    beta_interaction = b3.get("beta_interaction", 2.134)
-
-    rows = []
-    for _, pat in posteriors.iterrows():
-        pct_loss = pat["pct_loss_per_yr_median"]
-        # N(t)/N0 at 5 years (compound decay)
-        n_frac_5yr = (1 - pct_loss / 100) ** 5
-        # Predicted gap at median LEDD (500mg, scaled = 1.0)
-        ledd_scaled = 1.0
-        predicted_gap = (
-            intercept
-            + beta_nfrac * n_frac_5yr
-            + beta_ledd * ledd_scaled
-            + beta_interaction * n_frac_5yr * ledd_scaled
-        )
-
-        rows.append({
-            "PATNO": int(pat["PATNO"]),
-            "pct_loss_per_yr": pct_loss,
-            "n_frac_5yr": n_frac_5yr,
-            "predicted_gap_5yr": predicted_gap,
-            "n_scans": int(pat["n_scans"]),
-        })
-
-    return pd.DataFrame(rows)
-
-
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    prov = capture_provenance(
-        script_path=Path(__file__),
-        input_files=[
-            OUTPUT_DIR / "phase5_shared_cohort.json",
-            PHASE4 / "phase4_path_b_results.json",
-            POSTERIORS / "phase2_coupled_is_step26v4.csv",
-        ],
-        output_dir=OUTPUT_DIR,
-        seed=None,
-    )
-
-    with open(OUTPUT_DIR / "phase5_shared_cohort.json") as f:
-        cohort = json.load(f)
-    shared = cohort["shared_patnos"]
-    print(f"Shared cohort: {len(shared)} patients")
-
-    # Mechanistic features
-    mech_df = compute_mechanistic_features(shared)
-    print(f"Mechanistic features: {len(mech_df)} patients")
-
-    # Clinical question mapping
-    question_map = {
-        "giman_graph_dt": {
-            "answers": [
-                "When will the patient transition to the next NSD-ISS stage?",
-                "What is the probability of reaching Stage 4 within 5 years?",
-                "Which patients are at highest risk of rapid progression?",
-            ],
-            "cannot_answer": [
-                "How much will increasing LEDD improve motor scores?",
-                "When will medication benefit fall below clinical threshold?",
-                "What if we start a neuroprotective agent?",
-            ],
-            "metric": "C-td = 0.920 (transition timing)",
-        },
-        "mechanistic_twin": {
-            "answers": [
-                "How much treatment benefit (ON-OFF gap) does this patient get?",
-                "How will the gap change as neurons die?",
-                "What if LEDD is increased by 200mg?",
-                "What if a neuroprotective agent slows N(t) decline by 25%?",
-            ],
-            "cannot_answer": [
-                "When will the patient reach NSD-ISS Stage 4?",
-                "What is the 5-year survival probability for each transition?",
-            ],
-            "metric": "Gap interaction p=0.044, conditional R²=0.491",
-        },
-    }
-
-    # Correlation between mechanistic features and progression rate
-    # Use pct_loss_per_yr as proxy for "mechanistic risk" and compare with GIMAN risk
-    # (For full analysis, would need actual CIF predictions — here use pct_loss as surrogate)
-    mech_risk = mech_df["pct_loss_per_yr"].values
-    mech_gap = mech_df["predicted_gap_5yr"].values
-
-    # Quadrant analysis: fast vs slow progressors × high vs low gap
-    median_loss = np.median(mech_risk)
-    median_gap = np.median(mech_gap)
-
-    quadrants = {
-        "fast_loss_high_gap": int(((mech_risk > median_loss) & (mech_gap > median_gap)).sum()),
-        "fast_loss_low_gap": int(((mech_risk > median_loss) & (mech_gap <= median_gap)).sum()),
-        "slow_loss_high_gap": int(((mech_risk <= median_loss) & (mech_gap > median_gap)).sum()),
-        "slow_loss_low_gap": int(((mech_risk <= median_loss) & (mech_gap <= median_gap)).sum()),
-    }
-
-    # Correlation between loss rate and predicted gap
-    rho_loss_gap, p_loss_gap = spearmanr(mech_risk, mech_gap)
-
-    results = {
-        "n_shared_patients": len(shared),
-        "n_with_mechanistic": len(mech_df),
-        "clinical_question_map": question_map,
-        "complementarity_thesis": (
-            "GIMAN predicts WHEN (transition timing, C-td=0.920). "
-            "Mechanistic predicts HOW MUCH BENEFIT (gap interaction, p=0.044). "
-            "These are different clinical questions with independent variance."
-        ),
-        "mechanistic_features": {
-            "pct_loss_per_yr": {
-                "mean": float(np.mean(mech_risk)),
-                "median": float(np.median(mech_risk)),
-                "std": float(np.std(mech_risk)),
-            },
-            "predicted_gap_5yr": {
-                "mean": float(np.mean(mech_gap)),
-                "median": float(np.median(mech_gap)),
-                "std": float(np.std(mech_gap)),
-            },
-        },
-        "correlation_loss_vs_gap": {
-            "spearman_rho": float(rho_loss_gap),
-            "p_value": float(p_loss_gap),
-        },
-        "quadrant_analysis": quadrants,
-        "_provenance": prov,
-    }
-
-    out_path = OUTPUT_DIR / "phase5_complementarity.json"
-    with open(out_path, "w") as f:
-        json.dump(results, f, indent=2, default=str)
-    print(f"Saved: {out_path}")
-
-
-if __name__ == "__main__":
-    main()
-```
-
-- [ ] **Step 2: Run the script**
-
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_complementarity_analysis.py`
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add scripts/mechanistic_twin/phase5_complementarity_analysis.py
-git commit -m "feat: Phase 5 Step 3 — complementarity analysis (GIMAN vs mechanistic)"
-```
-
----
-
-### Task 4: Counterfactual Simulation Engine
-
-**Files:**
-- Create: `scripts/mechanistic_twin/phase5_counterfactual_engine.py`
-- Create: `tests/mechanistic_twin/test_phase5_counterfactual.py`
-- Read: `outputs/mechanistic_twin/phase4/phase4_path_b_results.json`
-- Read: `outputs/mechanistic_twin/phase4/phase4_confounding_control.json`
-- Read: `outputs/mechanistic_twin/data/posteriors/phase2_coupled_is_step26v4.csv`
-- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_counterfactuals.json`
-
-**Context for implementer:** This is the mechanistic model's unique capability — GIMAN CANNOT do this. The counterfactual engine simulates "what if" scenarios by modifying model inputs (LEDD, N(t) trajectory) and computing predicted gap changes. Three scenarios:
-
-1. **Dose escalation:** "What if LEDD increases by 200mg at month 24?"
-2. **Neuroprotective intervention:** "What if a drug reduces pct_loss_per_yr by 25%?"
-3. **Treatment timing:** "What if treatment starts 12 months earlier?"
-
-The interaction model from Phase 4 (severity-controlled, Model M2):
-```
-GAP = β₀ + β₁×n_frac_c + β₂×ledd_c + β₃×n_frac_c×ledd_c + β₄×updrs3_off_c + (1|patient)
-```
-
-For counterfactual simulation, we use the fixed-effects coefficients only (no random effects — those are patient-specific lookup tables, not causal parameters).
-
-- [ ] **Step 1: Write failing tests for counterfactual engine**
-
-```python
-# tests/mechanistic_twin/test_phase5_counterfactual.py
-import pytest
-import numpy as np
-from scripts.mechanistic_twin.phase5_counterfactual_engine import (
-    predict_gap_trajectory,
-    simulate_dose_escalation,
-    simulate_neuroprotection,
-    CounterfactualResult,
-)
-
-
-def test_predict_gap_trajectory_shape():
-    """Gap trajectory should have one value per time point."""
-    years = np.array([0, 1, 2, 3, 4, 5])
-    gap = predict_gap_trajectory(
-        pct_loss_per_yr=3.29, ledd=500.0, years=years
-    )
-    assert gap.shape == (6,)
-    assert all(np.isfinite(gap))
-
-
-def test_gap_decreases_over_time():
-    """Gap should decrease as neurons die (fewer neurons → less benefit)."""
-    years = np.array([0, 5, 10])
-    gap = predict_gap_trajectory(pct_loss_per_yr=5.0, ledd=500.0, years=years)
-    assert gap[0] > gap[1] > gap[2], "Gap should decrease over time"
-
-
-def test_dose_escalation_increases_gap():
-    """Increasing LEDD should increase the gap (more medication → more benefit)."""
-    result = simulate_dose_escalation(
-        pct_loss_per_yr=3.29,
-        baseline_ledd=500.0,
-        new_ledd=700.0,
-        years=np.array([0, 1, 2, 3, 4, 5]),
-    )
-    assert isinstance(result, CounterfactualResult)
-    # At every time point, higher LEDD should give higher gap
-    assert all(result.counterfactual_gap >= result.baseline_gap - 0.01)
-
-
-def test_neuroprotection_increases_gap():
-    """Reducing neuron loss rate should increase the gap at future time points."""
-    result = simulate_neuroprotection(
-        baseline_pct_loss=5.0,
-        treated_pct_loss=3.75,  # 25% reduction
-        ledd=500.0,
-        years=np.array([0, 1, 2, 3, 4, 5]),
-    )
-    assert isinstance(result, CounterfactualResult)
-    # At year 0, no difference. At year 5, treated should have higher gap.
-    assert abs(result.delta_gap[0]) < 0.01, "No difference at baseline"
-    assert result.delta_gap[-1] > 0, "Treatment should improve gap at year 5"
-
-
-def test_neuroprotection_zero_effect_at_baseline():
-    """At t=0, neuroprotection hasn't had time to act — gap should be equal."""
-    result = simulate_neuroprotection(
-        baseline_pct_loss=5.0,
-        treated_pct_loss=2.5,
-        ledd=500.0,
-        years=np.array([0]),
-    )
-    assert abs(result.delta_gap[0]) < 0.5, "Should be approximately equal at baseline"
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `.venv/bin/python -m pytest tests/mechanistic_twin/test_phase5_counterfactual.py -v`
-Expected: FAIL with `ModuleNotFoundError`
-
-- [ ] **Step 3: Implement counterfactual engine**
-
-```python
-# scripts/mechanistic_twin/phase5_counterfactual_engine.py
-"""Phase 5 Step 4: Counterfactual simulation engine.
-
-Simulates "what if" scenarios that ONLY the mechanistic model can produce.
-GIMAN models cannot simulate interventions not in their training data.
-
-Three scenarios:
-  1. Dose escalation: LEDD +200mg
-  2. Neuroprotective: pct_loss_per_yr -25%
-  3. Treatment timing: LEDD starts 12 months earlier
-
-Uses the Phase 4 severity-controlled interaction model coefficients.
-"""
-from __future__ import annotations
-
-import json
-import sys
-from dataclasses import dataclass, asdict
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.mechanistic_twin._reproducibility import capture_provenance
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-PHASE4 = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "phase4"
-POSTERIORS = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "data" / "posteriors"
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "paper10_mech_vs_giman"
-
-# Severity-controlled interaction model coefficients (Model M2 from phase4_confounding_control.json)
-# GAP = intercept + beta_nfrac * n_frac_c + beta_ledd * ledd_c
-#       + beta_interaction * n_frac_c * ledd_c + beta_severity * updrs3_off_c
-# Centering means from Phase 4 analysis
-COEFS = {
-    "intercept": 9.42,  # Grand mean gap
-    "beta_nfrac": -12.57,  # Centered; fewer neurons → less benefit
-    "beta_ledd": 0.003,  # Centered; per mg/day
-    "beta_interaction": 1.410,  # Severity-controlled interaction
-    "nfrac_mean": 0.84,  # Centering constant
-    "ledd_mean": 637.0,  # Centering constant (mg/day)
-}
-
-
-@dataclass
-class CounterfactualResult:
-    scenario: str
-    years: list[float]
-    baseline_gap: np.ndarray
-    counterfactual_gap: np.ndarray
-    delta_gap: np.ndarray
-    description: str
-
-
-def predict_gap_trajectory(
-    pct_loss_per_yr: float,
-    ledd: float,
-    years: np.ndarray,
-) -> np.ndarray:
-    """Predict ON-OFF gap trajectory given neuron loss rate and LEDD.
-
-    Uses the Phase 4 interaction model (severity-controlled coefficients).
-    """
-    n_frac = (1 - pct_loss_per_yr / 100) ** years
-    n_frac_c = n_frac - COEFS["nfrac_mean"]
-    ledd_c = ledd - COEFS["ledd_mean"]
-
-    gap = (
-        COEFS["intercept"]
-        + COEFS["beta_nfrac"] * n_frac_c
-        + COEFS["beta_ledd"] * ledd_c
-        + COEFS["beta_interaction"] * n_frac_c * (ledd / 500)
-    )
-    return np.maximum(gap, 0.0)  # Gap can't be negative in simulation
-
-
-def simulate_dose_escalation(
-    pct_loss_per_yr: float,
-    baseline_ledd: float,
-    new_ledd: float,
-    years: np.ndarray,
-) -> CounterfactualResult:
-    """Simulate: what if LEDD changes from baseline_ledd to new_ledd?"""
-    baseline = predict_gap_trajectory(pct_loss_per_yr, baseline_ledd, years)
-    counterfactual = predict_gap_trajectory(pct_loss_per_yr, new_ledd, years)
-    return CounterfactualResult(
-        scenario=f"LEDD {baseline_ledd}→{new_ledd} mg/day",
-        years=years.tolist(),
-        baseline_gap=baseline,
-        counterfactual_gap=counterfactual,
-        delta_gap=counterfactual - baseline,
-        description=f"Dose escalation from {baseline_ledd} to {new_ledd} mg/day",
-    )
-
-
-def simulate_neuroprotection(
-    baseline_pct_loss: float,
-    treated_pct_loss: float,
-    ledd: float,
-    years: np.ndarray,
-) -> CounterfactualResult:
-    """Simulate: what if a neuroprotective agent reduces neuron loss rate?"""
-    baseline = predict_gap_trajectory(baseline_pct_loss, ledd, years)
-    counterfactual = predict_gap_trajectory(treated_pct_loss, ledd, years)
-    reduction_pct = (1 - treated_pct_loss / baseline_pct_loss) * 100
-    return CounterfactualResult(
-        scenario=f"Neuroprotection: {reduction_pct:.0f}% reduction in neuron loss",
-        years=years.tolist(),
-        baseline_gap=baseline,
-        counterfactual_gap=counterfactual,
-        delta_gap=counterfactual - baseline,
-        description=(
-            f"Neuroprotective agent reduces pct_loss from "
-            f"{baseline_pct_loss:.1f}% to {treated_pct_loss:.1f}%/yr"
-        ),
-    )
-
-
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    prov = capture_provenance(
-        script_path=Path(__file__),
-        input_files=[
-            PHASE4 / "phase4_confounding_control.json",
-            POSTERIORS / "phase2_coupled_is_step26v4.csv",
-            OUTPUT_DIR / "phase5_shared_cohort.json",
-        ],
-        output_dir=OUTPUT_DIR,
-        seed=None,
-    )
-
-    # Load shared cohort
-    with open(OUTPUT_DIR / "phase5_shared_cohort.json") as f:
-        cohort = json.load(f)
-    shared_patnos = cohort["shared_patnos"]
-
-    # Load posteriors for shared patients
-    posteriors = pd.read_csv(POSTERIORS / "phase2_coupled_is_step26v4.csv")
-    posteriors["PATNO"] = posteriors["PATNO"].astype(int)
-    posteriors = posteriors[posteriors["PATNO"].isin(shared_patnos)]
-
-    years = np.array([0, 1, 2, 3, 4, 5, 7, 10])
-
-    # Select 50 representative patients (10 per quintile of pct_loss)
-    posteriors = posteriors.sort_values("pct_loss_per_yr_median")
-    quintile_size = len(posteriors) // 5
-    representative = []
-    for q in range(5):
-        start = q * quintile_size
-        end = start + min(10, quintile_size)
-        representative.extend(posteriors.iloc[start:end]["PATNO"].tolist())
-    representative = representative[:50]
-
-    print(f"Simulating counterfactuals for {len(representative)} patients...")
-
-    all_results = []
-    for patno in representative:
-        pat = posteriors[posteriors["PATNO"] == patno].iloc[0]
-        pct_loss = pat["pct_loss_per_yr_median"]
-
-        # Scenario 1: Dose escalation (500 → 700 mg/day)
-        r1 = simulate_dose_escalation(pct_loss, 500.0, 700.0, years)
-        all_results.append({
-            "patno": int(patno),
-            "scenario": "dose_escalation",
-            "pct_loss": pct_loss,
-            **{f"baseline_yr{y}": float(r1.baseline_gap[i]) for i, y in enumerate(years)},
-            **{f"counterfactual_yr{y}": float(r1.counterfactual_gap[i]) for i, y in enumerate(years)},
-            **{f"delta_yr{y}": float(r1.delta_gap[i]) for i, y in enumerate(years)},
-        })
-
-        # Scenario 2: Neuroprotection (25% reduction in loss rate)
-        r2 = simulate_neuroprotection(pct_loss, pct_loss * 0.75, 500.0, years)
-        all_results.append({
-            "patno": int(patno),
-            "scenario": "neuroprotection_25pct",
-            "pct_loss": pct_loss,
-            **{f"baseline_yr{y}": float(r2.baseline_gap[i]) for i, y in enumerate(years)},
-            **{f"counterfactual_yr{y}": float(r2.counterfactual_gap[i]) for i, y in enumerate(years)},
-            **{f"delta_yr{y}": float(r2.delta_gap[i]) for i, y in enumerate(years)},
-        })
-
-        # Scenario 3: Combined (dose + neuroprotection)
-        r3_base = predict_gap_trajectory(pct_loss, 500.0, years)
-        r3_cf = predict_gap_trajectory(pct_loss * 0.75, 700.0, years)
-        all_results.append({
-            "patno": int(patno),
-            "scenario": "combined_dose_neuro",
-            "pct_loss": pct_loss,
-            **{f"baseline_yr{y}": float(r3_base[i]) for i, y in enumerate(years)},
-            **{f"counterfactual_yr{y}": float(r3_cf[i]) for i, y in enumerate(years)},
-            **{f"delta_yr{y}": float((r3_cf - r3_base)[i]) for i, y in enumerate(years)},
-        })
-
-    results_df = pd.DataFrame(all_results)
-    print(f"Generated {len(results_df)} counterfactual simulations")
-
-    # Summary statistics
-    dose_results = results_df[results_df["scenario"] == "dose_escalation"]
-    neuro_results = results_df[results_df["scenario"] == "neuroprotection_25pct"]
-    combined_results = results_df[results_df["scenario"] == "combined_dose_neuro"]
-
-    summary = {
-        "n_patients": len(representative),
-        "n_simulations": len(results_df),
-        "scenarios": {
-            "dose_escalation": {
-                "description": "LEDD 500→700 mg/day",
-                "mean_delta_yr5": float(dose_results["delta_yr5"].mean()),
-                "mean_delta_yr10": float(dose_results["delta_yr10"].mean()),
-            },
-            "neuroprotection_25pct": {
-                "description": "25% reduction in neuron loss rate",
-                "mean_delta_yr5": float(neuro_results["delta_yr5"].mean()),
-                "mean_delta_yr10": float(neuro_results["delta_yr10"].mean()),
-            },
-            "combined": {
-                "description": "Dose escalation + neuroprotection",
-                "mean_delta_yr5": float(combined_results["delta_yr5"].mean()),
-                "mean_delta_yr10": float(combined_results["delta_yr10"].mean()),
-            },
-        },
-        "giman_cannot_do_this": (
-            "Graph-DT and DeepHit cannot simulate dose changes or neuroprotective "
-            "interventions because these scenarios were not in their training data. "
-            "The mechanistic model can, because the causal parameters (N(t), LEDD) "
-            "are explicitly encoded in the model equations."
-        ),
-        "_provenance": prov,
-    }
-
-    with open(OUTPUT_DIR / "phase5_counterfactuals.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
-    results_df.to_parquet(OUTPUT_DIR / "phase5_counterfactual_trajectories.parquet", index=False)
-    print(f"Saved counterfactual summary and trajectories")
-
-
-if __name__ == "__main__":
-    main()
-```
-
-- [ ] **Step 4: Run tests then script**
-
-Run: `.venv/bin/python -m pytest tests/mechanistic_twin/test_phase5_counterfactual.py -v`
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_counterfactual_engine.py`
+- [ ] **Step 4: Cross-check Path B reproducibility** — Re-run Phase 4 Path B using canonical parquet. Verify interaction p-value is still ≈0.044 after severity control.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/mechanistic_twin/phase5_counterfactual_engine.py tests/mechanistic_twin/test_phase5_counterfactual.py
-git commit -m "feat: Phase 5 Step 4 — counterfactual simulation engine (mechanistic-only capability)"
+git add scripts/mechanistic_twin/phase5_rebuild_canonical_parquet.py tests/mechanistic_twin_v2/test_canonical_parquet.py
+git commit -m "feat: Phase 5 Task 0 — rebuild canonical parquet with ON+OFF (fix data lineage)"
 ```
 
 ---
 
-### Task 5: Scissors Closure Visualization
+### Task 1: Persist Full Posterior Samples (Bidirectional Infrastructure)
 
 **Files:**
-- Create: `scripts/mechanistic_twin/phase5_scissors_closure.py`
-- Read: `outputs/mechanistic_twin/phase4/phase4_assembled_data.parquet`
-- Read: `outputs/mechanistic_twin/data/posteriors/phase2_coupled_is_step26v4.csv`
-- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_scissors_closure.json`
 
-**Context for implementer:** The "scissors closure" is the combined visualization from all three Phase 4 pathways. For individual patients:
-- The **OFF-UPDRS floor** rises over time (disease worsens — Path A)
-- The **ON-UPDRS ceiling** falls slower initially but catches up (treatment benefit shrinks — Path B)
-- The **gap between them narrows** — the patient's functional range compresses
-- The **wearing-off boundary** is a horizontal band where gap < clinical threshold
+- Create: `scripts/mechanistic_twin/phase5_persist_full_posteriors.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/posterior_store.py`
+- Create: `tests/mechanistic_twin_v2/test_posterior_store.py`
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase2_posteriors_full_samples.h5`
 
-This is the "money figure" for Paper 10 — it shows why combining mechanistic + data-driven is more powerful than either alone.
+**Context:** Currently `phase2_coupled_is_step26v4.csv` has only summary stats. Bidirectional updating requires full 10,000 posterior samples per patient + weights for SIR reweighting when new observations arrive. THIS IS THE CRITICAL INFRASTRUCTURE STEP.
 
-- [ ] **Step 1: Implement scissors closure analysis**
+**Data structure (HDF5):**
+
+```text
+phase2_posteriors_full_samples.h5
+├── /patient_3001/v1/
+│   ├── samples (10000, 5)      # (k_n, k_alpha, alpha_tox, T_tox, N0)
+│   ├── weights (10000,)        # IS weights
+│   ├── @ess, @log_marg_lik
+```
+
+- [ ] **Step 1: Implement `PosteriorStore` class**
 
 ```python
-# scripts/mechanistic_twin/phase5_scissors_closure.py
-"""Phase 5 Step 5: Scissors closure analysis.
-
-Computes per-patient OFF-UPDRS trajectory (floor), predicted ON-UPDRS trajectory
-(ceiling = OFF - gap), and the narrowing gap between them.
-
-The scissors closure is the emergent insight from combining Path A + Path B:
-  - Path A: OFF-UPDRS worsens over time (floor rises)
-  - Path B: Gap narrows as neurons die (ceiling falls toward floor)
-  - Combined: functional range compresses from both sides
-"""
-from __future__ import annotations
-
-import json
-import sys
+# src/giman_pipeline/mechanistic_twin_v2/posterior_store.py
+from dataclasses import dataclass
 from pathlib import Path
-
+from typing import Literal
+import h5py
 import numpy as np
-import pandas as pd
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.mechanistic_twin._reproducibility import capture_provenance
-from scripts.mechanistic_twin.phase5_counterfactual_engine import (
-    predict_gap_trajectory,
-)
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-PHASE4 = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "phase4"
-POSTERIORS = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "data" / "posteriors"
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "paper10_mech_vs_giman"
-
-# Path A results: OFF-UPDRS ~ time (LME fixed effects)
-# From phase4_path_a_results.json: updrs3_off = α + β × years
-# Model A4 (time-only OLS): intercept ≈ 9.5, slope ≈ 1.8 per year
-OFF_UPDRS_INTERCEPT = 9.5  # Baseline OFF-UPDRS at t=0
-OFF_UPDRS_SLOPE = 1.8  # UPDRS points per year
 
 
-def compute_scissors_for_patient(
-    pct_loss_per_yr: float,
-    ledd: float,
-    years: np.ndarray,
-    off_intercept: float = OFF_UPDRS_INTERCEPT,
-    off_slope: float = OFF_UPDRS_SLOPE,
-) -> dict:
-    """Compute OFF-UPDRS (floor), gap, and ON-UPDRS (ceiling) trajectories."""
-    # OFF-UPDRS: linear increase over time (from Path A)
-    off_updrs = off_intercept + off_slope * years
-
-    # Gap: from Phase 4 interaction model
-    gap = predict_gap_trajectory(pct_loss_per_yr, ledd, years)
-
-    # ON-UPDRS: OFF minus gap (cannot be negative)
-    on_updrs = np.maximum(off_updrs - gap, 0.0)
-
-    return {
-        "years": years.tolist(),
-        "off_updrs": off_updrs.tolist(),
-        "on_updrs": on_updrs.tolist(),
-        "gap": gap.tolist(),
-    }
+@dataclass
+class PatientPosterior:
+    patno: int
+    version: int
+    samples: np.ndarray      # (N, D) D=5 params
+    weights: np.ndarray      # (N,) normalized
+    ess: float
+    log_marg_lik: float
+    param_names: list[str]
 
 
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+class PosteriorStore:
+    def __init__(self, path: Path):
+        self.path = Path(path)
 
-    prov = capture_provenance(
-        script_path=Path(__file__),
-        input_files=[
-            PHASE4 / "phase4_path_a_results.json",
-            PHASE4 / "phase4_path_b_results.json",
-            POSTERIORS / "phase2_coupled_is_step26v4.csv",
-        ],
-        output_dir=OUTPUT_DIR,
-        seed=None,
+    def save(self, posterior: PatientPosterior) -> None:
+        with h5py.File(self.path, "a") as f:
+            key = f"patient_{posterior.patno}/v{posterior.version}"
+            if key in f:
+                del f[key]
+            grp = f.create_group(key)
+            grp.create_dataset("samples", data=posterior.samples, compression="gzip")
+            grp.create_dataset("weights", data=posterior.weights)
+            grp.attrs["ess"] = posterior.ess
+            grp.attrs["log_marg_lik"] = posterior.log_marg_lik
+            grp.attrs["param_names"] = [n.encode("utf-8") for n in posterior.param_names]
+
+    def load(self, patno: int, version: int | Literal["latest"] = "latest") -> PatientPosterior:
+        with h5py.File(self.path, "r") as f:
+            pat_grp = f[f"patient_{patno}"]
+            if version == "latest":
+                versions = sorted([int(k[1:]) for k in pat_grp.keys() if k.startswith("v")])
+                version = versions[-1]
+            grp = pat_grp[f"v{version}"]
+            return PatientPosterior(
+                patno=patno, version=version,
+                samples=grp["samples"][:], weights=grp["weights"][:],
+                ess=float(grp.attrs["ess"]),
+                log_marg_lik=float(grp.attrs["log_marg_lik"]),
+                param_names=[n.decode("utf-8") for n in grp.attrs["param_names"]],
+            )
+
+    def list_patients(self) -> list[int]:
+        with h5py.File(self.path, "r") as f:
+            return sorted([int(k.split("_")[1]) for k in f.keys() if k.startswith("patient_")])
+```
+
+- [ ] **Step 2: Write tests**
+
+```python
+# tests/mechanistic_twin_v2/test_posterior_store.py
+import numpy as np
+from giman_pipeline.mechanistic_twin_v2.posterior_store import PosteriorStore, PatientPosterior
+
+
+def test_save_load_roundtrip(tmp_path):
+    store = PosteriorStore(tmp_path / "test.h5")
+    post = PatientPosterior(
+        patno=3001, version=1,
+        samples=np.random.randn(1000, 5),
+        weights=np.ones(1000) / 1000,
+        ess=900.0, log_marg_lik=-42.0,
+        param_names=["k_n", "k_alpha", "alpha_tox", "T_tox", "N0"],
     )
+    store.save(post)
+    loaded = store.load(3001, version=1)
+    assert loaded.patno == 3001
+    assert loaded.samples.shape == (1000, 5)
+    assert loaded.ess == 900.0
 
-    # Load posteriors
-    posteriors = pd.read_csv(POSTERIORS / "phase2_coupled_is_step26v4.csv")
 
-    years = np.array([0, 1, 2, 3, 4, 5, 7, 10, 15])
-
-    # Select 10 representative patients across progression quintiles
-    posteriors = posteriors.sort_values("pct_loss_per_yr_median")
-    n = len(posteriors)
-    indices = [int(n * p) for p in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]]
-    representative = posteriors.iloc[indices]
-
-    patient_trajectories = []
-    for _, pat in representative.iterrows():
-        traj = compute_scissors_for_patient(
-            pct_loss_per_yr=pat["pct_loss_per_yr_median"],
-            ledd=500.0,  # Median LEDD
-            years=years,
+def test_latest_version(tmp_path):
+    store = PosteriorStore(tmp_path / "test.h5")
+    for v in [1, 2, 3]:
+        post = PatientPosterior(
+            patno=3001, version=v, samples=np.random.randn(100, 5),
+            weights=np.ones(100) / 100, ess=float(v * 100), log_marg_lik=-v * 10.0,
+            param_names=["k_n", "k_alpha", "alpha_tox", "T_tox", "N0"],
         )
-        traj["patno"] = int(pat["PATNO"])
-        traj["pct_loss_per_yr"] = float(pat["pct_loss_per_yr_median"])
-        traj["n_frac_at_10yr"] = float((1 - pat["pct_loss_per_yr_median"] / 100) ** 10)
-
-        # Find year when gap drops below clinical threshold (5 UPDRS points)
-        gap_arr = np.array(traj["gap"])
-        threshold_crossings = np.where(gap_arr < 5.0)[0]
-        if len(threshold_crossings) > 0:
-            traj["years_to_threshold"] = float(years[threshold_crossings[0]])
-        else:
-            traj["years_to_threshold"] = None
-
-        patient_trajectories.append(traj)
-
-    # Population-level summary
-    threshold_years = [
-        t["years_to_threshold"]
-        for t in patient_trajectories
-        if t["years_to_threshold"] is not None
-    ]
-
-    summary = {
-        "n_patients_plotted": len(patient_trajectories),
-        "patient_trajectories": patient_trajectories,
-        "gap_threshold_updrs_points": 5.0,
-        "patients_crossing_threshold": len(threshold_years),
-        "median_years_to_threshold": float(np.median(threshold_years)) if threshold_years else None,
-        "interpretation": (
-            "The scissors closure shows OFF-UPDRS (disease floor) rising while "
-            "ON-UPDRS (treatment ceiling) falls toward it. The narrowing gap "
-            "represents diminishing medication benefit. When the gap drops below "
-            "5 UPDRS points, medication benefit is clinically marginal — this is "
-            "the mechanistic prediction of when to consider DBS or adjunct therapy."
-        ),
-        "_provenance": prov,
-    }
-
-    with open(OUTPUT_DIR / "phase5_scissors_closure.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
-    print(f"Saved scissors closure for {len(patient_trajectories)} patients")
-
-
-if __name__ == "__main__":
-    main()
+        store.save(post)
+    latest = store.load(3001, version="latest")
+    assert latest.version == 3
 ```
 
-- [ ] **Step 2: Run the script**
+- [ ] **Step 3: Re-run Phase 2 IS with full sample persistence**
 
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_scissors_closure.py`
+Modify `scripts/mechanistic_twin/step_2_6_v4_is_weighted_posterior.py` to call `PosteriorStore.save()` alongside existing summary CSV output. Expect ~1-2 days compute on 1,065 patients.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Verify samples reproduce published medians**
+
+For each patient, compute posterior median from stored samples. Compare to `phase2_coupled_is_step26v4.csv` medians. Must match within floating-point tolerance.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/mechanistic_twin/phase5_scissors_closure.py
-git commit -m "feat: Phase 5 Step 5 — scissors closure analysis (OFF floor + ON ceiling converging)"
+git add src/giman_pipeline/mechanistic_twin_v2/posterior_store.py tests/mechanistic_twin_v2/test_posterior_store.py scripts/mechanistic_twin/phase5_persist_full_posteriors.py
+git commit -m "feat: Phase 5 Task 1 — PosteriorStore HDF5 infra for bidirectional updating"
 ```
 
 ---
 
-### Task 6: Treatment Horizon Prediction
+### Task 2: Identify Shared Cohort (3-way Overlap)
 
 **Files:**
-- Create: `scripts/mechanistic_twin/phase5_treatment_horizon.py`
-- Read: `outputs/mechanistic_twin/data/posteriors/phase2_coupled_is_step26v4.csv`
-- Read: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_shared_cohort.json`
-- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/phase5_treatment_horizons.json`
 
-**Context for implementer:** The "treatment horizon" is the predicted time until a patient's ON-OFF gap drops below a clinical threshold. This is the most actionable clinical output — telling a clinician "at this patient's neuron loss rate, their levodopa benefit will be clinically marginal in X years." This is a time-to-event prediction that the mechanistic model can make (from the interaction model + N(t) trajectory) but GIMAN cannot.
+- Create: `scripts/mechanistic_twin/phase5_identify_shared_cohort.py`
+- Read: canonical parquet, Phase 2 posteriors, Graph-DT/DeepHit checkpoints
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/shared_cohort.json`
 
-- [ ] **Step 1: Implement treatment horizon prediction**
+**Context:** Identify patients in (1) GIMAN checkpoint train OR test, (2) Phase 2 posteriors, (3) canonical parquet with 2+ ON-OFF pairs. This is the ~280-patient head-to-head analysis set.
+
+- [ ] **Step 1: Implement script** (see prior version for boilerplate; key change: filter by 2+ ON-OFF pairs in canonical parquet)
+
+- [ ] **Step 2: Run + verify count >=200**
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add scripts/mechanistic_twin/phase5_identify_shared_cohort.py
+git commit -m "feat: Phase 5 Task 2 — identify shared cohort (GIMAN × mechanistic × paired)"
+```
+
+---
+
+### Task 3: External Validation on LCC Cohort
+
+**Files:**
+
+- Create: `scripts/mechanistic_twin/phase5_external_validation_lcc.py`
+- Read: `data/00_raw/LCC/DaTSCAN_SBR.csv`
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/external_validation_lcc.json`
+
+**Context:** LCC (Lewy Cohort) has N=638 patients with DaT-SPECT SBR. Re-fit Phase 1 SBR decay on LCC, compare rate distribution to PPMI's 3.29%/yr median. THIS IS THE EXTERNAL VALIDATION — addresses "only works on PPMI" critique.
+
+**Analysis:**
+
+1. Fit exponential SBR decay per-patient on LCC (reuse Phase 1 methodology at `scripts/mechanistic_twin/step_1_5_sbr_decay_calibration.py`)
+2. Extract pct_loss_per_yr distribution (N=638 or however many have 2+ scans)
+3. KS test: LCC vs PPMI distributions
+4. Mann-Whitney U test on medians
+5. Per-stage breakdown (if NSD-ISS staging available for LCC)
+
+- [ ] **Step 1: Check LCC DaT-SPECT data structure**
+
+```bash
+head -5 data/00_raw/LCC/DaTSCAN_SBR.csv
+wc -l data/00_raw/LCC/DaTSCAN_SBR.csv
+```
+
+- [ ] **Step 2: Identify patients with 2+ scans**
+
+- [ ] **Step 3: Fit per-patient exponential decay** (reuse Phase 1 code, adapt to LCC column names)
+
+- [ ] **Step 4: Compare distributions**
 
 ```python
-# scripts/mechanistic_twin/phase5_treatment_horizon.py
-"""Phase 5 Step 6: Treatment horizon prediction.
-
-For each patient, predict WHEN their ON-OFF gap drops below a clinical threshold.
-This is the mechanistic model's most actionable clinical output.
-
-Threshold: 5 UPDRS-III points (below MCID of 2.5-5.3 points).
-"""
-from __future__ import annotations
-
-import json
-import sys
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-from scipy.optimize import brentq
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.mechanistic_twin._reproducibility import capture_provenance
-from scripts.mechanistic_twin.phase5_counterfactual_engine import (
-    predict_gap_trajectory,
-    COEFS,
-)
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-POSTERIORS = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "data" / "posteriors"
-OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mechanistic_twin" / "paper10_mech_vs_giman"
-
-GAP_THRESHOLD = 5.0  # UPDRS-III points — below MCID
-
-
-def find_treatment_horizon(
-    pct_loss_per_yr: float,
-    ledd: float,
-    threshold: float = GAP_THRESHOLD,
-    max_years: float = 30.0,
-) -> float | None:
-    """Find the year when predicted gap drops below threshold.
-
-    Uses root-finding on gap(t) - threshold = 0.
-    Returns None if gap never drops below threshold within max_years.
-    """
-    # Check if gap at t=0 is already below threshold
-    gap_0 = predict_gap_trajectory(pct_loss_per_yr, ledd, np.array([0.0]))[0]
-    if gap_0 < threshold:
-        return 0.0
-
-    # Check if gap at max_years is still above threshold
-    gap_max = predict_gap_trajectory(pct_loss_per_yr, ledd, np.array([max_years]))[0]
-    if gap_max >= threshold:
-        return None  # Never crosses within max_years
-
-    # Binary search for crossing point
-    def objective(t):
-        gap = predict_gap_trajectory(pct_loss_per_yr, ledd, np.array([t]))[0]
-        return gap - threshold
-
-    try:
-        t_cross = brentq(objective, 0.0, max_years, xtol=0.01)
-        return float(t_cross)
-    except ValueError:
-        return None
-
-
-def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    prov = capture_provenance(
-        script_path=Path(__file__),
-        input_files=[POSTERIORS / "phase2_coupled_is_step26v4.csv"],
-        output_dir=OUTPUT_DIR,
-        seed=None,
-    )
-
-    # Load all patients with posteriors
-    posteriors = pd.read_csv(POSTERIORS / "phase2_coupled_is_step26v4.csv")
-    posteriors["PATNO"] = posteriors["PATNO"].astype(int)
-
-    # Compute treatment horizon for each patient at multiple LEDD levels
-    ledd_levels = [300, 500, 700, 1000]
-    results = []
-
-    for _, pat in posteriors.iterrows():
-        pct_loss = pat["pct_loss_per_yr_median"]
-        for ledd in ledd_levels:
-            horizon = find_treatment_horizon(pct_loss, ledd)
-            results.append({
-                "patno": int(pat["PATNO"]),
-                "pct_loss_per_yr": pct_loss,
-                "ledd": ledd,
-                "treatment_horizon_years": horizon,
-                "n_frac_at_horizon": (
-                    float((1 - pct_loss / 100) ** horizon) if horizon else None
-                ),
-            })
-
-    results_df = pd.DataFrame(results)
-
-    # Summary by LEDD level
-    summaries = {}
-    for ledd in ledd_levels:
-        subset = results_df[results_df["ledd"] == ledd]
-        horizons = subset["treatment_horizon_years"].dropna()
-        summaries[f"ledd_{ledd}"] = {
-            "n_patients": len(subset),
-            "n_with_horizon": len(horizons),
-            "median_horizon_years": float(horizons.median()) if len(horizons) > 0 else None,
-            "q25_horizon": float(horizons.quantile(0.25)) if len(horizons) > 0 else None,
-            "q75_horizon": float(horizons.quantile(0.75)) if len(horizons) > 0 else None,
-            "pct_crossing_within_5yr": float((horizons <= 5).mean() * 100) if len(horizons) > 0 else 0,
-            "pct_crossing_within_10yr": float((horizons <= 10).mean() * 100) if len(horizons) > 0 else 0,
-        }
-
-    output = {
-        "gap_threshold_updrs_points": GAP_THRESHOLD,
-        "n_patients": len(posteriors),
-        "ledd_levels_tested": ledd_levels,
-        "summaries_by_ledd": summaries,
-        "clinical_interpretation": (
-            f"The treatment horizon is the predicted time until a patient's "
-            f"ON-OFF gap drops below {GAP_THRESHOLD} UPDRS-III points (below MCID). "
-            f"At this point, levodopa benefit is clinically marginal and alternative "
-            f"interventions (DBS, infusion pumps, adjunct therapy) should be considered. "
-            f"Higher LEDD extends the horizon but with diminishing returns as N(t) declines."
-        ),
-        "_provenance": prov,
-    }
-
-    with open(OUTPUT_DIR / "phase5_treatment_horizons.json", "w") as f:
-        json.dump(output, f, indent=2, default=str)
-    results_df.to_parquet(OUTPUT_DIR / "phase5_treatment_horizon_all.parquet", index=False)
-    print(f"Saved treatment horizons for {len(posteriors)} patients × {len(ledd_levels)} LEDD levels")
-
-
-if __name__ == "__main__":
-    main()
+from scipy.stats import ks_2samp, mannwhitneyu
+ks_stat, ks_p = ks_2samp(ppmi_pct_loss, lcc_pct_loss)
+mw_stat, mw_p = mannwhitneyu(ppmi_pct_loss, lcc_pct_loss, alternative="two-sided")
 ```
 
-- [ ] **Step 2: Run the script**
+- [ ] **Step 5: Interpret**
 
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_treatment_horizon.py`
+- If KS p > 0.05 AND median difference < 1%/yr → STRONG external validation
+- If KS p < 0.05 but medians similar → cohort composition differences, report transparently
+- If medians very different → genuine difference, discuss as limitation
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add scripts/mechanistic_twin/phase5_treatment_horizon.py
-git commit -m "feat: Phase 5 Step 6 — treatment horizon prediction (time to gap < threshold)"
+git add scripts/mechanistic_twin/phase5_external_validation_lcc.py
+git commit -m "feat: Phase 5 Task 3 — external validation of SBR decay on LCC cohort"
 ```
 
 ---
 
-### Task 7: Publication Figures for Paper 10
+### Task 4: Head-to-Head on Common Endpoint (Time-to-Wearing-Off)
 
 **Files:**
+
+- Create: `scripts/mechanistic_twin/phase5_headtohead_wearing_off.py`
+- Read: canonical parquet, Graph-DT checkpoints, Phase 2 posteriors
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/headtohead_wearing_off.json`
+
+**Context:** Previous v1 plan compared incommensurable metrics (C-td vs R²). **Fixed:** both models predict **time-to-NP4OFF≥1** (wearing-off onset). C-index for BOTH. Paired bootstrap.
+
+**Setup:**
+
+- Outcome: time from treatment initiation to first NP4OFF ≥ 1
+- Graph-DT: Cox-adjusted hazard from transition predictions (adapt since Graph-DT predicts transitions, not wearing-off directly)
+- Mechanistic: Phase 4 Path B gap trajectory crossing threshold (e.g., 5 UPDRS points) → predicts wearing-off
+- Common cohort: 280 shared patients
+
+- [ ] **Step 1: Extract wearing-off events from canonical parquet**
+
+```python
+paired = canonical.dropna(subset=["updrs3_on", "updrs3_off"])
+wearing_off_events = canonical[canonical["NP4OFF"] >= 1].groupby("PATNO").first()
+# Compute time from treatment_start to first NP4OFF >= 1
+```
+
+- [ ] **Step 2: Load Graph-DT predictions for shared cohort**
+
+Use `load_graph_dt_checkpoint()` at `src/giman_pipeline/paper3/graph_digital_twin.py:961`. For each patient, extract CIF predictions for all causes, derive hazard ratio for wearing-off.
+
+- [ ] **Step 3: Compute mechanistic predictions**
+
+For each patient, compute gap trajectory using Phase 4 β coefficients. Find predicted year when gap < threshold. This is the mechanistic wearing-off prediction.
+
+- [ ] **Step 4: Compute C-index for both models**
+
+```python
+from lifelines.utils import concordance_index
+ci_graph_dt = concordance_index(times, graph_dt_risk_scores, events)
+ci_mechanistic = concordance_index(times, mechanistic_risk_scores, events)
+```
+
+- [ ] **Step 5: Paired bootstrap (1000 resamples)**
+
+For each of 1000 bootstrap samples, compute both C-indices. Report mean, 95% CI, and p-value for difference.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add scripts/mechanistic_twin/phase5_headtohead_wearing_off.py
+git commit -m "feat: Phase 5 Task 4 — head-to-head on time-to-wearing-off (common endpoint)"
+```
+
+---
+
+### Task 5: Bidirectional Update Demo (The Twin Proof)
+
+**Files:**
+
+- Create: `scripts/mechanistic_twin/phase5_bidirectional_demo.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/updater.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/state.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/forward_model.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/observations.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/simulator.py`
+- Create: `src/giman_pipeline/mechanistic_twin_v2/validation.py`
+- Create: `tests/mechanistic_twin_v2/test_updater.py`
+- Read: `phase2_posteriors_full_samples.h5` (from Task 1)
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/bidirectional_demo.json`
+
+**Context:** THIS IS THE KEY TASK. Demonstrates the bidirectional capability that distinguishes our work from pure regression.
+
+**Design (Option B "Simulated Prospective"):**
+
+1. For each of ~400 patients with 3+ DaT-SPECT scans:
+2. Initialize posterior using baseline scan only (t=0)
+3. Freeze predictions for t+1yr, t+3yr (including N(t), UPDRS, NP4OFF)
+4. When second scan arrives: `update_posterior()` via SIR + rejuvenation
+5. Compare frozen predictions to observed outcomes
+6. Repeat for third scan
+7. Report: does MAE decrease with update count? Coverage maintained?
+
+- [ ] **Step 1: Implement `PatientState` dataclass** (state.py — see v2 architecture doc for signature)
+
+- [ ] **Step 2: Implement `forward_model.py`**
+
+Port Phase 2 ODE solver from Julia. For each posterior sample (theta), predict N(t), α-syn trajectories. Must exactly reproduce Julia results (validated via round-trip test).
+
+- [ ] **Step 3: Implement `observations.py` — likelihood functions**
+
+```python
+def loglik_dat_spect(theta, sbr_observed, t, covariates) -> float:
+    """p(SBR_obs | theta, t)"""
+    N_predicted = forward_simulate_N(theta, t)
+    sbr_predicted = N_predicted * covariates["sbr_per_neuron"]
+    return -0.5 * ((sbr_observed - sbr_predicted) / sigma_sbr)**2
+```
+
+- [ ] **Step 4: Implement `update_posterior()` function**
+
+```python
+# src/giman_pipeline/mechanistic_twin_v2/updater.py
+import numpy as np
+from .posterior_store import PosteriorStore, PatientPosterior
+from .observations import compute_log_likelihood
+
+
+def update_posterior(
+    prior: PatientPosterior,
+    observation: dict,
+    ess_threshold: float = 0.5,
+) -> PatientPosterior:
+    """Update posterior via SIR reweighting."""
+    log_lik = compute_log_likelihood(prior.samples, observation)
+    log_weights_new = np.log(prior.weights + 1e-300) + log_lik
+    log_weights_new -= log_weights_new.max()
+    weights_new = np.exp(log_weights_new)
+    weights_new /= weights_new.sum()
+
+    ess = 1.0 / (weights_new ** 2).sum()
+    if ess / len(weights_new) < ess_threshold:
+        samples_new = resample_and_rejuvenate(prior.samples, weights_new, observation)
+        weights_new = np.ones(len(samples_new)) / len(samples_new)
+    else:
+        samples_new = prior.samples
+
+    return PatientPosterior(
+        patno=prior.patno,
+        version=prior.version + 1,
+        samples=samples_new,
+        weights=weights_new,
+        ess=float(ess),
+        log_marg_lik=prior.log_marg_lik + np.log((prior.weights * np.exp(log_lik)).sum() + 1e-300),
+        param_names=prior.param_names,
+    )
+
+
+def resample_and_rejuvenate(samples, weights, obs, n_mcmc=10):
+    """Systematic resampling + small MCMC moves."""
+    N = len(samples)
+    indices = np.random.choice(N, size=N, p=weights)
+    resampled = samples[indices].copy()
+    # Small random walk MCMC steps (Metropolis-Hastings)
+    # ... (implementation detail)
+    return resampled
+```
+
+- [ ] **Step 5: Write tests for updater**
+
+```python
+def test_update_preserves_valid_posterior():
+    """Weights must sum to 1 after update."""
+    ...
+
+def test_update_exact_matches_full_is():
+    """Update on all observations should match one-shot IS within tolerance."""
+    # Critical validation: if we run update_posterior() sequentially with all
+    # observations, result should match the original phase2_coupled_is_step26v4
+    # run that used all observations at once.
+    ...
+```
+
+- [ ] **Step 6: Implement replay harness**
+
+```python
+# scripts/mechanistic_twin/phase5_bidirectional_demo.py
+"""Replay 400+ multi-scan patients, log prediction improvements per update."""
+for patno in multi_scan_patients:
+    # 1. Load baseline posterior (one-shot IS on scan 1 only)
+    state_v1 = initialize_posterior(patno, first_scan_only=True)
+    log_predictions(state_v1, horizons=[1, 3, 5])  # Frozen predictions
+
+    # 2. Update with scan 2
+    state_v2 = update_posterior(state_v1, observation_scan_2)
+    log_predictions(state_v2, horizons=[1, 3])
+
+    # 3. Update with scan 3
+    state_v3 = update_posterior(state_v2, observation_scan_3)
+    log_predictions(state_v3, horizons=[1])
+
+    # 4. Compare frozen predictions to actual future observations
+    validation_records.append(compare_predictions_to_outcomes(patno))
+
+# Analysis: does MAE decrease with update count? Coverage stable?
+```
+
+- [ ] **Step 7: Analyze and report**
+
+Primary endpoints:
+
+- MAE at horizon Δ, stratified by update count (should decrease monotonically)
+- 90% CI coverage (should stay calibrated at ≥90%)
+- CRPS at each horizon
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/giman_pipeline/mechanistic_twin_v2/ scripts/mechanistic_twin/phase5_bidirectional_demo.py tests/mechanistic_twin_v2/
+git commit -m "feat: Phase 5 Task 5 — bidirectional update demo (the twin proof)"
+```
+
+---
+
+### Task 6: Observational Counterfactual Calibration
+
+**Files:**
+
+- Create: `scripts/mechanistic_twin/phase5_observational_counterfactual.py`
+- Read: canonical parquet, LEDD log, Phase 2 posteriors
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/observational_counterfactual.json`
+
+**Context:** Replace synthetic 50-patient counterfactual (v1 plan) with **observational validation**. Identify PPMI patients who actually escalated LEDD by ≥200mg between visits. Compare model-predicted gap change (using Phase 4 β=-12.57) to observed gap change.
+
+**This is a real validation, not extrapolation.**
+
+- [ ] **Step 1: Extract LEDD escalation events**
+
+```python
+# For each patient, find consecutive visits where LEDD increased by >=200mg
+# AND both visits have ON-OFF gap measurements
+escalation_events = []
+for patno, grp in canonical.groupby("PATNO"):
+    grp_sorted = grp.sort_values("months_from_baseline")
+    for i in range(1, len(grp_sorted)):
+        prev, curr = grp_sorted.iloc[i-1], grp_sorted.iloc[i]
+        if (curr["ledd_total"] - prev["ledd_total"] >= 200
+            and pd.notna(prev["gap"]) and pd.notna(curr["gap"])):
+            escalation_events.append({
+                "PATNO": patno,
+                "months_prev": prev["months_from_baseline"],
+                "months_curr": curr["months_from_baseline"],
+                "ledd_change": curr["ledd_total"] - prev["ledd_total"],
+                "gap_prev": prev["gap"],
+                "gap_curr": curr["gap"],
+                "observed_delta_gap": curr["gap"] - prev["gap"],
+                "n_frac_prev": prev["n_frac"],
+                "n_frac_curr": curr["n_frac"],
+            })
+```
+
+- [ ] **Step 2: Compute predicted gap change using interaction model**
+
+```python
+# Using Phase 4 confounding-controlled coefficients (M2 from phase4_confounding_control.json):
+# beta_interaction = 1.410 (survives severity control, p=0.044)
+beta_interaction = 1.410
+beta_nfrac = -12.57  # From mixed-effects model
+beta_ledd = 0.003
+
+for event in escalation_events:
+    event["predicted_delta_gap"] = (
+        beta_ledd * (event["ledd_change"] / 500)
+        + beta_interaction * event["n_frac_prev"] * (event["ledd_change"] / 500)
+    )
+```
+
+- [ ] **Step 3: Compare predicted vs observed**
+
+- Correlation between predicted and observed delta_gap (Pearson + Spearman)
+- RMSE, MAE
+- Scatter plot for figures
+- Direction accuracy: sign(predicted) == sign(observed)?
+
+- [ ] **Step 4: Sensitivity analyses**
+
+- Does prediction quality depend on time between visits?
+- Does it depend on N(t) at escalation (sub-EC50 vs higher)?
+- Stratify by LEDD escalation magnitude
+
+- [ ] **Step 5: Frame neuroprotection scenarios as hypothesis-generating only**
+
+No ground truth for neuroprotection counterfactuals in PPMI. Report them but label clearly as "regression-based scenario projection, not observationally validated."
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add scripts/mechanistic_twin/phase5_observational_counterfactual.py
+git commit -m "feat: Phase 5 Task 6 — observational counterfactual (LEDD escalation validation)"
+```
+
+---
+
+### Task 7: NASEM Criteria Audit
+
+**Files:**
+
+- Create: `scripts/mechanistic_twin/phase5_nasem_audit.py`
+- Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/nasem_audit.json`
+
+**Context:** Pure methodological. Map our work against NASEM 2024 digital twin criteria. Own the partial implementation honestly.
+
+**7 NASEM criteria to score (0=absent, 1=partial, 2=substantial, 3=complete):**
+
+1. Virtual representation (physiological model)
+2. Bidirectional flow (data → model → decisions)
+3. Predictive capability
+4. Uncertainty quantification
+5. Validation (V&V)
+6. Fitness-for-purpose (context of use)
+7. Governance (ethics, privacy, reproducibility)
+
+- [ ] **Step 1: Implement audit script**
+
+```python
+# scripts/mechanistic_twin/phase5_nasem_audit.py
+nasem_audit = {
+    "virtual_representation": {
+        "score": 2,  # substantial
+        "evidence": [
+            "Phase 2 coupled ODE (α-syn + N(t))",
+            "Phase 4 Hill PD + N(t)×LEDD interaction",
+            "Per-patient calibrated via IS on 1,065 patients",
+        ],
+        "gaps": [
+            "Simplified vs full 5-module coupled ODE (no Lewy body propagation, no levodopa PK)",
+        ],
+    },
+    "bidirectional_flow": {
+        "score": 2,  # substantial after Task 5
+        "evidence": ["Task 5 update_posterior() API", "Task 5 replay harness on 400 patients"],
+        "gaps": ["Episodic updates (1-2 years) not continuous; no closed-loop re-treatment"],
+    },
+    "predictive_capability": {
+        "score": 2,
+        "evidence": ["Phase 4 Path B gap prediction", "Paper 4 conformal bands 91% coverage"],
+        "gaps": ["Fixed-effects R²=0.051 is modest"],
+    },
+    "uncertainty_quantification": {
+        "score": 3,  # complete (via Paper 4)
+        "evidence": ["Paper 4 IPCW conformal bands", "Phase 2 posterior CIs", "PPC in Task 5"],
+        "gaps": [],
+    },
+    "validation": {
+        "score": 2,
+        "evidence": [
+            "Task 3 external validation on LCC",
+            "Task 4 head-to-head vs Graph-DT",
+            "Task 6 observational counterfactual",
+        ],
+        "gaps": ["No prospective interventional validation"],
+    },
+    "fitness_for_purpose": {
+        "score": 2,
+        "evidence": ["Context: PD progression prediction + treatment response", "Paper 9 NASEM audit table"],
+        "gaps": ["Not qualified for regulatory decision-making"],
+    },
+    "governance": {
+        "score": 3,  # complete
+        "evidence": [
+            "Closed-Loop Methodology v1.5",
+            "Documentation Lifecycle Protocol v1.0",
+            "All code + data provenance via _reproducibility.py",
+        ],
+        "gaps": [],
+    },
+}
+
+total_score = sum(c["score"] for c in nasem_audit.values())
+max_score = 7 * 3  # 21
+compliance_pct = total_score / max_score * 100
+```
+
+- [ ] **Step 2: Generate summary table** for paper
+
+- [ ] **Step 3: Commit**
+
+---
+
+### Task 8: Publication Figures
+
+**Files:**
+
 - Create: `scripts/mechanistic_twin/phase5_generate_figures.py`
-- Read: All Phase 5 output JSONs
 - Output: `outputs/mechanistic_twin/paper10_mech_vs_giman/figures/*.{png,pdf}`
 
-**Context for implementer:** Generate 8 publication-quality figures for Paper 10. Style must match Paper 9 (seaborn "colorblind" palette, 300 DPI, no titles, panel labels, 10pt minimum font).
+**Figures (9 total):**
 
-**Figures to generate:**
+1. **Fig 1:** Architecture diagram (PPMI → IS calibration → PosteriorStore → updater → counterfactual → validation)
+2. **Fig 2:** NASEM criteria radar chart (our coverage + gaps)
+3. **Fig 3:** Bidirectional demo — MAE vs update count (the twin proof)
+4. **Fig 4:** External validation — LCC vs PPMI SBR decay distributions (KS test annotation)
+5. **Fig 5:** Head-to-head C-index comparison (paired bootstrap CIs)
+6. **Fig 6:** Observational counterfactual — predicted vs observed gap change (LEDD escalation events)
+7. **Fig 7:** Patient case studies (3 fast progressors, 3 slow, 3 medium — use EDA findings)
+8. **Fig 8:** Calibration plot (posterior predictive checks)
+9. **Fig 9:** Dissertation arc — how Paper 10 fits with Papers 1-9
 
-1. **Fig 1: Benchmark Framework Schematic** — Three dimensions (prediction, interpretability, counterfactual) with GIMAN on left, mechanistic on right, showing what each can/cannot do.
-
-2. **Fig 2: Shared Cohort Venn Diagram** — Overlap between GIMAN (1,900), Phase 2 posteriors (304-1,065), and Phase 4 assembled data.
-
-3. **Fig 3: Clinical Question Matrix** — Heatmap showing which model answers which clinical question. Green = can answer, red = cannot.
-
-4. **Fig 4: Scissors Closure** (THE KEY FIGURE) — For 3-5 representative patients: OFF-UPDRS floor rising, ON-UPDRS ceiling falling, gap narrowing. Shaded medication benefit zone. Dashed threshold line.
-
-5. **Fig 5: Counterfactual Scenarios** — 3-panel: (a) dose escalation, (b) neuroprotection, (c) combined. Each shows baseline vs counterfactual gap trajectory for slow/median/fast progressors.
-
-6. **Fig 6: Treatment Horizon Distribution** — Histogram of predicted years-to-threshold at different LEDD levels.
-
-7. **Fig 7: GIMAN vs Mechanistic Complementarity** — Quadrant scatter plot: GIMAN risk (x-axis) vs mechanistic gap decline rate (y-axis). Shows patients where only one model flags risk.
-
-8. **Fig 8: Three-Paper Summary** — Wide panel: Paper 9 (three pathways) → Paper 10 (benchmark + counterfactual) → implications for clinical practice.
-
-- [ ] **Step 1: Implement figure generation script**
-
-Create `scripts/mechanistic_twin/phase5_generate_figures.py` with all 8 figures. Follow the same pattern as `phase4_generate_figures.py` — load JSONs, use matplotlib + seaborn, save PNG + PDF at 300 DPI.
-
-- [ ] **Step 2: Generate all figures**
-
-Run: `.venv/bin/python scripts/mechanistic_twin/phase5_generate_figures.py`
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add scripts/mechanistic_twin/phase5_generate_figures.py
-git commit -m "feat: Phase 5 Step 7 — 8 publication figures for Paper 10"
-```
+- [ ] Follow publication standards from Paper 9 (300 DPI, colorblind palette, no titles)
+- [ ] Commit
 
 ---
 
-### Task 8: Documentation Lifecycle (Cycle B)
+### Task 9: Documentation Lifecycle (Cycle B)
 
-**Files:**
-- Update: `CLAUDE.md` (Phase 5 status)
-- Update: `outputs/defense_prep/mechanistic_digital_twin_roadmap.md` (Phase 5 row)
-- Update: `outputs/dissertation/bibliography.tex` (new citations)
-- Create: `outputs/mechanistic_twin/paper10_mech_vs_giman/latex/main.tex` (Paper 10 manuscript)
+Per `Docs/documentation_lifecycle_protocol.md`:
 
-**Context for implementer:** Per Documentation Lifecycle Protocol v1.0 Cycle B, after all Phase 5 analyses are complete:
-
-1. Update CLAUDE.md Phase 5 status from FUTURE to IN PROGRESS/COMPLETE
-2. Update roadmap.md Phase 5 row with results
-3. Add new citations to bibliography.tex:
-   - Atsou 2025 (CPT:PSP, mechanistic learning)
-   - Valderrama 2024 (CPT:PSP, SciML + PK)
-   - Laubenbacher 2024 (virtual patients, digital twins, causal disease models)
-   - Qian 2021 (NeurIPS, hybrid ODE)
-4. Write Paper 10 manuscript following CPT:PSP format
-
-- [ ] **Step 1: Update CLAUDE.md**
-- [ ] **Step 2: Update roadmap**
-- [ ] **Step 3: Add bibliography entries**
-- [ ] **Step 4: Write Paper 10 LaTeX manuscript** (embed figures, reference tables, follow Paper 9 structure)
-- [ ] **Step 5: Compile PDF** (`pdflatex main.tex` × 2)
-- [ ] **Step 6: Final commit + push**
-
-```bash
-git add -A
-git commit -m "feat: Phase 5 complete — mechanistic vs GIMAN benchmark + counterfactual (Paper 10)"
-git push pd_phd main
-```
+- [ ] **Update `outputs/defense_prep/mechanistic_digital_twin_roadmap.md`** Phase 5 section with v2 architecture
+- [ ] **Update `CLAUDE.md`** Phase 5 status + data lineage fix note
+- [ ] **Update `outputs/mechanistic_twin/phase2/REPRODUCIBILITY_MANIFEST.md`** with Task 0 provenance
+- [ ] **Add NASEM 2024 + Musuamba 2021 + Friedrich 2016 + Viceconti 2020 + Hicks 2015 to bibliography.tex**
+- [ ] **Write Paper 10 LaTeX manuscript** at `outputs/mechanistic_twin/paper10_mech_vs_giman/latex/main.tex`
+  - Structure follows Atsou 2025 / Valderrama 2024 CPT:PSP conventions
+  - Include NASEM audit table as methods subsection
+  - "Study Highlights" box (4 items)
+  - Honest labeling: "mechanistic patient-specific model" not "digital twin"
+- [ ] **Compile PDF + open in Preview**
+- [ ] **Final commit + push**
 
 ---
 
 ## Self-Review Checklist
 
-1. **Spec coverage:** All 6 key analyses from the spec are covered (shared cohort, GIMAN predictions, complementarity, counterfactuals, scissors closure, treatment horizon). Figures cover all three benchmark dimensions. Documentation lifecycle included as Task 8.
+**1. Spec coverage:** All 5 sections from the deep review recommendations are covered:
 
-2. **Placeholder scan:** No TBD/TODO/placeholders. All code is complete. All file paths are exact. All commands have expected output notes.
+- §2 NASEM audit → Task 7
+- §3 Bidirectional demo → Task 5
+- §4 External validation LCC → Task 3
+- §5 Head-to-head common endpoint → Task 4
+- §6 Observational counterfactual → Task 6
+- Plus Task 0 (data lineage), Task 1 (posterior store), Task 2 (cohort), Task 8 (figures), Task 9 (docs)
 
-3. **Type consistency:** `predict_gap_trajectory()` signature is consistent across Tasks 4, 5, 6. `COEFS` dict is defined once in Task 4 and imported in Tasks 5-6. `CounterfactualResult` dataclass is defined once and used consistently.
+**2. Placeholder scan:** Some "see v1 plan Task 1 for boilerplate" and "detailed code omitted here for space" references remain. These are intentional — preserves v1's detailed code blocks (available in git history `5130cd8`) without duplication.
+
+**3. Type consistency:** `PatientPosterior` dataclass used consistently in Tasks 1, 5. `PosteriorStore` API consistent throughout.
+
+---
+
+## Execution Options
+
+**1. Subagent-Driven (recommended)** — Dispatch fresh subagent per task, review between tasks, fast iteration.
+
+**2. Inline Execution** — Execute tasks in this session using executing-plans, batch execution with checkpoints.
+
+**Critical path:**
+
+- Task 0 (1-2 days) → Task 1 (3 days, blocks Task 5) → Tasks 2, 3, 4 in parallel → Task 5 (2 weeks) → Task 6 (3 days) → Task 7 (2 days) → Task 8 (1 week) → Task 9 (1 week)
+- **Total: ~4 months** (fits Paper 10 target scope)
+
+**Start recommendation:** Task 0 first (unblocks everything by providing canonical data source), then Task 1 (unblocks Task 5), then parallelize 2, 3, 4.

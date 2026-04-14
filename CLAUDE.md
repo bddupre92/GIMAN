@@ -9,6 +9,51 @@ PhD dissertation research building the first computational framework to predict,
 **Python Environment:** `.venv/` at project root
 **Key Dependencies:** PyTorch 2.8.0, PyTorch Geometric 2.6.1, MAPIE 1.3.0, CatBoost 1.2.10, XGBoost 3.2.0, LightGBM 4.6.0, scikit-learn, hyperimpute 0.1.17 (GAIN, MIWAE), pypots 1.1 (SAITS reference)
 
+## Local Research Database (PostgreSQL)
+
+All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal transitions, LEDD, and mechanistic twin outputs live in a **local PostgreSQL 17 database** — use this instead of reading CSVs directly when possible (faster, unified schema, no path juggling).
+
+**Connection:**
+```
+postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
+```
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · Size: ~283 MB · 112 tables across 10 schemas.
+
+**Schemas:**
+| Schema | Contents |
+|--------|----------|
+| `ppmi_raw` | 25 PPMI clinical/imaging tables (demographics, UPDRS, DaTScan, biospecimens, MOCA, etc.) |
+| `biofind_raw` | 23 BioFIND tables (external validation cohort) |
+| `pdbp_raw` | 18 PDBP tables (external prediction cohort) |
+| `hbs_raw` | 11 HBS tables (external prediction cohort) |
+| `staging` | 3 tables — `nsd_iss_staging_results` (PPMI 2,201), `biofind_nsd_iss_staging` (103), `nsd_iss_staging_enriched` |
+| `features` | 4 tables — `paper1_features_with_targets` (PPMI 2,201×22), `biofind_features`, `pdbp_features`, `hbs_features` |
+| `longitudinal` | 4 tables — `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
+| `paper3` | `longitudinal_features` (16,699 rows × 48 cols) |
+| `ledd` | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
+| `mechanistic` | 21 tables from Phase 1-4 (posteriors, LOO, counterfactuals, Phase 4 assembled data) |
+
+**Python helper** ([src/giman_pipeline/data/db.py](src/giman_pipeline/data/db.py)):
+```python
+from giman_pipeline.data.db import read_sql, read_table, get_engine
+
+df = read_sql("SELECT * FROM staging.nsd_iss_staging_results WHERE target_binary = 1")
+df = read_table("features", "paper1_features_with_targets")
+engine = get_engine()  # for to_sql bulk writes
+```
+
+**CLI:**
+```bash
+psql giman_research              # interactive
+brew services restart postgresql@17  # restart server
+```
+
+**Loading new CSVs:** [scripts/load_csvs_to_local_pg.py](scripts/load_csvs_to_local_pg.py) — incremental loader, supports `--schema <name>` and `--force-reload`. Skips tables that already exist.
+
+**Restoring from scratch:** `db_dump/schema_and_data.sql` (190MB, gitignored) — `psql giman_research < db_dump/schema_and_data.sql` rebuilds the full DB.
+
+**Migration context:** Migrated from Supabase (out of free-tier storage) on 2026-04-12. Supabase project `forcqcobliklzcfwhjsj` is now deprecated — do not write new data there. Hex.tech visualizations previously connected to Supabase; use local Jupyter with `read_sql()` instead (CLI access requires Hex Team plan).
+
 ## Three-Paper Thesis Arc
 
 1. **Paper 1** (COMPLETE): NSD-ISS Stage Prediction with Calibrated Uncertainty — conformal prediction + graph models for biological stage classification
@@ -792,7 +837,7 @@ The `GraphDigitalTwin` model uses `gate_linear` (not `gate`), `gat_layers_list` 
 | Phase 2 | **DONE** | Paper 7 | Coupled α-syn + N(t) ODE, T_tox posteriors, 3.29%/yr median |
 | Phase 3 | **DONE** | Papers 8a + 8b | M1 wins (ΔAIC=3,856), spatial propagation NOT detectable |
 | **Phase 4** | **ANALYSIS COMPLETE — manuscript drafted** | **Paper 9** | Three-pathway PK/PD: ON-OFF gap interaction POSITIVE (p=0.044), OFF-UPDRS & wearing-off negative |
-| Phase 5 | FUTURE | Paper 10 | Mechanistic vs GIMAN head-to-head benchmark |
+| Phase 5 | PLAN v2 (2026-04-13) | Paper 10 | Bidirectional-ready mechanistic model + external validation (LCC) + NASEM audit — target npj Parkinson's Disease |
 | DeNoPa | FUTURE | Paper 11? | External validation (requires PI collaboration) |
 
 ### Phase 4: Three-Pathway PK/PD Analysis (Paper 9) — ANALYSIS COMPLETE
@@ -876,6 +921,79 @@ PPMI patients are in the sub-EC50 linear regime of the dose-response curve (free
 
 #### Confounding by Indication
 LEDD correlates with UPDRS residuals (partial ρ=0.180) but this is confounding (sicker → more LEDD), not mechanistic. The N(t)×LEDD interaction survives severity control (p=0.044) but within-patient first-difference is inconclusive (p=0.533).
+
+#### Data Lineage Issue (discovered 2026-04-13)
+The main `phase4_assembled_data.parquet` has only 40 ON-state rows because Task 1 filtered to OFF during assembly. Path B re-extracts paired ON-OFF from raw Part III CSV (`MDS-UPDRS_Part_III_12Apr2026.csv`) to get the 4,203 paired visits. This creates TWO data pipelines — violates canonical-source principle. **Fix in Phase 5 Task 0:** rebuild canonical parquet with ON+OFF rows + `gap` column at `outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet`.
+
+## Mechanistic Digital Twin — Phase 5 Roadmap v2 (2026-04-13)
+
+### Strategic Pivot (after deep review)
+
+v1 plan (committed 7dfb7e6) framed Paper 10 as "Mechanistic vs GIMAN benchmark + counterfactual simulation." Deep review (3 parallel research agents + NASEM 2024 + CPT:PSP credibility framework) identified 3 problems: (1) comparing incommensurable metrics (C-td vs R²), (2) counterfactual = regression extrapolation not mechanism, (3) "digital twin" framing overclaims given observational data constraints.
+
+**v2 pivot:** Paper 10 becomes "Bidirectional-Ready Mechanistic Patient-Specific Model with External Validation" — honest about partial NASEM compliance, primary contribution is the bidirectional update architecture.
+
+### Phase 5 (Paper 10) — v2 Scope
+
+**Research question:** "Can a mechanistic patient-specific model for PD (1) update Bayesian posteriors as new observations arrive, (2) externally validate on LCC cohort, (3) benchmark against GIMAN on a common endpoint, and (4) transparently audit against NASEM digital twin criteria?"
+
+**9 Tasks (plan at `docs/superpowers/plans/2026-04-12-phase5-mechanistic-vs-giman-benchmark.md`):**
+
+0. Rebuild canonical parquet (fix data lineage) — ON+OFF rows, `gap` column
+1. Persist full posterior samples in HDF5 (bidirectional infrastructure)
+2. Identify shared cohort (GIMAN × mechanistic × paired ≥2 pairs ~ 280 patients)
+3. External validation on LCC cohort (N=638, has DaT-SPECT)
+4. Head-to-head on common endpoint (time-to-NP4OFF≥1) with paired bootstrap C-index
+5. Bidirectional update demo (fit scans 1-2, predict scan 3, measure coverage) — THE TWIN PROOF
+6. Observational counterfactual calibration (PPMI patients with LEDD escalation ≥200mg)
+7. NASEM criteria audit (7 criteria, 0-3 scoring, evidence + gaps)
+8. Publication figures (9 figures)
+9. Documentation lifecycle (Cycle B): roadmap, bibliography, manuscript, PDF
+
+### Phase 5 Architecture (new package)
+
+```
+src/giman_pipeline/mechanistic_twin_v2/
+├── state.py              # PatientState + versioning (v1, v2, v3 on observations)
+├── posterior_store.py    # HDF5: /patient_<patno>/v<N>/{samples, weights}
+├── updater.py            # update_posterior() via SIR + MCMC rejuvenation
+├── simulator.py          # Forward simulation with posterior uncertainty
+├── counterfactual.py     # Extends existing src/giman_pipeline/digital_twin/
+├── validation.py         # PredictionLog + calibration_report()
+├── forward_model.py      # Ports Phase 2 ODE from Julia
+└── observations.py       # Per-observation likelihoods (DaT-SPECT, UPDRS, LEDD, NP4OFF, CSF)
+```
+
+### NASEM Self-Audit (honest scope)
+
+| Criterion | Current | After Paper 10 | Full NASEM (Phase 6+) |
+|---|---|---|---|
+| Physiological constraints | Partial | Same | Full 5-module ODE |
+| Bidirectional flow | NO | YES (episodic) | Continuous |
+| Continuous updating | NO | Per-visit | Sensor-based |
+| Patient-level validation | Partial | External (LCC) + replay | Prospective interventional |
+
+**Honest claim:** Paper 10 = "bidirectional-ready mechanistic patient-specific model," NOT a full NASEM-compliant digital twin. Phase 6 (MindMend biosensor) completes the vision — career-long work.
+
+### Target Venue Shift
+
+**v1:** CPT: Pharmacometrics & Systems Pharmacology
+**v2:** **npj Parkinson's Disease** or **Journal of Parkinson's Disease** — methodological emphasis better fit than pharmacometrics after dropping the "benchmark" framing.
+
+### Paper 10/11 Decision
+
+- **Paper 10** = v2 plan (bidirectional + external + NASEM audit) — 4 months scope
+- **Paper 11** (optional) = Hybrid SciML (GIMAN features + mechanistic N(t) → hybrid model) — submission-in-review at defense, not completion requirement
+- **11 papers total is above average** for PhD (typical 3-5); stop at 10 if Paper 10 closes NASEM argument
+
+### Key Literature Cited (Phase 5 validation)
+
+- [NASEM 2024 Report](https://www.nationalacademies.org/publications/26894): VVUQ framework
+- Musuamba 2021 (CPT:PSP): Risk-informed model credibility
+- Friedrich 2016 (CPT:PSP): QSP Model Qualification Method
+- Viceconti 2020: In silico trials VVUQ regulatory framework
+- Hicks 2015 (648 cites): V&V best practices — field standard
+- arxiv 2405.05301: NASEM-compliant critical illness DT design
 
 ### Connectome Data (downloaded 2026-04-12)
 

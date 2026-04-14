@@ -391,8 +391,9 @@ The computational demands are moderate by modern standards. A single workstation
 | **Phase 2: PPMI Calibration** | Months 4-12 | **✅ COMPLETE** | IS-weighted posterior (304 Wave A), T_tox reframe, Variant B mass-conservation, identifiability analysis, Wave B expansion (1,065 pts), prasinezumab counterfactual | Per-patient T_tox posteriors, 3.29%/yr median | — |
 | **Phase 2.5: Multi-Observable SAEM** | Months 10-12 | **✅ COMPLETE** | 7-agent systematic review → 8 PPMI observables. SAEM v1 (1,065 pts, 6 obs): ρ=-0.211 decisive test, ρ=0.609 agg% validation, ρ=-0.761 sparse-patient finding | Multi-observable population calibration + data registry | **Paper 7** (bioRxiv → CPT:PSP) |
 | **Phase 3: Connectome Propagation** | Months 12-18 | **✅ COMPLETE (2026-04-11)** | M1 independent regional decays wins over M6r spatial propagation (ΔAIC=3,856). Putamen 0.142/yr, caudate 0.119/yr (19% faster). Spatial propagation NOT detectable from 4-region DaT-SPECT. Budapest connectome: zero bilateral putamen fibers. | Papers 8a (PLoS Comp Biol, 15pp) + 8b (Movement Disorders, 9pp) | **Paper 8a** + **Paper 8b** |
-| **Phase 4: N(t)→DA→UPDRS PK/PD** | Months 14-20 | **LIT REVIEW COMPLETE (2026-04-12)** | Level 2.5 hybrid: pop-avg PK (Simon 2016/Contin 1997) + patient-specific N(t). DA(t) = k_AADC × C_brain_pop(LEDD) × N(t)/N₀. Fit k_AADC, EC50, h from UPDRS+LEDD+N(t). NOT PBPK. Gap confirmed: no published model couples N(t) from imaging to PD response. Primary competitor: Gupta 2025 (SBR-IRT). LEDD data: 9,583 rows, 1,678 pts (Apr 12 download). | N(t)-coupled UPDRS prediction + wearing-off timing | **Paper 9** (CPT:PSP) |
-| **Phase 5: Validation & Comparison** | Months 18-24 | **PENDING** | Head-to-head: mechanistic twin (Phases 1-4 coupled) vs GIMAN Papers 1-6. Counterfactual value-add (prasinezumab scenario). External: DeNoPa (N=113, oligomeric α-syn, requires PI collaboration with Prof. Brit Mollenhauer). | Comparison paper + external validation | **Paper 10** (Mov Disord) |
+| **Phase 4: Three-Pathway PK/PD** | Months 14-20 | **✅ ANALYSIS COMPLETE (2026-04-12)** | Three-pathway analysis: Path A (N(t)→OFF-UPDRS, time wins ΔAIC=+803 — informative negative); **Path B (ON-OFF gap, N(t)×LEDD interaction p=0.044 after severity control, ΔAIC=-72 — POSITIVE)**; Path C (wearing-off null, PK-driven). Sub-EC50 linear regime confirmed (Hill h_free=0.13). Manuscript drafted (26pg). | Three-pathway PK/PD analysis | **Paper 9** (CPT:PSP — MAJOR REVISION per 5-reviewer panel) |
+| **Phase 5: Bidirectional-Ready Model + External Validation** | Months 20-24 | **PLAN v2 (2026-04-13)** | v1 plan pivoted after deep review (3 agents + NASEM 2024). v2: (1) canonical parquet ON+OFF fix, (2) PosteriorStore HDF5 infra, (3) LCC external validation (N=638), (4) head-to-head on time-to-NP4OFF≥1 (common endpoint, not incommensurable metrics), (5) **bidirectional update demo** (fit scans 1-2, predict scan 3 — the twin proof), (6) observational counterfactual (LEDD escalations ≥200mg, not synthetic), (7) NASEM criteria audit. 9 tasks, 4 months. | Bidirectional-ready mechanistic model + external validation + NASEM audit | **Paper 10** (npj Parkinson's Disease) |
+| **Phase 5b: Hybrid SciML** (optional) | Months 24-30 | **FUTURE** | Add mechanistic features (N(t), gap) to GIMAN Graph-DT. Test if hybrid beats pure ML. Matches CPT:PSP trend (Atsou 2025, Valderrama 2024). Uses zero new data. Submission-in-review at defense, not completion requirement. | Hybrid SciML model | **Paper 11** (CPT:PSP) |
 | **Phase 6: MindMend Integration** | Months 24-60 | **FUTURE** | ISF-to-plasma calibration; particle filter for real-time updates; first-in-human feasibility | Closed-loop digital twin prototype | — |
 
 ### 7.1a Phase 3 Implementation Plan (UPDATED 2026-04-11, identifiability PASSED)
@@ -510,17 +511,45 @@ All 7 candidate models tested via `StructuralIdentifiability.jl`, **ALL globally
 
 **Note:** `LEDD_Concomitant_Medication_Log_08Feb2026.csv` is **EMPTY (0 bytes, failed download)**. Must derive LEDD from raw `Concomitant_Medication_Log_08Feb2026.csv` using Jost 2023 conversion factors.
 
-### 7.1c Phase 5 Validation Plan (NEW, 2026-04-10)
+### 7.1c Phase 5 Validation Plan (UPDATED v2, 2026-04-13)
 
-**Internal validation (PPMI):**
-- Train on Wave A (304 patients, ≥4 scans) → predict Wave B (761 patients, 2-3 scans)
-- Compare mechanistic predictions vs GIMAN Paper 3 Graph-DT (C-td 0.922)
+**v1 (2026-04-10) pivoted after deep review** (3 parallel agents: critical-thinking + brainstorming + technical + NASEM 2024 report + CPT:PSP credibility framework).
 
-**External validation (DeNoPa, pending data access):**
-- N=113 PD, baseline DaT-SPECT, CSF oligomeric α-syn (Majbour 2021 Mov Disord)
-- Test: does PPMI-calibrated population k_n distribution predict DeNoPa patients' oligomeric α-syn?
-- Zenodo dataset (Mollenhauer 2023) under investigation — data dictionary being reviewed
-- **This would be the first external validation of ANY mechanistic PD model** (field-wide gap confirmed by deep literature review)
+**v1 problems identified:**
+
+1. "Benchmark" framing compared incommensurable metrics (Graph-DT C-td vs mechanistic R²)
+2. Counterfactual simulation was regression extrapolation, not mechanism (sub-EC50 linear regime)
+3. "Digital twin" overclaim for partial NASEM compliance
+4. Data lineage issue: Phase 4 main parquet had only 40 ON-state rows (Path B re-extracted from raw)
+
+**v2 scope (plan at `docs/superpowers/plans/2026-04-12-phase5-mechanistic-vs-giman-benchmark.md`):**
+
+**Internal validation (PPMI) — UPDATED:**
+- Task 0: Rebuild canonical parquet with ON+OFF rows (fix data lineage)
+- Task 1: Persist full posterior samples (HDF5) for bidirectional infrastructure
+- Task 2: Identify shared cohort (~280 patients with GIMAN × mechanistic × paired ON-OFF)
+- Task 5: **Bidirectional update demo** — fit scans 1-2, predict scan 3, measure coverage/MAE decrease with update count (the twin proof)
+- Task 6: Observational counterfactual calibration on PPMI patients with LEDD escalation ≥200mg (real validation, not synthetic)
+
+**External validation — UPDATED to LCC (available NOW, no collaboration needed):**
+- Task 3: LCC cohort (N=638) has DaT-SPECT SBR at `data/00_raw/LCC/DaTSCAN_SBR.csv`
+- Fit Phase 1 exponential SBR decay, compare pct_loss_per_yr distribution to PPMI's 3.29%/yr median
+- KS test + Mann-Whitney U — does SBR decay generalize beyond PPMI?
+- DeNoPa (Mollenhauer collaboration) remains as Paper 11 or postdoc future work
+
+**Head-to-head — REFRAMED on common endpoint:**
+- Task 4: Both mechanistic and Graph-DT predict time-to-NP4OFF≥1 (wearing-off onset)
+- Paired bootstrap C-index (1000 resamples)
+- NOT incommensurable C-td vs R² (v1 framing)
+
+**NASEM criteria audit (NEW, Task 7):**
+- Score 7 NASEM 2024 criteria (0-3 each) with evidence + gaps
+- Own partial compliance honestly
+- Positions MindMend (Phase 6) as completion path
+
+**Target venue:** **npj Parkinson's Disease** or **Journal of Parkinson's Disease** (shifted from CPT:PSP after dropping "benchmark" framing)
+
+**Critical path:** Task 0 (1-2d) → Task 1 (3d, blocks Task 5) → Tasks 2, 3, 4 parallel → Task 5 (2wk) → Tasks 6-7 (1wk) → Tasks 8-9 (2wk). Total ~4 months.
 
 ### 7.2 Resource Estimate
 
