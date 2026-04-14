@@ -1008,12 +1008,36 @@ Directory: `data/00_raw/connectome/` (2.6GB, gitignored)
 | ATAG 7T | NEEDS BROWSER LOGIN | ~56MB |
 | ConnectomeDB (raw HCP) | NEEDS REGISTRATION | Large |
 
+### Local PostgreSQL Database (added 2026-04-13)
+
+All CSV/Parquet data loaded into local PostgreSQL for reproducibility. **290 MB, 146 tables across 10 schemas:**
+
+| Schema | Tables | Content |
+|---|---|---|
+| ppmi_raw | 25 | PPMI clinical/imaging |
+| biofind_raw | 23 | BioFIND external validation |
+| pdbp_raw | 52 | PDBP (+34 from April 11 LONI) |
+| hbs_raw | 11 | HBS external prediction |
+| staging | 3 | NSD-ISS staging |
+| features | 4 | ML feature sets |
+| longitudinal | 4 | Paper 3 longitudinal |
+| paper3 | 1 | Paper 3 features |
+| mechanistic | 21 | Phase 1-4 outputs |
+| ledd | 2 | LEDD April 2026 |
+
+**Load script:** `scripts/load_csvs_to_local_pg.py` (untracked — utility)
+
+**Coverage:** 436 non-empty CSV/Parquet files, 356 mechanistic_twin summary files. Zero gaps. 6 empty imaging query results (LONI returned no data) and 17 flagged duplicates are header-only — safe to ignore.
+
+**Future work (back pocket):** Package SQL database as reproducible deployment for external users (schema dump + sample data + Docker compose). Enables external PhD defense reviewers to rerun analysis end-to-end without hunting for PPMI/LONI credentials. Consider for Paper 10 supplementary materials or dissertation appendix.
+
 ### Git Repository
 
 **Working directory:** `~/Projects/CSCI-FALL-2025/` (primary, operate here)
 **Mirror:** `~/My Drive/CSCI FALL 2025/` (Google Drive auto-sync to cloud)
 **Remote:** `pd_phd` → https://github.com/bddupre92/PD_PHD (main branch)
 **Data files:** gitignored (`data/`, `*.csv`, `*.parquet`), live in Drive + local only
+**Local PostgreSQL:** `db_dump/` (gitignored) — canonical tabular source alongside Drive/local files
 
 ### Session 2026-04-12 Summary
 

@@ -119,6 +119,8 @@ outputs/mechanistic_twin/paper10_mech_vs_giman/
 
 **Context:** Fix the Phase 4 data lineage. Current parquet has only 40 ON rows; Path B rebuilds pairs ad-hoc. New canonical parquet must have ALL UPDRS-III rows (ON + OFF + unstated) with columns for both states paired by PATNO+EVENT_ID.
 
+**Optional optimization (2026-04-13):** Local PostgreSQL now has all data loaded (290 MB, 146 tables, 10 schemas). Task 0 can optionally read from `ppmi_raw.mds_updrs_part_iii`, `ppmi_raw.mds_updrs_part_iv`, `ledd.ledd_concomitant_medication_log`, and `mechanistic.phase2_coupled_is_step26v4` via SQLAlchemy instead of CSV files. Decision: use CSV (simpler, portable) for Paper 10; leave SQL path as a follow-up reproducibility packaging deliverable (external reviewers can rerun via Docker compose + db_dump).
+
 - [ ] **Step 1: Write failing test for canonical parquet schema**
 
 ```python
