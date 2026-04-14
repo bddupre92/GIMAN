@@ -1,0 +1,37 @@
+# Exclude data (18 GB) — mounted as read-only volume at runtime
+data/
+
+# Exclude outputs (517 MB) — mounted as read-write volume at runtime
+outputs/
+
+# Exclude the PG dump — passed through compose volume mount, not baked into image
+db_dump/
+
+# Exclude local venv, caches, git metadata
+.venv/
+.git/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+.coverage
+htmlcov/
+
+# Exclude editor + OS cruft
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Exclude large notebooks and intermediate artifacts that rebuild from scripts
+*.ipynb_checkpoints/
+runs/
+
+# Exclude connectome data (3 GB) — mounted read-only at runtime
+data/00_raw/connectome/
+
+# Exclude Google Drive sync dir if present
+"My Drive"/
+
+# Include everything else under src/, scripts/, tests/, etc.

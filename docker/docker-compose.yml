@@ -1,0 +1,52 @@
+name: giman-dissertation
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: giman-postgres
+    environment:
+      POSTGRES_DB: giman_research
+      POSTGRES_USER: giman
+      POSTGRES_PASSWORD: giman_local_2026
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # The db_dump is auto-loaded on first container start. Re-running compose
+      # will NOT re-load it; drop the `pgdata` volume (`docker compose down -v`)
+      # to restore a fresh copy.
+      - ../db_dump/schema_and_data.sql:/docker-entrypoint-initdb.d/01_restore.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U giman -d giman_research"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  giman:
+    container_name: giman-app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://giman:giman_local_2026@postgres:5432/giman_research
+      PGHOST: postgres
+      PGUSER: giman
+      PGPASSWORD: giman_local_2026
+      PGDATABASE: giman_research
+      # Match the project's expected entry points.
+      PYTHONPATH: /giman/src
+    volumes:
+      # Write-through: generated outputs persist to host.
+      - ../outputs:/giman/outputs
+      # Read-only: raw data; never modified from inside the container.
+      - ../data:/giman/data:ro
+    ports:
+      - "8888:8888"
+
+volumes:
+  pgdata:
