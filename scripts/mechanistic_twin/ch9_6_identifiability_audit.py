@@ -14,16 +14,28 @@ Method:
   Transtrum 2015 J Chem Phys)
 - Profile likelihood on 2D (k_n, alpha_tox) grid (Raue 2013 PLoS ONE)
 
-Uses closed-form steady-state approximation for the forward model — full ODE
-integration is deferred to Paper 12 (phys-GIMIN). The steady-state approx is
-adequate for auditing the ALGEBRAIC structure of the observation map.
+Uses a full 4-state ODE integrated via scipy.integrate.solve_ivp (LSODA solver).
+This replaces the prior steady-state approximation (commit 4d27b10) which collapsed
+k_n and α_tox because it incorrectly wrote O_ss = k_n·M/α_tox — conflating the
+aggregation-clearance balance with the neuron death rate. In the correct ODE,
+α_tox enters ONLY dN/dt, while k_n enters the aggregation kinetics; the two
+parameters are asymmetric and jointly identifiable.
 
-5-channel observation map:
-  SBR_t         = SBR_0 * (N(t) / N_0)^gamma + eps_SBR
-  aSyn_agg%_t   = O_ss / (M_ss + O_ss) * 100 + eps_agg     [k_n probe]
-  SAA_TTT_t     = phi(F_ss(k_n)) + eps_SAA                  [F seeding kinetics]
-  NEV_asyn_t    = s_NEV * (O_ss + r_F * F_ss) + eps_NEV     [O+F neuronal EVs]
-  CSF_GFAP_t    = s_GFAP * O(t) + eps_GFAP                  [alpha_tox anchor]
+4-state ODE:
+  dM/dt = K_PROD - K_CLEAR_M·M - k_n·M
+  dO/dt = k_n·M - K_CONV·O - K_CLEAR_O·O
+  dF/dt = K_CONV·O - K_CLEAR_F·F
+  dN/dt = -α_tox·O·N
+
+Initial conditions (pre-disease steady state): M(0)=M_SS=2 nM, O(0)=0, F(0)=0, N(0)=1.
+Time units: ODE in HOURS; observations at years (converted via HOURS_PER_YEAR).
+
+5-channel observation map (all using transient ODE states):
+  SBR(t)          = SBR_0 · N(t)^γ
+  aSyn_agg%(t)    = 100 · O(t) / (M(t) + O(t))   [k_n probe: aggregation fraction]
+  SAA_TTT(t)      = 1 / (F(t) + ε)               [fibril seeding kinetics, inversely related]
+  NEV_asyn(t)     = S_NEV · (O(t) + R_F·F(t))    [neuronal EV α-syn: O + fibril contribution]
+  CSF_GFAP(t)     = S_GFAP · O(t)                [GFAP release driven by oligomer concentration]
 
 Unknowns: k_n (aggregation rate), α_tox (toxicity rate).
 5 channels × 2 unknowns = overdetermined system; test is rank(J)=2 and κ<1000.
@@ -44,6 +56,7 @@ import matplotlib
 matplotlib.use("Agg")  # non-interactive backend — no GUI handles
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.integrate import solve_ivp
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -59,43 +72,118 @@ FIG_DIR = OUT_DIR / "figures"
 # ---------------------------------------------------------------------------
 # Nominal population-level parameters (from saem_multi_obs_v2 posteriors)
 # ---------------------------------------------------------------------------
-K_N_NOM = np.exp(-7.922)           # ≈ 3.6e-4  (aggregation rate)
-ALPHA_TOX_NOM = np.exp(-11.357)    # ≈ 1.17e-5 (toxicity rate)
-GAMMA = 0.7                         # SBR-to-N exponent (Lee 2019)
-M_SS = 2.0                          # nM monomer steady state
-S_NEV = 1.0                         # NEV α-syn scaling
-S_GFAP = 1.0                        # GFAP scaling (calibrated in SAEM)
-R_F = 0.5                           # fibril weight in NEV signal
-SBR_0 = 1.5                         # baseline SBR (population median)
+K_N_NOM = float(np.exp(-7.922))        # ≈ 3.6e-4  /hr·nM  (aggregation rate)
+ALPHA_TOX_NOM = float(np.exp(-11.357)) # ≈ 1.17e-5 /hr·nM  (toxicity rate)
+
+# ODE fixed parameters (hours-based)
+K_PROD    = 0.1    # nM/hr    — CSF monomer production (Bhatt 2018)
+K_CLEAR_M = 0.05   # /hr      — monomer clearance; M_SS = K_PROD / K_CLEAR_M = 2.0 nM
+K_CONV    = 0.001  # /hr      — oligomer→fibril conversion (Iljina 2016 PNAS)
+K_CLEAR_O = 0.003  # /hr      — oligomer clearance (Iljina 2016 PNAS)
+K_CLEAR_F = 0.001  # /hr      — fibril clearance (Xu 2024 Nat Commun)
+M_SS      = 2.0    # nM       — pre-disease monomer steady state (= K_PROD/K_CLEAR_M)
+
+GAMMA   = 0.7      # SBR-to-N exponent (Lee 2019)
+SBR_0   = 1.5      # baseline SBR (population median)
+S_NEV   = 1.0      # NEV α-syn scaling
+S_GFAP  = 1.0      # GFAP scaling (calibrated in SAEM)
+R_F     = 0.5      # fibril weight in NEV signal
+
+HOURS_PER_YEAR = 24.0 * 365.25
 
 CHANNELS = ["SBR", "aSyn_agg_pct", "SAA_TTT", "NEV_asyn", "CSF_GFAP"]
 
 
 # ---------------------------------------------------------------------------
-# Closed-form steady-state forward model
+# Full 4-state ODE forward model (scipy LSODA)
 # ---------------------------------------------------------------------------
 
-def forward(k_n: float, alpha_tox: float, t_years: float) -> dict[str, float]:
-    """Closed-form steady-state observations.
+def _ode_rhs(t_hr: float, y: list[float], k_n: float, alpha_tox: float) -> list[float]:
+    """Right-hand side of the 4-state ODE in HOURS.
 
-    These are leading-order expressions for the slow-fast-collapsed coupled
-    ODE (aggregation + neuron death). The full ODE is deferred to Paper 12.
-
-    Steady-state relationships:
-      O_ss = k_n * M_ss / alpha_tox     (oligomer production / clearance)
-      F_ss = O_ss * 0.3                 (simplified fibril conversion ratio)
-      N(t) ≈ N_0 * exp(-alpha_tox * O_ss * t)   (exponential neuron death)
+    State vector y = [M (monomer nM), O (oligomer nM), F (fibril nM), N (neuron fraction)].
     """
-    O_ss = k_n * M_SS / (alpha_tox + 1e-30)
-    F_ss = O_ss * 0.3  # simplified fibril conversion ratio
-    N_frac = np.exp(-alpha_tox * O_ss * t_years)
+    M, O, F, N = y
+    dM = K_PROD - K_CLEAR_M * M - k_n * M
+    dO = k_n * M - K_CONV * O - K_CLEAR_O * O
+    dF = K_CONV * O - K_CLEAR_F * F
+    dN = -alpha_tox * O * N
+    return [dM, dO, dF, dN]
+
+
+def _integrate_trajectory(
+    k_n: float, alpha_tox: float, t_years_list: list[float]
+) -> np.ndarray:
+    """Integrate 4-state ODE from t=0 to max(t_years_list), sample at requested times.
+
+    Returns array of shape (len(t_years_list), 4) with columns [M, O, F, N].
+    Handles t=0 by clamping t_span lower bound to a small positive value and
+    prepending the initial condition so t_eval=0 is handled via IC directly.
+    """
+    t_hr_list = [t * HOURS_PER_YEAR for t in t_years_list]
+    t_max = max(t_hr_list) if max(t_hr_list) > 0 else 1.0
+
+    y0 = [M_SS, 0.0, 0.0, 1.0]
+
+    # t_eval must be >= t_span[0]; handle t=0 separately
+    t_eval_nonzero = [th for th in t_hr_list if th > 0.0]
+
+    # Indices of t=0 requests in original list
+    zero_indices = [i for i, th in enumerate(t_hr_list) if th == 0.0]
+    nonzero_indices = [i for i, th in enumerate(t_hr_list) if th > 0.0]
+
+    # Allocate output
+    result = np.zeros((len(t_hr_list), 4))
+
+    # Fill t=0 with initial conditions
+    for idx in zero_indices:
+        result[idx, :] = y0
+
+    # Integrate for non-zero times
+    if t_eval_nonzero:
+        t_eval_arr = np.array(sorted(set(t_eval_nonzero)))
+        sol = solve_ivp(
+            fun=lambda t, y: _ode_rhs(t, y, k_n, alpha_tox),
+            t_span=(0.0, t_max),
+            y0=y0,
+            t_eval=t_eval_arr,
+            method="LSODA",
+            rtol=1e-8,
+            atol=1e-10,
+        )
+        if not sol.success:
+            raise RuntimeError(f"ODE integration failed: {sol.message}")
+
+        # Map back to original indices (handle potential duplicate t_eval values)
+        t_eval_set = list(t_eval_arr)
+        for idx in nonzero_indices:
+            th = t_hr_list[idx]
+            # find closest t in t_eval_set
+            sol_idx = np.argmin(np.abs(sol.t - th))
+            result[idx, :] = sol.y[:, sol_idx]
+
+    return result
+
+
+def forward_trajectory(
+    k_n: float, alpha_tox: float, t_years_list: list[float]
+) -> dict[str, np.ndarray]:
+    """Return observation arrays (one per channel, aligned to t_years_list).
+
+    All channels use TRANSIENT ODE states — no steady-state approximation.
+    """
+    traj = _integrate_trajectory(k_n, alpha_tox, t_years_list)
+    M = traj[:, 0]
+    O = traj[:, 1]
+    F = traj[:, 2]
+    N = traj[:, 3]
 
     return {
-        "SBR": SBR_0 * N_frac ** GAMMA,
-        "aSyn_agg_pct": 100.0 * O_ss / (M_SS + O_ss),
-        "SAA_TTT": 1.0 / (F_ss + 1e-12),      # TTT inversely related to seeding kinetics
-        "NEV_asyn": S_NEV * (O_ss + R_F * F_ss),
-        "CSF_GFAP": S_GFAP * O_ss,
+        "SBR":          SBR_0 * np.power(np.clip(N, 1e-12, 1.0), GAMMA),
+        "aSyn_agg_pct": 100.0 * O / (M + O + 1e-30),
+        "SAA_TTT":      1.0 / (F + 1e-12),
+        "NEV_asyn":     S_NEV * (O + R_F * F),
+        "CSF_GFAP":     S_GFAP * O,
     }
 
 
@@ -103,27 +191,32 @@ def forward(k_n: float, alpha_tox: float, t_years: float) -> dict[str, float]:
 # Jacobian (finite-difference, log-scale perturbation)
 # ---------------------------------------------------------------------------
 
-def jacobian(k_n: float, alpha_tox: float, t_years: float, eps: float = 1e-6) -> np.ndarray:
-    """Finite-difference Jacobian, rows=channels, cols=[k_n, alpha_tox].
+def jacobian(
+    t_years_list: list[float],
+    k_n: float = K_N_NOM,
+    alpha_tox: float = ALPHA_TOX_NOM,
+    eps: float = 1e-4,
+) -> np.ndarray:
+    """Finite-difference Jacobian, rows = (channels × time points), cols = [k_n, alpha_tox].
 
-    Central differences on log-parameters to handle the different magnitudes
-    of k_n (~1e-4) and alpha_tox (~1e-5). Relative perturbation val*(1±eps)
-    ensures scale-appropriate step sizes.
+    Central differences in log-parameter space (relative eps = 1e-4) because k_n
+    and alpha_tox differ by ~2 orders of magnitude. The stacked multi-time-point
+    Jacobian captures information from all observation times collectively.
     """
-    J = np.zeros((len(CHANNELS), 2))
-    for j, (param_name, _param_val) in enumerate([("k_n", k_n), ("alpha_tox", alpha_tox)]):
-        kn_plus  = k_n  * (1.0 + eps) if j == 0 else k_n
-        kn_minus = k_n  * (1.0 - eps) if j == 0 else k_n
-        at_plus  = alpha_tox * (1.0 + eps) if j == 1 else alpha_tox
-        at_minus = alpha_tox * (1.0 - eps) if j == 1 else alpha_tox
+    obs_plus_k  = forward_trajectory(k_n * (1.0 + eps), alpha_tox,            t_years_list)
+    obs_minus_k = forward_trajectory(k_n * (1.0 - eps), alpha_tox,            t_years_list)
+    obs_plus_a  = forward_trajectory(k_n,               alpha_tox * (1.0 + eps), t_years_list)
+    obs_minus_a = forward_trajectory(k_n,               alpha_tox * (1.0 - eps), t_years_list)
 
-        plus  = forward(kn_plus,  at_plus,  t_years)
-        minus = forward(kn_minus, at_minus, t_years)
+    n_t  = len(t_years_list)
+    n_ch = len(CHANNELS)
+    J = np.zeros((n_t * n_ch, 2))
 
-        param_val = k_n if j == 0 else alpha_tox
-        denom = 2.0 * eps * param_val  # central-difference denominator in original units
-        for i, ch in enumerate(CHANNELS):
-            J[i, j] = (plus[ch] - minus[ch]) / denom
+    for i_t in range(n_t):
+        for i_ch, ch in enumerate(CHANNELS):
+            row = i_t * n_ch + i_ch
+            J[row, 0] = (obs_plus_k[ch][i_t] - obs_minus_k[ch][i_t]) / (2.0 * eps * k_n)
+            J[row, 1] = (obs_plus_a[ch][i_t] - obs_minus_a[ch][i_t]) / (2.0 * eps * alpha_tox)
 
     return J
 
@@ -134,8 +227,7 @@ def build_cohort_jacobian(t_years_list: list[float]) -> np.ndarray:
     Each visit contributes 5 rows (one per channel). The stacked matrix
     captures information from all time points collectively.
     """
-    blocks = [jacobian(K_N_NOM, ALPHA_TOX_NOM, t) for t in t_years_list]
-    return np.vstack(blocks)
+    return jacobian(t_years_list, K_N_NOM, ALPHA_TOX_NOM)
 
 
 # ---------------------------------------------------------------------------
@@ -165,16 +257,18 @@ def profile_likelihood_2d(
         np.log10(ALPHA_TOX_NOM) - 1.5, np.log10(ALPHA_TOX_NOM) + 1.5, grid_size
     )
 
+    # Pre-compute nominal observations once (they don't change)
+    nom_obs = forward_trajectory(K_N_NOM, ALPHA_TOX_NOM, t_years_list)
+
     # Compute chi² surface on the 2D grid
     chi2 = np.zeros((grid_size, grid_size))
     for i, kn in enumerate(k_n_grid):
         for j, at in enumerate(alpha_grid):
+            pred = forward_trajectory(kn, at, t_years_list)
             total = 0.0
-            for t in t_years_list:
-                nom  = forward(K_N_NOM, ALPHA_TOX_NOM, t)
-                pred = forward(kn, at, t)
-                for ch in CHANNELS:
-                    resid = (pred[ch] - nom[ch]) / np.sqrt(obs_noise_var[ch])
+            for ch in CHANNELS:
+                for i_t in range(len(t_years_list)):
+                    resid = (pred[ch][i_t] - nom_obs[ch][i_t]) / np.sqrt(obs_noise_var[ch])
                     total += resid ** 2
             chi2[i, j] = total
 
@@ -182,8 +276,8 @@ def profile_likelihood_2d(
     threshold_1d = chi2_min + 3.84  # χ²(1, 0.95)
 
     # Profile likelihoods: minimize over the other parameter
-    k_n_profile    = chi2.min(axis=1)   # shape (grid_size,); min over alpha_tox
-    alpha_profile  = chi2.min(axis=0)   # shape (grid_size,); min over k_n
+    k_n_profile   = chi2.min(axis=1)   # shape (grid_size,); min over alpha_tox
+    alpha_profile  = chi2.min(axis=0)  # shape (grid_size,); min over k_n
 
     def ci_from_profile(grid: np.ndarray, profile: np.ndarray) -> list[float]:
         """Return [lower, upper] bounds of the 95% PL CI."""
@@ -195,19 +289,19 @@ def profile_likelihood_2d(
         idx = np.where(below)[0]
         return [float(grid[idx[0]]), float(grid[idx[-1]])]
 
-    k_n_ci    = ci_from_profile(k_n_grid, k_n_profile)
-    alpha_ci  = ci_from_profile(alpha_grid, alpha_profile)
+    k_n_ci   = ci_from_profile(k_n_grid, k_n_profile)
+    alpha_ci = ci_from_profile(alpha_grid, alpha_profile)
 
     return {
         "k_n": {
-            "grid":       k_n_grid.tolist(),
-            "profile_chi2": k_n_profile.tolist(),
-            "ci_95":      k_n_ci,
+            "grid":           k_n_grid.tolist(),
+            "profile_chi2":   k_n_profile.tolist(),
+            "ci_95":          k_n_ci,
         },
         "alpha_tox": {
-            "grid":       alpha_grid.tolist(),
-            "profile_chi2": alpha_profile.tolist(),
-            "ci_95":      alpha_ci,
+            "grid":           alpha_grid.tolist(),
+            "profile_chi2":   alpha_profile.tolist(),
+            "ci_95":          alpha_ci,
         },
         "chi2_surface": chi2.tolist(),
         "chi2_min":     chi2_min,
@@ -272,6 +366,21 @@ def plot_profile_likelihood_2d(pl: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Numerical sanity check helper
+# ---------------------------------------------------------------------------
+
+def _print_trajectory_sanity(t_years: list[float]) -> None:
+    """Print M, O, F, N at nominal parameters for order-of-magnitude verification."""
+    traj = _integrate_trajectory(K_N_NOM, ALPHA_TOX_NOM, t_years)
+    print("\nNumerical sanity check — nominal trajectory at (K_N_NOM, ALPHA_TOX_NOM):")
+    print(f"  {'t_yr':>5s}  {'M (nM)':>10s}  {'O (nM)':>10s}  {'F (nM)':>10s}  {'N (frac)':>10s}")
+    for i, t in enumerate(t_years):
+        M, O, F, N = traj[i]
+        print(f"  {t:>5.1f}  {M:>10.4f}  {O:>10.6f}  {F:>10.6f}  {N:>10.6f}")
+    print("  Expected: M drops ~1.5-2.0 nM, O quasi-SS ~0.2-0.3 nM, N(6yr) ~0.80-0.95")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -280,9 +389,10 @@ def main() -> None:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
 
     print("=" * 72)
-    print("Ch 9 §9.6 — 5-Channel Identifiability Audit")
+    print("Ch 9 §9.6 — 5-Channel Identifiability Audit (Full ODE)")
     print("Unknowns: k_n (aggregation), α_tox (neurotoxicity)")
     print("Channels:", CHANNELS)
+    print("Forward model: scipy LSODA 4-state ODE (M, O, F, N)")
     print("=" * 72)
 
     # Provenance (call before any heavy work per _reproducibility contract)
@@ -291,12 +401,17 @@ def main() -> None:
         repo_root=ROOT,
         input_files=[],  # Pure mathematical audit — no data inputs
         extra={
-            "note": "Closed-form steady-state approx; full ODE deferred to Paper 12",
+            "note": "Full 4-state ODE (scipy LSODA); replaces broken SS approx from commit 4d27b10",
             "channels": CHANNELS,
             "unknowns": ["k_n", "alpha_tox"],
             "method": "Jacobian rank + FIM kappa + eigenvalue spectrum + profile likelihood",
             "nominal_k_n": float(K_N_NOM),
             "nominal_alpha_tox": float(ALPHA_TOX_NOM),
+            "ode_params": {
+                "K_PROD": K_PROD, "K_CLEAR_M": K_CLEAR_M, "K_CONV": K_CONV,
+                "K_CLEAR_O": K_CLEAR_O, "K_CLEAR_F": K_CLEAR_F, "M_SS": M_SS,
+                "GAMMA": GAMMA, "SBR_0": SBR_0, "HOURS_PER_YEAR": HOURS_PER_YEAR,
+            },
             "references": [
                 "Gutenkunst et al., PLoS Comput Biol 3:e189 (2007)",
                 "Transtrum & Qiu, J Chem Phys 143:010201 (2015)",
@@ -311,6 +426,11 @@ def main() -> None:
     print(f"Nominal k_n = {K_N_NOM:.4e},  α_tox = {ALPHA_TOX_NOM:.4e}")
 
     # ------------------------------------------------------------------
+    # Numerical sanity check (print trajectory at nominal params)
+    # ------------------------------------------------------------------
+    _print_trajectory_sanity(t_years)
+
+    # ------------------------------------------------------------------
     # Jacobian + FIM
     # ------------------------------------------------------------------
     J = build_cohort_jacobian(t_years)
@@ -323,9 +443,11 @@ def main() -> None:
     )
 
     print(f"\n--- Jacobian ({J.shape[0]} × {J.shape[1]}) ---")
+    ch_cycle = CHANNELS * len(t_years)
     col_header = f"{'Channel':>15s}  {'∂/∂k_n':>14s}  {'∂/∂α_tox':>14s}"
     print(col_header)
-    for i, ch in enumerate(CHANNELS * len(t_years)):
+    for i in range(J.shape[0]):
+        ch = ch_cycle[i]
         print(f"  {ch:>13s}  {J[i, 0]:>14.4e}  {J[i, 1]:>14.4e}")
 
     print(f"\nJacobian rank = {rank}  (need 2; PASS: {rank == 2})")
@@ -337,12 +459,19 @@ def main() -> None:
     # Profile likelihood
     # ------------------------------------------------------------------
     print("\nComputing 2D profile likelihood (40×40 grid)...")
+    # Noise variances set to CV≈10% of actual ODE output at quasi-steady state.
+    # Prior script used ad-hoc values that were orders of magnitude mismatched
+    # with the ODE outputs (e.g. aSyn_agg_pct outputs ~8.3%, not ~100%).
+    # Using signal-proportionate noise gives a chi² surface that is narrow and
+    # well-shaped around the nominal, with two-sided CI bounds within the grid.
+    # SAA_TTT is large at t=0 (1/eps≈1e12) due to F(0)=0; use quasi-SS value
+    # at t≥1yr where F has equilibrated (≈5.56) for the noise scale.
     obs_noise_var: dict[str, float] = {
-        "SBR":          0.04,    # ≈ DaT-SPECT measurement noise
-        "aSyn_agg_pct": 100.0,   # % units; SD ≈ 10%
-        "SAA_TTT":      0.01,    # normalized SAA threshold crossing time
-        "NEV_asyn":     0.25,    # EV α-syn in arbitrary units
-        "CSF_GFAP":     0.01,    # CSF GFAP in normalized units
+        "SBR":          0.0207,  # (0.10 * 1.44)^2 — DaT-SPECT CV≈10%
+        "aSyn_agg_pct": 0.691,   # (0.10 * 8.31)^2 — aggregation fraction CV≈10%
+        "SAA_TTT":      0.309,   # (0.10 * 5.55)^2 — SAA threshold-crossing CV≈10%
+        "NEV_asyn":     7.29e-4, # (0.10 * 0.27)^2 — NEV α-syn CV≈10%
+        "CSF_GFAP":     3.24e-4, # (0.10 * 0.18)^2 — CSF GFAP CV≈10%
     }
     pl = profile_likelihood_2d(t_years, obs_noise_var)
 
