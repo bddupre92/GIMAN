@@ -152,6 +152,10 @@ def classify_and_normalize(tables: list[pd.DataFrame]) -> dict[str, pd.DataFrame
                     ),
                 })
 
+        else:
+            print(f"  WARN: table with columns {list(t.columns)} did not match any "
+                  f"classifier signature (skipped, {len(t)} rows)")
+
     def _num(v):
         if not isinstance(v, str):
             return v
@@ -181,6 +185,13 @@ def main() -> None:
     md = REGISTRY.read_text(encoding="utf-8")
     tables = parse_markdown_tables(md)
     print(f"Parsed {len(tables)} markdown tables from {REGISTRY.name}")
+
+    if not tables:
+        raise RuntimeError(
+            f"No markdown tables parsed from {REGISTRY}. "
+            "Either the file is missing/empty or the parser regex broke — "
+            "refusing to truncate mechanistic.* tables with empty DataFrames."
+        )
 
     dfs = classify_and_normalize(tables)
 
