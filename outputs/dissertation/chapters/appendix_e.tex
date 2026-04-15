@@ -72,9 +72,17 @@ Linux, and Windows (via Docker Desktop) across both \texttt{linux/amd64} and
 
 \begin{itemize}
   \item Python 3.10 with the Poetry-locked dependency set (PyTorch 2.8,
-    PyTorch Geometric 2.6, MAPIE 1.3, CatBoost, scikit-learn, pandas, etc.),
-  \item Julia 1.11 with the \texttt{MechanisticTwin} project
-    (DifferentialEquations.jl, Turing.jl, Sundials.jl, StructuralIdentifiability.jl),
+    PyTorch Geometric 2.6, MAPIE 1.3, CatBoost, XGBoost, LightGBM, lifelines,
+    scikit-survival, h5py, ArviZ, PyMC, scikit-learn, pandas, etc.),
+  \item Julia 1.11.3 (aarch64) with the \texttt{MechanisticTwin} project
+    declared (DifferentialEquations.jl, Turing.jl, Sundials.jl,
+    StructuralIdentifiability.jl). Note: Julia \texttt{Pkg.instantiate()} has a
+    known precompile failure in aarch64 Docker Desktop (see
+    \texttt{outputs/defense\_prep/julia\_docker\_limitation.md}). Reviewers who
+    need to refit Phase 1--4 calibrations from scratch should install Julia
+    natively via \texttt{juliaup}; Python-only reproduction (Papers 1--6,
+    plus Paper 10 results from committed HDF5 posteriors) works inside Docker
+    without issue.
   \item Jupyter Lab, \texttt{psycopg2-binary}, and \texttt{postgresql-client}
     preinstalled for immediate analysis and DB access.
 \end{itemize}

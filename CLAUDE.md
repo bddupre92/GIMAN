@@ -1223,19 +1223,23 @@ All CSV/Parquet data loaded into local PostgreSQL for reproducibility. **290 MB,
 
 **Master mapping:** [`Docs/research_directions/2026-04-13_dissertation_completion_mapping.md`](Docs/research_directions/2026-04-13_dissertation_completion_mapping.md) — maps 30 Phase C catalog items to 1 new chapter (Ch 16 Paper 11 Cross-Cohort) + 1 new appendix (App E Reproducibility) + 23 sub-section additions + 2 deferred to postdoc.
 
-**Execution plan:** [`Docs/superpowers/plans/2026-04-13-dissertation-completion-execution.md`](Docs/superpowers/plans/2026-04-13-dissertation-completion-execution.md) — 17-week task-level timeline.
+**Execution plan:** [`Docs/superpowers/plans/2026-04-14-dissertation-completion-execution-v2.md`](Docs/superpowers/plans/2026-04-14-dissertation-completion-execution-v2.md) — 17-week v2 (supersedes v1 dated 2026-04-13 after Paper 11 was dropped as duplicative of Paper 1).
 
-**Final dissertation structure:** 16 chapters + 2 appendices (App D math reference existing, App E reproducibility new). Paper 11 Cross-Cohort is Ch 16; everything else is sub-section additions to existing chapters.
+**Final dissertation structure:** 15 chapters + 2 appendices (App D math reference existing, App E reproducibility new). No Paper 11; instead four sub-section additions strengthening existing papers: §9.6, §11.7, §12.6, §13.8.
 
-**Critical path (minimum-defensible defense):**
+**Critical path (v2, minimum-defensible defense):**
 
 | Week | Deliverable | Status |
 |---|---|---|
-| 1 | Appendix E §E.1-§E.2 Docker + data dictionary | Next |
-| 2-9 | Ch 16 Paper 11 Cross-Cohort (BioFIND → PDBP → HBS + pooled meta-analysis) | — |
-| 10-13 | Ch 11 §11.7 6-region ROI split (close whole-putamen limitation) | — |
-| 14-15 | Ch 13 §13.8 Mechanistic conformal bands on counterfactuals (NASEM UQ → regulatorily MIDD-ready) | — |
-| 16 | Ch 14/15 narrative refresh (limitations/future work update) | — |
+| 1 | Appendix E §E.1–§E.2 Docker + data dictionary | **DONE** (commits `4b643c6`, `d44c705`, `cc2e981`) |
+| 1 | Defense-prep audit completion | **DONE** 2026-04-14 (1,017/1,127 claims verified; 12 chapter errors fixed; commits `1c1cac7`, `b9e7f58`) |
+| 2–7 | Ch 9 §9.6 multi-channel observation (Olink CSF + NfL + Amprion SAA) | — |
+| 8–11 | Ch 11 §11.7 6-region ROI split (close whole-putamen limitation) | — |
+| 12–13 | Ch 13 §13.8 Mechanistic conformal bands on counterfactuals | — |
+| 14–15 | Ch 12 §12.6 Genotype-stratified Path B | — |
+| 16 | Ch 14/15 narrative refresh | — |
 | 17 | Final PDF compile + presubmit + defense slides | — |
 
 **Deferred to postdoc:** C3-2 Hybrid SciML UDE (→ Paper 12); F12 MindMend Phase 6; F13 DeNoPa external validation; F14 prospective interventional trial.
+
+**Julia refit capability:** Docker-baked Julia 1.11 has a known Pkg precompile failure on aarch64 Docker Desktop (see `outputs/defense_prep/julia_docker_limitation.md`). Reviewers refitting Phase 1–4 calibrations from scratch must install Julia natively via juliaup. HDF5 posterior store (127 MB) + per-patient Parquet chains are the authoritative mechanistic artifacts and reproduce all Paper 10 numerical claims inside Docker (Python-only path).
