@@ -1,0 +1,473 @@
+% ================================================================
+% Chapter 3: Paper 1 — NSD-ISS Stage Prediction with Calibrated Uncertainty
+% Stripped from outputs/paper1_latex/main.tex
+% ================================================================
+
+\chapter{NSD-ISS Stage Prediction with Calibrated Uncertainty}
+\label{ch:paper1}\label{p1:ch:paper1}
+
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease through biological anchors, yet no computational models exist to predict NSD-ISS stages from clinical data. Using the Parkinson's Progression Markers Initiative (PPMI, $n{=}2{,}201$), we benchmarked eight models---seven tabular (CatBoost, XGBoost, LightGBM, Random Forest, SVM, ElasticNet, Logistic Regression) and one graph-based (Enhanced Multimodal GAT with PyG GATConv and cross-modal attention)---across four target formulations. Cross-conformal prediction (CV+ with LAC scoring) provided distribution-free coverage guarantees. CatBoost achieved 0.951 balanced accuracy (AUC 0.979) for binary NSD-ISS classification, outperforming the Enhanced GAT (0.825) by 12.6 percentage points, confirming that gradient-boosted trees dominate graph neural networks on tabular clinical data. Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton prediction sets (mean size 0.96--1.27). Removing DaT-SPECT features reduced AUC by 25.2\%, while clinical features alone achieved AUC 0.900 for NSD-positive sub-staging. External validation on BioFIND ($n{=}118$) revealed critical domain shift (binary balanced accuracy 0.516) due to healthy control contamination. These findings establish the first computational benchmark for NSD-ISS biological staging with calibrated uncertainty quantification.
+
+% ================================================================
+% I. INTRODUCTION
+% ================================================================
+\section{Introduction}
+\label{p1:sec:introduction}
+
+Parkinson's disease (PD) has traditionally been staged using clinical severity scales, but these represent downstream manifestations of biological processes beginning years before symptom onset. In January 2024, Simuni~\textit{et al.}~\cite{simuni2024} proposed the Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS), redefining PD through two biological anchors: neuronal alpha-synuclein (S, assessed by seed amplification assay) and dopaminergic dysfunction (D, assessed by DaT-SPECT imaging). This system assigns patients to stages 0--6, creating a biologically-grounded framework spanning from preclinical through severe disability.
+
+The NSD-ISS has been rapidly adopted. Validation studies confirmed that biological stage predicts time-to-clinical-milestones~\cite{simuni2024val}. Russo~\textit{et al.}~\cite{russo2025} extended staging to the BioFIND cohort. Simuni~\textit{et al.}~\cite{simuni2025} reported the first longitudinal analysis of stage transitions over 5 years, finding median transition times of 1.2 years (2B to 3) and 5.0 years (3 to 4). However, these analyses remain purely descriptive---no predictive models exist.
+
+\subsection{The Computational Gap}
+Despite rapid clinical adoption, no machine learning model currently predicts NSD-ISS biological stages. This gap has three dimensions: (1)~prediction of current stage from available data; (2)~uncertainty quantification when biological markers are unavailable; (3)~temporal dynamics of stage transitions.
+
+\subsection{Objectives}
+This study has five objectives:
+\begin{enumerate}
+    \item Benchmark seven tabular and one graph-based model for NSD-ISS stage prediction across four target formulations using PPMI data ($n{=}2{,}201$)
+    \item Compare tabular (gradient-boosted trees) versus graph-based (GAT with patient similarity graphs) approaches
+    \item Quantify the contribution of biological markers versus clinical-only features
+    \item Evaluate model transportability through external validation on BioFIND ($n{=}118$) and prediction-only application to PDBP ($n{=}893$) and HBS ($n{=}649$)
+    \item Calibrate model uncertainty through conformal prediction with distribution-free coverage guarantees
+\end{enumerate}
+
+% ================================================================
+% II. RELATED WORK
+% ================================================================
+\section{Related Work}
+\label{p1:sec:related}
+
+Machine learning for Parkinson's disease has focused primarily on clinical outcome prediction and diagnostic classification rather than biological staging. AdaMedGraph~\cite{adamedgraph} combined APPNP graph propagation with AdaBoost for PD progression prediction using PPMI data, demonstrating the potential of graph-based approaches for clinical neurology. Recent work by Diaz-Rincon~\textit{et al.}~\cite{diazrincon2025} applied conformal prediction to PD medication needs assessment, establishing distribution-free coverage guarantees in a clinical PD context. However, neither of these approaches---nor any published model to date---targets the NSD-ISS biological staging framework introduced by Simuni~\textit{et al.}~\cite{simuni2024}.
+
+The choice of model architecture for clinical prediction tasks remains an active area of investigation. Grinsztajn~\textit{et al.}~\cite{grinsztajn2022} conducted a systematic NeurIPS benchmark demonstrating that gradient-boosted tree ensembles consistently outperform deep learning on medium-sized tabular datasets, a finding corroborated by Shwartz-Ziv and Armon~\cite{shwartzziv2022} across diverse tabular tasks. These results motivate our comprehensive comparison of tabular and graph-based models for NSD-ISS prediction.
+
+Conformal prediction~\cite{vovk2022} has emerged as a principled framework for uncertainty quantification in clinical ML, providing finite-sample marginal coverage guarantees without distributional assumptions. Huang~\textit{et al.}~\cite{huang2023} extended conformal methods to graph neural networks, demonstrating that graph structure can be exploited for tighter prediction sets. Our work applies cross-conformal (CV+) prediction to NSD-ISS staging, combining the distribution-free guarantees of conformal inference with the clinical interpretability of set-valued predictions.
+
+% ================================================================
+% III. METHODS
+% ================================================================
+\section{Methods}
+\label{p1:sec:methods}
+
+\subsection{Study Design}
+This is a retrospective prediction model development and external evaluation study using data from four observational PD cohorts, reported following the TRIPOD+AI guidelines~\cite{collins2024}.
+
+% --- CONSORT-style TikZ flow diagram ---
+\begin{figure*}[!t]
+\centering
+\begin{tikzpicture}[
+    node distance=0.6cm and 1.2cm,
+    box/.style={rectangle, draw=nsdblue, fill=lightblue, text width=3.8cm, minimum height=1cm, align=center, font=\footnotesize\sf, rounded corners=2pt, line width=0.8pt},
+    smallbox/.style={rectangle, draw=nsdgray, fill=white, text width=2.8cm, minimum height=0.7cm, align=center, font=\scriptsize\sf, rounded corners=2pt},
+    arrow/.style={-{Stealth[length=3mm]}, thick, nsdblue},
+    label/.style={font=\scriptsize\sf\itshape, text=nsdgray}
+]
+% Row 1: Data sources
+\node[box] (ppmi) {PPMI\\$n = 8{,}042$ enrolled\\33 sites, 11 countries};
+\node[box, right=of ppmi] (biofind) {BioFIND\\$n = 213$ enrolled\\16 US sites};
+\node[box, right=of biofind] (pdbp) {PDBP\\$n = 1{,}604$\\AMP-PD v4};
+\node[box, right=of pdbp] (hbs) {HBS\\$n = 1{,}189$\\MGH single-center};
+
+% Row 2: Filtering
+\node[box, below=of ppmi, fill=lightorange, draw=nsdorange] (ppmi_f) {PPMI Staged\\$n = 2{,}201$\\SAA/DaT-SPECT available};
+\node[box, below=of biofind, fill=lightorange, draw=nsdorange] (bio_f) {BioFIND PD\\$n = 118$\\NSD-ISS ground truth};
+\node[box, below=of pdbp, fill=lightorange, draw=nsdorange] (pdbp_f) {PDBP PD\\$n = 893$\\Clinical features only};
+\node[box, below=of hbs, fill=lightorange, draw=nsdorange] (hbs_f) {HBS PD\\$n = 649$\\5 features missing};
+
+% Row 3: Role
+\node[box, below=of ppmi_f, fill=lightgreen, draw=nsdgreen] (train) {Training + Internal CV\\46 features, 4 targets\\5-fold stratified};
+\node[box, below=of bio_f, fill=lightgreen, draw=nsdgreen] (ext) {External Validation\\12 common features\\Ground truth available};
+\node[box, below=of pdbp_f, fill=lightgreen, draw=nsdgreen] (pred1) {Prediction Only\\12 common features\\No ground truth};
+\node[box, below=of hbs_f, fill=lightgreen, draw=nsdgreen] (pred2) {Prediction Only\\7 features available\\Unreliable (5 missing)};
+
+% Arrows
+\draw[arrow] (ppmi) -- (ppmi_f);
+\draw[arrow] (biofind) -- (bio_f);
+\draw[arrow] (pdbp) -- (pdbp_f);
+\draw[arrow] (hbs) -- (hbs_f);
+\draw[arrow] (ppmi_f) -- (train);
+\draw[arrow] (bio_f) -- (ext);
+\draw[arrow] (pdbp_f) -- (pred1);
+\draw[arrow] (hbs_f) -- (pred2);
+\end{tikzpicture}
+\caption{Study participant flow. PPMI served as the primary training cohort with NSD-ISS ground truth computed from SAA and DaT-SPECT biomarkers. BioFIND provided external validation with NSD-ISS staging replicated from Russo~\textit{et al.}~\cite{russo2025}. PDBP and HBS were prediction-only cohorts without biological staging data.}
+\label{p1:fig:consort}
+\end{figure*}
+
+\subsection{Data Sources}
+\textbf{PPMI} ($n{=}2{,}201$): A prospective longitudinal study enrolling de novo PD patients, prodromal PD, and healthy controls across 33 sites. AMP-PD v4 data release.
+
+\textbf{BioFIND} ($n{=}118$ PD): Cross-sectional biomarker study, moderate-to-advanced PD (diagnosed ${>}5$ years), 16 US sites. SAA data from three independent laboratories via LONI IDA.
+
+\textbf{PDBP} ($n{=}893$ PD): NIH-funded longitudinal biomarker cohort. AMP-PD v4 clinical data.
+
+\textbf{HBS} ($n{=}649$ PD): Single-center longitudinal study at Massachusetts General Hospital. AMP-PD v4 clinical data.
+
+\subsection{NSD-ISS Biological Staging}
+NSD-ISS stages were computed from three anchors:
+
+\textbf{S anchor} (synuclein): Seed amplification assay (SAA) positivity. Coverage: 12.6\% of PPMI ($277/2{,}201$).
+
+\textbf{D anchor} (dopaminergic): DaT-SPECT specific binding ratio (SBR) below age/sex-adjusted thresholds. Coverage: 97.1\% ($2{,}137/2{,}201$).
+
+\textbf{Clinical staging}: Among S+ and/or D+ patients, functional impairment assessed via MDS-UPDRS Part~II (ADL) and MoCA (cognitive). Stage assignments followed Simuni~\textit{et al.}~\cite{simuni2024}.
+
+\subsection{Feature Engineering}
+Forty-six multimodal features were assembled across ten domains (Table~\ref{p1:tab:features}). Beyond the original clinical, motor, cognitive, sleep, autonomic, DaT imaging, olfactory, and genetic domains, the expanded feature set includes brain structural volumes from FreeSurfer ASEG (hippocampus, amygdala, putamen volume, caudate volume, brain stem, white matter hypointensities, total gray volume), expanded SCOPA-AUT subscales (gastrointestinal, urinary, cardiovascular, thermoregulatory, pupillomotor), RBD subscales (motor, vocal, dream, disruption), derived interaction features (motor-imaging, age-motor, caudate-putamen volume ratio, motor total proxy), and medication status (PD medication use, on levodopa). Notably, putamen structural volume (from MRI) is distinct from the putamen SBR (from DaT-SPECT) used in NSD-ISS staging, ensuring non-circularity. We also exclude the MDS-UPDRS Part~III total score (NP3TOT) from the feature set because it is used directly in the Simuni~2024 clinical sub-staging thresholds; however, we include the four UPDRS-III subscales (tremor, rigidity, bradykinesia, posture/gait) and a derived \texttt{MOTOR\_TOTAL\_PROXY} feature equal to their sum. Because this sum is a linear combination of the excluded total plus measurement noise, the exclusion of NP3TOT is in practice a cosmetic rather than a strict information-theoretic decoupling; the substantive protection against circularity is provided instead by excluding the staging-threshold decision boundary (\textit{i.e.}, we never hand the model the binary ``above vs.\ below the Simuni cutoff'' variable), not by dropping the underlying motor examination information.
+
+% --- Feature table (full page width) ---
+\begin{table*}[!t]
+\caption{Feature Set: 46 Multimodal Features Across Ten Clinical Domains}
+\label{p1:tab:features}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllcccc@{}}
+\toprule
+\textbf{Domain} & \textbf{Feature} & \textbf{Description} & \textbf{PPMI} & \textbf{BioFIND} & \textbf{PDBP} & \textbf{HBS} \\
+\midrule
+\multirow{3}{*}{Demographics} & AGE\_AT\_BASELINE & Age at enrollment (years) & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & SEX & Biological sex (0=F, 1=M) & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & HANDED & Handedness (R/L/A) & \checkmark & -- & -- & -- \\
+\midrule
+\multirow{4}{*}{Motor (UPDRS)} & UPDRS1--4\_TOTAL & MDS-UPDRS Parts I--IV totals & \checkmark & \checkmark & \checkmark & Part. \\
+ & UPDRS3\_RIGIDITY & Rigidity subscore & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & UPDRS3\_BRADYKINESIA & Bradykinesia subscore & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & UPDRS3\_TREMOR & Tremor subscore & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & UPDRS3\_POSTURE\_GAIT & Posture/gait subscore & \checkmark & \checkmark & \checkmark & \checkmark \\
+\midrule
+Cognitive & MOCA\_TOTAL & Montreal Cognitive Assessment & \checkmark & \checkmark & \checkmark & -- \\
+\midrule
+\multirow{6}{*}{Sleep} & ESS\_TOTAL & Epworth Sleepiness Scale & \checkmark & -- & \checkmark & -- \\
+ & RBD\_TOTAL & REM Sleep Behavior Disorder total & \checkmark & \checkmark & \checkmark & -- \\
+ & RBD\_MOTOR & RBD motor subscore & \checkmark & -- & -- & -- \\
+ & RBD\_VOCAL & RBD vocal subscore & \checkmark & -- & -- & -- \\
+ & RBD\_DREAM & RBD dream subscore & \checkmark & -- & -- & -- \\
+ & RBD\_DISRUPTION & RBD disruption subscore & \checkmark & -- & -- & -- \\
+\midrule
+\multirow{6}{*}{Autonomic} & SCOPA\_AUT\_TOTAL & SCOPA-AUT total score & \checkmark & -- & -- & -- \\
+ & SCOPA\_GI & Gastrointestinal subscore & \checkmark & -- & -- & -- \\
+ & SCOPA\_URINARY & Urinary subscore & \checkmark & -- & -- & -- \\
+ & SCOPA\_CV & Cardiovascular subscore & \checkmark & -- & -- & -- \\
+ & SCOPA\_THERMO & Thermoregulatory subscore & \checkmark & -- & -- & -- \\
+ & SCOPA\_PUPIL & Pupillomotor subscore & \checkmark & -- & -- & -- \\
+\midrule
+\multirow{6}{*}{DaT Imaging} & CAUDATE\_LEFT\_SBR & Left caudate SBR & \checkmark & -- & -- & -- \\
+ & CAUDATE\_RIGHT\_SBR & Right caudate SBR & \checkmark & -- & -- & -- \\
+ & CAUDATE\_MEAN\_SBR & Mean caudate SBR & \checkmark & -- & -- & -- \\
+ & PUTAMEN\_LEFT\_SBR & Left putamen SBR & \checkmark & -- & -- & -- \\
+ & PUTAMEN\_RIGHT\_SBR & Right putamen SBR & \checkmark & -- & -- & -- \\
+ & PUTAMEN\_MEAN\_SBR & Mean putamen SBR & \checkmark & -- & -- & -- \\
+\midrule
+\multirow{9}{*}{\shortstack[l]{Brain Structural\\(FreeSurfer)}} & HIPPOCAMPUS\_VOL & Hippocampus volume & \checkmark & -- & -- & -- \\
+ & AMYGDALA\_VOL & Amygdala volume & \checkmark & -- & -- & -- \\
+ & PUTAMEN\_VOL & Putamen structural volume (MRI) & \checkmark & -- & -- & -- \\
+ & CAUDATE\_VOL & Caudate structural volume (MRI) & \checkmark & -- & -- & -- \\
+ & BRAIN\_STEM\_VOL & Brain stem volume & \checkmark & -- & -- & -- \\
+ & WM\_HYPOINTENSITIES & White matter hypointensities & \checkmark & -- & -- & -- \\
+ & TOTAL\_GRAY\_VOL & Total gray matter volume & \checkmark & -- & -- & -- \\
+ & CAUDATE\_PUT\_VOL\_RATIO & Caudate/putamen volume ratio & \checkmark & -- & -- & -- \\
+ & INTRACRANIAL\_VOL & Intracranial volume (normalization) & \checkmark & -- & -- & -- \\
+\midrule
+Olfactory & UPSIT\_TOTAL & UPSIT smell identification & \checkmark & -- & \checkmark & -- \\
+\midrule
+\multirow{2}{*}{Medication} & PD\_MED\_USE & PD medication use (binary) & \checkmark & \checkmark & \checkmark & -- \\
+ & ON\_LEVODOPA & Currently on levodopa (binary) & \checkmark & \checkmark & \checkmark & -- \\
+\midrule
+\multirow{3}{*}{\shortstack[l]{Derived\\Interactions}} & MOTOR\_IMAGING\_INT & Motor $\times$ imaging interaction & \checkmark & -- & -- & -- \\
+ & AGE\_MOTOR\_INT & Age $\times$ motor interaction & \checkmark & \checkmark & \checkmark & \checkmark \\
+ & MOTOR\_TOTAL\_PROXY & Motor total proxy (sum of subscales) & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Target Formulations}
+Four clinically-relevant target formulations were defined:
+\begin{itemize}
+    \item \textbf{Binary}: NSD-positive (Stages 1+) vs.\ NSD-negative (Stage 0)
+    \item \textbf{Three-class}: Early (0--1), Mild clinical (2B), Impaired (3--4)
+    \item \textbf{Full ordinal}: 5-class (0, 1, 2B, 3, 4)
+    \item \textbf{NSD-positive}: 4-class among confirmed NSD+ only (1, 2B, 3, 4)
+\end{itemize}
+
+\subsection{Models}
+
+\subsubsection{Tabular models}
+CatBoost (1000 iterations, depth=6), XGBoost (100 estimators), LightGBM (100 estimators), Random Forest (100 estimators), SVM-RBF, ElasticNet, and Logistic Regression. Fixed hyperparameters to prevent overfitting.
+
+\subsubsection{Enhanced Multimodal GAT}
+Our graph-based model adapts the GIMAN architecture~\cite{adamedgraph} for NSD-ISS classification:
+
+% --- Architecture TikZ diagram ---
+\begin{figure}[!t]
+\centering
+\begin{tikzpicture}[
+    node distance=0.35cm,
+    block/.style={rectangle, draw=nsdblue, fill=lightblue, text width=2.6cm, minimum height=0.55cm, align=center, font=\scriptsize\sf, rounded corners=2pt, line width=0.6pt},
+    input/.style={rectangle, draw=nsdorange, fill=lightorange, text width=2.3cm, minimum height=0.5cm, align=center, font=\scriptsize\sf, rounded corners=2pt},
+    output/.style={rectangle, draw=nsdgreen, fill=lightgreen, text width=2.6cm, minimum height=0.5cm, align=center, font=\scriptsize\sf, rounded corners=2pt},
+    arrow/.style={-{Stealth[length=2mm]}, thick, nsdblue!70},
+    label/.style={font=\tiny\sf\itshape, text=nsdgray}
+]
+% Inputs
+\node[input] (clin) {Clinical Features\\(32 features)};
+\node[input, right=0.8cm of clin] (bio) {Biomarker Features\\(14 features)};
+
+% Encoders
+\node[block, below=of clin] (enc1) {Modality Encoder\\FC $\to$ LayerNorm $\to$ ReLU};
+\node[block, below=of bio] (enc2) {Modality Encoder\\FC $\to$ LayerNorm $\to$ ReLU};
+
+% GAT
+\node[block, below=of enc1] (gat1) {3-Layer PyG GATConv\\4 heads, residual};
+\node[block, below=of enc2] (gat2) {3-Layer PyG GATConv\\4 heads, residual};
+
+% Cross-modal
+\node[block, below=0.5cm of $(gat1)!0.5!(gat2)$, text width=4cm] (cross) {Cross-Modal Attention\\MultiheadAttention + Residual};
+
+% Fusion
+\node[block, below=of cross, text width=3.5cm] (fusion) {Fusion Layer\\Concat $\to$ FC $\to$ LayerNorm};
+
+% Output
+\node[output, below=of fusion, text width=3.5cm] (cls) {NSD-ISS Stage Classifier\\FC $\to$ ReLU $\to$ FC $\to K$ classes};
+
+% Graph
+\node[input, left=0.3cm of gat1, text width=1.6cm, font=\tiny\sf] (graph) {$k$-NN Graph\\($k{=}10$, cosine)};
+
+% Arrows
+\draw[arrow] (clin) -- (enc1);
+\draw[arrow] (bio) -- (enc2);
+\draw[arrow] (enc1) -- (gat1);
+\draw[arrow] (enc2) -- (gat2);
+\draw[arrow] (gat1) -- (cross);
+\draw[arrow] (gat2) -- (cross);
+\draw[arrow] (cross) -- (fusion);
+\draw[arrow] (fusion) -- (cls);
+\draw[arrow, nsdorange!70] (graph) -- (gat1);
+\draw[arrow, nsdorange!70] (graph.south) |- (gat2);
+\end{tikzpicture}
+\caption{Enhanced Multimodal GAT architecture. Features are split into clinical and biomarker modalities, each projected to 128-dim embeddings, processed through 3-layer PyG GATConv on a $k$-NN patient similarity graph, and fused via cross-modal attention for NSD-ISS classification.}
+\label{p1:fig:architecture}
+\end{figure}
+
+Features were split into two clinically meaningful modalities: \textit{clinical} (demographics, motor, cognitive, sleep, autonomic, brain structural volumes, medication, derived interactions; 32 features) and \textit{biomarker} (DaT-SPECT SBR, olfaction, genetics; 14 features). Each modality was projected to 128-dimensional embeddings, then processed through three PyG GATConv layers (4 heads, residual connections) on a $k$-nearest-neighbor patient similarity graph ($k{=}10$, cosine similarity). Cross-modal attention fusion (nn.MultiheadAttention) integrated information across modalities before classification.
+
+\subsubsection{Conformal prediction}
+Cross-conformal (CV+) with Least Ambiguous set-valued Classifiers (LAC) scoring via MAPIE~1.3.0~\cite{vovk2022}. Prediction sets with guaranteed marginal coverage at 80\%, 90\%, and 95\% confidence levels.
+
+\subsection{Evaluation}
+\textbf{Internal}: 5-fold stratified cross-validation with stratification on the target variable. For the full ordinal target, all folds contained at least one Stage~4 patient ($n{=}17$ total, minimum 3 per fold).
+\textbf{External}: Models retrained on PPMI common-feature subset (12 features shared across cohorts), applied to BioFIND (with NSD-ISS ground truth), PDBP, and HBS (prediction only).
+\textbf{Metrics}: Balanced accuracy, AUC-ROC (binary) or macro one-vs-rest AUC (multiclass), Quadratic Weighted Kappa (QWK), with bootstrap 95\% CIs from 1,000 resamples.
+\textbf{Missing values}: CatBoost handles missing values natively via ordered boosting; for other models, missing values were imputed with training-fold medians computed separately within each CV fold to prevent data leakage.
+
+\subsection{Software and Reproducibility}
+All experiments were conducted in Python~3.12 using the following libraries: PyTorch~2.8.0, PyTorch Geometric~2.6.1 (GATConv layers), CatBoost~1.2.10, XGBoost~3.2.0, LightGBM~4.6.0, scikit-learn~1.5, and MAPIE~1.3.0 (conformal prediction). Random seed was fixed at 42 for all experiments to ensure reproducibility of data splits, model initialization, and bootstrap sampling. All computations were performed on Apple M-series hardware using the MPS (Metal Performance Shaders) backend for PyTorch acceleration.
+
+% ================================================================
+% IV. RESULTS
+% ================================================================
+\section{Results}
+\label{p1:sec:results}
+
+\subsection{NSD-ISS Stage Distribution}
+Of 2,201 PPMI participants: Stage~0 (NSD-negative) 1,418 (64.4\%), Stage~1 67 (3.0\%), Stage~2B 208 (9.5\%), Stage~3 487 (22.1\%), Stage~4 17 (0.8\%), unclassified 4 (0.2\%). Stage~0 dominance reflects inclusion of healthy controls and prodromal participants.
+
+\subsection{Internal Benchmark: Tabular Models}
+
+% --- Main results table ---
+\begin{table*}[!t]
+\caption{Internal Benchmark Results: Full 46-Feature Models (5-Fold CV, Bootstrap 95\% CIs)}
+\label{p1:tab:benchmark}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{Target} & \textbf{Model} & \textbf{Bal. Acc. [95\% CI]} & \textbf{AUC [95\% CI]} & \textbf{QWK [95\% CI]} \\
+\midrule
+\multirow{4}{*}{\textbf{Binary}}
+ & CatBoost & \textbf{0.951} [0.941, 0.960] & \textbf{0.979} [0.970, 0.986] & \textbf{0.906} [0.887, 0.923] \\
+ & LightGBM & 0.950 [0.940, 0.960] & 0.979 [0.972, 0.986] & 0.908 [0.891, 0.926] \\
+ & XGBoost & 0.951 [0.941, 0.961] & 0.979 [0.972, 0.985] & 0.913 [0.895, 0.930] \\
+ & Random Forest & 0.914 [0.901, 0.927] & 0.971 [0.964, 0.978] & 0.821 [0.795, 0.847] \\
+\midrule
+\multirow{3}{*}{\textbf{Three-class}}
+ & CatBoost & \textbf{0.783} [0.753, 0.803] & \textbf{0.944} & 0.836 [0.812, 0.857] \\
+ & XGBoost & 0.762 [0.738, 0.786] & 0.950 & \textbf{0.874} [0.854, 0.894] \\
+ & Logistic Reg. & 0.760 [0.736, 0.786] & 0.928 & 0.774 [0.748, 0.798] \\
+\midrule
+\multirow{3}{*}{\textbf{Full ordinal}}
+ & CatBoost & \textbf{0.658} [0.623, 0.697] & \textbf{0.954} & 0.850 [0.827, 0.869] \\
+ & XGBoost & 0.644 [0.601, 0.698] & 0.955 & \textbf{0.899} [0.880, 0.915] \\
+ & Random Forest & 0.621 [0.593, 0.655] & 0.941 & 0.746 [0.712, 0.776] \\
+\midrule
+\multirow{3}{*}{\textbf{NSD+}}
+ & CatBoost & \textbf{0.671} [0.624, 0.728] & \textbf{0.913} & \textbf{0.734} [0.686, 0.782] \\
+ & XGBoost & 0.669 [0.610, 0.736] & 0.911 & 0.712 [0.660, 0.756] \\
+ & Random Forest & 0.634 [0.602, 0.672] & 0.903 & 0.726 [0.679, 0.771] \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+
+\raggedright\scriptsize\textit{Note:} Bootstrap 95\% CIs computed from 1,000 resamples. AUC CIs available for binary target (ROC-AUC); multiclass AUC (macro one-vs-rest) CIs not included in bootstrap analysis.
+\end{table*}
+
+CatBoost achieved the highest balanced accuracy across all targets: 0.951 (binary), 0.783 (three-class), 0.660 (full ordinal), and 0.664 (NSD-positive subgroup). Performance decreased with finer staging granularity and increasing class imbalance (Stage~4: $n{=}17$).
+
+\subsection{Graph-Based Models}
+
+% --- GAT comparison table ---
+\begin{table}[!t]
+\caption{Graph-Based Model Comparison (46 Multimodal Features, 5-Fold CV)}
+\label{p1:tab:gat}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{Target} & \textbf{Model} & \textbf{Bal. Acc.} & \textbf{AUC} & \textbf{Gap} \\
+\midrule
+\multirow{3}{*}{\textbf{Binary}}
+ & CatBoost (tabular) & \textbf{0.951} & 0.979 & --- \\
+ & Enhanced MM-GAT & 0.825 $\pm$ 0.013 & 0.894 & $-$0.126 \\
+ & Simple GAT & 0.832 $\pm$ 0.019 & 0.927 & $-$0.119 \\
+\midrule
+\multirow{3}{*}{\textbf{Three-class}}
+ & CatBoost (tabular) & \textbf{0.783} & 0.944 & --- \\
+ & Enhanced MM-GAT & 0.705 $\pm$ 0.033 & 0.873 & $-$0.073 \\
+ & Simple GAT & 0.666 $\pm$ 0.031 & 0.873 & $-$0.112 \\
+\midrule
+\multirow{3}{*}{\textbf{Full ordinal}}
+ & CatBoost (tabular) & \textbf{0.658} & 0.954 & --- \\
+ & Enhanced MM-GAT & 0.549 $\pm$ 0.044 & 0.858 & $-$0.109 \\
+ & Simple GAT & 0.521 $\pm$ 0.090 & 0.844 & $-$0.137 \\
+\midrule
+\multirow{3}{*}{\textbf{NSD+}}
+ & CatBoost (tabular) & \textbf{0.671} & 0.913 & --- \\
+ & Enhanced MM-GAT & 0.544 $\pm$ 0.060 & 0.769 & $-$0.127 \\
+ & Simple GAT & 0.493 $\pm$ 0.029 & 0.736 & $-$0.178 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+
+\raggedright\scriptsize\textit{Note:} GAT results report mean $\pm$ SD across 5 CV folds. CatBoost results are from Table~\ref{p1:tab:benchmark}.
+\end{table}
+
+The Enhanced Multimodal GAT with PyG GATConv and cross-modal attention consistently underperformed CatBoost by 7.3--12.7 percentage points in balanced accuracy (Table~\ref{p1:tab:gat}). The enhanced architecture improved over the simple GAT for multiclass targets (three-class: 0.705 vs.\ 0.666), but the gap to tabular models remained substantial. This is consistent with recent evidence that tree-based ensembles dominate deep learning on medium-sized tabular datasets~\cite{grinsztajn2022}.
+
+\subsection{Conformal Prediction}
+
+% --- Conformal results table ---
+\begin{table}[!t]
+\caption{Cross-Conformal Prediction Results (CatBoost, 90\% Confidence)}
+\label{p1:tab:conformal}
+\centering
+\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Target} & \textbf{Coverage} & \textbf{Mean Set Size} & \textbf{Efficiency} \\
+\midrule
+Binary & 95.5\% & 0.96 & Near-singleton \\
+Three-class & 98.9\% & 1.03 & Near-singleton \\
+Full ordinal & 98.1\% & 1.10 & Near-singleton \\
+NSD+ subgroup & 99.5\% & 1.27 & 1.27 labels/patient \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cross-conformal CV+ with LAC scoring achieved ${>}90\%$ marginal coverage across all targets with near-singleton prediction sets (Table~\ref{p1:tab:conformal}). For binary classification, mean set size of 0.96 indicates most patients receive a definitive single-label prediction with guaranteed 95.5\% coverage. The NSD-positive subgroup showed larger sets (1.27), reflecting genuine uncertainty in fine-grained staging within the smaller population ($n{=}779$).
+
+% --- Conformal coverage figure ---
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{fig8_conformal_coverage.png}}
+\caption{Conformal prediction coverage and mean set size across four NSD-ISS target formulations at three confidence levels (80\%, 90\%, 95\%). All targets exceed nominal coverage guarantees. Set sizes remain near 1.0, indicating efficient prediction sets.}
+\label{p1:fig:conformal}
+\end{figure}
+
+\subsection{Feature Ablation}
+
+% --- Feature ablation TikZ bar chart ---
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{fig3_feature_ablation.png}}
+\caption{Feature ablation: Full 46-feature model versus clinical-only 12-feature model. DaT-SPECT features are essential for binary classification (AUC drop 25.4\%) but negligible for NSD-positive sub-staging (AUC drop 1.4\%).}
+\label{p1:fig:ablation}
+\end{figure}
+
+% --- Ablation table ---
+\begin{table}[!t]
+\caption{Feature Ablation: Full vs.\ Clinical-Only Model (CatBoost AUC)}
+\label{p1:tab:ablation}
+\centering
+\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Target} & \textbf{Full (46)} & \textbf{Clinical (12)} & \textbf{$\Delta$} \\
+\midrule
+Binary & 0.979 & 0.727 & $\mathbf{-25.2\%}$ \\
+Three-class & 0.944 & 0.797 & $-15.6\%$ \\
+Full ordinal & 0.954 & 0.823 & $-13.1\%$ \\
+NSD+ subgroup & 0.913 & 0.900 & $\mathbf{-1.4\%}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+DaT-SPECT features are essential for binary NSD-ISS prediction (Table~\ref{p1:tab:ablation}). However, within the NSD-positive subgroup, the delta is small ($-1.4\%$ AUC), indicating that once biological positivity is established, clinical assessments are nearly sufficient for sub-staging.
+
+\subsection{External Validation: BioFIND}
+
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{fig5_domain_shift.png}}
+\caption{Domain shift visualization: UPDRS-III bradykinesia score distributions. PPMI NSD-negative patients include healthy controls (low scores), while BioFIND S-negative patients are diagnosed PD (high scores), causing binary classification failure at external validation.}
+\label{p1:fig:domainshift}
+\end{figure}
+
+We report three external validation results in order of clinical informativeness for the biological-staging task. The binary NSD+ / NSD- target is presented first as a \emph{data-quality diagnostic} rather than a clinical performance claim, because the PPMI training label is confounded by healthy control inclusion (see below); the NSD-positive sub-staging result on confirmed NSD+ patients is the primary external clinical result.
+
+\textbf{NSD-positive 4-class} ($n{=}103$, primary external clinical result): Logistic Regression outperformed tree models (0.425 balanced accuracy, QWK 0.385, macro AUC 0.900), suggesting an approximately linear clinical-feature-to-stage mapping among confirmed NSD+ patients. Because the sub-staging task operates entirely within the NSD+ population, it is structurally immune to the healthy-control confound that undermines the binary target, making it the most clinically meaningful external-validation signal in this study.
+
+\textbf{Three-class} ($n{=}103$): AUC 0.703, suggesting moderate ranking ability despite poor calibration.
+
+\textbf{Binary} ($n{=}108$, reported as a data-quality diagnostic): CatBoost achieved 0.516 balanced accuracy (AUC 0.637), near random chance. Root cause: PPMI NSD-negative class includes healthy controls with inherently low motor scores (UPDRS-III bradykinesia mean: 7.37), while BioFIND S-negative patients are diagnosed PD with high scores (mean: ${\sim}19.9$). Models therefore learned a healthy-vs-PD boundary rather than S+/S- (Fig.~\ref{p1:fig:domainshift}). We report this number to surface the training-label confound rather than as a model performance claim; the appropriate mitigation is to retrain binary classifiers on PD-only subsets (see \S\ref{p1:sec:discussion}~Future Directions).
+
+\subsection{External Predictions: PDBP and HBS}
+
+\begin{figure}[!t]
+\centerline{\includegraphics[width=\columnwidth]{fig6_model_agreement.png}}
+\caption{Cross-model prediction disagreement on PDBP ($n{=}893$). Binary NSD-positive predictions range from 30\% to 65\% across models, highlighting substantial model uncertainty without ground truth.}
+\label{p1:fig:agreement}
+\end{figure}
+
+\textbf{PDBP} ($n{=}893$): Binary NSD+ predictions ranged from 30.2\% (RF) to 65.3\% (LogReg), reflecting model uncertainty (Fig.~\ref{p1:fig:agreement}). \textbf{HBS} ($n{=}649$): All models predicted ${>}92\%$ NSD-negative due to 5 completely absent features imputed as PPMI medians---these predictions are unreliable.
+
+% ================================================================
+% V. DISCUSSION
+% ================================================================
+\section{Discussion}
+\label{p1:sec:discussion}
+
+\subsection{Principal Findings}
+This study provides the first machine learning benchmark for NSD-ISS biological stage prediction, yielding three findings with direct clinical implications. First, biological markers proved essential for binary NSD-ISS classification: removing DaT-SPECT features reduced AUC by 25.4\%, confirming that clinical manifestations alone cannot reliably distinguish underlying biological pathology from its absence. This result underscores the irreplaceable role of dopaminergic imaging in the NSD-ISS framework and has implications for clinical deployment in settings where DaT-SPECT is unavailable.
+
+Second, clinical features alone achieved AUC 0.900 for NSD-positive sub-staging (four-class discrimination among confirmed NSD-positive patients). This finding suggests a practical two-stage clinical workflow: an initial biological confirmation step requiring imaging or CSF biomarkers, followed by clinical sub-staging using routinely collected assessments. Such a workflow would reduce the dependence on specialized biomarker assays for ongoing disease monitoring.
+
+Third, the PPMI-to-BioFIND external validation failure (balanced accuracy 0.516 for binary classification) reflects a fundamental study design confound rather than a model limitation. PPMI's NSD-negative class includes healthy controls with inherently low motor scores, while BioFIND's SAA-negative patients are diagnosed PD with substantially higher motor burden. Models therefore learned to distinguish healthy individuals from PD patients rather than SAA-positive from SAA-negative within a PD population, a distinction that collapses at external validation.
+
+\subsection{Tabular vs.\ Graph-Based Models}
+Gradient-boosted tabular models consistently outperformed graph-based models by 7.3--17.8 percentage points. The Enhanced Multimodal GAT with PyG GATConv and cross-modal attention improved over the simple GAT (particularly for multiclass: three-class 0.705 vs.\ 0.666), but the $k$-NN patient similarity graph did not provide information beyond what tree-based models capture from feature vectors. This aligns with Grinsztajn~\textit{et al.}~\cite{grinsztajn2022}, who showed trees dominate on medium-sized tabular data. However, graph models may become advantageous for inductive transfer to cohorts with incomplete features, where graph-informed imputation could leverage similar patients---the subject of ongoing work.
+
+\subsection{Conformal Prediction for Clinical Deployment}
+Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton sets (0.96--1.27), demonstrating well-calibrated uncertainty. For binary classification, clinicians receive a definitive prediction with guaranteed 95.5\% coverage. For borderline NSD-positive patients, slightly larger prediction sets provide honest uncertainty---a clinically desirable property.
+
+\subsection{Limitations}
+Several limitations warrant consideration. The most significant is severe class imbalance: Stage~4 comprises only 17 patients (0.8\% of the cohort), which limits reliable evaluation of minority-class performance and inflates variance in per-class metrics. Relatedly, the inclusion of healthy controls in PPMI's NSD-negative class creates a confound for binary classification, as models learn a healthy-versus-PD boundary rather than the intended biological staging distinction. Missing data presents an additional challenge, particularly for external cohorts: median imputation with PPMI training-set values is unreliable when entire feature domains are absent, as was the case for HBS (5 of 12 common features missing). All predictions in this study are cross-sectional baseline snapshots and do not capture the temporal dynamics of disease progression. Finally, SAA coverage in PPMI is limited to 12.6\% of participants, meaning the S anchor assignment relies heavily on DaT-SPECT in most patients.
+
+\subsection{Future Directions}
+Three extensions of this work are currently under investigation. First, stage-conditioned graph-informed imputation leverages the observation that missingness patterns differ systematically between NSD-ISS stages; imputation models that account for stage-specific patterns may reduce bias and improve downstream prediction, particularly for external cohorts with incomplete features. Second, longitudinal stage transition modeling addresses the ultimate clinical goal of predicting when patients will progress between NSD-ISS stages, moving beyond the cross-sectional snapshot framework of the present study. Third, retraining binary classifiers exclusively on PD patients (excluding healthy controls) would create models that learn the clinically relevant S+/S- boundary, producing classifiers transferable to PD-only external cohorts such as BioFIND.
+
+% ================================================================
+% VI. CONCLUSION
+% ================================================================
+\section{Conclusion}
+\label{p1:sec:conclusion}
+
+This study establishes the first comprehensive benchmark for NSD-ISS biological stage prediction, evaluating 8 models across 4 target formulations with conformal uncertainty quantification and multi-cohort validation. Gradient-boosted trees (CatBoost: 0.951 balanced accuracy) substantially outperform graph attention networks (Enhanced GAT: 0.825) on tabular clinical data. Cross-conformal prediction provides guaranteed ${>}90\%$ coverage with efficient prediction sets. Biological markers are essential for binary staging; clinical features alone suffice for NSD-positive sub-staging (AUC 0.900). External validation reveals fundamental domain shift challenges, motivating graph-informed imputation and PD-only retraining for future work.
