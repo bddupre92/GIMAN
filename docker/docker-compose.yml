@@ -51,6 +51,13 @@ services:
       - ../outputs:/giman/outputs
       # Read-only: raw data; never modified from inside the container.
       - ../data:/giman/data:ro
+      # Live source mounts so dev iteration doesn't require image rebuilds.
+      # The image still bakes a copy at build time so the container is
+      # self-contained when these mounts are absent (e.g., for a reviewer who
+      # doesn't have the repo cloned).
+      - ../scripts:/giman/scripts
+      - ../src:/giman/src
+      - ../tests:/giman/tests
     ports:
       - "8888:8888"
 

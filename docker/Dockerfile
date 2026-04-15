@@ -73,7 +73,18 @@ RUN pip install --no-cache-dir \
         jupyterlab \
         ipykernel \
         matplotlib \
-        psycopg2-binary
+        psycopg2-binary \
+        h5py \
+        lifelines \
+        scikit-survival \
+        catboost \
+        xgboost \
+        lightgbm \
+        mapie \
+        hyperimpute \
+        pypots \
+        arviz \
+        pymc
 
 ###############################################################################
 # Stage 3: Runtime

@@ -1,0 +1,6175 @@
+{
+  "n_candidates": 684,
+  "n_linked": 678,
+  "n_unlinked": 6,
+  "by_chapter": {
+    "1": {
+      "linked": 19,
+      "unlinked": 0
+    },
+    "2": {
+      "linked": 130,
+      "unlinked": 0
+    },
+    "3": {
+      "linked": 72,
+      "unlinked": 0
+    },
+    "4": {
+      "linked": 113,
+      "unlinked": 0
+    },
+    "5": {
+      "linked": 37,
+      "unlinked": 0
+    },
+    "6": {
+      "linked": 69,
+      "unlinked": 0
+    },
+    "7": {
+      "linked": 39,
+      "unlinked": 0
+    },
+    "8": {
+      "linked": 32,
+      "unlinked": 0
+    },
+    "9": {
+      "linked": 31,
+      "unlinked": 0
+    },
+    "10": {
+      "linked": 27,
+      "unlinked": 1
+    },
+    "11": {
+      "linked": 23,
+      "unlinked": 1
+    },
+    "12": {
+      "linked": 18,
+      "unlinked": 0
+    },
+    "13": {
+      "linked": 9,
+      "unlinked": 0
+    },
+    "14": {
+      "linked": 4,
+      "unlinked": 0
+    },
+    "15": {
+      "linked": 5,
+      "unlinked": 0
+    },
+    "99": {
+      "linked": 50,
+      "unlinked": 4
+    }
+  },
+  "linked_details": [
+    {
+      "claim_id": 318,
+      "chapter_id": 1,
+      "value": 93.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 319,
+      "chapter_id": 1,
+      "value": 5.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 320,
+      "chapter_id": 1,
+      "value": 89.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 321,
+      "chapter_id": 1,
+      "value": 87.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 322,
+      "chapter_id": 1,
+      "value": 13.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 323,
+      "chapter_id": 1,
+      "value": 73.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 324,
+      "chapter_id": 1,
+      "value": 83.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 325,
+      "chapter_id": 1,
+      "value": 4.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 326,
+      "chapter_id": 1,
+      "value": 29.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 327,
+      "chapter_id": 1,
+      "value": 118.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 328,
+      "chapter_id": 1,
+      "value": 893.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 329,
+      "chapter_id": 1,
+      "value": 649.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 331,
+      "chapter_id": 1,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 332,
+      "chapter_id": 1,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 333,
+      "chapter_id": 1,
+      "value": 3.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 335,
+      "chapter_id": 1,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 337,
+      "chapter_id": 1,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 338,
+      "chapter_id": 1,
+      "value": 9.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 339,
+      "chapter_id": 1,
+      "value": 9.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 343,
+      "chapter_id": 2,
+      "value": 40.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 344,
+      "chapter_id": 2,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 345,
+      "chapter_id": 2,
+      "value": 13.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 346,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 347,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 348,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 349,
+      "chapter_id": 2,
+      "value": 6.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 350,
+      "chapter_id": 2,
+      "value": 46.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 351,
+      "chapter_id": 2,
+      "value": 14.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 352,
+      "chapter_id": 2,
+      "value": 55.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 353,
+      "chapter_id": 2,
+      "value": 31.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 354,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 355,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 356,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 357,
+      "chapter_id": 2,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 358,
+      "chapter_id": 2,
+      "value": 2.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 359,
+      "chapter_id": 2,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 360,
+      "chapter_id": 2,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 361,
+      "chapter_id": 2,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 362,
+      "chapter_id": 2,
+      "value": 175.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 363,
+      "chapter_id": 2,
+      "value": 287.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 364,
+      "chapter_id": 2,
+      "value": 336.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 365,
+      "chapter_id": 2,
+      "value": 336.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 366,
+      "chapter_id": 2,
+      "value": 286.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 367,
+      "chapter_id": 2,
+      "value": 50.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 368,
+      "chapter_id": 2,
+      "value": 20.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 369,
+      "chapter_id": 2,
+      "value": 30.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 370,
+      "chapter_id": 2,
+      "value": 60.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 371,
+      "chapter_id": 2,
+      "value": 18.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 372,
+      "chapter_id": 2,
+      "value": 14.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 373,
+      "chapter_id": 2,
+      "value": 60.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 374,
+      "chapter_id": 2,
+      "value": 38.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 375,
+      "chapter_id": 2,
+      "value": 12.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 376,
+      "chapter_id": 2,
+      "value": 60.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 377,
+      "chapter_id": 2,
+      "value": 18.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 378,
+      "chapter_id": 2,
+      "value": 40.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 379,
+      "chapter_id": 2,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 380,
+      "chapter_id": 2,
+      "value": 13.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 381,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 382,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 383,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 384,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 385,
+      "chapter_id": 2,
+      "value": 12.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 386,
+      "chapter_id": 2,
+      "value": 40.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 387,
+      "chapter_id": 2,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 388,
+      "chapter_id": 2,
+      "value": 43.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/three_class/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 389,
+      "chapter_id": 2,
+      "value": 27.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 390,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 391,
+      "chapter_id": 2,
+      "value": 13.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 392,
+      "chapter_id": 2,
+      "value": 13.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 393,
+      "chapter_id": 2,
+      "value": 27.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 394,
+      "chapter_id": 2,
+      "value": 73.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 395,
+      "chapter_id": 2,
+      "value": 14.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 396,
+      "chapter_id": 2,
+      "value": 14.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 397,
+      "chapter_id": 2,
+      "value": 55.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 398,
+      "chapter_id": 2,
+      "value": 31.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 399,
+      "chapter_id": 2,
+      "value": 77.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 400,
+      "chapter_id": 2,
+      "value": 47.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 401,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 402,
+      "chapter_id": 2,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 403,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 404,
+      "chapter_id": 2,
+      "value": 27.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 405,
+      "chapter_id": 2,
+      "value": 57.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 406,
+      "chapter_id": 2,
+      "value": 57.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 407,
+      "chapter_id": 2,
+      "value": 27.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 408,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 409,
+      "chapter_id": 2,
+      "value": 30.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 410,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 411,
+      "chapter_id": 2,
+      "value": 57.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 412,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 413,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 414,
+      "chapter_id": 2,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 415,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 416,
+      "chapter_id": 2,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 417,
+      "chapter_id": 2,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 418,
+      "chapter_id": 2,
+      "value": 27.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 419,
+      "chapter_id": 2,
+      "value": 87.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 420,
+      "chapter_id": 2,
+      "value": 46.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 421,
+      "chapter_id": 2,
+      "value": 12.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 422,
+      "chapter_id": 2,
+      "value": 6.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 423,
+      "chapter_id": 2,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 424,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 425,
+      "chapter_id": 2,
+      "value": 6.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 426,
+      "chapter_id": 2,
+      "value": 46.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 427,
+      "chapter_id": 2,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 428,
+      "chapter_id": 2,
+      "value": 90.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 429,
+      "chapter_id": 2,
+      "value": 84.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 430,
+      "chapter_id": 2,
+      "value": 72.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 431,
+      "chapter_id": 2,
+      "value": 65.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 432,
+      "chapter_id": 2,
+      "value": 9.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 433,
+      "chapter_id": 2,
+      "value": 12.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 434,
+      "chapter_id": 2,
+      "value": 9.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 435,
+      "chapter_id": 2,
+      "value": 8.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 436,
+      "chapter_id": 2,
+      "value": 10.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 437,
+      "chapter_id": 2,
+      "value": 6.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 438,
+      "chapter_id": 2,
+      "value": 7.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 439,
+      "chapter_id": 2,
+      "value": 46.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 440,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 441,
+      "chapter_id": 2,
+      "value": 6.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 442,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 443,
+      "chapter_id": 2,
+      "value": 87.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 444,
+      "chapter_id": 2,
+      "value": 9.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 445,
+      "chapter_id": 2,
+      "value": 8.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 446,
+      "chapter_id": 2,
+      "value": 6.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 447,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 449,
+      "chapter_id": 2,
+      "value": 12.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 451,
+      "chapter_id": 2,
+      "value": 13.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 452,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 453,
+      "chapter_id": 2,
+      "value": 26.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 454,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 455,
+      "chapter_id": 2,
+      "value": 87.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 456,
+      "chapter_id": 2,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 457,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 458,
+      "chapter_id": 2,
+      "value": 14.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 459,
+      "chapter_id": 2,
+      "value": 55.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 460,
+      "chapter_id": 2,
+      "value": 31.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 461,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 462,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 463,
+      "chapter_id": 2,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 464,
+      "chapter_id": 2,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 465,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 466,
+      "chapter_id": 2,
+      "value": 23.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 467,
+      "chapter_id": 2,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 468,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 469,
+      "chapter_id": 2,
+      "value": 83.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 470,
+      "chapter_id": 2,
+      "value": 86.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 471,
+      "chapter_id": 2,
+      "value": 9.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 472,
+      "chapter_id": 2,
+      "value": 87.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 473,
+      "chapter_id": 2,
+      "value": 17.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 474,
+      "chapter_id": 2,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 477,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 478,
+      "chapter_id": 3,
+      "value": 25.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 479,
+      "chapter_id": 3,
+      "value": 213.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 480,
+      "chapter_id": 3,
+      "value": 118.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 481,
+      "chapter_id": 3,
+      "value": 893.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 482,
+      "chapter_id": 3,
+      "value": 649.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 483,
+      "chapter_id": 3,
+      "value": 12.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 484,
+      "chapter_id": 3,
+      "value": 97.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 485,
+      "chapter_id": 3,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 486,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 487,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 488,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 489,
+      "chapter_id": 3,
+      "value": 64.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 490,
+      "chapter_id": 3,
+      "value": 3.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 491,
+      "chapter_id": 3,
+      "value": 9.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 492,
+      "chapter_id": 3,
+      "value": 22.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 493,
+      "chapter_id": 3,
+      "value": 0.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 494,
+      "chapter_id": 3,
+      "value": 0.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 495,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 496,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 497,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 498,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 499,
+      "chapter_id": 3,
+      "value": 0.941,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 500,
+      "chapter_id": 3,
+      "value": 0.974,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 501,
+      "chapter_id": 3,
+      "value": 0.887,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 508,
+      "chapter_id": 3,
+      "value": 0.901,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 509,
+      "chapter_id": 3,
+      "value": 0.964,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 510,
+      "chapter_id": 3,
+      "value": 0.795,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 511,
+      "chapter_id": 3,
+      "value": 0.753,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 512,
+      "chapter_id": 3,
+      "value": 0.812,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 513,
+      "chapter_id": 3,
+      "value": 0.738,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 514,
+      "chapter_id": 3,
+      "value": 0.854,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 515,
+      "chapter_id": 3,
+      "value": 0.736,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 516,
+      "chapter_id": 3,
+      "value": 0.748,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 517,
+      "chapter_id": 3,
+      "value": 0.623,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 518,
+      "chapter_id": 3,
+      "value": 0.827,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 521,
+      "chapter_id": 3,
+      "value": 0.593,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 522,
+      "chapter_id": 3,
+      "value": 0.712,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 523,
+      "chapter_id": 3,
+      "value": 0.624,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 524,
+      "chapter_id": 3,
+      "value": 0.686,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 525,
+      "chapter_id": 3,
+      "value": 0.61,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 526,
+      "chapter_id": 3,
+      "value": 0.66,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 527,
+      "chapter_id": 3,
+      "value": 0.602,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 528,
+      "chapter_id": 3,
+      "value": 0.679,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 529,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 530,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 531,
+      "chapter_id": 3,
+      "value": 95.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 532,
+      "chapter_id": 3,
+      "value": 98.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 533,
+      "chapter_id": 3,
+      "value": 98.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 534,
+      "chapter_id": 3,
+      "value": 99.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 535,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 536,
+      "chapter_id": 3,
+      "value": 95.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 537,
+      "chapter_id": 3,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 538,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 539,
+      "chapter_id": 3,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 540,
+      "chapter_id": 3,
+      "value": 25.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 541,
+      "chapter_id": 3,
+      "value": 1.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 542,
+      "chapter_id": 3,
+      "value": 25.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 543,
+      "chapter_id": 3,
+      "value": 15.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 544,
+      "chapter_id": 3,
+      "value": 13.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 546,
+      "chapter_id": 3,
+      "value": 1.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 550,
+      "chapter_id": 3,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 551,
+      "chapter_id": 3,
+      "value": 65.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 552,
+      "chapter_id": 3,
+      "value": 30.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 553,
+      "chapter_id": 3,
+      "value": 65.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 554,
+      "chapter_id": 3,
+      "value": 92.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 555,
+      "chapter_id": 3,
+      "value": 25.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 557,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 558,
+      "chapter_id": 3,
+      "value": 95.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 559,
+      "chapter_id": 3,
+      "value": 0.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 560,
+      "chapter_id": 3,
+      "value": 12.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 562,
+      "chapter_id": 3,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 563,
+      "chapter_id": 4,
+      "value": 39.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 564,
+      "chapter_id": 4,
+      "value": 90.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 565,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 566,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 567,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 568,
+      "chapter_id": 4,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 569,
+      "chapter_id": 4,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 570,
+      "chapter_id": 4,
+      "value": 5.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 571,
+      "chapter_id": 4,
+      "value": 5.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 572,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 573,
+      "chapter_id": 4,
+      "value": 39.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 574,
+      "chapter_id": 4,
+      "value": 5.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 575,
+      "chapter_id": 4,
+      "value": 39.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 576,
+      "chapter_id": 4,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 577,
+      "chapter_id": 4,
+      "value": 60.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 578,
+      "chapter_id": 4,
+      "value": 64.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 579,
+      "chapter_id": 4,
+      "value": 0.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 580,
+      "chapter_id": 4,
+      "value": 90.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 581,
+      "chapter_id": 4,
+      "value": 0.3,
+      "unit": "beta_coef",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 582,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 583,
+      "chapter_id": 4,
+      "value": 90.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 584,
+      "chapter_id": 4,
+      "value": 0.3,
+      "unit": "beta_coef",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 585,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 586,
+      "chapter_id": 4,
+      "value": 70.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 587,
+      "chapter_id": 4,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 588,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 589,
+      "chapter_id": 4,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 590,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 591,
+      "chapter_id": 4,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 592,
+      "chapter_id": 4,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 593,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 594,
+      "chapter_id": 4,
+      "value": 39.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 595,
+      "chapter_id": 4,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 596,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 597,
+      "chapter_id": 4,
+      "value": 21.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 598,
+      "chapter_id": 4,
+      "value": 26.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 599,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 600,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 601,
+      "chapter_id": 4,
+      "value": 53.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 602,
+      "chapter_id": 4,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 603,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 608,
+      "chapter_id": 4,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 609,
+      "chapter_id": 4,
+      "value": 26.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 610,
+      "chapter_id": 4,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 611,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 612,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 613,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 614,
+      "chapter_id": 4,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 615,
+      "chapter_id": 4,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 616,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 617,
+      "chapter_id": 4,
+      "value": 64.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 618,
+      "chapter_id": 4,
+      "value": 17.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 619,
+      "chapter_id": 4,
+      "value": 13.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 620,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 621,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 622,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 623,
+      "chapter_id": 4,
+      "value": 90.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 624,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 625,
+      "chapter_id": 4,
+      "value": 90.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 626,
+      "chapter_id": 4,
+      "value": 94.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 627,
+      "chapter_id": 4,
+      "value": 92.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 628,
+      "chapter_id": 4,
+      "value": 91.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 629,
+      "chapter_id": 4,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 630,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 631,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 632,
+      "chapter_id": 4,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 633,
+      "chapter_id": 4,
+      "value": 17.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 634,
+      "chapter_id": 4,
+      "value": 45.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 635,
+      "chapter_id": 4,
+      "value": 45.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 636,
+      "chapter_id": 4,
+      "value": 45.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 637,
+      "chapter_id": 4,
+      "value": 52.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 638,
+      "chapter_id": 4,
+      "value": 71.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 639,
+      "chapter_id": 4,
+      "value": 81.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 640,
+      "chapter_id": 4,
+      "value": 90.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 641,
+      "chapter_id": 4,
+      "value": 95.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 642,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 643,
+      "chapter_id": 4,
+      "value": 70.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 644,
+      "chapter_id": 4,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 645,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 646,
+      "chapter_id": 4,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 647,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 648,
+      "chapter_id": 4,
+      "value": 2.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 649,
+      "chapter_id": 4,
+      "value": 3.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 650,
+      "chapter_id": 4,
+      "value": 17.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 651,
+      "chapter_id": 4,
+      "value": 779.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 652,
+      "chapter_id": 4,
+      "value": 2.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 653,
+      "chapter_id": 4,
+      "value": 3.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 654,
+      "chapter_id": 4,
+      "value": 779.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 655,
+      "chapter_id": 4,
+      "value": 5.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/binary/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 656,
+      "chapter_id": 4,
+      "value": 5.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/binary/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 657,
+      "chapter_id": 4,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 658,
+      "chapter_id": 4,
+      "value": 26.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 659,
+      "chapter_id": 4,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 660,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 661,
+      "chapter_id": 4,
+      "value": 1.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 662,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 663,
+      "chapter_id": 4,
+      "value": 5.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/binary/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 664,
+      "chapter_id": 4,
+      "value": 5.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 665,
+      "chapter_id": 4,
+      "value": 96.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 666,
+      "chapter_id": 4,
+      "value": 64.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 667,
+      "chapter_id": 4,
+      "value": 45.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 669,
+      "chapter_id": 4,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 670,
+      "chapter_id": 4,
+      "value": 17.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 671,
+      "chapter_id": 4,
+      "value": 17.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 672,
+      "chapter_id": 4,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 673,
+      "chapter_id": 4,
+      "value": 17.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 674,
+      "chapter_id": 4,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 675,
+      "chapter_id": 4,
+      "value": 26.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 676,
+      "chapter_id": 4,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 677,
+      "chapter_id": 4,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 678,
+      "chapter_id": 4,
+      "value": 5.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/binary/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 679,
+      "chapter_id": 4,
+      "value": 5.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 680,
+      "chapter_id": 4,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 681,
+      "chapter_id": 5,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 682,
+      "chapter_id": 5,
+      "value": 62.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 683,
+      "chapter_id": 5,
+      "value": 82.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 684,
+      "chapter_id": 5,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 685,
+      "chapter_id": 5,
+      "value": 16699.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 686,
+      "chapter_id": 5,
+      "value": 60.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 687,
+      "chapter_id": 5,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 688,
+      "chapter_id": 5,
+      "value": 2892.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper3_deephit/deephit_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 689,
+      "chapter_id": 5,
+      "value": 48.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 690,
+      "chapter_id": 5,
+      "value": 60.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 691,
+      "chapter_id": 5,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 692,
+      "chapter_id": 5,
+      "value": 2892.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper3_deephit/deephit_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 693,
+      "chapter_id": 5,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 694,
+      "chapter_id": 5,
+      "value": 1900.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper3_markov/markov_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 695,
+      "chapter_id": 5,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 696,
+      "chapter_id": 5,
+      "value": 3.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/three_class/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 697,
+      "chapter_id": 5,
+      "value": 38.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 698,
+      "chapter_id": 5,
+      "value": 80.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 699,
+      "chapter_id": 5,
+      "value": 90.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 700,
+      "chapter_id": 5,
+      "value": 60.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 701,
+      "chapter_id": 5,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 702,
+      "chapter_id": 5,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 703,
+      "chapter_id": 5,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 704,
+      "chapter_id": 5,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 705,
+      "chapter_id": 5,
+      "value": 62.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 706,
+      "chapter_id": 5,
+      "value": 82.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 707,
+      "chapter_id": 5,
+      "value": 52.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 708,
+      "chapter_id": 5,
+      "value": 94.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 709,
+      "chapter_id": 5,
+      "value": 52.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 710,
+      "chapter_id": 5,
+      "value": 80.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 711,
+      "chapter_id": 5,
+      "value": 39.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 712,
+      "chapter_id": 5,
+      "value": 91.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 713,
+      "chapter_id": 5,
+      "value": 62.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 714,
+      "chapter_id": 5,
+      "value": 82.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 715,
+      "chapter_id": 5,
+      "value": 4.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 716,
+      "chapter_id": 5,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 717,
+      "chapter_id": 5,
+      "value": 62.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 718,
+      "chapter_id": 6,
+      "value": 91.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 719,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 720,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 721,
+      "chapter_id": 6,
+      "value": 81.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 722,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 723,
+      "chapter_id": 6,
+      "value": 74.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 724,
+      "chapter_id": 6,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 725,
+      "chapter_id": 6,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 726,
+      "chapter_id": 6,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 727,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 728,
+      "chapter_id": 6,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 729,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 730,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 732,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 733,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 734,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 735,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 742,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 743,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 744,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 745,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 746,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 747,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 748,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 749,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 750,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 751,
+      "chapter_id": 6,
+      "value": 82.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 752,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 753,
+      "chapter_id": 6,
+      "value": 91.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 754,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 755,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 756,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 757,
+      "chapter_id": 6,
+      "value": 90.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 758,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 759,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 760,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 761,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 762,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 763,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 764,
+      "chapter_id": 6,
+      "value": 85.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 765,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 766,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 767,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 768,
+      "chapter_id": 6,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 769,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 770,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 771,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 772,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 773,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 774,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 775,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 776,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 777,
+      "chapter_id": 6,
+      "value": 0.1,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 778,
+      "chapter_id": 6,
+      "value": 0.35,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 779,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 780,
+      "chapter_id": 6,
+      "value": 82.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 781,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 782,
+      "chapter_id": 6,
+      "value": 81.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 783,
+      "chapter_id": 6,
+      "value": 74.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 784,
+      "chapter_id": 6,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 785,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 786,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 787,
+      "chapter_id": 6,
+      "value": 82.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 788,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 789,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 790,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 791,
+      "chapter_id": 6,
+      "value": 74.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 792,
+      "chapter_id": 6,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 793,
+      "chapter_id": 6,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 794,
+      "chapter_id": 7,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 795,
+      "chapter_id": 7,
+      "value": 9.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 796,
+      "chapter_id": 7,
+      "value": 9.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 797,
+      "chapter_id": 7,
+      "value": 3.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 798,
+      "chapter_id": 7,
+      "value": 15.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 799,
+      "chapter_id": 7,
+      "value": 40.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 800,
+      "chapter_id": 7,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 801,
+      "chapter_id": 7,
+      "value": 60.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 802,
+      "chapter_id": 7,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 803,
+      "chapter_id": 7,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 804,
+      "chapter_id": 7,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 805,
+      "chapter_id": 7,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 806,
+      "chapter_id": 7,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 807,
+      "chapter_id": 7,
+      "value": 15.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 808,
+      "chapter_id": 7,
+      "value": 0.001,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 809,
+      "chapter_id": 7,
+      "value": 0.001,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 810,
+      "chapter_id": 7,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 811,
+      "chapter_id": 7,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 812,
+      "chapter_id": 7,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 813,
+      "chapter_id": 7,
+      "value": 7.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 814,
+      "chapter_id": 7,
+      "value": 24.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 815,
+      "chapter_id": 7,
+      "value": 21.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 816,
+      "chapter_id": 7,
+      "value": 43.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 817,
+      "chapter_id": 7,
+      "value": 31.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 818,
+      "chapter_id": 7,
+      "value": 18.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 819,
+      "chapter_id": 7,
+      "value": 37.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 820,
+      "chapter_id": 7,
+      "value": 0.001,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 821,
+      "chapter_id": 7,
+      "value": 18.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 822,
+      "chapter_id": 7,
+      "value": 43.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 823,
+      "chapter_id": 7,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 824,
+      "chapter_id": 7,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 825,
+      "chapter_id": 7,
+      "value": 3.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 826,
+      "chapter_id": 7,
+      "value": 0.001,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 827,
+      "chapter_id": 7,
+      "value": 4.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 828,
+      "chapter_id": 7,
+      "value": 4.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 829,
+      "chapter_id": 7,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 830,
+      "chapter_id": 7,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 831,
+      "chapter_id": 7,
+      "value": 9.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 832,
+      "chapter_id": 7,
+      "value": 9.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 833,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 834,
+      "chapter_id": 8,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 835,
+      "chapter_id": 8,
+      "value": 0.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 836,
+      "chapter_id": 8,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 837,
+      "chapter_id": 8,
+      "value": 22.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 838,
+      "chapter_id": 8,
+      "value": 3.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 839,
+      "chapter_id": 8,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 840,
+      "chapter_id": 8,
+      "value": 16699.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 841,
+      "chapter_id": 8,
+      "value": 1900.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper3_markov/markov_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 842,
+      "chapter_id": 8,
+      "value": 0.3,
+      "unit": "beta_coef",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 843,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 844,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 845,
+      "chapter_id": 8,
+      "value": 8.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 846,
+      "chapter_id": 8,
+      "value": 26.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 847,
+      "chapter_id": 8,
+      "value": 62.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 848,
+      "chapter_id": 8,
+      "value": 2.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 849,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 850,
+      "chapter_id": 8,
+      "value": 94.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 851,
+      "chapter_id": 8,
+      "value": 99.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 852,
+      "chapter_id": 8,
+      "value": 60.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 853,
+      "chapter_id": 8,
+      "value": 93.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 854,
+      "chapter_id": 8,
+      "value": 98.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 855,
+      "chapter_id": 8,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 856,
+      "chapter_id": 8,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 857,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 858,
+      "chapter_id": 8,
+      "value": 0.914,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 859,
+      "chapter_id": 8,
+      "value": 0.0,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 860,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 861,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 862,
+      "chapter_id": 8,
+      "value": 60.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 863,
+      "chapter_id": 8,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 864,
+      "chapter_id": 8,
+      "value": 98.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 865,
+      "chapter_id": 9,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 867,
+      "chapter_id": 9,
+      "value": 0.05,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 871,
+      "chapter_id": 9,
+      "value": 3.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 872,
+      "chapter_id": 9,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 873,
+      "chapter_id": 9,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 874,
+      "chapter_id": 9,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 875,
+      "chapter_id": 9,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 876,
+      "chapter_id": 9,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 877,
+      "chapter_id": 9,
+      "value": 96.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 878,
+      "chapter_id": 9,
+      "value": 29.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 879,
+      "chapter_id": 9,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 880,
+      "chapter_id": 9,
+      "value": 106.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 881,
+      "chapter_id": 9,
+      "value": 96.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 882,
+      "chapter_id": 9,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 884,
+      "chapter_id": 9,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 885,
+      "chapter_id": 9,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 886,
+      "chapter_id": 9,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 887,
+      "chapter_id": 9,
+      "value": 99.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 888,
+      "chapter_id": 9,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 889,
+      "chapter_id": 9,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 890,
+      "chapter_id": 9,
+      "value": 110.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 891,
+      "chapter_id": 9,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 892,
+      "chapter_id": 9,
+      "value": 110.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 893,
+      "chapter_id": 9,
+      "value": 5.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 894,
+      "chapter_id": 9,
+      "value": 17.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 895,
+      "chapter_id": 9,
+      "value": 53.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 896,
+      "chapter_id": 9,
+      "value": 17.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 897,
+      "chapter_id": 9,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 898,
+      "chapter_id": 9,
+      "value": 105.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 899,
+      "chapter_id": 9,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 900,
+      "chapter_id": 9,
+      "value": 99.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 902,
+      "chapter_id": 10,
+      "value": 15.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 903,
+      "chapter_id": 10,
+      "value": 200.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 904,
+      "chapter_id": 10,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 905,
+      "chapter_id": 10,
+      "value": 51.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 906,
+      "chapter_id": 10,
+      "value": 83.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 908,
+      "chapter_id": 10,
+      "value": 3.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 909,
+      "chapter_id": 10,
+      "value": 0.01,
+      "unit": "beta_coef",
+      "linked_to": "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 910,
+      "chapter_id": 10,
+      "value": 228.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/adamedgraph_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 911,
+      "chapter_id": 10,
+      "value": 4.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 912,
+      "chapter_id": 10,
+      "value": 22.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 913,
+      "chapter_id": 10,
+      "value": 38.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 914,
+      "chapter_id": 10,
+      "value": 6.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 915,
+      "chapter_id": 10,
+      "value": 58.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 916,
+      "chapter_id": 10,
+      "value": 31.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 917,
+      "chapter_id": 10,
+      "value": 228.3,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/adamedgraph_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 918,
+      "chapter_id": 10,
+      "value": 15.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 919,
+      "chapter_id": 10,
+      "value": 115.4,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 920,
+      "chapter_id": 10,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 921,
+      "chapter_id": 10,
+      "value": 4.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 922,
+      "chapter_id": 10,
+      "value": 1.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 923,
+      "chapter_id": 10,
+      "value": 1.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 924,
+      "chapter_id": 10,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 925,
+      "chapter_id": 10,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 926,
+      "chapter_id": 10,
+      "value": 6542.0,
+      "unit": "delta_aic",
+      "linked_to": "outputs/mechanistic_twin/phase2/phase3_regional_saem_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 927,
+      "chapter_id": 10,
+      "value": 1507.0,
+      "unit": "delta_aic",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 928,
+      "chapter_id": 10,
+      "value": 10703.0,
+      "unit": "delta_aic",
+      "linked_to": "outputs/mechanistic_twin/phase2/phase3_regional_saem_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 931,
+      "chapter_id": 10,
+      "value": 19.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 933,
+      "chapter_id": 11,
+      "value": 19.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 934,
+      "chapter_id": 11,
+      "value": 0.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 935,
+      "chapter_id": 11,
+      "value": 4.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 936,
+      "chapter_id": 11,
+      "value": 4.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 937,
+      "chapter_id": 11,
+      "value": 298.0,
+      "unit": "delta_aic",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 940,
+      "chapter_id": 11,
+      "value": 65.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 941,
+      "chapter_id": 11,
+      "value": 65.8,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 942,
+      "chapter_id": 11,
+      "value": 0.01,
+      "unit": "beta_coef",
+      "linked_to": "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 946,
+      "chapter_id": 11,
+      "value": 0.056,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_experiments/three_class/adamedgraph_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 949,
+      "chapter_id": 11,
+      "value": 0.06,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 958,
+      "chapter_id": 11,
+      "value": 68.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 959,
+      "chapter_id": 11,
+      "value": 72.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 960,
+      "chapter_id": 11,
+      "value": 40.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 961,
+      "chapter_id": 11,
+      "value": 96.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 962,
+      "chapter_id": 11,
+      "value": 4.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 963,
+      "chapter_id": 11,
+      "value": 19.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 964,
+      "chapter_id": 11,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 965,
+      "chapter_id": 11,
+      "value": 11.9,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 966,
+      "chapter_id": 11,
+      "value": 14.2,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 967,
+      "chapter_id": 11,
+      "value": 72.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 968,
+      "chapter_id": 11,
+      "value": 4.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 969,
+      "chapter_id": 11,
+      "value": 19.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 970,
+      "chapter_id": 11,
+      "value": 4.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 972,
+      "chapter_id": 12,
+      "value": 1674.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 975,
+      "chapter_id": 12,
+      "value": 1674.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 978,
+      "chapter_id": 12,
+      "value": 5014.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase4/phase4_data_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 980,
+      "chapter_id": 12,
+      "value": 3.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 981,
+      "chapter_id": 12,
+      "value": 1610.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase4/phase4_data_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 982,
+      "chapter_id": 12,
+      "value": 4.79,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 983,
+      "chapter_id": 12,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 984,
+      "chapter_id": 12,
+      "value": 4772.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase4/phase4_hypothesis_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 987,
+      "chapter_id": 12,
+      "value": 80.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 988,
+      "chapter_id": 12,
+      "value": 5.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 989,
+      "chapter_id": 12,
+      "value": 15.5,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 990,
+      "chapter_id": 12,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 991,
+      "chapter_id": 12,
+      "value": 3058.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase4/phase4_confounding_control.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 992,
+      "chapter_id": 12,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 995,
+      "chapter_id": 12,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 999,
+      "chapter_id": 12,
+      "value": 10.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1000,
+      "chapter_id": 12,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1002,
+      "chapter_id": 12,
+      "value": 93.75,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1006,
+      "chapter_id": 13,
+      "value": 43.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/per_stage_analysis.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1007,
+      "chapter_id": 13,
+      "value": 595.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1008,
+      "chapter_id": 13,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "verified",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1014,
+      "chapter_id": 13,
+      "value": 88.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1018,
+      "chapter_id": 13,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1021,
+      "chapter_id": 13,
+      "value": -0.085,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_Vanilla.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1022,
+      "chapter_id": 13,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1023,
+      "chapter_id": 13,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1025,
+      "chapter_id": 13,
+      "value": -0.631,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/mechanistic_twin/paper10_mech_vs_giman/observational_counterfactual.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1034,
+      "chapter_id": 14,
+      "value": 9.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1035,
+      "chapter_id": 14,
+      "value": 29.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1038,
+      "chapter_id": 14,
+      "value": 12.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1045,
+      "chapter_id": 14,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1048,
+      "chapter_id": 15,
+      "value": 90.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1049,
+      "chapter_id": 15,
+      "value": 3.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1051,
+      "chapter_id": 15,
+      "value": 0.044,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1052,
+      "chapter_id": 15,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1054,
+      "chapter_id": 15,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1059,
+      "chapter_id": 99,
+      "value": 12.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1060,
+      "chapter_id": 99,
+      "value": 2201.0,
+      "unit": "large_count",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1062,
+      "chapter_id": 99,
+      "value": 95.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1063,
+      "chapter_id": 99,
+      "value": 60.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1064,
+      "chapter_id": 99,
+      "value": 97.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1065,
+      "chapter_id": 99,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1066,
+      "chapter_id": 99,
+      "value": 0.6,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1068,
+      "chapter_id": 99,
+      "value": 16699.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1069,
+      "chapter_id": 99,
+      "value": 30.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1070,
+      "chapter_id": 99,
+      "value": 39.1,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1071,
+      "chapter_id": 99,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1073,
+      "chapter_id": 99,
+      "value": 16699.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1076,
+      "chapter_id": 99,
+      "value": 10.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1077,
+      "chapter_id": 99,
+      "value": 100.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1078,
+      "chapter_id": 99,
+      "value": 118.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1079,
+      "chapter_id": 99,
+      "value": 893.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1080,
+      "chapter_id": 99,
+      "value": 649.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1082,
+      "chapter_id": 99,
+      "value": 0.001,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1083,
+      "chapter_id": 99,
+      "value": 19.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/three_class_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1084,
+      "chapter_id": 99,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1085,
+      "chapter_id": 99,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1086,
+      "chapter_id": 99,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1093,
+      "chapter_id": 99,
+      "value": 0.0001,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1094,
+      "chapter_id": 99,
+      "value": 0.51,
+      "unit": "p_value",
+      "linked_to": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1095,
+      "chapter_id": 99,
+      "value": 78.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1096,
+      "chapter_id": 99,
+      "value": 19.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1097,
+      "chapter_id": 99,
+      "value": 33.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1100,
+      "chapter_id": 99,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1101,
+      "chapter_id": 99,
+      "value": 96.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1102,
+      "chapter_id": 99,
+      "value": 100.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1103,
+      "chapter_id": 99,
+      "value": 5.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1105,
+      "chapter_id": 99,
+      "value": 20.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/three_class_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1106,
+      "chapter_id": 99,
+      "value": 49.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1107,
+      "chapter_id": 99,
+      "value": 10.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1108,
+      "chapter_id": 99,
+      "value": 10.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1109,
+      "chapter_id": 99,
+      "value": 106.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1110,
+      "chapter_id": 99,
+      "value": 28.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results_combined.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1111,
+      "chapter_id": 99,
+      "value": 0.01,
+      "unit": "ci_bracket",
+      "linked_to": "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1112,
+      "chapter_id": 99,
+      "value": 110.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1113,
+      "chapter_id": 99,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1114,
+      "chapter_id": 99,
+      "value": 50.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1115,
+      "chapter_id": 99,
+      "value": 17.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1116,
+      "chapter_id": 99,
+      "value": 8.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1117,
+      "chapter_id": 99,
+      "value": 65.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_benchmark/binary_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1118,
+      "chapter_id": 99,
+      "value": 105.0,
+      "unit": "sample_size",
+      "linked_to": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1119,
+      "chapter_id": 99,
+      "value": 17.6,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1120,
+      "chapter_id": 99,
+      "value": 96.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1121,
+      "chapter_id": 99,
+      "value": 32.7,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/binary_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1123,
+      "chapter_id": 99,
+      "value": 1678.0,
+      "unit": "large_count",
+      "linked_to": "outputs/mechanistic_twin/phase4/phase4_data_summary.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    },
+    {
+      "claim_id": 1129,
+      "chapter_id": 99,
+      "value": 42.0,
+      "unit": "percentage",
+      "linked_to": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "verdict_was": "partial",
+      "verdict_now": "verified"
+    }
+  ]
+}
