@@ -16,7 +16,10 @@ services:
       # to restore a fresh copy.
       - ../db_dump/schema_and_data.sql:/docker-entrypoint-initdb.d/01_restore.sql:ro
     ports:
-      - "5432:5432"
+      # Host 5433 → container 5432 to avoid colliding with a local native
+      # PostgreSQL 17 install on the host. Inside the compose network the
+      # giman service still talks to postgres:5432.
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U giman -d giman_research"]
       interval: 5s
@@ -33,6 +36,9 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # db.py reads GIMAN_DB_URL (see src/giman_pipeline/data/db.py). DATABASE_URL
+      # also set for any third-party libs that read that convention.
+      GIMAN_DB_URL: postgresql+psycopg2://giman:giman_local_2026@postgres:5432/giman_research
       DATABASE_URL: postgresql+psycopg2://giman:giman_local_2026@postgres:5432/giman_research
       PGHOST: postgres
       PGUSER: giman

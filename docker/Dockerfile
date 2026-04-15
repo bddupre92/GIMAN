@@ -66,6 +66,15 @@ COPY README.md ./
 # package itself; that happens after src/ is copied in the runtime stage.
 RUN poetry install --only main --no-root
 
+# Reviewers need Jupyter Lab + common analysis tools that live in Poetry's dev
+# group. Install them directly rather than pulling in the whole dev group (which
+# drags in pytest/mypy/ruff — not needed for reproduction).
+RUN pip install --no-cache-dir \
+        jupyterlab \
+        ipykernel \
+        matplotlib \
+        psycopg2-binary
+
 ###############################################################################
 # Stage 3: Runtime
 ###############################################################################
