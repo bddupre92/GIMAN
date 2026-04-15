@@ -1,0 +1,90 @@
+wing: csci_fall_2025
+rooms:
+- name: archive_new
+  description: Files from Archive_New/
+  keywords:
+  - archive_new
+  - archive_new
+- name: archive
+  description: Files from archive/
+  keywords:
+  - archive
+  - archive
+- name: configuration
+  description: Files from config/
+  keywords:
+  - configuration
+  - config
+- name: research
+  description: Files from references/
+  keywords:
+  - research
+  - references
+- name: commandlist
+  description: Files from commandlist/
+  keywords:
+  - commandlist
+  - commandlist
+- name: testing
+  description: Files from tests/
+  keywords:
+  - testing
+  - tests
+- name: clinical_dashboard
+  description: Files from clinical_dashboard/
+  keywords:
+  - clinical_dashboard
+  - clinical_dashboard
+- name: gimimpn_imputation
+  description: Files from GIMImpN_imputation/
+  keywords:
+  - gimimpn_imputation
+  - gimimpn_imputation
+- name: documentation
+  description: Files from Docs/
+  keywords:
+  - documentation
+  - docs
+- name: parkinsons's_systematic_review
+  description: Files from Parkinsons's Systematic Review/
+  keywords:
+  - parkinsons's_systematic_review
+  - parkinsons's systematic review
+- name: results
+  description: Files from results/
+  keywords:
+  - results
+  - results
+- name: visualizations
+  description: Files from visualizations/
+  keywords:
+  - visualizations
+  - visualizations
+- name: scripts
+  description: Files from scripts/
+  keywords:
+  - scripts
+  - scripts
+- name: data
+  description: Files from data/
+  keywords:
+  - data
+  - data
+- name: outputs
+  description: Files from outputs/
+  keywords:
+  - outputs
+  - outputs
+- name: notebooks
+  description: Files from notebooks/
+  keywords:
+  - notebooks
+  - notebooks
+- name: src
+  description: Files from src/
+  keywords:
+  - src
+  - src
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []
