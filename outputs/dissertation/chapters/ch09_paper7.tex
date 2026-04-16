@@ -118,6 +118,18 @@ Adding CSF total $\alpha$-synuclein as a second observable partially broke the $
 \label{fig:p7-csf-fit}
 \end{figure}
 
+\subsection{Per-Patient Posterior-Predictive Check}
+\label{sec:p7-ppc}
+
+To make the per-patient calibration concrete at the individual scale, Figure~\ref{fig:p7-ppc} shows posterior-predictive-check (PPC) panels for three representative Wave~A patients --- a slow, typical, and fast progressor, selected by their IS-weighted posterior mean neuron-loss rate (2.3\%/yr, 4.8\%/yr, and 24.3\%/yr respectively). Each panel overlays the observed DaT-SPECT putaminal SBR measurements on a forward-simulation envelope drawn from 500 weighted posterior samples propagated through the closed-form Variant~B slow-fast-collapse forward model (Eqs.~\eqref{eq:p7-dMdt}--\eqref{eq:p7-sbr-decay}). The 90\% posterior-predictive band widens with extrapolation horizon, correctly reflecting the compounding of parameter uncertainty forward in time; observed measurements sit within the band in all three exemplars, indicating that per-patient posteriors are not merely sharp but also calibrated against held-out observations. The fast-progressor panel shows the clinically actionable regime of the model: separation between the posterior median and the $T_\text{tox}{=}0$ flat baseline widens rapidly after year~2, meaning a disease-modifying intervention delivered at that horizon would become detectable in DaT-SPECT within the model's prediction envelope.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{p7_per_patient_ppc.pdf}
+\caption{\textbf{Per-patient posterior-predictive check.} Three representative PPMI Wave~A patients selected by IS-weighted posterior mean neuron-loss rate (slow: 2.3\%/yr; typical: 4.8\%/yr; fast: 24.3\%/yr). Red markers are observed putaminal SBR measurements; solid line is the posterior median trajectory; shaded band is the 90\% posterior-predictive band from 500 weighted samples of $(k_n, \alpha_\text{tox})$ forward-simulated on a 10-year grid using the closed-form Variant~B slow-fast-collapse forward model.}
+\label{fig:p7-ppc}
+\end{figure}
+
 \begin{table}[htbp]
 \centering
 \caption{Degeneracy-breaking: SBR-only (v4) vs.\ joint SBR+CSF (v5).}
