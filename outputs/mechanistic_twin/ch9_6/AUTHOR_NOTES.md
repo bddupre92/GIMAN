@@ -45,3 +45,48 @@ Add these to Zotero RT8B9N2J + `audit.citation` alongside the Liu 2023 / Bäckst
 ## Boundary-CI warnings emitted by Task 2
 
 See `identifiability.json.profile_likelihood_boundary_warnings`. α_tox.lower_hits_grid_min = true. k_n has no boundary hits. This is documented in Item 7 above and must be surfaced in §9.6 methods.
+
+## Task 4 cohort discoveries (2026-04-15)
+
+**Channel coverage after outer-join of 2,630 patients, 8,032 visits:**
+
+| Channel | Patients | Rows | Source |
+|---|---|---|---|
+| SBR (DaT-SPECT) | 2,118 | 4,058 | `ppmi_raw.datscan_sbr_analysis` (R+L)/2 |
+| aSyn aggregate% | 100 | 100 | Proj 286, plasma, **V01 ONLY — cross-sectional** |
+| SAA TTT | 164 | 234 | Proj 207, Amprion CSF |
+| NEV α-syn | 521 | 524 | Proj 204, **serum** (not CSF) |
+| CSF GFAP | 371 | 1,597 | Simoa Proj 152 |
+| NfL (held-out) | 1,190 | 4,952 | Proj 144, **serum** (not CSF) |
+
+**Primary-channel-count distribution:**
+- 0 channels: 138 pts (NfL-only cohort, should drop for SAEM)
+- 1 channel: 1,949 pts (mostly SBR-only)
+- 2 channels: 357
+- 3 channels: 140
+- 4 channels: 39
+- **All 5: 7 patients**
+
+**SBR + GFAP + NfL triple-coverage: 355 patients** — this is the *effective* cohort for individual α_tox estimation.
+
+## Revised §9.6 framing (replaces earlier "4-obs / 2-unknown overdetermined" narrative)
+
+Instead of: *"5-channel multi-observable SAEM"*
+
+Use: *"SBR-anchored hierarchical SAEM with per-visit biomarker augmentation. Primary identification of k_n and α_tox comes from the 4,058 SBR observations across 2,118 patients; sparse CSF/serum biomarker channels (NEV α-syn n=521, GFAP n=371, NfL n=1,190 held-out) contribute likelihood information when observed per-visit. The 355-patient SBR+GFAP+NfL intersection constitutes the effective cohort for individual α_tox estimation; the remaining patients inform the population-level distribution via hierarchical pooling."*
+
+**Additional corrections to prior plan text:**
+
+- **aSyn aggregate% is cross-sectional** (V01 only, 100 pts) — removed from the 5-primary claim in §9.6. Mention as "baseline correlation check" rather than longitudinal channel.
+- **NEV α-syn is serum, not CSF** (Yan 2023 JAMA Neurology measured serum NEVs)
+- **NfL is serum, not CSF** (Bäckström 2020 serum NfL)
+- **GFAP is Simoa Project 152, not Olink**
+
+## Why this is not a failure
+
+The §9.6 contribution now reads as:
+1. A methodological finding — SS identifiability ≠ ODE identifiability (Task 2)
+2. An honest cohort disclosure — sparse-channel SAEM with population-level α_tox identification
+3. An external-ish validation — 1,190-patient serum NfL held out, predict dN/dt from fitted N(t), report R²
+
+This is a tighter, more defensible §9.6 than the aspirational "5-channel overdetermined" original framing.
