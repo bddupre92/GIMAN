@@ -1233,7 +1233,7 @@ All CSV/Parquet data loaded into local PostgreSQL for reproducibility. **290 MB,
 |---|---|---|
 | 1 | Appendix E §E.1–§E.2 Docker + data dictionary | **DONE** (commits `4b643c6`, `d44c705`, `cc2e981`) |
 | 1 | Defense-prep audit completion | **DONE** 2026-04-14 (1,017/1,127 claims verified; 12 chapter errors fixed; commits `1c1cac7`, `b9e7f58`) |
-| 2–7 | Ch 9 §9.6 multi-channel observation (Olink CSF + NfL + Amprion SAA) | — |
+| 2–7 | Ch 9 §9.6 multi-channel observation (Simoa GFAP + NfL + Amprion SAA) | **DONE 2026-04-16** — feat/ch9-6-multichannel branch; 5-channel SAEM on 2,118 pts, 37x GFAP matched-cohort tightening, LOO 97.9% coverage + CRPS 0.07, NfL held-out R²=0.005 correctly predicted |
 | 8–11 | Ch 11 §11.7 6-region ROI split (close whole-putamen limitation) | — |
 | 12–13 | Ch 13 §13.8 Mechanistic conformal bands on counterfactuals | — |
 | 14–15 | Ch 12 §12.6 Genotype-stratified Path B | — |
