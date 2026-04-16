@@ -1,0 +1,15 @@
+{
+  "n_patients_with_3plus_scans": 261,
+  "slope_residual_vs_visit_order": {
+    "median": -0.008801175203876965,
+    "mean": -0.007456647285403165,
+    "q025": -0.19335092632601097,
+    "q975": 0.14558569430610152
+  },
+  "pvalue_trend": {
+    "median_pvalue": 0.457876923556369,
+    "n_significant_at_0.05": 21,
+    "frac_significant_at_0.05": 0.08045977011494253
+  },
+  "interpretation": "slope > 0 => residuals increase with visit order => rate is DECELERATING (actual decay slower than model predicts); slope < 0 => rate ACCELERATING; median near 0 with few individually-significant => constant-rate model holds."
+}
