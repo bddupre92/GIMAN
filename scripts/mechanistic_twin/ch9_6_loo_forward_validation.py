@@ -6,8 +6,8 @@ Inputs:
   - Cohort:  outputs/mechanistic_twin/ch9_6/cohort_5channel.parquet
 
 Outputs:
-  - loo_forward.json      (aggregate coverage + relative error)
-  - loo_forward.csv       (per-scan results)
+  - loo_forward.json      (aggregate coverage + relative error + sharpness metrics)
+  - loo_forward.csv       (per-scan results with CRPS and interval_score columns)
   - residual_timecourse.json (trend slopes, p-values)
   - loo_stratified.json   (slow/normal/fast coverage)
 
@@ -18,14 +18,25 @@ Method:
   and O_ss(k_n) = k_n * M_SS^2 / (K_CONV + K_CLEAR_O).
   This exactly matches multi_obs_saem.py::compute_patient_log_likelihood.
 - For each (patno, held-out scan):
-    1. Sample from the patient's log-normal posterior (mean, sd) for (k_n, alpha_tox).
+    1. Sample (k_n, alpha_tox) from the patient's log-normal posterior.
     2. Reweight samples by the Gaussian LL of remaining scans (sigma_sbr from diagnostics.json).
     3. Simulate SBR at held-out scan time for each sample.
     4. Compute 95% CI, check if observed is in CI.
+    5. Compute CRPS (Gneiting & Raftery 2007) and interval score at α=0.05.
 - Trend analysis: for patients with >=3 scans, fit linear regression of
   (observed - predicted) vs visit index, report slope p-value.
 - Stratification: pct_loss_per_yr thresholds on informative subset (sigma_logkn < 1.0).
   Patients with pct_loss >= 99 are capped at 50%/yr to avoid ceiling artifacts.
+
+Sharpness metrics (Gneiting & Raftery 2007 JASA, DOI 10.1198/016214506000001437):
+- CRPS: Continuous Ranked Probability Score via empirical-distribution formula.
+  CRPS(F, y) = E|X - y| - 0.5 * E|X - X'|   (Szekely 2003 pairwise formulation).
+  Lower is better. Reports both marginal uncertainty (width) and miscalibration.
+- Interval score (IS) at α=0.05: (u - l) + (2/α)*max(l-y,0) + (2/α)*max(y-u,0).
+  Strictly proper; penalizes BOTH wide bands AND misses. Lower is better.
+- mean_ci_width: average (ci_high - ci_low). If >> 1.0 on SBR scale [0,3],
+  coverage may be trivially satisfied by diffuse-prior bands rather than
+  tight mechanistic calibration.
 
 Note on 100%/yr ceiling: 49 patients have pct_loss_per_yr = 100.0 (SS exponential
 ceiling artifact). These are capped at 50.0 for stratification but included in all
@@ -79,6 +90,44 @@ def predict_sbr(k_n: np.ndarray, alpha_tox: np.ndarray,
     t_hr = t_years * HR_PER_YR
     log_ratio = np.clip(-decay_hr * t_hr, -50.0, 0.0)
     return sbr_anchor * np.exp(GAMMA * log_ratio)
+
+
+def interval_score(ci_low: float, ci_high: float, obs: float,
+                   alpha: float = 0.05) -> float:
+    """Gneiting & Raftery 2007 JASA interval score at confidence (1-alpha).
+
+    IS_α = (u - l) + (2/α) * max(l - y, 0) + (2/α) * max(y - u, 0)
+
+    Lower is better. Penalizes BOTH wide bands AND miscoverage. Coverage
+    alone can be inflated by wide diffuse-prior bands; IS is a strictly-
+    proper scoring rule that balances calibration against sharpness.
+    """
+    width = ci_high - ci_low
+    low_miss = max(ci_low - obs, 0.0)
+    high_miss = max(obs - ci_high, 0.0)
+    return width + (2.0 / alpha) * (low_miss + high_miss)
+
+
+def crps_weighted(samples: np.ndarray, weights: np.ndarray, obs: float) -> float:
+    """Weighted CRPS via Szekely 2003 pairwise-absolute-difference formula.
+
+    CRPS(F, y) = E|X - y| - 0.5 * E|X - X'|
+
+    Lower is better. Equals MAE when the distribution is a delta at the median.
+    Rewards sharp, well-calibrated predictive distributions.
+    """
+    samples = np.asarray(samples)
+    w = np.asarray(weights)
+    w = w / max(w.sum(), 1e-30)
+    mae = float(np.sum(w * np.abs(samples - obs)))
+    # Resample to empirical distribution (weighted) for pairwise term
+    rng = np.random.default_rng(0)
+    n = len(samples)
+    idx = rng.choice(n, size=n, p=w)
+    s = np.sort(samples[idx])
+    # Σ_i Σ_j |s_i - s_j| / n² = (2/n²) Σ_i s_i (2i - n + 1)
+    pairwise = float((2.0 / (n * n)) * np.sum(s * (2 * np.arange(n) - n + 1)))
+    return mae - 0.5 * pairwise
 
 
 def log_sbr_ll(obs: float, pred: np.ndarray, sigma: float) -> np.ndarray:
@@ -191,6 +240,12 @@ def loo_one_patient(
         # Weighted mean as point estimate
         pred_mean = float(np.sum(w * preds))
 
+        # Sharpness metrics (Gneiting & Raftery 2007) — address "wide bands
+        # inflate coverage" concern via strictly proper scoring rules.
+        is_score = interval_score(ci_low, ci_high, obs_sbr, alpha=0.05)
+        crps_val = crps_weighted(preds_obs, w, obs_sbr)
+        ci_width = float(ci_high - ci_low)
+
         results.append({
             "patno":       int(patno),
             "visit_index": int(i),
@@ -200,8 +255,11 @@ def loo_one_patient(
             "pred_mean":   pred_mean,
             "ci_low":      ci_low,
             "ci_high":     ci_high,
+            "ci_width":    ci_width,
             "in_ci":       bool(ci_low <= obs_sbr <= ci_high),
             "rel_error":   float(abs(obs_sbr - pred_mean) / max(abs(obs_sbr), 1e-6)),
+            "interval_score": float(is_score),
+            "crps":        float(crps_val),
             "ess":         float(ess),
             "n_scans":     int(n),
         })
@@ -367,10 +425,21 @@ def main() -> None:
         "sigma_sbr_used":                sigma_sbr,
         "runtime_seconds":               round(elapsed, 1),
         "coverage_by_horizon":           horizons,
+        # Sharpness metrics (Gneiting & Raftery 2007) — address concern that
+        # 97.9% coverage could be inflated by wide diffuse-prior bands. Lower
+        # is better for both CRPS and interval_score.
+        "mean_ci_width":                 float(df_res["ci_width"].mean()) if "ci_width" in df_res else None,
+        "median_ci_width":               float(df_res["ci_width"].median()) if "ci_width" in df_res else None,
+        "mean_interval_score":           float(df_res["interval_score"].mean()) if "interval_score" in df_res else None,
+        "median_interval_score":         float(df_res["interval_score"].median()) if "interval_score" in df_res else None,
+        "mean_crps":                     float(df_res["crps"].mean()) if "crps" in df_res else None,
+        "median_crps":                   float(df_res["crps"].median()) if "crps" in df_res else None,
         "note": (
             "Anchor scan (visit_index=0, t=0) excluded: at t=0 all samples predict "
             "sbr_anchor exactly, yielding trivially 100% coverage. "
-            "All n_scans_evaluated are true forward predictions (t > 0)."
+            "All n_scans_evaluated are true forward predictions (t > 0). "
+            "Sharpness metrics (Gneiting & Raftery 2007 JASA 10.1198/016214506000001437) "
+            "balance coverage against CI width; lower is better."
         ),
     }
     OUT_DIR.mkdir(parents=True, exist_ok=True)
