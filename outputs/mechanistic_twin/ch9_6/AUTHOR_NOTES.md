@@ -90,3 +90,42 @@ The §9.6 contribution now reads as:
 3. An external-ish validation — 1,190-patient serum NfL held out, predict dN/dt from fitted N(t), report R²
 
 This is a tighter, more defensible §9.6 than the aspirational "5-channel overdetermined" original framing.
+
+## Task 5 discovery: SAEM forward model is SS, not ODE (2026-04-15)
+
+**Critical gap between Task 2 identifiability audit and SAEM v3 calibration.**
+
+The SAEM's forward model uses a **steady-state approximation**:
+```
+O_ss(k_n) = k_n · M_SS² / (K_CONV + K_CLEAR_O)   [α_tox NOT in O_ss]
+F_ss(k_n) = K_CONV · O_ss / K_CLEAR_F            [also independent of α_tox]
+SBR(t)    = SBR_0 · exp(GAMMA · (-α_tox · O_ss · t_hr))   [α_tox enters here only]
+```
+
+The Task 2 identifiability audit used the full 4-state scipy ODE (transient M, O, F, N).
+
+**Consequences for §9.6:**
+
+1. **Under SS, α_tox is informed ONLY by SBR** (via the exponential decay). The other 4 channels (GFAP, aSyn_agg%, SAA_TTT, NEV_αsyn) depend only on O_ss, which is a function of k_n alone.
+
+2. **GFAP does NOT tighten α_tox in the SAEM.** It tightens k_n (same as the other O-channels). This CONTRADICTS the earlier prose draft that positioned GFAP as an "α_tox anchor."
+
+3. **Task 2's κ=19.86 is best-case.** It assumes all 5 channels carry α_tox information via transient O(t) feedback. Under the SAEM's SS regime, the effective α_tox channel count is 1 (SBR only), so the actual SAEM identifiability is SS-restricted.
+
+4. **α_tox improvements come from cohort size, not channel count.** SAEM v2 had 304 patients with σ(log α_tox) = 1.959. SAEM v3 will have more patients (esp. the 355 SBR+GFAP+NfL triples) — that's the real source of α_tox tightening.
+
+**Scientifically defensible — but needs honest framing:**
+
+In §9.6 prose (Task 9):
+- Do NOT claim "GFAP improves α_tox identifiability"
+- DO claim "GFAP provides an independent probe of oligomeric burden (O_ss), sharpening k_n estimation and indirectly informing α_tox through the SBR-channel exponential"
+- Acknowledge the SS vs full-ODE gap as a limitation; position Task 2's ODE-based κ as "a best-case structural identifiability result" and the SAEM SS as "a tractable population-level estimator whose practical identifiability is dominated by SBR for α_tox and by all 5 channels for k_n"
+- Cite this as motivation for future work (Paper 12 phys-GIMIN): "A full-ODE SAEM would unify the identifiability regime; deferred to future work."
+
+**Why the SAEM chose SS:**
+- SS is valid: O(t) and F(t) reach quasi-steady state within ~1000 hr (~6 weeks), and all PPMI observations are at months-to-years timescales. The SS approximation is numerically accurate.
+- SS is fast: no per-patient ODE integration in each E-step iteration — the SAEM can scale to 1,065 patients in <2 hr. Full ODE would be 10-100× slower.
+- SS is back-compatible: SAEM v1/v2 used it; switching to full ODE breaks checkpoint compatibility and requires re-validation.
+
+**Recommendation for Task 6:**
+Accept the SS regime for SAEM v3 as-is. Do not attempt to change the SAEM's forward model mid-project. Document the SS-vs-ODE discrepancy honestly in §9.6. The scientific contribution of Task 2 (structural identifiability proof under full ODE) is still valid and publishable; it just has a different scope than the SAEM calibration.
