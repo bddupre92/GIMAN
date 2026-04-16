@@ -246,3 +246,72 @@ Task 2 showed α_tox is "population-identifiable, individual-sloppy." Task 7's N
 - Serum NfL at the individual level captures a mix of genuine α_tox variation + measurement noise + comorbidities, which our SS model cannot disentangle
 
 This is an honest, internally consistent narrative for §9.6.
+
+## Task 8.5: Pre-prose audit additions (2026-04-16)
+
+### 8.5a — Matched-cohort GFAP ablation (**supersedes naive 185× claim**)
+
+Same 357 patients, same visits, same other 4 channels. Only GFAP presence differs.
+
+| Metric | WITH GFAP | WITHOUT GFAP | Ratio |
+|---|---|---|---|
+| σ(log k_n) median | 0.019 | 0.725 | **37× tightening** |
+| σ(log α_tox) median | 0.404 | 0.748 | 1.9× tightening |
+| pct_loss/yr median | 9.32% | 8.45% | ~same |
+| cor(log k_n, log α_tox) | **−0.043** | −0.463 | decoupled by GFAP |
+
+**37× exceeds Fisher-info theory's naive 1.5-5× prediction** (Liu 2023 β=0.313) because in our SS model GFAP is a DIRECT functional readout of O_ss(k_n), not a correlational coupling. O_ss = k_n·M²/(K_CONV + K_CLEAR_O) has no α_tox dependence.
+
+§9.6 framing: "A matched-cohort ablation (same 357 patients, visits, and 4 other channels) isolates the GFAP channel effect to 37-fold σ(log k_n) tightening. GFAP additionally decouples the sloppy ridge, reducing cor(log k_n, log α_tox) from −0.46 to −0.04."
+
+### 8.5b — CRPS + interval score sharpness
+
+Per Gneiting & Raftery 2007 JASA (DOI 10.1198/016214506000001437), coverage alone can be inflated by wide diffuse-prior bands.
+
+| Metric | Value | Interpretation |
+|---|---|---|
+| Coverage (95% CI) | 97.9% | (unchanged) |
+| Median CI width | 0.75 | **~25% of SBR dynamic range [0, 3]** — informative, not trivial |
+| Median interval score | 0.75 | miscoverage penalty rarely active |
+| Median CRPS | 0.07 | tight calibration |
+
+Bands are narrow enough that the 97.9% coverage is a genuine calibration finding.
+
+### 8.5c — Comparison matrix vs published PD models
+
+| Study | N | Channels | Model | Code | Headline |
+|---|---|---|---|---|---|
+| **Ours (SAEM v3)** | **2,118** | **5 + NfL held** | **4-state ODE (k_n, α_tox)** | — | LOO 97.9%, CRPS 0.07 |
+| Gupta 2025 CPT [10.1002/cpt.3593] | 615 | 2 (SBR + UPDRS IRT) | Empirical IRT | No | ρ=0.73-0.78 |
+| Véronneau-Veilleux 2021 JPKPD | Simulation | PK + DA + basal ganglia | ODE neurocomputational | No | Qualitative |
+| Iljina 2016 PNAS | In vitro | Single-molecule fluorescence | 2-step kinetics | No | Priors only |
+| Koval 2021 Sci Rep (AD) | 1,800 ADNI | Cortical + PET + cognition | Riemannian SAEM | **Leaspy GitHub** | Beat 56 TADPOLE |
+| Hähnel 2024 npj PD | 1,124 | Motor + non-motor | LTJMM+VaDER | Partial | 2 subtypes cross-cohort |
+| Chen 2024 J Neurol | 354 | 6 milestones | LCA | No | 83%/17% slow/rapid |
+
+**Recommended §9.6 comparison paragraph:**
+
+> The closest prior PPMI-based pharmacometric model is Gupta et al. (2025, CPT), who fit a modified IRT linking striatal binding ratio to MDS-UPDRS Parts I–III in 615 early-stage patients, reporting Spearman ρ = 0.73–0.78 but acknowledging that caudate/cognitive symptoms were not captured. Our SAEM v3 extends this in four ways: (i) it fits 2,118 PPMI patients — more than three times Gupta's cohort and larger than any single published PD NLME model we identified; (ii) it estimates **mechanistic** ODE parameters (seeding rate k_n, neurotoxicity coupling α_tox) rather than empirical item-response slopes, establishing structural identifiability of the full 4-state model (FIM κ = 19.86); (iii) it integrates five orthogonal channels (SBR + CSF α-syn + SAA_TTT + NEV α-syn + CSF-GFAP Simoa), whereas Gupta uses two and Véronneau-Veilleux (2021) uses none from patients; and (iv) matched-cohort GFAP addition tightens σ(log k_n) 37-fold, directly resolving Gupta's caudate/cognitive gap. Methodologically we parallel Koval et al.'s AD Course Map SAEM (2021), but apply it to coupled α-syn/neurodegeneration ODEs rather than phenomenological Riemannian manifolds.
+
+### Future Leaspy head-to-head (optional supplement)
+
+`aramis-lab/leaspy` is the only practically runnable published SAEM on PPMI-like data. Could be fit to our 5-channel longitudinal cohort as a **phenomenological baseline** for RMSE/AIC head-to-head. By design Leaspy is non-mechanistic (no ODE parameters), so this comparison would contrast interpretability (mechanistic parameters + identifiability proof) rather than raw fit quality. Deferred to supplement / Paper 12 unless reviewer demands.
+
+### Citation additions for §9.6
+
+Add to audit.citation (not already there):
+- `gupta2025cpt` DOI 10.1002/cpt.3593 (PMID 40077911)
+- `koval2021admap` DOI 10.1038/s41598-021-87434-1
+- `veronneauveilleux2021` DOI 10.1007/s10928-020-09723-y
+- `iljina2016pnas` DOI 10.1073/pnas.1524128113
+- `hahnel2024npjpd` DOI 10.1038/s41531-024-00712-3
+- `chen2024jneurol` DOI 10.1007/s00415-024-12645-1
+- `gneiting2007jasa` DOI 10.1198/016214506000001437
+- `liu2023gfap` DOI 10.1186/s12974-023-02812-y (J Neuroinflammation — already in audit but verify DOI)
+- `savickarlsson2009aaps` DOI 10.1208/s12248-009-9133-0
+- `seibyl1997jnm` PMID 9293807
+- `buchert2020ejnmmi` DOI 10.1186/s40658-020-00304-z
+- `kerstens2020ejnmmi` DOI 10.1186/s13550-020-00629-x
+- `feuerstein2026prd` DOI 10.1016/j.parkreldis.2026.108266
+
+Run `scripts/mechanistic_twin/add_ch9_6_citations.py` expansion (or add via Zotero RT8B9N2J sync).
