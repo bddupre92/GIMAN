@@ -267,6 +267,24 @@ The M1 population-level decay rates were biologically plausible: caudate mean $0
 
 This real-data result confirms the SBC prediction: while $k_{\text{spread}}$ is structurally identifiable and recoverable in simulation ($r = 0.892$), the spatial propagation signal in real DaT-SPECT data is insufficient to outperform a simpler model that independently fits each region. The $\Delta$AIC of 5,668 indicates that the propagation model's single degree of freedom cannot capture the patient-specific regional variation that M1's four parameters accommodate. The honest conclusion is that four-region DaT-SPECT data at PPMI-grade temporal resolution resolve \textit{per-region} decline rates but not the \textit{mechanistic coupling} between regions.
 
+\begin{table}[t]
+\centering
+\caption{Comparison with prior network-diffusion / spatial-propagation identifiability studies.}
+\label{p8a:tab:competitors}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Study & Disease & Parameter-recovery SBC? & FIM analysis? & Remediated model? \\
+\midrule
+Raj 2012~\cite{raj2012}             & AD    & No                   & No & No \\
+Pandya 2019~\cite{pandya2019}       & AD/PD & No                   & No & No \\
+Schafer 2021~\cite{schafer2021}     & AD    & Partial (MCMC only)  & No & No \\
+Abdelgawad 2022~\cite{abdelgawad2022} & PD  & No                   & No & No \\
+\textbf{This work}                   & \textbf{PD} & \textbf{Yes (200 SBC reps)} & \textbf{Yes (CRLB)} & \textbf{Yes (1-parameter $k_{\text{spread}}$)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ============================================================================
 % DISCUSSION
 % ============================================================================

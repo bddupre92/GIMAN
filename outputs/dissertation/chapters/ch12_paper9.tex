@@ -36,9 +36,9 @@ hazards, and formal identifiability analysis are applied.
 \textbf{Results:}
 Path~B is the headline finding: the $\Nfrac \times \LEDD$ interaction
 significantly predicts the ON--OFF gap ($n{=}3{,}178$ visits, 772 patients;
-$\Delta\mathrm{AIC}{=}{-}72$ vs.\ baselines; mixed-effects $\beta(\Nfrac){=}{-}12.57$,
+$\Delta\mathrm{AIC}{=}{-}72$ vs.\ baselines; mixed-effects $\beta(\Nfrac){=}{-}11.62$,
 $p{<}10^{-37}$, conditional $R^2{=}0.491$). Each 10\% decrease in $\Nfrac$
-increases the ON--OFF gap by 1.26 UPDRS-III points. The Hill model fails:
+increases the ON--OFF gap by 1.16 UPDRS-III points. The Hill model fails:
 free $h{=}0.13$, confirming a sub-EC$_{50}$ linear regime. Path~A is an
 informative negative: $\Nfrac$ does not outperform simple elapsed time for
 OFF-state UPDRS-III ($\Delta\mathrm{AIC}{=}{+}803$). Path~C is an
@@ -561,13 +561,13 @@ and the model comparison is summarized in Figure~\ref{fig:path_b_daic}.
 
 The mixed-effects model (B5) with patient-specific random intercepts
 confirms the interaction on 3,058 visits from 652 patients. The
-population-level $\Nfrac$ coefficient is $\beta(\Nfrac){=}{-}12.57$
+population-level $\Nfrac$ coefficient is $\beta(\Nfrac){=}{-}11.62$
 ($p < 10^{-37}$), and the interaction term
 $\beta(\Nfrac \times \LEDD_s){=}2.13$ ($p{=}0.011$). Conditional
 $R^2{=}0.491$, substantially higher than OLS $R^2{=}0.051$, reflecting
 important between-patient heterogeneity (random-intercept
 variance${}=22.93$). Each 10\% decrease in $\Nfrac$ increases the
-ON--OFF gap by 1.26 UPDRS-III points---a clinically meaningful effect
+ON--OFF gap by 1.16 UPDRS-III points---a clinically meaningful effect
 given the MDS-UPDRS-III minimal clinically important difference of
 3.25 points~\cite{holford2006}.
 
@@ -754,7 +754,7 @@ examining the test statistics.
 H & Hypothesis & Key Statistic & Verdict \\
 \midrule
 1 & Interaction beats baselines & $\Delta$AIC $= -72, -71$ & PASS \\
-2 & $\Nfrac$ moderates benefit & $\beta = -12.57$, $R^2_c = 0.49$ & PASS \\
+2 & $\Nfrac$ moderates benefit & $\beta = -11.62$, $R^2_c = 0.49$ & PASS \\
 3 & Wearing-off null & $\rho = -0.05$, $C = 0.52$ & Inform.\ neg. \\
 4 & Time beats $\Nfrac$ (OFF) & $\Delta$AIC $= +803$ & Inform.\ neg. \\
 5 & Sub-EC$_{50}$ regime & $h_\text{free} = 0.13$ & Confirmed \\
@@ -780,9 +780,9 @@ LEDD produces less synaptic dopamine. This manifests as a larger ON--OFF
 gap---not because the OFF state worsens faster, but because the ON state
 improves less.
 
-The mixed-effects coefficient $\beta(\Nfrac) = -12.57$ translates to a
+The mixed-effects coefficient $\beta(\Nfrac) = -11.62$ translates to a
 concrete clinical prediction: a patient who has lost 10\% of dopaminergic
-neurons will show 1.26 fewer UPDRS-III points of improvement from the same
+neurons will show 1.16 fewer UPDRS-III points of improvement from the same
 LEDD compared to an otherwise identical patient with full neuronal
 complement. While this effect size is modest relative to the UPDRS-III
 scale (0--132), it accumulates over disease progression and has
@@ -1031,8 +1031,8 @@ establish that:
 \begin{enumerate}
   \item $\Nfrac$ moderates levodopa treatment benefit through an
     interaction with LEDD ($\Delta\text{AIC} = -72$; $\beta(\Nfrac)
-    = -12.57$, $p < 10^{-37}$): each 10\% neuron loss reduces
-    treatment benefit by 1.26 UPDRS-III points.
+    = -11.62$, $p < 10^{-37}$): each 10\% neuron loss reduces
+    treatment benefit by 1.16 UPDRS-III points.
 
   \item PPMI patients operate in the sub-EC$_{50}$ linear regime
     of the dose--response curve ($h_\text{free} = 0.13$), rendering

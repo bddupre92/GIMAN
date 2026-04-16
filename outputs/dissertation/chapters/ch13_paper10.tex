@@ -30,6 +30,13 @@ A fifth, methodological question closes the chapter: a formal NASEM self-audit a
 
 We ported the Variant~B slow-fast-collapse closed-form forward model from Phase~2 into Python (\texttt{src/giman\_pipeline/mechanistic\_twin\_v2/forward\_model.py}) and implemented an HDF5-backed \texttt{PosteriorStore} (per-patient versioned sample arrays with ESS metadata) plus a SIR updater with an effective-sample-size trigger for optional Metropolis--Hastings rejuvenation. Constants $K_\text{PROD}, K_\text{CLEAR}^M, K_\text{CONV}, K_\text{CLEAR}^O, K_\text{AGE}, \gamma, \sigma_\text{SBR}$ are pinned identically to Phase~2 to ensure bitwise reproducibility of the forward model across the Julia--Python boundary.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{p10_fig1_architecture.pdf}
+\caption[Paper 10 architecture]{Bidirectional-ready mechanistic twin architecture. The Phase~2 closed-form forward model is loaded from HDF5 \texttt{PosteriorStore}; on arrival of a new DaT-SPECT observation, a Sequential Importance Resampling (SIR) step reweights the stored samples by the Gaussian observation likelihood and (when effective sample size drops below threshold) triggers Metropolis--Hastings rejuvenation. The updated posterior feeds back into the store, enabling episodic bidirectional flow.}
+\label{fig:p10-architecture}
+\end{figure}
+
 \subsection{Statistical and Computational Methodology}
 
 We implement bidirectional posterior updating via Sequential Monte Carlo samplers on static parameters~\cite{chopin2002sequential,delmoral2006smc,chopin2020introduction}. When a new DaT-SPECT observation arrives, we multiply existing importance weights by the observation's closed-form Gaussian likelihood under the Phase~2 slow-fast-collapse forward model ($\sigma = 0.20$, matching Phase~2 IS), renormalise, and trigger multinomial resampling whenever ESS drops below 30\% of $N$ (Kong--Liu--Wong~\cite{kong1994sequential}). The protocol has direct pharmacometric precedent: Dosne et al.~\cite{dosne2016sir,dosne2017automated} established SIR as a NONMEM-standard uncertainty-quantification tool, and Yngman et al.~\cite{yngman2022fullrandom} extended it to full random-effects models. Sample diversity is restored by an MH rejuvenation step per South et al.~\cite{south2019smc}, who proved SIR degenerates without rejuvenation under informative new data; our 3-parameter posteriors remain well below the dimensional-stability threshold of Beskos et al.~\cite{beskos2014stability}. Diagnostics follow Vehtari et al.~\cite{vehtari2017practical,vehtari2024psis,vehtari2021rhat} --- SIR vs full MCMC refit gated on PSIS $\hat{k} < 0.7$ and split-$\hat{R} < 1.01$. Point estimates are posterior medians per Gelman et al.~\cite{gelman2013bda3}, Vehtari \& Ojanen~\cite{vehtari2012survey}, and pharmacometric convention~\cite{mould2013basic2,mould2014basic3}; where the weighted mean empirically outperformed the median on held-out MAE we report both and discuss the regime-dependence explicitly. Credibility follows Viceconti et al.~\cite{viceconti2021insilico,viceconti2025credibilityml} VVUQ and the Musuamba et al.~\cite{musuamba2021credibility} risk-informed credibility matrix; model qualification follows Friedrich~\cite{friedrich2016mqm} QSP-MQM. Regulatorily, approximate posterior updates with pre-specified diagnostics are accepted practice under MIDD~\cite{marshall2016goodpractices,marshall2019midd,marshall2023harmonized,ich_m15_2024,galluppi2024midd}.
@@ -60,9 +67,23 @@ For 644 patients with $\geq 3$ DaT-SPECT scans, sequential SIR reweighting from 
 \label{fig:p10-bidirectional}
 \end{figure}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{p10_fig7_patient_cases.pdf}
+\caption[Per-patient posterior update examples]{Per-patient posterior update trajectories for three representative patients spanning slow, typical, and fast progressors. Shaded bands are 90\% credible intervals of the forward-simulated SBR trajectory after each SIR update; markers are the observed DaT-SPECT measurements consumed to reweight the posterior. Credible-interval width contracts monotonically with each additional observation.}
+\label{fig:p10-patient-cases}
+\end{figure}
+
 \subsection{External Validation --- HC-vs-PD Gap Within Literature Range}
 
 LCC-HC versus PPMI-HC putaminal SBR gap is 17.5\% (scanner/site effects). LCC-HC versus PPMI-PD putaminal SBR gap is $+114\%$, within the 40--200\% range reported by Wakasugi~2024~\cite{wakasugi2024combat} and Chahine~2020~\cite{chahine2020ratesirbd} for cross-sectional multi-site cohorts. This is a cross-sectional positive replication; longitudinal external decay validation is deferred to future work.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{p10_fig4_external_lcc.pdf}
+\caption[External LCC cross-sectional validation]{Cross-sectional LCC external validation. (A)~Baseline putaminal SBR for LCC healthy controls ($N = 43$), PPMI healthy controls, and PPMI PD. LCC-HC vs PPMI-HC gap of 17.5\% reflects scanner/site effects; LCC-HC vs PPMI-PD gap of 114\% is within the 40--200\% literature range. (B)~ComBat-style harmonisation residuals indicate site, not biology, is the dominant source of the HC-HC gap.}
+\label{fig:p10-external}
+\end{figure}
 
 \subsection{Head-to-Head --- Both Models Near Random, Graph-DT Marginally Better}
 
@@ -82,6 +103,13 @@ Paired $p$ & $0.046$ & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{p10_fig5_headtohead_cindex.pdf}
+\caption[Head-to-head $C$-index]{Paired-bootstrap $C$-index on time-to-NP4OFF-$\geq 1$ (626 shared-cohort patients, 480 events). (A)~Bootstrap distribution of $C$-indices for the mechanistic twin (\texttt{pct\_loss\_per\_yr}) and Graph-DT (sum of 5-yr CIF). Both distributions straddle 0.5. (B)~Paired $\Delta$($C$-index) distribution is shifted mildly negative ($-0.047$, paired $p{=}0.046$), consistent with wearing-off being a PK-driven endpoint that the mechanistic twin's neurodegeneration-rate signal does not capture.}
+\label{fig:p10-headtohead}
+\end{figure}
 
 Both $C$-indices are near $0.5$, indicating wearing-off is poorly predicted by either model's primary risk signal. The interpretation --- developed in Chapter~\ref{ch:paper9} and confirmed here on an independent cohort and endpoint --- is that wearing-off is PK-driven, not neurodegeneration-driven. Graph-DT's marginal edge comes from integrating a broader feature base (UPDRS, staging, $k$NN graph context), not from mechanistic advantage. This is exactly the complementarity-not-competition signal the dissertation narrative builds on in Chapter~\ref{ch:discussion}.
 
@@ -105,6 +133,20 @@ Observed mean $\Delta$gap & $1.299$ & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{p10_fig6_counterfactual_scatter.pdf}
+\caption[Observational counterfactual scatter]{Observed versus predicted $\Delta$gap at 481 LEDD-escalation events ($\geq 200$~mg) across 335 PPMI patients. Predictions are from the Phase~4 Path~B severity-controlled interaction model without retuning. Dashed line is $y = x$; solid line is the paired-bootstrap regression fit (slope $1.074$, 95\% CI $[0.877, 1.285]$).}
+\label{fig:p10-counterfactual}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{p10_fig8_calibration_bins.pdf}
+\caption[Counterfactual calibration bins]{Decile-binned calibration of predicted against observed $\Delta$gap. Bin means lie close to the identity line across the full prediction range (including large-escalation tails), with bootstrap 95\% CIs overlapping identity in every bin. Consistent with the tabulated slope of 1.07, this is a strong positive for the NASEM control-as-purpose criterion.}
+\label{fig:p10-calibration}
+\end{figure}
 
 The slope 95\% CI contains 1.0 and the intercept CI contains 0. Predicted and observed mean $\Delta$gap differ by $\sim 8\%$. This is a strong positive for the NASEM \emph{control-as-purpose} criterion: coefficients fit on Phase~4 data predict on average the correct magnitude of clinical response to a real drug change in real patients, without retuning.
 
@@ -147,12 +189,39 @@ Total & \multicolumn{2}{l}{16 / 21 (76.2\%); mean 2.29; no absent criteria} \\
 
 \paragraph{Gap to full NASEM compliance.} The sensor-continuous prospective tier (criterion~5 score~3) requires wearable or biosensor integration with real-time update latency. That is correctly scoped as Phase~6 (MindMend) future work in Chapter~\ref{ch:conclusion}. The full per-criterion evidence and gaps record is committed at \texttt{outputs/mechanistic\_twin/paper10\_mech\_vs\_giman/nasem\_audit.json}.
 
+\begin{table}[H]
+\centering
+\caption{Comparison with prior PD mechanistic digital twins, situated in the NASEM~2024 maturity framework.}
+\label{p10:tab:competitors}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Study & Bidirectional update? & External validation? & NASEM audit? & Maturity tier \\
+\midrule
+V\'{e}ronneau 2020~\cite{veronneau2020}            & No             & No              & No       & one-shot-fit \\
+Hemedan 2026~\cite{hemedan2026}                    & No             & No              & No       & one-shot-fit \\
+Corral-Acero 2020~\cite{corralacero2020cardiac} (cardiac) & Yes (episodic) & Yes           & Informal & episodic-update \\
+Coorey 2021~\cite{coorey2021healthdt} (cardiac)    & Yes (episodic) & Yes             & Informal & episodic-update \\
+\textbf{This work (PD)}                             & \textbf{Yes (SIR episodic)} & \textbf{Cross-sectional LCC} & \textbf{Formal 16/21} & \textbf{bidirectional-ready} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Discussion}
 \label{sec:p10-discussion}
 
 The four empirical questions close in a consistent direction: the mechanistic twin has counterfactual validity \emph{and} bidirectional-update capacity, but its predictive advantage is domain-specific --- it excels where pharmacology and imaging meet, and it does not beat ML models on signals outside that niche. Chapter~\ref{ch:discussion} develops the complementarity-not-competition framing that this chapter underwrites.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{p10_fig9_dissertation_arc.pdf}
+\caption[Dissertation arc]{Paper-by-paper dissertation arc situating Paper~10 at the closure of the mechanistic strand. Papers~1--6 build the correlational GIMAN stack (classification, imputation, transition timing, conformal survival, temporal validation, unified pipeline). Papers~7--9 build the static mechanistic twin (SBR calibration, identifiability, PK-PD coupling). Paper~10 operationalises bidirectional update and formally audits the result against the NASEM~2024 criteria. Together the papers demonstrate the complementarity-not-competition relationship between data-driven and mechanistic models in PD digital-twin research.}
+\label{fig:p10-arc}
+\end{figure}
+
 Two features of the methodological contribution deserve emphasis. First, the SIR update is \emph{regulatorily defensible} --- it has NONMEM-field-standard precedent (Dosne~2016/2017~\cite{dosne2016sir,dosne2017automated}) and fits inside the current MIDD harmonised guidance (ICH~M15, 2024~\cite{ich_m15_2024}; Galluppi~2024~\cite{galluppi2024midd}). Second, no CPT:PSP or JPKPD paper 2023--2026 does bidirectional Bayesian updating for PD (verified via systematic PubMed sweep), so the architectural contribution is novel in the target venue space (\emph{npj Parkinson's Disease} / \emph{Journal of Parkinson's Disease}).
+
+\paragraph{Clinical-pharmacology workflow.} Concretely, a bidirectional-ready mechanistic twin can be embedded in patient-level pharmacometric workflows to update individual $N(t)$ estimates at each clinic visit: each new DaT-SPECT scan triggers a SIR reweighting that refines the patient's posterior over $(k_n, \alpha_\text{tox}, T_\text{tox})$, which in turn updates the Path~B interaction coefficient prediction for the patient's ON--OFF gap response to LEDD. In adaptive trials of disease-modifying therapies, this supports per-visit dose optimisation, futility-stopping by posterior tail mass, and trial-arm switching when the updated individual posterior crosses a pre-specified enrichment threshold --- a workflow not currently deliverable by any published PD digital twin.
 
 \paragraph{Reverse causation and confounding by indication.} Physicians escalate LEDD because patients are clinically worsening, so observed $\Delta$gap reflects both the drug response and ongoing progression. Two design features guard against this interpretation. First, the prediction formula includes the current severity change $\Delta$\texttt{updrs3\_off\_c} as an explicit covariate, absorbing the progression component. Second, the first-difference structure (predicting $\Delta$gap rather than absolute gap) cancels patient-level fixed effects, so stable between-patient differences (e.g., physician prescribing style, baseline disease severity) drop out of the calibration slope. The resulting slope of 1.07 therefore measures the mechanistic drug-response component specifically; it is not a causal claim about LEDD escalation itself but a calibration claim about the mechanistic model's prediction of the drug-response portion of $\Delta$gap.
 

@@ -27,9 +27,9 @@ No computational model currently predicts the timing or direction of NSD-ISS sta
     \item \textbf{Population context:} How do similar patients' trajectories inform individual predictions?
 \end{enumerate}
 
-\subsection{Contributions}
+\subsection{Research Question and Contributions}
 
-This work makes four contributions:
+The primary research question of this study was: \emph{can a graph-informed deep survival framework predict per-patient NSD-ISS stage-transition timing---including bidirectional forward and backward transitions---more accurately than a classical multi-state Markov baseline while providing population-contextualised ``patients-like-you'' visualisation}? This work makes four contributions:
 \begin{enumerate}
     \item We characterize NSD-ISS stage transition dynamics in PPMI ($n{=}1{,}900$), including the first quantification of bidirectional transition rates across all seven NSD-ISS stages.
     \item We develop and compare three temporal prediction models---multi-state Markov, Dynamic-DeepHit, and a novel Graph-Informed Digital Twin---establishing the first benchmark for computational NSD-ISS transition prediction.
@@ -365,6 +365,24 @@ The t-SNE projection of GAT node embeddings (Fig.~\ref{p3:fig:graph_analysis}) r
 % ================================================================
 % V. DISCUSSION
 % ================================================================
+\begin{table}[t]
+\centering
+\caption{Comparison with prior transition-timing models on PD and related longitudinal cohorts.}
+\label{p3:tab:competitors}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Study & Target & Cohort & Method & $C_{\text{td}}$ \\
+\midrule
+Jackson 2011~\cite{jackson2011} style Markov & MS/HD states            & various & CTMC       & n/a \\
+Severson 2021~\cite{severson2021}             & Latent HMM              & PPMI 423 & HMM+RF     & n/a \\
+Simuni 2025~\cite{simuni2025}                 & NSD-ISS descriptive     & PPMI 995 & KM + Cox   & 0.70 (Cox) \\
+Lee 2019~\cite{lee2019}                       & Generic competing risks & various  & Dynamic-DeepHit & $\sim$0.78 \\
+\textbf{This work}                            & \textbf{NSD-ISS transitions} & \textbf{PPMI 1{,}900} & \textbf{Graph-DT} & \textbf{0.920 $\pm$ 0.013} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Discussion}
 \label{p3:sec:discussion}
 
@@ -420,4 +438,4 @@ Several limitations should be acknowledged:
 \section{Conclusion}
 \label{p3:sec:conclusion}
 
-We present the first computational models for predicting NSD-ISS stage transition timing in Parkinson's disease. Using 1,900 PPMI patients followed longitudinally, we demonstrate that (1)~bidirectional transitions are dominant, with 39.1\% of all transitions representing stage regression; (2)~deep survival models achieve strong discriminative performance ($C_\text{td} > 0.92$) for transition timing; and (3)~graph-augmented digital twins match purely temporal models ($C_\text{td}$ 0.920 vs.\ 0.924, $p{=}0.108$) while providing population-contextualized predictions and (in the $v5$ training run) 30\% lower fold-to-fold standard deviation. These models enable personalized transition risk assessment and lay groundwork for treatment-response prediction in the NSD-ISS framework.
+We present the first computational models for predicting NSD-ISS stage transition timing in Parkinson's disease. Using 1,900 PPMI patients followed longitudinally, we demonstrate that (1)~bidirectional transitions are dominant, with 39.1\% of all transitions representing stage regression; (2)~deep survival models achieve strong discriminative performance ($C_\text{td} > 0.92$) for transition timing; and (3)~graph-augmented digital twins match purely temporal models ($C_\text{td}$ 0.920 vs.\ 0.924, $p{=}0.108$) while providing population-contextualized predictions and (in the $v5$ training run) 30\% lower fold-to-fold standard deviation. These models enable personalized transition risk assessment and lay groundwork for treatment-response prediction in the NSD-ISS framework. Operationally, per-patient transition-timing predictions at $C_\text{td} > 0.92$ could support neuroprotective trial enrichment by selecting patients with high near-term progression probability, and provide early-stop criteria based on the fitted sojourn-time distributions---both directly actionable in adaptive trial designs at the NSD-ISS $2\text{B} \to 3$ and $3 \to 4$ transition boundaries that carry the heaviest therapeutic-window relevance.

@@ -20,7 +20,7 @@ The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS), propos
 
 Existing imputation methods for clinical data---Multiple Imputation by Chained Equations (MICE)~\cite{buuren2011}, MissForest~\cite{stekhoven2012}, $k$-nearest neighbor imputation---do not exploit patient graph structure and provide no principled uncertainty estimates. Deep imputation methods such as GAIN~\cite{yoon2018}, SAITS~\cite{du2023}, and GRAPE~\cite{you2020} incorporate graph or attention mechanisms but ignore disease staging information. Our prior work on Graph-Informed Multimodal Imputation Networks (GIMIN)~\cite{dupre2025gimin} demonstrated that patient similarity graphs and heteroscedastic decoding improve imputation fidelity, but did not incorporate biological staging.
 
-This paper makes three contributions:
+The primary research question of this study was: \emph{does NSD-ISS stage-conditioning in both the GIMIN patient-similarity graph and the heteroscedastic decoder improve imputation fidelity and downstream staging accuracy on PPMI multimodal clinical data with 39.6\% missingness, while delivering per-feature conformal uncertainty bounds that hold conditionally within each biological stage?} This paper makes three contributions:
 \begin{enumerate}
     \item \textbf{Stage-conditioned GIMIN}: We extend the GIMIN architecture with NSD-ISS stage conditioning in two components---stage-aware patient similarity graphs and a stage-conditioned heteroscedastic decoder---enabling biologically-informed imputation.
     \item \textbf{Per-feature conformal calibration per stage}: We provide distribution-free coverage guarantees conditioned on disease stage through per-feature absolute residual nonconformity scores with stage-conditional quantile thresholds.
@@ -603,6 +603,26 @@ Fig.~\ref{p2:fig:downstream} visualizes the downstream comparison for the three-
 % ================================================================
 % V. DISCUSSION
 % ================================================================
+\begin{table}[t]
+\centering
+\caption{Comparison with prior clinical imputation methods on PD-scale multimodal data.}
+\label{p2:tab:competitors}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Method & Graph-aware & Stage-conditioned & Uncertainty & Best RMSE $^{\dagger}$ \\
+\midrule
+MICE~\cite{buuren2011}             & No  & No  & No       & 145.5 \\
+MissForest~\cite{stekhoven2012}    & No  & No  & Bootstrap & 137.3 \\
+GAIN~\cite{yoon2018}               & No  & No  & No       & 210.0 \\
+SAITS~\cite{du2023}                & Self-attn & No & No   & 246.8 \\
+GRAPE~\cite{you2020}               & Yes & No  & No       & (not evaluated) \\
+\textbf{GIMIN StageDecoder} (this work) & \textbf{Yes} & \textbf{Yes} & \textbf{Per-feature conformal} & \textbf{107.1} \\
+\bottomrule
+\multicolumn{5}{@{}l}{\scriptsize $^{\dagger}$ 10\% mask on PPMI ($n{=}2{,}197$), 3-seed average.}
+\end{tabular}
+\end{table}
+
 \section{Discussion}
 \label{p2:sec:discussion}
 
@@ -640,7 +660,7 @@ Several limitations should be acknowledged. First, all experiments use the PPMI 
 
 \subsection{Clinical Implications}
 
-Stage-conditioned imputation has direct implications for clinical trial enrichment and patient stratification. By preserving stage-discriminative biomarker patterns, downstream staging algorithms can more accurately identify patients' biological disease stages even when key biomarkers (CSF, DaT-SPECT) are missing. This is particularly relevant for sites without access to SAA or DaT-SPECT imaging, where imputation-based staging could enable broader application of the NSD-ISS framework.
+Stage-conditioned imputation has direct implications for clinical trial enrichment and patient stratification. By preserving stage-discriminative biomarker patterns, downstream staging algorithms can more accurately identify patients' biological disease stages even when key biomarkers (CSF, DaT-SPECT) are missing. This is particularly relevant for sites without access to SAA or DaT-SPECT imaging, where imputation-based staging could enable broader application of the NSD-ISS framework. In practice, the +5.1\% downstream balanced-accuracy gain over MICE translates directly into trial-enrichment leverage at community-practice sites: screening pipelines that impute the 39.6\% PPMI-typical missing-value load with GIMIN StageDecoder can stratify candidates by predicted NSD-ISS stage before a biomarker panel is ordered, reducing recruitment failure rates and widening the deployable pool of NSD-ISS-grade trial sites.
 
 The conformal prediction intervals provide a principled basis for clinical decision-making under uncertainty. When an imputed value has a wide stage-conditional interval, clinicians can recognize that the imputation is unreliable and seek additional testing, rather than treating point estimates as ground truth.
 

@@ -21,8 +21,8 @@ The NSD-ISS has been rapidly adopted. Validation studies confirmed that biologic
 \subsection{The Computational Gap}
 Despite rapid clinical adoption, no machine learning model currently predicts NSD-ISS biological stages. This gap has three dimensions: (1)~prediction of current stage from available data; (2)~uncertainty quantification when biological markers are unavailable; (3)~temporal dynamics of stage transitions.
 
-\subsection{Objectives}
-This study has five objectives:
+\subsection{Research Question and Objectives}
+The primary research question of this study was: \emph{can a benchmarked machine-learning framework with calibrated uncertainty predict NSD-ISS biological stage from routinely collected PPMI data, including cross-cohort transportability and a clinical-only feature subset for sites lacking DaT-SPECT or SAA access?} Five specific objectives operationalise this question:
 \begin{enumerate}
     \item Benchmark seven tabular and one graph-based model for NSD-ISS stage prediction across four target formulations using PPMI data ($n{=}2{,}201$)
     \item Compare tabular (gradient-boosted trees) versus graph-based (GAT with patient similarity graphs) approaches
@@ -442,13 +442,31 @@ We report three external validation results in order of clinical informativeness
 % ================================================================
 % V. DISCUSSION
 % ================================================================
+\begin{table}[t]
+\centering
+\caption{Comparison with prior PD / NSD-ISS prediction frameworks.}
+\label{p1:tab:competitors}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Study & Target & Cohort size & Uncertainty & Mechanism-aware \\
+\midrule
+Lian 2024~\cite{adamedgraph} (AdaMedGraph) & Clinical milestones & PPMI $n{=}884$ & None & No \\
+Russo 2025~\cite{russo2025}                & NSD-ISS descriptive & BioFIND 103 & None & No \\
+Simuni 2025~\cite{simuni2025}              & Transition KM       & PPMI 995   & 95\% CIs & No \\
+Diaz-Rincon 2025~\cite{diazrincon2025}     & Medication need     & PPMI 427   & Conformal & No \\
+\textbf{This work}                          & \textbf{NSD-ISS 4 targets} & \textbf{PPMI 2{,}201 + 3 external cohorts 1{,}660} & \textbf{Cross-conformal} & \textbf{Bridged via Chs.~\ref{ch:paper7}--\ref{ch:paper10}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Discussion}
 \label{p1:sec:discussion}
 
 \subsection{Principal Findings}
 This study provides the first machine learning benchmark for NSD-ISS biological stage prediction, yielding three findings with direct clinical implications. First, biological markers proved essential for binary NSD-ISS classification: removing DaT-SPECT features reduced AUC by 25.4\%, confirming that clinical manifestations alone cannot reliably distinguish underlying biological pathology from its absence. This result underscores the irreplaceable role of dopaminergic imaging in the NSD-ISS framework and has implications for clinical deployment in settings where DaT-SPECT is unavailable.
 
-Second, clinical features alone achieved AUC 0.900 for NSD-positive sub-staging (four-class discrimination among confirmed NSD-positive patients). This finding suggests a practical two-stage clinical workflow: an initial biological confirmation step requiring imaging or CSF biomarkers, followed by clinical sub-staging using routinely collected assessments. Such a workflow would reduce the dependence on specialized biomarker assays for ongoing disease monitoring.
+Second, clinical features alone achieved AUC 0.900 for NSD-positive sub-staging (four-class discrimination among confirmed NSD-positive patients). This finding suggests a practical two-stage clinical workflow: an initial biological confirmation step requiring imaging or CSF biomarkers, followed by clinical sub-staging using routinely collected assessments. Such a workflow would reduce the dependence on specialized biomarker assays for ongoing disease monitoring. Operationally, the clinical-only sub-staging model at AUC 0.900 can support trial stratification and recruitment screening at community-practice sites that lack DaT-SPECT or SAA access, extending NSD-ISS-based trial enrichment beyond the specialised imaging centres where the framework was originally validated.
 
 Third, the PPMI-to-BioFIND external validation failure (balanced accuracy 0.516 for binary classification) reflects a fundamental study design confound rather than a model limitation. PPMI's NSD-negative class includes healthy controls with inherently low motor scores, while BioFIND's SAA-negative patients are diagnosed PD with substantially higher motor burden. Models therefore learned to distinguish healthy individuals from PD patients rather than SAA-positive from SAA-negative within a PD population, a distinction that collapses at external validation.
 

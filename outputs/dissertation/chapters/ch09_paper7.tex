@@ -16,6 +16,8 @@ Papers~1--6 of this dissertation established the computational infrastructure fo
 
 Several groups have proposed frameworks for mechanistic PD models~\cite{denaro2024,bakshi2018}, but to date no published study has calibrated a compartmental $\alpha$-synuclein ODE to individual patients from longitudinal neuroimaging data with formal identifiability analysis. Recent adjacent work includes: Hemedan et al.~\cite{hemedan2026} (governed Bayesian twin on PPMI clinical scores); Ivanova \& Karelina~\cite{ivanova2024} (mouse population QSP); Righetti et al.~\cite{righetti2025} (in~vitro $\alpha$-synuclein ODE). None combines (i)~a compartmental $[M, O, F, N]$ state space with (ii)~per-patient Bayesian calibration from (iii)~longitudinal DaT-SPECT imaging with (iv)~formal structural and practical identifiability analysis and (v)~a second biomarker observable for degeneracy breaking.
 
+The primary research question of this study was: \emph{can a per-patient Bayesian posterior over $\alpha$-synuclein aggregation and neurotoxicity parameters be identified from longitudinal DaT-SPECT and CSF $\alpha$-synuclein in PPMI, and does it deliver counterfactual predictions consistent with the PASADENA null imaging endpoint?} A secondary question, addressed in Section~\ref{sec:ch9-6}, is whether extending the observation space from two channels (DaT-SPECT + CSF $\alpha$-syn) to five channels (adding GFAP, NfL, and Simoa-Amprion SAA) delivers further identifiability gains on a larger PPMI cohort ($N = 2{,}118$).
+
 
 \section{Methods}
 \label{sec:p7-methods}
@@ -163,7 +165,7 @@ C (optimistic) & 0.35 & 3.77 & 53.8\% \\
 \end{tabular}
 \end{table}
 
-The PASADENA trial's DaT-SPECT secondary endpoint was negative~\cite{pagano2022}. Our prediction is consistent: the predicted 17.6\% slowing yields an effect size $d \approx 0.055$, far below detection at $N=105$/arm in a 52-week trial. The model would be falsified if a future trial demonstrated ${>}30\%$ SBR-decline slowing, requiring $\eta_\text{abx} > 0.23$.
+The PASADENA trial's DaT-SPECT secondary endpoint was negative~\cite{pagano2022}. Our prediction is consistent: the predicted 17.6\% slowing yields an effect size $d \approx 0.055$, far below detection at $N=105$/arm in a 52-week trial. The model would be falsified if a future trial demonstrated ${>}30\%$ SBR-decline slowing, requiring $\eta_\text{abx} > 0.23$. More generally, this falsifiable counterfactual framework supports adaptive trial design for anti-$\alpha$-synuclein disease-modifying therapies: given a target detection threshold, the per-patient $T_\text{tox}$ posterior quantifies the minimum effect size detectable at a specified sample size, enabling pre-enrollment enrichment for the HIGH-INFO rapid-progressor subgroup in whom a treatment effect is most likely to rise above imaging noise. Chapter~\ref{ch:paper10} operationalises the bidirectional update that replaces the one-shot counterfactual with a per-visit posterior refresh, addressing the NASEM 2024 digital-twin continuous-update criterion.
 
 \begin{figure}[htbp]
 \centering
@@ -175,10 +177,30 @@ The PASADENA trial's DaT-SPECT secondary endpoint was negative~\cite{pagano2022}
 
 \input{chapters/ch09_section96_multichannel}
 
+\begin{table}[t]
+\centering
+\caption{Comparison with prior PD mechanistic / compartmental ODE calibration frameworks.}
+\label{p7:tab:competitors}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Study & Compartmental ODE & Per-patient? & Identifiability analysis & Second observable \\
+\midrule
+V\'{e}ronneau 2020~\cite{veronneau2020} & Yes (population)        & No  & No      & No \\
+Ivanova 2024~\cite{ivanova2024}         & Yes (mouse QSP)         & No  & No      & No \\
+Hemedan 2026~\cite{hemedan2026}         & No (clinical scores)    & Yes & No      & No \\
+Righetti 2025~\cite{righetti2025}       & Yes (in vitro)          & No  & Partial & No \\
+\textbf{This work}                       & \textbf{Yes (4-state $[M,O,F,N]$)} & \textbf{Yes ($n{=}304$)} & \textbf{Structural + practical~\cite{villaverde2016,raue2009}} & \textbf{Yes (SBR + CSF, §9.6 extends to 5 channels)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Discussion}
 \label{sec:p7-discussion}
 
 \textbf{Scope and terminology.} We use ``mechanistic patient-specific model'' rather than ``digital twin'' to describe the current framework, because a clinical-grade digital twin would additionally require explicit drug PK/PD, connectome-mediated spatial propagation, and prospective validation against interventional data. The present work establishes the foundational calibration infrastructure; the full 5-module architecture is described in Appendix~\ref{sec:mech-summary}.
+
+\textbf{Bottom-line result.} The joint SBR + CSF calibration delivered a per-patient Bayesian posterior over the coupled $\alpha$-synuclein--neuron-death ODE in PD: cohort-median implied neuron loss was 3.29\%/yr across 304 PPMI Wave~A patients, sitting within the Fearnley \& Lees canonical 2--5\%/yr range, and adding CSF $\alpha$-synuclein as a second observable reduced the $k_n$--$\alpha_\text{tox}$ correlation from $-0.240$ to $-0.113$ (29\% cohort-wide $k_n$ tightening; 49\% on the HIGH-INFO subset of 106 patients). The §\ref{sec:ch9-6} 5-channel extension on 2{,}118 patients sharpens full-ODE Fisher-Information-Matrix condition number to $\kappa = 19.86$, versus $\kappa \approx 10^{12}$ under a steady-state approximation, empirically demonstrating that transient-state observations are necessary to preserve identifiability.
 
 Three principal findings emerge. \textbf{First}, the SBR-only posterior produces a cohort-median neuron loss rate consistent with the canonical 2--5\%/yr range, providing evidence that the ODE captures real inter-patient disease heterogeneity. \textbf{Second}, adding CSF $\alpha$-synuclein partially breaks the sloppy-ridge degeneracy, enabling per-patient separation of nucleation rate from neurotoxicity coupling. Future oligomeric-specific assays~\cite{majbour2016} could fully resolve the degeneracy. \textbf{Third}, the counterfactual is consistent with the PASADENA null imaging endpoint, correctly predicting an effect below statistical detection in a 1-year trial.
 
