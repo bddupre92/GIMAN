@@ -318,6 +318,16 @@
       ]
     }
   },
+  "profile_likelihood_boundary_warnings": {
+    "k_n": {
+      "lower_hits_grid_min": false,
+      "upper_hits_grid_max": false
+    },
+    "alpha_tox": {
+      "lower_hits_grid_min": true,
+      "upper_hits_grid_max": false
+    }
+  },
   "nominal_values": {
     "k_n": 0.00036267624816241654,
     "alpha_tox": 1.168739087840634e-05
@@ -336,7 +346,7 @@
   "verdict_pl_alpha_twosided": true,
   "all_gates_pass": true,
   "_provenance": {
-    "datetime_utc": "2026-04-15T23:52:34.804185+00:00",
+    "datetime_utc": "2026-04-16T00:33:16.552070+00:00",
     "python": {
       "version": "3.13.3",
       "executable": "/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python",
@@ -348,14 +358,14 @@
       "pyarrow": "23.0.1"
     },
     "git": {
-      "sha": "4d27b1084384b21ead61dd6849380fd9015ab304",
+      "sha": "a1109a62e43132b9a73c6fdcf8203aa1ea89a0b1",
       "branch": "feat/ch9-6-multichannel",
       "dirty": true
     },
     "script": {
       "path": "scripts/mechanistic_twin/ch9_6_identifiability_audit.py",
-      "sha256": "7626650e8556e9719b64bb0bab4130f4ea7db0ef1e687b6f358b58b94f10e3c1",
-      "size_bytes": 24595
+      "sha256": "606c64fc70d5d8db3c83d33b629ef24621dc45597b38ce7f5982fe3d1b8a3d59",
+      "size_bytes": 25870
     },
     "cli_args": [
       "scripts/mechanistic_twin/ch9_6_identifiability_audit.py"

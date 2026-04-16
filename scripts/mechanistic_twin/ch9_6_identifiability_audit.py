@@ -489,6 +489,20 @@ def main() -> None:
     print(f"  Saved: {FIG_DIR}/profile_likelihood_2d.{{png,pdf}}")
 
     # ------------------------------------------------------------------
+    # Boundary detection for profile-likelihood CIs
+    # ------------------------------------------------------------------
+    def _ci_hits_boundary(ci, grid, rtol=1e-10):
+        return {
+            "lower_hits_grid_min": abs(ci[0] - grid[0]) <= rtol * max(abs(grid[0]), 1e-30) + 1e-300,
+            "upper_hits_grid_max": abs(ci[1] - grid[-1]) <= rtol * max(abs(grid[-1]), 1e-30) + 1e-300,
+        }
+
+    boundary_warnings = {
+        "k_n": _ci_hits_boundary(pl["k_n"]["ci_95"], pl["k_n"]["grid"]),
+        "alpha_tox": _ci_hits_boundary(pl["alpha_tox"]["ci_95"], pl["alpha_tox"]["grid"]),
+    }
+
+    # ------------------------------------------------------------------
     # Verdicts
     # ------------------------------------------------------------------
     verdict_rank2      = rank == 2
@@ -510,6 +524,17 @@ def main() -> None:
     print(f"  k_n PL CI two-sided:    {'YES' if pl_k_n_twosided else 'NO — ONE-SIDED'}")
     print(f"  α_tox PL CI two-sided:  {'YES' if pl_alpha_twosided else 'NO — ONE-SIDED'}")
     print(f"\n  Overall: {'ALL GATES PASS — §9.6 SAEM v3 calibration is GO' if all_pass else 'GATE FAILURE — STOP AND REPORT'}")
+
+    for param, w in boundary_warnings.items():
+        if w["lower_hits_grid_min"] or w["upper_hits_grid_max"]:
+            hits = []
+            if w["lower_hits_grid_min"]:
+                hits.append("lower")
+            if w["upper_hits_grid_max"]:
+                hits.append("upper")
+            print(f"WARN: {param} 95% CI hits grid {'/'.join(hits)} boundary "
+                  f"— sloppy-ridge direction (consistent with cor(log k_n, log α_tox) = -0.851 "
+                  f"per Phase 2 Step 2.6v4 SAEM posteriors)")
 
     # ------------------------------------------------------------------
     # Write JSON output
@@ -536,6 +561,7 @@ def main() -> None:
                 "ci_95":        alpha_ci,
             },
         },
+        "profile_likelihood_boundary_warnings": boundary_warnings,
         "nominal_values": {
             "k_n":       float(K_N_NOM),
             "alpha_tox": float(ALPHA_TOX_NOM),

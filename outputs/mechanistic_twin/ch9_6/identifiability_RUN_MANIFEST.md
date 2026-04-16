@@ -2,7 +2,7 @@
 
 **Purpose:** canonical provenance receipt for this specific run. Every scientific claim traced to this run's outputs must cite this manifest row.
 
-**Run timestamp (UTC):** 2026-04-15T23:52:34.804185+00:00
+**Run timestamp (UTC):** 2026-04-16T00:33:16.552070+00:00
 
 ## Environment
 
@@ -13,14 +13,14 @@
 | NumPy          | 2.4.4 |
 | Pandas         | 2.3.3 |
 | PyArrow        | 23.0.1 |
-| Git SHA        | `4d27b1084384b21ead61dd6849380fd9015ab304` (DIRTY) |
+| Git SHA        | `a1109a62e43132b9a73c6fdcf8203aa1ea89a0b1` (DIRTY) |
 | Git branch     | `feat/ch9-6-multichannel` |
 
 ## Script self-hash
 
 - **Path:** `scripts/mechanistic_twin/ch9_6_identifiability_audit.py`
-- **SHA-256:** `7626650e8556e9719b64bb0bab4130f4ea7db0ef1e687b6f358b58b94f10e3c1`
-- **Size:** 24595 bytes
+- **SHA-256:** `606c64fc70d5d8db3c83d33b629ef24621dc45597b38ce7f5982fe3d1b8a3d59`
+- **Size:** 25870 bytes
 
 ## CLI invocation
 
@@ -92,7 +92,7 @@ scripts/mechanistic_twin/ch9_6_identifiability_audit.py
 
 ```bash
 cd "${REPO_ROOT}"
-git checkout 4d27b1084384b21ead61dd6849380fd9015ab304
+git checkout a1109a62e43132b9a73c6fdcf8203aa1ea89a0b1
 .venv/bin/python scripts/mechanistic_twin/ch9_6_identifiability_audit.py
 ```
 
