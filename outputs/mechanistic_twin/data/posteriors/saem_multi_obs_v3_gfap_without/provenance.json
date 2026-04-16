@@ -1,0 +1,45 @@
+{
+  "datetime_utc": "2026-04-16T14:58:11.095948+00:00",
+  "python": {
+    "version": "3.13.3",
+    "executable": "/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python",
+    "platform": "macOS-26.4-arm64-arm-64bit-Mach-O"
+  },
+  "packages": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "pyarrow": "23.0.1"
+  },
+  "git": {
+    "sha": "9c5ba2f63da7414b418be14453c869a3b3c7c18f",
+    "branch": "feat/ch9-6-multichannel",
+    "dirty": true
+  },
+  "script": {
+    "path": "scripts/mechanistic_twin/multi_obs_saem.py",
+    "sha256": "ced909f460e5e3a51f6efea7a6f15fadc45cb00eacd0e362cd5839ce90e64cc1",
+    "size_bytes": 31017
+  },
+  "cli_args": [
+    "scripts/mechanistic_twin/ch9_6_matched_cohort_ablation.py"
+  ],
+  "input_files": [
+    {
+      "path": "outputs/mechanistic_twin/data/dat_spect_longitudinal.parquet",
+      "sha256": "2951d13797c7efaa01a42866e5f0dbc995785e0cbeb1a95b5d18857a9f0c527b",
+      "size_bytes": 39461,
+      "row_count": 3109
+    },
+    {
+      "path": "outputs/mechanistic_twin/data/multi_observable_inventory.parquet",
+      "sha256": "3df3731c0d7038e5e13d4a874b643198065a89adf683e54a940d6bf4566b4d64",
+      "size_bytes": 42924,
+      "row_count": 1065
+    }
+  ],
+  "extra": {
+    "seed": 20260415,
+    "N_IS": 50000,
+    "run_tag": "multi_obs_v3_gfap_without"
+  }
+}

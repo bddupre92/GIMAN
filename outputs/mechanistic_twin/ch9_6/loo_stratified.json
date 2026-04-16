@@ -1,0 +1,20 @@
+{
+  "fast": {
+    "n_scans": 442,
+    "n_patients": 179,
+    "coverage_95": 0.9660633484162896,
+    "median_rel_error": 0.1519567698749082
+  },
+  "normal": {
+    "n_scans": 84,
+    "n_patients": 37,
+    "coverage_95": 0.9761904761904762,
+    "median_rel_error": 0.1274180832002189
+  },
+  "slow": {
+    "n_scans": 255,
+    "n_patients": 107,
+    "coverage_95": 0.9607843137254902,
+    "median_rel_error": 0.17044766948906642
+  }
+}

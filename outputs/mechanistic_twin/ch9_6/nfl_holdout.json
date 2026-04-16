@@ -1,0 +1,12 @@
+{
+  "n_patients": 769,
+  "n_visits": 3483,
+  "n_usable_log_pairs": 3483,
+  "r_squared_dN_dt_vs_NfL": 0.005268073182607556,
+  "pearson_r": 0.07258149338920739,
+  "p_value": 1.805681721096855e-05,
+  "slope_log_log": 0.015320171978931226,
+  "intercept_log_log": 2.6096020257214274,
+  "publishable_threshold": "R^2 >= 0.20 considered moderate external validation",
+  "note": "Forward model: nfl_pred = S_nfl * alpha_tox_ebe * O_ss(k_n_ebe) * HR_PER_YR. S_nfl = 1.0 (population scale factor not calibrated; log-log removes additive bias). NfL was excluded from SAEM v3 likelihood -- this is a true held-out check."
+}
