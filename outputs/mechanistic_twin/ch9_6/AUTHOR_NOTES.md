@@ -315,3 +315,28 @@ Add to audit.citation (not already there):
 - `feuerstein2026prd` DOI 10.1016/j.parkreldis.2026.108266
 
 Run `scripts/mechanistic_twin/add_ch9_6_citations.py` expansion (or add via Zotero RT8B9N2J sync).
+
+## Task 9b: Leaspy head-to-head — DEFERRED
+
+**Status: attempted, BLOCKED, documented as honest scope deferral.**
+
+Leaspy (aramis-lab/leaspy, Koval 2021 Sci Rep 10.1038/s41598-021-87434-1) is the only published SAEM with public code practically runnable on PPMI-like data. A phenomenological-vs-mechanistic head-to-head was attempted 2026-04-16.
+
+**Blocker:** Leaspy 2.0.2 pins `torch<2.8` and `Python<=3.13`. Our project venv has torch 2.11.0 (required by PyTorch Geometric 2.6.1, used across Papers 1, 3, 4 Graph-DT and conformal pipelines) and Python 3.13.3. Downgrading torch would regress Paper 3/4 infrastructure — unacceptable.
+
+**Recommended future execution (sidecar venv):**
+```bash
+pyenv install 3.10.14
+python -m venv .venv-leaspy
+.venv-leaspy/bin/pip install leaspy==2.0.2 pandas pyarrow
+.venv-leaspy/bin/python scripts/mechanistic_twin/ch9_6_leaspy_baseline.py
+```
+
+**§9.6 supplement framing (if reviewer asks):**
+
+> A phenomenological baseline comparison (Leaspy univariate SAEM; Koval et al. 2021 Sci Rep) was considered but deferred due to dependency constraints: Leaspy 2.0.2 pins torch<2.8, incompatible with the torch 2.11 used across our Papers 1/3/4 PyTorch Geometric infrastructure. The comparison would contrast interpretability (our mechanistic k_n, α_tox) against raw fit quality (Leaspy's latent time/pace), and is deferred to future work with a sidecar venv. This deferral does not affect the primary §9.6 claims (identifiability of k_n, α_tox; matched-cohort 37× GFAP effect; 97.9% LOO coverage with CRPS 0.07), which stand independent of external benchmark.
+
+**Why this isn't a gap for the chapter:**
+- Leaspy is phenomenological (Riemannian manifold latent time), not mechanistic. A favorable Leaspy RMSE wouldn't undermine our interpretability claims; an unfavorable one would be expected (Leaspy is optimized for fit quality).
+- Gupta 2025 CPT (closest PPMI mechanistic/IRT competitor, now cited) provides sufficient prior-work positioning.
+- The §9.6 contributions are methodological (SS-vs-ODE gap, matched ablation, CRPS-validated coverage) — not fit-quality-competitive.
