@@ -1,0 +1,68 @@
+======================================================================
+SAEM v3 — ch9.6 Five-Channel Calibration (GFAP)
+======================================================================
+  n_iterations: 150  n_burn: 75  seed: 20260415
+  run_tag:      saem_multi_obs_v3
+
+Loading parquets...
+  ch9_6 cohort: 8032 rows, 2630 patients
+  dat_spect:    3109 rows, 1065 patients
+  inventory:    1065 patients
+
+Building patient records...
+  Skipped (no SBR):         0
+  Skipped (bad SBR anchor): 0
+  Total records built: 2118
+
+Channel coverage (2118 patients after SBR filter):
+  SBR (anchor)      :  2118 (100.0%)  ####################
+  CSF α-syn         :   505 ( 23.8%)  ####
+  SAA TTT           :   227 ( 10.7%)  ##
+  aSyn agg frac     :    95 (  4.5%)  
+  NEV α-syn         :   158 (  7.5%)  #
+  GFAP (ch9.6)      :   357 ( 16.9%)  ###
+  NfL (held-out)    :     0 (  0.0%)  
+
+SAEM: 2118 patients, coverage: CSF=505, SAA=227, Agg=95, NEV=158, NfL=0, GFAP=357
+  [  0/150] μ_kn=-9.611 σ_kn=2.469 μ_at=-10.733 σ_at=2.203 | ESS=40131 cor=-0.005 %/yr=1.56
+  [ 10/150] μ_kn=-11.285 σ_kn=3.504 μ_at=-9.093 σ_at=3.627 | ESS=33092 cor=-0.007 %/yr=1.24
+  [ 20/150] μ_kn=-11.527 σ_kn=3.529 μ_at=-8.754 σ_at=3.584 | ESS=32922 cor=-0.008 %/yr=1.37
+  [ 30/150] μ_kn=-11.551 σ_kn=3.524 μ_at=-8.637 σ_at=3.547 | ESS=32336 cor=-0.006 %/yr=1.48
+  [ 40/150] μ_kn=-11.555 σ_kn=3.524 μ_at=-8.628 σ_at=3.536 | ESS=32332 cor=-0.007 %/yr=1.49
+  [ 50/150] μ_kn=-11.548 σ_kn=3.521 μ_at=-8.582 σ_at=3.530 | ESS=32046 cor=-0.008 %/yr=1.60
+  [ 60/150] μ_kn=-11.565 σ_kn=3.529 μ_at=-8.658 σ_at=3.552 | ESS=32565 cor=-0.006 %/yr=1.45
+  [ 70/150] μ_kn=-11.560 σ_kn=3.522 μ_at=-8.616 σ_at=3.508 | ESS=32448 cor=-0.007 %/yr=1.52
+  [ 80/150] μ_kn=-11.567 σ_kn=3.525 μ_at=-8.618 σ_at=3.522 | ESS=32510 cor=-0.007 %/yr=1.48
+  [ 90/150] μ_kn=-11.566 σ_kn=3.525 μ_at=-8.621 σ_at=3.523 | ESS=32481 cor=-0.007 %/yr=1.48
+  [100/150] μ_kn=-11.565 σ_kn=3.525 μ_at=-8.621 σ_at=3.523 | ESS=32390 cor=-0.007 %/yr=1.49
+  [110/150] μ_kn=-11.564 σ_kn=3.525 μ_at=-8.620 σ_at=3.523 | ESS=32386 cor=-0.008 %/yr=1.49
+  [120/150] μ_kn=-11.563 σ_kn=3.525 μ_at=-8.620 σ_at=3.524 | ESS=32379 cor=-0.007 %/yr=1.49
+  [130/150] μ_kn=-11.562 σ_kn=3.525 μ_at=-8.620 σ_at=3.526 | ESS=32351 cor=-0.007 %/yr=1.49
+  [140/150] μ_kn=-11.562 σ_kn=3.525 μ_at=-8.619 σ_at=3.525 | ESS=32382 cor=-0.007 %/yr=1.49
+  [149/150] μ_kn=-11.562 σ_kn=3.525 μ_at=-8.620 σ_at=3.526 | ESS=32312 cor=-0.007 %/yr=1.49
+
+Results saved to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/mechanistic_twin/data/posteriors/saem_multi_obs_v3
+
+======================================================================
+MULTI-OBSERVABLE SAEM — SUMMARY
+======================================================================
+Patients: 2118 (2118 valid)
+
+Population: μ_kn=-11.562 (k_n=9.52e-06), σ_kn=3.525
+            μ_at=-8.620 (α_tox=1.81e-04), σ_at=3.526
+
+--- Degeneracy diagnostic ---
+  IS v4 (SBR-only):     SD/prior = 0.926
+  IS v5 (SBR+CSF):      SD/prior = 0.655
+  HLME SBR-only:        SD/prior = 0.53
+  SAEM MULTI-OBS:       SD/prior = 2.004
+  cor(log k_n, log α):  -0.007
+  %/yr neuron loss:     1.49% [0.04, 79.83]
+
+--- Stratified by α-syn observable ---
+  WITH (n=680):    SD/prior = 0.018, cor = -0.103
+  WITHOUT (n=1438): SD/prior = 2.342, cor = -0.003
+
+--- Next: Run decisive test ---
+  python scripts/mechanistic_twin/hlme_decisive_test.py --hlme-dir saem_multi_obs_v3
+======================================================================
