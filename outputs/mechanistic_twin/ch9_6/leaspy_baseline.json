@@ -1,0 +1,17 @@
+{
+  "leaspy_version": "2.0.2",
+  "model_type": "LogisticModel (Riemannian mixed-effects, univariate)",
+  "algorithm": "mcmc_saem",
+  "n_iter": 3000,
+  "seed": 20260416,
+  "n_patients": 1051,
+  "n_scans": 2991,
+  "fit_time_seconds": 7.0,
+  "rmse_aggregate": 0.0974362939825326,
+  "mae_aggregate": 0.07251962481953779,
+  "median_relative_error_approx": 0.04472866769216579,
+  "per_patient_rmse_median": 0.06709300153824868,
+  "per_patient_rmse_q025": 0.012226625511463711,
+  "per_patient_rmse_q975": 0.21515290753306435,
+  "note": "Per-patient RMSE on SBR (original scale). Aggregate RMSE is pooled across scans. SBR scaled to (0, 1) for LogisticModel; residuals computed after inverse-scaling to raw SBR."
+}
