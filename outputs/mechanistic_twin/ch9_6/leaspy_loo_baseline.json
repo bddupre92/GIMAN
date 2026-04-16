@@ -1,0 +1,13 @@
+{
+  "leaspy_version": "2.0.2",
+  "model_type": "LogisticModel per-scan LOO",
+  "n_patients": 618,
+  "n_scans": 2125,
+  "population_fit_time_s": 5.6,
+  "loo_total_time_s": 81.7,
+  "rmse_sbr": 0.13839158947050248,
+  "mae_sbr": 0.10246169261020772,
+  "median_abs_error": 0.08133267879486061,
+  "median_relative_error": 0.11841008721328362,
+  "evaluation": "per-scan LOO (population fit fixed, per-patient re-personalization on N-1 scans)"
+}

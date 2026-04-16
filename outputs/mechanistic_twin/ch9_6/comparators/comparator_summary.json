@@ -1,0 +1,158 @@
+{
+  "naive_ols_exp_per_patient": {
+    "evaluation": "in_sample",
+    "fit_time_seconds": 0.06578588485717773,
+    "aggregate": {
+      "n_scans": 2991,
+      "n_patients": 1051,
+      "rmse": 0.057545909156850636,
+      "mae": 0.034711994704832314,
+      "median_abs_error": 0.018611883323063405,
+      "median_relative_error": 0.02831909578113881
+    },
+    "mechanistic_params": {},
+    "hyperparameters": {
+      "model": "log-linear OLS per patient"
+    },
+    "notes": "No pooling. Fits 2 parameters per patient independently. Fails for patients with <2 scans or non-positive values."
+  },
+  "naive_ols_exp_per_patient_loo": {
+    "evaluation": "loo",
+    "fit_time_seconds": 0.09056687355041504,
+    "aggregate": {
+      "n_scans": 2125,
+      "n_patients": 618,
+      "rmse": 0.24222865586784242,
+      "mae": 0.14808888149853194,
+      "median_abs_error": 0.10475660006766696,
+      "median_relative_error": 0.15454802259887004
+    },
+    "mechanistic_params": {},
+    "hyperparameters": {
+      "model": "log-linear OLS per patient, leave-one-scan-out"
+    },
+    "notes": "Per-scan LOO. Each patient contributes N predictions, each fit on their remaining N-1 scans. Requires \u2265 3 scans/patient."
+  },
+  "scipy_population_exp": {
+    "evaluation": "in_sample",
+    "fit_time_seconds": 0.025009870529174805,
+    "aggregate": {
+      "n_scans": 2991,
+      "n_patients": 1051,
+      "rmse": 0.3804589067447285,
+      "mae": 0.2609447510299433,
+      "median_abs_error": 0.1948192770448195,
+      "median_relative_error": 0.26306826870913036
+    },
+    "mechanistic_params": {
+      "SBR_0_population": 0.9098192770448195,
+      "decay_rate_per_yr": 0.11480302126878048
+    },
+    "hyperparameters": {
+      "model": "population exponential (2 params, no RE)"
+    },
+    "notes": "Ignores between-patient heterogeneity. Worst-case pooled baseline."
+  },
+  "statsmodels_lme_random_slopes": {
+    "evaluation": "in_sample",
+    "fit_time_seconds": 3.8072569370269775,
+    "aggregate": {
+      "n_scans": 2991,
+      "n_patients": 1051,
+      "rmse": 0.07196349586858838,
+      "mae": 0.05273825025463895,
+      "median_abs_error": 0.039690196564246216,
+      "median_relative_error": 0.05488538589388035
+    },
+    "mechanistic_params": {
+      "fixed_intercept": 0.9088205130144875,
+      "fixed_slope_per_yr": -0.07611718337176654,
+      "log_likelihood": -5.505686509162842,
+      "converged": false
+    },
+    "hyperparameters": {
+      "model": "SBR ~ time + (time | patno), LBFGS"
+    },
+    "notes": "Hierarchical shrinkage (random intercepts + slopes). Phenomenological \u2014 slope has no mechanistic interpretation."
+  },
+  "statsmodels_lme_patient_loo": {
+    "evaluation": "loo_patient_level",
+    "fit_time_seconds": 3.8851282596588135,
+    "aggregate": {
+      "n_scans": 2991,
+      "n_patients": 1051,
+      "rmse": 0.3813984049610847,
+      "mae": 0.2657614755267074,
+      "median_abs_error": 0.20270332964272098,
+      "median_relative_error": 0.2715733550772344
+    },
+    "mechanistic_params": {},
+    "hyperparameters": {
+      "model": "LME with population-level-only prediction (random effects unknown for held-out patient)"
+    },
+    "notes": "Approximate LME LOO: use population fixed effects for all scans (no random slope info for held-out patients). This is the INDUCTIVE prediction \u2014 what LME predicts for a NEW patient before any of their scans are seen. Equivalent to \u00a711.7's 'new-patient generalization' framing."
+  },
+  "cox_ph_sbr_threshold": {
+    "evaluation": "time_to_event",
+    "fit_time_seconds": 0.27198266983032227,
+    "aggregate": {
+      "n_scans": 0,
+      "rmse": NaN,
+      "mae": NaN
+    },
+    "mechanistic_params": {
+      "threshold": 1.0,
+      "n_events": 193,
+      "n_total": 339,
+      "hazard_ratio_baseline_sbr": 0.07390710634491796,
+      "concordance": 0.8164120256283883
+    },
+    "hyperparameters": {
+      "threshold": 1.0,
+      "event": "sbr_putamen < 1.0"
+    },
+    "notes": "Time-to-event framing: patient contributes an event at the first scan where SBR drops below threshold. Hazard ratio tells us how baseline SBR predicts time to the threshold event. Complements regression baselines."
+  },
+  "leaspy_logistic_insample": {
+    "evaluation": "in_sample",
+    "fit_time_seconds": 7.0,
+    "aggregate": {
+      "n_scans": 0,
+      "rmse": NaN,
+      "mae": NaN
+    },
+    "mechanistic_params": {
+      "latent_time": "non-interpretable",
+      "latent_pace": "non-interpretable"
+    },
+    "hyperparameters": {
+      "model": "LogisticModel (Riemannian MMS)",
+      "framework": "Leaspy 2.0.2"
+    },
+    "notes": "Pre-run Leaspy results loaded from leaspy_baseline.json. RMSE 0.0974 (in-sample, 1051 patients)."
+  },
+  "saem_v3_5channel_loo": {
+    "evaluation": "loo",
+    "fit_time_seconds": 0.0,
+    "aggregate": {
+      "n_scans": 1940,
+      "n_patients": 1051,
+      "rmse": 0.16916140349803022,
+      "mae": 0.12244128075169339,
+      "median_abs_error": 0.09593811491780235,
+      "median_relative_error": 0.14408806793108228
+    },
+    "mechanistic_params": {
+      "k_n": "identifiable (per-patient posterior)",
+      "alpha_tox": "identifiable (per-patient posterior)",
+      "coverage_95_credible_interval": 0.979381443298969,
+      "median_crps": 0.07043334367902845,
+      "median_ci_width": 0.7483588702428261
+    },
+    "hyperparameters": {
+      "model": "4-state coupled ODE (M, O, F, N)",
+      "channels": 5
+    },
+    "notes": "LOO posterior-predictive from \u00a79.6 Task 7. Mechanistic ODE with identifiable k_n + \u03b1_tox. The only comparator that produces full uncertainty quantification (CRPS, coverage, profile likelihood)."
+  }
+}
