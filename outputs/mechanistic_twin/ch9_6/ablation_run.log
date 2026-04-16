@@ -1,0 +1,75 @@
+GFAP-informative cohort (has_gfap=True in v3): 357 patients
+  Skipped (no SBR):         0
+  Skipped (bad SBR anchor): 0
+Matched records with finite GFAP: 357
+
+=== Matched cohort WITH GFAP (357 patients) ===
+SAEM: 357 patients, coverage: CSF=249, SAA=127, Agg=59, NEV=38, NfL=0, GFAP=357
+  [  0/150] μ_kn=-13.506 σ_kn=0.311 μ_at=-9.822 σ_at=2.847 | ESS=109 cor=0.026 %/yr=0.03
+  [ 10/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.819 σ_at=0.915 | ESS=1785 cor=-0.029 %/yr=8.71
+  [ 20/150] μ_kn=-13.573 σ_kn=0.245 μ_at=-4.737 σ_at=0.779 | ESS=2004 cor=-0.034 %/yr=9.29
+  [ 30/150] μ_kn=-13.573 σ_kn=0.245 μ_at=-4.735 σ_at=0.780 | ESS=1966 cor=-0.035 %/yr=9.35
+  [ 40/150] μ_kn=-13.573 σ_kn=0.245 μ_at=-4.736 σ_at=0.780 | ESS=1994 cor=-0.033 %/yr=9.34
+  [ 50/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.735 σ_at=0.780 | ESS=1969 cor=-0.036 %/yr=9.36
+  [ 60/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.738 σ_at=0.780 | ESS=1966 cor=-0.036 %/yr=9.25
+  [ 70/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.778 | ESS=1981 cor=-0.033 %/yr=9.34
+  [ 80/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=1965 cor=-0.034 %/yr=9.34
+  [ 90/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.778 | ESS=2005 cor=-0.033 %/yr=9.31
+  [100/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=2008 cor=-0.036 %/yr=9.30
+  [110/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=2001 cor=-0.036 %/yr=9.33
+  [120/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=1986 cor=-0.034 %/yr=9.34
+  [130/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=1993 cor=-0.034 %/yr=9.35
+  [140/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=1965 cor=-0.036 %/yr=9.33
+  [149/150] μ_kn=-13.573 σ_kn=0.244 μ_at=-4.736 σ_at=0.779 | ESS=1991 cor=-0.036 %/yr=9.32
+
+Results saved to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/mechanistic_twin/data/posteriors/saem_multi_obs_v3_gfap_with
+
+=== Matched cohort WITHOUT GFAP (357 patients) ===
+SAEM: 357 patients, coverage: CSF=249, SAA=127, Agg=59, NEV=38, NfL=0, GFAP=0
+  [  0/150] μ_kn=-8.462 σ_kn=2.228 μ_at=-10.590 σ_at=2.018 | ESS=8725 cor=-0.243 %/yr=3.66
+  [ 10/150] μ_kn=-5.969 σ_kn=1.631 μ_at=-12.522 σ_at=1.461 | ESS=12467 cor=-0.524 %/yr=7.73
+  [ 20/150] μ_kn=-5.360 σ_kn=1.253 μ_at=-13.056 σ_at=1.092 | ESS=14501 cor=-0.525 %/yr=8.32
+  [ 30/150] μ_kn=-5.195 σ_kn=1.164 μ_at=-13.215 σ_at=0.991 | ESS=15552 cor=-0.523 %/yr=8.37
+  [ 40/150] μ_kn=-5.167 σ_kn=1.150 μ_at=-13.246 σ_at=0.970 | ESS=16418 cor=-0.512 %/yr=8.45
+  [ 50/150] μ_kn=-5.155 σ_kn=1.144 μ_at=-13.248 σ_at=0.969 | ESS=16499 cor=-0.518 %/yr=8.40
+  [ 60/150] μ_kn=-5.144 σ_kn=1.137 μ_at=-13.266 σ_at=0.946 | ESS=16486 cor=-0.508 %/yr=8.38
+  [ 70/150] μ_kn=-5.131 σ_kn=1.130 μ_at=-13.272 σ_at=0.953 | ESS=16360 cor=-0.518 %/yr=8.47
+  [ 80/150] μ_kn=-5.137 σ_kn=1.133 μ_at=-13.267 σ_at=0.948 | ESS=16496 cor=-0.516 %/yr=8.39
+  [ 90/150] μ_kn=-5.138 σ_kn=1.134 μ_at=-13.269 σ_at=0.951 | ESS=16313 cor=-0.510 %/yr=8.46
+  [100/150] μ_kn=-5.138 σ_kn=1.135 μ_at=-13.268 σ_at=0.952 | ESS=16259 cor=-0.518 %/yr=8.44
+  [110/150] μ_kn=-5.138 σ_kn=1.135 μ_at=-13.268 σ_at=0.952 | ESS=16418 cor=-0.518 %/yr=8.47
+  [120/150] μ_kn=-5.138 σ_kn=1.135 μ_at=-13.268 σ_at=0.952 | ESS=16294 cor=-0.523 %/yr=8.44
+  [130/150] μ_kn=-5.138 σ_kn=1.135 μ_at=-13.268 σ_at=0.952 | ESS=16422 cor=-0.515 %/yr=8.41
+  [140/150] μ_kn=-5.138 σ_kn=1.135 μ_at=-13.268 σ_at=0.951 | ESS=16381 cor=-0.515 %/yr=8.37
+  [149/150] μ_kn=-5.138 σ_kn=1.135 μ_at=-13.268 σ_at=0.951 | ESS=16399 cor=-0.519 %/yr=8.45
+
+Results saved to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/mechanistic_twin/data/posteriors/saem_multi_obs_v3_gfap_without
+
+=== MATCHED-COHORT GFAP ABLATION ===
+{
+  "n_matched_patients": 357,
+  "with_gfap": {
+    "label": "WITH_GFAP",
+    "n": 357,
+    "mean_log_k_n_sd": 0.020120166605284873,
+    "median_log_k_n_sd": 0.0193664885736791,
+    "mean_log_alpha_tox_sd": 0.4611173341757847,
+    "median_log_alpha_tox_sd": 0.4040903326475317,
+    "median_pct_loss_per_yr": 9.318060741000387,
+    "mean_cor_logk_logalpha": -0.042680725151816354
+  },
+  "without_gfap": {
+    "label": "WITHOUT_GFAP",
+    "n": 357,
+    "mean_log_k_n_sd": 0.7130474135643358,
+    "median_log_k_n_sd": 0.7253145936918014,
+    "mean_log_alpha_tox_sd": 0.7566441567276331,
+    "median_log_alpha_tox_sd": 0.7478552355728864,
+    "median_pct_loss_per_yr": 8.445925620410765,
+    "mean_cor_logk_logalpha": -0.4630426743048337
+  },
+  "sigma_logkn_tightening_ratio_median": 37.45204459406095,
+  "sigma_logkn_tightening_ratio_mean": 35.43943882537448,
+  "interpretation": "Same 357 patients, same visits, only GFAP presence differs. Ratio \u03c3_without / \u03c3_with isolates the GFAP channel contribution.",
+  "literature_prediction_1.5_to_5x": "Fisher-info theory predicts 1.5-5\u00d7 tightening for \u03b2=0.313 coupling (Liu 2023 J Neuroinflammation; Kerioui 2022 joint-biomarker NLME)"
+}
