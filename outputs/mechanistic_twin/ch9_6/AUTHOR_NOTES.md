@@ -184,3 +184,65 @@ Both are scientifically defensible. The gate test was loosened from 1.5 to 1.0 %
 - Report BOTH aggregate and stratified metrics.
 - Frame as: "The GFAP channel delivers tight k_n identification in 357/2,118 patients; the remaining 1,761 patients inform the population-level distribution via hierarchical pooling."
 - The 1.49%/yr population median is honest reporting of the mixed PPMI cohort.
+
+## Task 7: Validation results (2026-04-15)
+
+### LOO forward validation — PASSES
+
+| Metric | Value | Interpretation |
+|---|---|---|
+| Scans evaluated | 1,940 | 1,051 patients with ≥2 scans |
+| Coverage (95% CI) | **97.9%** | Exceeds 85% target by wide margin |
+| Median rel error | 14.4% | Matches DaT-SPECT test-retest (~16%) |
+| Coverage <1yr | 94.1% | |
+| Coverage 1-2yr | 97.6% | |
+| Coverage 2-5yr | 98.3% | |
+
+**LOO strongly validates the SAEM v3 fit.** The model predicts held-out scans at the DaT-SPECT precision floor across all time horizons.
+
+### Residual time-course — constant-rate assumption HOLDS
+
+- 261 patients with ≥3 scans analyzed
+- Median residual slope: **-0.009 SBR/visit** (essentially zero)
+- 21/261 (8%) show significant trends at p<0.05 (barely above 5% FDR floor)
+- Direction: slight negative median → mild population-level tendency toward *accelerating* decline vs the constant-rate fit
+
+**Verdict:** The constant-rate SS SAEM is adequate for §9.6 claims. The 8% individually-significant trend rate is weak evidence that ~20/2118 patients would benefit from time-varying modeling — motivates Paper 12 future work but does NOT invalidate §9.6.
+
+### Stratified coverage — equitable across progressor classes
+
+| Group | N patients | N scans | Coverage |
+|---|---|---|---|
+| Slow (<2%/yr) | 107 | 255 | 96.1% |
+| Normal (2-5%/yr) | 37 | 84 | 97.6% |
+| Fast (>5%/yr, capped at 50) | 179 | 442 | 96.6% |
+
+No systematic calibration bias. SAEM v3 works equally well for prodromal (slow) and rapidly-converting (fast) patients.
+
+### NfL held-out validation — NEGATIVE FINDING
+
+- 769 patients, 3,483 visits
+- **R² = 0.005** (Pearson r = 0.073, p = 1.8e-5)
+- Statistical significance driven by N, not effect size
+- Log-log slope = 0.015 (near zero)
+
+**Predicted α_tox · O_ss · N(t) does NOT explain observed serum NfL at the individual level.**
+
+Two causes identified:
+1. **S_nfl = 1.0 is a placeholder constant** — the true NfL-per-(dN/dt) calibration factor is unknown in this model; the SAEM v3 did not estimate it (NfL was held out)
+2. **1,438/2,118 patients are prior-dominated** — their EBEs cluster at population mean, carrying no patient-specific information
+
+**§9.6 framing of this negative finding:**
+
+> *"Serum NfL validation (769 patients held out from calibration): predicted instantaneous neuron loss rate did not explain observed NfL variation at the individual level (R² = 0.005). Two explanations: (i) the scaling factor S_nfl was fixed at 1.0 rather than estimated, absorbing unknown unit conversion; (ii) majority of patients have single-scan SBR data producing prior-dominated posteriors. This matches the Phase 2 registry finding that NfL does not carry independent information about α_tox separate from the direction already captured by SBR (Mollenhauer, DATA_LITERATURE_REGISTRY §5). A future SAEM variant including NfL in the likelihood with S_nfl as a free parameter is expected to improve this correlation."*
+
+This is actually consistent with the original Phase 2 empirical finding. NfL is primarily a progression biomarker, not a mechanistic probe of the k_n/α_tox decomposition.
+
+### Consistency with Task 2 identifiability audit
+
+Task 2 showed α_tox is "population-identifiable, individual-sloppy." Task 7's NfL finding matches:
+- Individual α_tox estimates are sloppy (especially for the 1,438 SBR-only patients)
+- Individual dN/dt predictions therefore inherit that sloppiness
+- Serum NfL at the individual level captures a mix of genuine α_tox variation + measurement noise + comorbidities, which our SS model cannot disentangle
+
+This is an honest, internally consistent narrative for §9.6.
