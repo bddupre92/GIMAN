@@ -34,7 +34,9 @@ Delyon, Lavielle & Moulines 1999 Ann Stat 27:94  -- SAEM convergence proof
 from __future__ import annotations
 
 import json
+import math
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -64,6 +66,168 @@ T_TOX_CONST = M_SS**2 / (K_CONV + K_CLEAR_O)
 
 # Prior bounds for IS draws
 N_IS = 50_000  # IS samples per patient per E-step
+
+# ====================================================================
+# ParamVector — typed parameter bag for single-patient likelihood calls
+# ====================================================================
+# NOTE: The SAEM E/M-step uses plain dicts (pop_params, patient) for
+# vectorised IS batches.  ParamVector is a scalar companion for the
+# per-channel helper functions and the test suite, and for ch9.6
+# single-point likelihood evaluations used in identifiability checks.
+#
+# Appended fields (s_gfap, sigma_gfap) carry defaults so that code
+# that constructs a ParamVector without GFAP args remains valid
+# (v2 checkpoint back-compat).
+
+@dataclass
+class ParamVector:
+    """Scalar parameter bag for single-patient log-likelihood evaluation.
+
+    Core parameters
+    ---------------
+    k_n        : nucleation rate (/hr) — same as k_n in IS/SAEM
+    alpha_tox  : neurotoxicity rate (/hr) — same as alpha_tox in IS/SAEM
+
+    Observation noise (σ) and scale (S/C) parameters
+    -------------------------------------------------
+    sigma_sbr  : SBR observation noise (a.u.)
+    sigma_agg  : aSyn aggregate fraction noise
+    sigma_saa  : SAA log-TTT noise (log-scale)
+    sigma_nev  : NEV α-syn noise
+
+    ch9.6 GFAP additions (appended with defaults for v2 back-compat)
+    -----------------------------------------------------------------
+    s_gfap     : GFAP scale factor  (log2 ng/mL per unit oligomer)
+    sigma_gfap : GFAP observation noise (log2 ng/mL)
+    """
+    k_n: float
+    alpha_tox: float
+    sigma_sbr: float
+    sigma_agg: float
+    sigma_saa: float
+    sigma_nev: float
+    # ch9.6 additions — appended for v2 checkpoint back-compat
+    s_gfap: float = 1.0
+    sigma_gfap: float = 0.5
+
+
+# ====================================================================
+# Per-channel likelihood helpers (scalar; used by total_log_likelihood)
+# ====================================================================
+
+def gfap_likelihood(gfap_obs: float, O_t: float, s_gfap: float,
+                    sigma_gfap: float) -> float:
+    """Normal log-likelihood for CSF GFAP channel.
+
+    GFAP(t) ~ Normal(s_gfap * O_t, sigma_gfap)
+
+    Where O_t is the oligomer concentration at the observation time (from
+    the steady-state approximation O_ss(k_n) used throughout this SAEM),
+    and s_gfap, sigma_gfap are calibrated population parameters.
+
+    Uses log2(ng/mL) for GFAP measurements (matching the Simoa Project 152
+    extraction convention — see mechanistic.ch9_6_gfap_longitudinal).
+
+    Parameters
+    ----------
+    gfap_obs  : observed CSF GFAP in log2(ng/mL)
+    O_t       : oligomer concentration at observation time (nM)
+    s_gfap    : scale parameter mapping O_t → predicted log2(ng/mL)
+    sigma_gfap: observation noise std (log2 ng/mL)
+
+    Returns
+    -------
+    float : normal log-likelihood (always finite for finite inputs)
+    """
+    pred = s_gfap * O_t
+    resid = gfap_obs - pred
+    return -0.5 * (resid / sigma_gfap) ** 2 - math.log(sigma_gfap) - 0.5 * math.log(2 * math.pi)
+
+
+def total_log_likelihood(obs: dict, params: ParamVector) -> float:
+    """Scalar log-likelihood for one patient-visit observation dict.
+
+    This is a single-point (non-batched) counterpart to the vectorised
+    compute_patient_log_likelihood() used in the SAEM E-step.  It uses
+    the same steady-state forward model (O_ss, F_ss) so that identifi-
+    ability results from ch9_6_identifiability_audit.py apply here.
+
+    NOTE on forward-model alignment:
+    The SAEM uses a steady-state (SS) approximation — O_ss(k_n) and
+    F_ss(k_n) from analytic formulas — rather than the 4-state scipy ODE
+    used in ch9_6_identifiability_audit.py (Task 2).  This is a known
+    divergence: the SS model is faster and sufficient for the SAEM IS
+    E-step, but the identifiability proof from Task 2 is strictly valid
+    only for the ODE-integrated trajectories.  Flag for Task 9 / §9.6
+    discussion: verify that SS ≈ ODE at steady state for all obs types.
+
+    Parameters
+    ----------
+    obs    : dict with any subset of keys:
+               "sbr"          – DaT-SPECT SBR (a.u.)
+               "asyn_agg_pct" – aSyn aggregate percentage (%)
+               "saa_ttt"      – SAA dilution TTT (hours)
+               "nev_asyn"     – NEV α-syn signal
+               "gfap_npx"     – CSF GFAP in log2(ng/mL)   [ch9.6 addition]
+               "t_years"      – observation time (years, used for SBR decay)
+    params : ParamVector
+
+    Returns
+    -------
+    float : total log-likelihood (sum over present channels)
+    """
+    k_n = params.k_n
+    atox = params.alpha_tox
+    o_ss_val = k_n * M_SS**2 / (K_CONV + K_CLEAR_O)
+    f_ss_val = K_CONV * o_ss_val / K_CLEAR_F
+
+    ll = 0.0
+
+    # --- SBR (longitudinal decay) ---
+    if "sbr" in obs and obs["sbr"] is not None and math.isfinite(obs["sbr"]):
+        t_yr = float(obs.get("t_years", 0.0))
+        t_hr = t_yr * HR_PER_YR
+        decay_hr = atox * o_ss_val + K_AGE
+        log_ratio = max(-decay_hr * t_hr, -50.0)
+        sbr_anchor = float(obs["sbr"])  # treat observed SBR as anchor (t=0)
+        sbr_pred = sbr_anchor * math.exp(GAMMA * log_ratio)
+        ll += -0.5 * ((sbr_pred - sbr_anchor) / params.sigma_sbr) ** 2
+
+    # --- aSyn aggregate fraction ---
+    if "asyn_agg_pct" in obs and obs["asyn_agg_pct"] is not None:
+        agg_obs = float(obs["asyn_agg_pct"])
+        if math.isfinite(agg_obs):
+            agg_pred = o_ss_val / (M_SS + o_ss_val) * 100.0
+            ll += -0.5 * ((agg_pred - agg_obs) / params.sigma_agg) ** 2
+
+    # --- SAA dilution TTT ---
+    if "saa_ttt" in obs and obs["saa_ttt"] is not None:
+        saa_obs = float(obs["saa_ttt"])
+        if math.isfinite(saa_obs) and saa_obs > 0:
+            # log-normal model (matching compute_patient_log_likelihood)
+            log_ttt_pred = -math.log(max(f_ss_val, 1e-20))
+            log_ttt_obs = math.log(max(saa_obs, 0.01))
+            ll += -0.5 * ((log_ttt_pred - log_ttt_obs) / params.sigma_saa) ** 2
+
+    # --- NEV α-syn ---
+    if "nev_asyn" in obs and obs["nev_asyn"] is not None:
+        nev_obs = float(obs["nev_asyn"])
+        if math.isfinite(nev_obs):
+            nev_pred = o_ss_val + f_ss_val  # S_nev = 1.0 (population default)
+            ll += -0.5 * ((nev_pred - nev_obs) / params.sigma_nev) ** 2
+
+    # --- CSF GFAP (ch9.6 addition) ---
+    if "gfap_npx" in obs and obs["gfap_npx"] is not None:
+        gfap_obs_val = float(obs["gfap_npx"])
+        if math.isfinite(gfap_obs_val):
+            ll += gfap_likelihood(
+                gfap_obs=gfap_obs_val,
+                O_t=o_ss_val,
+                s_gfap=params.s_gfap,
+                sigma_gfap=params.sigma_gfap,
+            )
+
+    return ll
 
 
 def O_ss(k_n):
@@ -127,6 +291,11 @@ def compute_patient_log_likelihood(
     if not np.isnan(patient["nfl"]):
         nfl_pred = pop_params["S_nfl"] * atox * o_ss * HR_PER_YR
         ll += -0.5 * ((nfl_pred - patient["nfl"]) / pop_params["sigma_nfl"]) ** 2
+
+    # === 7. CSF GFAP (ch9.6 addition) ===
+    if not np.isnan(patient.get("gfap_npx", np.nan)):
+        gfap_pred = pop_params["S_gfap"] * o_ss
+        ll += -0.5 * ((gfap_pred - patient["gfap_npx"]) / pop_params["sigma_gfap"]) ** 2
 
     return ll
 
@@ -192,6 +361,11 @@ def e_step_one_patient(patient: dict, pop_params: dict, rng: np.random.Generator
         log_ttt_pred = np.log(pop_params["C_saa"]) - np.log(max(f_ss_ebe, 1e-20))
         saa_resid_sq = (log_ttt_pred - np.log(max(patient["saa_ttt"], 0.01))) ** 2
 
+    gfap_resid_sq = None
+    if not np.isnan(patient.get("gfap_npx", np.nan)):
+        gfap_pred = pop_params["S_gfap"] * o_ss_ebe
+        gfap_resid_sq = (gfap_pred - patient["gfap_npx"]) ** 2
+
     return {
         "error": False,
         "patno": patient["patno"],
@@ -210,6 +384,7 @@ def e_step_one_patient(patient: dict, pop_params: dict, rng: np.random.Generator
         "sbr_resid_sq": sbr_resid_sq,
         "csf_resid_sq": csf_resid_sq,
         "saa_resid_sq": saa_resid_sq,
+        "gfap_resid_sq": gfap_resid_sq,
     }
 
 
@@ -246,12 +421,15 @@ def m_step(e_results: list[dict], pop_params: dict, gamma_k: float) -> dict:
     all_sbr_resid = []
     all_csf_resid = []
     all_saa_resid = []
+    all_gfap_resid = []
     for r in valid:
         all_sbr_resid.extend(r["sbr_resid_sq"])
         if r["csf_resid_sq"] is not None:
             all_csf_resid.append(r["csf_resid_sq"])
         if r["saa_resid_sq"] is not None:
             all_saa_resid.append(r["saa_resid_sq"])
+        if r.get("gfap_resid_sq") is not None:
+            all_gfap_resid.append(r["gfap_resid_sq"])
 
     if all_sbr_resid:
         sigma_sbr_new = np.sqrt(np.mean(all_sbr_resid))
@@ -262,6 +440,9 @@ def m_step(e_results: list[dict], pop_params: dict, gamma_k: float) -> dict:
     if all_saa_resid:
         sigma_saa_new = np.sqrt(np.mean(all_saa_resid))
         new_params["sigma_saa"] = (1 - gamma_k) * pop_params["sigma_saa"] + gamma_k * max(sigma_saa_new, 0.1)
+    if all_gfap_resid:
+        sigma_gfap_new = np.sqrt(np.mean(all_gfap_resid))
+        new_params["sigma_gfap"] = (1 - gamma_k) * pop_params["sigma_gfap"] + gamma_k * max(sigma_gfap_new, 0.05)
 
     return new_params
 
@@ -301,6 +482,8 @@ def load_data():
             "asyn_agg_frac": float(inv_row.asyn_agg_frac_median.iloc[0]) if len(inv_row) and pd.notna(inv_row.asyn_agg_frac_median.iloc[0]) else np.nan,
             "nev_asyn": float(inv_row.nev_asyn_median.iloc[0]) if len(inv_row) and pd.notna(inv_row.nev_asyn_median.iloc[0]) else np.nan,
             "nfl": float(inv_row.nfl_median.iloc[0]) if len(inv_row) and pd.notna(inv_row.nfl_median.iloc[0]) else np.nan,
+            # ch9.6 GFAP addition — log2(ng/mL) median per patient
+            "gfap_npx": float(inv_row.gfap_log2_median.iloc[0]) if len(inv_row) and "gfap_log2_median" in inv_row.columns and pd.notna(inv_row.gfap_log2_median.iloc[0]) else np.nan,
         }
         # SAA: use expanded extraction (all TTT sources, median across reps)
         if int(patno) in saa_expanded:
@@ -324,8 +507,9 @@ def run_saem(patients: list[dict], n_iterations: int = 100, n_burn: int = 50,
     n_agg = sum(1 for p in patients if not np.isnan(p["asyn_agg_frac"]))
     n_nev = sum(1 for p in patients if not np.isnan(p["nev_asyn"]))
     n_nfl = sum(1 for p in patients if not np.isnan(p["nfl"]))
+    n_gfap = sum(1 for p in patients if not np.isnan(p.get("gfap_npx", np.nan)))
     print(f"SAEM: {len(patients)} patients, coverage: CSF={n_csf}, SAA={n_saa}, "
-          f"Agg={n_agg}, NEV={n_nev}, NfL={n_nfl}")
+          f"Agg={n_agg}, NEV={n_nev}, NfL={n_nfl}, GFAP={n_gfap}")
 
     # Initial population params
     pop = {
@@ -343,6 +527,10 @@ def run_saem(patients: list[dict], n_iterations: int = 100, n_burn: int = 50,
         "S_nev": 1.0,
         "S_nfl": 1.0,
         "C_saa": 1.0,
+        # ch9.6 GFAP additions — S_gfap and sigma_gfap initialized from
+        # Task 4 cohort (median log2(GFAP)≈4.0, O_ss≈2e-3 nM → S≈2000)
+        "S_gfap": 2000.0,
+        "sigma_gfap": 0.5,
     }
 
     # SAEM iteration
@@ -426,6 +614,7 @@ def save_results(pop, e_results, history, patients, run_tag, seed):
             "has_agg": not np.isnan(p["asyn_agg_frac"]),
             "has_nev": not np.isnan(p["nev_asyn"]),
             "has_nfl": not np.isnan(p["nfl"]),
+            "has_gfap": not np.isnan(p.get("gfap_npx", np.nan)),
         })
     indiv_df = pd.DataFrame(rows).sort_values("PATNO")
     indiv_df.to_csv(out_dir / "individual_params.csv", index=False)
