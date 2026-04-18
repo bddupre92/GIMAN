@@ -6,7 +6,7 @@
 \chapter{NSD-ISS Stage Prediction with Calibrated Uncertainty}
 \label{ch:paper1}\label{p1:ch:paper1}
 
-The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease through biological anchors, yet no computational models exist to predict NSD-ISS stages from clinical data. Using the Parkinson's Progression Markers Initiative (PPMI, $n{=}2{,}201$), we benchmarked eight models---seven tabular (CatBoost, XGBoost, LightGBM, Random Forest, SVM, ElasticNet, Logistic Regression) and one graph-based (Enhanced Multimodal GAT with PyG GATConv and cross-modal attention)---across four target formulations. Cross-conformal prediction (CV+ with LAC scoring) provided distribution-free coverage guarantees. CatBoost achieved 0.951 balanced accuracy (AUC 0.979) for binary NSD-ISS classification, outperforming the Enhanced GAT (0.825) by 12.6 percentage points, confirming that gradient-boosted trees dominate graph neural networks on tabular clinical data. Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton prediction sets (mean size 0.96--1.27). Removing DaT-SPECT features reduced AUC by 25.2\%, while clinical features alone achieved AUC 0.900 for NSD-positive sub-staging. External validation on BioFIND ($n{=}118$) revealed critical domain shift (binary balanced accuracy 0.516) due to healthy control contamination. These findings establish the first computational benchmark for NSD-ISS biological staging with calibrated uncertainty quantification.
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease through biological anchors, yet no computational models exist to predict NSD-ISS stages from clinical data. Using the Parkinson's Progression Markers Initiative (PPMI, $n{=}2{,}201$), we benchmarked eight models---seven tabular (CatBoost, XGBoost, LightGBM, Random Forest, SVM, ElasticNet, Logistic Regression) and one graph-based (Enhanced Multimodal GAT with PyG GATConv and cross-modal attention)---across four target formulations: binary (NSD-positive vs.\ NSD-negative), three-class (early / mild clinical / impaired), full five-class ordinal, and NSD-positive sub-staging (four stages among confirmed NSD+ patients only). Cross-conformal prediction (CV+ with LAC scoring) provided distribution-free coverage guarantees. CatBoost achieved 0.951 balanced accuracy (AUC 0.979) for binary NSD-ISS classification, outperforming the Enhanced GAT (0.825) by 12.6 percentage points, confirming that gradient-boosted trees dominate graph neural networks on tabular clinical data. Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton prediction sets (mean size 0.96--1.27). Removing DaT-SPECT features reduced AUC by 25.2\%, while clinical features alone achieved AUC 0.900 for NSD-positive sub-staging. External validation on BioFIND ($n{=}118$) revealed critical domain shift (binary balanced accuracy 0.516) due to healthy control contamination. These findings establish the first computational benchmark for NSD-ISS biological staging with calibrated uncertainty quantification.
 
 % ================================================================
 % I. INTRODUCTION
@@ -30,6 +30,25 @@ The primary research question of this study was: \emph{can a benchmarked machine
     \item Evaluate model transportability through external validation on BioFIND ($n{=}118$) and prediction-only application to PDBP ($n{=}893$) and HBS ($n{=}649$)
     \item Calibrate model uncertainty through conformal prediction with distribution-free coverage guarantees
 \end{enumerate}
+
+Table~\ref{p1:tab:targets} summarises the four NSD-ISS target formulations used throughout this chapter. The formulations span the full clinical-utility spectrum: binary detection of biological disease (screening), three-class triage (treatment routing), full ordinal staging (longitudinal monitoring), and NSD-positive sub-staging (trial enrichment at sites without imaging).
+
+\begin{table}[t]
+\centering
+\caption{Four NSD-ISS target formulations evaluated in this study.}
+\label{p1:tab:targets}
+\small
+\begin{tabular}{@{}lcl@{}}
+\toprule
+\textbf{Target} & \textbf{Classes} & \textbf{What it predicts} \\
+\midrule
+Binary           & 2 & NSD-positive (stages 1+) vs.\ NSD-negative (stage 0) \\
+Three-class      & 3 & Early (0--1) vs.\ mild clinical (2B) vs.\ impaired (3--4) \\
+Full ordinal     & 5 & All observed stages: 0, 1, 2B, 3, 4 \\
+NSD-positive     & 4 & Sub-staging among confirmed NSD+ only: 1, 2B, 3, 4 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ================================================================
 % II. RELATED WORK

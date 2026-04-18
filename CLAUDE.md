@@ -1243,3 +1243,44 @@ All CSV/Parquet data loaded into local PostgreSQL for reproducibility. **290 MB,
 **Deferred to postdoc:** C3-2 Hybrid SciML UDE (→ Paper 12); F12 MindMend Phase 6; F13 DeNoPa external validation; F14 prospective interventional trial.
 
 **Julia refit capability:** Docker-baked Julia 1.11 has a known Pkg precompile failure on aarch64 Docker Desktop (see `outputs/defense_prep/julia_docker_limitation.md`). Reviewers refitting Phase 1–4 calibrations from scratch must install Julia natively via juliaup. HDF5 posterior store (127 MB) + per-patient Parquet chains are the authoritative mechanistic artifacts and reproduce all Paper 10 numerical claims inside Docker (Python-only path).
+
+## Journal Submission Pipeline (2026-04-17)
+
+Custom skill at `~/.claude/skills/journal-style-audit/SKILL.md` (user-invocable) orchestrates end-to-end paper → journal submission:
+
+**Invoke:** `/journal-style-audit <paper.tex> <journal-key>` — audits + offers 5-phase remediation
+**3-tier profile cascade:** (1) built-in Tier-1 deep profiles, (2) `venue-templates` skill (50+ venues), (3) WebFetch/ezproxy fallback
+**Tier-1 profiles:** `ieee-jbhi`, `npj-pd`, `cpt-psp`, `plos-compbio`
+
+### Working submission packages (2026-04-17)
+
+All at `outputs/mechanistic_twin/paper{N}_submission/{venue}/main.pdf`:
+
+| Paper | Venue | Template | Pages | Refs |
+|---|---|---|---|---|
+| 1 (Stage Prediction) | IEEE JBHI | `ieeecolor.cls` + `generic.sty` | 8 | 11 |
+| 2 (GIMIN Imputation) | IEEE JBHI | same | 8 | 17 |
+| 3 (Graph-DT Transitions) | IEEE JBHI | same | 7 | 19 |
+| 9 (PK/PD Three-Pathway) | CPT:PSP | `article` 12pt | 24 | 23 |
+
+### Reusable IEEE submission recipe
+
+1. **Copy templates** from `outputs/paper1_latex/{ieeecolor.cls, generic.sty}` to submission dir
+2. **Create logo stub** — IEEE `generic.sty` references `\logoname.eps` even with `logowidth=0pc`; make a 1×1 transparent PDF/EPS with a minimal `standalone` tikzpicture
+3. **Copy chapter_content.tex** from `outputs/dissertation/chapters/chNN_paperN.tex` (don't modify the chapter — edit the submission copy)
+4. **Extract bibliography** — Python one-liner: match `\cite{}` keys in submission against `outputs/dissertation/bibliography.tex`, emit `bibliography_extracted.tex` with only matched `\bibitem` entries
+5. **Create main.tex wrapper** — `\documentclass[journal,twoside,web]{ieeecolor}`, define NSD colors, `\markboth{IEEE JOURNAL...}{Dupre: Title}`, `\input{chapter_content.tex}` + `\input{bibliography_extracted.tex}`
+6. **Tight float parameters (NO `\FloatBarrier`)** — `\topfraction=0.9`, `\textfraction=0.07`, `\floatpagefraction=0.7`, `totalnumber=5`. `\FloatBarrier` causes blank half-pages at section boundaries.
+7. **Layout fixes for IEEE two-column:**
+   - Wide TikZ diagrams → wrap in `\resizebox{\textwidth}{!}{...}`
+   - Overflowing tables → `\scriptsize` + `\setlength{\tabcolsep}{3pt}` + `p{Xcm}` columns + shorten labels
+   - Bar labels overlapping axis → raise `ymax` + `clip=false` + `inner sep=1pt`
+   - Full-page figures → `figure*` environment (spans both columns)
+
+### Built-in profile audit categories
+
+Structure, Voice/Tone, Readability, Figures/Tables, References, Required Elements. Each profile specifies: word limits (abstract + body), required section order, abstract type (structured vs unstructured), active-voice target ratio, mean/max sentence length, figure/table limits, reference style + limits, required elements (Data Availability, Author Contributions, Study Highlights, Author Summary, IEEE Keywords, etc.).
+
+### Remediation pipeline (if user approves after audit)
+
+Phase 0: copy to submission dir · Phase 1: structure fixes (Study Highlights, Data Avail, etc.) · Phase 2: content trimming (abstract, body, figs, tables) · Phase 3: voice/style (passive→active, split long sentences) · Phase 3.5: `claude-scholar:critique-figures` · Phase 3.7: LaTeX formatting fixes · Phase 4: bibliography extraction + `claude-scholar:latex-cleanup` + `claude-scholar:check-refs` + compile · Phase 5: re-audit with before/after metrics.

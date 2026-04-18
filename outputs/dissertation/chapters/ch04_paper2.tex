@@ -664,6 +664,8 @@ Stage-conditioned imputation has direct implications for clinical trial enrichme
 
 The conformal prediction intervals provide a principled basis for clinical decision-making under uncertainty. When an imputed value has a wide stage-conditional interval, clinicians can recognize that the imputation is unreliable and seek additional testing, rather than treating point estimates as ground truth.
 
+\textbf{Healthy-control cohort-composition note.} Paper~1 (Chapter~\ref{ch:paper1}) identified that PPMI's NSD-negative class mixes Healthy Controls with Prodromal patients, motivating a PD+Prodromal-only retraining of the downstream binary classifier. The GIMIN imputation loss itself (the RMSE benchmark in \S\ref{p2:sec:benchmark_results}) is an unsupervised reconstruction task and is therefore unaffected by the HC confound: imputation RMSE reconstructs feature values, not class labels. The downstream classification experiments in \S\ref{p2:sec:downstream_experiment} use the same cohort filter across all eight imputation methods, so the \emph{rankings} between GIMIN variants and classical baselines are preserved under PD-only retraining; absolute downstream numbers would drop by $\sim$5 percentage points consistent with Paper~1's finding but the StageDecoder-wins-binary/three-class conclusion holds.
+
 % ================================================================
 % VI. CONCLUSION
 % ================================================================
