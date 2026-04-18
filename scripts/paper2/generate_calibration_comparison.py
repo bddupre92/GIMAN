@@ -183,19 +183,14 @@ def main():
                 line += f"{e['mean']:>12.3f} (Δ{e['gap_from_target']:+5.3f})"
         print(line)
 
-    # ── Figure: reliability diagram overlaid ─────────────────────────
-    fig, ax = plt.subplots(figsize=(7, 6))
-    ax.plot(
-        [0.4, 1.0], [0.4, 1.0],
-        "--", color="gray", linewidth=1.0, label="Ideal calibration",
-    )
-
+    # ── Figure: 2-panel reliability diagram + gap-from-ideal ─────────
+    # Okabe-Ito colorblind-safe palette
     colors = {
-        "D0 raw": "#d62728",  # red
-        "B temp-scaled": "#1f77b4",  # blue
-        "D1 conformal": "#2ca02c",  # green
-        "A retuned-raw": "#ff7f0e",  # orange
-        "A+B retuned+temp": "#9467bd",  # purple
+        "D0 raw": "#D55E00",           # vermillion
+        "B temp-scaled": "#0072B2",    # blue
+        "D1 conformal": "#009E73",     # bluish green
+        "A retuned-raw": "#E69F00",    # orange
+        "A+B retuned+temp": "#CC79A7", # reddish purple
     }
     markers = {
         "D0 raw": "x",
@@ -205,10 +200,16 @@ def main():
         "A+B retuned+temp": "D",
     }
 
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.8), gridspec_kw={"width_ratios": [1.0, 1.2]})
+    ax_rel, ax_gap = axes
+
+    # ─ Panel A: reliability diagram ─
+    ax_rel.plot(
+        [0.4, 1.0], [0.4, 1.0],
+        "--", color="#555555", linewidth=1.2, label="Ideal",
+    )
     for name, by_gamma in conditions.items():
-        xs = []
-        ys = []
-        yerr = []
+        xs, ys, yerr = [], [], []
         for g in COVERAGE_TARGETS:
             vals = by_gamma.get(g, np.array([]))
             if vals.size == 0:
@@ -216,28 +217,63 @@ def main():
             xs.append(g)
             ys.append(vals.mean())
             yerr.append(vals.std(ddof=0))
-        ax.errorbar(
+        ax_rel.errorbar(
             xs, ys, yerr=yerr,
             color=colors.get(name, "black"),
             marker=markers.get(name, "o"),
-            markersize=9, linewidth=1.8,
+            markersize=8, linewidth=1.8,
             label=name,
             capsize=3,
+            markeredgewidth=1.3,
         )
+    ax_rel.set_xlabel(r"Nominal coverage $\gamma$", fontsize=12)
+    ax_rel.set_ylabel("Observed coverage", fontsize=12)
+    ax_rel.set_title("(A) Reliability diagram", fontsize=12, loc="left")
+    ax_rel.set_xlim(0.4, 1.0)
+    ax_rel.set_ylim(0.4, 1.0)
+    ax_rel.grid(True, alpha=0.3, linestyle=":")
+    ax_rel.set_aspect("equal")
+    ax_rel.tick_params(axis="both", labelsize=10)
 
-    ax.set_xlabel("Nominal coverage $\\gamma$", fontsize=12)
-    ax.set_ylabel("Observed coverage", fontsize=12)
-    ax.set_title(
-        "Calibration comparison: raw vs temperature-scaled vs conformal\n"
-        "(48 checkpoints per condition, mean ± SD)",
-        fontsize=13,
+    # ─ Panel B: gap-from-ideal grouped bar chart ─
+    cond_names = list(conditions.keys())
+    n_cond = len(cond_names)
+    n_targets = len(COVERAGE_TARGETS)
+    bar_w = 0.8 / n_cond
+    x_base = np.arange(n_targets)
+
+    for i, name in enumerate(cond_names):
+        gaps = []
+        for g in COVERAGE_TARGETS:
+            vals = conditions[name].get(g, np.array([]))
+            if vals.size == 0:
+                gaps.append(0)
+            else:
+                gaps.append(vals.mean() - g)
+        xs = x_base - 0.4 + (i + 0.5) * bar_w
+        ax_gap.bar(
+            xs, gaps,
+            width=bar_w * 0.9,
+            color=colors.get(name, "black"),
+            edgecolor="black", linewidth=0.5,
+            label=name,
+        )
+    ax_gap.axhline(0, color="black", linewidth=0.8)
+    # Shade the "good" region within ±0.02
+    ax_gap.axhspan(-0.02, 0.02, color="#009E73", alpha=0.08, zorder=0)
+    ax_gap.set_xticks(x_base)
+    ax_gap.set_xticklabels([f"{g:.2f}" for g in COVERAGE_TARGETS], fontsize=10)
+    ax_gap.set_xlabel(r"Nominal coverage $\gamma$", fontsize=12)
+    ax_gap.set_ylabel(r"Gap = observed $-\gamma$", fontsize=12)
+    ax_gap.set_title("(B) Gap from ideal calibration (bar per condition)", fontsize=12, loc="left")
+    ax_gap.grid(True, axis="y", alpha=0.3, linestyle=":")
+    ax_gap.tick_params(axis="y", labelsize=10)
+    ax_gap.legend(loc="lower right", fontsize=9, ncol=2, frameon=True, framealpha=0.95)
+
+    fig.suptitle(
+        "Calibration comparison across 48 GIMIN checkpoints (4 variants × 4 mask fractions × 3 runs, mean ± SD)",
+        fontsize=12, y=1.02,
     )
-    ax.legend(loc="upper left", fontsize=10)
-    ax.set_xlim(0.4, 1.0)
-    ax.set_ylim(0.4, 1.0)
-    ax.grid(True, alpha=0.3)
-    ax.set_aspect("equal")
-
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_calibration_compare.pdf", bbox_inches="tight")
     fig.savefig(FIG_DIR / "fig_calibration_compare.png", dpi=300, bbox_inches="tight")
