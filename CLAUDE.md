@@ -1284,3 +1284,94 @@ Structure, Voice/Tone, Readability, Figures/Tables, References, Required Element
 ### Remediation pipeline (if user approves after audit)
 
 Phase 0: copy to submission dir · Phase 1: structure fixes (Study Highlights, Data Avail, etc.) · Phase 2: content trimming (abstract, body, figs, tables) · Phase 3: voice/style (passive→active, split long sentences) · Phase 3.5: `claude-scholar:critique-figures` · Phase 3.7: LaTeX formatting fixes · Phase 4: bibliography extraction + `claude-scholar:latex-cleanup` + `claude-scholar:check-refs` + compile · Phase 5: re-audit with before/after metrics.
+
+## Session 2026-04-18 Summary (P2 Calibration Ablation + P6 GIMIN Integration + Cross-Arc Strategy)
+
+Four deliverables in a single long session:
+
+### 1. Paper 2: Calibration-Ablation §V.E (IEEE JBHI, 11pp)
+
+Can the raw Gaussian decoder's 23.6pp under-coverage gap at γ=0.90 be closed at the decoder level? Full factorial of 5 conditions measured on all 48 Paper 2 benchmark checkpoints:
+
+| Target γ | D0 raw | B temp-scaled | D1 conformal | A retuned-raw | A+B |
+|---|---|---|---|---|---|
+| 0.50 | 0.460 | 0.501 | 0.525 | 0.461 | 0.500 |
+| 0.90 | **0.664** | **0.858** | **0.909** | **0.664** | **0.858** |
+| 0.95 | 0.682 | 0.940 | 0.956 | 0.682 | 0.940 |
+
+**Findings:**
+1. B (per-feature temperature scaling) closes ~82% of the gap with 33 scalars + no retraining.
+2. A (training-time λ_cal=0.1 + warmup=0 retuning) gives ZERO improvement on raw coverage — clean negative result.
+3. B and D1 are complementary: B wins at γ∈{0.50, 0.70, 0.80}; D1 wins at γ∈{0.90, 0.95}.
+4. GIMIN-DF (flow-matching decoder) properly scoped as future work.
+
+Added to submission: loss equations, hyperparameter `table*`, §V.D transparency paragraph with exact 48-checkpoint numbers, §V.E Closing the Raw-Decoder Calibration Gap + Table + Fig 4 (Okabe-Ito 2-panel), CSDI/TabDDPM/Hossain/CFMI/Angelopoulos-Bates citations.
+
+### 2. Paper 6: GIMIN Integration Fix + Full 1,900-Cohort Run → JAMIA (14pp)
+
+`scripts/paper6/unified_pipeline_demo.py` declared `GIMIN_CKPT` but never loaded it (v1 used median-fill). v2 fixes end-to-end:
+
+- **Real GIMIN inference** (StageDecoderOnly checkpoint, stage-aware graph β=0.3 k=15, MC-dropout T=20, per-feature temperature scaling median T=0.87).
+- **Hybrid feature alignment**: 5 CatBoost-12 features from GIMIN (AGE, MOCA, ESS, RBD) — SEX excluded due to logit inverse issue. 7 remaining features from Paper 1 raw. Median fallback for the rest. Per-feature provenance logged.
+- **Full 1,900 PD+Prodromal cohort**: 22.1 s (84 pts/s), 0 errors. Provenance 33.3%/54.9%/11.8%.
+- Within-NSD+ accuracy 42.5% (471/1108); 792 Stage-0/5/6 patients correctly flagged as out-of-scope by design.
+- Paper 4 conformal band width 0.037 (cohort-invariant).
+
+JAMIA submission package at `outputs/mechanistic_twin/paper6_submission/jamia/`: 241-word structured abstract, full-width pipeline architecture schematic (Fig. 1), CONSORT cohort-selection diagram (Fig. 2), 3 aggregate figures, Deployment-Audit Protocol as Table 1 (4 pre-registered metrics), TRIPOD+AI supplement, cover letter with preprint-first strategy.
+
+### 3. Cross-Arc Integration Strategy (Papers 1-6 ↔ Papers 7-10)
+
+New design doc `Docs/research_directions/2026-04-18_paper_arc_integration.md` maps 7 latent connections between data-driven and mechanistic arcs, organized in 3 tiers:
+
+- **Tier 0 (cosmetic, do now):** P6 cites P9 Path B; P9 cites P6; P10 cites P2.
+- **Tier 1 (Paper 10 on critical path):** Mechanistic calibration + external validation + NASEM audit.
+- **Tier 2 (Paper 11 postdoc):** Wire GIMIN σ into P7 observation likelihood (L1); N(t)/N₀ as Graph-DT feature (L7); joint P4 conformal + P7 Bayesian UQ (L3); temporal validation of twin (L4).
+
+P1 CatBoost → mechanistic-twin Module 2e is the ONE active link today.
+
+### 4. Publication Timing: Preprint-First
+
+All dissertation papers get bioRxiv DOIs simultaneously as submission-ready. Each paper cites others by preprint DOI; updated to published DOIs at copy-edit stage. Standard solution for cross-companion citation.
+
+### New persistent artefacts
+
+Tracked (in git):
+- `src/giman_pipeline/imputation/temperature_scaling.py` — `PerFeatureTemperatureScaler` module (reusable across P2 + P6)
+- `scripts/paper2/measure_raw_coverage.py` — reconstructs any GIMIN state_dict, runs MC-dropout, measures raw + temp-scaled coverage at 5 γ levels
+- `scripts/paper2/generate_calibration_comparison.py` — 2-panel reliability + gap-from-ideal Okabe-Ito figure
+- `scripts/paper2/run_calibration_comparison.sh` — one-shot automation
+- `scripts/paper6/unified_pipeline_demo_v2.py` — GIMIN+temperature integrated pipeline
+- `scripts/paper6/generate_v2_aggregate_figures.py` — aggregate figure + stats generator
+- `scripts/run_paper2_experiments.py` — added `--lambda-cal`, `--cal-warmup-epochs`, `--lambda-dist`, `--lambda-cross` CLI flags
+- `Docs/research_directions/2026-04-18_paper_arc_integration.md` — cross-arc map
+
+Untracked (outputs/, Drive-synced):
+- `outputs/paper2_benchmark/runs/cal_retune_lambda0.1_warmup0/` — 48 A-variant checkpoints
+- `outputs/paper2_benchmark/calibration_retune/` — measurement JSONs + figures + CSV decision table
+- `outputs/mechanistic_twin/paper6_submission/jamia/` — JAMIA package (main.tex + chapter_content.tex + cover letter + TRIPOD+AI + figures/ + bibliography + 14pp PDF)
+- `outputs/paper6/pipeline_results/v2_full_cohort/` — 1,900-patient pipeline output + aggregate stats JSON
+- `outputs/paper6/_snapshot_pre_gimin_fix_20260418/` — frozen Feb-24 pre-fix state
+- `outputs/paper6/DESIGN_gimin_integration.md` + `DEPRECATION_PLAN.md`
+- `outputs/paper6/figures_src/fig_pipeline_architecture_v2.tex` + `fig_consort_flow.tex`
+
+### Key gotchas discovered
+
+- **GIMIN heteroscedastic decoder emits raw LOGITS for binary features.** The sigmoid is applied only in the blended-imputed-value path, not in the returned `mean_pred`. P6 workaround: exclude SEX from the GIMIN→CatBoost overlap mapping. Binary-feature logit inverse is a pending cleanup in `GIMINImputer`.
+- **Paper 2 benchmark checkpoints are state_dict-only.** No `scaler_state_dict` embedded. Fix: fit `ModalityAwareScaler` at runtime with the same logic as `run_paper2_experiments.py` main(), then assign `imputer.scaler = scaler` before `impute()`. Now in `unified_pipeline_demo_v2.py`.
+- **Paper 4 IPCW conformal is a MARGINAL wrapper.** Band width is cohort-invariant (single global quantile). Per-patient histograms are degenerate; report as prose not figure.
+- **Figure overflow past references in JAMIA.** `[!t]` (top-only) → `[htbp]` (here/top/bottom/float-page) fixes figures landing after bibliography.
+- **StageGraphOnly vs. StageDecoderOnly use DIFFERENT model classes.** StageGraphOnly uses `VanillaGIMIN` + stage-aware graph (no stage embedding in model); StageDecoderOnly uses `StageConditionedGIMIN` + vanilla graph. `_build_model` in `measure_raw_coverage.py` must branch on this.
+- **`--output-name` CLI plumbing gotcha.** When I first added CLI args to `measure_raw_coverage.py`, the save call sites still used the hardcoded filename. Fix: parameterize `open()` calls with `out_name` / `sum_name`. Lesson: when adding CLI flags, audit ALL usages not just the main path.
+
+### Next-session resume checklist
+
+1. **Deprecation review**: old P6 Feb-24 artifacts (snapshotted), stale `outputs/paper6/latex/{main,paper6}.tex`, Docs/solutions duplicates.
+2. **Integration-5 (decision support) execution**: add `N(t)/N₀` surfacing to P6 `unified_pipeline_demo_v2.py` output JSON schema; update Discussion with L5 cross-reference to P9.
+3. **Commit P1 chapter edits** to `ch03_paper1.tex` (Espay+PD-only work from earlier in the session).
+4. **Integration-1 to 4 plan docs** (Paper 10 / Paper 11 scope) — short design docs in `Docs/research_directions/`.
+
+### Documentation lifecycle hygiene (per `Docs/documentation_lifecycle_protocol.md` v1.0)
+
+- **Cycle A (per-step):** All new scripts have self-describing output JSONs; calibration CSV has a header row; reproducibility manifest NOT updated (this session didn't produce mechanistic-twin artifacts — P2/P6 have their own submission-dir trails).
+- **Cycle B (per-block):** Paper 2 and Paper 6 submission packages each have TRIPOD+AI supplements (P6) and conformal JSON comparison (P2) that preserve the claim→artifact trail.
+- **Cycle C (per-session, this update):** Root CLAUDE.md updated with session summary (this block). Next-session resume checklist included above.
