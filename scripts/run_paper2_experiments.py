@@ -141,6 +141,31 @@ def parse_args():
         action="store_false",
         help="Disable model checkpoint saving",
     )
+    # P2-Cal.A: calibration-loss retuning for the calibration comparison
+    parser.add_argument(
+        "--lambda-cal",
+        type=float,
+        default=0.01,
+        help="Weight on the differentiable calibration loss term (default 0.01)",
+    )
+    parser.add_argument(
+        "--cal-warmup-epochs",
+        type=int,
+        default=50,
+        help="Epochs before calibration loss is activated (default 50)",
+    )
+    parser.add_argument(
+        "--lambda-dist",
+        type=float,
+        default=0.1,
+        help="Weight on the distribution-matching loss term (default 0.1)",
+    )
+    parser.add_argument(
+        "--lambda-cross",
+        type=float,
+        default=0.10,
+        help="Weight on the cross-modal consistency loss term (default 0.10)",
+    )
     return parser.parse_args()
 
 
@@ -421,6 +446,10 @@ def train_gimin_model(
     is_stage_conditioned=False,
     cross_modal_pairs=None,
     binary_feature_indices=None,
+    lambda_dist: float = 0.1,
+    lambda_cross: float = 0.10,
+    lambda_cal: float = 0.01,
+    cal_warmup_epochs: int = 50,
 ):
     """Train a GIMIN model with self-supervised masking and composite loss.
 
@@ -447,10 +476,10 @@ def train_gimin_model(
 
     # Build composite loss with all 4 terms
     loss_fn = GIMINLoss(
-        lambda_dist=0.1,
-        lambda_cross=0.10,
-        lambda_cal=0.01,
-        cal_warmup_epochs=50,
+        lambda_dist=lambda_dist,
+        lambda_cross=lambda_cross,
+        lambda_cal=lambda_cal,
+        cal_warmup_epochs=cal_warmup_epochs,
         cross_modal_pairs=cross_modal_pairs,
         binary_feature_indices=binary_feature_indices or [0],
     ).to(device)
@@ -940,6 +969,10 @@ def main():
                     is_stage_conditioned=False,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
+                    lambda_dist=args.lambda_dist,
+                    lambda_cross=args.lambda_cross,
+                    lambda_cal=args.lambda_cal,
+                    cal_warmup_epochs=args.cal_warmup_epochs,
                 )
                 v_metrics, v_imputed, v_mean, v_std = evaluate_gimin_model(
                     vanilla_model,
@@ -998,6 +1031,10 @@ def main():
                     is_stage_conditioned=True,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
+                    lambda_dist=args.lambda_dist,
+                    lambda_cross=args.lambda_cross,
+                    lambda_cal=args.lambda_cal,
+                    cal_warmup_epochs=args.cal_warmup_epochs,
                 )
                 s_metrics, s_imputed, s_mean, s_std = evaluate_gimin_model(
                     stage_model,
@@ -1058,6 +1095,10 @@ def main():
                     is_stage_conditioned=False,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
+                    lambda_dist=args.lambda_dist,
+                    lambda_cross=args.lambda_cross,
+                    lambda_cal=args.lambda_cal,
+                    cal_warmup_epochs=args.cal_warmup_epochs,
                 )
                 ag_metrics, _, _, _ = evaluate_gimin_model(
                     ablation_graph_model,
@@ -1117,6 +1158,10 @@ def main():
                     is_stage_conditioned=True,
                     cross_modal_pairs=cross_modal_pairs,
                     binary_feature_indices=binary_indices,
+                    lambda_dist=args.lambda_dist,
+                    lambda_cross=args.lambda_cross,
+                    lambda_cal=args.lambda_cal,
+                    cal_warmup_epochs=args.cal_warmup_epochs,
                 )
                 ad_metrics, _, _, _ = evaluate_gimin_model(
                     ablation_decoder_model,
