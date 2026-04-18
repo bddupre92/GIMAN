@@ -99,9 +99,12 @@ CATBOOST_12_FEATURES = [
 
 # Features GIMIN shares with CatBoost-12 (after name harmonization).
 # Map GIMIN feature name → CatBoost-12 feature name.
+# SEX is excluded even though GIMIN has it, because GIMIN's decoder
+# outputs a raw logit for binary features (sigmoid only applied in the
+# blended imputed-value path, not in the returned mean_pred). SEX is
+# reliably observed in Paper 1, so paper1_raw is always used.
 GIMIN_TO_CATBOOST_12 = {
-    "AGE_AT_VISIT": "AGE_AT_BASELINE",  # approximate: baseline visit only
-    "SEX": "SEX",
+    "AGE_AT_VISIT": "AGE_AT_BASELINE",  # baseline visit only
     "MCATOT": "MOCA_TOTAL",
     "ESS_TOTAL": "ESS_TOTAL",
     "RBD_TOTAL": "RBD_TOTAL",
