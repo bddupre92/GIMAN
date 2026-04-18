@@ -2,7 +2,7 @@
 
 **How to use the GIMAN second-brain stack (Obsidian + Mempalace + PostgreSQL + Zotero + Audit DB) across Claude Code, Claude Desktop, ChatGPT, Gemini, and Perplexity.**
 
-Last updated: 2026-04-14
+Last updated: 2026-04-18 (session summary + SQL registry update workflow added)
 
 ---
 
@@ -98,6 +98,39 @@ It will automatically call `mempalace_search` and `mempalace_kg_query` for you. 
 | 3. Check mempalace for prior bug patterns | auto via MCP |
 | 4. Check `claim_lineage.sqlite3` for linked claims (if the bug affects published numbers) | via `read_sql()` |
 | 5. After fix → `vault_sync.py` picks up the new mtime on that file | automatic |
+
+### "I produced a new CSV/parquet and want it in the SQL research registry"
+
+The local `giman_research` PostgreSQL database (290 MB, 146 tables, 10 schemas) is the canonical tabular source. Every new data artefact should follow this loop:
+
+| Step | Tool | Command |
+|------|------|---------|
+| 1. Save the new artefact as CSV or Parquet with a stable path | — | e.g. `outputs/paper6/pipeline_results/v2_full_cohort/aggregate_stats.csv` |
+| 2. Decide the schema | — | `ppmi_raw`, `staging`, `features`, `longitudinal`, `paper3`, `mechanistic`, `ledd`, or a new schema |
+| 3. Add the file to the loader's pattern table | edit `scripts/load_csvs_to_local_pg.py` | add `(schema, table_name, glob_pattern)` row |
+| 4. Run the incremental loader | `.venv/bin/python scripts/load_csvs_to_local_pg.py --schema <name>` | loads only the new table; skips existing |
+| 5. Verify via `read_sql()` | `from giman_pipeline.data.db import read_sql; df = read_sql("SELECT ... LIMIT 10")` | sanity-check 10 rows |
+| 6. (Optional) Update `db_dump/schema_and_data.sql` if the artefact is dissertation-critical | `pg_dump giman_research > db_dump/schema_and_data.sql` | gitignored; kept locally |
+| 7. Cite in Appendix E data dictionary table | edit `outputs/dissertation/chapters/appendix_e.tex` | per documentation lifecycle v1.0 Cycle A |
+| 8. Note the new schema/table in root `CLAUDE.md` Local Research Database section | — | per documentation lifecycle v1.0 Cycle C |
+
+**Common patterns from recent sessions:**
+
+- **Ch 9.6 multichannel (2026-04-16):** Wrote 5-channel cohort parquet first (`outputs/mechanistic_twin/ch9_6/cohort_5channel.parquet`) → loaded into `mechanistic.multi_observable_inventory` + `mechanistic.ch9_6_gfap_longitudinal` via the loader script. Reads in assembly: `mechanistic.dat_spect_longitudinal + multi_observable_inventory + ch9_6_gfap_longitudinal + ppmi_raw.current_biospecimen_analysis_results`.
+- **Paper 6 v2 pipeline (2026-04-18):** The `outputs/paper6/pipeline_results/v2_full_cohort/pipeline_summary.json` (1,900-patient JSON, ~1.2 MB) is NOT loaded into PG because (a) it's denormalized per-patient, (b) it's ephemeral (regenerated each pipeline run), and (c) the underlying features already live in `features.paper1_features_with_targets`. Lesson: JSON blob outputs of downstream inference pipelines usually stay as JSON; the upstream feature tables they consume are what goes into PG.
+- **Phase 2 posteriors (2026-04-13):** HDF5 store (`outputs/mechanistic_twin/data/posteriors/posterior_store.h5`) is the canonical home for 1,065-patient Bayesian samples. NOT loaded into PG — PostgreSQL is poor at blob storage. Rule: tabular summaries go to PG, per-patient sample chains stay in HDF5 or Parquet.
+
+**Decision rule — does my new artefact belong in PG?**
+
+| Artefact type | Goes to PG? | Example |
+|---|---|---|
+| Raw cohort-level table (patients × features) | ✅ YES | `ppmi_raw.dat_spect`, `features.paper1_features_with_targets` |
+| Staged or processed cohort-level table | ✅ YES | `staging.nsd_iss_staging_results`, `longitudinal.transitions` |
+| Per-patient aggregate summary (1 row/patient) | ✅ YES | `staging.biofind_nsd_iss_staging` |
+| Per-patient deep object (CIF arrays, posterior samples) | ❌ NO (HDF5/Parquet) | Phase 2 chains, Paper 3 per-patient CIFs |
+| Downstream pipeline output JSON | ❌ NO (JSON on disk) | `outputs/paper6/pipeline_results/v2_full_cohort/pipeline_summary.json` |
+| Figure data / summary metrics | ❌ NO (CSV on disk) | `outputs/paper2_benchmark/calibration_retune/calibration_comparison_table.csv` |
+| Model checkpoint | ❌ NO (`.pt` on disk) | `outputs/paper3_checkpoints/*.pt` |
 
 ---
 
