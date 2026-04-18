@@ -66,6 +66,19 @@ GIMIN_MASK_PATH = (
 )
 OUTPUT_DIR = ROOT / "outputs" / "paper6" / "pipeline_results"
 
+# L5 Integration (Paper 9 Path B → Paper 6 CDSS): per-patient N(t)/N_0 from
+# the Phase 2 combined-cohort IS posteriors. Intersection with Paper 6's 1,900
+# cohort is partial (1,065 patients have posteriors); patients without a
+# posterior receive null entries in the mechanistic block.
+PHASE2_POSTERIORS_PATH = (
+    ROOT
+    / "outputs"
+    / "mechanistic_twin"
+    / "data"
+    / "posteriors"
+    / "phase2_combined_1065.csv"
+)
+
 DEEPHIT_CKPT = ROOT / "outputs" / "paper3_checkpoints" / "deephit" / "fold0_deephit.pt"
 GRAPHDT_CKPT = (
     ROOT / "outputs" / "paper3_checkpoints" / "graph_dt" / "fold0_graph_dt.pt"
@@ -112,6 +125,47 @@ GIMIN_TO_CATBOOST_12 = {
 
 STAGE_LABELS = {0: "0", 1: "1", 2: "2B", 3: "3", 4: "4", 5: "5", 6: "6"}
 NSD_POSITIVE_LABELS = {0: "1", 1: "2B", 2: "3", 3: "4"}
+
+
+def load_phase2_posteriors():
+    """Load Paper 9 / mechanistic Phase 2 per-patient neuron-loss posteriors.
+
+    Returns a dict keyed by PATNO (int) with {pct_median, pct_q025, pct_q975}
+    percent-loss-per-year posteriors. Returns an empty dict if the posteriors
+    file is missing (integration-5 becomes a no-op).
+    """
+    if not PHASE2_POSTERIORS_PATH.exists():
+        return {}
+    df = pd.read_csv(
+        PHASE2_POSTERIORS_PATH,
+        usecols=[
+            "PATNO",
+            "pct_loss_per_yr_median",
+            "pct_loss_per_yr_q025",
+            "pct_loss_per_yr_q975",
+        ],
+    )
+    return {
+        int(row.PATNO): {
+            "pct_median": float(row.pct_loss_per_yr_median),
+            "pct_q025": float(row.pct_loss_per_yr_q025),
+            "pct_q975": float(row.pct_loss_per_yr_q975),
+        }
+        for row in df.itertuples(index=False)
+    }
+
+
+def compute_n_frac(pct_loss_per_yr: float, years: float) -> float:
+    """Compound-decay N(t)/N_0 = (1 - pct/100)^years.
+
+    pct_loss_per_yr: median posterior percent-loss-per-year.
+    years: time since calibration anchor (baseline visit). For Paper 6
+        use `follow_up_months / 12` so the reported fraction matches
+        the patient's current predicted-stage visit.
+    """
+    if not np.isfinite(pct_loss_per_yr) or pct_loss_per_yr < 0:
+        return float("nan")
+    return float((1.0 - pct_loss_per_yr / 100.0) ** max(years, 0.0))
 
 
 def _get_device() -> torch.device:
@@ -356,7 +410,7 @@ def train_catboost_staging(cohort_choice: str):
 def run_patient_pipeline(
     patno, features_df, gimin_stack, catboost_model, col_medians,
     dh_model, dh_ckpt, gdt_model, gdt_ckpt, device,
-    p1_df,
+    p1_df, phase2_posteriors=None,
 ):
     """Full pipeline for one patient with GIMIN-imputed CatBoost inputs."""
     from giman_pipeline.paper3.dynamic_deephit import (
@@ -537,6 +591,31 @@ def run_patient_pipeline(
             })
     top_transitions.sort(key=lambda d: d["max_cif"], reverse=True)
 
+    # ── Mechanistic twin: N(t)/N_0 from Phase 2 posteriors (L5 integration) ──
+    # Surfaces dopaminergic neuron fraction at the current-visit horizon so
+    # clinicians can anticipate medication-response attenuation per Paper 9
+    # Path B (N(t)×LEDD interaction, p=0.044).
+    years = float(times[-1]) / 12.0
+    mech = {"available": False, "source": "phase2_combined_1065"}
+    if phase2_posteriors is not None and int(patno) in phase2_posteriors:
+        post = phase2_posteriors[int(patno)]
+        mech.update(
+            {
+                "available": True,
+                "years_from_baseline": round(years, 2),
+                "pct_loss_per_yr_median": round(post["pct_median"], 3),
+                "pct_loss_per_yr_q025": round(post["pct_q025"], 3),
+                "pct_loss_per_yr_q975": round(post["pct_q975"], 3),
+                "n_frac_median": round(compute_n_frac(post["pct_median"], years), 4),
+                "n_frac_q025": round(compute_n_frac(post["pct_q975"], years), 4),
+                "n_frac_q975": round(compute_n_frac(post["pct_q025"], years), 4),
+                "reference": (
+                    "Paper 9 Path B: N(t)×LEDD interaction p=0.044; fewer "
+                    "dopaminergic neurons -> smaller ON-OFF gap"
+                ),
+            }
+        )
+
     return {
         "patno": int(patno),
         "n_visits": n_visits,
@@ -548,6 +627,7 @@ def run_patient_pipeline(
         "gimin_imputed_means": gimin_imputed_means,
         "gimin_calibrated_stds": gimin_calibrated_stds,
         "gimin_used": gimin_idx is not None,
+        "mechanistic": mech,
         "deephit_cif": dh_cif.tolist(),
         "graph_dt_cif": gdt_cif.tolist(),
         "deephit_cif_bands": dh_bands.tolist(),
@@ -597,6 +677,13 @@ def run_unified_pipeline():
     features_df = pd.read_csv(FEATURES_PATH, low_memory=False)
     p1_df = pd.read_csv(PAPER1_PATH)
 
+    # Load Phase 2 mechanistic posteriors for L5 N(t)/N_0 surfacing
+    phase2_posteriors = load_phase2_posteriors()
+    print(
+        f"  Phase 2 posteriors loaded: {len(phase2_posteriors)} patients "
+        f"(L5 integration {'active' if phase2_posteriors else 'inactive'})"
+    )
+
     if args.vignette_ids:
         patnos = args.vignette_ids
     elif args.cohort == "pd_only" and "COHORT_DEFINITION" in p1_df.columns:
@@ -623,6 +710,7 @@ def run_unified_pipeline():
             r = run_patient_pipeline(
                 patno, features_df, gimin_stack, catboost_model, col_medians,
                 dh_model, dh_ckpt, gdt_model, gdt_ckpt, device, p1_df,
+                phase2_posteriors=phase2_posteriors,
             )
             all_results[str(patno)] = r
         except Exception as e:
@@ -634,6 +722,10 @@ def run_unified_pipeline():
 
     # Aggregate summary
     successful = [r for r in all_results.values() if "error" not in r]
+    mech_hits = [
+        r for r in successful if r.get("mechanistic", {}).get("available")
+    ]
+    n_frac_vals = [r["mechanistic"]["n_frac_median"] for r in mech_hits]
     summary = {
         "cohort": args.cohort,
         "n_requested": len(patnos),
@@ -645,6 +737,25 @@ def run_unified_pipeline():
         "temperature_median": float(np.median(gimin_stack["temperatures"])),
         "temperature_mean": float(np.mean(gimin_stack["temperatures"])),
         "conformal_band_width_from_paper4": 0.037,
+        "mechanistic_l5": {
+            "source": "outputs/mechanistic_twin/data/posteriors/phase2_combined_1065.csv",
+            "n_patients_with_posterior": len(mech_hits),
+            "coverage_fraction": round(
+                len(mech_hits) / max(len(successful), 1), 3
+            ),
+            "n_frac_median_p50": (
+                round(float(np.median(n_frac_vals)), 4) if n_frac_vals else None
+            ),
+            "n_frac_median_p25_p75": (
+                [
+                    round(float(np.percentile(n_frac_vals, 25)), 4),
+                    round(float(np.percentile(n_frac_vals, 75)), 4),
+                ]
+                if n_frac_vals
+                else None
+            ),
+            "reference": "Paper 9 Phase 4 Path B (N(t)xLEDD interaction p=0.044)",
+        },
     }
 
     # Save
