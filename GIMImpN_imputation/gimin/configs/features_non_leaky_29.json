@@ -1,0 +1,58 @@
+{
+  "description": "GIMIN non-leaky 29-feature schema for Paper 2 Workstream 1 ablation. Drops 4 staging-algorithm features (NP3TOT, NHY, PUTAMEN_L_SBR, PUTAMEN_R_SBR) from the original 33-feature schema to eliminate label leakage into the downstream NSD-ISS stage prediction experiment.",
+  "created": "2026-04-18",
+  "rationale": "NSD-ISS stage labels in Russo 2025 / Simuni 2024 are derived from MDS-UPDRS Part III (including NP3TOT and implicitly NHY staging threshold), and DaT-SPECT putaminal SBR (PUTAMEN_{L,R}_SBR). Including these four features in the imputation inputs creates a feed-forward path from stage label to imputation decoder, inflating downstream utility gains. This config removes them.",
+  "features": [
+    "SEX",
+    "AGE_AT_VISIT",
+    "PIGD_SCORE",
+    "TREMOR_SCORE",
+    "MCATOT",
+    "CAUDATE_L_VOL",
+    "CAUDATE_R_VOL",
+    "PUTAMEN_L_VOL",
+    "PUTAMEN_R_VOL",
+    "HIPPOCAMPUS_L_VOL",
+    "HIPPOCAMPUS_R_VOL",
+    "CAUDATE_L_SBR",
+    "CAUDATE_R_SBR",
+    "CAUDATE_ASYMMETRY",
+    "PUTAMEN_ASYMMETRY",
+    "ALPHA_SYNUCLEIN",
+    "TOTAL_TAU",
+    "ABETA42",
+    "PTAU181",
+    "UPSIT_TOTAL",
+    "RBD_TOTAL",
+    "SCOPA_AUT_TOTAL",
+    "ESS_TOTAL",
+    "ENTORHINAL_L_CTH",
+    "ENTORHINAL_R_CTH",
+    "CINGULATE_L_CTH",
+    "CINGULATE_R_CTH",
+    "PRECENTRAL_L_CTH",
+    "PRECENTRAL_R_CTH"
+  ],
+  "modality_dims": [2, 3, 6, 4, 4, 4, 6],
+  "modality_totals_verify": 29,
+  "dropped_features": [
+    "NP3TOT",
+    "NHY",
+    "PUTAMEN_L_SBR",
+    "PUTAMEN_R_SBR"
+  ],
+  "dropped_cross_modal_pairs_by_old_index": [
+    [9, 15],
+    [10, 16],
+    [15, 16],
+    [3, 15],
+    [3, 16]
+  ],
+  "dropped_cross_modal_pairs_description": [
+    "PUTAMEN_L_VOL <-> PUTAMEN_L_SBR (dropped SBR side)",
+    "PUTAMEN_R_VOL <-> PUTAMEN_R_SBR (dropped SBR side)",
+    "PUTAMEN_L_SBR <-> PUTAMEN_R_SBR (both sides dropped)",
+    "NHY <-> PUTAMEN_L_SBR (both sides dropped)",
+    "NHY <-> PUTAMEN_R_SBR (both sides dropped)"
+  ]
+}

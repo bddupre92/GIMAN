@@ -166,7 +166,58 @@ def parse_args():
         default=0.10,
         help="Weight on the cross-modal consistency loss term (default 0.10)",
     )
+    # W1 non-leaky ablation: JSON config overriding default 33-feature schema
+    parser.add_argument(
+        "--keep-features-json",
+        type=str,
+        default=None,
+        help=(
+            "Optional path to a JSON config overriding the default 33-feature "
+            "KEEP_FEATURES + MODALITY_DIMS + cross-modal pairs. Used for the "
+            "Paper 2 Workstream 1 non-leaky ablation (29-feature schema)."
+        ),
+    )
     return parser.parse_args()
+
+
+def apply_feature_override(json_path: str):
+    """Override module-level KEEP_FEATURES and MODALITY_DIMS from a JSON config.
+
+    Returns the set of old-index cross-modal pairs that should be dropped
+    (as reported in the JSON), so the caller can filter the GIMIN config
+    accordingly. Any pair referencing a dropped feature index is removed;
+    surviving pairs are re-indexed to match the new 29-feature order.
+    """
+    global KEEP_FEATURES, MODALITY_DIMS
+    import json as _json
+    from pathlib import Path as _Path
+
+    cfg_path = _Path(json_path)
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"keep-features JSON not found: {cfg_path}")
+    with open(cfg_path) as f:
+        override = _json.load(f)
+
+    new_features = override["features"]
+    new_dims = override["modality_dims"]
+    assert sum(new_dims) == len(new_features), (
+        f"modality_dims sum ({sum(new_dims)}) != len(features) ({len(new_features)})"
+    )
+
+    old_to_new = {
+        old_idx: new_idx
+        for new_idx, feat in enumerate(new_features)
+        for old_idx, old_feat in enumerate(KEEP_FEATURES)
+        if old_feat == feat
+    }
+
+    KEEP_FEATURES = list(new_features)
+    MODALITY_DIMS = list(new_dims)
+    print(
+        f"[apply_feature_override] KEEP_FEATURES override active: "
+        f"{len(new_features)} features, MODALITY_DIMS={new_dims}"
+    )
+    return old_to_new
 
 
 def load_data():
@@ -419,15 +470,42 @@ def run_baselines(
 # ── GIMIN training helpers ──────────────────────────────────────────
 
 
-def build_gimin_config():
+def build_gimin_config(old_to_new_index=None):
     """Build a GIMINConfig matching the Paper 2 feature set.
 
-    Returns a GIMINConfig instance whose modalities/normalization/cross-modal
-    pairs correspond to the 33 KEEP_FEATURES used in this benchmark.
+    If old_to_new_index is provided (W1 non-leaky ablation), filter the
+    default 33-feature cross-modal pairs: drop any pair referencing a feature
+    that is not in old_to_new_index, and re-index surviving pair endpoints
+    to the new (e.g., 29-feature) index space. Also rebuild binary-feature
+    indices and modality definitions on the reduced schema.
     """
     cfg = GIMINConfig()
-    # The default config already defines 33 features across 7 modalities
-    # with correct normalization strategies and cross-modal pairs.
+    if old_to_new_index is None:
+        return cfg
+
+    # Filter + re-index cross-modal pairs
+    filtered_pairs = []
+    for pair in cfg.cross_modal_pairs:
+        if pair[0] in old_to_new_index and pair[1] in old_to_new_index:
+            filtered_pairs.append(
+                [old_to_new_index[pair[0]], old_to_new_index[pair[1]]]
+            )
+    dropped = len(cfg.cross_modal_pairs) - len(filtered_pairs)
+    print(
+        f"[build_gimin_config] Cross-modal pairs: "
+        f"{len(cfg.cross_modal_pairs)} -> {len(filtered_pairs)} ({dropped} dropped)"
+    )
+    cfg.cross_modal_pairs = filtered_pairs
+
+    # Rebuild binary_feature_indices (SEX is the only binary in the 33 schema
+    # at old index 0; stays at new index 0 since SEX is first in non-leaky too)
+    if cfg.binary_feature_indices:
+        cfg.binary_feature_indices = [
+            old_to_new_index[i]
+            for i in cfg.binary_feature_indices
+            if i in old_to_new_index
+        ]
+
     return cfg
 
 
@@ -781,6 +859,11 @@ def main():
     args = parse_args()
     np.random.seed(args.seed)
 
+    # W1 non-leaky ablation: override feature schema before load_data()
+    old_to_new_index = None
+    if args.keep_features_json:
+        old_to_new_index = apply_feature_override(args.keep_features_json)
+
     # ── Timestamped output directory ───────────────────────────────
     # Each run gets its own directory that is NEVER overwritten.
     output_dir = PROJECT_ROOT / "outputs" / "paper2_benchmark"
@@ -802,6 +885,8 @@ def main():
         "skip_baselines": args.skip_baselines,
         "skip_gimin": args.skip_gimin,
         "save_checkpoints": args.save_checkpoints,
+        "keep_features_json": args.keep_features_json,
+        "keep_features_count": len(KEEP_FEATURES),
     }
     with open(run_dir / "config.json", "w") as f:
         json.dump(run_config, f, indent=2)
@@ -887,7 +972,7 @@ def main():
                 torch.manual_seed(seed)
 
                 # ── Build modality-aware scaler and normalize ─────
-                cfg = build_gimin_config()
+                cfg = build_gimin_config(old_to_new_index=old_to_new_index)
                 scaler = build_scaler_from_config(cfg)
 
                 # Fit scaler on CORRUPTED observation (what the model sees)
