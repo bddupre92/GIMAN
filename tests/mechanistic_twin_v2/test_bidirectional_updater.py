@@ -86,6 +86,46 @@ def test_loglik_higher_for_matching_params():
     assert ll_true[0] > ll_bad[0]
 
 
+def test_loglik_scalar_vs_uniform_vector_sigma_equivalent():
+    """L1.a: per-obs sigma vector with uniform entries must match scalar result."""
+    rng = np.random.default_rng(123)
+    k = rng.normal(5e-5, 1e-5, size=20).clip(min=1e-7)
+    a = rng.normal(5e-5, 1e-5, size=20).clip(min=1e-7)
+    t = np.array([0.0, 1.0, 2.0, 3.0])
+    sbr_obs = np.array([2.0, 1.85, 1.7, 1.55])
+    sigma_scalar = 0.2
+    sigma_vec = np.full_like(sbr_obs, sigma_scalar, dtype=float)
+    ll_scalar = loglik_sbr(k, a, t, sbr_obs, sbr_0=2.0, sigma=sigma_scalar)
+    ll_vec = loglik_sbr(k, a, t, sbr_obs, sbr_0=2.0, sigma=sigma_vec)
+    np.testing.assert_allclose(ll_scalar, ll_vec, atol=1e-12)
+
+
+def test_loglik_per_obs_sigma_downweights_noisy_visit():
+    """A visit with larger sigma must contribute less to the log-likelihood."""
+    k = np.array([5e-5])
+    a = np.array([5e-5])
+    t = np.array([0.0, 2.0])
+    # Large residual at t=2 compared to prediction (to create discrimination power)
+    sbr_obs = np.array([2.0, 0.5])
+    sigma_tight = np.array([0.08, 0.08])          # both tight → big penalty at t=2
+    sigma_loose_at_t2 = np.array([0.08, 0.80])    # loose at t=2 → small penalty
+    ll_tight = loglik_sbr(k, a, t, sbr_obs, sbr_0=2.0, sigma=sigma_tight)
+    ll_loose = loglik_sbr(k, a, t, sbr_obs, sbr_0=2.0, sigma=sigma_loose_at_t2)
+    # Loosening the noisy visit makes the likelihood LESS negative (closer to 0)
+    assert ll_loose[0] > ll_tight[0]
+
+
+def test_loglik_rejects_mismatched_sigma_length():
+    """Safety: vector sigma whose length != n_obs must raise."""
+    import pytest
+    k = np.array([5e-5])
+    a = np.array([5e-5])
+    t = np.array([0.0, 1.0, 2.0])
+    sbr_obs = np.array([2.0, 1.9, 1.8])
+    with pytest.raises(ValueError, match="sigma vector shape"):
+        loglik_sbr(k, a, t, sbr_obs, sbr_0=2.0, sigma=np.array([0.08, 0.08]))
+
+
 def test_update_weights_sum_to_one():
     prior = _make_prior()
     t_new = np.array([0.0, 2.0])

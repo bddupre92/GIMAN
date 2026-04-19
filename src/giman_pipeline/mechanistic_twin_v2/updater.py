@@ -33,6 +33,7 @@ def update_posterior(
     sbr_0: float,
     ess_frac_threshold: float = 0.3,
     rng: np.random.Generator | None = None,
+    sigma: float | np.ndarray | None = None,
 ) -> PatientPosterior:
     """SIR reweight a patient's posterior with new SBR observations.
 
@@ -44,6 +45,12 @@ def update_posterior(
             across all updates for a patient).
         ess_frac_threshold: Resample when ESS/N falls below this fraction.
         rng: Optional numpy Generator for reproducible resampling.
+        sigma: Observation noise. Either a scalar (applied to every new visit,
+            default SBR_SIGMA=0.20) OR a vector of shape (n_new,) where entry
+            i is the per-visit noise scale. Per-visit vectors consume GIMIN
+            temperature-scaled σ via cross-paper integration L1
+            (Docs/research_directions/2026-04-19_L1_gimin_sigma_bridge_design.md).
+            If None, loglik_sbr uses its default scalar σ.
 
     Returns:
         Updated PatientPosterior with version += 1.
@@ -51,7 +58,12 @@ def update_posterior(
     rng = rng if rng is not None else np.random.default_rng(0)
     k_n, alpha_tox = _param_columns(prior)
 
-    log_lik_new = loglik_sbr(k_n, alpha_tox, t_years_new, sbr_obs_new, sbr_0)
+    if sigma is None:
+        log_lik_new = loglik_sbr(k_n, alpha_tox, t_years_new, sbr_obs_new, sbr_0)
+    else:
+        log_lik_new = loglik_sbr(
+            k_n, alpha_tox, t_years_new, sbr_obs_new, sbr_0, sigma=sigma,
+        )
 
     # Log-weights → stabilised softmax
     log_w = np.log(prior.weights + 1e-300) + log_lik_new
