@@ -17,21 +17,26 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · Size: ~283 MB · 112 tables across 10 schemas.
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 702 MB · 181 tables across 14 schemas** (verified 2026-04-18).
 
 **Schemas:**
-| Schema | Contents |
-|--------|----------|
-| `ppmi_raw` | 25 PPMI clinical/imaging tables (demographics, UPDRS, DaTScan, biospecimens, MOCA, etc.) |
-| `biofind_raw` | 23 BioFIND tables (external validation cohort) |
-| `pdbp_raw` | 18 PDBP tables (external prediction cohort) |
-| `hbs_raw` | 11 HBS tables (external prediction cohort) |
-| `staging` | 3 tables — `nsd_iss_staging_results` (PPMI 2,201), `biofind_nsd_iss_staging` (103), `nsd_iss_staging_enriched` |
-| `features` | 4 tables — `paper1_features_with_targets` (PPMI 2,201×22), `biofind_features`, `pdbp_features`, `hbs_features` |
-| `longitudinal` | 4 tables — `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
-| `paper3` | `longitudinal_features` (16,699 rows × 48 cols) |
-| `ledd` | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
-| `mechanistic` | 21 tables from Phase 1-4 (posteriors, LOO, counterfactuals, Phase 4 assembled data) |
+
+| Schema | Tables | Contents |
+|--------|--------|----------|
+| `ppmi_raw` | 26 | PPMI clinical/imaging tables (demographics, UPDRS, DaTScan, biospecimens, MOCA, etc.) |
+| `ppmi_olink` | 8 | PPMI Olink proteomics NPX (projects 196, 222, 9000 — CSF + plasma inflammation panels) |
+| `ppmi_found` | 1 | PPMI-FOUND anti-inflammatory-med RFQ (research-feasibility query export) |
+| `biofind_raw` | 23 | BioFIND tables (external validation cohort) |
+| `pdbp_raw` | 52 | PDBP tables (external prediction cohort + April 2026 LONI IDA reload: +34 tables, includes DLB SPECT metadata) |
+| `hbs_raw` | 11 | HBS tables (external prediction cohort) |
+| `staging` | 3 | `nsd_iss_staging_results` (PPMI 2,201), `biofind_nsd_iss_staging` (103), `nsd_iss_staging_enriched` |
+| `features` | 4 | `paper1_features_with_targets` (PPMI 2,201×22), `biofind_features`, `pdbp_features`, `hbs_features` |
+| `longitudinal` | 4 | `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
+| `paper3` | 1 | `longitudinal_features` (16,699 rows × 48 cols) |
+| `ledd` | 2 | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
+| `mechanistic` | 25 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal) |
+| `reference` | 9 | LONI data dictionaries, harmonized code lists, biomarker dashboards, PPMI project catalog, `phase5_bibliography` |
+| `audit` | 12 | Defense-prep claim lineage — `chapter`, `citation`, `citation_use`, `claim`, `code_artifact`, `data_source` and link tables |
 
 **Python helper** ([src/giman_pipeline/data/db.py](src/giman_pipeline/data/db.py)):
 ```python
@@ -53,6 +58,55 @@ brew services restart postgresql@17  # restart server
 **Restoring from scratch:** `db_dump/schema_and_data.sql` (190MB, gitignored) — `psql giman_research < db_dump/schema_and_data.sql` rebuilds the full DB.
 
 **Migration context:** Migrated from Supabase (out of free-tier storage) on 2026-04-12. Supabase project `forcqcobliklzcfwhjsj` is now deprecated — do not write new data there. Hex.tech visualizations previously connected to Supabase; use local Jupyter with `read_sql()` instead (CLI access requires Hex Team plan).
+
+### Registry-freshness protocol (update CLAUDE.md when any of these fire)
+
+The **Schemas** table above is load-bearing — downstream code, reviewer audits, and the defense-prep DB all assume the counts are current. It drifted badly between 2026-04-10 (10 schemas / 112 tables / 283 MB) and 2026-04-18 (14 / 181 / 702 MB) because the following actions ran without a registry update:
+
+- New PDBP LONI IDA reload added 34 tables to `pdbp_raw`
+- Olink proteomics (project 196/222/9000) added 8 tables + the new `ppmi_olink` schema
+- PPMI-FOUND RFQ export added the `ppmi_found` schema
+- Defense-prep claim-lineage migration added the `audit` schema (12 tables)
+- LONI reference dictionaries added the `reference` schema (9 tables)
+- Phase 5 blocks + ch9.6 work added 4 tables to `mechanistic`
+
+**Update the registry table above whenever you:**
+
+1. Run `scripts/load_csvs_to_local_pg.py --schema <name>` (any schema, any `--force-reload`)
+2. Create a new schema via `CREATE SCHEMA ...` in a notebook or script
+3. Load Olink / Found / RFQ / external-cohort exports
+4. Write a new persistent `mechanistic.*` or `features.*` or `paper3.*` table
+
+**Verification one-liner (takes <1 sec):**
+
+```bash
+psql giman_research -Atc "SELECT
+  (SELECT pg_size_pretty(pg_database_size('giman_research'))) || ' · ' ||
+  (SELECT COUNT(*) FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema')) || ' tables · ' ||
+  (SELECT COUNT(DISTINCT schemaname) FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema','public')) || ' user schemas'"
+```
+
+If the output does not match the `Size` / table count / schema count stated above, update the registry table in this file in the same commit as the underlying data change. See [`scripts/load_csvs_to_local_pg.py`](scripts/load_csvs_to_local_pg.py) for the canonical loader.
+
+### Audit-DB freshness protocol (literature, claims, model verdicts)
+
+The `audit.*` schema (see the Schemas table above) mirrors `outputs/defense_prep/e2e_audit/claim_lineage.sqlite3` and is the **structured truth** for 1,127 claims × 344 citations × 175 data-sources across the dissertation. Unlike the SQL registry counts, audit rows are extracted from LaTeX + code artifacts by the numbered defense-prep pipeline, so they lag whenever literature is added, claims are edited, or model runs produce new results.
+
+**When to refresh the audit DB** (triggers → scripts):
+
+| Trigger | Fix | What updates |
+|---------|-----|--------------|
+| Added `\bibitem{}` to `outputs/dissertation/bibliography.tex` | `scripts/defense_prep/01_extract_citations.py` then `03_resolve_citations_to_zotero.py` | `audit.citation`, `audit.citation_use` |
+| Edited `outputs/dissertation/chapters/ch*.tex` (new/changed prose, tables, results) | `scripts/defense_prep/02_extract_numerical_claims.py` then `07_per_claim_value_verifier.py` | `audit.claim`, `claim.verdict` |
+| Added JSON/CSV result file under `outputs/paper{1..12}*/` | Re-run `07_per_claim_value_verifier.py`; if a model failure refutes a prior claim, manually set `claim.verdict='refuted'` with `verdict_notes` citing the commit | `claim.verdict`, `claim.verdict_notes` |
+| Moved/renamed a data file cited as provenance | `scripts/defense_prep/04_data_lineage_walker.py` | `audit.data_source`, `code_artifact_link` |
+| Zotero `RT8B9N2J` refreshed (new paper notes) | `scripts/defense_prep/03_resolve_citations_to_zotero.py` | `citation.zotero_verified`, `zotero_key` |
+
+**What the hook catches:** a second `PreToolUse` hook ([`scripts/check_audit_freshness.py`](scripts/check_audit_freshness.py)) scans the staged diff on every `git commit*` and surfaces a `systemMessage` reminder if any of the first three triggers above are present. It does **not block** — audit refresh can take minutes and commits often need to land mid-pipeline. Escape hatch: `GIMAN_SKIP_AUDIT_FRESHNESS_CHECK=1 git commit ...`.
+
+**Model-failure → claim invalidation** is inherently manual and the hook cannot detect it. The rule: when a model run produces a result that contradicts a previously-published claim in the dissertation, edit the row in `audit.claim` directly (`UPDATE audit.claim SET verdict='refuted', verdict_notes='commit <sha>: <why>' WHERE claim_id=...`) and regenerate `claim_lineage.sqlite3` via the pipeline. Do not delete the claim — refutation is evidence too.
+
+After any audit refresh, re-run `scripts/defense_prep/99_defensibility_scorer.py` to regenerate `outputs/defense_prep/e2e_audit/scorecard_summary.csv` and re-sync to Obsidian via `scripts/vault_sync.py`.
 
 ## Second Brain — Obsidian Vault + Mempalace + Audit DB
 
