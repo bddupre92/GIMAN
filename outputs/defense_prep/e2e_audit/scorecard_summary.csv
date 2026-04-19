@@ -1,17 +1,17 @@
 chapter_number,title,defensibility_score,total_claims,verified,partial,unverified
-1,Introduction,yellow,39,10,29,0
-2,Systematic Literature Review,yellow,153,8,145,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,99,19,80,0
-4,Paper 2: GIMIN Imputation,yellow,135,6,129,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,55,7,48,0
-6,Paper 4: Conformalized Survival Analysis,yellow,88,10,78,0
-7,Paper 5: Temporal Validation,yellow,55,6,49,0
-8,Paper 6: Unified Clinical Decision Support,yellow,42,5,37,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,59,24,35,0
-10,Paper 8a: Spatial Propagation Identifiability,yellow,69,40,29,0
-11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,63,38,25,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,56,35,21,0
-13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,61,53,8,0
-14,"Discussion (Unified, Papers 1-10)",yellow,28,24,4,0
-15,Conclusion + Future Work Catalog,yellow,14,9,5,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,111,46,65,0
+1,Introduction,yellow,39,29,10,0
+2,Systematic Literature Review,yellow,153,138,15,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,99,91,8,0
+4,Paper 2: GIMIN Imputation,yellow,135,118,17,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,55,44,11,0
+6,Paper 4: Conformalized Survival Analysis,yellow,88,79,9,0
+7,Paper 5: Temporal Validation,yellow,55,45,10,0
+8,Paper 6: Unified Clinical Decision Support,yellow,42,37,5,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,59,55,4,0
+10,Paper 8a: Spatial Propagation Identifiability,yellow,69,67,2,0
+11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,63,61,2,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,56,53,3,0
+13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,61,61,0,0
+14,"Discussion (Unified, Papers 1-10)",yellow,28,28,0,0
+15,Conclusion + Future Work Catalog,yellow,14,14,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,111,96,15,0
