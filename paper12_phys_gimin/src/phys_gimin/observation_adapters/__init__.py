@@ -1,11 +1,10 @@
-"""Observation adapters — wrappers that feed phys-GIMIN σ into the mechanistic twin.
+"""Observation adapters for cross-paper integration L1 (GIMIN → mechanistic twin).
 
-Week 5+ scope. Each adapter imports from the main project but does not
-modify it. See scoping plan "σ-contract via wrappers" section for the
-patch-via-wrapper discipline.
+Task 2 (2026-04-19): PerVisitSbrLikelihood wraps main-project loglik_sbr to accept
+per-visit sigma vectors from GIMIN imputation.
 
-Planned modules:
-- sbr.py — Per-visit SBR likelihood wrapper on mechanistic_twin_v2.observations.
-- multichannel.py — Ch 9.6 σ-vector SAEM wrapper.
-- path_b.py — Errors-in-variables regression on Paper 9 Path B GAP.
+Task 3 (pending): multichannel adapters (GFAP, NfL, Amprion SAA) + Path B (ON-OFF gap).
 """
+from phys_gimin.observation_adapters.sbr import PerVisitSbrLikelihood
+
+__all__ = ["PerVisitSbrLikelihood"]
