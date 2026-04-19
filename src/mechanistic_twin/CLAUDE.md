@@ -311,6 +311,15 @@ Consequences:
 
 The cleanest integration point for Python ↔ Julia interop is [python_bridge/graph_loader.py](python_bridge/graph_loader.py). It bypasses `src/giman_pipeline/paper3/graph_digital_twin.py::load_graph_dt_checkpoint` (which auto-selects MPS/CUDA — see Known Issues) and returns plain numpy arrays with `map_location='cpu'`.
 
+### Cross-paper integration L1 — GIMIN σ → twin observation likelihood (2026-04-19)
+
+- **Design doc:** [`Docs/research_directions/2026-04-19_L1_gimin_sigma_bridge_design.md`](../../Docs/research_directions/2026-04-19_L1_gimin_sigma_bridge_design.md)
+- **Python bridge:** [`scripts/mechanistic_twin/export_gimin_to_julia.py`](../../scripts/mechanistic_twin/export_gimin_to_julia.py) — emits `outputs/mechanistic_twin/l1_gimin_bridge/gimin_dat_sbr_imputed.parquet` with per-patient `(obs, imputed_mean, imputed_std, is_observed)` tuples for CAUDATE_L/R_SBR, PUTAMEN_L/R_SBR, and derived bilateral means.
+- **Julia consumption contract:** likelihood becomes $\mathcal{N}(\text{SBR}_{\text{pred}}(t); \mu_{\text{eff}}, \sigma_{\text{eff}}^2)$ where, for observed scans, $\mu_{\text{eff}} = \text{SBR}_{\text{obs}}$ and $\sigma_{\text{eff}} = \sigma_{\text{sensor}}$ (literature-anchored ≈0.08 per Fearnley-Lees-style test-retest); for GIMIN-imputed scans, $\mu_{\text{eff}} = \mu_{\text{GIMIN}}$ and $\sigma_{\text{eff}}^2 = \sigma_{\text{GIMIN}}^2 + \sigma_{\text{sensor}}^2$ (quadrature; GIMIN σ already temperature-scaled to 0.90 nominal coverage).
+- **Current stub bridge output:** 1,900 baseline-visit rows with 1,368 observed DaT-SBR values. The 532 NaN rows require re-running GIMIN on the full 33-feature schema (the P6 v2 pipeline used the 12-feature clinical-only schema that doesn't impute DaT-SBR).
+- **Phase 5 / Paper 10 execution status:** infrastructure ready; full re-calibration with GIMIN-σ-fed likelihood on the 1,900-patient cohort is the Phase 5 Task 5+ work.
+- **Why this matters for the arc:** W4 (Paper 6, 2026-04-18) showed that Mean imputation matches GIMIN on raw accuracy. The `dupre2026paper2` claim of "uncertainty-enabled" (not "principled accuracy") imputation depends on a concrete downstream σ-consumer. L1 IS that consumer. Do not deprecate the GIMIN σ output without updating this doc.
+
 ## Known Issues (from deep review)
 
 The scaffold was generated in an earlier session without being executed. Five BLOCKERs were caught and fixed before Phase 1 Step 1.4:
