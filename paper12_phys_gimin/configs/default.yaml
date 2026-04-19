@@ -1,0 +1,41 @@
+# configs/default.yaml
+defaults:
+  - _self_
+
+experiment:
+  name: phys_gimin_default
+  seed: 1001
+  deterministic: true
+  output_root: outputs/paper12_phys_gimin/runs
+  output_schema_version: "1.0"
+
+data:
+  feature_schema: 33
+  modality_dims: [2, 5, 6, 6, 4, 4, 6]  # 33 features total, 7 modalities (Paper 2 precedent)
+  ppmi_cohort_filter: all  # or "pd_only" for APPRDX==1
+  mask_fractions: [0.10, 0.25, 0.50, 0.75]
+
+model:
+  embed_dim: 64
+  num_gnn_layers: 3
+  num_heads: 4
+  mc_dropout: 0.1
+  num_stages: 6
+  stage_embed_dim: 16
+  use_stage_attention_bias: true
+
+training:
+  n_epochs: 300
+  patience: 20
+  batch_size: 256
+  lr: 1e-3
+  lambda_phys_target: 1.0
+  warmup_epochs: 5
+  min_recon_fraction: 0.30
+  floor_violation_decay: 0.5
+  ema_alpha: 0.9
+
+regularizer:
+  variant: literature  # or "self"
+  beta: 0.5
+  eps: 1e-3

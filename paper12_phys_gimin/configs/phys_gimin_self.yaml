@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - default
+  - _self_
+
+experiment:
+  name: phys_gimin_self
+
+regularizer:
+  variant: self
+  posterior_hdf5_path: /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/mechanistic_twin/paper10_mech_vs_giman/posteriors.h5

@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+  - default
+  - _self_
+
+experiment:
+  name: phys_gimin_lit
+
+regularizer:
+  variant: literature
