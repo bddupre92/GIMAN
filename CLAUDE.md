@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · Size: ~283 MB · 112 tables across 10 schemas.
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 718 MB · 183 tables across 14 schemas** (verified 2026-04-19).
 
 **Schemas:**
 | Schema | Contents |
@@ -27,7 +27,7 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `pdbp_raw` | 18 PDBP tables (external prediction cohort) |
 | `hbs_raw` | 11 HBS tables (external prediction cohort) |
 | `staging` | 3 tables — `nsd_iss_staging_results` (PPMI 2,201), `biofind_nsd_iss_staging` (103), `nsd_iss_staging_enriched` |
-| `features` | 4 tables — `paper1_features_with_targets` (PPMI 2,201×22), `biofind_features`, `pdbp_features`, `hbs_features` |
+| `features` | 6 tables — `paper1_features_with_targets` (PPMI 2,201×22), `biofind_features`, `pdbp_features`, `hbs_features`, `paper2_gimin_cohort` (35,687×40 GIMIN full cohort), `paper2_gimin_missingness_mask` (35,687×40 matching mask, 1=observed) |
 | `longitudinal` | 4 tables — `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
