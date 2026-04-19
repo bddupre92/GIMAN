@@ -1,0 +1,398 @@
+{
+  "max_all_14": {
+    "baseline": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227606,
+      "rmse": 0.13690679195567043,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 0.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x2.5": {
+      "n_patients": 428,
+      "mean_abs_error": 0.1605507775769849,
+      "median_abs_error": 0.14298958718109867,
+      "rmse": 0.19755464918675045,
+      "coverage_95ci": 0.1939252336448598,
+      "median_width_95ci": 0.0908632659082694,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x5.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.1434494459987527,
+      "median_abs_error": 0.12960085053655562,
+      "rmse": 0.17637673046231406,
+      "coverage_95ci": 0.34579439252336447,
+      "median_width_95ci": 0.16234291012537122,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x10.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.12111394964220032,
+      "median_abs_error": 0.1068251688218479,
+      "rmse": 0.14929784333943769,
+      "coverage_95ci": 0.5887850467289719,
+      "median_width_95ci": 0.24752725906824896,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x20.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11273676906000397,
+      "median_abs_error": 0.09976078358816287,
+      "rmse": 0.13885149771274657,
+      "coverage_95ci": 0.7289719626168224,
+      "median_width_95ci": 0.29641983853700327,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "paired": {
+      "l1_sigma_x2.5": {
+        "sigma_inflation": 2.5,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.04992952397438223,
+        "median_delta_abs_error": 0.02871242722413636,
+        "mean_delta_95ci": [
+          0.0406508239429086,
+          0.05972273072784333
+        ],
+        "pct_patients_improved": 0.3060747663551402
+      },
+      "l1_sigma_x5.0": {
+        "sigma_inflation": 5.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.032828192396150015,
+        "median_delta_abs_error": 0.019361450624720195,
+        "mean_delta_95ci": [
+          0.025373656217081562,
+          0.04051379571016629
+        ],
+        "pct_patients_improved": 0.3107476635514019
+      },
+      "l1_sigma_x10.0": {
+        "sigma_inflation": 10.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.010492696039597637,
+        "median_delta_abs_error": 0.006266137143679851,
+        "mean_delta_95ci": [
+          0.006035454990540797,
+          0.015334342515317546
+        ],
+        "pct_patients_improved": 0.3644859813084112
+      },
+      "l1_sigma_x20.0": {
+        "sigma_inflation": 20.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.0021155154574013205,
+        "median_delta_abs_error": 0.0013222748206186963,
+        "mean_delta_95ci": [
+          0.00034217559340493197,
+          0.003807944575442857
+        ],
+        "pct_patients_improved": 0.397196261682243
+      }
+    },
+    "best_sigma": 20.0
+  },
+  "max_1": {
+    "baseline": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227606,
+      "rmse": 0.13690679195567043,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 0.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x2.5": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260265,
+      "median_abs_error": 0.09834844449227617,
+      "rmse": 0.13690679195567046,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 1.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x5.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227609,
+      "rmse": 0.13690679195567043,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 1.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x10.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227603,
+      "rmse": 0.13690679195567046,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 1.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x20.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227617,
+      "rmse": 0.13690679195567046,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 1.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "paired": {
+      "l1_sigma_x2.5": {
+        "sigma_inflation": 2.5,
+        "n_paired": 428,
+        "mean_delta_abs_error": 2.5939790294980292e-18,
+        "median_delta_abs_error": 0.0,
+        "mean_delta_95ci": [
+          -7.846786564231539e-18,
+          1.2389492339639961e-17
+        ],
+        "pct_patients_improved": 0.22429906542056074
+      },
+      "l1_sigma_x5.0": {
+        "sigma_inflation": 5.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 1.686086369173719e-18,
+        "median_delta_abs_error": 0.0,
+        "mean_delta_95ci": [
+          -7.720330086543509e-18,
+          1.024783840341065e-17
+        ],
+        "pct_patients_improved": 0.2219626168224299
+      },
+      "l1_sigma_x10.0": {
+        "sigma_inflation": 10.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 4.020667495721945e-18,
+        "median_delta_abs_error": 0.0,
+        "mean_delta_95ci": [
+          -5.9013022921080165e-18,
+          1.330062747375114e-17
+        ],
+        "pct_patients_improved": 0.21261682242990654
+      },
+      "l1_sigma_x20.0": {
+        "sigma_inflation": 20.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 6.22554967079527e-18,
+        "median_delta_abs_error": 0.0,
+        "mean_delta_95ci": [
+          -3.179245548028522e-18,
+          1.5239626798300923e-17
+        ],
+        "pct_patients_improved": 0.21261682242990654
+      }
+    },
+    "best_sigma": 2.5
+  },
+  "max_3": {
+    "baseline": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227606,
+      "rmse": 0.13690679195567043,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 0.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x2.5": {
+      "n_patients": 428,
+      "mean_abs_error": 0.14674348927711342,
+      "median_abs_error": 0.13155314328434814,
+      "rmse": 0.17817173222562116,
+      "coverage_95ci": 0.338785046728972,
+      "median_width_95ci": 0.16028191141331583,
+      "mean_imputed_input": 2.97196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x5.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.12137558711022808,
+      "median_abs_error": 0.1083713585195284,
+      "rmse": 0.14890938168812748,
+      "coverage_95ci": 0.6261682242990654,
+      "median_width_95ci": 0.2503097572561591,
+      "mean_imputed_input": 2.97196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x10.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11290454672869688,
+      "median_abs_error": 0.10113673560518036,
+      "rmse": 0.13926709636520723,
+      "coverage_95ci": 0.7336448598130841,
+      "median_width_95ci": 0.3034243952295396,
+      "mean_imputed_input": 2.97196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x20.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11118351937603962,
+      "median_abs_error": 0.09813311071488179,
+      "rmse": 0.13739095713291496,
+      "coverage_95ci": 0.7663551401869159,
+      "median_width_95ci": 0.31890997336848814,
+      "mean_imputed_input": 2.97196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "paired": {
+      "l1_sigma_x2.5": {
+        "sigma_inflation": 2.5,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.03612223567451074,
+        "median_delta_abs_error": 0.022282158555006037,
+        "mean_delta_95ci": [
+          0.02910907323523504,
+          0.04396211545014402
+        ],
+        "pct_patients_improved": 0.2897196261682243
+      },
+      "l1_sigma_x5.0": {
+        "sigma_inflation": 5.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.010754333507625408,
+        "median_delta_abs_error": 0.008404541111067476,
+        "mean_delta_95ci": [
+          0.006966219772605955,
+          0.014825863743820888
+        ],
+        "pct_patients_improved": 0.34579439252336447
+      },
+      "l1_sigma_x10.0": {
+        "sigma_inflation": 10.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.0022832931260942067,
+        "median_delta_abs_error": 0.001993881050055102,
+        "mean_delta_95ci": [
+          0.0010029764845200094,
+          0.0036609409413513017
+        ],
+        "pct_patients_improved": 0.3808411214953271
+      },
+      "l1_sigma_x20.0": {
+        "sigma_inflation": 20.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.0005622657734369433,
+        "median_delta_abs_error": 0.0005187407179454429,
+        "mean_delta_95ci": [
+          0.00022892626851559147,
+          0.0009253587272471915
+        ],
+        "pct_patients_improved": 0.3878504672897196
+      }
+    },
+    "best_sigma": 20.0
+  },
+  "max_5": {
+    "baseline": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227606,
+      "rmse": 0.13690679195567043,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 0.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x2.5": {
+      "n_patients": 428,
+      "mean_abs_error": 0.15353948548782764,
+      "median_abs_error": 0.1351354200299112,
+      "rmse": 0.18683930432609094,
+      "coverage_95ci": 0.2733644859813084,
+      "median_width_95ci": 0.1404376423114127,
+      "mean_imputed_input": 4.897196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x5.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.12556588871307228,
+      "median_abs_error": 0.1124912101949499,
+      "rmse": 0.15505879133465583,
+      "coverage_95ci": 0.5327102803738317,
+      "median_width_95ci": 0.22884852134939845,
+      "mean_imputed_input": 4.897196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x10.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11380687610020168,
+      "median_abs_error": 0.10114644712069212,
+      "rmse": 0.1405701503732348,
+      "coverage_95ci": 0.719626168224299,
+      "median_width_95ci": 0.29211712490834046,
+      "mean_imputed_input": 4.897196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x20.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11139534177136058,
+      "median_abs_error": 0.09804949232427271,
+      "rmse": 0.1375822884206435,
+      "coverage_95ci": 0.764018691588785,
+      "median_width_95ci": 0.3160038967087399,
+      "mean_imputed_input": 4.897196261682243,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "paired": {
+      "l1_sigma_x2.5": {
+        "sigma_inflation": 2.5,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.04291823188522498,
+        "median_delta_abs_error": 0.025998332389904455,
+        "mean_delta_95ci": [
+          0.03486033404653558,
+          0.051428129235693655
+        ],
+        "pct_patients_improved": 0.308411214953271
+      },
+      "l1_sigma_x5.0": {
+        "sigma_inflation": 5.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.014944635110469588,
+        "median_delta_abs_error": 0.011291728197014683,
+        "mean_delta_95ci": [
+          0.010040653388397795,
+          0.02048184879722002
+        ],
+        "pct_patients_improved": 0.3341121495327103
+      },
+      "l1_sigma_x10.0": {
+        "sigma_inflation": 10.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.0031856224975990092,
+        "median_delta_abs_error": 0.0026439286636854575,
+        "mean_delta_95ci": [
+          0.0012510245592031902,
+          0.0052490767554180945
+        ],
+        "pct_patients_improved": 0.37850467289719625
+      },
+      "l1_sigma_x20.0": {
+        "sigma_inflation": 20.0,
+        "n_paired": 428,
+        "mean_delta_abs_error": 0.0007740881687579107,
+        "median_delta_abs_error": 0.0005696893445091833,
+        "mean_delta_95ci": [
+          0.00023847222851439042,
+          0.0013447697004024045
+        ],
+        "pct_patients_improved": 0.39485981308411217
+      }
+    },
+    "best_sigma": 20.0
+  }
+}

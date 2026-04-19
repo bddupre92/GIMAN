@@ -1,0 +1,112 @@
+{
+  "config": {
+    "n_patients": null,
+    "output": "/Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/mechanistic_twin/paper10_mech_vs_giman/l1_putamen_demo.json",
+    "sigma_sweep": true
+  },
+  "sigma_sweep": [
+    2.5,
+    5.0,
+    10.0,
+    20.0
+  ],
+  "modes": {
+    "baseline": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11062125360260268,
+      "median_abs_error": 0.09834844449227606,
+      "rmse": 0.13690679195567043,
+      "coverage_95ci": 0.7686915887850467,
+      "median_width_95ci": 0.32247757642132824,
+      "mean_imputed_input": 0.0,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x2.5": {
+      "n_patients": 428,
+      "mean_abs_error": 0.1605507775769849,
+      "median_abs_error": 0.14298958718109867,
+      "rmse": 0.19755464918675045,
+      "coverage_95ci": 0.1939252336448598,
+      "median_width_95ci": 0.0908632659082694,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x5.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.1434494459987527,
+      "median_abs_error": 0.12960085053655562,
+      "rmse": 0.17637673046231406,
+      "coverage_95ci": 0.34579439252336447,
+      "median_width_95ci": 0.16234291012537122,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x10.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.12111394964220032,
+      "median_abs_error": 0.1068251688218479,
+      "rmse": 0.14929784333943769,
+      "coverage_95ci": 0.5887850467289719,
+      "median_width_95ci": 0.24752725906824896,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    },
+    "l1_sigma_x20.0": {
+      "n_patients": 428,
+      "mean_abs_error": 0.11273676906000397,
+      "median_abs_error": 0.09976078358816287,
+      "rmse": 0.13885149771274657,
+      "coverage_95ci": 0.7289719626168224,
+      "median_width_95ci": 0.29641983853700327,
+      "mean_imputed_input": 13.689252336448599,
+      "mean_observed_input": 2.6378504672897196
+    }
+  },
+  "paired_comparison": {
+    "l1_sigma_x2.5": {
+      "sigma_inflation": 2.5,
+      "n_paired": 428,
+      "mean_delta_abs_error": 0.04992952397438223,
+      "median_delta_abs_error": 0.02871242722413636,
+      "mean_delta_95ci": [
+        0.0406508239429086,
+        0.05972273072784333
+      ],
+      "pct_patients_improved": 0.3060747663551402
+    },
+    "l1_sigma_x5.0": {
+      "sigma_inflation": 5.0,
+      "n_paired": 428,
+      "mean_delta_abs_error": 0.032828192396150015,
+      "median_delta_abs_error": 0.019361450624720195,
+      "mean_delta_95ci": [
+        0.025373656217081562,
+        0.04051379571016629
+      ],
+      "pct_patients_improved": 0.3107476635514019
+    },
+    "l1_sigma_x10.0": {
+      "sigma_inflation": 10.0,
+      "n_paired": 428,
+      "mean_delta_abs_error": 0.010492696039597637,
+      "median_delta_abs_error": 0.006266137143679851,
+      "mean_delta_95ci": [
+        0.006035454990540797,
+        0.015334342515317546
+      ],
+      "pct_patients_improved": 0.3644859813084112
+    },
+    "l1_sigma_x20.0": {
+      "sigma_inflation": 20.0,
+      "n_paired": 428,
+      "mean_delta_abs_error": 0.0021155154574013205,
+      "median_delta_abs_error": 0.0013222748206186963,
+      "mean_delta_95ci": [
+        0.00034217559340493197,
+        0.003807944575442857
+      ],
+      "pct_patients_improved": 0.397196261682243
+    }
+  },
+  "best_sigma_for_nominal_coverage": 20.0
+}
