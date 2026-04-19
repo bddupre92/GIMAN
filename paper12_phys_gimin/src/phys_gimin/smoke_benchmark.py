@@ -17,6 +17,7 @@ dispatches single-seed runs in sequence.
 from __future__ import annotations
 
 import json
+import sys
 import time
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
@@ -48,7 +49,119 @@ class SmokeRunResult:
     status: str                   # "completed" or "failed"
 
 
-# ── Tiny mock dataset (replicates _TinyDataset from test_training.py) ─────────
+# ── Real PPMI data loader (reuses Paper 2 pipeline) ────────────────────────────
+
+def _load_real_ppmi_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+    """Load the Paper 2 canonical 33-feature PPMI dataset via the existing pipeline.
+
+    This reuses scripts/run_paper2_experiments.py::load_data() without modification.
+    The Paper 2 script is importable as-is because argparse lives inside parse_args()
+    and CLI dispatch is guarded by `if __name__ == "__main__"`.
+
+    Returns:
+        features_np: (2201, 33) float32
+        mask_np:     (2201, 33) float32 — 1 = observed, 0 = missing
+        stages_np:   (2201,) int — NSD-ISS stages (0/1/2/3/4; 5 = unclassified)
+        feature_names: list of feature names (up to 33, depending on availability)
+    """
+    _project_root = Path("/Users/blair.dupre/Projects/CSCI-FALL-2025")
+    for _p in [_project_root / "scripts",
+               _project_root / "src",
+               _project_root / "GIMImpN_imputation"]:
+        _ps = str(_p)
+        if _ps not in sys.path:
+            sys.path.insert(0, _ps)
+
+    # Import without triggering argparse (argparse is in parse_args(); CLI is __main__-guarded).
+    from run_paper2_experiments import load_data as _paper2_load_data
+
+    features_np, mask_np, stages_np, feature_names = _paper2_load_data()
+    return features_np, mask_np, stages_np, feature_names
+
+
+# ── Dataset builders for mock vs real data ──────────────────────────────────
+
+def _build_dataset_with_masked_features(
+    true_features: torch.Tensor,
+    masked_features: torch.Tensor,
+    mask: torch.Tensor,
+    n_patients: int,
+    seed: int = 1001,
+) -> Dataset:
+    """Build a dataset from potentially real data with masked features.
+
+    For mock paths (mock_data=True), this wraps the features/mask in _MockDataset.
+    For real paths (mock_data=False), this wraps them in _RealDataDataset.
+
+    Args:
+        true_features: Full unmasked feature matrix (N, F)
+        masked_features: Features with artificial mask applied (N, F)
+        mask: Artificial mask (1 = observed, 0 = missing) (N, F)
+        n_patients: Size hint for the dataset
+        seed: Random seed for synthetic metadata
+
+    Returns:
+        A Dataset with batch dict containing fields expected by PhysGIMIN.
+    """
+    # Infer if data is real or mock based on size
+    if true_features.shape[0] > 100:
+        # Real data path — use wrapper
+        return _RealDataDataset(
+            features=masked_features,
+            mask=mask,
+            n_patients=true_features.shape[0],
+        )
+    else:
+        # Mock path — use existing mock dataset structure
+        dataset = _MockDataset(n_patients=n_patients, n_features=true_features.shape[1], seed=seed)
+        dataset.features = masked_features
+        dataset.mask = mask
+        return dataset
+
+
+class _RealDataDataset(Dataset):
+    """Wrapper for real PPMI data with the same batch interface as _MockDataset.
+
+    Converts real data (N, F) into a single batch dict with mock graph structure.
+    """
+
+    def __init__(self, features: torch.Tensor, mask: torch.Tensor, n_patients: int, seed: int = 1001):
+        self.features = features if isinstance(features, torch.Tensor) else torch.from_numpy(features).float()
+        self.mask = mask if isinstance(mask, torch.Tensor) else torch.from_numpy(mask).float()
+        self.n_patients = n_patients
+        self.seed = seed
+
+        # Mock metadata (matches _MockDataset interface)
+        rng = np.random.default_rng(seed)
+        self.stage_ids = torch.from_numpy(rng.integers(0, 6, (n_patients,))).long()
+        self.patnos = list(range(3000, 3000 + n_patients))
+        self.t_years = [np.array([0.0, 1.0])] * n_patients
+        self.sbr_0 = [2.5] * n_patients
+
+    def __len__(self) -> int:
+        return 1  # one full-graph batch
+
+    def __getitem__(self, idx: int) -> dict:
+        n = self.n_patients
+        # build a minimal connected edge list: chain 0→1→2→...→n-1 (undirected)
+        srcs = list(range(n - 1)) + list(range(1, n))
+        dsts = list(range(1, n)) + list(range(n - 1))
+        edge_index = torch.tensor([srcs, dsts], dtype=torch.long)
+        edge_weight = torch.ones(len(srcs))
+        overlap_frac = torch.ones(len(srcs))
+        return {
+            "features": self.features,
+            "mask": self.mask,
+            "edge_index": edge_index,
+            "edge_weight": edge_weight,
+            "overlap_frac": overlap_frac,
+            "stage_ids": self.stage_ids,
+            "patnos": self.patnos,
+            "t_years_per_patient": self.t_years,
+            "sbr_0_per_patient": self.sbr_0,
+            "ode_feature_indices": [0, 1],
+        }
+
 
 class _MockDataset(Dataset):
     """Mock dataset for smoke benchmark unit tests.
@@ -169,10 +282,22 @@ def run_single_seed(
             dataset = _MockDataset(n_patients=n_patients, n_features=n_features, seed=seed)
             true_features = dataset.features  # shape (n_patients, n_features)
         else:
-            raise NotImplementedError(
-                "Real PPMI data loading not implemented in unit-test path. "
-                "Pass mock_data=True for tests, or implement DB-backed loading here."
-            )
+            # Real-data path (Paper 2 canonical loader reused verbatim)
+            features_np, mask_np, stages_np, feature_names = _load_real_ppmi_data()
+            n_patients_real = features_np.shape[0]
+            n_features_real = features_np.shape[1]
+
+            # Optional subsampling for test runs (keeps first n_patients if caller requested fewer)
+            if n_patients is not None and n_patients < n_patients_real:
+                rng = np.random.default_rng(seed)
+                idx = rng.choice(n_patients_real, size=n_patients, replace=False)
+                features_np = features_np[idx]
+                mask_np = mask_np[idx]
+                stages_np = stages_np[idx]
+
+            true_features = torch.from_numpy(features_np).float()
+            # Compute mask as 1 where data is observed (mask_np == 1), 0 where missing
+            mask_torch = torch.from_numpy(mask_np).float()
 
         # 2. Apply MCAR mask
         masked_features, mask = _apply_mcar_mask(true_features, mask_fraction, seed=seed + 10000)
@@ -214,11 +339,14 @@ def run_single_seed(
                 device="cpu",
             )
 
-            # Build dataset with masked features
-            train_dataset = _MockDataset(n_patients=n_patients, n_features=n_features, seed=seed)
-            # Override features with masked version and mask
-            train_dataset.features = masked_features
-            train_dataset.mask = mask
+            # Build dataset with masked features (works for both mock and real data)
+            train_dataset = _build_dataset_with_masked_features(
+                true_features=true_features,
+                masked_features=masked_features,
+                mask=mask,
+                n_patients=n_patients,
+                seed=seed,
+            )
 
             loader = DataLoader(train_dataset, batch_size=1, collate_fn=_collate_passthrough)
 
@@ -230,9 +358,13 @@ def run_single_seed(
 
             # 5. Compute RMSE on masked entries
             model.eval()
-            full_dataset = _MockDataset(n_patients=n_patients, n_features=n_features, seed=seed)
-            full_dataset.features = masked_features
-            full_dataset.mask = mask
+            full_dataset = _build_dataset_with_masked_features(
+                true_features=true_features,
+                masked_features=masked_features,
+                mask=mask,
+                n_patients=n_patients,
+                seed=seed,
+            )
             full_loader = DataLoader(full_dataset, batch_size=1, collate_fn=_collate_passthrough)
 
             with torch.no_grad():

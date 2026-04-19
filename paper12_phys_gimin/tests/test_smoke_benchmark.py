@@ -48,3 +48,39 @@ class TestSmokeBenchmark:
         assert len(results) == 3
         cv = rmse_cv(results)
         assert 0 <= cv < float("inf"), f"CV should be finite, got {cv}"
+
+    def test_real_ppmi_loader_returns_expected_shapes(self):
+        """Confirm _load_real_ppmi_data returns (2201, 33) feature matrix matching Paper 2.
+
+        Guards against the main-project data-loading contract silently drifting.
+        If this test fails, Paper 2 has changed its load_data() return schema —
+        update phys-GIMIN's wrapper before continuing.
+        """
+        from pathlib import Path
+
+        # Skip if Paper 2 data files aren't present (e.g., CI without data-mount)
+        parquet_path = Path(
+            "/Users/blair.dupre/Projects/CSCI-FALL-2025/GIMImpN_imputation/outputs/ppmi_full_cohort.parquet"
+        )
+        staging_path = Path(
+            "/Users/blair.dupre/Projects/CSCI-FALL-2025/data/04_staging/nsd_iss_staging_results.csv"
+        )
+        if not parquet_path.exists() or not staging_path.exists():
+            pytest.skip(
+                f"Paper 2 data not present (parquet={parquet_path.exists()}, "
+                f"staging={staging_path.exists()}) — skipping real-data test"
+            )
+
+        from phys_gimin.smoke_benchmark import _load_real_ppmi_data
+
+        features_np, mask_np, stages_np, feature_names = _load_real_ppmi_data()
+
+        # Expected shape from Paper 2: 2,197 patients × 33 features
+        # (2,201 total in staging, minus 4 unclassified)
+        assert features_np.shape[0] == 2197, f"expected 2197 patients, got {features_np.shape[0]}"
+        assert features_np.shape[1] == 33, f"expected 33 features, got {features_np.shape[1]}"
+        assert mask_np.shape == features_np.shape
+        assert stages_np.shape == (2197,)
+        assert len(feature_names) == 33
+        # Stage values should be in {0,1,2,3,4} (no 5 = unclassified, since loader filters those out)
+        assert set(stages_np.tolist()).issubset({0, 1, 2, 3, 4})
