@@ -129,7 +129,77 @@ def parse_args():
         action="store_true",
         help="Skip GIMIN imputation (use cached if available)",
     )
+    parser.add_argument(
+        "--skip-dl",
+        action="store_true",
+        help=(
+            "Skip deep-learning baselines (GAIN, SAITS, MIWAE). Useful for W1 "
+            "where only GIMIN variants vs. classical baselines are compared, "
+            "and for environments without hyperimpute installed."
+        ),
+    )
+    parser.add_argument(
+        "--bootstrap-ci",
+        type=int,
+        default=0,
+        help=(
+            "If >0, compute bootstrap CIs with this many resamples per fold "
+            "(W1.4 decision gate uses 1000)."
+        ),
+    )
+    # W1 non-leaky ablation: JSON config overriding default 33-feature schema
+    parser.add_argument(
+        "--keep-features-json",
+        type=str,
+        default=None,
+        help=(
+            "Optional path to a JSON config overriding the default 33-feature "
+            "KEEP_FEATURES + MODALITY_DIMS + cross-modal pairs. Used for the "
+            "Paper 2 Workstream 1 non-leaky ablation (29-feature schema). "
+            "Mirrors the same flag in run_paper2_experiments.py."
+        ),
+    )
     return parser.parse_args()
+
+
+def apply_feature_override(json_path: str):
+    """Override module-level KEEP_FEATURES and MODALITY_DIMS from a JSON config.
+
+    Returns a dict mapping old feature index -> new feature index so the caller
+    can filter GIMIN cross-modal pairs referencing dropped features. Any pair
+    referencing a dropped feature index is removed; surviving pairs are
+    re-indexed to match the new (e.g., 29-feature) order.
+    """
+    global KEEP_FEATURES, MODALITY_DIMS
+    import json as _json
+    from pathlib import Path as _Path
+
+    cfg_path = _Path(json_path)
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"keep-features JSON not found: {cfg_path}")
+    with open(cfg_path) as f:
+        override = _json.load(f)
+
+    new_features = override["features"]
+    new_dims = override["modality_dims"]
+    assert sum(new_dims) == len(new_features), (
+        f"modality_dims sum ({sum(new_dims)}) != len(features) ({len(new_features)})"
+    )
+
+    old_to_new = {
+        old_idx: new_idx
+        for new_idx, feat in enumerate(new_features)
+        for old_idx, old_feat in enumerate(KEEP_FEATURES)
+        if old_feat == feat
+    }
+
+    KEEP_FEATURES = list(new_features)
+    MODALITY_DIMS = list(new_dims)
+    print(
+        f"[apply_feature_override] KEEP_FEATURES override active: "
+        f"{len(new_features)} features, MODALITY_DIMS={new_dims}"
+    )
+    return old_to_new
 
 
 def load_data():
@@ -284,10 +354,15 @@ def impute_gimin(
     stages: np.ndarray,
     epochs: int = 200,
     is_stage_conditioned: bool = False,
+    old_to_new_index: dict | None = None,
 ) -> np.ndarray:
     """GIMIN imputation (vanilla or stage-conditioned).
 
     Returns imputed features in original scale.
+
+    If ``old_to_new_index`` is provided (W1 non-leaky ablation), the GIMIN
+    config is filtered to drop cross-modal pairs referencing removed features
+    and binary_feature_indices is re-indexed to the new feature order.
     """
     import torch
     from gimin.data.scaler import build_scaler_from_config
@@ -304,8 +379,8 @@ def impute_gimin(
 
     torch.manual_seed(42)
 
-    # Build scaler
-    cfg = _build_gimin_config()
+    # Build scaler (honors feature-override mapping if provided)
+    cfg = _build_gimin_config(old_to_new_index=old_to_new_index)
     scaler = build_scaler_from_config(cfg)
 
     features_t = torch.tensor(features, dtype=torch.float32)
@@ -447,15 +522,42 @@ def impute_gimin(
     return result.astype(np.float32)
 
 
-def _build_gimin_config():
-    """Build GIMINConfig matching the 33-feature PPMI schema.
+def _build_gimin_config(old_to_new_index: dict | None = None):
+    """Build GIMINConfig matching the PPMI schema.
 
-    Uses defaults which already define 33 features across 7 modalities
-    with correct normalization strategies and cross-modal pairs.
+    Defaults define 33 features across 7 modalities with correct normalization
+    strategies and cross-modal pairs. If ``old_to_new_index`` is supplied (W1
+    non-leaky ablation), filter cross-modal pairs that reference any dropped
+    feature and re-index surviving pair endpoints to the new index space.
+    binary_feature_indices is rebuilt on the reduced schema.
     """
     from gimin.config import GIMINConfig
 
-    return GIMINConfig()
+    cfg = GIMINConfig()
+    if old_to_new_index is None:
+        return cfg
+
+    filtered_pairs = []
+    for pair in cfg.cross_modal_pairs:
+        if pair[0] in old_to_new_index and pair[1] in old_to_new_index:
+            filtered_pairs.append(
+                [old_to_new_index[pair[0]], old_to_new_index[pair[1]]]
+            )
+    dropped = len(cfg.cross_modal_pairs) - len(filtered_pairs)
+    print(
+        f"[_build_gimin_config] Cross-modal pairs: "
+        f"{len(cfg.cross_modal_pairs)} -> {len(filtered_pairs)} ({dropped} dropped)"
+    )
+    cfg.cross_modal_pairs = filtered_pairs
+
+    if cfg.binary_feature_indices:
+        cfg.binary_feature_indices = [
+            old_to_new_index[i]
+            for i in cfg.binary_feature_indices
+            if i in old_to_new_index
+        ]
+
+    return cfg
 
 
 def train_catboost_classifier(
@@ -528,12 +630,63 @@ def evaluate_fold(
     return metrics
 
 
+def _bootstrap_fold_metric(
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    n_classes: int,
+    n_bootstrap: int,
+    seed: int,
+) -> dict:
+    """Patient-level bootstrap CI for bal_acc, AUC, QWK on a single test fold."""
+    rng = np.random.default_rng(seed)
+    n = len(y_true)
+    accs, aucs, qwks = [], [], []
+    for _ in range(n_bootstrap):
+        idx = rng.integers(0, n, size=n)
+        yt = y_true[idx]
+        yp = y_prob[idx]
+        y_pred = np.argmax(yp, axis=1)
+        try:
+            accs.append(balanced_accuracy_score(yt, y_pred))
+        except Exception:
+            pass
+        try:
+            qwks.append(cohen_kappa_score(yt, y_pred, weights="quadratic"))
+        except Exception:
+            pass
+        try:
+            if n_classes == 2:
+                aucs.append(roc_auc_score(yt, yp[:, 1]))
+            else:
+                aucs.append(roc_auc_score(yt, yp, multi_class="ovr", average="macro"))
+        except Exception:
+            pass
+
+    def ci(vals):
+        if not vals:
+            return {"mean": float("nan"), "ci_lo": float("nan"), "ci_hi": float("nan")}
+        a = np.array(vals)
+        return {
+            "mean": float(a.mean()),
+            "ci_lo": float(np.quantile(a, 0.025)),
+            "ci_hi": float(np.quantile(a, 0.975)),
+        }
+
+    return {
+        "balanced_accuracy_bootstrap": ci(accs),
+        "auc_roc_bootstrap": ci(aucs),
+        "qwk_bootstrap": ci(qwks),
+        "n_bootstrap": n_bootstrap,
+    }
+
+
 def run_downstream_cv(
     features_imputed: np.ndarray,
     stages: np.ndarray,
     target_type: str,
     n_folds: int = 5,
     seed: int = 42,
+    n_bootstrap: int = 0,
 ) -> dict:
     """Run stratified CV downstream classification on imputed data."""
     targets = encode_target(stages, target_type)
@@ -565,6 +718,12 @@ def run_downstream_cv(
 
         y_prob = train_catboost_classifier(X_train, y_train, X_test, n_classes)
         fold_result = evaluate_fold(y_test, y_prob, n_classes)
+        if n_bootstrap > 0:
+            fold_result.update(
+                _bootstrap_fold_metric(
+                    y_test, y_prob, n_classes, n_bootstrap, seed=seed + fold_i
+                )
+            )
         fold_metrics.append(fold_result)
 
         logger.info(
@@ -575,9 +734,13 @@ def run_downstream_cv(
             fold_result["qwk"],
         )
 
-    # Aggregate
+    # Aggregate scalar keys only (dict-valued keys like *_bootstrap are already
+    # per-fold summaries and are preserved in fold_metrics below)
     aggregated = {}
     for key in fold_metrics[0].keys():
+        sample = fold_metrics[0][key]
+        if not isinstance(sample, (int, float, np.floating, np.integer)):
+            continue
         values = [fm[key] for fm in fold_metrics if not np.isnan(fm[key])]
         if values:
             aggregated[f"{key}_mean"] = float(np.mean(values))
@@ -585,6 +748,25 @@ def run_downstream_cv(
         else:
             aggregated[f"{key}_mean"] = float("nan")
             aggregated[f"{key}_std"] = float("nan")
+
+    # Aggregate bootstrap CIs across folds (pooled: mean of fold means,
+    # CI lo/hi averaged across per-fold 95% CI endpoints). Only iterate over
+    # dict-valued keys — scalar keys like "n_bootstrap" share the suffix but
+    # are not per-fold CI summaries.
+    bootstrap_keys = [
+        k for k, v in fold_metrics[0].items()
+        if k.endswith("_bootstrap") and isinstance(v, dict)
+    ]
+    for key in bootstrap_keys:
+        means = [fm[key]["mean"] for fm in fold_metrics]
+        los = [fm[key]["ci_lo"] for fm in fold_metrics]
+        his = [fm[key]["ci_hi"] for fm in fold_metrics]
+        aggregated[f"{key}_pooled"] = {
+            "mean": float(np.nanmean(means)),
+            "ci_lo": float(np.nanmean(los)),
+            "ci_hi": float(np.nanmean(his)),
+        }
+
     aggregated["n_folds"] = n_folds
     aggregated["n_classes"] = n_classes
     aggregated["n_samples"] = len(features_imputed)
@@ -601,6 +783,7 @@ def run_single_target(
     target_type: str,
     n_folds: int,
     seed: int,
+    n_bootstrap: int = 0,
 ) -> dict:
     """Run downstream classification for a single target type."""
     results = {}
@@ -614,6 +797,7 @@ def run_single_target(
             target_type,
             n_folds=n_folds,
             seed=seed,
+            n_bootstrap=n_bootstrap,
         )
         method_results["imputation_time"] = round(time.time() - t0, 2)
         results[method_name] = method_results
@@ -633,6 +817,12 @@ def run_single_target(
 def main():
     args = parse_args()
     np.random.seed(args.seed)
+
+    # W1 non-leaky ablation: apply feature override BEFORE load_data() so the
+    # reduced schema is in effect during data loading and GIMIN config build.
+    old_to_new_index = None
+    if args.keep_features_json:
+        old_to_new_index = apply_feature_override(args.keep_features_json)
 
     output_dir = PROJECT_ROOT / "outputs" / "paper2_benchmark"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -661,7 +851,9 @@ def main():
 
     # ── 2. Impute with each method (once, reused across targets) ─────
     imputation_methods = {}
-    n_methods = 8 if not args.skip_gimin else 6
+    n_dl = 0 if args.skip_dl else 3
+    n_gimin = 0 if args.skip_gimin else 2
+    n_methods = 3 + n_dl + n_gimin  # always: No_Imputation, Mean, MICE
     i = 0
 
     # Method 1: No imputation (zeros for missing)
@@ -683,26 +875,27 @@ def main():
     imputation_methods["MICE"] = impute_mice(features, mask)
     print(f"  Done in {time.time() - t0:.1f}s")
 
-    # Method 4: GAIN
-    i += 1
-    print(f"[{i}/{n_methods}] GAIN imputation...")
-    t0 = time.time()
-    imputation_methods["GAIN"] = impute_dl_baseline(features, mask, "GAIN")
-    print(f"  Done in {time.time() - t0:.1f}s")
+    if not args.skip_dl:
+        # Method 4: GAIN
+        i += 1
+        print(f"[{i}/{n_methods}] GAIN imputation...")
+        t0 = time.time()
+        imputation_methods["GAIN"] = impute_dl_baseline(features, mask, "GAIN")
+        print(f"  Done in {time.time() - t0:.1f}s")
 
-    # Method 5: SAITS
-    i += 1
-    print(f"[{i}/{n_methods}] SAITS imputation...")
-    t0 = time.time()
-    imputation_methods["SAITS"] = impute_dl_baseline(features, mask, "SAITS")
-    print(f"  Done in {time.time() - t0:.1f}s")
+        # Method 5: SAITS
+        i += 1
+        print(f"[{i}/{n_methods}] SAITS imputation...")
+        t0 = time.time()
+        imputation_methods["SAITS"] = impute_dl_baseline(features, mask, "SAITS")
+        print(f"  Done in {time.time() - t0:.1f}s")
 
-    # Method 6: MIWAE
-    i += 1
-    print(f"[{i}/{n_methods}] MIWAE imputation...")
-    t0 = time.time()
-    imputation_methods["MIWAE"] = impute_dl_baseline(features, mask, "MIWAE")
-    print(f"  Done in {time.time() - t0:.1f}s")
+        # Method 6: MIWAE
+        i += 1
+        print(f"[{i}/{n_methods}] MIWAE imputation...")
+        t0 = time.time()
+        imputation_methods["MIWAE"] = impute_dl_baseline(features, mask, "MIWAE")
+        print(f"  Done in {time.time() - t0:.1f}s")
 
     if not args.skip_gimin:
         # Method 7: GIMIN Vanilla
@@ -715,6 +908,7 @@ def main():
             stages,
             epochs=args.epochs,
             is_stage_conditioned=False,
+            old_to_new_index=old_to_new_index,
         )
         print(f"  Done in {time.time() - t0:.1f}s")
 
@@ -728,6 +922,7 @@ def main():
             stages,
             epochs=args.epochs,
             is_stage_conditioned=True,
+            old_to_new_index=old_to_new_index,
         )
         print(f"  Done in {time.time() - t0:.1f}s")
 
@@ -746,6 +941,7 @@ def main():
             target_type,
             args.num_folds,
             args.seed,
+            n_bootstrap=args.bootstrap_ci,
         )
         all_results[target_type] = target_results
 
@@ -768,7 +964,7 @@ def main():
         for name, res in results_dict.items():
             save_res = {}
             for k, v in res.items():
-                if k == "fold_metrics" or isinstance(v, (int, float, str)):
+                if k == "fold_metrics" or isinstance(v, (int, float, str, dict, list)):
                     save_res[k] = v
                 else:
                     save_res[k] = float(v)
