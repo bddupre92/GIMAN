@@ -233,6 +233,131 @@ Each load bumps the `mechanistic` (or `reference`) Schemas-table row in CLAUDE.m
 
 ---
 
+## Robustness contract — N=100 model protocol (applies globally)
+
+Paper 12's Tier 2 population study (W13) runs 300 models across 3 methods × 100 seeds. The contract below is **mandatory for every stochastic component**, not optional — retrofitting seed plumbing after a 300-run batch finishes is not recoverable. Bake it in from Phase 1.
+
+### Layer 1 — Seed-first architecture (mandatory for Tasks 5+)
+
+Every stochastic component MUST:
+
+1. Accept an explicit `seed: int` argument. No reliance on global `torch.manual_seed()` from the caller.
+2. Use local generators: `torch.Generator(device=device).manual_seed(seed)` for PyTorch RNG; `np.random.default_rng(seed)` for NumPy; set `torch.use_deterministic_algorithms(True)` at the trainer boundary.
+3. Log the received seed in every output JSON (`config.json`, `results.json`, `status.json`).
+4. Have a unit test named `test_deterministic_under_seed` that runs the component twice with the same seed and asserts bit-identical outputs.
+
+**Task 2 already satisfies this** (`test_deterministic_under_same_inputs`). **Task 5 (Trainer) and Task 7 (smoke benchmark) are where most of the seed plumbing lives.**
+
+### Layer 2 — Per-seed output directory schema (strict)
+
+Every training / benchmark run writes to:
+
+```
+outputs/paper12_phys_gimin/runs/{name}_seed{N}_{timestamp}/
+  config.json            # CLI args + git SHA + seed + MODALITY_DIMS + package versions
+  results.json           # RMSE, per-feature coverage, downstream C-td, final-epoch losses
+  training_history.json  # per-epoch: loss, lambda_phys, recon_fraction, sigma stats
+  checkpoint.pt          # final model state_dict (torch.save)
+  status.json            # {status: started|completed|failed|hung, reason, wall_time_s}
+  provenance.json        # prior_source_hash, data_file_hashes, variant_label
+```
+
+**No shared state across seeds.** 100 parallel runs must not race each other on file writes. Status files are written atomically (write to `.status.json.tmp` then `os.replace()`).
+
+### Layer 3 — Failure detection + watchdog (trainer contract)
+
+The trainer MUST:
+
+1. Write `status.json` with `{status: "started", pid: <os.getpid()>, start_ts: <iso>}` at entry.
+2. Update `status.json` on every epoch boundary (`{status: "running", epoch: N, last_update: <iso>}`).
+3. Finalize with `{status: "completed", wall_time_s: <float>, final_metrics: {...}}` atomically.
+4. On exception: finalize with `{status: "failed", reason: <str>, traceback: <str>, wall_time_s: ...}`.
+5. On NaN loss or NaN gradient: finalize with `{status: "failed", reason: "nan_loss", ...}` — do NOT continue training.
+
+The population-study controller watchdog kills any process where `status.json.last_update` is older than `watchdog_timeout_multiplier * median_wall_time` (default 3×). Hung seed → `{status: "hung"}` marker for exclusion in aggregation.
+
+### Layer 4 — Multi-seed CI invariant (Task 7 must include this)
+
+Before any large population study runs, we verify seed-stability at small N. The smoke benchmark in Task 7 must include an invariant test:
+
+```python
+# tests/test_smoke_benchmark.py
+def test_rmse_cv_across_seeds_below_plausibility_threshold(tmp_path):
+    """Run 3 seeds of phys-GIMIN-lit on a small dataset, assert CV < 0.15.
+
+    Rationale: if CV at N=3 is already huge, the N=100 population study will
+    be dominated by init noise rather than regularization effect. Catch
+    seed-sensitive instabilities at the unit-test level before burning H100
+    hours on a 300-run batch.
+    """
+    from phys_gimin.smoke_benchmark import run_multi_seed
+    results = run_multi_seed(
+        method="phys_gimin_lit",
+        seeds=[1001, 1002, 1003],
+        mask_fraction=0.10,
+        n_epochs=5,           # abbreviated for unit-test speed
+        n_patients=50,        # tiny dataset
+        output_dir=tmp_path,
+    )
+    rmses = [r["final_rmse"] for r in results]
+    cv = np.std(rmses) / np.mean(rmses)
+    assert cv < 0.15, f"RMSE CV = {cv:.3f} exceeds 0.15 threshold — seed-dependent instability"
+```
+
+**Gate effect:** if this test fails repeatedly across git commits, the population study at W13 is blocked until the instability is diagnosed. No "just launch the 300 runs and see what happens."
+
+### Layer 5 — Dedicated population-study runner (W13, created in Phase 4)
+
+```
+scripts/phase4/run_population_study.py
+  --methods phys_gimin_lit de_rooij_2025 vanilla_gimin
+  --n-seeds 100
+  --base-seed 1001
+  --mask-fraction 0.10
+  --output-dir outputs/paper12_phys_gimin/runs/population_study_{ts}/
+  --watchdog-timeout-multiplier 3.0
+  --max-parallel 4             # H100 memory budget: ~4 concurrent models
+  --top-k 10,20,50
+```
+
+Post-run aggregation at `scripts/phase4/aggregate_population_study.py`:
+
+1. Scan all 300 `status.json` files; filter to `status == completed` (log excluded seeds).
+2. Build a `DataFrame` of (method, seed, final_rmse, coverage_at_90, downstream_c_td).
+3. Rank by **training error** (per de Rooij §2.4); compute top-K populations for K ∈ {10, 20, 50}.
+4. Run pre-registered tests:
+   - **Primary:** Mann-Whitney U (top-20 RMSE: phys-GIMIN-lit vs Vanilla GIMIN), one-sided, α=0.05, Cliff's δ ≥ 0.33.
+   - **Secondary:** Kolmogorov-Smirnov on full-population RMSE CDFs.
+   - **Coverage:** χ² on proportion of top-20 models with coverage ≥ 0.90 at γ=0.90.
+5. Emit `population_study_verdict.json` with effect sizes + bootstrap CIs.
+6. Generate Figure 4 (violin plot + MW-U annotation).
+
+### Layer 6 — Inclusion criteria (pre-registered)
+
+A seed run is **included** in the population-study analysis if and only if:
+
+- `status == "completed"` (not failed, not hung, not crashed).
+- No NaN in `final_rmse`, `coverage_at_90`, or `downstream_c_td`.
+- `wall_time_s < 5 × median_wall_time` (exclude pathologically slow runs as likely-broken).
+- Final-epoch `recon_fraction >= 0.30` (respects the hard floor from `impl_best_practices.md`).
+
+Seeds failing any criterion → logged in `excluded_seeds.json` with reason. Total exclusions MUST be reported in Table 1 of the manuscript (reviewers demand this for fair population-level claims).
+
+### Compliance checklist per task
+
+| Task | Robustness requirement |
+|---|---|
+| Task 1 (PhysGIMIN) | No randomness in identity subclass — no seed needed |
+| Task 2 (SBR adapter) | Deterministic wrapper — `test_deterministic_under_same_inputs` covers it ✅ |
+| Task 3 (multichannel + path_b) | SAEM is stochastic — MUST accept `seed` + have determinism test |
+| Task 4 (TrajectoryCache) | Deterministic by construction — no change |
+| **Task 5 (Trainer)** | **All 5 layers above apply — this is the main enforcement point** |
+| Task 6 (Configs) | Hydra schema includes `experiment.seed` (required), `experiment.deterministic: bool`, `experiment.output_schema_version: str` |
+| Task 7 (Smoke + Q2 gate) | Layer 4 CV-threshold invariant test MUST pass before Q2 gate returns any verdict |
+| Phase 4 W13 | Layer 5 runner + Layer 6 inclusion criteria pre-registered in execution; verdict JSON is the single source of truth |
+
+---
+
 ## Phase map
 
 | Phase | Weeks | Focus | Deliverable | Gate |
@@ -781,13 +906,30 @@ git commit -m "feat(paper12-w2): TrajectoryCache with per-epoch invalidation + 6
 
 ---
 
-### Task 5 (W3, Day 1–3): `training.py` — LR-annealing λ scheduler + recon-floor clamp
+### Task 5 (W3, Day 1–3): `training.py` — LR-annealing λ scheduler + recon-floor clamp + robustness contract
 
 **Files:**
 - Create: `paper12_phys_gimin/src/phys_gimin/training.py`
 - Test: `paper12_phys_gimin/tests/test_training.py`
 
 **Core algorithm:** LR-annealing per Wang/Teng/Perdikaris 2021 with EMA α=0.9. Recon-floor clamp: if `L_recon / L_total < 0.30` after a step, reduce λ_phys by a decay factor for the next step. Best-practices recipe from `impl_best_practices.md` §2.
+
+**Robustness contract (non-negotiable — all 5 layers from the Robustness contract section above must be satisfied):**
+
+- `PhysGIMINTrainer.__init__` accepts `seed: int` (required, no default). Calls `torch.manual_seed(seed)`, `torch.cuda.manual_seed_all(seed)`, `torch.use_deterministic_algorithms(True)` once at entry. All downstream generators are local (`torch.Generator(device).manual_seed(seed)`).
+- Output directory is `outputs/paper12_phys_gimin/runs/{name}_seed{seed}_{timestamp}/` (timestamped, seeded, never reused).
+- Writes `status.json` atomically at: start, every epoch, and finalization. Epoch updates include `last_update: <iso>` for watchdog polling.
+- Writes `provenance.json` with `{prior_source_hash, data_file_hashes, variant_label, package_versions, git_sha}`.
+- Writes `config.json` echoing exact constructor args.
+- NaN gradient or NaN loss → finalize `status.json` with `{status: "failed", reason: "nan_loss" | "nan_grad", epoch: N, traceback: <str>}` and raise.
+- On clean completion → `{status: "completed", wall_time_s, final_metrics: {...}}`.
+
+**New tests (add 4 to the original 10, total 14):**
+
+11. `test_deterministic_under_seed` — two trainer runs with seed=1001 produce bit-identical `checkpoint.pt` bytes (via hash).
+12. `test_status_json_atomic_on_epoch_boundary` — kill the process between epochs, verify `status.json` is either fully-written-old or fully-written-new (never corrupted partial).
+13. `test_nan_loss_triggers_failed_status` — inject NaN into batch, verify `status.json` shows `status: "failed", reason: "nan_loss"` and exception is raised.
+14. `test_output_dir_schema_includes_all_required_files` — after 3-epoch run, verify `{config,results,training_history,provenance,status}.json` + `checkpoint.pt` all exist.
 
 - [ ] **Step 5.1: Write 10 failing tests**
 
@@ -1045,7 +1187,7 @@ if __name__ == "__main__":
     main(Path(sys.argv[1]))
 ```
 
-- [ ] **Step 7.3: Write gate tests (6 tests)**
+- [ ] **Step 7.3: Write gate tests (7 tests — includes CV-stability invariant from robustness contract)**
 
 Cover synthetic scenarios:
 1. Clearly above threshold + CI excludes 0 → PIVOT
@@ -1054,6 +1196,7 @@ Cover synthetic scenarios:
 4. Handles missing results file (raise `FileNotFoundError`)
 5. Handles NaN in results (skip + emit warning)
 6. JSON output schema contract
+7. **Seed-stability invariant (Layer 4 of Robustness contract):** 3-seed smoke run produces RMSE CV < 0.15 for Vanilla GIMIN. If CV exceeds threshold, Q2 gate refuses to emit PASS/PIVOT until instability is diagnosed.
 
 - [ ] **Step 7.4: Commit after scripts pass**
 
