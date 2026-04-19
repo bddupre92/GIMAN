@@ -1,0 +1,247 @@
+{
+  "meta": {
+    "script": "scripts/paper6/aggregate_revision_stats.py",
+    "inputs": {
+      "pipeline_summary": "/Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper6/pipeline_results/v2_full_cohort/pipeline_summary.json",
+      "posteriors": "/Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/mechanistic_twin/data/posteriors/phase2_combined_1065.csv",
+      "paper1_features": "/Users/blair.dupre/Projects/CSCI-FALL-2025/data/05_features/paper1_features_with_targets.csv"
+    },
+    "n_patients_in_pipeline": 1901,
+    "n_patients_in_posteriors": 1065
+  },
+  "A_accuracy_baselines": {
+    "accuracy_top1": 0.4259927797833935,
+    "n_correct_top1": 472,
+    "n_nsd_positive": 1108,
+    "chance_accuracy_4class": 0.25,
+    "majority_stage": "3",
+    "majority_stage_n": 620,
+    "majority_class_accuracy": 0.5595667870036101
+  },
+  "B_top2_accuracy": {
+    "top2_accuracy": 0.6967509025270758,
+    "top2_n_correct": 772,
+    "n_nsd_positive": 1108
+  },
+  "C_ordinal_mae": {
+    "mae": 0.6913357400722022,
+    "distribution": {
+      "0": 472,
+      "1": 508,
+      "2": 126,
+      "3": 2
+    }
+  },
+  "D_confusion_matrix": {
+    "matrix": {
+      "rows_actual": [
+        "1",
+        "2B",
+        "3",
+        "4"
+      ],
+      "cols_predicted": [
+        "1",
+        "2B",
+        "3",
+        "4"
+      ],
+      "values": [
+        [
+          17,
+          1,
+          0,
+          0
+        ],
+        [
+          6,
+          46,
+          66,
+          0
+        ],
+        [
+          18,
+          204,
+          396,
+          2
+        ],
+        [
+          2,
+          108,
+          229,
+          13
+        ]
+      ]
+    },
+    "per_stage_accuracy": {
+      "1": {
+        "n": 18,
+        "correct": 17,
+        "accuracy": 0.9444444444444444
+      },
+      "2B": {
+        "n": 118,
+        "correct": 46,
+        "accuracy": 0.3898305084745763
+      },
+      "3": {
+        "n": 620,
+        "correct": 396,
+        "accuracy": 0.6387096774193548
+      },
+      "4": {
+        "n": 352,
+        "correct": 13,
+        "accuracy": 0.036931818181818184
+      }
+    }
+  },
+  "E_coverage_consort": {
+    "totals": {
+      "n_ppmi_staged": 2201,
+      "n_longitudinal": 1900,
+      "n_covered_phase2": 1065,
+      "n_uncovered": 835,
+      "wave_a_covered": 304,
+      "wave_b_covered": 761
+    },
+    "age_at_baseline_years": {
+      "covered_mean": 62.621079522996986,
+      "covered_sd": 9.553238408111625,
+      "covered_n": 1065,
+      "uncovered_mean": 62.82613745814326,
+      "uncovered_sd": 10.723243211122844,
+      "uncovered_n": 835,
+      "t_stat": -0.4338411723923969,
+      "p_value": 0.6644593587447659,
+      "test": "welch_t"
+    },
+    "sex_male_pct": {
+      "covered_pos": 670,
+      "covered_n": 1065,
+      "covered_pct": 62.91079812206573,
+      "uncovered_pos": 510,
+      "uncovered_n": 835,
+      "uncovered_pct": 61.07784431137725,
+      "chi2": 0.5925428657816574,
+      "p_value": 0.441437489505341,
+      "test": "chi2"
+    },
+    "n_datscans_raw": {
+      "covered_mean": 2.905164319248826,
+      "covered_sd": 0.8613579920422233,
+      "covered_n": 1065,
+      "uncovered_mean": 1.0025806451612904,
+      "uncovered_sd": 0.050767223623271636,
+      "uncovered_n": 775,
+      "t_stat": 71.91190125068908,
+      "p_value": 0.0,
+      "test": "welch_t"
+    },
+    "n_visits_longitudinal": {
+      "covered_mean": 11.323004694835682,
+      "covered_sd": 6.633312375321017,
+      "covered_n": 1065,
+      "uncovered_mean": 5.5568862275449105,
+      "uncovered_sd": 4.468387214375212,
+      "uncovered_n": 835,
+      "t_stat": 22.577137698738163,
+      "p_value": 6.156353897299073e-100,
+      "test": "welch_t"
+    },
+    "follow_up_years": {
+      "covered_mean": 5.721314553990611,
+      "covered_sd": 4.09025825053113,
+      "covered_n": 1065,
+      "uncovered_mean": 3.4714171656686625,
+      "uncovered_sd": 4.136598952470079,
+      "uncovered_n": 835,
+      "t_stat": 11.82489184877522,
+      "p_value": 4.0886584949203835e-31,
+      "test": "welch_t"
+    },
+    "lrrk2_carrier_pct": {
+      "covered_pos": 123,
+      "covered_n": 1045,
+      "covered_pct": 11.770334928229666,
+      "uncovered_pos": 52,
+      "uncovered_n": 727,
+      "uncovered_pct": 7.152682255845942,
+      "chi2": 9.758774159826787,
+      "p_value": 0.0017846887261577984,
+      "test": "chi2"
+    },
+    "gba_carrier_pct": {
+      "covered_pos": 72,
+      "covered_n": 944,
+      "covered_pct": 7.627118644067797,
+      "uncovered_pos": 39,
+      "uncovered_n": 608,
+      "uncovered_pct": 6.4144736842105265,
+      "chi2": 0.6464994288979153,
+      "p_value": 0.42136701237483076,
+      "test": "chi2"
+    },
+    "apoe_e4_carrier_pct": {
+      "covered_pos": 256,
+      "covered_n": 1038,
+      "covered_pct": 24.66281310211946,
+      "uncovered_pos": 180,
+      "uncovered_n": 721,
+      "uncovered_pct": 24.965325936199722,
+      "chi2": 0.007810391576782196,
+      "p_value": 0.9295775022246574,
+      "test": "chi2"
+    },
+    "nsd_iss_stage_distribution": {
+      "stages": [
+        "0",
+        "1",
+        "2B",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "covered_counts": [
+        199,
+        0,
+        70,
+        450,
+        279,
+        61,
+        6
+      ],
+      "uncovered_counts": [
+        517,
+        18,
+        48,
+        170,
+        73,
+        9,
+        0
+      ],
+      "covered_pct": [
+        18.685446009389672,
+        0.0,
+        6.572769953051644,
+        42.25352112676056,
+        26.197183098591548,
+        5.727699530516432,
+        0.5633802816901409
+      ],
+      "uncovered_pct": [
+        61.91616766467066,
+        2.155688622754491,
+        5.748502994011976,
+        20.35928143712575,
+        8.742514970059881,
+        1.0778443113772456,
+        0.0
+      ],
+      "chi2": 433.4833816379535,
+      "p_value": 1.7584985935459988e-90,
+      "test": "chi2"
+    }
+  }
+}

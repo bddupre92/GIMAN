@@ -1,0 +1,179 @@
+% Paper 6 — JAMIA Research and Applications submission
+% Unified Clinical Decision-Support Pipeline for NSD-ISS Parkinson's Disease Staging
+% Dupre, 2026
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!50!black,
+    citecolor=blue!50!black,
+    urlcolor=blue!50!black,
+}
+\usepackage{authblk}
+
+% NSD color palette
+\definecolor{nsdblue}{HTML}{1F77B4}
+\definecolor{nsdorange}{HTML}{FF7F0E}
+\definecolor{nsdgreen}{HTML}{2CA02C}
+\definecolor{nsdred}{HTML}{D62728}
+\definecolor{nsdpurple}{HTML}{9467BD}
+\definecolor{nsdgray}{HTML}{7F7F7F}
+\definecolor{lightblue}{HTML}{E7F0FA}
+\definecolor{lightorange}{HTML}{FDECD7}
+\definecolor{lightgreen}{HTML}{E7F5E7}
+\definecolor{lightred}{HTML}{FADBD8}
+\definecolor{lightpurple}{HTML}{EBDEF0}
+
+\title{\bfseries A Reference-Implementation Clinical Decision-Support Pipeline for NSD-ISS Parkinson's Disease Staging: End-to-End Integration of Graph-Informed Imputation, Gradient-Boosted Staging, Transition Forecasting, and Distribution-Free Uncertainty}
+
+\author[1]{Blair D. Dupre, Ph.D.}
+\affil[1]{Department of Biomedical Engineering, University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-2em}
+
+% ─────────────────────────────────────────────────────────────────
+% STRUCTURED ABSTRACT (JAMIA-style, ≤250 words)
+% ─────────────────────────────────────────────────────────────────
+\subsubsection*{Abstract}
+
+\noindent\textbf{Objective.}
+Integrate graph-informed multimodal imputation, gradient-boosted NSD-ISS staging, Graph-Informed Digital Twin transition forecasting, distribution-free conformal uncertainty, and mechanistic dopaminergic-neuron-fraction $N(t)/N_0$ into a single reference-implementation clinical decision-support (CDS) pipeline, and characterize its throughput, per-feature provenance, and uncertainty output on a full longitudinal Parkinson's disease cohort.
+
+\noindent\textbf{Materials and Methods.}
+We deployed the pipeline on 1,900 Parkinson's Progression Markers Initiative patients with $\geq 2$ staged longitudinal visits. Per patient, the pipeline imputes the 33-feature multimodal vector with stage-conditioned GIMIN under per-feature temperature scaling, predicts NSD-positive stage with CatBoost-12 (trained on PD+Prodromal to address the Espay 2025 reference-class confound), forecasts 15-year cumulative incidence across seven destination stages with the Graph-Informed Digital Twin, attaches IPCW conformal bands, and surfaces $N(t)/N_0$ with 95\% credible intervals from the companion Paper-9 Phase-2 calibration.
+
+\noindent\textbf{Results.}
+Pipeline scored 1,900 patients in 22.8\,s (12\,ms/patient, 0 errors). Feature-value provenance was 33.3\% GIMIN, 54.9\% Paper-1 raw, 11.8\% fallback. Within-NSD-positive accuracy: 471/1108 (42.5\%); 792 Stage-0/5/6 patients fall outside scope by design. Mean conformal CIF band width was 0.037 (90\% CL). Mechanistic layer covered 1,065 of 1,900 (56.1\%); median $N(t)/N_0$ = 0.93 (IQR 0.74--0.97).
+
+\noindent\textbf{Discussion.}
+The 12\,ms/patient throughput supports interactive EHR-embedded use. Per-feature provenance, complementary temperature-scaled vs.\ conformal uncertainty, and surfaced mechanistic $N(t)/N_0$ jointly address deployment-transparency guidance. Limitations: NSD-positive training scope, transductive GIMIN graph, cross-sectional CatBoost inference, partial (56.1\%) mechanistic coverage.
+
+\noindent\textbf{Conclusion.}
+A unified NSD-ISS CDS pipeline with five-layer integration (imputation, staging, transition forecasting, conformal uncertainty, mechanistic $N(t)/N_0$), auditable provenance, and calibrated uncertainty is feasible at 12\,ms/patient. We release it with a pre-registered $n \geq 100$ prospective deployment-audit protocol.
+
+\vspace{0.5em}
+\noindent\textbf{Keywords:} Clinical decision support; Parkinson's disease; NSD-ISS; imputation; conformal prediction; digital twin; deployment
+
+\newpage
+
+% ─────────────────────────────────────────────────────────────────
+% Body — wrapper that includes the chapter content with JAMIA section names
+% ─────────────────────────────────────────────────────────────────
+
+% Redefine section mapping: JAMIA uses Background and Significance / Materials and Methods / Results / Discussion / Conclusion.
+% Body text is in chapter_content.tex (JAMIA-adapted).
+
+\input{chapter_content.tex}
+
+% ─────────────────────────────────────────────────────────────────
+% Required JAMIA sections (after conclusion, before references)
+% ─────────────────────────────────────────────────────────────────
+
+\section*{Data Availability}
+PPMI data are available to qualified researchers under a Data Use Agreement at \url{https://www.ppmi-info.org/access-data-specimens/download-data}. Upstream artefacts from the companion submissions---NSD-ISS staging tables, multimodal feature files, GIMIN and Graph-DT checkpoints, and IPCW conformal calibration files~\cite{dupre2026paper1,dupre2026paper2,dupre2026paper3,dupre2026paper4,dupre2026paper5}---required to reproduce the pipeline are archived at \url{https://github.com/bddupre92/PD_PHD} and will be deposited to Zenodo with a DOI at acceptance. The full per-patient pipeline output for all 1,900 patients ($\sim 1.2$\,MB aggregate JSON) is included in the supplementary material.
+
+\section*{Code Availability}
+Python source for the pipeline (\texttt{scripts/paper6/unified\_pipeline\_demo\_v2.py}), the per-feature temperature-scaling module (\texttt{src/giman\_pipeline/imputation/temperature\_scaling.py}), and the aggregate-figure generator (\texttt{scripts/paper6/generate\_v2\_aggregate\_figures.py}) are openly available at \url{https://github.com/bddupre92/PD_PHD} under the MIT license.
+
+\section*{Author Contributions}
+B.D.D.\ conceived the pipeline integration, implemented and executed all components, performed the analysis, and wrote the manuscript.
+
+\section*{Competing Interests}
+The author declares no competing interests.
+
+\section*{Funding}
+Dissertation research supported by the Department of Biomedical Engineering, University of North Dakota.
+
+\section*{Acknowledgements}
+The author thanks the Parkinson's Progression Markers Initiative participants and investigators for making this work possible. PPMI is sponsored by the Michael J.\ Fox Foundation for Parkinson's Research.
+
+% ─────────────────────────────────────────────────────────────────
+\bibliographystyle{unsrt}
+\begin{thebibliography}{99}
+
+\bibitem{simuni2024}
+T.~Simuni \textit{et al.}, ``A biological definition of neuronal $\alpha$-synuclein disease: towards an integrated staging system for research,'' \textit{Lancet Neurol.}, vol.~23, no.~2, pp.~178--190, 2024.
+
+\bibitem{espay2025refutation}
+A.~Espay \textit{et al.}, ``On the misinterpretation of the NSD-ISS biological staging framework,'' \textit{Mov.\ Disord.}, 2025.
+
+\bibitem{simuni2025progression}
+T.~Simuni \textit{et al.}, ``Longitudinal clinical and biomarker characteristics of NSD-ISS stages,'' \textit{Mov.\ Disord.}, vol.~40, 2025.
+
+\bibitem{dupre2026paper1}
+B.\,D.~Dupre, ``NSD-ISS stage prediction with calibrated uncertainty,'' submitted to \textit{IEEE J.\ Biomed.\ Health Inform.}, 2026. Companion submission: bioRxiv preprint DOI pending.
+
+\bibitem{dupre2026paper2}
+B.\,D.~Dupre, ``Stage-conditioned graph-informed multimodal imputation (GIMIN) for NSD-ISS staging data,'' submitted to \textit{IEEE J.\ Biomed.\ Health Inform.}, 2026. Includes a per-feature temperature-scaling calibration ablation that informs the present pipeline's uncertainty layer. Companion submission: bioRxiv preprint DOI pending.
+
+\bibitem{dupre2026paper3}
+B.\,D.~Dupre, ``Graph-informed NSD-ISS transition prediction with conformalized uncertainty and subgroup equity in Parkinson's disease,'' submitted to \textit{npj Digit.\ Med.}, 2026. Delivers the Graph-Informed Digital Twin + IPCW conformal layer used here. Companion submission: bioRxiv preprint DOI pending.
+
+\bibitem{dupre2026paper4}
+B.\,D.~Dupre, ``Conformalized survival analysis for NSD-ISS stage transitions,'' submitted to \textit{npj Digit.\ Med.}, 2026 (combined with Paper~3 for venue aim). IPCW cause-specific conformal CIF bands and per-subgroup conditional coverage. Companion submission: bioRxiv preprint DOI pending.
+
+\bibitem{dupre2026paper5}
+B.\,D.~Dupre, ``Temporal validation and deployment readiness for NSD-ISS stage-transition prediction,'' submitted to \textit{J.\ Am.\ Med.\ Inform.\ Assoc.}, 2026. Companion submission: bioRxiv preprint DOI pending.
+
+\bibitem{dupre2026paper9}
+B.\,D.~Dupre, ``Three-pathway pharmacokinetic-pharmacodynamic analysis of levodopa in Parkinson's disease,'' submitted to \textit{CPT: Pharmacometrics Syst.\ Pharmacol.}, 2026. Path~B finding (N(t)$\times$LEDD interaction, $p=0.044$) informs the deployment note in the Discussion. bioRxiv preprint DOI pending.
+
+\bibitem{dupre2026paper10}
+B.\,D.~Dupre, ``Bidirectional-ready mechanistic patient-specific model with external validation and NASEM audit in Parkinson's disease,'' submitted to \textit{npj Parkinson's Disease}, 2026. Consumes GIMIN posterior samples in the observation-likelihood update cycle. Companion submission: bioRxiv preprint DOI pending.
+
+\bibitem{lian2024adamedgraph}
+X.~Lian \textit{et al.}, ``AdaMedGraph: PD-stage prediction via APPNP + AdaBoost on PPMI,'' \textit{npj Parkinsons Dis.}, vol.~10, 2024.
+
+\bibitem{collins2024tripodai}
+G.~S.~Collins \textit{et al.}, ``TRIPOD+AI statement: updated guidance for reporting clinical prediction models that use regression or machine learning methods,'' \textit{BMJ}, vol.~385, e078378, 2024.
+
+\bibitem{sendak2020deployment}
+M.~P.~Sendak \textit{et al.}, ``Path to clinical deployment of machine learning,'' \textit{Nat.\ Med.}, vol.~26, 2020.
+
+\bibitem{fda2024pccp}
+U.S.\ Food and Drug Administration, ``Marketing submission recommendations for a predetermined change control plan for AI/ML-enabled device software functions,'' \textit{FDA Guidance}, Dec.~2024.
+
+\bibitem{wiens2019clinicalml}
+J.~Wiens \textit{et al.}, ``Do no harm: a roadmap for responsible machine learning for health care,'' \textit{Nat.\ Med.}, vol.~25, 2019.
+
+\bibitem{kawamoto2005cdss}
+K.~Kawamoto \textit{et al.}, ``Improving clinical practice using clinical decision support systems,'' \textit{BMJ}, vol.~330, 2005.
+
+\bibitem{finlayson2021clinician}
+S.~G.~Finlayson \textit{et al.}, ``The clinician and dataset shift in artificial intelligence,'' \textit{N.\ Engl.\ J.\ Med.}, vol.~385, 2021.
+
+\bibitem{seibyl2008dat}
+J.~Seibyl \textit{et al.}, ``DaT-SPECT imaging in Parkinson's disease,'' \textit{Mov.\ Disord.}, 2008.
+
+\bibitem{iprognosis2020}
+M.~Arroyo-Gallego \textit{et al.}, ``iPrognosis: A multimodal mobile platform for symptom surveillance in Parkinson's disease,'' \textit{J.\ Parkinsons Dis.}, 2020.
+
+\bibitem{foxinsight2020}
+C.~M.~Tanner \textit{et al.}, ``Fox Insight collects online, longitudinal, patient-reported outcomes and genetic data on Parkinson's disease,'' \textit{Sci.\ Data}, vol.~7, 2020.
+
+\bibitem{floodlight2021}
+F.~Lipsmeier \textit{et al.}, ``Floodlight: continuous smartphone-based monitoring of movement disorders,'' \textit{Nat.\ Digit.\ Med.}, 2021.
+
+\end{thebibliography}
+
+\end{document}
