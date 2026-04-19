@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phys_gimin"
+version = "0.1.0-alpha"
+description = "Physics-regularized multimodal imputation for Parkinson's disease biomarker data (Paper 12)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Blair Dupre", email = "blair.dupre@und.edu"}
+]
+keywords = [
+    "imputation",
+    "physics-informed",
+    "parkinsons-disease",
+    "biomarker",
+    "heteroscedastic-uncertainty",
+    "graph-attention",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+
+# Minimal deps. The main project .venv at /Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/
+# provides torch, pytorch-geometric, h5py, numpy, pandas, scikit-learn, MAPIE, etc.
+# phys_gimin inherits from that venv; do not duplicate deps here.
+dependencies = [
+    # Intentionally empty. Main-project venv provides everything.
+    # Declare phys-GIMIN-specific additions here as they arise.
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+]
+baselines = [
+    # Clean-room re-implementations of HSPGNN, CNODE, Demirkaya, Zou go under baselines/.
+    # Pure-PyTorch; no extra deps expected beyond main-project venv.
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["phys_gimin*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Fail fast on first error during active development.
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "N",  # pep8-naming
+    "UP", # pyupgrade
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]

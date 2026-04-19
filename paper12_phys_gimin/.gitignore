@@ -1,0 +1,22 @@
+# Output artifacts — gitignored per scoping plan's benchmark-integrity governance
+outputs/
+!outputs/.gitkeep
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Clean-room baseline build artifacts
+baselines/**/__pycache__/
+baselines/**/*.pyc
+baselines/**/checkpoints/
+
+# Local dev
+.env
+.venv/
+*.log
