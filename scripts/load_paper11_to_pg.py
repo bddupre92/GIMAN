@@ -161,7 +161,8 @@ def _model_metrics_row(
     ``--models`` included them.
     """
     model_data = summary.get(model)
-    if not isinstance(model_data, dict):
+    # Producer unconditionally emits {} for non-trained models; skip those too.
+    if not isinstance(model_data, dict) or not model_data:
         return None
 
     row = {
