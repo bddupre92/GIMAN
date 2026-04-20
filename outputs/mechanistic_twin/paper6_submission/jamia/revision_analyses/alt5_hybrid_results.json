@@ -1,0 +1,210 @@
+{
+  "config": {
+    "cohort": "NSD+ \u2229 PD+Prodromal \u2229 Phase-2-calibrated",
+    "n_patients": 511,
+    "n_features_control": 31,
+    "n_features_alt5": 32,
+    "mechanistic_feature": "pct_loss_per_yr_median",
+    "cv": "5-fold stratified",
+    "bootstrap_resamples": 1000,
+    "random_seed": 42
+  },
+  "control_catboost33_gimin": {
+    "n_patients": 511,
+    "n_features": 31,
+    "top1_accuracy": 0.9197651663405088,
+    "top1_95ci": [
+      0.8943248532289628,
+      0.9432485322896281
+    ],
+    "balanced_accuracy": 0.7289706492925809,
+    "balanced_acc_95ci": [
+      0.6197150554557116,
+      0.8417453428761029
+    ],
+    "per_stage": {
+      "stage_1": {
+        "n": 147,
+        "acc": 0.9183673469387755
+      },
+      "stage_2": {
+        "n": 355,
+        "acc": 0.9352112676056338
+      },
+      "stage_3": {
+        "n": 9,
+        "acc": 0.3333333333333333
+      }
+    },
+    "fold_results": [
+      {
+        "fold": 0,
+        "top1": 0.8932038834951457,
+        "bal_acc": 0.754303599374022,
+        "n_test": 103
+      },
+      {
+        "fold": 1,
+        "top1": 0.9117647058823529,
+        "bal_acc": 0.6226917057902973,
+        "n_test": 102
+      },
+      {
+        "fold": 2,
+        "top1": 0.9215686274509803,
+        "bal_acc": 0.786870649182451,
+        "n_test": 102
+      },
+      {
+        "fold": 3,
+        "top1": 0.9215686274509803,
+        "bal_acc": 0.6248988181965355,
+        "n_test": 102
+      },
+      {
+        "fold": 4,
+        "top1": 0.9509803921568627,
+        "bal_acc": 0.8009551562247045,
+        "n_test": 102
+      }
+    ],
+    "feat_list": [
+      "SEX",
+      "AGE_AT_VISIT",
+      "NP3TOT",
+      "NHY",
+      "PIGD_SCORE",
+      "TREMOR_SCORE",
+      "MCATOT",
+      "CAUDATE_L_VOL",
+      "CAUDATE_R_VOL",
+      "PUTAMEN_L_VOL",
+      "PUTAMEN_R_VOL",
+      "HIPPOCAMPUS_L_VOL",
+      "HIPPOCAMPUS_R_VOL",
+      "CAUDATE_L_SBR",
+      "CAUDATE_R_SBR",
+      "PUTAMEN_L_SBR",
+      "PUTAMEN_R_SBR",
+      "ALPHA_SYNUCLEIN",
+      "TOTAL_TAU",
+      "ABETA42",
+      "PTAU181",
+      "UPSIT_TOTAL",
+      "RBD_TOTAL",
+      "SCOPA_AUT_TOTAL",
+      "ESS_TOTAL",
+      "ENTORHINAL_L_CTH",
+      "ENTORHINAL_R_CTH",
+      "CINGULATE_L_CTH",
+      "CINGULATE_R_CTH",
+      "PRECENTRAL_L_CTH",
+      "PRECENTRAL_R_CTH"
+    ]
+  },
+  "alt5_catboost33_gimin_plus_nfrac": {
+    "n_patients": 511,
+    "n_features": 32,
+    "top1_accuracy": 0.9178082191780822,
+    "top1_95ci": [
+      0.8923679060665362,
+      0.9412915851272016
+    ],
+    "balanced_accuracy": 0.655835542354657,
+    "balanced_acc_95ci": [
+      0.6052699539585948,
+      0.7445997423159066
+    ],
+    "per_stage": {
+      "stage_1": {
+        "n": 147,
+        "acc": 0.9183673469387755
+      },
+      "stage_2": {
+        "n": 355,
+        "acc": 0.9380281690140845
+      },
+      "stage_3": {
+        "n": 9,
+        "acc": 0.1111111111111111
+      }
+    },
+    "fold_results": [
+      {
+        "fold": 0,
+        "top1": 0.883495145631068,
+        "bal_acc": 0.5876369327073553,
+        "n_test": 103
+      },
+      {
+        "fold": 1,
+        "top1": 0.9117647058823529,
+        "bal_acc": 0.6226917057902973,
+        "n_test": 102
+      },
+      {
+        "fold": 2,
+        "top1": 0.9313725490196079,
+        "bal_acc": 0.7915654848632022,
+        "n_test": 102
+      },
+      {
+        "fold": 3,
+        "top1": 0.9215686274509803,
+        "bal_acc": 0.6248988181965355,
+        "n_test": 102
+      },
+      {
+        "fold": 4,
+        "top1": 0.9411764705882353,
+        "bal_acc": 0.6342884895580378,
+        "n_test": 102
+      }
+    ],
+    "feat_list": [
+      "SEX",
+      "AGE_AT_VISIT",
+      "NP3TOT",
+      "NHY",
+      "PIGD_SCORE",
+      "TREMOR_SCORE",
+      "MCATOT",
+      "CAUDATE_L_VOL",
+      "CAUDATE_R_VOL",
+      "PUTAMEN_L_VOL",
+      "PUTAMEN_R_VOL",
+      "HIPPOCAMPUS_L_VOL",
+      "HIPPOCAMPUS_R_VOL",
+      "CAUDATE_L_SBR",
+      "CAUDATE_R_SBR",
+      "PUTAMEN_L_SBR",
+      "PUTAMEN_R_SBR",
+      "ALPHA_SYNUCLEIN",
+      "TOTAL_TAU",
+      "ABETA42",
+      "PTAU181",
+      "UPSIT_TOTAL",
+      "RBD_TOTAL",
+      "SCOPA_AUT_TOTAL",
+      "ESS_TOTAL",
+      "ENTORHINAL_L_CTH",
+      "ENTORHINAL_R_CTH",
+      "CINGULATE_L_CTH",
+      "CINGULATE_R_CTH",
+      "PRECENTRAL_L_CTH",
+      "PRECENTRAL_R_CTH",
+      "pct_loss_per_yr_median"
+    ]
+  },
+  "paired_delta": {
+    "mean_delta_top1": -0.0019569471624266144,
+    "delta_95ci": [
+      -0.009784735812133072,
+      0.003913894324853229
+    ],
+    "pct_patients_improved": 0.0019569471624266144,
+    "pct_patients_unchanged": 0.9941291585127201,
+    "pct_patients_worse": 0.003913894324853229
+  },
+  "verdict": "NULL: Mechanistic feature adds no measurable signal; complementarity confirmed"
+}

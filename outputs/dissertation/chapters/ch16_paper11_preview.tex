@@ -1,0 +1,86 @@
+% =============================================================================
+% Chapter 16 — Paper 11 Preview: Deep Hybrid SciML (Postdoc Direction)
+% Accelerated-demo preview of the natural postdoc-scope extension that
+% converts the Layer-2 calibration-gap finding (Ch 14 §14.4) into a design
+% specification for mechanistic regularisation of the data-driven predictor.
+% =============================================================================
+
+\chapter{Paper~11 Preview: Deep Hybrid SciML as Postdoc-Scope Extension}
+\label{ch:paper11-preview}
+
+\section{Motivation --- the shallow-hybrid null}
+\label{sec:p11-motivation}
+
+Chapter~\ref{ch:discussion} (\S\ref{sec:disc-hybrid-architecture}) characterised a three-layer hybridisation architecture: parallel output integration (Paper~6), cross-validation and complementarity characterisation (Papers~9--10), and deep SciML fusion (Paper~11, postdoc). To convert the Layer-3 postdoc claim from speculation into a falsifiable design specification, a shallow-hybrid probe is reported here.
+
+The probe tests the simplest possible deep-fusion hypothesis: \emph{does adding the per-patient Phase-2 calibrated neurodegeneration rate as a 34th feature to the CatBoost-33 + GIMIN baseline improve within-NSD-positive Top-1 accuracy?} If yes, deep fusion is obviously worth pursuing; if no, deeper methods are needed.
+
+\paragraph{Protocol.} Control variant is Paper~6 Alt-1 (CatBoost-33 + GIMIN) restricted to the (NSD+ $\cap$ Phase-2-calibrated) intersection ($n = 511$). Test variant adds \texttt{pct\_loss\_per\_yr\_median} (the posterior-median annualised neurodegeneration rate from Chapter~\ref{ch:paper7}) as feature 34. Five-fold stratified cross-validation with 1{,}000-resample patient-level bootstrap. Same random seed (42) and CV scheme as the primary Paper~6 A/B test.
+
+\paragraph{Result.} Table~\ref{tab:p11-alt5} summarises the paired comparison.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Shallow-hybrid null: adding Phase-2-calibrated $N(t)$ rate as a CatBoost feature does not improve NSD-positive staging.}
+\label{tab:p11-alt5}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{Control (CB-33 + GIMIN)} & \textbf{Alt-5 (+ \texttt{pct\_loss\_per\_yr})} \\
+\midrule
+Top-1 accuracy     & $0.920$ $[0.894, 0.943]$ & $0.918$ $[0.892, 0.941]$ \\
+Balanced accuracy  & $0.729$                   & $0.656$                   \\
+Paired $\Delta$ Top-1 & \multicolumn{2}{c}{$-0.002$ $[-0.010, +0.004]$ (CI straddles zero)} \\
+\% patients improved & \multicolumn{2}{c}{$0.2\%$} \\
+\% patients unchanged & \multicolumn{2}{c}{$99.4\%$} \\
+\% patients worse  & \multicolumn{2}{c}{$0.4\%$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two readings agree. First, the headline Top-1 accuracy is statistically indistinguishable: the paired-bootstrap 95\% CI on $\Delta = -0.002$ straddles zero. Second, the balanced accuracy degrades by $7.3$~percentage points, consistent with a weakly-informative feature weakly overfitting the majority stages. The shallow-hybrid hypothesis is falsified on this endpoint.
+
+\paragraph{Why this was the expected result.}
+DaT-SPECT striatal binding ratio is already present in the 33-feature set, and the observation-model relationship $\mathrm{SBR}(t) = \mathrm{SBR}_0 (N(t)/N_0)^{\gamma}$ (with $\gamma = 0.7$) means that the ODE-derived rate is approximately a nonlinear transform of a feature the classifier already consumes. A feature-concatenation hybrid cannot extract additional signal when the mechanistic quantity is a deterministic function of an existing input channel.
+
+\section{What Paper~11 Will Actually Do}
+\label{sec:p11-plan}
+
+The null result above is not a defeat of hybridisation; it is a specification. It rules out the trivial concatenation approach and forces Paper~11 into one of three non-trivial directions:
+
+\subsection{Direction 1 --- Physics-informed neural ODE regularisation}
+
+Instead of concatenating $N(t)$ as a feature, constrain the predictor's internal representation to be consistent with the calibrated Variant~B ODE via a penalty term:
+\begin{equation}
+\mathcal{L}_\text{hybrid}(\theta) = \mathcal{L}_\text{data}(\theta) + \lambda \cdot \mathbb{E}_{t}\!\left[\bigl\|\frac{d}{dt}\hat{N}_\theta(t) + (\alpha_\text{tox} O_\text{ss} + k_\text{age})\hat{N}_\theta(t)\bigr\|^2\right]
+\label{eq:p11-regularisation}
+\end{equation}
+where $\hat{N}_\theta(t)$ is the predictor's internal estimate of the neuron-fraction trajectory. This is the Universal Differential Equations approach of Rackauckas et al.~\cite{rackauckas2020universal}, with non-negativity and area-under-curve regularisation per de~Rooij et al.~\cite{deRooij2025physiology}. The lit-prior variant (Véronneau-Veilleux parameters) avoids the tautology flagged in the phys-GIMIN scope decision~\cite{phys_gimin_scope}.
+
+\subsection{Direction 2 --- Trajectory-aware imputation with joint calibration}
+
+The companion Paper~10 L1 finding (\S\ref{sec:p10-l1}) shows that GIMIN's per-feature $\sigma$ is marginally calibrated but not jointly calibrated when many imputations stack. Paper~11 would retrain GIMIN with an explicit trajectory-aware correlation penalty so that imputed residuals are not correlated across the patient timeline, enabling the bidirectional likelihood to consume imputed observations without the $\sigma \times 2.5 \to 19\%$ joint coverage collapse.
+
+\subsection{Direction 3 --- Hybrid posterior propagation}
+
+Rather than fusing at the prediction layer, fuse at the posterior layer. Paper~10 exports per-patient HDF5 posteriors over $(k_n, \alpha_\text{tox}, T_\text{tox})$; Paper~11 would propagate these through the correlational pipeline as a weighted prior on patient-specific staging thresholds, producing a Bayesian hybrid prediction with uncertainty that reflects both the ML epistemic uncertainty and the mechanistic posterior width.
+
+\section{Why This is Postdoc-Scope}
+\label{sec:p11-postdoc-scope}
+
+Paper~11 is explicitly scoped as postdoc-scope, not dissertation-critical, for four reasons.
+
+\textbf{First, the dissertation argument is closed without it.} Paper~10 passes the NASEM self-audit 16/21 with no absent criteria and demonstrates bidirectional update. Paper~11 is a deepening, not a closure.
+
+\textbf{Second, the external data required is not yet publicly accessible.} All three proposed directions need longitudinal external DaT-SPECT to validate generalisation beyond PPMI; the exhaustive audit in Chapter~\ref{ch:paper10} confirmed that SURE-PD3 (BioSEND DUA pending), DeNoPa (Mollenhauer collaboration pending), and ICEBERG (Paris Brain Institute, direct collaboration) are the three candidate sources, all outside the defense timeline.
+
+\textbf{Third, the tautology constraint is load-bearing.} Any physics-regularised GIMIN variant (companion \texttt{phys-GIMIN} postdoc project, \texttt{feat/paper12-phys-gimin} branch) that uses the Phase-2 posteriors as a regulariser is circular when applied to Papers~7, 10. The phys-GIMIN scope decision records the two-variant design (lit-prior safe for Papers~2, 3, 9; self-prior restricted to Paper~2 native benchmark as ablation only).
+
+\textbf{Fourth, 10 papers is already above the PhD norm} (typical 3--5). The stopping rule \emph{``stop at 10 if Paper~10 closes the NASEM argument''} is met.
+
+\section{Accelerated-Demo Summary}
+\label{sec:p11-summary}
+
+This chapter is not Paper~11. It is an accelerated-demo preview that (i)~reports a falsifiable null on the shallow-hybrid hypothesis, (ii)~converts the Chapter~\ref{ch:discussion} three-layer architectural claim into a testable design specification, and (iii)~explicitly scopes deep hybridisation as postdoc work with three concrete directions. The accompanying script, data, and revision-analysis artefact (\texttt{scripts/paper6/test\_p6\_alt5\_hybrid.py}; \texttt{outputs/mechanistic\_twin/paper6\_submission/jamia/revision\_analyses/\-alt5\_hybrid\_results.json}) are provided so the null result and the derived design specification are independently reproducible.
+
+Paper~11, when executed in postdoc, will pick up Direction~1 first as the least-tautological of the three and as the natural continuation of the de~Rooij 2025\cite{deRooij2025physiology} physics-informed UDE regularisation line of work.
