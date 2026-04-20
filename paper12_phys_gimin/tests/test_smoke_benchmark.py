@@ -1,6 +1,7 @@
 """Tests for smoke benchmark pipeline (uses synthetic data)."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -49,6 +50,27 @@ class TestSmokeBenchmark:
         cv = rmse_cv(results)
         assert 0 <= cv < float("inf"), f"CV should be finite, got {cv}"
 
+    def test_real_ppmi_loader_returns_patnos(self):
+        """_load_real_ppmi_data now returns a 5-tuple including PATNOs."""
+        from pathlib import Path
+        parquet_path = Path(
+            "/Users/blair.dupre/Projects/CSCI-FALL-2025/GIMImpN_imputation/outputs/ppmi_full_cohort.parquet"
+        )
+        staging_path = Path(
+            "/Users/blair.dupre/Projects/CSCI-FALL-2025/data/04_staging/nsd_iss_staging_results.csv"
+        )
+        if not parquet_path.exists() or not staging_path.exists():
+            pytest.skip("Paper 2 data not present — skipping real-data test")
+
+        from phys_gimin.smoke_benchmark import _load_real_ppmi_data
+        result = _load_real_ppmi_data()
+        assert len(result) == 5, f"Expected 5-tuple, got {len(result)}-tuple"
+        features_np, mask_np, stages_np, feature_names, patnos = result
+        assert len(patnos) == features_np.shape[0], (
+            f"patnos length {len(patnos)} != n_patients {features_np.shape[0]}"
+        )
+        assert all(isinstance(p, int) for p in patnos[:5]), "PATNOs should be ints"
+
     def test_real_ppmi_loader_returns_expected_shapes(self):
         """Confirm _load_real_ppmi_data returns (2201, 33) feature matrix matching Paper 2.
 
@@ -73,7 +95,7 @@ class TestSmokeBenchmark:
 
         from phys_gimin.smoke_benchmark import _load_real_ppmi_data
 
-        features_np, mask_np, stages_np, feature_names = _load_real_ppmi_data()
+        features_np, mask_np, stages_np, feature_names, patnos = _load_real_ppmi_data()
 
         # Expected shape from Paper 2: 2,197 patients × 33 features
         # (2,201 total in staging, minus 4 unclassified)
@@ -82,5 +104,94 @@ class TestSmokeBenchmark:
         assert mask_np.shape == features_np.shape
         assert stages_np.shape == (2197,)
         assert len(feature_names) == 33
+        assert len(patnos) == 2197, f"expected 2197 patnos, got {len(patnos)}"
         # Stage values should be in {0,1,2,3,4} (no 5 = unclassified, since loader filters those out)
         assert set(stages_np.tolist()).issubset({0, 1, 2, 3, 4})
+
+
+class TestRealDataFidelity:
+    """Pin the three fidelity properties against future regression.
+
+    Guards: random stages (Bug 1), chain graph (Bug 2), constant sbr_0 (Bug 3).
+    """
+
+    _PARQUET = Path(
+        "/Users/blair.dupre/Projects/CSCI-FALL-2025/GIMImpN_imputation/outputs/ppmi_full_cohort.parquet"
+    )
+
+    def _skip_if_no_data(self):
+        if not self._PARQUET.exists():
+            import pytest as _pytest
+            _pytest.skip("Paper 2 parquet not present — skipping real-data test")
+
+    def test_real_stages_are_not_uniformly_random(self):
+        """Real stages_np has the expected NSD-ISS distribution (Stage 0 dominates).
+
+        Paper 2 distribution: 1418/67/208/487/17 = 64.5%/3%/9.5%/22.1%/0.8%.
+        A random draw from {0..5} would be uniform ~16.7% per stage.
+        """
+        self._skip_if_no_data()
+
+        from phys_gimin.smoke_benchmark import _load_real_ppmi_data
+        _, _, stages_np, _, _ = _load_real_ppmi_data()
+
+        # Stage 0 must be 60–70% of the cohort — NOT ~17% which would indicate random
+        stage_0_frac = float((stages_np == 0).sum() / len(stages_np))
+        assert stage_0_frac > 0.55, (
+            f"Stage 0 is {stage_0_frac:.2%} of cohort — expected ~64.5% per Paper 2. "
+            "If close to 17%, stages are being randomly generated."
+        )
+
+    def test_real_data_graph_is_not_a_chain(self, tmp_path):
+        """After run_single_seed on real data, the graph has more than 2-neighbor connectivity."""
+        self._skip_if_no_data()
+
+        from phys_gimin.smoke_benchmark import run_single_seed
+        result = run_single_seed(
+            method="phys_gimin_lit", seed=1001, mask_fraction=0.1,
+            n_epochs=2, n_patients=None, n_features=33,
+            output_dir=tmp_path, mock_data=False,
+        )
+        assert result.status == "completed", (
+            f"run_single_seed failed: {(Path(result.run_dir) / 'error.txt').read_text()}"
+            if (Path(result.run_dir) / "error.txt").exists() else "run failed (no error.txt)"
+        )
+        prov_path = Path(result.run_dir) / "provenance.json"
+        assert prov_path.exists(), "provenance.json must exist after a real-data run"
+        prov = json.loads(prov_path.read_text())
+        assert "graph_stats" in prov, "Trainer must log graph stats in provenance"
+        # Average degree for a chain graph is ~2; k-NN at k=15 should give avg_degree ~30
+        avg_degree = prov["graph_stats"]["avg_degree"]
+        assert avg_degree > 5.0, (
+            f"Avg degree = {avg_degree:.1f}. Chain graph = 2, k-NN with k=15 should give ~30."
+        )
+
+    def test_real_sbr_0_varies_across_patients(self, tmp_path):
+        """sbr_0 per patient is NOT a constant vector."""
+        self._skip_if_no_data()
+
+        from phys_gimin.smoke_benchmark import run_single_seed
+        result = run_single_seed(
+            method="phys_gimin_lit", seed=1001, mask_fraction=0.1,
+            n_epochs=2, n_patients=None, n_features=33,
+            output_dir=tmp_path, mock_data=False,
+        )
+        assert result.status == "completed", (
+            f"run_single_seed failed: {(Path(result.run_dir) / 'error.txt').read_text()}"
+            if (Path(result.run_dir) / "error.txt").exists() else "run failed (no error.txt)"
+        )
+        prov_path = Path(result.run_dir) / "provenance.json"
+        assert prov_path.exists(), "provenance.json must exist after a real-data run"
+        prov = json.loads(prov_path.read_text())
+        assert "sbr_0_stats" in prov, "provenance.json must contain sbr_0_stats"
+        stats = prov["sbr_0_stats"]
+        # Std should be >0 — if ==0 then sbr_0 is a constant
+        assert stats["std"] > 0.05, (
+            f"sbr_0 std = {stats['std']:.3f} — a constant vector has std=0. "
+            "Real DaT-SBR baseline values vary across the cohort."
+        )
+        # Check fallback count is reasonable (not 100% fallback)
+        assert stats["n_fallback"] / stats["n_total"] < 0.95, (
+            f"{stats['n_fallback']}/{stats['n_total']} patients got median fallback — "
+            "suggests CAUDATE/PUTAMEN columns aren't being read."
+        )

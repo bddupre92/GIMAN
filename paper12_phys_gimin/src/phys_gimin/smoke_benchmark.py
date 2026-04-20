@@ -52,7 +52,7 @@ class SmokeRunResult:
 
 # ── Real PPMI data loader (reuses Paper 2 pipeline) ────────────────────────────
 
-def _load_real_ppmi_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str]]:
+def _load_real_ppmi_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str], list[int]]:
     """Load the Paper 2 canonical 33-feature PPMI dataset via the existing pipeline.
 
     This reuses scripts/run_paper2_experiments.py::load_data() without modification.
@@ -60,10 +60,11 @@ def _load_real_ppmi_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str
     and CLI dispatch is guarded by `if __name__ == "__main__"`.
 
     Returns:
-        features_np: (2201, 33) float32
-        mask_np:     (2201, 33) float32 — 1 = observed, 0 = missing
-        stages_np:   (2201,) int — NSD-ISS stages (0/1/2/3/4; 5 = unclassified)
+        features_np: (2197, 33) float32  — un-normalized raw features
+        mask_np:     (2197, 33) float32  — 1 = observed, 0 = missing
+        stages_np:   (2197,) int         — NSD-ISS stages (0/1/2/3/4; 5 = unclassified)
         feature_names: list of feature names (up to 33, depending on availability)
+        patnos:      list[int]           — PPMI PATNO per patient (same row order)
     """
     _project_root = get_project_root()
     for _p in [_project_root / "scripts",
@@ -74,93 +75,191 @@ def _load_real_ppmi_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str
             sys.path.insert(0, _ps)
 
     # Import without triggering argparse (argparse is in parse_args(); CLI is __main__-guarded).
-    from run_paper2_experiments import load_data as _paper2_load_data
+    from run_paper2_experiments import load_data as _paper2_load_data, STAGE_MAP
 
     features_np, mask_np, stages_np, feature_names = _paper2_load_data()
-    return features_np, mask_np, stages_np, feature_names
+
+    # Reconstruct PATNOs by replaying the same filtering logic as load_data().
+    # We load the same parquet + staging CSV to extract PATNO in the merged order.
+    import pandas as pd
+    data_dir = _project_root / "GIMImpN_imputation" / "outputs"
+    staging_path = _project_root / "data" / "04_staging" / "nsd_iss_staging_results.csv"
+
+    features_df = pd.read_parquet(data_dir / "ppmi_full_cohort.parquet")
+    staging_df = pd.read_csv(staging_path)
+    staging_df["stage_encoded"] = staging_df["nsd_iss_stage"].astype(str).map(STAGE_MAP)
+    staging_df["stage_encoded"] = staging_df["stage_encoded"].fillna(5).astype(int)
+    staging_valid = staging_df[staging_df["nsd_iss_stage"] != "unclassified"].copy()
+    staged_patnos = set(staging_valid["PATNO"].values)
+
+    staged_mask = features_df.index.isin(staged_patnos)
+    features_staged = features_df[staged_mask].copy().reset_index()
+    features_staged = features_staged.merge(
+        staging_valid[["PATNO", "stage_encoded", "nsd_iss_stage"]],
+        on="PATNO",
+        how="inner",
+    )
+    patnos = features_staged["PATNO"].tolist()
+
+    return features_np, mask_np, stages_np, feature_names, patnos
 
 
-# ── Dataset builders for mock vs real data ──────────────────────────────────
+# ── Real-data graph builder ─────────────────────────────────────────────────────
 
-def _build_dataset_with_masked_features(
-    true_features: torch.Tensor,
-    masked_features: torch.Tensor,
-    mask: torch.Tensor,
-    n_patients: int,
-    seed: int = 1001,
-) -> Dataset:
-    """Build a dataset from potentially real data with masked features.
+def _build_real_graph(
+    features_np: np.ndarray,
+    mask_np: np.ndarray,
+    stages_np: np.ndarray,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, str]:
+    """Build a stage-aware k-NN patient similarity graph (Paper 2 method).
 
-    For mock paths (mock_data=True), this wraps the features/mask in _MockDataset.
-    For real paths (mock_data=False), this wraps them in _RealDataDataset.
+    Tries to import StageAwareGraphBuilder from the main project.
+    Falls back to a plain cosine-similarity k-NN (k=15) via sklearn if the
+    import fails — still a real graph, just not stage-aware.
 
     Args:
-        true_features: Full unmasked feature matrix (N, F)
-        masked_features: Features with artificial mask applied (N, F)
-        mask: Artificial mask (1 = observed, 0 = missing) (N, F)
-        n_patients: Size hint for the dataset
-        seed: Random seed for synthetic metadata
+        features_np: (N, D) float32 un-normalized features
+        mask_np:     (N, D) float32 observation mask (1=observed, 0=missing)
+        stages_np:   (N,)   int NSD-ISS stage array
 
     Returns:
-        A Dataset with batch dict containing fields expected by PhysGIMIN.
+        edge_index:   (2, n_edges) long tensor
+        edge_weight:  (n_edges,) float tensor
+        overlap_frac: (n_edges,) float tensor
+        builder_name: str label for provenance logging
     """
-    # Infer if data is real or mock based on size
-    if true_features.shape[0] > 100:
-        # Real data path — use wrapper
-        return _RealDataDataset(
-            features=masked_features,
-            mask=mask,
-            n_patients=true_features.shape[0],
-        )
-    else:
-        # Mock path — use existing mock dataset structure
-        dataset = _MockDataset(n_patients=n_patients, n_features=true_features.shape[1], seed=seed)
-        dataset.features = masked_features
-        dataset.mask = mask
-        return dataset
+    _project_root = get_project_root()
+    main_src = str(_project_root / "src")
+    if main_src not in sys.path:
+        sys.path.insert(0, main_src)
 
+    try:
+        from giman_pipeline.imputation.stage_graph_builder import StageAwareGraphBuilder
+
+        builder = StageAwareGraphBuilder(
+            k_neighbors=15,
+            min_overlap=3,
+            stage_affinity_beta=0.3,
+            use_stratified=False,
+        )
+        result = builder.build_full_graph(features_np, mask_np, stages=stages_np)
+        edge_index = result["edge_index"]
+        edge_weight = result["edge_weight"]
+        overlap_frac = result["overlap_frac"]
+        builder_name = "stage_aware_knn_k15"
+
+    except ImportError:
+        # Fallback: plain cosine k-NN via sklearn (still a real graph)
+        from sklearn.neighbors import NearestNeighbors
+        from sklearn.preprocessing import normalize
+
+        # Z-score normalize observed features (zero-fill missing)
+        col_means = np.nanmean(
+            np.where(mask_np > 0, features_np, np.nan), axis=0
+        )
+        col_stds = np.nanstd(
+            np.where(mask_np > 0, features_np, np.nan), axis=0
+        )
+        col_stds = np.where(col_stds < 1e-8, 1.0, col_stds)
+        feat_norm = (features_np - col_means) * mask_np / col_stds
+
+        nbrs = NearestNeighbors(n_neighbors=16, metric="cosine", algorithm="brute")
+        nbrs.fit(feat_norm)
+        distances, indices = nbrs.kneighbors(feat_norm)
+
+        N, D = features_np.shape
+        src_list, dst_list, weight_list = [], [], []
+        for i in range(N):
+            for j_pos in range(1, 16):  # skip self (position 0)
+                j = indices[i, j_pos]
+                w = float(1.0 - distances[i, j_pos])
+                if w > 0:
+                    src_list.append(i)
+                    dst_list.append(j)
+                    weight_list.append(w)
+
+        # Symmetrize
+        edge_dict: dict[tuple[int, int], float] = {}
+        for s, d, w in zip(src_list, dst_list, weight_list, strict=False):
+            key = (min(s, d), max(s, d))
+            if key not in edge_dict or w > edge_dict[key]:
+                edge_dict[key] = w
+
+        final_src, final_dst, final_weight = [], [], []
+        for (u, v), w in edge_dict.items():
+            final_src.extend([u, v])
+            final_dst.extend([v, u])
+            final_weight.extend([w, w])
+
+        edge_index = torch.tensor([final_src, final_dst], dtype=torch.long)
+        edge_weight = torch.tensor(final_weight, dtype=torch.float32)
+
+        # overlap_frac: fraction of features observed on both ends
+        mask_f32 = mask_np.astype(np.float32)
+        src_arr = edge_index[0].numpy()
+        dst_arr = edge_index[1].numpy()
+        overlaps = (mask_f32[src_arr] * mask_f32[dst_arr]).sum(axis=1) / D
+        overlap_frac = torch.tensor(overlaps, dtype=torch.float32)
+        builder_name = "cosine_knn_k15_fallback"
+
+    return edge_index, edge_weight, overlap_frac, builder_name
+
+
+# ── Dataset classes ─────────────────────────────────────────────────────────────
 
 class _RealDataDataset(Dataset):
-    """Wrapper for real PPMI data with the same batch interface as _MockDataset.
+    """Wrapper for REAL PPMI data matching PhysGIMIN's expected batch dict.
 
-    Converts real data (N, F) into a single batch dict with mock graph structure.
+    Constructor takes pre-computed graph + real metadata. The smoke benchmark's
+    run_single_seed builds the graph via the main-project StageAwareGraphBuilder
+    and threads it through here.
+
+    All three data-fidelity properties are guaranteed by the constructor:
+      - stage_ids: real NSD-ISS stages from Paper 2 load_data()
+      - sbr_0_per_patient: real per-patient striatal DaT-SBR baseline
+      - edge_index/edge_weight: k-NN patient similarity graph (k=15, not a chain)
     """
 
-    def __init__(self, features: torch.Tensor, mask: torch.Tensor, n_patients: int, seed: int = 1001):
+    def __init__(
+        self,
+        features: torch.Tensor,
+        mask: torch.Tensor,
+        stages: torch.Tensor,                        # REAL NSD-ISS stages (long, shape=(n_pts,))
+        sbr_0_per_patient: list[float],              # REAL baseline striatal SBR
+        edge_index: torch.Tensor,                    # (2, n_edges) from main-project builder
+        edge_weight: torch.Tensor,                   # (n_edges,)
+        overlap_frac: torch.Tensor,                  # (n_edges,)
+        patnos: list[int],                           # patient IDs (real PATNO or sequential)
+        ode_feature_indices: list[int],              # which feature columns are DaT-SBR targets
+    ):
         self.features = features if isinstance(features, torch.Tensor) else torch.from_numpy(features).float()
         self.mask = mask if isinstance(mask, torch.Tensor) else torch.from_numpy(mask).float()
-        self.n_patients = n_patients
-        self.seed = seed
-
-        # Mock metadata (matches _MockDataset interface)
-        rng = np.random.default_rng(seed)
-        self.stage_ids = torch.from_numpy(rng.integers(0, 6, (n_patients,))).long()
-        self.patnos = list(range(3000, 3000 + n_patients))
-        self.t_years = [np.array([0.0, 1.0])] * n_patients
-        self.sbr_0 = [2.5] * n_patients
+        self.stage_ids = stages if isinstance(stages, torch.Tensor) else torch.tensor(stages, dtype=torch.long)
+        self.sbr_0 = sbr_0_per_patient
+        self._edge_index = edge_index
+        self._edge_weight = edge_weight
+        self._overlap_frac = overlap_frac
+        self.patnos = patnos
+        self.n_patients = self.features.shape[0]
+        # 2 time points match len(ode_feature_indices) = 2
+        self.t_years = [np.array([0.0, 1.0])] * self.n_patients
+        self._ode_feature_indices = ode_feature_indices
 
     def __len__(self) -> int:
-        return 1  # one full-graph batch
+        return 1
 
     def __getitem__(self, idx: int) -> dict:
-        n = self.n_patients
-        # build a minimal connected edge list: chain 0→1→2→...→n-1 (undirected)
-        srcs = list(range(n - 1)) + list(range(1, n))
-        dsts = list(range(1, n)) + list(range(n - 1))
-        edge_index = torch.tensor([srcs, dsts], dtype=torch.long)
-        edge_weight = torch.ones(len(srcs))
-        overlap_frac = torch.ones(len(srcs))
         return {
             "features": self.features,
             "mask": self.mask,
-            "edge_index": edge_index,
-            "edge_weight": edge_weight,
-            "overlap_frac": overlap_frac,
+            "edge_index": self._edge_index,
+            "edge_weight": self._edge_weight,
+            "overlap_frac": self._overlap_frac,
             "stage_ids": self.stage_ids,
             "patnos": self.patnos,
             "t_years_per_patient": self.t_years,
             "sbr_0_per_patient": self.sbr_0,
-            "ode_feature_indices": [0, 1],
+            "ode_feature_indices": self._ode_feature_indices,
         }
 
 
@@ -289,6 +388,51 @@ def _build_normalization_scaler(
     return scaler
 
 
+def _extract_sbr_0_per_patient(
+    features_np: np.ndarray,
+    mask_np: np.ndarray,
+    feature_names: list[str],
+) -> tuple[list[float], int]:
+    """Extract per-patient baseline striatal DaT-SBR from the raw (un-normalized) features.
+
+    Uses the mean of observed CAUDATE_L_SBR, CAUDATE_R_SBR, PUTAMEN_L_SBR,
+    PUTAMEN_R_SBR columns. Missing SBR columns fall back to cohort median.
+
+    Args:
+        features_np: (N, D) float32 raw (un-normalized) features
+        mask_np:     (N, D) float32 observation mask (1=observed, 0=missing)
+        feature_names: list of column names matching columns of features_np
+
+    Returns:
+        sbr_0_per_pt: list[float] of per-patient baseline SBR, length N
+        n_fallback:   int count of patients who got cohort-median fallback
+    """
+    sbr_col_names = ["CAUDATE_L_SBR", "CAUDATE_R_SBR", "PUTAMEN_L_SBR", "PUTAMEN_R_SBR"]
+    sbr_col_indices = [
+        feature_names.index(name)
+        for name in sbr_col_names
+        if name in feature_names
+    ]
+
+    if len(sbr_col_indices) == 0:
+        # No DaT-SBR columns present — use a constant placeholder
+        return [2.5] * features_np.shape[0], features_np.shape[0]
+
+    sbr_cols = features_np[:, sbr_col_indices]          # (N, up to 4)
+    obs_for_sbr = mask_np[:, sbr_col_indices]           # (N, up to 4)
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        row_sums = (sbr_cols * obs_for_sbr).sum(axis=1)
+        row_counts = np.clip(obs_for_sbr.sum(axis=1), 1, None)
+        sbr_0_raw = np.where(obs_for_sbr.sum(axis=1) > 0, row_sums / row_counts, np.nan)
+
+    cohort_median = float(np.nanmedian(sbr_0_raw))
+    n_fallback = int(np.isnan(sbr_0_raw).sum())
+    sbr_0_clean = np.where(np.isnan(sbr_0_raw), cohort_median, sbr_0_raw)
+
+    return sbr_0_clean.tolist(), n_fallback
+
+
 def run_single_seed(
     method: str,
     seed: int,
@@ -307,6 +451,10 @@ def run_single_seed(
     run_dir = output_dir / run_name
     run_dir.mkdir(parents=True, exist_ok=True)
 
+    # For provenance — will be populated in the real-data phys_gimin_lit path
+    graph_stats: dict | None = None
+    sbr_0_stats: dict | None = None
+
     try:
         # 1. Build data
         if mock_data:
@@ -315,7 +463,7 @@ def run_single_seed(
             original_mask = torch.ones_like(true_features)  # mock data is fully observed
         else:
             # Real-data path (Paper 2 canonical loader reused verbatim)
-            features_np, mask_np, stages_np, feature_names = _load_real_ppmi_data()
+            features_np, mask_np, stages_np, feature_names, patnos_list = _load_real_ppmi_data()
             n_patients_real = features_np.shape[0]
 
             # Optional subsampling for test runs (keeps first n_patients if caller requested fewer)
@@ -325,6 +473,7 @@ def run_single_seed(
                 features_np = features_np[idx]
                 mask_np = mask_np[idx]
                 stages_np = stages_np[idx]
+                patnos_list = [patnos_list[i] for i in idx]
 
             true_features = torch.from_numpy(features_np).float()
             original_mask = torch.from_numpy(mask_np).float()
@@ -386,14 +535,74 @@ def run_single_seed(
                 device=resolved_device,
             )
 
-            # Build dataset with normalized masked features
-            train_dataset = _build_dataset_with_masked_features(
-                true_features=true_features_norm if scaler is not None else true_features,
-                masked_features=masked_features_norm,
-                mask=mask,
-                n_patients=n_patients,
-                seed=seed,
-            )
+            if mock_data:
+                # Mock data: use _MockDataset (chain graph is fine for smoke tests)
+                train_dataset: Dataset = _MockDataset(
+                    n_patients=n_patients, n_features=n_features, seed=seed
+                )
+                train_dataset.features = masked_features_norm  # type: ignore[attr-defined]
+                train_dataset.mask = mask                       # type: ignore[attr-defined]
+                eval_dataset: Dataset = _MockDataset(
+                    n_patients=n_patients, n_features=n_features, seed=seed
+                )
+                eval_dataset.features = masked_features_norm   # type: ignore[attr-defined]
+                eval_dataset.mask = mask                        # type: ignore[attr-defined]
+
+            else:
+                # Real data: build stage-aware k-NN graph + extract real sbr_0
+                # sbr_0 extracted from UN-NORMALIZED features (physics ODE needs real SBR units)
+                sbr_0_list, n_fallback = _extract_sbr_0_per_patient(
+                    features_np, mask_np, feature_names
+                )
+                sbr_0_vals = np.array(sbr_0_list)
+                sbr_0_stats = {
+                    "mean": float(np.mean(sbr_0_vals)),
+                    "std": float(np.std(sbr_0_vals)),
+                    "min": float(np.min(sbr_0_vals)),
+                    "max": float(np.max(sbr_0_vals)),
+                    "n_total": len(sbr_0_list),
+                    "n_fallback": n_fallback,
+                }
+
+                # Build stage-aware k-NN graph (Paper 2 method)
+                # Use original mask (not MCAR mask) for graph construction —
+                # same convention as Paper 2 which builds graph before artificial masking.
+                edge_index, edge_weight, overlap_frac, builder_name = _build_real_graph(
+                    features_np, mask_np, stages_np
+                )
+                n_nodes = features_np.shape[0]
+                n_edges = edge_index.shape[1]
+                avg_degree = float(n_edges / max(n_nodes, 1))
+                graph_stats = {
+                    "n_nodes": n_nodes,
+                    "n_edges": n_edges,
+                    "avg_degree": avg_degree,
+                    "builder": builder_name,
+                }
+
+                # Identify DaT-SBR feature indices for physics regularizer
+                sbr_col_names = ["CAUDATE_L_SBR", "CAUDATE_R_SBR", "PUTAMEN_L_SBR", "PUTAMEN_R_SBR"]
+                ode_feature_indices = [
+                    feature_names.index(name)
+                    for name in sbr_col_names
+                    if name in feature_names
+                ][:2]  # use first 2 (CAUDATE_L, CAUDATE_R) to match ode_feature_indices length
+
+                real_stages = torch.tensor(stages_np, dtype=torch.long)
+
+                real_dataset = _RealDataDataset(
+                    features=masked_features_norm,
+                    mask=mask,
+                    stages=real_stages,
+                    sbr_0_per_patient=sbr_0_list,
+                    edge_index=edge_index,
+                    edge_weight=edge_weight,
+                    overlap_frac=overlap_frac,
+                    patnos=patnos_list,
+                    ode_feature_indices=ode_feature_indices if ode_feature_indices else [0, 1],
+                )
+                train_dataset = real_dataset
+                eval_dataset = real_dataset
 
             loader = DataLoader(train_dataset, batch_size=1, collate_fn=_collate_passthrough)
 
@@ -405,14 +614,7 @@ def run_single_seed(
 
             # 5. Compute RMSE on masked entries (normalized scale)
             model.eval()
-            full_dataset = _build_dataset_with_masked_features(
-                true_features=true_features_norm if scaler is not None else true_features,
-                masked_features=masked_features_norm,
-                mask=mask,
-                n_patients=n_patients,
-                seed=seed,
-            )
-            full_loader = DataLoader(full_dataset, batch_size=1, collate_fn=_collate_passthrough)
+            full_loader = DataLoader(eval_dataset, batch_size=1, collate_fn=_collate_passthrough)
 
             _infer_device = torch.device(resolved_device)
             with torch.no_grad():
@@ -442,7 +644,8 @@ def run_single_seed(
         final_rmse = float("nan")
         actual_epochs = 0
         # Write error info
-        (run_dir / "error.txt").write_text(str(exc))
+        import traceback as _tb
+        (run_dir / "error.txt").write_text(f"{exc}\n\n{_tb.format_exc()}")
 
     result = SmokeRunResult(
         method=method,
@@ -459,6 +662,20 @@ def run_single_seed(
 
     # Write per-seed JSON
     (run_dir / "results.json").write_text(json.dumps(asdict(result), indent=2))
+
+    # Merge graph_stats + sbr_0_stats into provenance.json if they were computed
+    if graph_stats is not None or sbr_0_stats is not None:
+        prov_path = run_dir / "provenance.json"
+        if prov_path.exists():
+            existing = json.loads(prov_path.read_text())
+        else:
+            existing = {}
+        if graph_stats is not None:
+            existing["graph_stats"] = graph_stats
+        if sbr_0_stats is not None:
+            existing["sbr_0_stats"] = sbr_0_stats
+        prov_path.write_text(json.dumps(existing, indent=2))
+
     return result
 
 

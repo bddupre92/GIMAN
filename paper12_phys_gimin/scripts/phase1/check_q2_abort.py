@@ -20,8 +20,29 @@ def main():
     verdict = evaluate_from_smoke_summary(summary_path)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(asdict(verdict), indent=2))
-    print(json.dumps(asdict(verdict), indent=2))
+    verdict_dict = asdict(verdict)
+    args.output.write_text(json.dumps(verdict_dict, indent=2))
+
+    # Print aggregate verdict
+    print("\n=== Q2 Gate — Aggregate ===")
+    aggregate_keys = {k: v for k, v in verdict_dict.items() if k != "per_fraction"}
+    print(json.dumps(aggregate_keys, indent=2))
+
+    # Print per-fraction verdicts if present
+    if verdict_dict.get("per_fraction"):
+        print("\n=== Q2 Gate — Per-Fraction ===")
+        for frac_key, frac_data in verdict_dict["per_fraction"].items():
+            decision = frac_data["decision"]
+            phys_rmse = frac_data.get("phys_rmse_median", float("nan"))
+            mean_rmse = frac_data.get("mean_rmse_median", float("nan"))
+            cv = frac_data.get("cv_phys", float("nan"))
+            print(
+                f"  frac={frac_key}: {decision:30s} "
+                f"phys_rmse={phys_rmse:.4f}  mean_rmse={mean_rmse:.4f}  cv={cv:.3f}"
+            )
+
+    print(f"\nOverall decision: {verdict.decision}")
+    print(f"Verdict written to: {args.output}")
 
 
 if __name__ == "__main__":
