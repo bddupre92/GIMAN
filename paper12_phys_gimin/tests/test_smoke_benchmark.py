@@ -109,6 +109,30 @@ class TestSmokeBenchmark:
         assert set(stages_np.tolist()).issubset({0, 1, 2, 3, 4})
 
 
+    def test_real_data_uses_full_cohort_when_n_patients_is_none(self, tmp_path):
+        """When mock_data=False and n_patients=None, the smoke uses all 2,197 patients."""
+        parquet = Path("/Users/blair.dupre/Projects/CSCI-FALL-2025/GIMImpN_imputation/outputs/ppmi_full_cohort.parquet")
+        if not parquet.exists():
+            pytest.skip("Paper 2 parquet not present")
+
+        from phys_gimin.smoke_benchmark import run_single_seed
+        result = run_single_seed(
+            method="mean",           # Mean baseline — no training, just scaler + fill
+            seed=1001,
+            mask_fraction=0.1,
+            n_epochs=1,
+            n_patients=None,         # the new default
+            n_features=33,
+            output_dir=tmp_path,
+            mock_data=False,
+        )
+        # Assert SmokeRunResult.n_patients reflects the full cohort, not 50
+        assert result.n_patients > 1000, (
+            f"Expected full cohort (~2197), got {result.n_patients}. "
+            "Confirms n_patients=None triggers full-cohort path."
+        )
+
+
 class TestRealDataFidelity:
     """Pin the three fidelity properties against future regression.
 

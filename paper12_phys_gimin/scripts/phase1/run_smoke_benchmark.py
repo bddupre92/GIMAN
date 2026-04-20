@@ -24,12 +24,18 @@ def main():
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--mask-fractions", type=float, nargs="+",
                         default=[0.10, 0.25, 0.50, 0.75])
-    parser.add_argument("--n-seeds", type=int, default=3)
+    parser.add_argument("--n-seeds", type=int, default=5)
     parser.add_argument("--base-seed", type=int, default=1001)
     parser.add_argument("--n-epochs", type=int, default=100)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--mock-data", dest="mock_data", action="store_true", default=True)
     parser.add_argument("--no-mock-data", dest="mock_data", action="store_false")
+    parser.add_argument(
+        "--n-patients",
+        type=int,
+        default=None,
+        help="Subsample size (default: full cohort on real data, 50 on mock).",
+    )
     parser.add_argument(
         "--device",
         choices=["auto", "cpu", "mps", "cuda"],
@@ -45,13 +51,13 @@ def main():
         phys_results = run_multi_seed(
             method="phys_gimin_lit", seeds=seeds, mask_fraction=frac,
             n_epochs=args.n_epochs, output_dir=args.output_dir / f"frac_{frac}",
-            mock_data=args.mock_data, device=args.device,
+            mock_data=args.mock_data, device=args.device, n_patients=args.n_patients,
         )
         # Mean baseline (single seed — deterministic)
         mean_results = run_multi_seed(
             method="mean", seeds=[args.base_seed], mask_fraction=frac,
             n_epochs=1, output_dir=args.output_dir / f"frac_{frac}",
-            mock_data=args.mock_data, device=args.device,
+            mock_data=args.mock_data, device=args.device, n_patients=args.n_patients,
         )
         all_results.extend(phys_results)
         all_results.extend(mean_results)

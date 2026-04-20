@@ -438,7 +438,7 @@ def run_single_seed(
     seed: int,
     mask_fraction: float,
     n_epochs: int,
-    n_patients: int,
+    n_patients: int | None,
     n_features: int,
     output_dir: Path,
     mock_data: bool = True,
@@ -455,18 +455,24 @@ def run_single_seed(
     graph_stats: dict | None = None
     sbr_0_stats: dict | None = None
 
+    # Resolve the actual number of patients for result reporting
+    _actual_n_patients: int = n_patients if n_patients is not None else 50  # updated below for real data
+
     try:
         # 1. Build data
         if mock_data:
-            dataset = _MockDataset(n_patients=n_patients, n_features=n_features, seed=seed)
+            _mock_n = n_patients if n_patients is not None else 50
+            dataset = _MockDataset(n_patients=_mock_n, n_features=n_features, seed=seed)
             true_features = dataset.features  # shape (n_patients, n_features)
             original_mask = torch.ones_like(true_features)  # mock data is fully observed
+            _actual_n_patients = _mock_n
         else:
             # Real-data path (Paper 2 canonical loader reused verbatim)
             features_np, mask_np, stages_np, feature_names, patnos_list = _load_real_ppmi_data()
             n_patients_real = features_np.shape[0]
 
             # Optional subsampling for test runs (keeps first n_patients if caller requested fewer)
+            # When n_patients is None, use the full cohort.
             if n_patients is not None and n_patients < n_patients_real:
                 rng = np.random.default_rng(seed)
                 idx = rng.choice(n_patients_real, size=n_patients, replace=False)
@@ -477,6 +483,7 @@ def run_single_seed(
 
             true_features = torch.from_numpy(features_np).float()
             original_mask = torch.from_numpy(mask_np).float()
+            _actual_n_patients = features_np.shape[0]  # actual count after optional subsampling
 
         # 2. Apply MCAR mask
         masked_features, mask = _apply_mcar_mask(true_features, mask_fraction, seed=seed + 10000)
@@ -655,7 +662,7 @@ def run_single_seed(
         wall_time_s=wall_time_s,
         run_dir=str(run_dir),
         n_epochs=actual_epochs,
-        n_patients=n_patients,
+        n_patients=_actual_n_patients,
         n_features=n_features,
         status=status,
     )
@@ -684,7 +691,7 @@ def run_multi_seed(
     seeds: list[int],
     mask_fraction: float,
     n_epochs: int,
-    n_patients: int = 50,
+    n_patients: int | None = None,
     n_features: int = 33,
     output_dir: Path = Path("outputs/paper12_phys_gimin/runs/smoke_test"),
     mock_data: bool = True,
