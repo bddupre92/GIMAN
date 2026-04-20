@@ -38,7 +38,7 @@ The coverage baselines cited above (raw 0.664; temperature-scaled 0.858; conform
 > 2. The β-NLL + stop-gradient-on-σ-inside-L_physics recipe that prevents physics-induced σ collapse — applicable to any heteroscedastic predictive model with an auxiliary physics loss.
 > 3. The pre-registered tautology-audit protocol — applicable whenever a method both generates and consumes mechanistic posteriors.
 >
-> These three are the "methods paper" core. The PD-specific α-synuclein + neuron-death ODE + PPMI evaluation is the "application" vehicle. Note that de Rooij's physiology-informed regularisation pattern is orthogonal to these three and is imported — phys-GIMIN's lit variant vendors `github.com/Computational-Biology-TUe/ude-regularization` directly (CC-BY).
+> These three are the "methods paper" core. The PD-specific α-synuclein + neuron-death ODE + PPMI evaluation is the "application" vehicle. Note that de Rooij's physiology-informed regularisation pattern is orthogonal to these three and is imported — phys-GIMIN's lit variant vendors `github.com/Computational-Biology-TUe/ude-regularization` directly (MIT).
 
 ### 0.3 Paper 11 (L1 integration) dependency
 
@@ -57,7 +57,7 @@ The coverage baselines cited above (raw 0.664; temperature-scaled 0.858; conform
 
 > **Top-3 physics-regularised competitors (REVISED):**
 >
-> 1. **de Rooij et al. 2025 PLOS Comp Biol** — physiology-informed UDE regularisation for biology (glucose minimal model). THE closest methodological prior. Open-source CC-BY code: vendor directly.
+> 1. **de Rooij et al. 2025 PLOS Comp Biol** — physiology-informed UDE regularisation for biology (glucose minimal model). THE closest methodological prior. Open-source MIT code: vendor directly.
 > 2. **Wang et al. 2025 CNODE PPMI** (arXiv 2511.04789) — conditional neural ODE for PD progression on PPMI MRI. Data-driven, no mechanistic prior, forecasting not imputation.
 > 3. **Xiao et al. 2025 TD-HNODE** — hypergraph + neural ODE on T2D progression. Pending independent verification.
 >

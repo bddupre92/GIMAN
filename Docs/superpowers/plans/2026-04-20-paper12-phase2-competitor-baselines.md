@@ -4,7 +4,7 @@
 
 **Goal:** Vendor de Rooij 2025 + clean-room re-implement 4 competitor methods, each passing a per-competitor 10% fidelity gate (reproduce published metrics within 10% on their original dataset) before being admitted to the Paper 12 §V benchmark suite.
 
-**Architecture:** All competitor code lives in `paper12_phys_gimin/baselines/<competitor>/` as a standalone package. de Rooij is git-subtree-added (CC-BY); the other four are clean-room from paper text. Each exposes a thin adapter in `paper12_phys_gimin/src/phys_gimin/baseline_adapters/<competitor>_adapter.py` that wraps the competitor for use in the Paper 12 benchmark pipeline.
+**Architecture:** All competitor code lives in `paper12_phys_gimin/baselines/<competitor>/` as a standalone package. de Rooij is git-subtree-added (MIT); the other four are clean-room from paper text. Each exposes a thin adapter in `paper12_phys_gimin/src/phys_gimin/baseline_adapters/<competitor>_adapter.py` that wraps the competitor for use in the Paper 12 benchmark pipeline.
 
 **Tech Stack:** Same as Phase 1 — Python 3.10, PyTorch 2.8.0, torchdiffeq, torch-geometric. No new deps.
 
@@ -108,7 +108,7 @@ paper12_phys_gimin/
 
 ---
 
-## W5 — de Rooij 2025 vendor (CC-BY, direct vendor, no clean-room)
+## W5 — de Rooij 2025 vendor (MIT, direct vendor, no clean-room)
 
 ### W5 Task 1 — git-subtree add the de Rooij repo
 
@@ -165,7 +165,7 @@ as a thin wrapper — the vendored tree stays pristine for future syncs via
 git add paper12_phys_gimin/baselines/derooij_2025/ \
         paper12_phys_gimin/src/phys_gimin/baseline_adapters/derooij_adapter.py \
         paper12_phys_gimin/tests/test_baseline_adapters/test_derooij_adapter.py
-git commit -m "feat(paper12-w5): vendor de Rooij 2025 (CC-BY) + PPMI adapter + fidelity gate"
+git commit -m "feat(paper12-w5): vendor de Rooij 2025 (MIT) + PPMI adapter + fidelity gate"
 ```
 
 ---

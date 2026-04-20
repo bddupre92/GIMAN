@@ -18,7 +18,7 @@ Reviewers routinely reject unfair comparisons against re-implemented baselines (
 
 **One competitor is vendorable directly (no clean-room needed):**
 
-- **de Rooij et al. 2025 PLOS Comp Biol** — companion repo `github.com/Computational-Biology-TUe/ude-regularization` is **CC-BY licensed**. **VENDOR DIRECTLY** into `paper12_phys_gimin/baselines/derooij2025/`. No fidelity gate, no clean-room. de Rooij 2025 is the #1 methodological prior for phys-GIMIN's lit variant per `novelty_verdict.md` (2026-04-19 correction).
+- **de Rooij et al. 2025 PLOS Comp Biol** — companion repo `github.com/Computational-Biology-TUe/ude-regularization` is **MIT licensed**. **VENDOR DIRECTLY** into `paper12_phys_gimin/baselines/derooij2025/`. No fidelity gate, no clean-room. de Rooij 2025 is the #1 methodological prior for phys-GIMIN's lit variant per `novelty_verdict.md` (2026-04-19 correction).
 
 **Important scope clarification.** LagCNN (Li et al. 2024 CIKM) is a **generic DL imputation baseline**, NOT a physics-regularised competitor. It was originally mis-labelled as "Liang 2024 HSPGNN" by a lit-review agent hallucination. LagCNN belongs in the DL-imputer zoo alongside SAITS / GAIN / MIWAE, not in the physics-regularised competitor list. Its fidelity gate (below) is still required if we admit it as a baseline.
 
@@ -35,7 +35,7 @@ Reviewers routinely reject unfair comparisons against re-implemented baselines (
 
 | # | Citation | Retrieval path | Action |
 |---|---|---|---|
-| 5 | **de Rooij et al. 2025** — PLOS Comp Biol (DOI 10.1371/journal.pcbi.1012198) | Open access PDF + `github.com/Computational-Biology-TUe/ude-regularization` (CC-BY) | **VENDOR DIRECTLY** — no clean-room, no fidelity gate, no email |
+| 5 | **de Rooij et al. 2025** — PLOS Comp Biol (DOI 10.1371/journal.pcbi.1012198) | Open access PDF + `github.com/Computational-Biology-TUe/ude-regularization` (MIT) | **VENDOR DIRECTLY** — no clean-room, no fidelity gate, no email |
 
 ## §3 — Verification protocol per competitor
 
@@ -75,7 +75,7 @@ Every row above has its dataset and headline metric confirmed from the published
 - **Wang 2025 CNODE** — arXiv 2511.04789 §II.B-II.D complete. Clean-room implementable. **No email needed.**
 - **Demirkaya 2021 EMBC** — Algorithm fully specified in Eq. 4-11. Clean-room implementable. **No email needed to neu-spiral/Hybrid-ODE-NN.**
 - **Zou 2025 MNODE-HGS** — arXiv 2505.18996v3 includes full algorithm. Clean-room implementable. **No email needed to bobjz/H2NCM.**
-- **de Rooij 2025** — **VENDOR DIRECTLY** from `github.com/Computational-Biology-TUe/ude-regularization` (CC-BY). No clean-room, no email, no fidelity gate.
+- **de Rooij 2025** — **VENDOR DIRECTLY** from `github.com/Computational-Biology-TUe/ude-regularization` (MIT). No clean-room, no email, no fidelity gate.
 
 ## §5 — License-request emails (NOT NEEDED)
 
@@ -107,7 +107,7 @@ Total elapsed: **3 weeks before the main Paper 12 §V grid can launch**. This al
 | Fidelity gate passed on the original dataset but integration with phys-GIMIN's 33-feature schema fails | MEDIUM | Track schema integration as a separate admission checklist item (§8) — do not conflate with fidelity |
 | de Rooij vendor code version drifts from published experiments | LOW | Pin `Computational-Biology-TUe/ude-regularization` to a specific git SHA in `baselines/derooij2025/README.md`; record sha256 in run `config.json`. |
 
-All four competitors are clean-room implementable from paper text alone. The de Rooij 2025 competitor is vendorable under CC-BY — no licensing friction in either case. The earlier "license-request lag" risk (R10 in `risk_register.md`) is downgraded from MEDIUM to LOW: emails are no longer a Week-1 blocker since no clean-room reproduction depends on them.
+All four competitors are clean-room implementable from paper text alone. The de Rooij 2025 competitor is vendorable under MIT — no licensing friction in either case. The earlier "license-request lag" risk (R10 in `risk_register.md`) is downgraded from MEDIUM to LOW: emails are no longer a Week-1 blocker since no clean-room reproduction depends on them.
 
 ## §8 — Admission checklist
 

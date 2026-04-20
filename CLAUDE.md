@@ -1280,7 +1280,7 @@ All CSV/Parquet data loaded into local PostgreSQL for reproducibility. **290 MB,
 ### Next: Phase 2 — Competitor baselines (W5–W8)
 
 Per sub-plan `Docs/superpowers/plans/2026-04-20-paper12-phase2-competitor-baselines.md`:
-- W5: vendor de Rooij 2025 (CC-BY from github.com/Computational-Biology-TUe/ude-regularization).
+- W5: vendor de Rooij 2025 (MIT from github.com/Computational-Biology-TUe/ude-regularization).
 - W6: Wang 2025 CNODE clean-room (arXiv 2511.04789).
 - W7: Demirkaya 2021 CKF + Zou 2025 MNODE-HGS parallel.
 - W8: LagCNN clean-room as DL imputation baseline (NOT physics-regularized competitor).

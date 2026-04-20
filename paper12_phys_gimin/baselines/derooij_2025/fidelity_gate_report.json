@@ -29,5 +29,20 @@
   "gate_rationale": "The pre-saved JLD2 files in minimal-model/saved_runs/ are the exact files used by the authors to generate the published figures (post/generate_figures.jl loads them directly). Confirming these 36 files are intact, readable, and internally consistent with the published loss function constitutes a strong fidelity check — stronger than an independent re-run on different hardware with a different Julia version, which would introduce numerical differences due to RNG and floating-point non-determinism.",
   "blocker_for_full_rerun": "Julia 1.12.5 available (host) but Project.toml specifies julia = '1.10.0, 1.10.4'. Full parallel run (8 cores, 100 starts, 36 lambda combos) estimated 2-8 hours. Deferred to high-compute session if needed.",
   "date_evaluated": "2026-04-20",
-  "notes": "License confirmed MIT (not CC-BY as originally noted in scoping doc — both are permissive and permit use with attribution). All 36 saved-run files present. Glucose data: 7 timepoints at 0/15/30/60/90/120/240 min from Berry et al. 2020 Nat Med."
+  "notes": "License confirmed MIT (not CC-BY as originally noted in scoping doc — both are permissive and permit use with attribution). All 36 saved-run files present. Glucose data: 7 timepoints at 0/15/30/60/90/120/240 min from Berry et al. 2020 Nat Med.",
+  "julia_equivalence": {
+    "method": "juliacall 0.9.31 bridge — Python regularizer helpers vs Julia derooij_bridge.jl functions; 10 pytest tests (unit + random-sweep)",
+    "julia_version_used": "1.12.6 (juliaup default; Julia 1.10.11 also installed)",
+    "trapz_version": "2.0.3",
+    "bridge_env": "src/phys_gimin/baseline_adapters/julia_bridge_env/ (Trapz-only, compat 1.10-1.12)",
+    "bridge_file": "src/phys_gimin/baseline_adapters/derooij_bridge.jl",
+    "nonneg_max_abs_diff": "< 1e-10 (float64 comparison; < 1e-6 in float32 downstream use)",
+    "auc_max_abs_diff": "< 1e-10 (float64 comparison; < 1e-6 in float32 downstream use)",
+    "status": "PASS",
+    "test_file": "tests/test_baseline_adapters/test_derooij_julia_equivalence.py",
+    "n_tests": 10,
+    "all_tests_pass": true,
+    "note_on_full_derooij_env": "De Rooij's full DifferentialEquations+Lux environment fails to precompile on Julia 1.10.11 due to OrdinaryDiffEqSymplecticRK API change. Only Trapz is needed for the two regularizer functions. Full env instantiation deferred; see JULIA_SETUP_LOG.md.",
+    "date_evaluated": "2026-04-19"
+  }
 }

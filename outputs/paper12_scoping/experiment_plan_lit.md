@@ -111,11 +111,11 @@ If no cell achieves ≥ 0.88 coverage at γ=0.90, the pilot fails and phys-GIMIN
 - Vanilla GIMIN — Paper 2 `runs/full_benchmark_20260222_160247/` checkpoint, re-evaluated on the Paper 12 grid.
 - StageConditioned GIMIN (StageDecoder) — same run, same re-evaluation.
 
-**Clean-room competitor re-implementations (4) + de Rooij vendor (1).** Standalone under `paper12_phys_gimin/baselines/`; each clean-room port reads only the paper's algorithm box, never any upstream source code. de Rooij is vendored directly under CC-BY.
+**Clean-room competitor re-implementations (4) + de Rooij vendor (1).** Standalone under `paper12_phys_gimin/baselines/`; each clean-room port reads only the paper's algorithm box, never any upstream source code. de Rooij is vendored directly under MIT.
 
 | Baseline | Upstream | License status | Port effort |
 |---|---|---|---|
-| `derooij2025/` | `github.com/Computational-Biology-TUe/ude-regularization` | **CC-BY** → VENDOR DIRECTLY | 0.5 weeks (vendor + adapter to 4-feature twin-observable schema) |
+| `derooij2025/` | `github.com/Computational-Biology-TUe/ude-regularization` | **MIT** → VENDOR DIRECTLY | 0.5 weeks (vendor + adapter to 4-feature twin-observable schema) |
 | `li2024_lagcnn/` | no public repo located | n/a | 1 week (clean-room from CIKM paper Eq. 2-13). CNN + Time Lag + FFT — generic DL imputation baseline alongside SAITS/GAIN/MIWAE, NOT a physics-regularised competitor |
 | `wang2025_cnode_ppmi/` | arXiv 2511.04789, no public repo located | n/a | 2 weeks (clean-room from §II.B-II.D; direct PD contrast; same PPMI cohort) |
 | `demirkaya2021/` | `neu-spiral/Hybrid-ODE-NN` | **NO LICENSE** → clean-room | 1.5 weeks from paper Eq. 4-11. No email needed (algorithm fully specified). |
@@ -285,7 +285,7 @@ Paper 12 total (lit + self) updated correspondingly in `experiment_plan_self.md`
 
 | Weeks | Deliverable |
 |---|---|
-| 1–2 | Clean-room re-implementation of 4 competitor baselines (LagCNN, CNODE PPMI, Demirkaya 2021, Zou 2025) + vendor `Computational-Biology-TUe/ude-regularization` (de Rooij 2025, CC-BY) and adapt to twin-observable schema. No license-request emails required. |
+| 1–2 | Clean-room re-implementation of 4 competitor baselines (LagCNN, CNODE PPMI, Demirkaya 2021, Zou 2025) + vendor `Computational-Biology-TUe/ude-regularization` (de Rooij 2025, MIT) and adapt to twin-observable schema. No license-request emails required. |
 | 3–4 | Abort-gate execution on 12-feature clinical schema. Go/no-go decision. |
 | 5–6 | Main grid: MCAR + MAR × 4 fractions × 3 seeds × full-PPMI arm. |
 | 7–8 | PD-only ablation arm + BioFIND transfer test + PDBP scale-up test. |

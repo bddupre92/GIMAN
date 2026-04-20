@@ -1,5 +1,20 @@
 """Thin wrapper adapter for de Rooij et al. 2025 UDE physiology-informed regularization.
 
+Module-level helpers for numerical equivalence testing
+-------------------------------------------------------
+``_python_nonneg_loss`` and ``_python_auc_loss`` are direct Python translations of
+the regularizer expressions from de Rooij's ``ude.jl``::
+
+    nonnegatives    = sum(abs2, min.(0, ra)) * λ_nonneg
+    auc_regularizer = abs(trapz(0:480, ra) - 1.) * λ_AUC
+
+Both functions return UNSCALED penalties (λ = 1). They accept 1-D torch tensors and
+return Python floats, mirroring the Julia bridge functions ``derooij_nonneg_loss`` /
+``derooij_auc_loss`` in ``derooij_bridge.jl``.
+
+These helpers are exposed at module level so that the julia-equivalence test can
+import them without instantiating a full ``DeRooijImputer``.
+
 Reference
 ---------
 de Rooij M, Erdős B, van Riel N, O'Donovan S. 2025.
@@ -103,6 +118,65 @@ PPMI_NONNEG_FEATURES: dict[int, float] = {
 # AUC constraint: features interpretable as "rate over session" (UPDRS-III subscales)
 # AUC regularizer pushes ∑ predicted_f ≈ 1 (normalised), analogous to meal appearance.
 # Not directly applicable to tabular imputation — disabled by default (λ_AUC=0).
+
+
+# ---------------------------------------------------------------------------
+# Module-level regularizer helpers (for numerical equivalence testing)
+#
+# These are direct Python translations of the regularizer expressions in
+# de Rooij's ude.jl (get_ude_loss function body):
+#
+#   nonnegatives    = sum(abs2, min.(0, ra)) * λ_nonneg
+#   auc_regularizer = abs(trapz(0:480, ra) - 1.) * λ_AUC
+#
+# Both functions accept a 1-D torch.Tensor and return a Python float.
+# λ is NOT applied here (caller scales). Matches derooij_bridge.jl exactly.
+# ---------------------------------------------------------------------------
+
+def _python_nonneg_loss(ra: "torch.Tensor") -> float:
+    """Non-negativity regularizer: sum of squared negative values.
+
+    Direct Python translation of de Rooij ude.jl:
+        nonnegatives = sum(abs2, min.(0, ra))
+
+    Args:
+        ra: 1-D torch.Tensor of predictions/rates (any shape is flattened).
+            Converted to float64 internally for bit-level parity with Julia.
+
+    Returns:
+        Unscaled penalty as Python float (λ = 1).
+    """
+    import torch as _torch
+    # Use float64 to match Julia's default Float64 arithmetic.
+    ra = ra.double().flatten()
+    neg = _torch.minimum(ra, _torch.zeros_like(ra))
+    return float((neg ** 2).sum())
+
+
+def _python_auc_loss(ra: "torch.Tensor", times: "torch.Tensor") -> float:
+    """AUC regularizer: |trapz(times, ra) - 1|.
+
+    Direct Python translation of de Rooij ude.jl:
+        auc_regularizer = abs(trapz(0:480, ra) - 1.)
+
+    Uses the trapezoidal rule, consistent with Julia's Trapz.jl.
+
+    Args:
+        ra: 1-D torch.Tensor of rates/predictions (same length as times).
+            Converted to float64 internally for bit-level parity with Julia.
+        times: 1-D torch.Tensor of time points (must be sorted ascending).
+
+    Returns:
+        Unscaled penalty as Python float (λ = 1).
+    """
+    import torch as _torch
+    # Use float64 to match Julia's default Float64 arithmetic.
+    ra = ra.double().flatten()
+    times = times.double().flatten()
+    # Trapezoidal integration: sum of 0.5*(ra[i]+ra[i+1]) * (t[i+1]-t[i])
+    dt = times[1:] - times[:-1]
+    trapz_val = float((0.5 * (ra[:-1] + ra[1:]) * dt).sum())
+    return float(abs(trapz_val - 1.0))
 
 
 class _PhysMLPImputer(nn.Module if _TORCH_AVAILABLE else object):
