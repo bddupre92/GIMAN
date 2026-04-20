@@ -311,6 +311,9 @@ def evaluate_records(
     abs_err, t_horizon_yrs, t_baseline_yrs, n_observed_visits.
     """
     out = []
+    eval_failures = 0
+    first_failure_logged = False
+    n_records = len(records)
     for patno, t, s, f in records:
         if len(t) < 3:
             continue
@@ -339,7 +342,12 @@ def evaluate_records(
             model.set_context(f, t[:-1], s[:-1])
             try:
                 pred = odeint(model, s[0:1], t, method="dopri5", atol=1e-4, rtol=1e-3)
-            except Exception:
+            except Exception as exc:
+                eval_failures += 1
+                if not first_failure_logged:
+                    print(f"  [warn] odeint fail (eval, patno {int(patno)}): "
+                          f"{type(exc).__name__}: {exc}")
+                    first_failure_logged = True
                 continue
             pred = pred.squeeze(-1) if pred.ndim > 1 else pred
             s_pred = float(pred[-1].item() if pred[-1].ndim == 0 else pred[-1, 0].item())
@@ -356,6 +364,8 @@ def evaluate_records(
             "t_baseline_yrs": float(t_0),
             "n_observed_visits": int(len(t)),
         })
+    if mode == "deep" and eval_failures > 0:
+        print(f"  [eval-{mode}] odeint_failures={eval_failures}/{n_records}")
     return out
 
 
@@ -428,6 +438,7 @@ def train_with_early_stopping(
         model.train()
         total = 0.0
         n = 0
+        epoch_failures = 0
         for patno, t, s, f in train_records:
             if len(t) < 3:
                 continue
@@ -442,7 +453,11 @@ def train_with_early_stopping(
             model.set_context(f, t_train, s_train)
             try:
                 pred_train = odeint(model, s_train[0:1], t_train, method="dopri5", atol=1e-4, rtol=1e-3)
-            except Exception:
+            except Exception as exc:
+                epoch_failures += 1
+                if epoch == 0 and epoch_failures == 1:
+                    print(f"  [warn] odeint fail (epoch {epoch}, patno {int(patno)}): "
+                          f"{type(exc).__name__}: {exc}")
                 continue
             pred_train = pred_train.squeeze(-1) if pred_train.ndim > 1 else pred_train
 
@@ -455,6 +470,11 @@ def train_with_early_stopping(
                 ])
                 phys_pen = lambda_physics * (resid_samples ** 2).mean()
 
+            # NOTE: The demo at scripts/paper11_demo/hybrid_sciml_neural_ode.py wraps
+            # `derivs` in `torch.no_grad()`, which accidentally disables the gradient
+            # through the monotonicity penalty. We intentionally do NOT wrap here — the
+            # penalty should be a real differentiable constraint. Consequence: results at
+            # lambda_monotone > 0 are not bit-for-bit comparable to the demo.
             mono_pen = torch.tensor(0.0)
             if lambda_monotone > 0:
                 derivs = torch.stack([
@@ -469,6 +489,8 @@ def train_with_early_stopping(
             opt.step()
             total += float(loss.item())
             n += 1
+        if epoch_failures > 0:
+            print(f"  epoch {epoch + 1}/{epochs} odeint_failures={epoch_failures}/{len(train_records)}")
         epoch_train_loss = total / max(n, 1)
         train_losses.append(epoch_train_loss)
 
@@ -541,6 +563,30 @@ def bootstrap_delta_ci(
     lo = float(np.quantile(deltas, alpha / 2))
     hi = float(np.quantile(deltas, 1 - alpha / 2))
     return {"point": point, "ci_lo": lo, "ci_hi": hi}
+
+
+def maybe_bootstrap(
+    errs_a: np.ndarray,
+    errs_b: np.ndarray,
+    *,
+    n_resamples: int,
+    rng: np.random.Generator,
+    alpha: float = 0.05,
+    label: str = "",
+) -> dict:
+    """Wrap bootstrap_delta_ci with a guard against <2 paired samples.
+
+    Aggressive smoke caps (e.g., --train-cap 30 --test-cap 10) or pathological
+    odeint failures can leave fewer than 2 paired patients, in which case
+    percentile CIs are meaningless. Return {nan, None, None} with a warning.
+    """
+    n_paired = min(len(errs_a), len(errs_b))
+    if len(errs_a) < 2 or len(errs_b) < 2:
+        print(f"  [warn] bootstrap skipped{' (' + label + ')' if label else ''}: "
+              f"paired n={n_paired} < 2")
+        return {"point": float("nan"), "ci_lo": None, "ci_hi": None}
+    return bootstrap_delta_ci(errs_a, errs_b, n_resamples=n_resamples,
+                              rng=rng, alpha=alpha)
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -772,11 +818,17 @@ def main() -> None:
                 errs_pm_fair.append(pm_fair_by_patno[patno])
         errs_hybrid_np = np.array(errs_hybrid, dtype=float)
         errs_pm_fair_np = np.array(errs_pm_fair, dtype=float)
-        ci = bootstrap_delta_ci(errs_hybrid_np, errs_pm_fair_np,
-                                n_resamples=args.bootstrap_resamples, rng=rng)
+        ci = maybe_bootstrap(
+            errs_hybrid_np, errs_pm_fair_np,
+            n_resamples=args.bootstrap_resamples, rng=rng,
+            label="hybrid vs pure_mech_fair",
+        )
         deltas["hybrid_minus_puremech_fair"] = ci
-        print(f"  Δ(hybrid − pure_mech_fair): {ci['point']:+.4f}  "
-              f"[{ci['ci_lo']:+.4f}, {ci['ci_hi']:+.4f}]")
+        if ci["ci_lo"] is None:
+            print(f"  Δ(hybrid − pure_mech_fair): point={ci['point']}  [CI skipped]")
+        else:
+            print(f"  Δ(hybrid − pure_mech_fair): {ci['point']:+.4f}  "
+                  f"[{ci['ci_lo']:+.4f}, {ci['ci_hi']:+.4f}]")
 
         if pure_nn_test_errs is not None:
             pure_nn_by_patno = {pure_nn_test_patnos[i]: pure_nn_test_errs[i]
@@ -787,14 +839,18 @@ def main() -> None:
                 if patno in pure_nn_by_patno:
                     errs_hybrid_pn.append(hybrid_test_errs[i])
                     errs_pn.append(pure_nn_by_patno[patno])
-            ci = bootstrap_delta_ci(
+            ci = maybe_bootstrap(
                 np.array(errs_hybrid_pn, dtype=float),
                 np.array(errs_pn, dtype=float),
                 n_resamples=args.bootstrap_resamples, rng=rng,
+                label="hybrid vs pure_nn",
             )
             deltas["hybrid_minus_purenn"] = ci
-            print(f"  Δ(hybrid − pure_nn):       {ci['point']:+.4f}  "
-                  f"[{ci['ci_lo']:+.4f}, {ci['ci_hi']:+.4f}]")
+            if ci["ci_lo"] is None:
+                print(f"  Δ(hybrid − pure_nn):       point={ci['point']}  [CI skipped]")
+            else:
+                print(f"  Δ(hybrid − pure_nn):       {ci['point']:+.4f}  "
+                      f"[{ci['ci_lo']:+.4f}, {ci['ci_hi']:+.4f}]")
 
     # ── Write summary.json ──
     summary = {
@@ -923,7 +979,10 @@ def main() -> None:
     if hybrid_summary is not None:
         print(f"  hybrid                : {hybrid_summary['test_mae']:.4f}")
     for k, v in deltas.items():
-        print(f"  Δ[{k}] = {v['point']:+.4f}  [{v['ci_lo']:+.4f}, {v['ci_hi']:+.4f}]")
+        if v["ci_lo"] is None or v["ci_hi"] is None:
+            print(f"  Δ[{k}] = point={v['point']}  [CI skipped]")
+        else:
+            print(f"  Δ[{k}] = {v['point']:+.4f}  [{v['ci_lo']:+.4f}, {v['ci_hi']:+.4f}]")
 
 
 if __name__ == "__main__":
