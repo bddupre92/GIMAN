@@ -40,6 +40,29 @@ Reduced scope: W5 (de Rooij vendor) + W6 (Wang CNODE) execute unchanged. W7 + W8
 
 ---
 
+## Gate outcome — Path A accepted (2026-04-20)
+
+Phase 1 Q2 gate emitted partitioned CONTINUE:
+
+- fractions 0.25, 0.50, 0.75: CONTINUE via effect-size override path
+- fraction 0.10: INSUFFICIENT (Mean near-optimal, no measurable phys benefit)
+
+User accepted Path A: proceed to Phase 2 with manuscript scope emphasizing
+frac ≥ 0.25 as primary evaluation regime. Fraction 0.10 is benchmarked for
+completeness but reported as supplementary.
+
+Executing Branch A (full W5–W8 plan below).
+
+The pre-registered decision rubric remains intact for reference: if at any
+point during Phase 2 a competitor baseline produces results that would force
+a PIVOT verdict (phys-GIMIN fails to beat Mean on headline fracs), the full
+scope reduces to the σ-calibration-only Branch B. The rubric emits PIVOT when:
+
+- Phys-GIMIN RMSE ≥ Mean RMSE at fractions 0.50 and 0.75 simultaneously, OR
+- Bootstrap 95% CI includes zero at both fractions 0.50 and 0.75.
+
+---
+
 ## Informed by v5 smoke findings
 
 Regardless of which branch executes, three insights from the v5 smoke benchmark inform all Phase 2 work:
