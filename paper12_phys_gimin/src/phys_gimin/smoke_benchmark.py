@@ -33,6 +33,7 @@ from phys_gimin.priors.literature import LiteraturePriorProvider
 from phys_gimin.regularizer import PhysicsRegularizer
 from phys_gimin.trajectory_cache import TrajectoryCache
 from phys_gimin.training import PhysGIMINTrainer
+from phys_gimin.utils.paths import get_project_root, get_device
 
 
 @dataclass
@@ -64,7 +65,7 @@ def _load_real_ppmi_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, list[str
         stages_np:   (2201,) int — NSD-ISS stages (0/1/2/3/4; 5 = unclassified)
         feature_names: list of feature names (up to 33, depending on availability)
     """
-    _project_root = Path("/Users/blair.dupre/Projects/CSCI-FALL-2025")
+    _project_root = get_project_root()
     for _p in [_project_root / "scripts",
                _project_root / "src",
                _project_root / "GIMImpN_imputation"]:
@@ -268,6 +269,7 @@ def run_single_seed(
     n_features: int,
     output_dir: Path,
     mock_data: bool = True,
+    device: str | None = None,
 ) -> SmokeRunResult:
     """Run one seed at one mask fraction. Returns result + writes JSON to output_dir."""
     t0 = time.time()
@@ -324,6 +326,7 @@ def run_single_seed(
             regularizer = PhysicsRegularizer(provider=provider, beta=0.5)
             cache = TrajectoryCache(provider=provider)
             optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+            resolved_device = get_device(override=device)
             trainer = PhysGIMINTrainer(
                 model=model,
                 regularizer=regularizer,
@@ -336,7 +339,7 @@ def run_single_seed(
                 output_dir=run_dir,
                 run_name="phys_gimin_lit",
                 deterministic=True,
-                device="cpu",
+                device=resolved_device,
             )
 
             # Build dataset with masked features (works for both mock and real data)
@@ -367,17 +370,18 @@ def run_single_seed(
             )
             full_loader = DataLoader(full_dataset, batch_size=1, collate_fn=_collate_passthrough)
 
+            _infer_device = torch.device(resolved_device)
             with torch.no_grad():
                 batch = next(iter(full_loader))
                 output = model(
-                    batch["features"],
-                    batch["mask"],
-                    batch["edge_index"],
-                    batch["edge_weight"],
-                    batch["overlap_frac"],
-                    batch["stage_ids"],
+                    batch["features"].to(_infer_device),
+                    batch["mask"].to(_infer_device),
+                    batch["edge_index"].to(_infer_device),
+                    batch["edge_weight"].to(_infer_device),
+                    batch["overlap_frac"].to(_infer_device),
+                    batch["stage_ids"].to(_infer_device),
                 )
-            predicted = output["imputed_mean"]
+            predicted = output["imputed_mean"].cpu()
             final_rmse = _compute_rmse(predicted, true_features, mask)
             actual_epochs = train_result.final_epoch + 1
 
@@ -422,6 +426,7 @@ def run_multi_seed(
     n_features: int = 33,
     output_dir: Path = Path("outputs/paper12_phys_gimin/runs/smoke_test"),
     mock_data: bool = True,
+    device: str | None = None,
 ) -> list[SmokeRunResult]:
     """Run multiple seeds sequentially; return list of results."""
     results = []
@@ -435,6 +440,7 @@ def run_multi_seed(
             n_features=n_features,
             output_dir=output_dir,
             mock_data=mock_data,
+            device=device,
         )
         results.append(result)
     return results

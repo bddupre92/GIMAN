@@ -30,6 +30,12 @@ def main():
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--mock-data", dest="mock_data", action="store_true", default=True)
     parser.add_argument("--no-mock-data", dest="mock_data", action="store_false")
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cpu", "mps", "cuda"],
+        default="auto",
+        help="Training device (auto-detects CUDA -> MPS -> CPU by default).",
+    )
     args = parser.parse_args()
 
     seeds = [args.base_seed + i for i in range(args.n_seeds)]
@@ -39,13 +45,13 @@ def main():
         phys_results = run_multi_seed(
             method="phys_gimin_lit", seeds=seeds, mask_fraction=frac,
             n_epochs=args.n_epochs, output_dir=args.output_dir / f"frac_{frac}",
-            mock_data=args.mock_data,
+            mock_data=args.mock_data, device=args.device,
         )
         # Mean baseline (single seed — deterministic)
         mean_results = run_multi_seed(
             method="mean", seeds=[args.base_seed], mask_fraction=frac,
             n_epochs=1, output_dir=args.output_dir / f"frac_{frac}",
-            mock_data=args.mock_data,
+            mock_data=args.mock_data, device=args.device,
         )
         all_results.extend(phys_results)
         all_results.extend(mean_results)
@@ -56,6 +62,7 @@ def main():
         "seeds": seeds,
         "mask_fractions": args.mask_fractions,
         "n_epochs": args.n_epochs,
+        "device": args.device,
         "total_runs": len(all_results),
         "completed_runs": sum(1 for r in all_results if r.status == "completed"),
         "per_run": [{"method": r.method, "seed": r.seed,
