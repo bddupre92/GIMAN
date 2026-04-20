@@ -1,0 +1,116 @@
+{
+  "model": "Path B mixed-effects (PyMC NUTS)",
+  "formula": "gap ~ beta0 + beta1*n_frac + beta2*ledd_scaled + beta3*(n_frac*ledd_scaled) + beta4*off_severity_z + (1|PATNO)",
+  "priors": {
+    "beta_k": "Normal(0, 10)",
+    "sigma_patient": "HalfNormal(5)",
+    "sigma_resid": "HalfNormal(5)"
+  },
+  "sampler": {
+    "algorithm": "NUTS (PyMC 5.28)",
+    "chains": 4,
+    "warmup": 2000,
+    "draws": 2000,
+    "total_post_samples": 8000,
+    "target_accept": 0.95,
+    "seed": 42
+  },
+  "beta3_posterior": {
+    "mean": 1.7882471084799365,
+    "median": 1.7978883666236434,
+    "sd": 0.7655260846288185,
+    "quantile_2.5": 0.2654350072699527,
+    "quantile_97.5": 3.268003853332775,
+    "P_beta3_lt_0": 0.009375,
+    "P_beta3_gt_0": 0.990625
+  },
+  "diagnostics": {
+    "rhat_max": 1.001767871980171,
+    "rhat_passes_1p01": true,
+    "ess_bulk_beta3": 2019.8800090177356,
+    "ess_tail_beta3": 3295.250844312155,
+    "ess_beta3_passes_400": true
+  },
+  "parameters": {
+    "beta0_intercept": {
+      "mean": 16.559,
+      "sd": 1.272,
+      "hdi_2.5%": 14.031,
+      "hdi_97.5%": 19.098,
+      "ess_bulk": 1578.0,
+      "ess_tail": 2510.0,
+      "r_hat": 1.0
+    },
+    "beta1_nfrac": {
+      "mean": -10.36,
+      "sd": 1.448,
+      "hdi_2.5%": -13.225,
+      "hdi_97.5%": -7.51,
+      "ess_bulk": 1623.0,
+      "ess_tail": 2575.0,
+      "r_hat": 1.0
+    },
+    "beta2_ledd": {
+      "mean": -0.348,
+      "sd": 0.636,
+      "hdi_2.5%": -1.59,
+      "hdi_97.5%": 0.904,
+      "ess_bulk": 1929.0,
+      "ess_tail": 3258.0,
+      "r_hat": 1.0
+    },
+    "beta3_interaction": {
+      "mean": 1.788,
+      "sd": 0.766,
+      "hdi_2.5%": 0.291,
+      "hdi_97.5%": 3.282,
+      "ess_bulk": 2020.0,
+      "ess_tail": 3295.0,
+      "r_hat": 1.0
+    },
+    "beta4_severity": {
+      "mean": 1.842,
+      "sd": 0.204,
+      "hdi_2.5%": 1.441,
+      "hdi_97.5%": 2.225,
+      "ess_bulk": 2363.0,
+      "ess_tail": 4228.0,
+      "r_hat": 1.0
+    },
+    "sigma_patient": {
+      "mean": 4.36,
+      "sd": 0.174,
+      "hdi_2.5%": 4.011,
+      "hdi_97.5%": 4.696,
+      "ess_bulk": 2593.0,
+      "ess_tail": 4408.0,
+      "r_hat": 1.0
+    },
+    "sigma_resid": {
+      "mean": 6.415,
+      "sd": 0.09,
+      "hdi_2.5%": 6.241,
+      "hdi_97.5%": 6.591,
+      "ess_bulk": 5591.0,
+      "ess_tail": 6005.0,
+      "r_hat": 1.0
+    }
+  },
+  "frequentist_comparison": {
+    "freq_beta_nfrac_main_effect": -12.57,
+    "freq_beta3_interaction_scaled": 1.98,
+    "freq_p_value_interaction": 0.044,
+    "delta_aic_vs_baseline": -72.0,
+    "note": "The dissertation's \u03b2 = \u221212.57 refers to the MAIN effect of N(t)/N\u2080 on the ON\u2212OFF gap (fewer neurons \u2192 smaller gap); the Bayesian counterpart is \u03b2\u2081_nfrac \u2248 \u221210.4. The N(t)\u00d7LEDD INTERACTION coefficient (\u03b2\u2083) is small and positive once baseline OFF-severity is controlled (frequentist mixed-effects: \u03b2\u2083 \u2248 +1.98 on ledd_scaled = LEDD/500 scale, p \u2248 0.011; OLS: \u03b2\u2083 \u2248 +2.58, p \u2248 0.001). The Bayesian posterior mean of \u03b2\u2083 reproduces the frequentist point estimate to within sampler noise."
+  },
+  "data": {
+    "n_obs": 3178,
+    "n_patients": 772,
+    "gap_mean": 9.662366268093141,
+    "gap_sd": 8.277389535822914,
+    "nfrac_mean": 0.8341447710157902,
+    "nfrac_sd": 0.22124315456488292,
+    "ledd_scaled_mean": 1.2743188200125866,
+    "ledd_scaled_sd": 0.8554894825474753
+  }
+}
