@@ -1,10 +1,13 @@
 """Q2 abort gate — pre-registered decision logic.
 
 CRITERION (from plan):
-  IF median_rmse(Mean) - median_rmse(phys-GIMIN-lit) > 0.02 * median_rmse(Mean)
-     AND bootstrap 95% CI for the delta lies entirely above 0
+  IF median_rmse(phys-GIMIN-lit) - median_rmse(Mean) > 0.02 * median_rmse(Mean)
+     AND bootstrap 95% CI for phys_deficit lies entirely above 0
   THEN emit PIVOT_TO_SIGMA_ONLY
   ELSE emit CONTINUE_AS_PLANNED
+
+phys_deficit > 0 means phys-GIMIN is WORSE than Mean (higher RMSE = failure mode).
+PIVOT fires when phys-GIMIN fails to beat Mean by a meaningful margin.
 
 Also enforces Robustness Layer 4: if CV of phys-GIMIN-lit RMSE across seeds
 exceeds 0.15, gate refuses to emit a verdict (emits INSUFFICIENT_SEED_STABILITY).
@@ -25,9 +28,9 @@ Decision = Literal["CONTINUE_AS_PLANNED", "PIVOT_TO_SIGMA_ONLY", "INSUFFICIENT_S
 @dataclass
 class Q2Verdict:
     decision: Decision
-    median_gap: float
+    phys_deficit_median: float
     threshold: float
-    delta_median_bootstrap: float
+    phys_deficit_bootstrap_median: float
     ci_lower: float
     ci_upper: float
     cv_phys_gimin: float
@@ -35,22 +38,25 @@ class Q2Verdict:
     source: str
 
 
-def bootstrap_delta_ci(
+def bootstrap_phys_deficit_ci(
     rmse_mean: np.ndarray,
     rmse_phys: np.ndarray,
     n_boot: int = 10_000,
     seed: int = 1001,
 ) -> tuple[float, float, float]:
+    """Bootstrap CI for phys_deficit = median(rmse_phys) - median(rmse_mean).
+
+    phys_deficit > 0 ↔ phys is worse than Mean (higher RMSE).
+    """
     rng = np.random.default_rng(seed)
     n_mean = len(rmse_mean)
     n_phys = len(rmse_phys)
-    deltas = np.empty(n_boot)
+    deficits = np.empty(n_boot)
     for i in range(n_boot):
-        # Resample each group independently (unpaired bootstrap — different seed counts OK)
         idx_m = rng.integers(0, n_mean, n_mean)
         idx_p = rng.integers(0, n_phys, n_phys)
-        deltas[i] = np.median(rmse_mean[idx_m]) - np.median(rmse_phys[idx_p])
-    return float(np.median(deltas)), float(np.percentile(deltas, 2.5)), float(np.percentile(deltas, 97.5))
+        deficits[i] = np.median(rmse_phys[idx_p]) - np.median(rmse_mean[idx_m])
+    return float(np.median(deficits)), float(np.percentile(deficits, 2.5)), float(np.percentile(deficits, 97.5))
 
 
 def evaluate_q2_gate(
@@ -63,6 +69,10 @@ def evaluate_q2_gate(
 
     rmse_mean: Mean baseline RMSE values (length = n_seeds_mean, often 1)
     rmse_phys: phys-GIMIN-lit RMSE values (length = n_seeds_phys, typically 3)
+
+    PIVOT_TO_SIGMA_ONLY fires when phys-GIMIN FAILS to beat Mean on RMSE
+    (phys_deficit > threshold AND CI entirely above 0).
+    CONTINUE_AS_PLANNED fires when phys-GIMIN beats or ties Mean.
     """
     if len(rmse_mean) == 0 or len(rmse_phys) == 0:
         raise ValueError("rmse_mean and rmse_phys must be non-empty")
@@ -74,26 +84,29 @@ def evaluate_q2_gate(
     if len(rmse_phys) >= 2 and cv_phys > cv_stability_threshold:
         return Q2Verdict(
             decision="INSUFFICIENT_SEED_STABILITY",
-            median_gap=0.0, threshold=0.0,
-            delta_median_bootstrap=0.0, ci_lower=0.0, ci_upper=0.0,
+            phys_deficit_median=0.0, threshold=0.0,
+            phys_deficit_bootstrap_median=0.0, ci_lower=0.0, ci_upper=0.0,
             cv_phys_gimin=cv_phys, n_seeds_phys_gimin=len(rmse_phys),
             source="inline",
         )
 
-    median_gap = float(np.median(rmse_mean) - np.median(rmse_phys))
+    # phys_deficit > 0 means phys is WORSE than Mean (higher RMSE = failure mode).
+    # PIVOT when phys cannot beat Mean by a meaningful margin:
+    #   phys_deficit > threshold * median(Mean).
+    phys_deficit = float(np.median(rmse_phys) - np.median(rmse_mean))
     threshold = abort_threshold_fraction * float(np.median(rmse_mean))
-    delta_median, ci_lo, ci_hi = bootstrap_delta_ci(rmse_mean, rmse_phys)
+    delta_median, ci_lo, ci_hi = bootstrap_phys_deficit_ci(rmse_mean, rmse_phys)
 
-    if median_gap > threshold and ci_lo > 0:
+    if phys_deficit > threshold and ci_lo > 0:
         decision = "PIVOT_TO_SIGMA_ONLY"
     else:
         decision = "CONTINUE_AS_PLANNED"
 
     return Q2Verdict(
         decision=decision,
-        median_gap=median_gap,
+        phys_deficit_median=phys_deficit,
         threshold=threshold,
-        delta_median_bootstrap=delta_median,
+        phys_deficit_bootstrap_median=delta_median,
         ci_lower=ci_lo,
         ci_upper=ci_hi,
         cv_phys_gimin=cv_phys,

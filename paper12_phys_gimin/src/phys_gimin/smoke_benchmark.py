@@ -22,7 +22,7 @@ import time
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import torch
@@ -260,6 +260,35 @@ def _run_mean_baseline(
     return filled
 
 
+def _build_normalization_scaler(
+    true_features: torch.Tensor,
+    observed_mask: torch.Tensor,
+    mock_data: bool,
+) -> "Any | None":
+    """Build and fit a ModalityAwareScaler on observed-only entries.
+
+    Uses Paper 2's build_gimin_config + build_scaler_from_config so the
+    normalization strategy exactly matches the Paper 2 benchmark.
+
+    Returns None for mock data (no meaningful scale issue there).
+    RMSE reported on normalized scale when scaler is applied (labelled
+    rmse_zscore in outputs). The directional verdict (phys > Mean or phys < Mean)
+    is unchanged by a scale transform.
+    """
+    if mock_data:
+        return None
+
+    # Import Paper 2 pipeline (sys.path already extended in _load_real_ppmi_data)
+    from run_paper2_experiments import build_gimin_config as _build_gimin_config
+    from gimin.data.scaler import build_scaler_from_config as _build_scaler
+
+    cfg = _build_gimin_config(old_to_new_index=None)  # default 33-feature schema
+    scaler = _build_scaler(cfg)
+    # Fit on all observed entries of the full (un-MCAR-masked) data.
+    scaler.fit(true_features, observed_mask)
+    return scaler
+
+
 def run_single_seed(
     method: str,
     seed: int,
@@ -283,11 +312,11 @@ def run_single_seed(
         if mock_data:
             dataset = _MockDataset(n_patients=n_patients, n_features=n_features, seed=seed)
             true_features = dataset.features  # shape (n_patients, n_features)
+            original_mask = torch.ones_like(true_features)  # mock data is fully observed
         else:
             # Real-data path (Paper 2 canonical loader reused verbatim)
             features_np, mask_np, stages_np, feature_names = _load_real_ppmi_data()
             n_patients_real = features_np.shape[0]
-            n_features_real = features_np.shape[1]
 
             # Optional subsampling for test runs (keeps first n_patients if caller requested fewer)
             if n_patients is not None and n_patients < n_patients_real:
@@ -298,20 +327,35 @@ def run_single_seed(
                 stages_np = stages_np[idx]
 
             true_features = torch.from_numpy(features_np).float()
-            # Compute mask as 1 where data is observed (mask_np == 1), 0 where missing
-            mask_torch = torch.from_numpy(mask_np).float()
+            original_mask = torch.from_numpy(mask_np).float()
 
         # 2. Apply MCAR mask
         masked_features, mask = _apply_mcar_mask(true_features, mask_fraction, seed=seed + 10000)
 
+        # 2b. Normalization (matches Paper 2 §V.D) — fit on full observed entries.
+        # Scaler is shared across method calls within one seed; caller builds it here.
+        # RMSE is computed on z-scored scale (Option A from spec).
+        scaler = _build_normalization_scaler(true_features, original_mask, mock_data)
+
+        if scaler is not None:
+            # Transform both true and masked features to normalized scale.
+            # The observed_mask (original_mask) governs which values the scaler
+            # uses — we transform using the MCAR mask so missing positions stay 0.
+            true_features_norm = scaler.transform(true_features, original_mask)
+            masked_features_norm = scaler.transform(masked_features, mask)
+        else:
+            true_features_norm = true_features
+            masked_features_norm = masked_features
+
         if method == "mean":
-            # 3+4. Mean baseline: fill with column means on observed data, compute RMSE
-            predicted = _run_mean_baseline(masked_features, mask)
-            final_rmse = _compute_rmse(predicted, true_features, mask)
+            # 3+4. Mean baseline: fill with column means on observed data, compute RMSE.
+            # Evaluated on normalized scale for apples-to-apples vs phys_gimin_lit.
+            predicted = _run_mean_baseline(masked_features_norm, mask)
+            final_rmse = _compute_rmse(predicted, true_features_norm, mask)
             actual_epochs = 1
 
         elif method == "phys_gimin_lit":
-            # 3. Build PhysGIMIN + trainer
+            # 3. Build PhysGIMIN + trainer; train on normalized features.
             torch.manual_seed(seed)
             model = PhysGIMIN(
                 modality_dims=[2, 5, 6, 6, 4, 4, 6],
@@ -342,10 +386,10 @@ def run_single_seed(
                 device=resolved_device,
             )
 
-            # Build dataset with masked features (works for both mock and real data)
+            # Build dataset with normalized masked features
             train_dataset = _build_dataset_with_masked_features(
-                true_features=true_features,
-                masked_features=masked_features,
+                true_features=true_features_norm if scaler is not None else true_features,
+                masked_features=masked_features_norm,
                 mask=mask,
                 n_patients=n_patients,
                 seed=seed,
@@ -359,11 +403,11 @@ def run_single_seed(
             if train_result.status == "failed":
                 raise RuntimeError(f"Training failed: {train_result.failure_reason}")
 
-            # 5. Compute RMSE on masked entries
+            # 5. Compute RMSE on masked entries (normalized scale)
             model.eval()
             full_dataset = _build_dataset_with_masked_features(
-                true_features=true_features,
-                masked_features=masked_features,
+                true_features=true_features_norm if scaler is not None else true_features,
+                masked_features=masked_features_norm,
                 mask=mask,
                 n_patients=n_patients,
                 seed=seed,
@@ -382,7 +426,8 @@ def run_single_seed(
                     batch["stage_ids"].to(_infer_device),
                 )
             predicted = output["imputed_mean"].cpu()
-            final_rmse = _compute_rmse(predicted, true_features, mask)
+            # RMSE on normalized scale (Option A — directional verdict unchanged)
+            final_rmse = _compute_rmse(predicted, true_features_norm, mask)
             actual_epochs = train_result.final_epoch + 1
 
         else:
