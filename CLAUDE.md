@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 718 MB · 183 tables across 14 schemas** (verified 2026-04-19).
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 718 MB · 185 tables across 14 schemas** (verified 2026-04-20).
 
 **Schemas:**
 | Schema | Contents |
@@ -31,7 +31,7 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `longitudinal` | 4 tables — `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
-| `mechanistic` | 21 tables from Phase 1-4 (posteriors, LOO, counterfactuals, Phase 4 assembled data) |
+| `mechanistic` | 23 tables from Phase 1-4 + Paper 12 Phase 1 (posteriors, LOO, counterfactuals, Phase 4 assembled data, `paper12_w4_smoke_results`, `paper12_q2_gate_verdict`) |
 
 **Python helper** ([src/giman_pipeline/data/db.py](src/giman_pipeline/data/db.py)):
 ```python
