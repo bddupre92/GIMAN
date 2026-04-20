@@ -36,7 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -128,9 +128,22 @@ def _nan_to_none(v):
 def _parse_timestamp(ts: str | None) -> datetime | None:
     if not ts:
         return None
-    # summary.json uses ISO 8601 w/ +00:00; Python's fromisoformat handles this in 3.11+.
+    # summary.json uses ISO 8601 with '+00:00' suffix. Python 3.11+ fromisoformat
+    # handles this natively; 3.10 rejects the offset suffix and would silently
+    # return None (storing NULL for run_timestamp). The main .venv is 3.12 but
+    # .venv-leaspy is 3.10.14, so keep a compat fallback.
     try:
         return datetime.fromisoformat(ts)
+    except (TypeError, ValueError):
+        pass
+    try:
+        for suffix in ("+00:00", "Z"):
+            if ts.endswith(suffix):
+                return datetime.fromisoformat(ts[: -len(suffix)]).replace(
+                    tzinfo=timezone.utc
+                )
+        # Last resort: strip trailing timezone-ish characters (ISO 8601 shape).
+        return datetime.fromisoformat(ts[:19])
     except (TypeError, ValueError):
         return None
 
@@ -291,62 +304,103 @@ def _truncate_tables(engine, dry_run: bool) -> None:
             conn.execute(text(s))
 
 
-def _delete_config_rows(engine, config_ids: list[str], dry_run: bool) -> None:
+def _preview_delete_config_rows(config_ids: list[str]) -> None:
+    """Dry-run preview of the per-config DELETE."""
     if not config_ids:
         return
-    if dry_run:
-        print(f"[dry-run] Would DELETE rows for {len(config_ids)} config_ids from "
-              "mechanistic.paper11_sciml_summary + paper11_sciml_results:")
-        for cid in config_ids:
-            print(f"  {cid}")
-        return
-    with engine.begin() as conn:
-        conn.execute(
-            text("DELETE FROM mechanistic.paper11_sciml_summary "
-                 "WHERE config_id = ANY(:ids)"),
-            {"ids": config_ids},
-        )
-        conn.execute(
-            text("DELETE FROM mechanistic.paper11_sciml_results "
-                 "WHERE config_id = ANY(:ids)"),
-            {"ids": config_ids},
-        )
+    print(f"[dry-run] Would DELETE rows for {len(config_ids)} config_ids from "
+          "mechanistic.paper11_sciml_summary + paper11_sciml_results (one "
+          "transaction per config, DELETE + INSERT summary + INSERT results "
+          "atomic):")
+    for cid in config_ids:
+        print(f"  {cid}")
 
 
-def _insert_summary(engine, rows: list[dict], dry_run: bool) -> int:
+def _delete_config_rows_on_conn(conn, config_id: str) -> None:
+    """DELETE rows for a single config_id using an open Connection.
+
+    Caller owns the transaction (see ``_upsert_config_atomically``).
+    """
+    conn.execute(
+        text("DELETE FROM mechanistic.paper11_sciml_summary WHERE config_id = :id"),
+        {"id": config_id},
+    )
+    conn.execute(
+        text("DELETE FROM mechanistic.paper11_sciml_results WHERE config_id = :id"),
+        {"id": config_id},
+    )
+
+
+def _preview_insert_summary(rows: list[dict]) -> int:
     if not rows:
         return 0
     df = pd.DataFrame(rows)
-    if dry_run:
-        print(f"[dry-run] Would INSERT {len(df)} rows into "
-              f"mechanistic.paper11_sciml_summary; columns={list(df.columns)}")
-        # Show a compact preview.
-        preview = df[["config_id", "model", "test_mae", "test_rmse",
-                      "delta_vs_puremech_fair_point"]].copy()
-        print(preview.to_string(index=False))
-        return len(df)
-    df.to_sql(
-        "paper11_sciml_summary", engine, schema="mechanistic",
-        if_exists="append", index=False, method="multi", chunksize=500,
-    )
+    print(f"[dry-run] Would INSERT {len(df)} rows into "
+          f"mechanistic.paper11_sciml_summary; columns={list(df.columns)}")
+    # Show a compact preview.
+    preview = df[["config_id", "model", "test_mae", "test_rmse",
+                  "delta_vs_puremech_fair_point"]].copy()
+    print(preview.to_string(index=False))
     return len(df)
 
 
-def _insert_results(engine, df: pd.DataFrame, dry_run: bool) -> int:
+def _preview_insert_results(df: pd.DataFrame) -> int:
     if df.empty:
         return 0
-    if dry_run:
-        print(f"[dry-run] Would INSERT {len(df)} rows into "
-              f"mechanistic.paper11_sciml_results; columns={list(df.columns)}")
-        print("  split × model counts:")
-        counts = df.groupby(["split", "model"]).size().unstack(fill_value=0)
-        print(counts.to_string())
-        return len(df)
-    df.to_sql(
-        "paper11_sciml_results", engine, schema="mechanistic",
-        if_exists="append", index=False, method="multi", chunksize=1000,
-    )
+    print(f"[dry-run] Would INSERT {len(df)} rows into "
+          f"mechanistic.paper11_sciml_results; columns={list(df.columns)}")
+    print("  split × model counts:")
+    counts = df.groupby(["split", "model"]).size().unstack(fill_value=0)
+    print(counts.to_string())
     return len(df)
+
+
+def _upsert_config_atomically(
+    engine,
+    config_id: str,
+    summary_rows: list[dict],
+    results_df: pd.DataFrame,
+    skip_delete: bool,
+) -> tuple[int, int]:
+    """Run DELETE + INSERT summary + INSERT results in ONE transaction.
+
+    If any step raises, the whole transaction rolls back — prevents the
+    silent data-gap bug where a DELETE committed but the INSERT failed.
+
+    ``skip_delete=True`` is used after ``--force-reload`` TRUNCATE; the
+    tables are already empty so the per-config DELETE is unnecessary. The
+    INSERTs still run inside the same transaction for consistency.
+
+    pandas ``DataFrame.to_sql`` accepts a live ``Connection`` via the ``con``
+    kwarg and reuses the caller's transaction (does NOT start its own).
+    """
+    summary_df = pd.DataFrame(summary_rows) if summary_rows else None
+    with engine.begin() as conn:
+        if not skip_delete:
+            _delete_config_rows_on_conn(conn, config_id)
+        if summary_df is not None and not summary_df.empty:
+            summary_df.to_sql(
+                "paper11_sciml_summary",
+                con=conn,
+                schema="mechanistic",
+                if_exists="append",
+                index=False,
+                method="multi",
+                chunksize=500,
+            )
+        if not results_df.empty:
+            results_df.to_sql(
+                "paper11_sciml_results",
+                con=conn,
+                schema="mechanistic",
+                if_exists="append",
+                index=False,
+                method="multi",
+                chunksize=1000,
+            )
+    n_sum = 0 if summary_df is None else len(summary_df)
+    n_res = len(results_df)
+    return n_sum, n_res
 
 
 def _update_claude_md(dry_run: bool) -> None:
@@ -437,16 +491,20 @@ def main():
     if not args.dry_run:
         print("Tables: mechanistic.paper11_sciml_summary + paper11_sciml_results ensured.")
 
-    # Force-reload or per-config delete.
+    # Force-reload path: TRUNCATE once, then the per-config loop can skip DELETE.
+    # Default path: per-config DELETE is part of each atomic transaction.
+    skip_delete_per_config = False
     if args.force_reload:
         print("--force-reload: TRUNCATing paper11_sciml_summary + paper11_sciml_results "
               "(other mechanistic.* tables untouched).")
         _truncate_tables(engine, args.dry_run)
+        skip_delete_per_config = True
     else:
-        config_ids = [cid for cid, _, _ in configs]
-        _delete_config_rows(engine, config_ids, args.dry_run)
+        if args.dry_run:
+            _preview_delete_config_rows([cid for cid, _, _ in configs])
 
-    # Load each config.
+    # Load each config atomically (DELETE + INSERT summary + INSERT results
+    # in ONE engine.begin() per config — prevents silent data gaps on failure).
     total_summary = 0
     total_results = 0
     per_config_counts = []
@@ -461,8 +519,17 @@ def main():
         summary_rows = _build_summary_rows(summary)
         results_df = _build_results_df(per_patient_csv, cid)
 
-        n_sum = _insert_summary(engine, summary_rows, args.dry_run)
-        n_res = _insert_results(engine, results_df, args.dry_run)
+        if args.dry_run:
+            n_sum = _preview_insert_summary(summary_rows)
+            n_res = _preview_insert_results(results_df)
+        else:
+            n_sum, n_res = _upsert_config_atomically(
+                engine,
+                cid,
+                summary_rows,
+                results_df,
+                skip_delete=skip_delete_per_config,
+            )
         total_summary += n_sum
         total_results += n_res
         per_config_counts.append((cid, n_sum, n_res))
