@@ -1,0 +1,80 @@
+% Paper 7 — CPT:PSP submission
+% Per-Patient Bayesian Calibration of a Coupled α-Synuclein Aggregation—Neuron
+% Death ODE in Parkinson's Disease with Multi-Channel Identifiability
+%
+% Target venue : CPT: Pharmacometrics & Systems Pharmacology (ASCPT / Wiley)
+% Article type : Research (regular article)
+% Derived from : outputs/dissertation/chapters/ch09_paper7.tex
+%                + outputs/dissertation/chapters/ch09_section96_multichannel.tex
+%
+% DO NOT edit the dissertation source; edit this copy.
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\doublespacing   % CPT:PSP prefers double-spaced submission
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!50!black,
+    citecolor=blue!50!black,
+    urlcolor=blue!50!black,
+}
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{unsrtnat}
+\usepackage{authblk}
+
+% NSD / figure colour palette
+\definecolor{nsdblue}{HTML}{1F77B4}
+\definecolor{nsdorange}{HTML}{FF7F0E}
+\definecolor{nsdgreen}{HTML}{2CA02C}
+\definecolor{nsdred}{HTML}{D62728}
+
+% CPT:PSP Study Highlights styling
+\newtcolorbox{studyhighlights}{
+    enhanced, breakable,
+    colback=blue!3, colframe=nsdblue, boxrule=0.5pt,
+    arc=3pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title=\textbf{Study Highlights},
+    fonttitle=\bfseries\color{white},
+    coltitle=white,
+    colbacktitle=nsdblue,
+    attach boxed title to top left={yshift=-2mm,xshift=3mm},
+    boxed title style={colback=nsdblue,boxrule=0pt,arc=1pt}
+}
+
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\setcounter{secnumdepth}{0}
+
+\title{\bfseries Per-Patient Bayesian Calibration of a Coupled $\alpha$-Synuclein Aggregation--Neuron Death ODE in Parkinson's Disease: Multi-Channel Identifiability from Longitudinal DaT-SPECT, CSF $\alpha$-Synuclein, and Plasma GFAP in 2{,}118 PPMI Patients}
+
+\author[1]{Blair D.~Dupre, Ph.D.}
+\affil[1]{Department of Biomedical Engineering, University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-2em}
+
+\input{chapter_content.tex}
+
+\input{bibliography_extracted.tex}
+
+\end{document}
