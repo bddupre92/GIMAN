@@ -2,6 +2,10 @@
 
 **Session ended:** 2026-04-20, user paused to download Wang 2025 CNODE PPMI T1 MRI data from LONI IDA (Advanced Image Search).
 
+**2026-04-20 update — MRI DOWNLOADS COMPLETE.** User returned with 861 patient DICOM directories across `PPMI_MRI_1` (204) + `PPMI MRI_2` (657). Cross-referenced with PPMI `participant_status.cohort_definition = 'PD'`: **761 PD patients with ≥1 T1 visit, 327 with ≥2 visits, 206 with ≥3 visits** — 3–4× Wang's N=161 target. W6 data gate is UNBLOCKED.
+
+**Strategy agreed (2026-04-20):** Dual-path execution — (a) subsample to Wang's exact N=161 (111×2-visit + 50×3-visit) for unambiguous fidelity-gate pass/fail, then (b) retrain on full PD pool (N=327 ≥2-visit) for extended Wang reproduction + adapter + phys-GIMIN benchmark.
+
 **Branch:** `feat/paper12-phys-gimin` · **Latest commit:** `427285a` · **Tests:** 94/94 passing · **Worktree:** `~/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin`
 
 ---
@@ -57,11 +61,39 @@ Root cause: most local PD DICOM dirs have DaTScan only, not T1.
 
 ---
 
-## When downloads complete — W6 execution checklist
+## W6 execution checklist (data gate CLEARED 2026-04-20)
 
-### Step 1. Ingest new DICOMs into local tree
+### Data locations (merged inventory, post-download)
 
-Place in `data/00_raw/GIMAN/PPMI_dcm/{PATNO}/...` matching the existing layout. If LONI provides a zip, extract preserving directory structure.
+- **New download batch 1:** `data/00_raw/PPMI_MRI_1/` (204 patients, SAG_3D_T1_FSPGR + MPRAGE)
+- **New download batch 2:** `data/00_raw/PPMI MRI_2/` (657 patients, SAG_3D_MPRAGE + variants, many with 2+ timepoints already)
+- **Existing:** `data/00_raw/GIMAN/PPMI_dcm/` (200 PD patients, mostly DaTScan-only, some T1)
+- **Merged PD+T1 longitudinal cohort:** 761 / 327 (≥2 visits) / 206 (≥3 visits)
+
+### Drive archive plan (retention policy)
+
+**Hard rule: never run FreeSurfer recon-all directly into a Drive-synced path.** Drive File Stream's file-locking + millions-of-small-files pattern that FreeSurfer creates will tank recon-all or silently corrupt intermediate state. Keep FreeSurfer on local disk, migrate finished outputs to Drive after extraction.
+
+**Target Drive folder:** `~/My Drive (dupre.blair92@gmail.com)/PPMIData_FreeSurfer/`
+
+| Stage | Local (working) | Drive (archive) | Action |
+|---|---|---|---|
+| Raw DICOMs | `data/00_raw/PPMI_MRI_{1,2}/` | `PPMIData_FreeSurfer/dicom_archive/{PATNO}.tar.gz` | After FreeSurfer validates, tarball per-patient → Drive → delete local |
+| dcm2niix NIfTI | `data/01_processed/GIMAN/t1_expansion_nifti/PATNO_{PATNO}/` | (optional) `PPMIData_FreeSurfer/nifti_archive/{PATNO}_{VISIT}.tar.gz` | Keep local (small, cheap reproducibility starting point) |
+| FreeSurfer full | `data/02_freesurfer/{PATNO}_{VISIT}/` (~1 GB/scan) | — (too big) | Delete local `/mri`, `/surf`, `/label`, `/scripts` after extraction |
+| FreeSurfer `/stats` + `aparc+aseg.mgz` | `data/02_freesurfer/{PATNO}_{VISIT}/stats/` | `PPMIData_FreeSurfer/freesurfer_stats/{PATNO}_{VISIT}/` | Copy to Drive + keep local |
+| SQL features | `mechanistic.paper12_wang_features` | — | Authoritative; backup via `pg_dump` |
+
+**Peak vs working set:** ~700 GB during recon-all (local scratch) → ~15 GB post-cleanup (local) + ~30 GB compressed (Drive).
+
+**Pre-flight checks required before W6 Step 4 (FreeSurfer):**
+1. Confirm Drive quota ≥ 50 GB free on `dupre.blair92@gmail.com` account (compressed DICOMs + `/stats` alone ≈ 30 GB)
+2. Confirm the Drive folder is auto-syncing (create test file, verify appears in web UI)
+3. Decide: is `dupre.blair92@gmail.com` the right long-term home vs. UND account (for reviewer access at peer review)?
+
+### Step 1. Ingest new DICOMs into canonical layout
+
+Merge `PPMI_MRI_1/` + `PPMI MRI_2/` directories into `data/00_raw/GIMAN/PPMI_dcm/{PATNO}/` (preserve protocol/date subdirs). Use `rsync -av --ignore-existing` to avoid overwriting existing DaTScan directories for the same PATNO.
 
 Verify:
 ```bash
@@ -106,7 +138,9 @@ Heavy compute (~1 hr/scan on A5000 CUDA, longer on MPS). Extract:
 - 68 subcortical volumes (Desikan-Killiany)
 - Vertex-wise medial thickness
 
-**Consider using PC/A5000 for this step** per `DUAL_MACHINE_SETUP.md`. CPU-only MPS will be very slow for FreeSurfer.
+**Must use PC/A5000 for this step** per `DUAL_MACHINE_SETUP.md`. CPU-only MPS is ~10× slower for FreeSurfer.
+
+**CRITICAL: run on local disk, NOT on `~/My Drive/PPMIData_FreeSurfer/`.** Drive File Stream's file-locking + millions-of-small-files pattern that FreeSurfer creates will tank recon-all speed or silently corrupt intermediate state. Output to `data/02_freesurfer/{PATNO}_{VISIT}/` locally; migrate after extraction per Step 9.
 
 ### Step 4. Dispatch W6 subagent (clean-room CNODE)
 
@@ -144,7 +178,40 @@ CREATE TABLE mechanistic.paper12_competitor_fidelity (
 
 This closes the per-competitor fidelity tracking loop for W5–W8.
 
-**Same-commit rule:** bump `mechanistic` schema count in both worktree and main-repo CLAUDE.md from 27 → 28.
+**Same-commit rule:** bump `mechanistic` schema count in both worktree and main-repo CLAUDE.md from 27 → 28 (competitor_fidelity) or 29 (add `paper12_wang_features` table too). SQL registry hook will block the commit if count is stale.
+
+### Step 9. Drive archive + local cleanup (after SQL load + validation)
+
+**Pre-archive validation (non-negotiable):** spot-check 10 random patients — re-extract FreeSurfer `aseg.stats` + `aparc.stats` row values into Python, compare to `mechanistic.paper12_wang_features` rows. Equality to 6 decimal places required before any local deletion.
+
+Per-patient migration loop (sketch):
+
+```bash
+DRIVE_ROOT="$HOME/My Drive (dupre.blair92@gmail.com)/PPMIData_FreeSurfer"
+mkdir -p "$DRIVE_ROOT/dicom_archive" "$DRIVE_ROOT/freesurfer_stats"
+
+for PATNO in $(cat data/02_freesurfer/validated_patnos.txt); do
+  # 1. DICOM tarball → Drive → delete local
+  tar -czf "$DRIVE_ROOT/dicom_archive/${PATNO}.tar.gz" \
+    -C data/00_raw/GIMAN/PPMI_dcm "$PATNO"
+  rm -rf "data/00_raw/GIMAN/PPMI_dcm/$PATNO"
+
+  # 2. FreeSurfer /stats + aparc+aseg.mgz → Drive
+  for VISIT_DIR in data/02_freesurfer/${PATNO}_*; do
+    VISIT=$(basename "$VISIT_DIR")
+    mkdir -p "$DRIVE_ROOT/freesurfer_stats/$VISIT"
+    cp -r "$VISIT_DIR/stats" "$DRIVE_ROOT/freesurfer_stats/$VISIT/"
+    cp "$VISIT_DIR/mri/aparc+aseg.mgz" "$DRIVE_ROOT/freesurfer_stats/$VISIT/"
+    # 3. Delete bulky local FreeSurfer dirs
+    rm -rf "$VISIT_DIR/mri" "$VISIT_DIR/surf" "$VISIT_DIR/label" "$VISIT_DIR/scripts"
+  done
+done
+
+du -sh "$DRIVE_ROOT"        # expect ~30 GB
+du -sh data/02_freesurfer/  # expect <5 GB after cleanup
+```
+
+**Do NOT delete `PPMI_MRI_1/` or `PPMI MRI_2/` raw directories until every PATNO has confirmed Drive-side tarball + SQL row.** Archive is append-only; reviewers may ask for raw DICOM access during peer review. Drive sync is cheaper than re-downloading from LONI IDA later.
 
 ---
 
