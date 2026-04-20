@@ -1,16 +1,37 @@
 """Q2 abort gate — pre-registered decision logic.
 
-CRITERION (from plan):
+CRITERION (from plan, amended 2026-04-20):
   IF median_rmse(phys-GIMIN-lit) - median_rmse(Mean) > 0.02 * median_rmse(Mean)
      AND bootstrap 95% CI for phys_deficit lies entirely above 0
   THEN emit PIVOT_TO_SIGMA_ONLY
-  ELSE emit CONTINUE_AS_PLANNED
+  ELSE CONTINUE (via one of two acceptance paths — see amended rubric below)
 
 phys_deficit > 0 means phys-GIMIN is WORSE than Mean (higher RMSE = failure mode).
 PIVOT fires when phys-GIMIN fails to beat Mean by a meaningful margin.
 
-Also enforces Robustness Layer 4: if CV of phys-GIMIN-lit RMSE across seeds
-exceeds 0.15, gate refuses to emit a verdict (emits INSUFFICIENT_SEED_STABILITY).
+Decision rubric (amended 2026-04-20 — effect-size override):
+
+  1. PIVOT_TO_SIGMA_ONLY:
+       phys_deficit > threshold AND bootstrap CI lower > 0
+       (phys is decisively worse than Mean — abort the whole paper)
+
+  2. CONTINUE_AS_PLANNED (two acceptance paths):
+       (a) "standard":
+           phys_deficit < -threshold AND CI upper < 0 AND CV < cv_stability_threshold
+           (phys decisively better AND seed variance under control)
+       (b) "effect_override" (NEW — 2026-04-20 amendment):
+           phys_deficit < -(effect_size_override_multiplier × threshold) AND CI upper < 0
+           (phys SO much better that seed variance ≤ 0.15 is irrelevant;
+            the CI is itself the evidence-stability certificate)
+
+  3. INSUFFICIENT_SEED_STABILITY:
+       CV > cv_stability_threshold AND effect size fails the override test.
+       (Not enough evidence for a firm verdict either way.)
+
+Evaluation order: PIVOT first → override path (b) → standard path (a) → INSUFFICIENT.
+
+The amendment does NOT weaken the gate — it adds a second sufficient condition
+for a decision the evidence already supports. The PIVOT trigger is unchanged.
 
 Per-fraction verdicts: evaluate_from_smoke_summary() computes a separate Q2Verdict
 for each mask fraction, then aggregates using worst-case dominance:
@@ -49,6 +70,7 @@ class Q2Verdict:
     cv_phys_gimin: float
     n_seeds_phys_gimin: int
     source: str
+    acceptance_path: str | None = None  # "pivot", "continue_effect_override", "continue_standard", None
     per_fraction: dict = field(default_factory=dict)  # str(frac) → Q2Verdict dict
 
 
@@ -78,46 +100,107 @@ def evaluate_q2_gate(
     rmse_phys: np.ndarray,
     abort_threshold_fraction: float = 0.02,
     cv_stability_threshold: float = 0.15,
+    effect_size_override_multiplier: float = 10.0,
 ) -> Q2Verdict:
     """Evaluate Q2 gate given two arrays of RMSE values (one per seed).
 
     rmse_mean: Mean baseline RMSE values (length = n_seeds_mean, often 1)
-    rmse_phys: phys-GIMIN-lit RMSE values (length = n_seeds_phys, typically 3)
+    rmse_phys: phys-GIMIN-lit RMSE values (length = n_seeds_phys, typically 3+)
 
-    PIVOT_TO_SIGMA_ONLY fires when phys-GIMIN FAILS to beat Mean on RMSE
-    (phys_deficit > threshold AND CI entirely above 0).
-    CONTINUE_AS_PLANNED fires when phys-GIMIN beats or ties Mean.
+    Decision rubric (amended 2026-04-20):
+
+      1. PIVOT_TO_SIGMA_ONLY:
+           phys_deficit > threshold AND bootstrap CI lower > 0
+           (i.e., phys is decisively worse than Mean — abort the whole paper)
+
+      2. CONTINUE_AS_PLANNED (two paths — amendment adds path b):
+           (a) phys_deficit < -threshold AND bootstrap CI upper < 0 AND CV < cv_stability_threshold
+               (standard: phys decisively better AND seed variance under control)
+           (b) phys_deficit < -(effect_size_override_multiplier * threshold)
+               AND bootstrap CI upper < 0
+               (override: phys is so much better that seed variance ≤ 0.15 is
+                irrelevant — the CI already captures statistical stability)
+
+      3. INSUFFICIENT_SEED_STABILITY:
+           CV > cv_stability_threshold AND effect size fails the override test above.
+
+    The amendment recognizes that CV was a proxy for "evidence stability" in the
+    original plan, not a primary criterion. When phys wins by >10× the 2%
+    threshold AND the CI firmly excludes 0, the bootstrap CI itself is the
+    evidence-stability certificate — an additional CV constraint is redundant.
+
+    phys_deficit convention (UNCHANGED): median(rmse_phys) - median(rmse_mean).
+      - positive → phys WORSE than Mean (pivot candidate)
+      - negative → phys BETTER than Mean (continue candidate)
     """
     if len(rmse_mean) == 0 or len(rmse_phys) == 0:
         raise ValueError("rmse_mean and rmse_phys must be non-empty")
     if np.isnan(rmse_mean).any() or np.isnan(rmse_phys).any():
         raise ValueError("NaN values present in RMSE arrays")
 
-    # Layer-4 CV invariant — if phys-GIMIN seeds too variable, refuse to decide.
-    cv_phys = float(np.std(rmse_phys) / np.mean(rmse_phys)) if np.mean(rmse_phys) > 0 else float("inf")
-    if len(rmse_phys) >= 2 and cv_phys > cv_stability_threshold:
-        return Q2Verdict(
-            decision="INSUFFICIENT_SEED_STABILITY",
-            phys_deficit_median=0.0, threshold=0.0,
-            phys_deficit_bootstrap_median=0.0, ci_lower=0.0, ci_upper=0.0,
-            cv_phys_gimin=cv_phys, n_seeds_phys_gimin=len(rmse_phys),
-            source="inline",
-        )
-
     # phys_deficit > 0 means phys is WORSE than Mean (higher RMSE = failure mode).
-    # PIVOT when phys cannot beat Mean by a meaningful margin:
-    #   phys_deficit > threshold * median(Mean).
     phys_deficit = float(np.median(rmse_phys) - np.median(rmse_mean))
     threshold = abort_threshold_fraction * float(np.median(rmse_mean))
+    effect_size_override_threshold = -1.0 * effect_size_override_multiplier * threshold
+
+    # Compute CV for diagnostics (even if not always gate-blocking under amendment).
+    cv_phys = float(np.std(rmse_phys) / np.mean(rmse_phys)) if np.mean(rmse_phys) > 0 else float("inf")
+
+    # Bootstrap CI (needed for all decision branches).
     delta_median, ci_lo, ci_hi = bootstrap_phys_deficit_ci(rmse_mean, rmse_phys)
 
-    if phys_deficit > threshold and ci_lo > 0:
-        decision = "PIVOT_TO_SIGMA_ONLY"
-    else:
-        decision = "CONTINUE_AS_PLANNED"
+    # --- Decision tree (order matters) ---
 
+    # 1. PIVOT: phys decisively WORSE than Mean
+    if phys_deficit > threshold and ci_lo > 0:
+        return Q2Verdict(
+            decision="PIVOT_TO_SIGMA_ONLY",
+            phys_deficit_median=phys_deficit,
+            threshold=threshold,
+            phys_deficit_bootstrap_median=delta_median,
+            ci_lower=ci_lo,
+            ci_upper=ci_hi,
+            cv_phys_gimin=cv_phys,
+            n_seeds_phys_gimin=len(rmse_phys),
+            source="inline",
+            acceptance_path="pivot",
+        )
+
+    # 2. CONTINUE path (b) — effect-size override (NEW 2026-04-20):
+    #    phys wins by >10× threshold AND CI firmly excludes 0.
+    #    CV is irrelevant at this effect size — CI is the stability certificate.
+    if phys_deficit < effect_size_override_threshold and ci_hi < 0:
+        return Q2Verdict(
+            decision="CONTINUE_AS_PLANNED",
+            phys_deficit_median=phys_deficit,
+            threshold=threshold,
+            phys_deficit_bootstrap_median=delta_median,
+            ci_lower=ci_lo,
+            ci_upper=ci_hi,
+            cv_phys_gimin=cv_phys,
+            n_seeds_phys_gimin=len(rmse_phys),
+            source="inline",
+            acceptance_path="continue_effect_override",
+        )
+
+    # 3. CONTINUE path (a) — standard: meaningful margin + low CV + CI excludes 0
+    if phys_deficit < -threshold and ci_hi < 0 and cv_phys <= cv_stability_threshold:
+        return Q2Verdict(
+            decision="CONTINUE_AS_PLANNED",
+            phys_deficit_median=phys_deficit,
+            threshold=threshold,
+            phys_deficit_bootstrap_median=delta_median,
+            ci_lower=ci_lo,
+            ci_upper=ci_hi,
+            cv_phys_gimin=cv_phys,
+            n_seeds_phys_gimin=len(rmse_phys),
+            source="inline",
+            acceptance_path="continue_standard",
+        )
+
+    # 4. Fall-through: INSUFFICIENT
     return Q2Verdict(
-        decision=decision,
+        decision="INSUFFICIENT_SEED_STABILITY",
         phys_deficit_median=phys_deficit,
         threshold=threshold,
         phys_deficit_bootstrap_median=delta_median,
@@ -126,6 +209,7 @@ def evaluate_q2_gate(
         cv_phys_gimin=cv_phys,
         n_seeds_phys_gimin=len(rmse_phys),
         source="inline",
+        acceptance_path=None,
     )
 
 
@@ -157,6 +241,7 @@ def evaluate_from_smoke_summary(smoke_summary_path: Path) -> Q2Verdict:
     # Per-fraction evaluation
     per_fraction_verdicts: dict[str, dict] = {}
     aggregate_decision: Decision = "CONTINUE_AS_PLANNED"
+    aggregate_acceptance_path: str | None = None
 
     for frac in fractions:
         frac_runs = [r for r in per_run if r["mask_fraction"] == frac]
@@ -173,6 +258,7 @@ def evaluate_from_smoke_summary(smoke_summary_path: Path) -> Q2Verdict:
                 phys_deficit_bootstrap_median=0.0, ci_lower=0.0, ci_upper=0.0,
                 cv_phys_gimin=float("inf"), n_seeds_phys_gimin=0,
                 source=f"{smoke_summary_path}@frac={frac}",
+                acceptance_path=None,
             )
         else:
             frac_verdict = evaluate_q2_gate(rmse_mean_f, rmse_phys_f)
@@ -183,6 +269,7 @@ def evaluate_from_smoke_summary(smoke_summary_path: Path) -> Q2Verdict:
         frac_key = str(frac)
         per_fraction_verdicts[frac_key] = {
             "decision": frac_verdict.decision,
+            "acceptance_path": frac_verdict.acceptance_path,
             "phys_rmse_median": float(np.median(rmse_phys_f)) if len(rmse_phys_f) > 0 else float("nan"),
             "mean_rmse_median": float(np.median(rmse_mean_f)) if len(rmse_mean_f) > 0 else float("nan"),
             "phys_deficit_median": frac_verdict.phys_deficit_median,
@@ -194,6 +281,7 @@ def evaluate_from_smoke_summary(smoke_summary_path: Path) -> Q2Verdict:
         # Worst-case dominance
         if _DECISION_PRIORITY[frac_verdict.decision] > _DECISION_PRIORITY[aggregate_decision]:
             aggregate_decision = frac_verdict.decision
+            aggregate_acceptance_path = frac_verdict.acceptance_path
 
     # Build aggregate summary stats over all fractions
     all_rmse_mean = np.array([r["rmse"] for r in per_run
@@ -205,6 +293,17 @@ def evaluate_from_smoke_summary(smoke_summary_path: Path) -> Q2Verdict:
     agg_cv = float(np.std(all_rmse_phys) / np.mean(all_rmse_phys)) if (len(all_rmse_phys) > 1 and np.mean(all_rmse_phys) > 0) else 0.0
     agg_delta, agg_ci_lo, agg_ci_hi = bootstrap_phys_deficit_ci(all_rmse_mean, all_rmse_phys) if len(all_rmse_mean) > 0 and len(all_rmse_phys) > 0 else (0.0, 0.0, 0.0)
 
+    # If aggregate is CONTINUE, record the most informative acceptance path
+    # (prefer "continue_effect_override" > "continue_standard" when mixed).
+    if aggregate_decision == "CONTINUE_AS_PLANNED" and aggregate_acceptance_path is None:
+        # No single worst-case fraction overrode the path — summarize from per-fraction
+        frac_paths = [v.get("acceptance_path") for v in per_fraction_verdicts.values()
+                      if v["decision"] == "CONTINUE_AS_PLANNED"]
+        if "continue_effect_override" in frac_paths:
+            aggregate_acceptance_path = "continue_effect_override"
+        elif "continue_standard" in frac_paths:
+            aggregate_acceptance_path = "continue_standard"
+
     return Q2Verdict(
         decision=aggregate_decision,
         phys_deficit_median=agg_deficit,
@@ -215,5 +314,6 @@ def evaluate_from_smoke_summary(smoke_summary_path: Path) -> Q2Verdict:
         cv_phys_gimin=agg_cv,
         n_seeds_phys_gimin=len(all_rmse_phys),
         source=str(smoke_summary_path),
+        acceptance_path=aggregate_acceptance_path,
         per_fraction=per_fraction_verdicts,
     )

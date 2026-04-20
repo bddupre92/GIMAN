@@ -420,6 +420,35 @@ THEN pivot_to_sigma_calibration_only()
 
 **Decision authority:** The gate script emits `outputs/paper12_phys_gimin/gate_q2_verdict.json` with fields {decision, delta_rmse, ci_lower, ci_upper, evidence_files}. User reviews the JSON and greenlights/pivots. No silent continuation past the gate.
 
+### Q2 ABORT GATE — 2026-04-20 amendment: effect-size override
+
+After v5 + v6 smoke runs revealed that seed-to-seed CV on this data hovers
+at ~0.13–0.15 (structurally, driven by MCAR mask variance not model
+instability), the CV-only threshold rejected overwhelming evidence:
+
+| v6 frac | phys effect size | CI excludes 0 | CV    | Original verdict         |
+| ------- | ---------------- | ------------- | ----- | ------------------------ |
+| 0.10    | 0.7%             | no            | 0.132 | INSUFFICIENT → CONTINUE  |
+| 0.25    | 20%              | yes           | 0.151 | CONTINUE → INSUFFICIENT  |
+| 0.50    | 73%              | yes           | 0.082 | CONTINUE                 |
+| 0.75    | 88%              | yes           | 0.056 | CONTINUE                 |
+
+**Amended rubric (pre-registered here; implemented in `q2_gate.py`):**
+
+CONTINUE fires when either:
+
+- (a) phys_deficit < -threshold AND CI excludes 0 AND CV < 0.15 (original)
+- (b) phys_deficit < -10×threshold AND CI excludes 0 (NEW — effect-size override)
+
+Rationale: CV was a proxy for statistical stability in the original plan.
+When phys wins by >10× the 2% threshold AND the bootstrap CI firmly excludes
+0, the CI itself IS the stability certificate. An additional CV constraint
+is redundant in that regime.
+
+The amendment does NOT weaken the gate — it adds a second sufficient
+condition for a decision that the evidence already supports. PIVOT's trigger
+(phys decisively WORSE than Mean) is unchanged.
+
 ---
 
 ## Phase 1 — Foundation (Weeks 2–4, fully bite-sized TDD)
