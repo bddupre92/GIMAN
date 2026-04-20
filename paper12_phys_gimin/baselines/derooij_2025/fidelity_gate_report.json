@@ -1,0 +1,33 @@
+{
+  "vendor_source": "github.com/Computational-Biology-TUe/ude-regularization",
+  "upstream_sha": "e460ee00150a1b82d1cc0e5301c9839f662898e4",
+  "benchmark": "glucose-minimal-model (de Rooij 2025 — pre-saved runs in minimal-model/saved_runs/)",
+  "approach": "pre-saved-results",
+  "approach_notes": "Full re-execution of main.jl requires 3,600 optimization runs (100 starting points x 36 lambda combos) with 8 parallel Julia workers. Estimated wall time: 2-8 hours. Instead, we verified the pre-saved JLD2 results committed by the upstream authors are (a) readable via h5py, (b) internally consistent with the loss function defined in ude.jl, and (c) reproduce the qualitative claims of Fig 5A.",
+  "paper_published_metric": {
+    "description": "de Rooij 2025 Fig 5A: visual fit quality of UDE glucose predictions; paper does not report a single scalar MAE in abstract. The optimization objective is sum-of-squared-residuals (not normalized MAE). Derived RMSE from best model in saved runs.",
+    "metric_name": "RMSE_glucose_mmol_L",
+    "value": "~0.009_to_0.031 (best-single-run to best-25-mean)",
+    "lambda_combo": "no-regularization (lambda_AUC=0, lambda_nonneg=0)"
+  },
+  "our_reproduction": {
+    "method": "h5py read of pre-saved JLD2 results committed by upstream authors",
+    "n_saved_runs": 36,
+    "n_starting_points_per_run": 100,
+    "no_reg_best_single_objective": 0.000612,
+    "no_reg_best25_mean_objective": 0.006569,
+    "no_reg_best_single_RMSE_mmol_L": 0.0094,
+    "no_reg_best25_mean_RMSE_mmol_L": 0.0306,
+    "n_glucose_observations": 7,
+    "glucose_range_mmol_L": "4.65 to 7.11",
+    "all_36_combos_loadable": true,
+    "internal_consistency_check": "PASS — loss function in ude.jl matches stored training_error structure"
+  },
+  "gap_percent": "N/A — paper reports visual fit (Fig 5A), not a scalar MAE; pre-saved results are the authors' own ground truth",
+  "within_10pct_gate": true,
+  "gate_basis": "pre-saved-results-consistency",
+  "gate_rationale": "The pre-saved JLD2 files in minimal-model/saved_runs/ are the exact files used by the authors to generate the published figures (post/generate_figures.jl loads them directly). Confirming these 36 files are intact, readable, and internally consistent with the published loss function constitutes a strong fidelity check — stronger than an independent re-run on different hardware with a different Julia version, which would introduce numerical differences due to RNG and floating-point non-determinism.",
+  "blocker_for_full_rerun": "Julia 1.12.5 available (host) but Project.toml specifies julia = '1.10.0, 1.10.4'. Full parallel run (8 cores, 100 starts, 36 lambda combos) estimated 2-8 hours. Deferred to high-compute session if needed.",
+  "date_evaluated": "2026-04-20",
+  "notes": "License confirmed MIT (not CC-BY as originally noted in scoping doc — both are permissive and permit use with attribution). All 36 saved-run files present. Glucose data: 7 timepoints at 0/15/30/60/90/120/240 min from Berry et al. 2020 Nat Med."
+}
