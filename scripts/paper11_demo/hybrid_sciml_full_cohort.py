@@ -200,12 +200,22 @@ class GRUTrajectoryResidual(nn.Module):
     The hidden state is recomputed from scratch on every forward pass
     (simple, correct, slow — acceptable for the grid we're running,
     per the Task 1 architectural spec).
+
+    When ``state_aware=True``, a synthetic final step ``(y, features)`` carrying
+    the ODE solver's current state ``y`` is appended to the input sequence.
+    This closes a train/eval asymmetry: without it, the GRU's residual is
+    frozen between the last observation and the prediction target (since no
+    new observations arrive in that interval), whereas the MLP's residual
+    adapts to the evolving state ``y``. State-aware makes the GRU residual
+    equally state-responsive while preserving its observation-history memory.
+    ``y`` here is the solver's own current guess — not a label leak.
     """
 
-    def __init__(self, n_features: int, hidden: int = 32):
+    def __init__(self, n_features: int, hidden: int = 32, state_aware: bool = False):
         super().__init__()
         self.hidden = hidden
         self.n_features = n_features
+        self.state_aware = state_aware
         self.gru = nn.GRU(input_size=1 + n_features, hidden_size=hidden, num_layers=1, batch_first=True)
         self.head = nn.Linear(hidden, 1)
         with torch.no_grad():
@@ -231,8 +241,15 @@ class GRUTrajectoryResidual(nn.Module):
             mask = torch.zeros_like(self._t_obs, dtype=torch.bool)
             mask[0] = True
         s_prefix = self._s_obs[mask]  # shape (k,)
-        feat_expanded = self._features.unsqueeze(0).expand(int(mask.sum().item()), -1)  # (k, n_feat)
-        seq = torch.cat([s_prefix.unsqueeze(-1), feat_expanded], dim=-1).unsqueeze(0)  # (1, k, 1+n_feat)
+        k = int(mask.sum().item())
+        feat_expanded = self._features.unsqueeze(0).expand(k, -1)  # (k, n_feat)
+        seq = torch.cat([s_prefix.unsqueeze(-1), feat_expanded], dim=-1)  # (k, 1+n_feat)
+        if self.state_aware:
+            # Append the solver's current state y as a synthetic final step.
+            # y is the ODE solver's guess at time t — not an observed label.
+            y_step = torch.cat([y.view(1), self._features]).unsqueeze(0)  # (1, 1+n_feat)
+            seq = torch.cat([seq, y_step], dim=0)  # (k+1, 1+n_feat)
+        seq = seq.unsqueeze(0)  # (1, L, 1+n_feat) where L = k or k+1
         _, h = self.gru(seq)  # h: (1, 1, hidden)
         out = self.head(h.squeeze(0).squeeze(0))  # (1,)
         return out
@@ -245,10 +262,12 @@ class GRUTrajectoryResidual(nn.Module):
 class PureNeuralODE(nn.Module):
     """dS/dt = NN(S, features) — fully data-driven baseline."""
 
-    def __init__(self, n_features: int, hidden: int = 32, use_gru: bool = False):
+    def __init__(self, n_features: int, hidden: int = 32, use_gru: bool = False,
+                 gru_state_aware: bool = False):
         super().__init__()
         if use_gru:
-            self.residual_net = GRUTrajectoryResidual(n_features, hidden)
+            self.residual_net = GRUTrajectoryResidual(n_features, hidden,
+                                                      state_aware=gru_state_aware)
         else:
             self.residual_net = PointwiseMLPResidual(n_features, hidden)
         self.use_gru = use_gru
@@ -270,11 +289,13 @@ class PhysicsInformedNeuralODE(nn.Module):
     The residual is small-initialised so early training ≈ pure mechanistic.
     """
 
-    def __init__(self, n_features: int, hidden: int = 32, use_gru: bool = False):
+    def __init__(self, n_features: int, hidden: int = 32, use_gru: bool = False,
+                 gru_state_aware: bool = False):
         super().__init__()
         self.log_k_age = nn.Parameter(torch.tensor(np.log(K_AGE_LIT_RATE), dtype=torch.float32))
         if use_gru:
-            self.residual_net = GRUTrajectoryResidual(n_features, hidden)
+            self.residual_net = GRUTrajectoryResidual(n_features, hidden,
+                                                      state_aware=gru_state_aware)
         else:
             self.residual_net = PointwiseMLPResidual(n_features, hidden)
         self.use_gru = use_gru
@@ -638,6 +659,10 @@ def parse_args() -> argparse.Namespace:
                    help="Weight on ReLU(dS/dt+1e-4) penalty (default 0.01).")
     p.add_argument("--use-gru", action="store_true",
                    help="Use GRU-over-trajectory residual instead of pointwise MLP.")
+    p.add_argument("--gru-state-aware", action="store_true",
+                   help="When --use-gru is set, append (y, features) as synthetic "
+                        "final GRU step so the residual is state-responsive (closes "
+                        "the train/eval asymmetry vs MLP). No effect without --use-gru.")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--config-id", type=str, required=True,
                    help="Subdirectory name under outputs/paper11_demo/full_cohort/.")
@@ -731,7 +756,8 @@ def main() -> None:
     if args.models in ("pure_nn", "both"):
         print("\n--- Pure Neural ODE (data-driven; no mechanistic prior) ---")
         torch.manual_seed(args.seed)
-        model_a = PureNeuralODE(n_features=n_features, use_gru=args.use_gru).to(DEVICE)
+        model_a = PureNeuralODE(n_features=n_features, use_gru=args.use_gru,
+                                 gru_state_aware=args.gru_state_aware).to(DEVICE)
         hist_a = train_with_early_stopping(
             model_a, train_records, val_records,
             epochs=args.epochs, patience=args.patience,
@@ -769,7 +795,8 @@ def main() -> None:
     if args.models in ("hybrid", "both"):
         print("\n--- Physics-Informed Neural ODE (lit prior + learned residual) ---")
         torch.manual_seed(args.seed)
-        model_b = PhysicsInformedNeuralODE(n_features=n_features, use_gru=args.use_gru).to(DEVICE)
+        model_b = PhysicsInformedNeuralODE(n_features=n_features, use_gru=args.use_gru,
+                                             gru_state_aware=args.gru_state_aware).to(DEVICE)
         hist_b = train_with_early_stopping(
             model_b, train_records, val_records,
             epochs=args.epochs, patience=args.patience,
@@ -861,6 +888,7 @@ def main() -> None:
         "lambda_physics": float(args.lambda_physics),
         "lambda_monotone": float(args.lambda_monotone),
         "use_gru": bool(args.use_gru),
+        "gru_state_aware": bool(args.gru_state_aware),
         "seed": int(args.seed),
         "epochs_max": int(args.epochs),
         "patience": int(args.patience),
