@@ -355,12 +355,15 @@ def evaluate_records(
             raise ValueError(f"unknown mode: {mode}")
 
         abs_err = abs(s_pred - s_last)
+        # For anchor-last the prediction horizon is 1-step (t[-2] -> t[-1]);
+        # for fair/deep modes it's the full trajectory (t[0] -> t[-1]).
+        t_horizon = horizon_anchor if mode == "pure_mech_anchor_last" else horizon_fair
         out.append({
             "patno": int(patno),
             "s_obs_last": float(s_last),
             "s_pred_last": float(s_pred),
             "abs_err": float(abs_err),
-            "t_horizon_yrs": float(horizon_fair),
+            "t_horizon_yrs": float(t_horizon),
             "t_baseline_yrs": float(t_0),
             "n_observed_visits": int(len(t)),
         })
