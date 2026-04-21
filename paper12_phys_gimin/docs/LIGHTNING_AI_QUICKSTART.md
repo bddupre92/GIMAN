@@ -49,15 +49,19 @@ ls -lh scripts/lightning_fastsurfer_setup.sh
 ls -lh scripts/lightning_driver.py
 ```
 
-## 4. Run the driver — one command
+## 4. Run the drivers — sequential
 
-**Default (dual A100, ~2.5-3.5 hrs, ~$7):**
+Free plan = 1 active Studio at a time. Run main first, then anchor.
+
+### 4a. Main FastSurfer run (Wang N=161, ~3 hrs, ~$7)
+
+**Default (dual A100, ~2.5-3.5 hrs):**
 
 ```bash
 python scripts/lightning_driver.py --dual-gpu
 ```
 
-**Single A100 fallback (if dual unavailable in your tier):**
+**Single A100 fallback:**
 
 ```bash
 python scripts/lightning_driver.py --single-gpu
@@ -68,6 +72,22 @@ python scripts/lightning_driver.py --single-gpu
 ```bash
 python scripts/lightning_driver.py --install-only
 ```
+
+### 4b. FreeSurfer concordance anchor (20 scans, ~20 hrs, ~$5-15 post-credits)
+
+After the main run finishes and its Studio is stopped, launch the anchor:
+
+```bash
+python scripts/lightning_anchor_driver.py
+```
+
+This spins up a **separate** Studio `paper12-fs-anchor` on `Machine.CPU_X_32`,
+installs vanilla FreeSurfer 7.4.1, runs `recon-all` on 20 random Wang patients
+(4 parallel × -openmp 8), and downloads `freesurfer_anchor_stats.tar.gz`.
+
+Purpose: in-cohort FastSurfer ↔ FreeSurfer concordance (Dice + thickness r)
+for the Methods section. Defends against the reviewer question "does FastSurfer
+hold on PD patients specifically?"
 
 ### What it does
 
