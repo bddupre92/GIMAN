@@ -35,6 +35,23 @@ import sys
 import time
 from pathlib import Path
 
+def _load_dotenv() -> None:
+    """Load paper12_phys_gimin/data/.env into os.environ if present (before any SDK import)."""
+    env_path = Path(__file__).resolve().parents[1] / "paper12_phys_gimin/data/.env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k, v = k.strip(), v.strip().strip("'\"")
+        if k and v and k not in os.environ:
+            os.environ[k] = v
+
+
+_load_dotenv()
+
 try:
     from lightning_sdk import Machine, Studio
 except ImportError:
