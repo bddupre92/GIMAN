@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wang_2025_cnode_ppmi"
+version = "0.1.0"
+description = "Clean-room re-implementation of Wang et al. 2025 Conditional Neural ODE (arXiv 2511.04789) for Parkinson's disease T1 MRI progression forecasting."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Blair Dupre", email = "blair.dupre@und.edu"}
+]
+keywords = [
+    "neural-ode",
+    "parkinsons-disease",
+    "ppmi",
+    "longitudinal",
+    "morphometry",
+    "clean-room",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+
+# Minimal deps. Main project venv supplies torch + numpy already; declared here
+# for standalone reproducibility.
+dependencies = [
+    "torch>=2.0",
+    "torchdiffeq>=0.2.3",
+    "numpy>=1.24",
+]

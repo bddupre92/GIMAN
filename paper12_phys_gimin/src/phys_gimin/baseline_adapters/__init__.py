@@ -6,7 +6,10 @@ Each adapter wraps an external method and exposes the phys-GIMIN baseline interf
 Available adapters:
   - DeRooijImputer: wraps de Rooij et al. 2025 UDE physiology-informed regularization
     (vendored at baselines/derooij_2025/, VENDOR_NOTES.md for attribution)
+  - CnodeAdapter: wraps Wang et al. 2025 Conditional Neural ODE (clean-room at
+    baselines/wang_2025_cnode_ppmi/, arXiv:2511.04789).
 """
+from phys_gimin.baseline_adapters.cnode_adapter import CnodeAdapter
 from phys_gimin.baseline_adapters.derooij_adapter import DeRooijImputer
 
-__all__ = ["DeRooijImputer"]
+__all__ = ["CnodeAdapter", "DeRooijImputer"]
