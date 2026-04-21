@@ -24,7 +24,16 @@ import time
 from pathlib import Path
 
 DOCKER = "/Applications/Docker.app/Contents/Resources/bin/docker"
+DOCKER_BIN_DIR = "/Applications/Docker.app/Contents/Resources/bin"
 IMAGE = "deepmi/fastsurfer:latest"
+
+
+def _docker_env() -> dict:
+    """Build env with Docker bin in PATH so docker-credential-desktop is findable."""
+    import os as _os
+    env = _os.environ.copy()
+    env["PATH"] = f"{DOCKER_BIN_DIR}:{env.get('PATH', '')}"
+    return env
 
 WORKTREE = Path(__file__).resolve().parents[1]
 REPO_ROOT = Path("/Users/blair.dupre/Projects/CSCI-FALL-2025")
@@ -41,16 +50,17 @@ def check_prereqs() -> None:
         if not p.exists():
             sys.stderr.write(f"ERROR: missing {p}\n")
             sys.exit(1)
+    env = _docker_env()
     # Docker daemon check
-    r = subprocess.run([DOCKER, "info"], capture_output=True, text=True)
+    r = subprocess.run([DOCKER, "info"], capture_output=True, text=True, env=env)
     if r.returncode != 0:
         sys.stderr.write("ERROR: Docker daemon not running. Open Docker Desktop.\n")
         sys.exit(1)
     # Image pull (idempotent)
-    r = subprocess.run([DOCKER, "image", "inspect", IMAGE], capture_output=True, text=True)
+    r = subprocess.run([DOCKER, "image", "inspect", IMAGE], capture_output=True, text=True, env=env)
     if r.returncode != 0:
         print(f"[prereq] Pulling {IMAGE} (~5 GB, one-time)...")
-        subprocess.run([DOCKER, "pull", IMAGE], check=True)
+        subprocess.run([DOCKER, "pull", IMAGE], check=True, env=env)
     else:
         print(f"[prereq] Image {IMAGE} already pulled")
 
@@ -99,7 +109,7 @@ def run_one(subj_id: str, nifti: Path, threads: int) -> tuple[str, float]:
         "--threads", str(threads),
         "--fs_license", "/fs_license.txt",
     ]
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800, env=_docker_env())
     elapsed = time.time() - t0
     if r.returncode != 0 or not is_complete(subj_id):
         # Persist failure log
