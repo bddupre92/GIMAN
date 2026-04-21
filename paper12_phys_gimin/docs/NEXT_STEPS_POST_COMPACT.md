@@ -1,196 +1,166 @@
-# Paper 12 W6 — Resume Guide (2026-04-21 evening)
+# Paper 12 W6 — Resume Guide (2026-04-21 late evening)
 
-**Session closed:** 2026-04-21, multi-path FastSurfer compute exploration — GPU wasteful, Mac too slow, pivoting to user's Threadripper+A5000 desktop.
+**Session closed:** 2026-04-21, FastSurfer batch LAUNCHED on Lightning academic account `blairdupre`, 64-core CPU tier.
 
-**Branch:** `feat/paper12-phys-gimin` · **Worktree:** `~/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin` · **Latest:** `7eeb4b9`
-
----
-
-## Resume command (one-liner)
-
-```
-"Continue Paper 12 W6 from paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md — CNODE clean-room done, FastSurfer compute pivoting to Threadripper+A5000 desktop via WSL2+Docker. Write scripts/windows_wsl2_fastsurfer.sh and walk user through setup."
-```
+**Branch:** `feat/paper12-phys-gimin` · **Worktree:** `~/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin` · **Latest pushed:** `b285a12`
 
 ---
 
-## Where we are (2026-04-21)
+## Resume command
 
-### ✅ Done
-- Wang N=161 manifest + full 327-PD cohort manifest (committed)
-- 952 T1 scans converted to NIfTI via dcm2niix (committed)
-- `/tmp/nifti_wang_n161.tar.gz` (4.9 GB) ready for upload
-- License.txt at `paper12_phys_gimin/data/license.txt`
-- **W6 Step 5: Wang CNODE clean-room implementation + 99/99 tests** (commit `9b7dd3e`)
-- Pipeline **end-to-end validated** via Mac Docker 3-scan smoke test (all 3 produced `stats/aseg+DKT.stats`)
-
-### 🚫 Dead paths (don't retry these)
-- **Lightning A100 GPU** — FastSurfer full pipeline is 97% CPU-bound. GPU idle 97% of time. Wasteful for the workload.
-- **Mac Docker (Rosetta2 emulation)** — ~50 min/scan. 401 × 50 min = ~150 hrs. Too slow.
-- **Mac native MPS** — PyTorch MPS backend missing `add_alpha_strided_cast_half_float` op. FastSurfer crashes. Known PyTorch limitation.
-- **Lightning CPU_X_96** — requires Team plan at $150/mo. Not worth for one-off.
-
-### 🎯 Best path forward: USER'S Threadripper WRX90 + RTX A5000 desktop
-
-Spec: AMD Threadripper Pro WRX90 (up to 96 cores depending on SKU), RTX A5000 (24 GB GDDR6, 8192 CUDA), 256 GB RAM, 4 TB NVMe, Windows 11 Pro.
-
-**Setup path: Windows 11 → WSL2 → Docker Desktop → FastSurfer Docker image with GPU passthrough.**
-
-Expected wall-clock by CPU SKU:
-| SKU | Cores | Parallel scans (4 threads each) | 401-scan full pipeline |
-|-----|-------|--------------------------------|------------------------|
-| 7965WX | 24 | 6 | ~17 hrs |
-| 7975WX | 32 | 8 | ~13 hrs |
-| 7985WX | 64 | 16 | ~6.5 hrs |
-| 7995WX | 96 | 24 | **~4 hrs** |
-
-Cost: $0 compute.
+```
+"Continue Paper 12 W6 — FastSurfer batch running on Lightning Studio paper12-fastsurfer (blairdupre/default-teamspace, 64-core CPU). Read paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md and check /tmp/fastsurfer.log status on the Studio via SDK."
+```
 
 ---
 
-## Immediate next action — on Windows Threadripper
+## Current live state
 
-### Prerequisites (user confirms)
-1. Windows 11 Pro (confirmed from spec)
-2. NVIDIA A5000 driver up to date
-3. `git` installed (or download repo ZIP)
-4. ~50 GB free disk for Docker image + outputs
+| Item | Value |
+|---|---|
+| Lightning account | `blairdupre` (academic, UND) |
+| Teamspace | `default-teamspace` |
+| Studio | `paper12-fastsurfer` |
+| Studio ID | `01kps6rns0a9wsbnccrnkkzy20` |
+| Compute | **CPU_X_64** (upgrade in progress, ~5 min) |
+| Expected runtime | ~6.5 hrs for 401 scans |
+| Parallelism | 16 concurrent FastSurfer processes × 4 threads each |
+| Pipeline | FULL (DL seg + surface recon → aseg+DKT.stats + thickness) |
 
-### IMPORTANT: Why WSL2 + Docker — FreeSurfer is Linux-only
+## Files in Studio root (`/teamspace/studios/this_studio/`)
 
-FreeSurfer doesn't run natively on Windows. The pipeline is:
-- Windows 11 host → WSL2 Ubuntu 22.04 (real Linux kernel) → Docker Desktop (Linux containers via WSL2 backend) → `deepmi/fastsurfer` container (Ubuntu 22 + FreeSurfer 7.4.1)
+- ✅ `nifti_wang_n161.tar.gz` (5.0 GB)
+- ✅ `license.txt` (102 B)
+- ✅ `lightning_cpu_parallel_fastsurfer.sh` (4.8 KB)
 
-No emulation layer (unlike Mac where x86 Docker runs under Rosetta). Docker on Windows runs containers natively on x86_64 hardware — expect ~2-3 min/scan vs Mac's 23-50 min.
+## Credentials state (Mac)
 
-### Step 1 — Install WSL2 + Docker Desktop (one-time, ~30 min)
+- `~/.lightning/credentials.json` — set to `blairdupre` UUID (a844d035-c12...)
+- `~/.lightning/lightning_rsa` — regenerated for new account, SCP/SSH working
+- `paper12_phys_gimin/data/.env` — LIGHTNING_USER_ID/API_KEY/USERNAME/TEAMSPACE populated
 
-In Windows PowerShell (Admin):
-```powershell
-wsl --install -d Ubuntu-22.04
-```
-Reboot. Then inside Ubuntu WSL2 terminal:
-```bash
-# Verify GPU visible
-nvidia-smi
-```
-Should show RTX A5000. If not, update NVIDIA driver from https://www.nvidia.com/Download/index.aspx.
+## Auto-sleep concern
 
-Download Docker Desktop for Windows: https://www.docker.com/products/docker-desktop/
-- Install → Settings → Resources → WSL Integration → **Enable for Ubuntu-22.04**
-- Settings → Resources → **Enable GPU acceleration** (NVIDIA checkbox)
+Lightning Studio defaults to "auto sleep after 10 mins of inactivity." FastSurfer batch should keep the Studio active (16 parallel CPU workers), but to be safe, keep-alive heartbeat runs alongside the batch (writes to `/tmp/keepalive.log` every 5 min).
 
-Verify Docker sees GPU:
-```bash
-docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
-```
-Should print A5000 details.
+---
 
-### Step 2 — Clone repo on Windows (WSL2 side)
+## Launch sequence (if not already done)
+
+Once 64-core CPU is ready:
 
 ```bash
-cd ~
-git clone https://github.com/bddupre92/PD_PHD.git pd_phd
-cd pd_phd
-# Switch to the paper12 worktree branch
-git fetch origin feat/paper12-phys-gimin
-git checkout feat/paper12-phys-gimin
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/lightning studio ssh --name paper12-fastsurfer --teamspace blairdupre/default-teamspace
 ```
 
-### Step 3 — Copy the NIfTI tarball + license to WSL2
-
-From Mac (sync to Google Drive or direct SCP):
-- `/tmp/nifti_wang_n161.tar.gz` (4.9 GB)
-- `paper12_phys_gimin/data/license.txt`
-
-To WSL2 Ubuntu:
-- Download from Drive, or SCP over the LAN, or USB drive transfer
-- Target locations:
-  - `/home/<user>/fastsurfer_work/nifti_wang_n161.tar.gz`
-  - `/home/<user>/fastsurfer_work/license.txt`
-
-### Step 4 — Run the Windows/WSL2 FastSurfer batch
-
-**Script to be created next session:** `scripts/windows_wsl2_fastsurfer.sh`
-
-Design:
-- Auto-detect CPU count (`nproc`)
-- `N_PARALLEL = n_cpu / 4` (4 threads per FastSurfer scan)
-- Use `docker run --gpus all deepmi/fastsurfer:latest` with full pipeline (no `--seg_only`)
-- Each container: `--device cuda` for DL seg, CPU for surface recon
-- GPU shared across parallel containers (DL seg is brief ~20 sec, low VRAM ~3 GB per scan)
-- `xargs -P$N_PARALLEL` to launch concurrent containers
-- Idempotent resume (`stats/aseg+DKT.stats` + `stats/lh.aparc.DKTatlas.mapped.stats` check)
-- Output: per-subject dir under `/output/<subj_id>/`
-
-### Step 5 — Monitor + collect results
+Inside Studio:
 
 ```bash
-# Live tail
-tail -f ~/fastsurfer_work/batch.log
+cd /teamspace/studios/this_studio
 
-# Progress check
-find ~/fastsurfer_work/fastsurfer_out -name 'aseg+DKT.stats' | wc -l   # X / 401
+# Step 1: Install FreeSurfer + FastSurfer + deps (~5 min)
+bash lightning_cpu_parallel_fastsurfer.sh install
+
+# Step 2: Start keep-alive heartbeat
+nohup bash -c 'while true; do date >> /tmp/keepalive.log; sleep 300; done' > /dev/null 2>&1 &
+echo $! > /tmp/keepalive.pid
+
+# Step 3: Launch FastSurfer batch detached
+nohup bash lightning_cpu_parallel_fastsurfer.sh process > /tmp/fastsurfer.log 2>&1 &
+echo $! > /tmp/fastsurfer.pid
+
+# Step 4: Verify both alive
+sleep 30 && ps -p $(cat /tmp/fastsurfer.pid) && echo "--- log tail ---" && tail -15 /tmp/fastsurfer.log
 ```
 
-When done, tarball results:
+Exit SSH. Batch runs ~6.5 hrs.
+
+---
+
+## Monitoring (from Mac after reopening Claude)
+
+Query Studio from local Mac:
+
 ```bash
-cd ~/fastsurfer_work/fastsurfer_out
-tar -czf ~/fastsurfer_full_stats.tar.gz */stats/ */mri/aparc*.mgz
+set -a; source /Users/blair.dupre/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin/paper12_phys_gimin/data/.env; set +a
+
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python -c "
+import os, json
+c = json.load(open(os.path.expanduser('~/.lightning/credentials.json')))
+os.environ['LIGHTNING_USER_ID'] = c['user_id']; os.environ['LIGHTNING_API_KEY'] = c['api_key']
+from lightning_sdk import Studio
+s = Studio('paper12-fastsurfer', teamspace='default-teamspace', user='blairdupre', create_ok=False)
+out = s.run('''
+echo \"OK count:\"; grep -c \"\\[OK\\]\" /tmp/fastsurfer.log
+echo \"START count:\"; grep -c \"\\[START\\]\" /tmp/fastsurfer.log
+echo \"keep-alive alive:\"; ps -p \$(cat /tmp/keepalive.pid) >/dev/null && echo YES || echo NO
+echo \"--- last 8 lines ---\"; tail -8 /tmp/fastsurfer.log
+''')
+print(out)
+"
 ```
 
-Then SCP to Mac for SQL load (W6 Step 8).
+## When batch completes
+
+Inside Studio (or via SDK run):
+
+```bash
+# Package results
+cd /teamspace/studios/fastsurfer_out
+find . \( -path '*/stats/*' -o -name 'aparc*.mgz' \) -type f | tar -czf /teamspace/studios/this_studio/fastsurfer_full_stats.tar.gz -T -
+du -sh /teamspace/studios/this_studio/fastsurfer_full_stats.tar.gz
+```
+
+Download tarball back to Mac:
+
+```bash
+# Same scp pattern as earlier uploads
+scp -i ~/.lightning/lightning_rsa \
+  s_01kps6rns0a9wsbnccrnkkzy20@ssh.lightning.ai:/teamspace/studios/this_studio/fastsurfer_full_stats.tar.gz \
+  /Users/blair.dupre/Projects/CSCI-FALL-2025/data/02_fastsurfer_out.tar.gz
+```
+
+Extract + load to PG (next session Step 8).
+
+## Stop Studio after completion (halt billing)
+
+```bash
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python -c "
+import os, json
+c = json.load(open(os.path.expanduser('~/.lightning/credentials.json')))
+os.environ['LIGHTNING_USER_ID'] = c['user_id']; os.environ['LIGHTNING_API_KEY'] = c['api_key']
+from lightning_sdk import Studio
+s = Studio('paper12-fastsurfer', teamspace='default-teamspace', user='blairdupre', create_ok=False)
+s.stop(); print('Stopped:', s.status)
+"
+```
 
 ---
 
-## Fallback paths if Windows desktop unavailable
+## What's still pending (post-batch)
 
-1. **Google Colab Pro** (user has subscription): run `scripts/paper12_fastsurfer_colab.ipynb`. ~10 hrs on A100 if available, ~20 hrs on T4. Zero new cost. File manually uploaded via Drive.
-2. **AWS c5.24xlarge** (96 vCPU): $4/hr × 4 hrs = ~$16. Clean SSH-based flow. Adapt `scripts/lightning_cpu_parallel_fastsurfer.sh` with minor path changes.
-3. **UND HPC Talon** (ticket already submitted): 72 cores, free, but 1-5 day approval wait.
-
----
-
-## Cross-device chat continuity (new Windows session)
-
-**Claude Code conversations DO NOT sync across devices.** But the context persists via committed files:
-
-1. **Memory files** — `~/.claude/projects/-Users-blair-dupre-Projects-CSCI-FALL-2025/memory/` (Mac-side). On Windows, Claude Code auto-loads from Windows-equivalent `.claude/projects/<project-hash>/memory/` — you'd need to manually recreate key memory files OR copy.
-
-2. **What actually persists across devices (and is the "right" way)**:
-   - `paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md` (this file — committed)
-   - `paper12_phys_gimin/docs/PHASE_1_SUMMARY.md`
-   - `CLAUDE.md` (main project — committed)
-   - Everything in the git repo
-
-**Workflow on Windows:**
-1. Clone the repo
-2. Open Claude Code in the repo directory
-3. Give resume command: *"Read paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md and main CLAUDE.md; pick up from the Windows/WSL2 setup step."*
-4. Claude Code reads these files automatically (via CLAUDE.md auto-load) and has full context.
-
-**VS Code extension "Settings Sync" does NOT sync Claude Code chat history** — only VS Code settings/extensions. Chat is per-device.
+- **W6 Step 6:** Fidelity gate eval on real FastSurfer features (volumes + thickness) against Wang 2025 [RMSE 0.145-0.177, R² 0.743-0.909]
+- **W6 Step 8:** SQL load (`mechanistic.paper12_competitor_fidelity` + `paper12_wang_features`) + schema count bump
+- **W6 Step 9:** Drive archive + local cleanup
+- **W7a:** Demirkaya 2021 CKF clean-room
+- **W7b:** Zou 2025 MNODE-HGS clean-room
+- **W8:** LagCNN clean-room
 
 ---
 
-## Key artifacts to reference on Windows machine
+## Cross-device chat continuity reminder
 
-- Scripts folder: `scripts/`
-  - `lightning_cpu_parallel_fastsurfer.sh` — adaptable template (Linux CPU+Docker path)
-  - `local_fastsurfer_batch.py` — Mac Docker version (don't use on Windows; reference logic only)
-  - `paper12_fastsurfer_colab.ipynb` — Colab fallback
-  - `windows_wsl2_fastsurfer.sh` — **TO BE WRITTEN** next session
-- Manifests: `paper12_phys_gimin/data/wang_n161_manifest.csv`, `pd_full_cohort_manifest.csv`
-- Wang CNODE clean-room: `paper12_phys_gimin/baselines/wang_2025_cnode_ppmi/` (commit `9b7dd3e`)
-- Adapter: `paper12_phys_gimin/src/phys_gimin/baseline_adapters/cnode_adapter.py`
-- Tests: `paper12_phys_gimin/tests/test_wang_cnode.py` (5 tests, 99/99 suite)
+Claude Code chat history is LOCAL per device. What persists across Mac/Windows/etc:
 
----
+- ✅ This doc + `CLAUDE.md` + all committed code (pulled via `git pull`)
+- ✅ Lightning credentials in `~/.lightning/credentials.json` (machine-local, must re-setup on each device)
+- ❌ Chat transcripts (don't sync)
+- ❌ Memory files at `~/.claude/projects/.../memory/` (Mac-local)
 
-## Current Mac state at session close
+**On a new device:** clone repo, paste the resume command above, Claude reads CLAUDE.md + this file automatically → full context.
 
-- Mac Docker smoke test (PID 17079) may still be running — produced 3/3 valid `aseg+DKT.stats`
-- Safe to `kill $(pgrep -f local_fastsurfer_batch)` if you want to free Mac resources
-- `caffeinate` may still be backgrounded — `pkill caffeinate` to stop
-- `~/.lightning/credentials.json` set with correct bddupre92 UUID
-- Lightning Studio `paper12-fastsurfer` is Stopped (billing halted)
+## Fallback plan if Lightning batch fails overnight
+
+1. **UND HPC Talon** ticket submitted earlier — if access lands, same script pattern, 72 cores, free
+2. **User's Threadripper WRX90 + RTX A5000** desktop — WSL2+Docker, script template ready in `scripts/lightning_cpu_parallel_fastsurfer.sh` (small adaptations for Windows)
+3. **AWS c5.24xlarge** — $16, ~4 hrs, SSH-based, clean cloud flow
