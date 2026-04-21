@@ -58,14 +58,17 @@ GPU_HARD_TIMEOUT_S = 8 * 3600  # $20 cap → 8 hrs @ $2/hr dual A100 = $16
 
 
 def check_auth() -> None:
-    for k in ("LIGHTNING_USER_ID", "LIGHTNING_API_KEY"):
-        if not os.environ.get(k):
-            sys.stderr.write(
-                f"ERROR: {k} not set. Get credentials from Lightning AI "
-                f"Account Settings → Keys → Programmatic Login, then:\n"
-                f"  export {k}=<value>\n"
-            )
-            sys.exit(1)
+    env_set = bool(os.environ.get("LIGHTNING_USER_ID") and os.environ.get("LIGHTNING_API_KEY"))
+    creds_file = Path.home() / ".lightning" / "credentials"
+    if not env_set and not creds_file.exists():
+        sys.stderr.write(
+            "ERROR: no Lightning credentials found. Either:\n"
+            "  1. Run `lightning login` in a Terminal (saves to ~/.lightning/credentials)\n"
+            "  2. Export LIGHTNING_USER_ID and LIGHTNING_API_KEY in your shell\n"
+            "Get keys at https://lightning.ai/me/keys\n"
+        )
+        sys.exit(1)
+    print(f"[auth] Using {'env vars' if env_set else 'cached credentials at ~/.lightning/credentials'}")
 
 
 def check_local_files(install_only: bool) -> None:

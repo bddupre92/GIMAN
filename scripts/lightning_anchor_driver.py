@@ -54,13 +54,15 @@ CPU_HARD_TIMEOUT_S = 30 * 3600
 
 
 def check_auth() -> None:
-    for k in ("LIGHTNING_USER_ID", "LIGHTNING_API_KEY"):
-        if not os.environ.get(k):
-            sys.stderr.write(
-                f"ERROR: {k} not set. Get from https://lightning.ai/me/keys, then:\n"
-                f"  export {k}=<value>\n"
-            )
-            sys.exit(1)
+    env_set = bool(os.environ.get("LIGHTNING_USER_ID") and os.environ.get("LIGHTNING_API_KEY"))
+    creds_file = Path.home() / ".lightning" / "credentials"
+    if not env_set and not creds_file.exists():
+        sys.stderr.write(
+            "ERROR: no Lightning credentials. Run `lightning login` in Terminal, "
+            "or export LIGHTNING_USER_ID + LIGHTNING_API_KEY.\n"
+        )
+        sys.exit(1)
+    print(f"[auth] Using {'env vars' if env_set else 'cached credentials'}")
 
 
 def check_local_files(install_only: bool) -> None:
