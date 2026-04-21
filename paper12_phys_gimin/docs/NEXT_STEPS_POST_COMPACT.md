@@ -1,244 +1,189 @@
-# Paper 12 — Next Steps After Compact (2026-04-20 session end)
+# Paper 12 W6 — Resume Guide (2026-04-21 evening)
 
-**Session ended:** 2026-04-20, user paused to download Wang 2025 CNODE PPMI T1 MRI data from LONI IDA (Advanced Image Search).
+**Session closed:** 2026-04-21, multi-path FastSurfer compute exploration — GPU wasteful, Mac too slow, pivoting to user's Threadripper+A5000 desktop.
 
-**2026-04-20 update — MRI DOWNLOADS COMPLETE.** User returned with 861 patient DICOM directories across `PPMI_MRI_1` (204) + `PPMI MRI_2` (657). Cross-referenced with PPMI `participant_status.cohort_definition = 'PD'`: **761 PD patients with ≥1 T1 visit, 327 with ≥2 visits, 206 with ≥3 visits** — 3–4× Wang's N=161 target. W6 data gate is UNBLOCKED.
-
-**Strategy agreed (2026-04-20):** Dual-path execution — (a) subsample to Wang's exact N=161 (111×2-visit + 50×3-visit) for unambiguous fidelity-gate pass/fail, then (b) retrain on full PD pool (N=327 ≥2-visit) for extended Wang reproduction + adapter + phys-GIMIN benchmark.
-
-**Branch:** `feat/paper12-phys-gimin` · **Latest commit:** `427285a` · **Tests:** 94/94 passing · **Worktree:** `~/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin`
+**Branch:** `feat/paper12-phys-gimin` · **Worktree:** `~/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin` · **Latest:** `7eeb4b9`
 
 ---
 
 ## Resume command (one-liner)
 
 ```
-"Continue Paper 12 Phase 2 from NEXT_STEPS_POST_COMPACT.md — pick up at the LONI IDA download status check."
+"Continue Paper 12 W6 from paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md — CNODE clean-room done, FastSurfer compute pivoting to Threadripper+A5000 desktop via WSL2+Docker. Write scripts/windows_wsl2_fastsurfer.sh and walk user through setup."
 ```
 
 ---
 
-## What's done (23 commits — full Phase 1 + W5)
+## Where we are (2026-04-21)
 
-- Phase 1 (W2–W4): 79/79 tests, full infrastructure, partitioned CONTINUE verdict (commits through `99f1e6c`)
-- **Phase 2 W5 firmly closed**: de Rooij 2025 vendored (MIT), PPMI adapter, juliacall equivalence bridge verifying Python regularizers match Julia to **< 1e-10** (commits `3de536c`, `59bc828`, `c51a304`, `427285a`)
-- License corrected across 10 scoping/plan docs (CC-BY → MIT for de Rooij)
+### ✅ Done
+- Wang N=161 manifest + full 327-PD cohort manifest (committed)
+- 952 T1 scans converted to NIfTI via dcm2niix (committed)
+- `/tmp/nifti_wang_n161.tar.gz` (4.9 GB) ready for upload
+- License.txt at `paper12_phys_gimin/data/license.txt`
+- **W6 Step 5: Wang CNODE clean-room implementation + 99/99 tests** (commit `9b7dd3e`)
+- Pipeline **end-to-end validated** via Mac Docker 3-scan smoke test (all 3 produced `stats/aseg+DKT.stats`)
 
----
+### 🚫 Dead paths (don't retry these)
+- **Lightning A100 GPU** — FastSurfer full pipeline is 97% CPU-bound. GPU idle 97% of time. Wasteful for the workload.
+- **Mac Docker (Rosetta2 emulation)** — ~50 min/scan. 401 × 50 min = ~150 hrs. Too slow.
+- **Mac native MPS** — PyTorch MPS backend missing `add_alpha_strided_cast_half_float` op. FastSurfer crashes. Known PyTorch limitation.
+- **Lightning CPU_X_96** — requires Team plan at $150/mo. Not worth for one-off.
 
-## Where we paused — LONI IDA download for W6
+### 🎯 Best path forward: USER'S Threadripper WRX90 + RTX A5000 desktop
 
-Wang 2025 CNODE (arXiv 2511.04789) fidelity-gate needs **N=161 PD patients** with longitudinal T1 MRI (111 × 2 visits + 50 × 3 visits).
+Spec: AMD Threadripper Pro WRX90 (up to 96 cores depending on SKU), RTX A5000 (24 GB GDDR6, 8192 CUDA), 256 GB RAM, 4 TB NVMe, Windows 11 Pro.
 
-**Local inventory from pre-compact check:**
+**Setup path: Windows 11 → WSL2 → Docker Desktop → FastSurfer Docker image with GPU passthrough.**
 
-| Metric | Have | Wang needs | Gap |
-|---|---|---|---|
-| PD DICOM dirs | 200 | — | ✓ |
-| PD with ≥1 T1 MRI visit | 56 | — | — |
-| **PD with ≥2 T1 visits** | **14** | 111 | **−97** |
-| **PD with ≥3 T1 visits** | **7** | 50 | **−43** |
+Expected wall-clock by CPU SKU:
+| SKU | Cores | Parallel scans (4 threads each) | 401-scan full pipeline |
+|-----|-------|--------------------------------|------------------------|
+| 7965WX | 24 | 6 | ~17 hrs |
+| 7975WX | 32 | 8 | ~13 hrs |
+| 7985WX | 64 | 16 | ~6.5 hrs |
+| 7995WX | 96 | 24 | **~4 hrs** |
 
-Root cause: most local PD DICOM dirs have DaTScan only, not T1.
-
-### LONI IDA Advanced Image Search filters (user was setting up)
-
-- **PROJECT/PHASE:** PPMI ✓
-- **SUBJECT → Research Group:** PD only
-- **STUDY/VISIT → PPMI timepoints:** Baseline + Month 12 + Month 24
-- **IMAGE → Modality:** MRI ✓
-- **IMAGING PROTOCOL → Acquisition Type:** 3D ✓
-- **IMAGING PROTOCOL → Weighting:** T1 ✓ (do NOT include T2)
-- **Image Types:** Original ✓ + Post-processed ✓ (raw DICOM is primary)
-- Manufacturer / Mfg Model / Field Strength / Acquisition Plane — leave blank (Wang used multi-vendor, all 3T)
-
-**User was struggling to kick off the LONI download.** If still blocked:
-- Check LONI IDA session state / re-authenticate
-- Try the "Simple Image Search" mode instead of Advanced
-- Alternatively use AMP-PD BigQuery to request the imaging collection via the data-request form
-
-**Expected download:** ~15–30 GB raw DICOMs across ~100 patients × 2–3 scans.
+Cost: $0 compute.
 
 ---
 
-## W6 execution checklist (data gate CLEARED 2026-04-20)
+## Immediate next action — on Windows Threadripper
 
-### Data locations (merged inventory, post-download)
+### Prerequisites (user confirms)
+1. Windows 11 Pro (confirmed from spec)
+2. NVIDIA A5000 driver up to date
+3. `git` installed (or download repo ZIP)
+4. ~50 GB free disk for Docker image + outputs
 
-- **New download batch 1:** `data/00_raw/PPMI_MRI_1/` (204 patients, SAG_3D_T1_FSPGR + MPRAGE)
-- **New download batch 2:** `data/00_raw/PPMI MRI_2/` (657 patients, SAG_3D_MPRAGE + variants, many with 2+ timepoints already)
-- **Existing:** `data/00_raw/GIMAN/PPMI_dcm/` (200 PD patients, mostly DaTScan-only, some T1)
-- **Merged PD+T1 longitudinal cohort:** 761 / 327 (≥2 visits) / 206 (≥3 visits)
+### Step 1 — Install WSL2 + Docker Desktop (one-time, ~30 min)
 
-### Drive archive plan (retention policy)
-
-**Hard rule: never run FreeSurfer recon-all directly into a Drive-synced path.** Drive File Stream's file-locking + millions-of-small-files pattern that FreeSurfer creates will tank recon-all or silently corrupt intermediate state. Keep FreeSurfer on local disk, migrate finished outputs to Drive after extraction.
-
-**Target Drive folder:** `~/My Drive (dupre.blair92@gmail.com)/PPMIData_FreeSurfer/`
-
-| Stage | Local (working) | Drive (archive) | Action |
-|---|---|---|---|
-| Raw DICOMs | `data/00_raw/PPMI_MRI_{1,2}/` | `PPMIData_FreeSurfer/dicom_archive/{PATNO}.tar.gz` | After FreeSurfer validates, tarball per-patient → Drive → delete local |
-| dcm2niix NIfTI | `data/01_processed/GIMAN/t1_expansion_nifti/PATNO_{PATNO}/` | (optional) `PPMIData_FreeSurfer/nifti_archive/{PATNO}_{VISIT}.tar.gz` | Keep local (small, cheap reproducibility starting point) |
-| FreeSurfer full | `data/02_freesurfer/{PATNO}_{VISIT}/` (~1 GB/scan) | — (too big) | Delete local `/mri`, `/surf`, `/label`, `/scripts` after extraction |
-| FreeSurfer `/stats` + `aparc+aseg.mgz` | `data/02_freesurfer/{PATNO}_{VISIT}/stats/` | `PPMIData_FreeSurfer/freesurfer_stats/{PATNO}_{VISIT}/` | Copy to Drive + keep local |
-| SQL features | `mechanistic.paper12_wang_features` | — | Authoritative; backup via `pg_dump` |
-
-**Peak vs working set:** ~700 GB during recon-all (local scratch) → ~15 GB post-cleanup (local) + ~30 GB compressed (Drive).
-
-**Pre-flight checks required before W6 Step 4 (FreeSurfer):**
-1. Confirm Drive quota ≥ 50 GB free on `dupre.blair92@gmail.com` account (compressed DICOMs + `/stats` alone ≈ 30 GB)
-2. Confirm the Drive folder is auto-syncing (create test file, verify appears in web UI)
-3. Decide: is `dupre.blair92@gmail.com` the right long-term home vs. UND account (for reviewer access at peer review)?
-
-### Step 1. Ingest new DICOMs into canonical layout
-
-Merge `PPMI_MRI_1/` + `PPMI MRI_2/` directories into `data/00_raw/GIMAN/PPMI_dcm/{PATNO}/` (preserve protocol/date subdirs). Use `rsync -av --ignore-existing` to avoid overwriting existing DaTScan directories for the same PATNO.
-
-Verify:
+In Windows PowerShell (Admin):
+```powershell
+wsl --install -d Ubuntu-22.04
+```
+Reboot. Then inside Ubuntu WSL2 terminal:
 ```bash
-/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python <<'EOF'
-from pathlib import Path
-from collections import Counter
-
-dcm_dir = Path("/Users/blair.dupre/Projects/CSCI-FALL-2025/data/00_raw/GIMAN/PPMI_dcm")
-pd_patnos_with_t1 = 0
-visit_counts = Counter()
-for pdir in dcm_dir.iterdir():
-    if not (pdir.is_dir() and pdir.name.isdigit()):
-        continue
-    t1_visits = set()
-    for proto_dir in pdir.iterdir():
-        if proto_dir.is_dir() and any(k in proto_dir.name.upper() for k in ["MPRAGE", "T1", "3D"]):
-            for date_dir in proto_dir.iterdir():
-                if date_dir.is_dir():
-                    t1_visits.add(date_dir.name[:10])
-    if t1_visits:
-        pd_patnos_with_t1 += 1
-        visit_counts[len(t1_visits)] += 1
-
-print(f"Patients with ≥1 T1 visit: {pd_patnos_with_t1}")
-print(f"Distribution: {dict(visit_counts)}")
-print(f"≥2 visits: {sum(c for n, c in visit_counts.items() if n >= 2)} (target 111)")
-print(f"≥3 visits: {sum(c for n, c in visit_counts.items() if n >= 3)} (target 50)")
-EOF
+# Verify GPU visible
+nvidia-smi
 ```
+Should show RTX A5000. If not, update NVIDIA driver from https://www.nvidia.com/Download/index.aspx.
 
-### Step 2. Convert DICOM → NIfTI
+Download Docker Desktop for Windows: https://www.docker.com/products/docker-desktop/
+- Install → Settings → Resources → WSL Integration → **Enable for Ubuntu-22.04**
+- Settings → Resources → **Enable GPU acceleration** (NVIDIA checkbox)
 
-Use `dcm2niix` (already on disk per earlier `t1_expansion_nifti/` pipeline):
+Verify Docker sees GPU:
 ```bash
-dcm2niix -o data/01_processed/GIMAN/t1_expansion_nifti/PATNO_{PATNO}/ \
-         data/00_raw/GIMAN/PPMI_dcm/{PATNO}/
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
 ```
+Should print A5000 details.
 
-### Step 3. Run FreeSurfer recon-all on each T1 scan
-
-Heavy compute (~1 hr/scan on A5000 CUDA, longer on MPS). Extract:
-- 68 subcortical volumes (Desikan-Killiany)
-- Vertex-wise medial thickness
-
-**Must use PC/A5000 for this step** per `DUAL_MACHINE_SETUP.md`. CPU-only MPS is ~10× slower for FreeSurfer.
-
-**CRITICAL: run on local disk, NOT on `~/My Drive/PPMIData_FreeSurfer/`.** Drive File Stream's file-locking + millions-of-small-files pattern that FreeSurfer creates will tank recon-all speed or silently corrupt intermediate state. Output to `data/02_freesurfer/{PATNO}_{VISIT}/` locally; migrate after extraction per Step 9.
-
-### Step 4. Dispatch W6 subagent (clean-room CNODE)
-
-Prompt template saved inline below. Sonnet model. Scope:
-
-1. Read Wang 2025 arXiv 2511.04789 §II.B–II.D carefully.
-2. Clean-room `paper12_phys_gimin/baselines/wang_2025_cnode_ppmi/cnode.py` + `train.py` from paper equations.
-3. Run on the FreeSurfer-extracted features (68 subcortical + vertex-wise thickness).
-4. Fidelity gate: 5-fold CV RMSE ∈ [0.145, 0.177], R² ∈ [0.743, 0.909] (from `clean_room_verification_protocol.md` §4 row 2).
-5. Build adapter at `src/phys_gimin/baseline_adapters/cnode_adapter.py` for PPMI 33-feature schema (wraps CNODE for phys-GIMIN benchmark pipeline).
-6. Add 5 adapter tests.
-7. Commit `feat(paper12-w6): Wang 2025 CNODE PPMI clean-room + adapter + fidelity gate`.
-
-Full prompt template in `paper12_phys_gimin/docs/W6_SUBAGENT_PROMPT.md` (to be created at W6 start).
-
-### Step 5. SQL updates after W6
-
-Load the fidelity gate result into `mechanistic.paper12_competitor_fidelity`:
-```sql
--- Schema to create in same commit as the data load
-CREATE TABLE mechanistic.paper12_competitor_fidelity (
-  id SERIAL PRIMARY KEY,
-  competitor TEXT NOT NULL,           -- 'wang_2025_cnode' | 'de_rooij_2025' | 'demirkaya_2021' | 'zou_2025' | 'lagcnn_2024'
-  benchmark TEXT NOT NULL,            -- 'ppmi_5fold_cv' | 'glucose_minimal_model' | 'retinal_snr22_56' | etc
-  metric_name TEXT NOT NULL,
-  published_value DOUBLE PRECISION,
-  reproduced_value DOUBLE PRECISION,
-  gap_percent DOUBLE PRECISION,
-  within_10pct_gate BOOLEAN,
-  commit_sha TEXT,
-  notes TEXT,
-  evaluated_at TIMESTAMP DEFAULT now()
-);
-```
-
-This closes the per-competitor fidelity tracking loop for W5–W8.
-
-**Same-commit rule:** bump `mechanistic` schema count in both worktree and main-repo CLAUDE.md from 27 → 28 (competitor_fidelity) or 29 (add `paper12_wang_features` table too). SQL registry hook will block the commit if count is stale.
-
-### Step 9. Drive archive + local cleanup (after SQL load + validation)
-
-**Pre-archive validation (non-negotiable):** spot-check 10 random patients — re-extract FreeSurfer `aseg.stats` + `aparc.stats` row values into Python, compare to `mechanistic.paper12_wang_features` rows. Equality to 6 decimal places required before any local deletion.
-
-Per-patient migration loop (sketch):
+### Step 2 — Clone repo on Windows (WSL2 side)
 
 ```bash
-DRIVE_ROOT="$HOME/My Drive (dupre.blair92@gmail.com)/PPMIData_FreeSurfer"
-mkdir -p "$DRIVE_ROOT/dicom_archive" "$DRIVE_ROOT/freesurfer_stats"
-
-for PATNO in $(cat data/02_freesurfer/validated_patnos.txt); do
-  # 1. DICOM tarball → Drive → delete local
-  tar -czf "$DRIVE_ROOT/dicom_archive/${PATNO}.tar.gz" \
-    -C data/00_raw/GIMAN/PPMI_dcm "$PATNO"
-  rm -rf "data/00_raw/GIMAN/PPMI_dcm/$PATNO"
-
-  # 2. FreeSurfer /stats + aparc+aseg.mgz → Drive
-  for VISIT_DIR in data/02_freesurfer/${PATNO}_*; do
-    VISIT=$(basename "$VISIT_DIR")
-    mkdir -p "$DRIVE_ROOT/freesurfer_stats/$VISIT"
-    cp -r "$VISIT_DIR/stats" "$DRIVE_ROOT/freesurfer_stats/$VISIT/"
-    cp "$VISIT_DIR/mri/aparc+aseg.mgz" "$DRIVE_ROOT/freesurfer_stats/$VISIT/"
-    # 3. Delete bulky local FreeSurfer dirs
-    rm -rf "$VISIT_DIR/mri" "$VISIT_DIR/surf" "$VISIT_DIR/label" "$VISIT_DIR/scripts"
-  done
-done
-
-du -sh "$DRIVE_ROOT"        # expect ~30 GB
-du -sh data/02_freesurfer/  # expect <5 GB after cleanup
+cd ~
+git clone https://github.com/bddupre92/PD_PHD.git pd_phd
+cd pd_phd
+# Switch to the paper12 worktree branch
+git fetch origin feat/paper12-phys-gimin
+git checkout feat/paper12-phys-gimin
 ```
 
-**Do NOT delete `PPMI_MRI_1/` or `PPMI MRI_2/` raw directories until every PATNO has confirmed Drive-side tarball + SQL row.** Archive is append-only; reviewers may ask for raw DICOM access during peer review. Drive sync is cheaper than re-downloading from LONI IDA later.
+### Step 3 — Copy the NIfTI tarball + license to WSL2
+
+From Mac (sync to Google Drive or direct SCP):
+- `/tmp/nifti_wang_n161.tar.gz` (4.9 GB)
+- `paper12_phys_gimin/data/license.txt`
+
+To WSL2 Ubuntu:
+- Download from Drive, or SCP over the LAN, or USB drive transfer
+- Target locations:
+  - `/home/<user>/fastsurfer_work/nifti_wang_n161.tar.gz`
+  - `/home/<user>/fastsurfer_work/license.txt`
+
+### Step 4 — Run the Windows/WSL2 FastSurfer batch
+
+**Script to be created next session:** `scripts/windows_wsl2_fastsurfer.sh`
+
+Design:
+- Auto-detect CPU count (`nproc`)
+- `N_PARALLEL = n_cpu / 4` (4 threads per FastSurfer scan)
+- Use `docker run --gpus all deepmi/fastsurfer:latest` with full pipeline (no `--seg_only`)
+- Each container: `--device cuda` for DL seg, CPU for surface recon
+- GPU shared across parallel containers (DL seg is brief ~20 sec, low VRAM ~3 GB per scan)
+- `xargs -P$N_PARALLEL` to launch concurrent containers
+- Idempotent resume (`stats/aseg+DKT.stats` + `stats/lh.aparc.DKTatlas.mapped.stats` check)
+- Output: per-subject dir under `/output/<subj_id>/`
+
+### Step 5 — Monitor + collect results
+
+```bash
+# Live tail
+tail -f ~/fastsurfer_work/batch.log
+
+# Progress check
+find ~/fastsurfer_work/fastsurfer_out -name 'aseg+DKT.stats' | wc -l   # X / 401
+```
+
+When done, tarball results:
+```bash
+cd ~/fastsurfer_work/fastsurfer_out
+tar -czf ~/fastsurfer_full_stats.tar.gz */stats/ */mri/aparc*.mgz
+```
+
+Then SCP to Mac for SQL load (W6 Step 8).
 
 ---
 
-## W7 + W8 (after W6)
+## Fallback paths if Windows desktop unavailable
 
-Sequenced per `Docs/superpowers/plans/2026-04-20-paper12-phase2-competitor-baselines.md`:
-
-- **W7a:** Demirkaya 2021 CKF clean-room (retinal SNR 22.56, MAPE gate [3.19, 3.89])
-- **W7b:** Zou 2025 MNODE-HGS clean-room (T1DEXI, RMSE gate [31.1, 37.9]) — parallel with W7a
-- **W8:** LagCNN clean-room (Weather 12.5% mask, MSE gate [0.025, 0.031]) as DL imputation baseline
-
-W7/W8 don't need additional data — the competitor original-dataset benchmarks use public data or synthetic.
+1. **Google Colab Pro** (user has subscription): run `scripts/paper12_fastsurfer_colab.ipynb`. ~10 hrs on A100 if available, ~20 hrs on T4. Zero new cost. File manually uploaded via Drive.
+2. **AWS c5.24xlarge** (96 vCPU): $4/hr × 4 hrs = ~$16. Clean SSH-based flow. Adapt `scripts/lightning_cpu_parallel_fastsurfer.sh` with minor path changes.
+3. **UND HPC Talon** (ticket already submitted): 72 cores, free, but 1-5 day approval wait.
 
 ---
 
-## Pre-compact status
+## Cross-device chat continuity (new Windows session)
 
-- **Git:** branch `feat/paper12-phys-gimin` is 23 commits ahead of main. Nothing uncommitted.
-- **SQL:** 718 MB · 185 tables · 14 schemas · 2 paper12 tables in `mechanistic`. Matches CLAUDE.md registry.
-- **Tests:** 94/94 passing.
-- **Compute options available:** Mac MPS (primary), PC RTX A5000 (per DUAL_MACHINE_SETUP.md), Colab Pro + UND HPC (future).
-- **Main-repo CLAUDE.md:** has uncommitted Phase 1 summary + registry drift on `feat/ch9-6-multichannel`. Stage in whatever commit happens next on that branch.
+**Claude Code conversations DO NOT sync across devices.** But the context persists via committed files:
 
-## Things NOT to forget
+1. **Memory files** — `~/.claude/projects/-Users-blair-dupre-Projects-CSCI-FALL-2025/memory/` (Mac-side). On Windows, Claude Code auto-loads from Windows-equivalent `.claude/projects/<project-hash>/memory/` — you'd need to manually recreate key memory files OR copy.
 
-1. When downloads land, **subsample to N=161 PD** if we overshoot (Wang's exact cohort), OR report a larger cohort in the manuscript as "extended Wang reproduction."
-2. **FreeSurfer version matters** for fidelity — Wang didn't specify. Use **v7.4.x** (most current, widely adopted) and document in `CLEAN_ROOM_NOTES.md`.
-3. **juliacall bridge** is fully working — reusable pattern if any other competitor (unlikely) also has Julia code.
-4. **Q2 gate amendment** (effect-size override) is pre-registered — Phase 2 results feeding into the gate use the amended rubric by default.
-5. Check `memory/paper12_phys_gimin_status.md` when resuming — always auto-loaded at session start.
+2. **What actually persists across devices (and is the "right" way)**:
+   - `paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md` (this file — committed)
+   - `paper12_phys_gimin/docs/PHASE_1_SUMMARY.md`
+   - `CLAUDE.md` (main project — committed)
+   - Everything in the git repo
+
+**Workflow on Windows:**
+1. Clone the repo
+2. Open Claude Code in the repo directory
+3. Give resume command: *"Read paper12_phys_gimin/docs/NEXT_STEPS_POST_COMPACT.md and main CLAUDE.md; pick up from the Windows/WSL2 setup step."*
+4. Claude Code reads these files automatically (via CLAUDE.md auto-load) and has full context.
+
+**VS Code extension "Settings Sync" does NOT sync Claude Code chat history** — only VS Code settings/extensions. Chat is per-device.
+
+---
+
+## Key artifacts to reference on Windows machine
+
+- Scripts folder: `scripts/`
+  - `lightning_cpu_parallel_fastsurfer.sh` — adaptable template (Linux CPU+Docker path)
+  - `local_fastsurfer_batch.py` — Mac Docker version (don't use on Windows; reference logic only)
+  - `paper12_fastsurfer_colab.ipynb` — Colab fallback
+  - `windows_wsl2_fastsurfer.sh` — **TO BE WRITTEN** next session
+- Manifests: `paper12_phys_gimin/data/wang_n161_manifest.csv`, `pd_full_cohort_manifest.csv`
+- Wang CNODE clean-room: `paper12_phys_gimin/baselines/wang_2025_cnode_ppmi/` (commit `9b7dd3e`)
+- Adapter: `paper12_phys_gimin/src/phys_gimin/baseline_adapters/cnode_adapter.py`
+- Tests: `paper12_phys_gimin/tests/test_wang_cnode.py` (5 tests, 99/99 suite)
+
+---
+
+## Current Mac state at session close
+
+- Mac Docker smoke test (PID 17079) may still be running — produced 3/3 valid `aseg+DKT.stats`
+- Safe to `kill $(pgrep -f local_fastsurfer_batch)` if you want to free Mac resources
+- `caffeinate` may still be backgrounded — `pkill caffeinate` to stop
+- `~/.lightning/credentials.json` set with correct bddupre92 UUID
+- Lightning Studio `paper12-fastsurfer` is Stopped (billing halted)
