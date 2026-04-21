@@ -84,7 +84,10 @@ def load_scans() -> list[tuple[str, Path]]:
 
 
 def is_complete(subj_id: str) -> bool:
-    return (OUTPUT_DIR / subj_id / "stats" / "aseg.stats").exists()
+    """FastSurfer --seg_only writes stats/aseg+DKT.stats (68 subcortical volumes,
+    Desikan-Killiany atlas). NOT stats/aseg.stats — that's FreeSurfer's classic
+    output which only appears after full surface recon."""
+    return (OUTPUT_DIR / subj_id / "stats" / "aseg+DKT.stats").exists()
 
 
 def run_one(subj_id: str, nifti: Path, threads: int) -> tuple[str, float]:
