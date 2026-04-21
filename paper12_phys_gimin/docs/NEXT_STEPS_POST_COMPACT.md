@@ -56,6 +56,13 @@ Cost: $0 compute.
 3. `git` installed (or download repo ZIP)
 4. ~50 GB free disk for Docker image + outputs
 
+### IMPORTANT: Why WSL2 + Docker — FreeSurfer is Linux-only
+
+FreeSurfer doesn't run natively on Windows. The pipeline is:
+- Windows 11 host → WSL2 Ubuntu 22.04 (real Linux kernel) → Docker Desktop (Linux containers via WSL2 backend) → `deepmi/fastsurfer` container (Ubuntu 22 + FreeSurfer 7.4.1)
+
+No emulation layer (unlike Mac where x86 Docker runs under Rosetta). Docker on Windows runs containers natively on x86_64 hardware — expect ~2-3 min/scan vs Mac's 23-50 min.
+
 ### Step 1 — Install WSL2 + Docker Desktop (one-time, ~30 min)
 
 In Windows PowerShell (Admin):
