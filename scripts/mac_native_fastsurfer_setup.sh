@@ -48,12 +48,28 @@ install_deps() {
     git clone --depth 1 --branch stable https://github.com/Deep-MI/FastSurfer.git "$FASTSURFER_DIR"
   fi
 
-  echo "[install] Installing PyTorch with MPS + FastSurfer deps..."
+  echo "[install] Installing PyTorch (Apple Silicon MPS-capable, no CUDA)..."
   # Apple Silicon wheels — torch auto-selects MPS on M-series
   pip install -q "torch>=2.2" "torchvision>=0.17"
-  cd "$FASTSURFER_DIR"
-  pip install -q -r requirements.txt
-  cd -
+
+  echo "[install] Installing FastSurfer runtime deps (CUDA pins filtered out)..."
+  # FastSurfer's requirements.txt pins nvidia-*-cu12 packages that don't exist
+  # on macOS ARM64. Install the actually-needed CPU/MPS-compatible deps directly.
+  pip install -q \
+    "nibabel>=4.0" \
+    "numpy<2.0" \
+    "scipy>=1.10" \
+    "scikit-image>=0.19" \
+    "torchio>=0.19" \
+    "tqdm>=4.60" \
+    "pyyaml>=6.0" \
+    "yacs>=0.1.8" \
+    "h5py>=3.8" \
+    "matplotlib>=3.6" \
+    "pandas>=2.0" \
+    "lapy>=1.0" \
+    "simpleitk>=2.3" \
+    "requests>=2.30"
 
   echo "[install] DONE. Test with: bash $0 test"
 }
