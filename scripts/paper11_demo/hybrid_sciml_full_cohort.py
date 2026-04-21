@@ -332,6 +332,10 @@ def evaluate_records(
     *,
     mode: str,
     k_rate: float = K_AGE_LIT_RATE,
+    solver_method: str = "dopri5",
+    solver_atol: float = 1e-4,
+    solver_rtol: float = 1e-3,
+    solver_step_size: float | None = None,
 ) -> list[dict]:
     """Per-patient last-scan eval.
 
@@ -372,7 +376,9 @@ def evaluate_records(
             # the full trajectory from s[0].
             model.set_context(f, t[:-1], s[:-1])
             try:
-                pred = odeint(model, s[0:1], t, method="dopri5", atol=1e-4, rtol=1e-3)
+                _opts = {"step_size": solver_step_size} if solver_step_size is not None else {}
+                pred = odeint(model, s[0:1], t, method=solver_method,
+                              atol=solver_atol, rtol=solver_rtol, options=_opts)
             except Exception as exc:
                 eval_failures += 1
                 if not first_failure_logged:
@@ -458,6 +464,10 @@ def train_with_early_stopping(
     lambda_physics: float,
     lambda_monotone: float,
     lr: float = 1e-3,
+    solver_method: str = "dopri5",
+    solver_atol: float = 1e-4,
+    solver_rtol: float = 1e-3,
+    solver_step_size: float | None = None,
 ) -> dict:
     """Train with val-last-scan MAE early stopping. Returns history dict and best state dict."""
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -486,7 +496,9 @@ def train_with_early_stopping(
             # held-out last scan) as context for residual computations.
             model.set_context(f, t_train, s_train)
             try:
-                pred_train = odeint(model, s_train[0:1], t_train, method="dopri5", atol=1e-4, rtol=1e-3)
+                _opts = {"step_size": solver_step_size} if solver_step_size is not None else {}
+                pred_train = odeint(model, s_train[0:1], t_train, method=solver_method,
+                                    atol=solver_atol, rtol=solver_rtol, options=_opts)
             except Exception as exc:
                 epoch_failures += 1
                 if epoch == 0 and epoch_failures == 1:
@@ -529,7 +541,11 @@ def train_with_early_stopping(
         train_losses.append(epoch_train_loss)
 
         # --- val-last-scan MAE ---
-        val_eval = evaluate_records(model, val_records, mode="deep")
+        val_eval = evaluate_records(
+            model, val_records, mode="deep",
+            solver_method=solver_method, solver_atol=solver_atol,
+            solver_rtol=solver_rtol, solver_step_size=solver_step_size,
+        )
         val_agg = aggregate_metrics(val_eval)
         val_mae = val_agg["test_mae"]
         val_maes.append(val_mae)
@@ -690,6 +706,16 @@ def parse_args() -> argparse.Namespace:
                    help="Optional smoke-test cap on #val patients (default: no cap).")
     p.add_argument("--test-cap", type=int, default=None,
                    help="Optional smoke-test cap on #test patients (default: no cap).")
+    p.add_argument("--solver-method", type=str, default="dopri5",
+                   choices=["dopri5", "dopri8", "rk4", "euler", "midpoint", "bosh3", "adaptive_heun"],
+                   help="torchdiffeq ODE solver (default dopri5).")
+    p.add_argument("--solver-atol", type=float, default=1e-4,
+                   help="Absolute tolerance for adaptive solvers (default 1e-4).")
+    p.add_argument("--solver-rtol", type=float, default=1e-3,
+                   help="Relative tolerance for adaptive solvers (default 1e-3).")
+    p.add_argument("--solver-step-size", type=float, default=None,
+                   help="Fixed step size in years for fixed-step solvers (rk4, euler). "
+                        "Default None means adaptive solvers only.")
     return p.parse_args()
 
 
@@ -698,6 +724,14 @@ def main() -> None:
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
+
+    # ODE solver keyword args (threaded through train + eval for sensitivity sweeps)
+    solver_kwargs = {
+        "solver_method": args.solver_method,
+        "solver_atol": args.solver_atol,
+        "solver_rtol": args.solver_rtol,
+        "solver_step_size": args.solver_step_size,
+    }
 
     out_dir = OUT_ROOT / args.config_id
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -778,11 +812,11 @@ def main() -> None:
             model_a, train_records, val_records,
             epochs=args.epochs, patience=args.patience,
             lambda_physics=0.0, lambda_monotone=args.lambda_monotone,  # no phys pen on pure NN
-            lr=1e-3,
+            lr=1e-3, **solver_kwargs,
         )
-        eval_a_train = evaluate_records(model_a, train_records, mode="deep")
-        eval_a_val = evaluate_records(model_a, val_records, mode="deep")
-        eval_a_test = evaluate_records(model_a, test_records, mode="deep")
+        eval_a_train = evaluate_records(model_a, train_records, mode="deep", **solver_kwargs)
+        eval_a_val = evaluate_records(model_a, val_records, mode="deep", **solver_kwargs)
+        eval_a_test = evaluate_records(model_a, test_records, mode="deep", **solver_kwargs)
         agg_a_test = aggregate_metrics(eval_a_test)
         print(f"  [pure_nn] test MAE={agg_a_test['test_mae']:.4f}  best_val={hist_a['best_val_mae']:.4f}"
               f"  @epoch {hist_a['best_epoch'] + 1}")
@@ -819,11 +853,11 @@ def main() -> None:
             model_b, train_records, val_records,
             epochs=args.epochs, patience=args.patience,
             lambda_physics=args.lambda_physics, lambda_monotone=args.lambda_monotone,
-            lr=1e-3,
+            lr=1e-3, **solver_kwargs,
         )
-        eval_b_train = evaluate_records(model_b, train_records, mode="deep")
-        eval_b_val = evaluate_records(model_b, val_records, mode="deep")
-        eval_b_test = evaluate_records(model_b, test_records, mode="deep")
+        eval_b_train = evaluate_records(model_b, train_records, mode="deep", **solver_kwargs)
+        eval_b_val = evaluate_records(model_b, val_records, mode="deep", **solver_kwargs)
+        eval_b_test = evaluate_records(model_b, test_records, mode="deep", **solver_kwargs)
         agg_b_test = aggregate_metrics(eval_b_test)
         learned_k = float(np.exp(model_b.log_k_age.item()))
         print(f"  [hybrid] test MAE={agg_b_test['test_mae']:.4f}  best_val={hist_b['best_val_mae']:.4f}"
@@ -909,6 +943,10 @@ def main() -> None:
         "gru_state_aware": bool(args.gru_state_aware),
         "gru_hidden": int(args.gru_hidden),
         "gru_dropout": float(args.gru_dropout),
+        "solver_method": str(args.solver_method),
+        "solver_atol": float(args.solver_atol),
+        "solver_rtol": float(args.solver_rtol),
+        "solver_step_size": (None if args.solver_step_size is None else float(args.solver_step_size)),
         "seed": int(args.seed),
         "epochs_max": int(args.epochs),
         "patience": int(args.patience),
