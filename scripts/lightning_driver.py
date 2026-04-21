@@ -148,6 +148,7 @@ def main() -> int:
     ap.add_argument("--dual-gpu", action="store_true", help="Use 2× A100 40GB (halves wall-clock at same total $)")
     ap.add_argument("--single-gpu", action="store_true", help="Use 1× A100 40GB (default)")
     ap.add_argument("--install-only", action="store_true", help="Install phase only (debug, no GPU switch)")
+    ap.add_argument("--skip-upload", action="store_true", help="Skip SDK upload (use when files were uploaded via web UI). Still orchestrates start/install/GPU-switch/run/stop.")
     ap.add_argument("--teamspace", default=None, help="Override teamspace (default: user's default)")
     args = ap.parse_args()
 
@@ -173,13 +174,30 @@ def main() -> int:
         studio.start(machine=cpu_machine)
         print(f"[driver] Studio running on {studio.machine}")
 
-        # ---- Upload files ----
-        upload_if_missing(studio, LOCAL_SETUP_SH, "lightning_fastsurfer_setup.sh")
-        studio.run("chmod +x lightning_fastsurfer_setup.sh")
+        # ---- Upload files (optional: skip if user uploaded via web UI) ----
+        if args.skip_upload:
+            print("[driver] --skip-upload: expecting files already present via web UI")
+            missing = []
+            for fname in ["lightning_fastsurfer_setup.sh"] + (
+                [] if args.install_only else ["nifti_wang_n161.tar.gz", "license.txt"]
+            ):
+                ls = studio.run(f"ls -la {fname} 2>/dev/null || echo MISSING")
+                if "MISSING" in ls:
+                    missing.append(fname)
+                else:
+                    print(f"[check] {fname} present ✓")
+            if missing:
+                raise RuntimeError(
+                    f"--skip-upload: these files are NOT in the Studio: {missing}. "
+                    "Upload them via web UI first (lightning.ai/bddupre92/vision-model/studios/paper12-fastsurfer)."
+                )
+        else:
+            upload_if_missing(studio, LOCAL_SETUP_SH, "lightning_fastsurfer_setup.sh")
+            if not args.install_only:
+                upload_if_missing(studio, LOCAL_NIFTI_TAR, "nifti_wang_n161.tar.gz")
+                upload_if_missing(studio, LOCAL_LICENSE, "license.txt")
 
-        if not args.install_only:
-            upload_if_missing(studio, LOCAL_NIFTI_TAR, "nifti_wang_n161.tar.gz")
-            upload_if_missing(studio, LOCAL_LICENSE, "license.txt")
+        studio.run("chmod +x lightning_fastsurfer_setup.sh")
 
         # ---- Install phase on CPU ----
         print("[driver] Running install phase on CPU...")
@@ -207,13 +225,21 @@ def main() -> int:
         # ---- Poll ----
         success = wait_for_process_phase(studio)
 
-        # ---- Download results ----
+        # ---- Download results (optional: may also hit 403 on notify_completion) ----
         if success:
-            print(f"[driver] Downloading results tarball...")
-            LOCAL_RESULTS.parent.mkdir(parents=True, exist_ok=True)
-            studio.download_file("fastsurfer_stats.tar.gz", str(LOCAL_RESULTS))
-            size_mb = LOCAL_RESULTS.stat().st_size / 1e6
-            print(f"[driver] Saved {LOCAL_RESULTS} ({size_mb:.1f} MB)")
+            if args.skip_upload:
+                # If uploads were broken, downloads likely are too — tell user to pull via web UI
+                print("[driver] --skip-upload flag also applies to download.")
+                print("[driver] Results tarball is READY at:")
+                print("           lightning.ai/bddupre92/vision-model/studios/paper12-fastsurfer")
+                print("           File: fastsurfer_stats.tar.gz (in Studio root)")
+                print("[driver] Download it via web UI → save to paper12_phys_gimin/data/fastsurfer_stats.tar.gz")
+            else:
+                print(f"[driver] Downloading results tarball...")
+                LOCAL_RESULTS.parent.mkdir(parents=True, exist_ok=True)
+                studio.download_file("fastsurfer_stats.tar.gz", str(LOCAL_RESULTS))
+                size_mb = LOCAL_RESULTS.stat().st_size / 1e6
+                print(f"[driver] Saved {LOCAL_RESULTS} ({size_mb:.1f} MB)")
 
         # ---- Teardown ----
         print(f"[driver] Switching back to CPU (free tier)...")
