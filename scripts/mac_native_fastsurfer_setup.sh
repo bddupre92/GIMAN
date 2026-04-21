@@ -24,10 +24,21 @@ LICENSE=/Users/blair.dupre/.config/superpowers/worktrees/CSCI-FALL-2025/feat-pap
 MANIFEST=/Users/blair.dupre/.config/superpowers/worktrees/CSCI-FALL-2025/feat-paper12-phys-gimin/paper12_phys_gimin/data/wang_n161_manifest.csv
 
 install_deps() {
-  echo "[install] Creating venv at $VENV (Python 3.11)..."
+  # Prefer 3.11 (official FastSurfer), fall back to 3.12 (tested works)
+  local PY=""
+  for v in 3.11 3.12; do
+    local cand=/opt/homebrew/bin/python${v}
+    if [ -x "$cand" ]; then PY=$cand; break; fi
+    cand=$(command -v python${v})
+    if [ -x "$cand" ]; then PY=$cand; break; fi
+  done
+  if [ -z "$PY" ]; then
+    echo "ERROR: need Python 3.11 or 3.12 (brew install python@3.11)"; exit 1
+  fi
+  echo "[install] Using $PY"
+  echo "[install] Creating venv at $VENV..."
   if [ ! -d "$VENV" ]; then
-    /opt/homebrew/bin/python3.11 -m venv "$VENV" || python3.11 -m venv "$VENV" || \
-      { echo "ERROR: need Python 3.11 (brew install python@3.11)"; exit 1; }
+    "$PY" -m venv "$VENV" || { echo "ERROR: venv creation failed"; exit 1; }
   fi
   source "$VENV/bin/activate"
   pip install -q --upgrade pip
