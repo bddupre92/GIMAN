@@ -157,10 +157,14 @@ def main() -> int:
     gpu_machine = Machine.A100_40GB_X_2 if args.dual_gpu else Machine.A100_40GB
     cpu_machine = Machine.CPU_X_4
 
-    print(f"[driver] Attaching Studio '{STUDIO_NAME}' (teamspace={args.teamspace or 'default'})")
-    studio_kwargs = {"name": STUDIO_NAME, "create_ok": True}
-    if args.teamspace:
-        studio_kwargs["teamspace"] = args.teamspace
+    teamspace = args.teamspace or os.environ.get("LIGHTNING_TEAMSPACE")
+    username = os.environ.get("LIGHTNING_USERNAME")
+    print(f"[driver] Attaching Studio '{STUDIO_NAME}' (teamspace={teamspace or 'auto'}, user={username or 'auto'})")
+    studio_kwargs: dict = {"name": STUDIO_NAME, "create_ok": True}
+    if teamspace:
+        studio_kwargs["teamspace"] = teamspace
+    if username:
+        studio_kwargs["user"] = username
     studio = Studio(**studio_kwargs)
 
     try:
