@@ -77,7 +77,26 @@ We evaluated the winning configuration's stability across cohort partition by re
 
 The per-fold test MAE was $0.1411 \pm 0.0159$ (SD, range $[0.1192, 0.1588]$), with a coefficient of variation of $11.3\%$. The $95\%$ confidence interval on the mean per-fold MAE (t-distribution, 4 degrees of freedom) was $[0.1213, 0.1609]$. Pooling all 428 patient-level predictions across folds yields an identical MAE of $0.1411$ and a pooled paired bootstrap difference against the pure-mechanistic fair baseline of $\Delta = -0.0528$, $95\%$ CI $[-0.0649, -0.0406]$ (1{,}000 resamples). All five fold-wise $95\%$ confidence intervals individually excluded zero, and the learned $k_\text{age}$ across folds was $0.045 \pm 0.013$/yr --- empirically recovering the Dzialas 2025 putamen-specific range ($4$--$6\%$/yr) at every fold of the cohort.
 
-As a secondary confirmation, we additionally re-trained the winning configuration on an independent random 70/15/15 cohort split (seed $=2026$). The resulting test MAE of $0.135$ falls within the k-fold confidence interval, and the corresponding paired $\Delta = -0.068$ $[-0.102, -0.036]$ is consistent with the pooled k-fold estimate. The winning configuration therefore generalises across both a pre-registered partition and a full cross-validated partition structure.
+Three complementary analyses of the same winning configuration are reported together in Table~\ref{tab:p11_validation_analyses} for transparency. The real 5-fold cross-validation is the primary result (non-overlapping test folds, each patient evaluated exactly once). We additionally report a repeated random-subsample analysis (five independent $70/15/15$ random splits with seeds $\{7, 42, 1337, 2025, 2026\}$) for completeness; its mean MAE of $0.128 \pm 0.016$ is $0.013$ below the real k-fold mean because patient overlap between test sets implicitly weights ``easy'' patients more heavily. The original single-seed headline ($0.152$ at seed $=42$) is visibly the most pessimistic draw of the five, and is therefore a selection-biased point estimate; we retain it in other subsections (grid sweep, solver sensitivity, architecture ablation) as a reproducible reference configuration but do not use it as the primary accuracy claim.
+
+\begin{table}[ht]
+\centering
+\caption{Three validation analyses of the same winning configuration ($\lambda_\text{physics} = 0.1$, $\lambda_\text{monotone} = 0.1$, MLP residual). The real k-fold analysis is the primary result; repeated random subsampling carries a small optimistic bias from test-set patient overlap and is reported for completeness.}
+\label{tab:p11_validation_analyses}
+\begin{tabular}{lccc}
+\toprule
+Analysis & Test MAE & $95\%$ CI & Notes \\
+\midrule
+Single seed $=42$ (prior headline) & $0.152$ & per-bootstrap & Worst of 5 seeds; selection-biased \\
+Repeated 5-seed (overlapping tests) & $0.128 \pm 0.016$ & $[0.108, 0.149]$ & Optimistic bias from overlap \\
+\textbf{Real 5-fold CV (non-overlapping)} & $\mathbf{0.141 \pm 0.016}$ & $\mathbf{[0.121, 0.161]}$ & \textbf{All 428 patients, each once} \\
+\midrule
+Option-B holdout (seed $=2026$ only) & $0.135$ & — & Independent pre-registered partition \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As a secondary confirmation of the k-fold estimate, the Option-B pre-registered holdout (seed $=2026$, a single $70/15/15$ random split never visited during hyperparameter search) yielded test MAE $0.135$ with paired $\Delta = -0.068$, $95\%$ CI $[-0.102, -0.036]$. This independent number falls within the k-fold confidence interval and is consistent with the pooled k-fold Δ estimate, confirming that the winning configuration generalises across both a pre-registered partition and a full cross-validated partition structure.
 
 \subsection{Monotonicity is the load-bearing regulariser}
 
