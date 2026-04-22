@@ -1,0 +1,65 @@
+{
+  "config": "lp=0.1, lm=0.1, MLP, seed=42 \u2014 prior sensitivity on k_age_init",
+  "k_age_init_tested": [
+    0.01,
+    0.025,
+    0.05
+  ],
+  "test_mae_per_init": [
+    0.15378077695002923,
+    0.15226525985277617,
+    0.15443265781952784
+  ],
+  "test_mae_range": [
+    0.15226525985277617,
+    0.15443265781952784
+  ],
+  "test_mae_spread": 0.0021673979667516663,
+  "learned_k_age_per_init": [
+    0.019589213170393707,
+    0.04499128785014824,
+    0.09852997178469489
+  ],
+  "all_cis_exclude_zero": true,
+  "per_config": [
+    {
+      "config_id": "prior_k_age_init_0.01",
+      "k_age_init": 0.01,
+      "test_mae": 0.15378077695002923,
+      "test_rmse": 0.2357439080375706,
+      "learned_k_age_per_yr": 0.019589213170393707,
+      "best_val_mae": 0.12023421202320606,
+      "best_epoch": 21,
+      "epochs_trained": 32,
+      "delta_vs_puremech_fair_point": -0.05138799905804975,
+      "delta_vs_puremech_fair_ci_lo": -0.08569718839262905,
+      "delta_vs_puremech_fair_ci_hi": -0.014273499100943714
+    },
+    {
+      "config_id": "grid_lp0.1_lm0.1_mlp",
+      "k_age_init": 0.025,
+      "test_mae": 0.15226525985277617,
+      "test_rmse": 0.2337172415876322,
+      "learned_k_age_per_yr": 0.04499128785014824,
+      "best_val_mae": 0.1178890309529379,
+      "best_epoch": 21,
+      "epochs_trained": 32,
+      "delta_vs_puremech_fair_point": -0.05290351615530281,
+      "delta_vs_puremech_fair_ci_lo": -0.08783304710843058,
+      "delta_vs_puremech_fair_ci_hi": -0.014163906537370603
+    },
+    {
+      "config_id": "prior_k_age_init_0.05",
+      "k_age_init": 0.05,
+      "test_mae": 0.15443265781952784,
+      "test_rmse": 0.2321753606449932,
+      "learned_k_age_per_yr": 0.09852997178469489,
+      "best_val_mae": 0.11660623189527541,
+      "best_epoch": 48,
+      "epochs_trained": 59,
+      "delta_vs_puremech_fair_point": -0.050736118188551144,
+      "delta_vs_puremech_fair_ci_lo": -0.08858121086391944,
+      "delta_vs_puremech_fair_ci_hi": -0.010063589082533648
+    }
+  ]
+}
