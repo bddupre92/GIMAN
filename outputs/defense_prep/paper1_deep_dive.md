@@ -227,7 +227,14 @@ Similarly, UPDRS-III subscales (tremor, rigidity, bradykinesia, axial) provide r
 
 ### 3.1a Feature Sets Used in Paper 1
 
-Paper 1 uses 22 multimodal features across 7 domains (submission Table II). The 12-feature subset used for external validation is a pre-specified intersection of features present in all four cohorts (PPMI, BioFIND, PDBP, HBS): AGE_AT_BASELINE, SEX, UPDRS1_TOTAL, UPDRS2_TOTAL, UPDRS3_TREMOR, UPDRS3_RIGIDITY, UPDRS3_BRADYKINESIA, UPDRS3_AXIAL, UPDRS4_TOTAL, MOCA_TOTAL, ESS_TOTAL, RBD_TOTAL. Supplementary S-3 reports a 33-feature sensitivity variant that adds 11 observed PPMI features (6 cortical thickness, 4 CSF biomarkers, 1 polygenic risk score) to test whether the MM-GAT's architectural gap to CatBoost is driven by feature count (see the 2026-04-22 update appended at the bottom of this deep-dive).
+Paper 1 uses 22 multimodal features across 7 domains (submission Table II). The 12-feature subset used for external validation is a pre-specified intersection of features present in all four cohorts (PPMI, BioFIND, PDBP, HBS): AGE_AT_BASELINE, SEX, UPDRS1_TOTAL, UPDRS2_TOTAL, UPDRS3_TREMOR, UPDRS3_RIGIDITY, UPDRS3_BRADYKINESIA, UPDRS3_AXIAL, UPDRS4_TOTAL, MOCA_TOTAL, ESS_TOTAL, RBD_TOTAL.
+
+Two pre-registered 33-feature sensitivity variants (both add the same 11 extensions: 6 cortical thickness per Fischl 2012, 4 CSF biomarkers per Mollenhauer 2017, 1 polygenic risk score per Nalls 2019):
+
+- **Supplementary S-3** — Multimodal GAT architectural test (3-modality, 32 features — GRS dropped in the initial raw-CSV ETL before the SQL-canonical assembly). Isolates whether the 2-modality MM-GAT's 12-13pp gap to CatBoost is architecture-limited or feature-count-limited. Closes the gap to -1.7pp on binary and -3.0pp on three-class; widens on full-ordinal and NSD+ due to partial-coverage median-imputation noise.
+- **Supplementary S-4** — Tabular null-result sensitivity (33 features, SQL-canonical). Same 11 extensions applied to all 7 tabular models + CatBoost. Pre-registered halt rule fired: >=3 of 4 targets regress within bootstrap-CI width. CatBoost-33 bal_acc: 0.951/0.772/0.650/0.650 vs 22-feat 0.951/0.783/0.660/0.664 on binary/three-class/full-ordinal/NSD+. **22-feat remains Paper 1's canonical schema.**
+
+Canonical source of truth for the 33-feature schema is the Postgres table `features.paper1_features_extended_33` (2,201 rows × 33 features, assembled via INNER JOIN of `features.paper1_features_with_targets` + `features.paper2_gimin_cohort` baseline-visit-per-PATNO). Coverage: GRS 81.3%, CTH 49.3%, CSF 33.7-39.0%. See `Docs/CONVENTIONS.md` for the SQL-as-source-of-truth standing rule established 2026-04-22 to prevent recurrence of prose-only feature-count claims.
 
 Throughout this deep-dive, "22-feature" refers to the 7-domain production feature set, "12-feature clinical-only" refers to the external-validation intersection, and CatBoost is reported as seeing ~20 features because UPDRS4_TOTAL and MOCA_TOTAL are dropped at model-fit time for >80% missingness. The Multimodal GAT partitions the same 22 features into 14 clinical + 8 biomarker encoder streams as an architectural constraint, not a feature-selection step.
 
@@ -570,16 +577,41 @@ After GATConv, **cross-modal attention** (`nn.MultiheadAttention`) lets each mod
 **Narrative change for the submission.** Grinsztajn-2022 holds, but the architecture-vs-feature-count question is now properly answered: on the two clinically most important targets (binary detection and three-class triage) the MM-GAT closes to within 1.7–3.0 pp of CatBoost when it is given the same imaging, CSF, and cortical-thickness information. On the rarer-class targets, the GAT's Extended-stream imputation noise outweighs the added signal. The submission's §V-B Discussion was updated with one paragraph summarising this (see the Phase 3e.3 edit in the 2026-04-22 pass); the full table is in Supplementary S-3 (`supplementary_gat_feature_sensitivity.md`).
 
 **Source artefacts.**
-- ETL: `scripts/paper1/assemble_extended_33_feat.py` (150 lines; PPMI file merges on PATNO, baseline-visit filter for CTH, earliest-of-BL/SC/V01/V02/V04 for CSF).
-- Data: `data/05_features/paper1_features_extended_33.csv` (2,201 × 48 columns = 38 base + 10 extra).
-- Benchmark runner: `scripts/run_enhanced_gat_3modality_benchmark.py` (forked from `scripts/run_enhanced_gat_benchmark.py`; 3-modality architecture with pairwise MHA inlined).
-- Results: `outputs/paper1_enhanced_gat_3mod/{binary,three_class,full_ordinal,nsd_positive}_results.json` + `summary.json`.
+- **ETL (S-3 original, raw-CSV-based, 32 features / GRS dropped)**: `scripts/paper1/assemble_extended_33_feat.py` (150 lines; PPMI file merges on PATNO, baseline-visit filter for CTH, earliest-of-BL/SC/V01/V02/V04 for CSF). Output: `data/05_features/paper1_features_extended_33.csv` (2,201 × 48 columns = 38 base + 10 extra, no GRS).
+- **Canonical SQL-sourced variant (S-4, 33 features)**: Postgres `features.paper1_features_extended_33` via assembler `scripts/paper1/create_sql_paper1_extended_33.py` (INNER JOIN of `features.paper1_features_with_targets` + `features.paper2_gimin_cohort` baseline-visit-per-PATNO; 81.3% GRS coverage recovered from `paper2_gimin_cohort` that the raw-CSV ETL missed). Null-rate report + feature metadata at `outputs/paper1_sql/{null_rate_report,metadata}.json`.
+- **GAT benchmark runner**: `scripts/run_enhanced_gat_3modality_benchmark.py` (forked from `scripts/run_enhanced_gat_benchmark.py`; 3-modality architecture with pairwise MHA inlined).
+- **Tabular benchmark runner (S-4)**: `scripts/run_paper1_benchmark_33feat.py` (forked from `scripts/run_paper1_benchmark.py` to read from Postgres via `giman_pipeline.data.db.read_sql()`, matches 22-feat hyperparameters for apples-to-apples comparison).
+- **Results**: `outputs/paper1_enhanced_gat_3mod/{binary,three_class,full_ordinal,nsd_positive}_results.json` + `summary.json` (S-3 GAT). `outputs/paper1_benchmark_33feat/{binary,three_class,full_ordinal,nsd_positive}_results.json` + `paper1_benchmark_33feat_report.md` (S-4 tabular null).
+
+### 3.6.2 Tabular 33-feature sensitivity — pre-registered null result (submission §IV-E + Supplementary S-4)
+
+Companion test to §3.6.1: the same 11 literature-grounded extensions (6 cortical thickness, 4 CSF biomarkers, 1 polygenic risk score) applied to all 7 tabular models + CatBoost on the SQL-canonical `features.paper1_features_extended_33` Postgres table. Unlike §3.6.1 which asked "does architecture-vs-feature-count matter for the MM-GAT?", this asks "does Paper 1's 22-feature canonical schema leave tabular signal on the table?" Pre-registered halt rule: HALT migration if ≥3 of 4 CatBoost targets regress on the 33-feat schema vs 22-feat.
+
+**Rule fired.** CatBoost 22-feat vs 33-feat balanced accuracy:
+
+| Target | 22-feat bal_acc | 33-feat bal_acc | Δ | Verdict |
+|---|---|---|---|---|
+| Binary | 0.951 | 0.951 | 0.000 | tie (ceiling) |
+| Three-class | 0.783 | 0.772 | −0.011 | regresses |
+| Full ordinal | 0.660 | 0.650 | −0.010 | regresses |
+| NSD+ subgroup | 0.664 | 0.650 | −0.014 | regresses |
+
+All deltas fall within bootstrap-CI width (~0.02-0.03) — statistically indistinguishable from zero but directionally consistent. **22-feat remains Paper 1's canonical schema.**
+
+**Mechanism** (two likely causes, consistent with §3.6.1 full-ordinal / NSD+ regression):
+
+1. **Median imputation of partially-observed biomarkers injects noise.** CSF covers 36.8% and CTH covers 49.3% of the 2,201-patient cohort. Median-imputation of the ~50-65% with missing values homogenises the feature space in a way that hurts rare-class discrimination (Stage 4 n=17, Stage 1 n=67).
+2. **DaT-SPECT already saturates the discrimination signal.** Submission Table III feature-ablation shows -25.2pp binary AUC without DaT. With DaT already in the 22-feat set, marginal information in CSF/CTH/GRS is small because these biomarkers correlate with the same underlying neurodegeneration signal DaT measures more directly.
+
+**Why this is a publishable null, not a failure.** Pre-registered decision rule + literature-grounded feature selection + matched hyperparameters + honest outcome reporting = textbook TRIPOD+AI robustness methodology. Reporting this null pre-empts the "why didn't you use more features?" reviewer objection and strengthens the paper's feature-selection rigor claim. Full submission write-up lives in `supplementary_tabular_33feat_sensitivity.md` (S-4) and a one-paragraph summary in §IV-E of the main submission.
+
+**SQL-as-source-of-truth convention (`Docs/CONVENTIONS.md`).** This migration also enshrined a standing project rule: every feature schema used by any paper MUST land in Postgres under `features.*` BEFORE any benchmark runs against it. The 2026-04-22 reality-check session discovered that the prior "46-feature" claim was prose-only — no SQL table, no CSV, no benchmark. The convention prevents recurrence by requiring (a) assembler script under `scripts/paper{N}/create_sql_paper{N}_{description}.py`, (b) feature metadata + null-rate JSON under `outputs/paper{N}_sql/`, (c) benchmark scripts that read from Postgres via `read_sql()` rather than CSV. CLAUDE.md Schemas table updated in the same commit (`72cba6f`).
 
 ### 3.7 Feature Ablation: DaT-SBR Is the Critical Feature
 
 Submission Table III (§IV-E) — full 22-feature model vs. 12-feature clinical-only subset (CatBoost AUC, 5-fold CV):
 
-| Target | Full (46) AUC | Clinical (12) AUC | Δ |
+| Target | Full (22) AUC | Clinical (12) AUC | Δ |
 |--------|---------------|-------------------|---|
 | Binary | 0.979 | 0.727 | **−25.2%** |
 | Three-class | **0.944** | 0.797 | **−15.6%** |
@@ -868,7 +900,7 @@ This section consolidates what was tested, how, and with what quantitative outco
 
 Canonical results are in submission Table III (§IV-E); also see §3.7 above. AUC values (full 22-feature / clinical 12-feature / Δ):
 
-| Target | Full (46) AUC | Clinical (12) AUC | Δ | Interpretation |
+| Target | Full (22) AUC | Clinical (12) AUC | Δ | Interpretation |
 |---|---|---|---|---|
 | Binary | 0.979 | 0.727 | **−25.2%** | DaT-SBR essential |
 | Three-class | 0.944 | 0.797 | −15.6% | DaT-SBR important |
@@ -1112,6 +1144,33 @@ LRRK2_CARRIER, GBA_CARRIER, APOE_E4_CARRIER
 
 That is 22 feature columns + 4 target columns + 12 staging-metadata columns = 38 columns total. `scripts/run_paper1_benchmark.py:69` additionally drops `UPDRS4_TOTAL` and `MOCA_TOTAL` at model-fit time (HIGH_MISS_COLS), so CatBoost sees 20 features. The Multimodal GAT architecture code (`scripts/run_enhanced_gat_benchmark.py:51,70`) lists CLINICAL_FEATURES (15 nominal, includes UPDRS3_TOTAL and UPDRS3_POSTURE_GAIT which are absent from the CSV — so effectively 13) and BIOMARKER_FEATURES (7 nominal, includes PUTAMEN_*_SBR and UPSIT which are absent from the CSV — so effectively 3). The submission's 14/8 split is the honest partition given the 22-feature CSV reality; the GAT runner script is stale and should be refreshed in a future pass to match, but that is a code-level cleanup rather than a manuscript correction.
 
+## Fix-Log 2026-04-22 (afternoon/evening) — SQL canonicalisation + 33-feat null + cross-paper reconciliation
+
+After the morning reality-check pass, further work was done across six commits (`72cba6f` → `c1c4485`) to:
+
+1. **Enshrine SQL-as-source-of-truth** (commit `72cba6f`): new `Docs/CONVENTIONS.md` codifies that every feature schema must live in Postgres under `features.*` BEFORE any benchmark runs against it. Prevents recurrence of the 46-feature-prose-only failure class. CLAUDE.md Schemas table updated (features row: 6 → 7 tables, adds `paper1_features_extended_33`; DB size 739 → 740 MB, tables 188 → 189).
+
+2. **Pre-registered 33-feature tabular null result** (commits `72cba6f` + `dd76c29`): same 11 extensions as §3.6.1 applied to all 7 tabular models. Halt rule (≥3 of 4 targets regress) fired; CatBoost-33 bal_acc 0.951/0.772/0.650/0.650 vs 22-feat 0.951/0.783/0.660/0.664. 22-feat confirmed as canonical. New §3.6.2 (this deep dive) + new Supplementary S-4 (`supplementary_tabular_33feat_sensitivity.md`) + new §IV-E paragraph in submission + new `\bibitem{nalls2019}`.
+
+3. **Cross-paper reconciliation** (commit `fa1f864`): dissertation chapter `ch03_paper1.tex` was on the stale 46-feature narrative; reverted to 22-feat canonical matching the submission. Also fixed cover letter contribution #3 ("full 46-feature" → "full 22-feature" + S-4 reference), Supplementary TRIPOD+AI items 7a + 15b (46-feature refs → 22-feature), and cross-refs at lines 135 + 186 of submission (added S-4 alongside S-3 for the tabular-vs-GAT distinction).
+
+4. **IEEE JBHI table-layout fixes** (commit `c1c4485`): Table IV (Graph-Based Model Comparison) dropped the redundant Gap column (5→4 cols) to fit single-column IEEE width; Table VII (Training-strategy sweep) converted `\begin{table}` → `\begin{table*}` (both columns) with `\cmidrule`-separated PPMI / BioFIND super-headers.
+
+5. **Audit DB refresh** (commit `4ffe164`): `scripts/defense_prep/{01,02,07,99}_*.py` pipeline run. 2,924 claims total, 93% verified, **0 contradicted, 0 critical flags**. The 33-feat null result did NOT invalidate any existing claim (claims are keyed to the 22-feat canonical benchmark numbers, which are unchanged).
+
+6. **Final commit arc** (post-reality-check): `60b723f` conformal sensitivity S-2 · `5aa1189` reality-check to 22-feat + GAT sensitivity S-3 · `72cba6f` SQL convention + 33-feat tabular null · `dd76c29` S-4 supplementary + nalls2019 · `fa1f864` cross-paper reconciliation · `4ffe164` audit DB · `c1c4485` Table IV/VII layout.
+
+**Paper 1 final submission state**:
+
+- 22-feature canonical schema, literature-grounded, circularity-audited, ablation-validated
+- 4-configuration HC-confound mitigation (§IV-H)
+- 3 pre-registered sensitivity supplementaries: S-2 (conformal calibration), S-3 (GAT architecture), S-4 (tabular null)
+- Main PDF 726 KB, compiles clean
+- Dissertation + submission + cover letter + TRIPOD+AI + all 4 supplementaries cross-consistent
+- SQL-as-source-of-truth enshrined for future work
+
+Grep verification across submission + dissertation: `grep -niE "46.feature|46 features|10 domains|46 multimodal|forty-six"` returns EMPTY (all historical references resolved).
+
 ---
 
-*Document generated for dissertation defense preparation. All metrics cited from actual output JSONs in `outputs/paper1_benchmark/`, `outputs/paper1_conformal/`, and `outputs/external_validation/`, plus submission tables in `outputs/mechanistic_twin/paper1_submission/ieee-jbhi/chapter_content.tex`. All file paths verified against the codebase.*
+*Document generated for dissertation defense preparation. All metrics cited from actual output JSONs in `outputs/paper1_benchmark/`, `outputs/paper1_benchmark_33feat/`, `outputs/paper1_conformal/`, `outputs/paper1_enhanced_gat_3mod/`, and `outputs/external_validation/`, plus submission tables in `outputs/mechanistic_twin/paper1_submission/ieee-jbhi/chapter_content.tex`. All file paths verified against the codebase. Canonical feature schema source: Postgres `features.paper1_features_with_targets` (22-feat production) and `features.paper1_features_extended_33` (33-feat sensitivity).*
