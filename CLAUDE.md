@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 731 MB · 187 tables across 14 schemas** (verified 2026-04-21 (post-p11-rigor-session)).
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 740 MB · 189 tables across 14 schemas** (verified 2026-04-22 (post-paper1-extended-33-load)).
 
 **Schemas:**
 
@@ -30,11 +30,11 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `pdbp_raw` | 52 | PDBP tables (external prediction cohort + April 2026 LONI IDA reload: +34 tables, includes DLB SPECT metadata) |
 | `hbs_raw` | 11 | HBS tables (external prediction cohort) |
 | `staging` | 3 | `nsd_iss_staging_results` (PPMI 2,201), `biofind_nsd_iss_staging` (103), `nsd_iss_staging_enriched` |
-| `features` | 6 | `paper1_features_with_targets` (PPMI 2,201×22), `biofind_features`, `pdbp_features`, `hbs_features`, `paper2_gimin_cohort` (35,687×40 GIMIN full cohort), `paper2_gimin_missingness_mask` (35,687×40 matching mask, 1=observed) |
+| `features` | 7 | `paper1_features_with_targets` (PPMI 2,201×22), **`paper1_features_extended_33` (PPMI 2,201×33, CANONICAL from 2026-04-22; 22 base + 11 extensions: 6 cortical thickness, 4 CSF biomarkers, 1 polygenic risk score; see [docs/CONVENTIONS.md](docs/CONVENTIONS.md) §1)**, `biofind_features`, `pdbp_features`, `hbs_features`, `paper2_gimin_cohort` (35,687×40 GIMIN full cohort), `paper2_gimin_missingness_mask` (35,687×40 matching mask, 1=observed) |
 | `longitudinal` | 4 | `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | 1 | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | 2 | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
-| `mechanistic` | 29 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke results `paper12_w4_smoke_results` + Q2 gate verdict `paper12_q2_gate_verdict`, Paper 11 SciML: grid + k-fold + ODE-sensitivity + prior-sensitivity + holdout configs (42 configs / 130 summary rows / 54,746 per-patient result rows as of 2026-04-21)) |
+| `mechanistic` | 30 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke + Q2 gate verdict, Paper 11 SciML configs, **Paper 12 W6 Wang FastSurfer features `paper12_wang_features` (400 scans × 161 pts × 109 structures = 43,600 rows, 2026-04-22)**) |
 | `reference` | 9 | LONI data dictionaries, harmonized code lists, biomarker dashboards, PPMI project catalog, `phase5_bibliography` |
 | `audit` | 12 | Defense-prep claim lineage — `chapter`, `citation`, `citation_use`, `claim`, `code_artifact`, `data_source` and link tables |
 
