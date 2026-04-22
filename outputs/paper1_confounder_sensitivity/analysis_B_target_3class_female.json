@@ -1,0 +1,135 @@
+{
+  "catboost": {
+    "model_name": "catboost",
+    "target_name": "target_3class_female",
+    "n_classes": 3,
+    "n_samples": 1351,
+    "train_time_seconds": 1.9047648906707764,
+    "predict_time_seconds": 0.004305839538574219,
+    "aggregate": {
+      "balanced_accuracy": 0.776685419596812,
+      "weighted_f1": 0.8797527370494255,
+      "macro_f1": 0.7692213283517632,
+      "cohen_kappa": 0.7556351414458322,
+      "quadratic_weighted_kappa": 0.8559325687188737,
+      "log_loss": 0.3338334567635764,
+      "per_class_recall": {
+        "0": 0.9422222222222222,
+        "1": 0.5555555555555556,
+        "2": 0.8322784810126582
+      },
+      "macro_auc_ovr": 0.941589025812883,
+      "weighted_auc_ovr": 0.9649133600103266,
+      "mean_absolute_error": 0.8161501116863293
+    },
+    "fold_metrics": [
+      {
+        "balanced_accuracy": 0.8466820987654321,
+        "weighted_f1": 0.9100539491338644,
+        "macro_f1": 0.8319595197488057,
+        "cohen_kappa": 0.8166143352100477,
+        "quadratic_weighted_kappa": 0.8819999242739768,
+        "log_loss": 0.30385031807770274,
+        "per_class_recall": {
+          "0": 0.9555555555555556,
+          "1": 0.7407407407407407,
+          "2": 0.84375
+        },
+        "macro_auc_ovr": 0.9557155484647168,
+        "weighted_auc_ovr": 0.9748231179922101,
+        "mean_absolute_error": 0.8148581854822238
+      },
+      {
+        "balanced_accuracy": 0.7944444444444444,
+        "weighted_f1": 0.8911881977671451,
+        "macro_f1": 0.7825956937799043,
+        "cohen_kappa": 0.7797356828193832,
+        "quadratic_weighted_kappa": 0.886535552193646,
+        "log_loss": 0.30718190005012386,
+        "per_class_recall": {
+          "0": 0.9388888888888889,
+          "1": 0.5555555555555556,
+          "2": 0.8888888888888888
+        },
+        "macro_auc_ovr": 0.9499285412925301,
+        "weighted_auc_ovr": 0.9706361039873295,
+        "mean_absolute_error": 0.825925925925926
+      },
+      {
+        "balanced_accuracy": 0.6779541446208114,
+        "weighted_f1": 0.8326361021936864,
+        "macro_f1": 0.6732376939539861,
+        "cohen_kappa": 0.6582466567607727,
+        "quadratic_weighted_kappa": 0.8040226921093347,
+        "log_loss": 0.4384937970349775,
+        "per_class_recall": {
+          "0": 0.9333333333333333,
+          "1": 0.37037037037037035,
+          "2": 0.7301587301587301
+        },
+        "macro_auc_ovr": 0.9017229611074664,
+        "weighted_auc_ovr": 0.9389137392894773,
+        "mean_absolute_error": 0.8111111111111111
+      },
+      {
+        "balanced_accuracy": 0.8086419753086419,
+        "weighted_f1": 0.8969890201350876,
+        "macro_f1": 0.8030624113021116,
+        "cohen_kappa": 0.7915632754342432,
+        "quadratic_weighted_kappa": 0.8825131959816107,
+        "log_loss": 0.2978257952113444,
+        "per_class_recall": {
+          "0": 0.9444444444444444,
+          "1": 0.5925925925925926,
+          "2": 0.8888888888888888
+        },
+        "macro_auc_ovr": 0.9547143324172609,
+        "weighted_auc_ovr": 0.9731190897463934,
+        "mean_absolute_error": 0.8150617283950617
+      },
+      {
+        "balanced_accuracy": 0.7556437389770722,
+        "weighted_f1": 0.8670929194125643,
+        "macro_f1": 0.7532319942974771,
+        "cohen_kappa": 0.7308746573635684,
+        "quadratic_weighted_kappa": 0.8238297872340425,
+        "log_loss": 0.32192652210553324,
+        "per_class_recall": {
+          "0": 0.9388888888888889,
+          "1": 0.5185185185185185,
+          "2": 0.8095238095238095
+        },
+        "macro_auc_ovr": 0.9496005538720396,
+        "weighted_auc_ovr": 0.9680413245594852,
+        "mean_absolute_error": 0.8138271604938272
+      }
+    ],
+    "bootstrap_cis": {
+      "balanced_accuracy": {
+        "value": 0.776685419596812,
+        "ci_low": 0.7444484701615794,
+        "ci_high": 0.8085346827155218
+      },
+      "weighted_f1": {
+        "value": 0.8797527370494255,
+        "ci_low": 0.8630690422944829,
+        "ci_high": 0.8977880534068143
+      },
+      "cohen_kappa": {
+        "value": 0.7556351414458322,
+        "ci_low": 0.7241081962765866,
+        "ci_high": 0.7896544050535278
+      },
+      "qwk": {
+        "value": 0.8559325687188737,
+        "ci_low": 0.8295716378132697,
+        "ci_high": 0.8834813188215687
+      },
+      "mae": {
+        "value": 0.8161501116863293,
+        "ci_low": 0.7792801039447163,
+        "ci_high": 0.8519251578319319
+      }
+    }
+  }
+}

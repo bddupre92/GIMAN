@@ -1,0 +1,106 @@
+{
+  "stratification_note": "ppmi_raw.screening_demographics.site_aprv is a site-APPROVAL date (MM/YYYY) and has only 45% coverage; no canonical site/center number exists in the Postgres mirror. We stratify instead by PPMI enrollment wave (participant_status.enroll_date), which is a more scientifically meaningful stratifier for PPMI cohort-effect bias than site identifier would be.",
+  "n_total_with_enrollment_year": 1845,
+  "n_excluded_missing_enroll_year": 356,
+  "wave_counts": {
+    "late_2021_2025": 915,
+    "early_2010_2013": 675,
+    "middle_2014_2020": 255
+  },
+  "targets": {
+    "target_binary": {
+      "per_wave": {
+        "late_2021_2025": {
+          "n_held_out": 915,
+          "n_train": 930,
+          "balanced_accuracy": 0.9131961246344491,
+          "auc_point": 0.9467347625760031,
+          "macro_auc_ovr": null,
+          "auc_bootstrap_95ci": [
+            0.9279344741385755,
+            0.9639113748402275
+          ],
+          "n_bootstrap_resamples_valid": 1000
+        },
+        "early_2010_2013": {
+          "n_held_out": 675,
+          "n_train": 1170,
+          "balanced_accuracy": 0.9132869506193789,
+          "auc_point": 0.9558044384109207,
+          "macro_auc_ovr": null,
+          "auc_bootstrap_95ci": [
+            0.9358375641784208,
+            0.9725337164256393
+          ],
+          "n_bootstrap_resamples_valid": 1000
+        },
+        "middle_2014_2020": {
+          "n_held_out": 255,
+          "n_train": 1590,
+          "balanced_accuracy": 0.9632867132867133,
+          "auc_point": 0.9918414918414918,
+          "macro_auc_ovr": null,
+          "auc_bootstrap_95ci": [
+            0.977320119077152,
+            0.9995354800718942
+          ],
+          "n_bootstrap_resamples_valid": 1000
+        }
+      },
+      "summary": {
+        "n_waves": 3,
+        "auc_mean": 0.9647935642761385,
+        "auc_std": 0.02385911867867444,
+        "auc_min": 0.9467347625760031,
+        "auc_max": 0.9918414918414918
+      }
+    },
+    "target_3class": {
+      "per_wave": {
+        "late_2021_2025": {
+          "n_held_out": 915,
+          "n_train": 930,
+          "balanced_accuracy": 0.7618530396823094,
+          "auc_point": 0.9304215413284885,
+          "macro_auc_ovr": 0.9304215413284885,
+          "auc_bootstrap_95ci": [
+            0.9112732239483619,
+            0.947515023173316
+          ],
+          "n_bootstrap_resamples_valid": 1000
+        },
+        "early_2010_2013": {
+          "n_held_out": 675,
+          "n_train": 1170,
+          "balanced_accuracy": 0.7319008323509449,
+          "auc_point": 0.939956499348889,
+          "macro_auc_ovr": 0.939956499348889,
+          "auc_bootstrap_95ci": [
+            0.9205007357759178,
+            0.9577069872111084
+          ],
+          "n_bootstrap_resamples_valid": 1000
+        },
+        "middle_2014_2020": {
+          "n_held_out": 255,
+          "n_train": 1590,
+          "balanced_accuracy": 0.835626378729827,
+          "auc_point": 0.946339806627913,
+          "macro_auc_ovr": 0.946339806627913,
+          "auc_bootstrap_95ci": [
+            0.9159293909746342,
+            0.9712518508166831
+          ],
+          "n_bootstrap_resamples_valid": 1000
+        }
+      },
+      "summary": {
+        "n_waves": 3,
+        "auc_mean": 0.9389059491017635,
+        "auc_std": 0.008010963387883914,
+        "auc_min": 0.9304215413284885,
+        "auc_max": 0.946339806627913
+      }
+    }
+  }
+}

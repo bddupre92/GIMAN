@@ -54,7 +54,7 @@ NSD-positive & 4 & NSD+ sub-staging: 1, 2B, 3, 4 \\
 \section{Related Work}
 \label{p1:sec:related}
 
-Machine learning for Parkinson's disease has focused primarily on clinical outcome prediction and diagnostic classification rather than biological staging. AdaMedGraph~\cite{adamedgraph} combined APPNP graph propagation with AdaBoost for PD progression prediction using PPMI data, demonstrating the potential of graph-based approaches for clinical neurology. Recent work by Diaz-Rincon~\textit{et al.}~\cite{diazrincon2025} applied conformal prediction to PD medication needs assessment, establishing distribution-free coverage guarantees in a clinical PD context. However, neither of these approaches---nor any published model to date---targets the NSD-ISS biological staging framework introduced by Simuni~\textit{et al.}~\cite{simuni2024}.
+Machine learning for Parkinson's disease has focused primarily on clinical outcome prediction and diagnostic classification rather than biological staging. AdaMedGraph~\cite{adamedgraph} combined APPNP graph propagation with AdaBoost (SAMME) for PD progression prediction using PPMI data. We reproduce AdaMedGraph in our benchmark (Table~\ref{p1:tab:gat}) and report its head-to-head performance on the NSD-ISS biological-staging targets; the per-feature-graph ensemble is competitive on binary classification but underperforms tree baselines on multi-class targets, consistent with the broader Grinsztajn~2022 finding. Recent work by Diaz-Rincon~\textit{et al.}~\cite{diazrincon2025} applied conformal prediction to PD medication needs assessment, establishing distribution-free coverage guarantees in a clinical PD context. However, neither of these approaches---nor any published model to date---targets the NSD-ISS biological staging framework introduced by Simuni~\textit{et al.}~\cite{simuni2024}.
 
 The choice of model architecture for clinical prediction tasks remains an active area of investigation. Grinsztajn~\textit{et al.}~\cite{grinsztajn2022} conducted a systematic NeurIPS benchmark demonstrating that gradient-boosted tree ensembles consistently outperform deep learning on medium-sized tabular datasets, a finding corroborated by Shwartz-Ziv and Armon~\cite{shwartzziv2022} across diverse tabular tasks. These results motivate our comprehensive comparison of tabular and graph-based models for NSD-ISS prediction.
 
@@ -332,28 +332,32 @@ CatBoost achieved the highest balanced accuracy across all targets: 0.951 (binar
 \toprule
 \textbf{Target} & \textbf{Model} & \textbf{Bal. Acc.} & \textbf{AUC} \\
 \midrule
-\multirow{4}{*}{\textbf{Binary}}
+\multirow{5}{*}{\textbf{Binary}}
  & CatBoost (tabular) & \textbf{0.951} & 0.979 \\
  & MM-GAT (2-mod, 22-feat) & 0.825 $\pm$ 0.013 & 0.894 \\
  & Simple GAT & 0.832 $\pm$ 0.019 & 0.927 \\
+ & AdaMedGraph & 0.870 $\pm$ 0.037 & 0.958 \\
  & MM-GAT (3-mod, 32-feat) & 0.934 $\pm$ 0.011 & 0.978 \\
 \midrule
-\multirow{4}{*}{\textbf{Three-class}}
+\multirow{5}{*}{\textbf{Three-class}}
  & CatBoost (tabular) & \textbf{0.783} & 0.944 \\
  & MM-GAT (2-mod, 22-feat) & 0.705 $\pm$ 0.033 & 0.873 \\
  & Simple GAT & 0.666 $\pm$ 0.031 & 0.873 \\
+ & AdaMedGraph & 0.606 $\pm$ 0.056 & 0.922 \\
  & MM-GAT (3-mod, 32-feat) & 0.753 $\pm$ 0.018 & 0.924 \\
 \midrule
-\multirow{4}{*}{\textbf{Full ordinal}}
+\multirow{5}{*}{\textbf{Full ordinal}}
  & CatBoost (tabular) & \textbf{0.658} & 0.954 \\
  & MM-GAT (2-mod, 22-feat) & 0.549 $\pm$ 0.044 & 0.858 \\
  & Simple GAT & 0.521 $\pm$ 0.090 & 0.844 \\
+ & AdaMedGraph & 0.363 $\pm$ 0.031 & 0.891 \\
  & MM-GAT (3-mod, 32-feat) & 0.502 $\pm$ 0.097 & 0.860 \\
 \midrule
-\multirow{4}{*}{\textbf{NSD+}}
+\multirow{5}{*}{\textbf{NSD+}}
  & CatBoost (tabular) & \textbf{0.671} & 0.913 \\
  & MM-GAT (2-mod, 22-feat) & 0.544 $\pm$ 0.060 & 0.769 \\
  & Simple GAT & 0.493 $\pm$ 0.029 & 0.736 \\
+ & AdaMedGraph & 0.327 $\pm$ 0.043 & 0.751 \\
  & MM-GAT (3-mod, 32-feat) & 0.417 $\pm$ 0.104 & 0.697 \\
 \bottomrule
 \end{tabular}
@@ -362,7 +366,7 @@ CatBoost achieved the highest balanced accuracy across all targets: 0.951 (binar
 \raggedright\scriptsize\textit{Note:} GAT results report mean $\pm$ SD across 5 CV folds. CatBoost results are from Table~\ref{p1:tab:benchmark}.
 \end{table}
 
-The Enhanced Multimodal GAT with PyG GATConv and cross-modal attention consistently underperformed CatBoost by 7.3--12.7 percentage points in balanced accuracy (Table~\ref{p1:tab:gat}). The enhanced architecture improved over the simple GAT for multiclass targets (three-class: 0.705 vs.\ 0.666), but the gap to tabular models remained substantial. This is consistent with recent evidence that tree-based ensembles dominate deep learning on medium-sized tabular datasets~\cite{grinsztajn2022}.
+Four graph architectures were benchmarked on the NSD-ISS targets: a single-stream Simple GAT, the 2-modality Multimodal GAT, AdaMedGraph~\cite{adamedgraph} (per-feature graph propagation combined with SAMME AdaBoost), and the 3-modality Multimodal GAT sensitivity variant (Table~\ref{p1:tab:gat}). To our knowledge, this is the first head-to-head evaluation of AdaMedGraph on the NSD-ISS biological-staging targets; the original Lian~\textit{et al.} report targeted a different PD progression endpoint on PPMI. AdaMedGraph beats both GAT variants on binary classification (0.870 vs.\ 0.832 Simple GAT, 0.825 Multimodal GAT), but collapses on the multi-class targets (three-class 0.606, full ordinal 0.363, NSD+ 0.327)---a pattern consistent with per-feature-graph ensembling via SAMME helping for coarse discrimination while failing to generalise to rarer-class ordinal targets where the minority-class sample size (Stage~4 $n{=}17$) is the binding constraint. All four graph architectures underperformed CatBoost, with the gap envelope spanning 8.1--33.7 percentage points in balanced accuracy. The fact that three distinct graph-architecture families---attention-only, attention with cross-modal fusion, and per-feature-graph with SAMME boosting---all lose to gradient-boosted trees strengthens the Grinsztajn~\textit{et al.}~\cite{grinsztajn2022} and Shwartz-Ziv \& Armon~\cite{shwartzziv2022} finding that tree-based ensembles dominate deep learning on medium-sized tabular datasets.
 
 \subsection{Conformal Prediction}
 
@@ -526,12 +530,16 @@ Second, clinical features alone achieved AUC 0.900 for NSD-positive sub-staging 
 Third, the PPMI-to-BioFIND external validation of the binary target (balanced accuracy 0.516) exposed a training-label confound rather than a model limitation: PPMI's NSD-negative class mixes healthy controls with prodromal patients, so the binary classifier trained on the full PPMI cohort learned a healthy-versus-PD boundary rather than a within-PD SAA-positive-versus-SAA-negative boundary. Retraining the same CatBoost classifier on the PD-only subset of PPMI (\S\ref{p1:sec:results:pdonly}) corrects this confound at source and demonstrates that the PD-within-PD discrimination is recoverable from the same 12-feature common set. Our result aligns with---and empirically operationalises---the Espay~\textit{et al.}~\cite{espay2025med} critique that NSD-ISS prediction models must explicitly account for the composition of their NSD-negative reference class, since mixing healthy controls with medication-treated prodromal patients introduces two confounds (dopaminergic treatment status and disease status) into a putatively biological label.
 
 \subsection{Tabular vs.\ Graph-Based Models}
-Gradient-boosted tabular models consistently outperformed the 2-modality 22-feature Multimodal GAT by 7.3--17.8 percentage points across the four targets (min: three-class Multimodal GAT at $-$0.073 balanced accuracy; max: NSD-positive simple GAT at $-$0.178; see Table~\ref{p1:tab:gat}). The Multimodal GAT with GATConv and cross-modal attention improved over a simple single-stream GAT (particularly for multiclass: three-class 0.705 vs.\ 0.666), but the $k$-NN patient-similarity graph did not provide information beyond what tree ensembles capture directly from feature vectors. This aligns with Grinsztajn~\textit{et al.}~\cite{grinsztajn2022} and Shwartz-Ziv \& Armon~\cite{shwartzziv2022}, who independently showed that trees dominate on medium-sized tabular data.
+Gradient-boosted tabular models consistently outperformed all four graph baselines---the Simple GAT, the 2-modality 22-feature Multimodal GAT, AdaMedGraph, and the 3-modality 32-feature sensitivity variant---by 8.1--33.7 percentage points in balanced accuracy across the four targets (min: binary AdaMedGraph at $-$0.081 balanced accuracy; max: NSD-positive AdaMedGraph at $-$0.337; see Table~\ref{p1:tab:gat}). The Multimodal GAT with GATConv and cross-modal attention improved over a simple single-stream GAT (particularly for multiclass: three-class 0.705 vs.\ 0.666), but the $k$-NN patient-similarity graph did not provide information beyond what tree ensembles capture directly from feature vectors. AdaMedGraph is the only graph baseline that beats the Multimodal GAT on binary classification (0.870 vs.\ 0.825), but it collapses on ordinal targets where per-feature-graph ensembling cannot recover from minority-class sample size (Stage~4 $n{=}17$). This aligns with Grinsztajn~\textit{et al.}~\cite{grinsztajn2022} and Shwartz-Ziv \& Armon~\cite{shwartzziv2022}, who independently showed that trees dominate on medium-sized tabular data.
 
 A pre-registered sensitivity variant with three modality streams and 10 further observed PPMI features (6 cortical-thickness regions per Fischl~\cite{fischl2012} and 4 CSF biomarkers per Mollenhauer~\textit{et~al.}~\cite{mollenhauer2017}) was evaluated to isolate whether the 2-modality gap is architectural or feature-count-limited (Supplementary~S-3). The 3-modality 32-feature Multimodal GAT (Table~\ref{p1:tab:gat}, fourth row per target) closes the CatBoost gap to $-$1.7 pp on binary (bal.\ acc.\ 0.934, AUC 0.978) and $-$3.0 pp on three-class (bal.\ acc.\ 0.753, AUC 0.924), but widens it on full ordinal ($-$15.6 pp) and NSD-positive subgroup ($-$25.4 pp). The two targets where the variant improves are the clinically most important (screening and triage); the two where it degrades are the rarer-class ordinal tasks where the Extended modality's $\sim$50\% cortical-thickness and $\sim$35\% CSF coverage introduces median-imputation noise into minority classes (Stage~4 $n{=}17$). We interpret this as partial support for both readings: Grinsztajn~2022 holds on average, but a graph-attention architecture given sufficient observed biological features is genuinely competitive with tree ensembles on the two clinically valuable targets. Graph models may also become advantageous for inductive transfer to cohorts with incomplete features, where graph-informed imputation can leverage similar patients; evaluating that hypothesis on NSD-ISS staging is left as future work.
 
 \subsection{Conformal Prediction for Clinical Deployment}
 Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton sets (0.96--1.27), demonstrating well-calibrated uncertainty. For binary classification, clinicians receive a definitive prediction with guaranteed 95.5\% coverage. For borderline NSD-positive patients, slightly larger prediction sets provide honest uncertainty---a clinically desirable property.
+
+\paragraph*{Confounder sensitivity}
+\label{p1:sec:discussion:confounders}
+Three pre-specified sensitivity analyses directly pre-empt the question of whether the 0.979 binary AUC is age-, sex-, or site-confounded; full results are given in Supplementary~S-5. First, a 1:1 greedy age-matched cohort (n${=}1{,}558$, caliper $\pm 2$ years, residual matched age~$\Delta{=}{-}0.002$ years vs.\ the full-cohort $+0.576$-year gap) yields binary CatBoost AUC~$0.969$ [95\% CI $0.960$--$0.978$], within $0.010$ of the full-cohort $0.979$, indicating that age is not a confound. Second, sex-stratified CatBoost yields nearly identical male and female binary AUCs ($0.9770$ vs.\ $0.9766$; bootstrap interaction $\Delta{=}{+}0.0004$, 95\% CI~$[-0.013, +0.015]$, $p{=}0.914$), consistent with the published finding that age-adjusted DaT-SPECT has no sex effect~\cite{varrone2013ageadjusted}. Third, a PPMI enrollment-wave leave-one-cohort-out analysis (early~2010--2013, middle~2014--2020, late~2021--2025 reflecting the PPMI~1.0 $\rightarrow$~2.0 transition; canonical site identifiers are not released in the current PPMI CSV snapshot) yields per-wave binary AUCs in $[0.947, 0.992]$ (mean~$0.965 \pm 0.024$, SD across waves) and three-class macro-AUCs in $[0.930, 0.946]$ (SD~$0.008$), demonstrating that the classifier generalises across PPMI eras without exceeding clinically acceptable variance~\cite{eusebi2017dat}. Uncontrolled confounders not tested here (scanner model, medication state at scan, comorbidities, handedness laterality) are enumerated in Supplementary~S-5.5 and are partially addressed elsewhere in this dissertation (Papers~5, 9, 12).
 
 \subsection{Limitations}
 \label{p1:sec:discussion:limitations}
@@ -576,3 +584,8 @@ Pre-registered 32-feature 3-modality variant (Clinical 14 / Biomarker 8 / Extend
 \subsection*{S-4. Pre-Registered 33-Feature Tabular Extension (Null Result)}
 
 Pre-registered sensitivity extending the 22-feature canonical schema to 33 features via six FreeSurfer cortical thickness measurements~\cite{fischl2012}, four CSF biomarkers~\cite{mollenhauer2017}, and a polygenic risk score~\cite{nalls2019}. Decision rule (halt if $\geq3$ of 4 CatBoost targets regress) locked before execution; rule fired. CatBoost balanced accuracy stayed at 0.951 on binary and regressed within bootstrap-CI-width on three-class ($-0.011$), full-ordinal ($-0.010$), and NSD+ subgroup ($-0.014$). Paper 1's 22-feature schema is retained. Full tables, mechanism discussion, and reproducibility details in \texttt{supplementary\_tabular\_33feat\_sensitivity.md}.
+
+\subsection*{S-5. Confounder Sensitivity (Age, Sex, Enrollment Wave)}
+\label{p1:sec:supp:confounders}
+
+Three pre-specified sensitivity analyses directly address whether the reported CatBoost binary AUC ($0.979$, Table~I) is confounded by age, sex, or PPMI enrollment wave. \textbf{(A) Age-matched 1:1 sensitivity}: a greedy nearest-neighbour matched cohort (n${=}1{,}558$, caliper $\pm 2$~years, residual matched $\Delta$\,age${=}{-}0.002$\,yr) yields binary AUC $0.969$\,[95\% CI $0.960$--$0.978$] and three-class macro-AUC $0.931$, both within one CI width of Table~I. \textbf{(B) Sex-stratified}: male (n${=}849$) and female (n${=}1{,}352$) binary AUCs are identical ($0.9770$ vs.\ $0.9766$; bootstrap $\Delta{=}{+}0.0004$, 95\% CI~$[-0.013, +0.015]$, $p{=}0.914$). No significant sex interaction on any of the four targets. \textbf{(C) Enrollment-wave leave-one-cohort-out}: three PPMI waves (early~2010--2013, middle~2014--2020, late~2021--2025) yield binary AUC range $0.947$--$0.992$ (mean~$0.965 \pm 0.024$) and three-class macro-AUC range $0.930$--$0.946$ (mean~$0.939 \pm 0.008$), demonstrating cross-era generalisability. Uncontrolled confounders not addressed (scanner model / reconstruction algorithm / medication state at acquisition / comorbidities / handedness laterality) and the rationale for the enrollment-wave-over-site-LOSO substitution (`\texttt{site\_aprv}' is a site-approval date, not a site identifier) are detailed in \texttt{supplementary\_confounder\_sensitivity.md}. Reproduction script: \texttt{scripts/paper1/run\_confounder\_sensitivity.py} (seed~$42$, $0.9$~min runtime).

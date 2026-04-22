@@ -1,0 +1,39 @@
+{
+  "n_matched_pairs": 779,
+  "n_matched_total": 1558,
+  "n_full_positive": 779,
+  "n_full_negative": 1422,
+  "age_delta_full_cohort_yr": 0.576017769611525,
+  "age_delta_matched_yr": -0.001669421211659028,
+  "caliper_years": 2.0,
+  "matching_method": "greedy_nearest_neighbour_1to1_without_replacement",
+  "targets": {
+    "target_binary": {
+      "n": 1558,
+      "balanced_accuracy": 0.9281129653401797,
+      "balanced_accuracy_ci": [
+        0.9151942387164999,
+        0.9405593077004234
+      ],
+      "auc_roc": 0.9693791289645888,
+      "auc_roc_ci": [
+        0.9601551627792454,
+        0.9778875645176862
+      ],
+      "macro_auc_ovr": null,
+      "quadratic_weighted_kappa": 0.8562259306803595
+    },
+    "target_3class": {
+      "n": 1556,
+      "balanced_accuracy": 0.7670422981441938,
+      "balanced_accuracy_ci": [
+        0.7408512388944714,
+        0.7913811489492729
+      ],
+      "auc_roc": null,
+      "auc_roc_ci": null,
+      "macro_auc_ovr": 0.9305646407208701,
+      "quadratic_weighted_kappa": 0.824425838787534
+    }
+  }
+}

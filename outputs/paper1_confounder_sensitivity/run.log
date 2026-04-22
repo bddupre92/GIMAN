@@ -1,0 +1,86 @@
+12:30:45 INFO: Joined cohort: n=2201, sex coverage=2201, enroll_year coverage=1845
+12:30:45 INFO: Enrollment-wave distribution: {'late_2021_2025': 915, 'early_2010_2013': 675, 'unknown': 356, 'middle_2014_2020': 255}
+12:30:45 INFO: ============================================================
+12:30:45 INFO: ANALYSIS A — Age-matched 1:1 (caliper 2 yr)
+12:30:45 INFO: ============================================================
+12:30:45 INFO: Age-match: 779 case/control pairs (1558 total) out of 779 cases / 1422 controls (caliper=2.0yr, mean |Δage|=0.027yr)
+12:30:45 INFO: Benchmark 'age_matched_target_binary': 1558 valid samples, 2 classes, distribution=[779, 779]
+12:30:46 INFO:   Running catboost...
+12:30:49 INFO:   catboost: bal_acc=0.9281 [95% CI 0.9152-0.9406], wf1=0.9281, kappa=0.8562, qwk=0.8562, train=1.5s
+12:30:49 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_A_target_binary_matched.json
+12:30:49 INFO: Benchmark 'age_matched_target_3class': 1556 valid samples, 3 classes, distribution=[844, 208, 504]
+12:30:49 INFO:   Running catboost...
+12:30:54 INFO:   catboost: bal_acc=0.7670 [95% CI 0.7409-0.7914], wf1=0.8375, kappa=0.7200, qwk=0.8244, train=1.9s
+12:30:54 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_A_target_3class_matched.json
+12:30:54 INFO: ============================================================
+12:30:54 INFO: ANALYSIS B — Sex-stratified
+12:30:54 INFO: ============================================================
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [ 0 20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:30:54 INFO: Benchmark 'target_binary_male': 849 valid samples, 2 classes, distribution=[566, 283]
+12:30:54 INFO:   Running catboost...
+12:30:57 INFO:   catboost: bal_acc=0.9382 [95% CI 0.9196-0.9565], wf1=0.9480, kappa=0.8826, qwk=0.8826, train=1.2s
+12:30:57 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_binary_male.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:30:57 INFO: Benchmark 'target_binary_female': 1352 valid samples, 2 classes, distribution=[856, 496]
+12:30:57 INFO:   Running catboost...
+12:31:00 INFO:   catboost: bal_acc=0.9408 [95% CI 0.9271-0.9551], wf1=0.9459, kappa=0.8835, qwk=0.8835, train=1.3s
+12:31:00 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_binary_female.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [ 0 20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:00 INFO: Benchmark 'target_3class_male': 846 valid samples, 3 classes, distribution=[585, 73, 188]
+12:31:00 INFO:   Running catboost...
+12:31:03 INFO:   catboost: bal_acc=0.7505 [95% CI 0.7072-0.7926], wf1=0.8707, kappa=0.7227, qwk=0.8062, train=1.8s
+12:31:03 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_3class_male.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:03 INFO: Benchmark 'target_3class_female': 1351 valid samples, 3 classes, distribution=[900, 135, 316]
+12:31:03 INFO:   Running catboost...
+12:31:08 INFO:   catboost: bal_acc=0.7767 [95% CI 0.7444-0.8085], wf1=0.8798, kappa=0.7556, qwk=0.8559, train=1.9s
+12:31:08 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_3class_female.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [ 0 20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:08 INFO: Benchmark 'target_full_ordinal_male': 846 valid samples, 5 classes, distribution=[563, 22, 73, 177, 11]
+12:31:08 INFO:   Running catboost...
+12:31:12 INFO:   catboost: bal_acc=0.5829 [95% CI 0.5317-0.6314], wf1=0.8343, kappa=0.6804, qwk=0.8229, train=2.4s
+12:31:12 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_full_ordinal_male.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:12 INFO: Benchmark 'target_full_ordinal_female': 1351 valid samples, 5 classes, distribution=[855, 45, 135, 310, 6]
+12:31:12 INFO:   Running catboost...
+12:31:17 INFO:   catboost: bal_acc=0.6357 [95% CI 0.6034-0.6672], wf1=0.8677, kappa=0.7560, qwk=0.8736, train=2.6s
+12:31:17 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_full_ordinal_female.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [ 0 20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:17 INFO: Benchmark 'target_nsd_positive_male': 283 valid samples, 4 classes, distribution=[22, 73, 177, 11]
+12:31:17 INFO:   Running catboost...
+12:31:20 INFO:   catboost: bal_acc=0.5844 [95% CI 0.5071-0.6730], wf1=0.7155, kappa=0.4705, qwk=0.6103, train=1.5s
+12:31:20 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_nsd_positive_male.json
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:20 INFO: Benchmark 'target_nsd_positive_female': 496 valid samples, 4 classes, distribution=[45, 135, 310, 6]
+12:31:20 INFO:   Running catboost...
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/metrics/_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+12:31:23 INFO:   catboost: bal_acc=0.6062 [95% CI 0.5712-0.6391], wf1=0.7953, kappa=0.6206, qwk=0.7344, train=1.8s
+12:31:23 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/analysis_B_target_nsd_positive_female.json
+12:31:23 INFO: Bootstrapping sex × binary-AUC interaction test...
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [ 0 20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/impute/_base.py:641: UserWarning: Skipping features without any observed values: [20]. At least one non-missing value is needed for imputation with strategy='median'.
+  warnings.warn(
+12:31:29 INFO: Sex interaction test: AUC_male=0.9770, AUC_female=0.9766, Δ=+0.0004 [-0.0131, +0.0152], p=0.914
+12:31:29 INFO: ============================================================
+12:31:29 INFO: ANALYSIS C — Enrollment-wave LOCO
+12:31:29 INFO: ============================================================
+12:31:29 INFO: Target: target_binary
+12:31:30 INFO:   Hold-out=late_2021_2025       n= 915 bal_acc=0.9132 AUC=0.9467
+12:31:31 INFO:   Hold-out=early_2010_2013      n= 675 bal_acc=0.9133 AUC=0.9558
+12:31:32 INFO:   Hold-out=middle_2014_2020     n= 255 bal_acc=0.9633 AUC=0.9918
+12:31:32 INFO: Target: target_3class
+12:31:33 INFO:   Hold-out=late_2021_2025       n= 915 bal_acc=0.7619 AUC=0.9304
+12:31:35 INFO:   Hold-out=early_2010_2013      n= 675 bal_acc=0.7319 AUC=0.9400
+12:31:36 INFO:   Hold-out=middle_2014_2020     n= 255 bal_acc=0.8356 AUC=0.9463
+12:31:36 INFO: Report saved to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_confounder_sensitivity/confounder_sensitivity_report.md
+12:31:36 INFO: Done. Total elapsed: 0.9 min
