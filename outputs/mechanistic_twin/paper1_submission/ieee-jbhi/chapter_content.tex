@@ -328,33 +328,33 @@ CatBoost achieved the highest balanced accuracy across all targets: 0.951 (binar
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llccc@{}}
+\begin{tabular}{@{}llcc@{}}
 \toprule
-\textbf{Target} & \textbf{Model} & \textbf{Bal. Acc.} & \textbf{AUC} & \textbf{Gap} \\
+\textbf{Target} & \textbf{Model} & \textbf{Bal. Acc.} & \textbf{AUC} \\
 \midrule
 \multirow{4}{*}{\textbf{Binary}}
- & CatBoost (tabular) & \textbf{0.951} & 0.979 & --- \\
- & Multimodal GAT (2-mod, 22-feat) & 0.825 $\pm$ 0.013 & 0.894 & $-$0.126 \\
- & Simple GAT & 0.832 $\pm$ 0.019 & 0.927 & $-$0.119 \\
- & Multimodal GAT (3-mod, 32-feat) & 0.934 $\pm$ 0.011 & 0.978 & $-$0.017 \\
+ & CatBoost (tabular) & \textbf{0.951} & 0.979 \\
+ & MM-GAT (2-mod, 22-feat) & 0.825 $\pm$ 0.013 & 0.894 \\
+ & Simple GAT & 0.832 $\pm$ 0.019 & 0.927 \\
+ & MM-GAT (3-mod, 32-feat) & 0.934 $\pm$ 0.011 & 0.978 \\
 \midrule
 \multirow{4}{*}{\textbf{Three-class}}
- & CatBoost (tabular) & \textbf{0.783} & 0.944 & --- \\
- & Multimodal GAT (2-mod, 22-feat) & 0.705 $\pm$ 0.033 & 0.873 & $-$0.073 \\
- & Simple GAT & 0.666 $\pm$ 0.031 & 0.873 & $-$0.112 \\
- & Multimodal GAT (3-mod, 32-feat) & 0.753 $\pm$ 0.018 & 0.924 & $-$0.030 \\
+ & CatBoost (tabular) & \textbf{0.783} & 0.944 \\
+ & MM-GAT (2-mod, 22-feat) & 0.705 $\pm$ 0.033 & 0.873 \\
+ & Simple GAT & 0.666 $\pm$ 0.031 & 0.873 \\
+ & MM-GAT (3-mod, 32-feat) & 0.753 $\pm$ 0.018 & 0.924 \\
 \midrule
 \multirow{4}{*}{\textbf{Full ordinal}}
- & CatBoost (tabular) & \textbf{0.658} & 0.954 & --- \\
- & Multimodal GAT (2-mod, 22-feat) & 0.549 $\pm$ 0.044 & 0.858 & $-$0.109 \\
- & Simple GAT & 0.521 $\pm$ 0.090 & 0.844 & $-$0.137 \\
- & Multimodal GAT (3-mod, 32-feat) & 0.502 $\pm$ 0.097 & 0.860 & $-$0.156 \\
+ & CatBoost (tabular) & \textbf{0.658} & 0.954 \\
+ & MM-GAT (2-mod, 22-feat) & 0.549 $\pm$ 0.044 & 0.858 \\
+ & Simple GAT & 0.521 $\pm$ 0.090 & 0.844 \\
+ & MM-GAT (3-mod, 32-feat) & 0.502 $\pm$ 0.097 & 0.860 \\
 \midrule
 \multirow{4}{*}{\textbf{NSD+}}
- & CatBoost (tabular) & \textbf{0.671} & 0.913 & --- \\
- & Multimodal GAT (2-mod, 22-feat) & 0.544 $\pm$ 0.060 & 0.769 & $-$0.127 \\
- & Simple GAT & 0.493 $\pm$ 0.029 & 0.736 & $-$0.178 \\
- & Multimodal GAT (3-mod, 32-feat) & 0.417 $\pm$ 0.104 & 0.697 & $-$0.254 \\
+ & CatBoost (tabular) & \textbf{0.671} & 0.913 \\
+ & MM-GAT (2-mod, 22-feat) & 0.544 $\pm$ 0.060 & 0.769 \\
+ & Simple GAT & 0.493 $\pm$ 0.029 & 0.736 \\
+ & MM-GAT (3-mod, 32-feat) & 0.417 $\pm$ 0.104 & 0.697 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
@@ -461,27 +461,29 @@ The Espay~\textit{et~al.}~\cite{espay2025refutation} refutation of SAA-only NSD-
 
 \paragraph*{Four training configurations} Table~\ref{p1:tab:pdonly} reports PPMI 5-fold cross-validation and balanced-BioFIND external performance for four training strategies.
 
-\begin{table}[!t]
+\begin{table*}[!t]
 \caption{Training-strategy sweep: CatBoost binary classifier on the 12-feature common subset. PPMI values are 5-fold stratified CV (mean $\pm$ SD). BioFIND is the balanced external set ($n{=}118$: 103 NSD+ Russo-staged + 15 SAA-negative PD per Bentivoglio~2026~\cite{bentivoglio2026saaneg}).}
 \label{p1:tab:pdonly}
 \centering
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{@{}lccccc@{}}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lcccccc@{}}
 \toprule
-\textbf{Configuration} & \textbf{$n_{\mathrm{tr}}$} & \textbf{PPMI Bal.\ Acc.} & \textbf{PPMI AUC} & \textbf{BioFIND Bal.\ Acc.} & \textbf{BioFIND AUC} \\
+\textbf{Configuration} & \textbf{$n_{\mathrm{tr}}$} & \multicolumn{2}{c}{\textbf{PPMI (5-fold CV)}} & \multicolumn{2}{c}{\textbf{BioFIND (balanced external)}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+ & & \textbf{Bal.\ Acc.} & \textbf{AUC} & \textbf{Bal.\ Acc.} & \textbf{AUC} \\
 \midrule
-Baseline (full PPMI)      & 2{,}201 & $0.670 \pm 0.026$ & $0.738 \pm 0.027$ & 0.470 & 0.561 \\
-\textbf{PD-only}          & 1{,}747 & $0.618 \pm 0.006$ & $0.677 \pm 0.016$ & \textbf{0.521} & 0.561 \\
-Weighted (HC = SWEDD = 0.1) & 2{,}201 & $0.652 \pm 0.027$ & $0.727 \pm 0.026$ & 0.497 & 0.524 \\
+Baseline (full PPMI)        & 2{,}201 & $0.670 \pm 0.026$          & $0.738 \pm 0.027$          & 0.470          & 0.561 \\
+\textbf{PD-only}            & 1{,}747 & $0.618 \pm 0.006$          & $0.677 \pm 0.016$          & \textbf{0.521} & 0.561 \\
+Weighted (HC = SWEDD = 0.1) & 2{,}201 & $0.652 \pm 0.027$          & $0.727 \pm 0.026$          & 0.497          & 0.524 \\
 \midrule
-Stage-A (HC vs.\ PD)      & 2{,}201 & $\mathbf{0.832 \pm 0.020}$ & $\mathbf{0.931 \pm 0.015}$ & --- & --- \\
+Stage-A (HC vs.\ PD)        & 2{,}201 & $\mathbf{0.832 \pm 0.020}$ & $\mathbf{0.931 \pm 0.015}$ & ---            & ---   \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
 
 \raggedright\scriptsize\textit{Note:} PD-only keeps PD + Prodromal, drops HC + SWEDD. Weighted keeps all cohorts with HC and SWEDD sample-weights reduced to 0.1. Stage-A is the HC-vs-PD detection head of the hierarchical architecture discussed in \S\ref{p1:sec:discussion}; no NSD-ISS external comparison is defined for this head.
-\end{table}
+\end{table*}
 
 \paragraph*{Where the HC confound matters} The magnitude of the training-label confound is feature-set dependent. With the \emph{full 22-feature} set (Table~\ref{p1:tab:benchmark}), PD-only retraining yields essentially the same internal result as the baseline ($0.946 \pm 0.014$ balanced accuracy versus $0.951 \pm 0.019$; $0.982 \pm 0.011$ AUC versus $0.979 \pm 0.013$), because DaT-SPECT striatal binding ratio dominates the decision boundary and leaves no room for the classifier to exploit motor-score differences between HC and PD patients. The confound emerges only on the clinical-only 12-feature common subset used for external transportability, where the absence of imaging features lets the model fall back on the HC-vs-PD motor-score gap as a shortcut. On that subset, PD-only retraining changes the balanced-BioFIND point estimate of balanced accuracy from 0.470 to 0.521 ($+5.1$ percentage points on the point estimate) while reducing internal PPMI AUC from 0.738 to 0.677. A post-hoc 1{,}000-resample bootstrap on the $n{=}118$ balanced BioFIND set with the 15:103 class imbalance shows that 95\% confidence intervals for the pre- and post-retraining balanced-accuracy estimates overlap substantially and straddle chance level; the $+5.1$ pp point improvement is therefore indicative of direction but is \emph{not statistically significant} at $\alpha{=}0.05$ at the $n{=}118$ external sample size. We report this limitation honestly: the PD-only retraining removes a label-leakage shortcut in the PPMI internal decision boundary (and should therefore be preferred for transportability), but a definitive demonstration of external-cohort rescue requires a larger PD-only external test set than BioFIND currently provides. The clinical implication is clear: sites with DaT-SPECT access should use the robust full-feature model; sites without imaging should use the PD-only retrained 12-feature model for deployment. DaT-SPECT availability varies substantially across community-practice settings, where the imaging modality is FDA-approved but not universally reimbursed~\cite{seibyl2018dat}, so the two-model deployment protocol is essential for any realistic clinical uptake of NSD-ISS staging.
 
