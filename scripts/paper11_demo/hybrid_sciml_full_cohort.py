@@ -87,6 +87,8 @@ def load_split(seed: int = 42, fold_index: int | None = None,
         df[sbr_col] = (df[left] + df[right]) / 2
 
     df = df.dropna(subset=[sbr_col, "months_from_baseline", "PATNO"])
+    assert not df.duplicated(["PATNO", "months_from_baseline"]).any(), \
+        "duplicate (PATNO, months_from_baseline) rows found — re-run data assembly"
     df["t_years"] = df["months_from_baseline"] / 12.0
 
     present_feats = [f for f in BASELINE_FEATS if f in df.columns]
@@ -316,9 +318,9 @@ class PhysicsInformedNeuralODE(nn.Module):
 
     def __init__(self, n_features: int, hidden: int = 32, use_gru: bool = False,
                  gru_state_aware: bool = False, gru_dropout: float = 0.0,
-                 gru_hidden: int = 32):
+                 gru_hidden: int = 32, k_age_init: float = K_AGE_LIT_RATE):
         super().__init__()
-        self.log_k_age = nn.Parameter(torch.tensor(np.log(K_AGE_LIT_RATE), dtype=torch.float32))
+        self.log_k_age = nn.Parameter(torch.tensor(np.log(k_age_init), dtype=torch.float32))
         if use_gru:
             self.residual_net = GRUTrajectoryResidual(
                 n_features, hidden=gru_hidden, state_aware=gru_state_aware,
@@ -740,6 +742,9 @@ def parse_args() -> argparse.Namespace:
                         "remainder is train+val (internal 82/18).")
     p.add_argument("--n-folds", type=int, default=5,
                    help="Total folds for k-fold CV (ignored unless --fold-index set).")
+    p.add_argument("--k-age-init", type=float, default=0.025,
+                   help="Initial value for the hybrid's learned k_age parameter (default "
+                        "0.025/yr, Fearnley-Lees midpoint). Used for prior sensitivity sweeps.")
     return p.parse_args()
 
 
@@ -873,7 +878,8 @@ def main() -> None:
         model_b = PhysicsInformedNeuralODE(n_features=n_features, use_gru=args.use_gru,
                                              gru_state_aware=args.gru_state_aware,
                                              gru_dropout=args.gru_dropout,
-                                             gru_hidden=args.gru_hidden).to(DEVICE)
+                                             gru_hidden=args.gru_hidden,
+                                             k_age_init=args.k_age_init).to(DEVICE)
         hist_b = train_with_early_stopping(
             model_b, train_records, val_records,
             epochs=args.epochs, patience=args.patience,
@@ -974,6 +980,7 @@ def main() -> None:
         "solver_step_size": (None if args.solver_step_size is None else float(args.solver_step_size)),
         "fold_index": (None if args.fold_index is None else int(args.fold_index)),
         "n_folds": int(args.n_folds),
+        "k_age_init": float(args.k_age_init),
         "seed": int(args.seed),
         "epochs_max": int(args.epochs),
         "patience": int(args.patience),
