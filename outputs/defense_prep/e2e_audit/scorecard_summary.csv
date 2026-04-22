@@ -1,17 +1,17 @@
 chapter_number,title,defensibility_score,total_claims,verified,partial,unverified
-1,Introduction,yellow,128,101,10,0
-2,Systematic Literature Review,yellow,417,398,15,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,323,271,8,0
-4,Paper 2: GIMIN Imputation,yellow,379,354,17,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,133,122,11,0
-6,Paper 4: Conformalized Survival Analysis,yellow,244,235,9,0
-7,Paper 5: Temporal Validation,yellow,139,129,10,0
-8,Paper 6: Unified Clinical Decision Support,yellow,119,113,5,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,156,151,4,0
-10,Paper 8a: Spatial Propagation Identifiability,yellow,135,131,2,0
-11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,141,137,2,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,122,113,3,0
-13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,129,127,0,0
-14,"Discussion (Unified, Papers 1-10)",yellow,72,72,0,0
-15,Conclusion + Future Work Catalog,yellow,30,28,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,257,228,15,0
+1,Introduction,yellow,212,173,10,0
+2,Systematic Literature Review,yellow,681,658,15,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,533,463,8,0
+4,Paper 2: GIMIN Imputation,yellow,623,590,17,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,211,200,11,0
+6,Paper 4: Conformalized Survival Analysis,yellow,400,391,9,0
+7,Paper 5: Temporal Validation,yellow,223,213,10,0
+8,Paper 6: Unified Clinical Decision Support,yellow,195,189,5,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,252,247,4,0
+10,Paper 8a: Spatial Propagation Identifiability,yellow,201,195,2,0
+11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,219,213,2,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,188,173,3,0
+13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,195,193,0,0
+14,"Discussion (Unified, Papers 1-10)",yellow,116,116,0,0
+15,Conclusion + Future Work Catalog,yellow,46,42,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,403,360,15,0

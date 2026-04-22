@@ -1,0 +1,12 @@
+{
+  "n_train": 996,
+  "n_held_out": 1141,
+  "balanced_accuracy": 0.7427515192918036,
+  "auc_point": 0.9362412014650209,
+  "macro_auc_ovr": 0.9362412014650209,
+  "auc_bootstrap_95ci": [
+    0.921244397404116,
+    0.9508225627814253
+  ],
+  "n_bootstrap_resamples_valid": 1000
+}

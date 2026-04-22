@@ -1,6 +1,6 @@
 # Zotero Re-Audit Queue (BΩ.1 — /find ezproxy pass)
 
-Total unverified citations: **360**
+Total unverified citations: **364**
 
 Sorted by claim usage (most-used first).
 
@@ -107,4 +107,4 @@ Sorted by claim usage (most-used first).
 | `calabresi2023` | P. Calabresi | 2023 | [no title] | 10.1038/s41419-023-05672-9 | 1 |
 | `campbell2020` | M.~Campbell | 2020 | Synthesis without meta-analysis (SWiM) in systematic reviews | — | 1 |
 
-... (260 more rows omitted; see `defensibility_matrix.csv` for full list)
+... (264 more rows omitted; see `defensibility_matrix.csv` for full list)
