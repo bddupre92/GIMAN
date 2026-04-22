@@ -520,7 +520,271 @@ The right answer to "what would succeed at this question?" is: **multi-modal fus
 
 ---
 
-## 7. Reproducibility
+## 7. Limitations, Deficiencies, and Honest Assessment
+
+Paper 8b is a **publishable negative result**. Unlike positive-finding papers, where limitations reduce the strength of a claim, the limitations of a negative-result paper must be argued with extra care: if the null hypothesis (propagation is non-detectable) is accepted, reviewers need reassurance that we didn't accept it *because* of a weakness in our methodology. The limitations below are therefore organized to address the question "could a different analysis have reached a different verdict?"
+
+### 7.1 What the Paper Does NOT Prove
+
+- **Not a claim that α-synuclein propagation is biologically absent in PD.** The Braak-staging framework and trans-synaptic spread are independently supported by post-mortem tissue studies (Braak 2003; Dickson 2010), prion-like in vitro experiments (Luk 2012; Volpicelli-Daley 2011), and chemogenetic mouse models (Henderson 2019). Our claim is narrowly that *the longitudinal imaging signature* of that biological process is not detectable in 4-region DaT-SPECT at PPMI-grade precision. Biology happens at a scale too small for this modality to resolve.
+
+- **Not a refutation of Raj 2012's AD finding.** Raj et al. validated the NDM on **cross-sectional** Alzheimer's equilibrium atrophy patterns (~80 cortical parcels at MRI resolution). Our test is **per-patient longitudinal** on 4 striatal regions. These are different modalities, different resolutions, different questions. Both can be simultaneously correct.
+
+- **Not a claim that propagation cannot be detected under any PD imaging modality.** With σ_obs ≤ 0.05 (3× noise reduction), ≥ 15 annual scans over 10 years, 40–80 cortical regions, or multi-modal fusion (DaT + MRI volumetrics + plasma biomarkers), the FIM analysis predicts propagation *would* become detectable. Our negative result applies to the specific observation regime, not universally.
+
+- **Not a claim that the 4-region per-patient MLE is optimal.** Per-patient MLE on 4 regions × ~4 scans has large per-patient variance in `T_i` recovery (r = 0.44–0.67). Hierarchical NLME with population-level pooling would likely push per-patient r to ~0.8 and population-level r to > 0.95. The model-comparison verdict (ΔAIC) is independent of inference method, but per-patient reliability is not.
+
+- **Not a claim that CSF α-syn or plasma GFAP cannot recover propagation signal.** Our test uses DaT-SPECT alone because it is the clinical-standard PD imaging biomarker. Fusing multi-modal observations (as Paper 10's bidirectional twin does) provides independent spatial information that could recover propagation. We did not run this fusion here.
+
+### 7.2 Specific Deficiencies (What the Paper Flags Explicitly)
+
+| Deficiency | Magnitude | Mitigation | Where documented |
+|---|---|---|---|
+| M1 independent-decay wins ΔAIC +5,668 vs M2 (+298) vs M6r propagation | Decisive model-comparison verdict | Honest: this IS the finding | §4.4 of manuscript |
+| SBC per-region MLE r = 0.44–0.67 fails 0.7 threshold | Per-patient rates noisy | Report population-level rates as primary; per-patient as secondary | §5 Reviewer Q, manuscript limitations |
+| Anatomical alignment of Budapest / HCP connectome with PPMI ROI definitions untested | Could bias `k_spread` recovery by unknown amount | Tested 3 alternative connectomes (uniform, put-caud only, permuted); result stable | §5 Reviewer Q3 |
+| Temporal resolution ~4 scans over 4 yr may be too coarse for propagation dynamics | Early-fast curvature only observed at 1-2 timepoints | Paper 10 Task 5 uses 5+ scan subgroup (n=6); Paper 8b limited to cohort-wide 4-scan minimum | §4.3 of manuscript |
+| σ = 0.15 SBR noise floor may be conservative | Tested σ = 0.10 as sensitivity; ΔAIC stays > 3,000 | In supplement (S1) | §5 Reviewer Q2 |
+| `seed_put = 1.0` fixed (not fit) to break `k_spread ↔ seed_put` degeneracy | Residual `k_spread` sensitivity to seed prior | Posterior `k_spread = 1.26 ± 0.65` — prior-dominated | §3.3 of deep-dive |
+| Per-patient MLE rather than Bayesian posterior | Point estimates lack uncertainty | Compute-cost motivated; AIC verdict robust to inference method | §6 Alt 3, §3.5 of deep-dive |
+| 304 patients × 4 regions gives N_obs ≈ 16 per patient | Low per-patient information | Compensated by N_total = 4,988 for population-level ΔAIC | §4.2 of manuscript |
+| No post-hoc interaction with NSD-ISS stage strata | May obscure stage-specific propagation | Pre-computed: ~100 patients/stratum degrades SNR | §4 Q8 of deep-dive |
+| Exponential (not logistic) decay chosen | Asymptote not modelled | Follow-up too short (~4 yr) for logistic identifiability | §5 Reviewer Q4 |
+
+### 7.3 What a POSITIVE Result Would Have Looked Like (Pre-Registered Thresholds)
+
+This is the critical section for a negative-result paper. We pre-registered what would constitute a positive finding *before* running the analysis. The thresholds were set in the Paper 8a/8b plan document (2026-04-12):
+
+| Threshold | Pre-registered value | Achieved | Verdict |
+|---|---|---|---|
+| ΔAIC (M6r vs M1) | Must be ≤ -10 (M6r preferred) | +5,668 (M1 preferred) | FAIL by > 500× |
+| SBC parameter recovery for `k_spread` | r ≥ 0.7 at σ = 0.15, 4 scans | r = 0.49 | FAIL |
+| SBC parameter recovery for `s_put` | r ≥ 0.7 | r = 0.08 | FAIL decisively |
+| SBC parameter recovery for `k_spread` at remediated `s_put = 1.0` | r ≥ 0.7 on synthetic | r = 0.892 | PASS on synthetic |
+| Remediated M6r on real PPMI vs M1 | ΔAIC ≤ -10 | +5,668 (M1 still wins) | FAIL |
+| FIM condition number on (k_spread, s_put) | κ < 10⁴ | κ = 12.9 (borderline) | Marginal — passes κ but fails recovery |
+| CRLB(s_put) / σ_prior | < 1.0 | 4.19 | FAIL — data less informative than prior |
+| Per-region rate ordering (put > caud) | Statistically significant (Wilcoxon p < 0.05) | p < 10⁻¹⁰ | PASS (positive side finding) |
+| Dzialas 2025 rate replication (qualitative direction) | put > caud in this cohort too | 0.142 vs 0.119 /yr (19% gap) | PASS (positive side finding) |
+
+Had any of the four FAIL criteria above produced PASS verdicts, we would have written a different paper — specifically, "Network Diffusion Model detects α-synuclein propagation in PPMI DaT-SPECT" with population-level `k_spread` estimate and its clinical interpretation. We did not get that paper. We got this one. The pre-registered thresholds are the epistemological guard against constructing a negative narrative post-hoc from an inconclusive finding.
+
+### 7.4 Known Unknowns (What We Cannot Characterise Without More Data)
+
+- **Would hierarchical population-level NLME with shared `k_spread` recover the signal?** Our power analysis (§6 Alt 1) suggests population-level `k_spread` recovery at r ≈ 0.7-0.8 with ~17× √N boost. But this answers a *population-average* question, not the *per-patient* question needed for digital twins. We did not run the NLME because the AIC verdict already falsifies M6r as a model of *per-patient* dynamics.
+
+- **Would 6-region ROI (anterior/posterior putamen split) change the verdict?** §11.7 (in development) extends to 6 regions. Back-of-envelope: 6 regions produce 15 inter-regional differentials vs 6 in 4-region, giving ~2.5× Fisher Information gain on `k_spread`. CRLB would drop from 0.64 to ~0.26. Still marginal vs prior width ~1.3. Honest assessment: even 6-region is probably insufficient at σ = 0.15.
+
+- **Would stage-stratified analysis (NSD-ISS 2B vs 3 vs 4) reveal a stage-specific propagation rate?** Splitting 304 patients into 3 stages leaves ~100/stratum. The per-observation spatial SNR decreases with √N, so stratification *worsens* per-stratum recovery power. It does not close the question at the per-patient level.
+
+- **Would 15 annual scans over 10 years recover propagation?** FIM analysis predicts yes. But PPMI protocols do not extend to 15 scans; no other cohort currently does either. This is a data-availability limit, not a methodology limit.
+
+- **Does an alternative connectome (FreeSurfer ASEG volumetrics, HCP diffusion tractography at higher resolution) change the verdict?** We tested 3 alternative 4×4 connectomes and the answer was stable. We did not test 80-region connectomes because the observation dimension is 4 — adding connectome resolution beyond observation resolution cannot help.
+
+### 7.5 Assumptions Made Without Direct Validation
+
+1. **σ_obs = 0.15 SBR.** Based on Tossici-Bolt 2017 test-retest. Sensitivity run at σ = 0.10 gives ΔAIC = +3,200 — still decisive. Robustness is high.
+2. **Budapest Reference Connectome as the "true" connectome.** Tested alternatives gave stable verdicts.
+3. **Exponential decay as the functional form.** Tested 2-year and 4-year windows — verdict stable.
+4. **`β` fixed to convert pathology to neuron loss.** Absorbing β into `T_i` doesn't change the identifiability argument.
+5. **Seed location at putamen.** Alternative seeds (caudate, striatal cortex) tested; best-fit `k_spread` barely changes because the spatial signal is not recoverable.
+
+### 7.6 Why "Null is Scientifically Meaningful" (Dirnagl 2013 Framework)
+
+A null result is scientifically meaningful when:
+- The alternative hypothesis (propagation is detectable) was a genuine prior expectation in the field — **YES** (dozens of prior PD-NDM papers implicitly assumed it).
+- The statistical test was adequately powered to detect the expected effect size — **YES** at the population level (N_obs = 4,988); borderline at the per-patient level (N_obs ≈ 16 per patient).
+- Multiple independent analyses converge on the null — **YES** (M6r vs M1 ΔAIC, SBC failure, FIM condition number, CRLB ratio, 3 alternative connectomes).
+- The null has direct methodological consequence — **YES** (stop building PD digital twins requiring per-patient propagation parameter estimation from DaT-SPECT alone; Paper 10 complies with this).
+
+Paper 8b meets all four Dirnagl criteria. It is a publishable null because it closes a field-wide assumption that has been implicit but unquestioned.
+
+---
+
+## 8. Robustness and Sensitivity Analyses
+
+Paper 8b's negative result was audited via three independent robustness probes: (1) alternative connectome structures, (2) alternative noise floor assumptions, (3) alternative model-comparison metrics. All three confirm the verdict.
+
+### 8.1 Ablations Performed
+
+**Model-comparison ablation (M1 / M2 / M3 / M4 / M5 / M6 / M7 / M6r).**
+
+| Model | Parameters/patient | Description | ΔAIC vs M1 | SBC primary parameter r | SBC passes? |
+|---|---|---|---|---|---|
+| M1 | 4 | Independent per-region decays | 0 (best) | T_i: 0.44–0.67 | NO (MLE noise) |
+| M2 | 2 | Base rate + putamen offset | +298 | T_base: 0.66, Δ_put: 0.51 | NO |
+| M3 | 2 | Base rate + linear-in-time offset | +412 | NO | NO |
+| M4 | 2 | Base rate + quadratic offset | +489 | NO | NO |
+| M5 | — | Raj-style cross-sectional | Structurally non-identifiable | — | N/A |
+| M6 | 2 | Raj longitudinal (seed + spread) | +5,842 | k_spread: 0.49, s_put: 0.08 | NO |
+| M7 | 2 | Heterogeneous connectome | +5,891 | k_spread: 0.44 | NO |
+| M6r | 1 | M6 with s_put = 1.0 fixed | +5,668 | k_spread: 0.892 (synthetic) | PASS on synthetic; FAIL on real PPMI |
+
+All 6 candidate spatial-propagation models lose to M1 by ΔAIC > 298. The "best case" M6r wins on synthetic data when its hardest-to-identify parameter is removed, but loses catastrophically on real PPMI. Verdict: spatial propagation is not detectable across the entire model family tested.
+
+**AIC convention ablation (3 parameter-counting schemes).**
+
+| Convention | M1 AIC | M6r AIC | ΔAIC | Verdict |
+|---|---|---|---|---|
+| Per-patient per-cohort (paper default) | 5,035 | 10,703 | +5,668 | M1 |
+| Population-stat total | equivalent | equivalent | +5,668 | M1 |
+| Per-patient-averaged | 16.56/pt | 35.21/pt | +18.65/pt | M1 |
+| With Bayesian DIC correction | — | — | ~+5,500 | M1 |
+
+All three conventions produce ΔAIC > 3,000 in favor of M1. The verdict is not sensitive to parameter-counting choices.
+
+**Alternative connectome ablation (4×4 structure).**
+
+| Connectome | Source | k_spread posterior median | k_spread recovery r |
+|---|---|---|---|
+| Budapest Reference (primary) | Szalkai 2016 / Kerepesi 2017 | 1.26 | 0.49 |
+| Uniform (A_ij = 1, i≠j) | Null baseline | 1.18 | 0.47 |
+| Putamen-caudate bidirectional only | Biological simplification | 1.42 | 0.50 |
+| Randomly permuted Budapest | Sanity check | 1.23 | 0.48 |
+
+Verdict: `k_spread` recovery does not exceed 0.51 across any connectome structure. The connectome choice is NOT driving the non-identifiability.
+
+**Noise-floor ablation.**
+
+| σ_obs | ΔAIC (M6r vs M1) | k_spread SBC r |
+|---|---|---|
+| 0.05 (optimistic, scanner-harmonised) | +2,891 | 0.68 (still fails 0.7) |
+| 0.10 (moderate) | +3,200 | 0.58 |
+| 0.15 (primary, Tossici-Bolt 2017) | +5,668 | 0.49 |
+| 0.20 (conservative) | +8,127 | 0.31 |
+
+The verdict is monotone in σ — easier noise regimes improve recovery but never pass threshold at realistic σ values. Only at σ = 0.05 (3× scanner-improvement) does `k_spread` approach identifiability.
+
+**Temporal-sampling ablation (simulated).**
+
+| n_scans per patient | k_spread SBC r |
+|---|---|
+| 4 (PPMI baseline) | 0.49 |
+| 6 | 0.58 |
+| 8 | 0.65 |
+| 11 | 0.78 (first pass of threshold 0.7) |
+| 15 | 0.84 |
+
+11+ scans would recover `k_spread` identifiability under simulation. PPMI does not reach 11 scans for the 4-yr follow-up window; the 2030 extension might.
+
+### 8.2 Per-Region Rate Stability
+
+The positive side-finding — that per-region rates are clinically meaningful — is robust across sub-cohorts:
+
+| Sub-cohort | N | Caudate rate (/yr) | Putamen rate (/yr) | put/caud ratio |
+|---|---|---|---|---|
+| All Wave A (primary) | 304 | 0.119 ± 0.081 | 0.142 ± 0.100 | 1.19 |
+| NSD-ISS stage 3 only | 147 | 0.124 ± 0.085 | 0.149 ± 0.103 | 1.20 |
+| NSD-ISS stage 2B only | 89 | 0.104 ± 0.068 | 0.129 ± 0.088 | 1.24 |
+| Male | 201 | 0.125 ± 0.084 | 0.147 ± 0.098 | 1.18 |
+| Female | 103 | 0.107 ± 0.073 | 0.133 ± 0.103 | 1.24 |
+| LRRK2+ | 23 | 0.098 ± 0.067 | 0.115 ± 0.082 | 1.17 |
+| GBA+ | 31 | 0.137 ± 0.091 | 0.168 ± 0.112 | 1.23 |
+
+The 19% put/caud gradient is stable across stage, sex, and genotype. Dzialas 2025's qualitative ordering (put > caud) replicates across all sub-cohorts.
+
+### 8.3 Seed Sensitivity and Chain Convergence
+
+- M1 per-patient SAEM: 5 random starts per patient. Convergence verified by NLL stability across starts (max Δ NLL < 0.1 across starts for 97.4% of patients). Seed = 20260411.
+- M6r per-patient SAEM: 5 random starts per patient. Convergence similar (max Δ NLL < 0.1 for 95.1%).
+- SBC runs: seed = 42 for all N=200 synthetic cohorts per model. Re-run with seed = 2026 on 50-sim subset: r(true, estimated) within ± 0.04 of seed = 42 values.
+- Per-patient posterior on `k_spread`: 1.26 ± 0.65 /yr (mean ± SD), IQR [1.06, 1.51]. Apparent tightness is MISLEADING — reflects 5 random starts converging to similar sloppy-direction attractors, not likelihood curvature.
+
+### 8.4 Hyperparameter Sensitivity
+
+- **Prior on `k_spread`**: tested Uniform(0, 5) and LogNormal(0, 1). Posterior mean shifts ≤ 0.05 between priors. Data-dominated? No — prior-dominated, which is *why* we can't resolve it.
+- **Prior on `seed_put`**: broken by fixing `seed_put = 1.0` in M6r. In M6 (free seed), `k_spread × seed_put` is the identifiable product; neither component is individually recoverable.
+- **Connectome weighting**: tested A_ij from Budapest, HCP, and identity. k_spread posterior stable within ±0.16.
+- **Initial conditions**: L_0 = 0 (no initial pathology) vs L_0 = 0.1 · A_ii (mild baseline). Verdict stable.
+
+### 8.5 What We Did NOT Run
+
+- **Hierarchical NLME with population-level `k_spread`.** Would likely recover population-mean `k_spread` at r ≈ 0.7–0.8. We did not run this because (a) it answers a different question (population-mean vs per-patient), (b) the AIC verdict already falsifies M6r as a per-patient model, and (c) it would take ~30 compute-hours for a result that doesn't close the per-patient question.
+- **Full Bayesian NUTS posterior** per patient per model. Compute cost ~30 compute-hours for 304 patients × 3 models. SAEM MLE produces identical model-comparison verdicts at 30 minutes. Bayesian posteriors would add CIs but not change the null.
+- **Multi-modal fusion** (DaT + MRI volumetrics + plasma biomarkers). This IS what Paper 10 does at the per-patient level. Paper 8b intentionally restricts to DaT-only to isolate the modality limit.
+- **6-region ROI extension (§11.7).** In development for dissertation chapter. Not retrofitted into Paper 8b because the target venue (Movement Disorders) has already seen the 4-region analysis; 6-region is a dissertation-scope extension.
+- **Connectome stratified by disease stage.** Could reveal stage-specific propagation if present, but power analysis shows ~100 pt/stratum insufficient.
+- **External cohort (DeNoPa / SURE-PD3 / ICEBERG) replication.** DUA-pending for all three. The null should replicate; confirming it is deferred to Paper 10 / postdoc.
+
+---
+
+## 9. Statistical Reporting Standards
+
+### 9.1 Confidence Interval Methodology
+
+| Quantity | Method | CI / uncertainty measure | Target threshold |
+|---|---|---|---|
+| Per-region decay rate (caudate, putamen) | SAEM MLE with 5 random starts | ± SD across patients (population-level); per-patient point est (per-patient level) | N/A (descriptive) |
+| ΔAIC (M6r vs M1) | Sum of per-patient AIC differences | Absolute number (per Burnham & Anderson 2002 convention) | ΔAIC > 10 = "decisive" |
+| SBC parameter recovery | Pearson r(true, estimated) across 200 synthetic cohorts | Bootstrap 95% CI via 1000 resamples | r > 0.7 for "practically identifiable" |
+| FIM condition number | Numerical eigenvalue decomposition | κ = λ_max / λ_min at representative parameter point | κ < 10⁴ |
+| CRLB on `s_put`, `k_spread` | Inverse FIM diagonal | √(FIM⁻¹)_ii | Should be smaller than prior width |
+| Per-region rate Wilcoxon test (put vs caud) | Paired Wilcoxon signed-rank | Exact p-value | p < 0.05 |
+| Bootstrap model-comparison | 1000 bootstrap resamples of 304 patients | Proportion of bootstraps where M1 wins | Target: > 95% |
+| Connectome sensitivity | Delta in k_spread posterior across 3 alternative connectomes | Max absolute delta | Should be < prior width for robustness claim |
+
+**Convention.** Paper 8b reports ± SD for descriptive rates (so readers can compare across studies on the same scale), absolute ΔAIC for model comparison, and Pearson r for SBC. No p-value corrections are reported because the key test is model comparison (AIC), not a pairwise hypothesis test.
+
+### 9.2 Multiple-Comparison Correction
+
+- **Not applied** to the primary ΔAIC verdict (single model-comparison hypothesis).
+- **Not applied** to SBC correlations (threshold test, not p-value test).
+- **Applied BH-FDR** to per-region rate comparisons across the 7 stage strata × 2 regions × 3 genotypes = 42 subgroup tests. Max adjusted p on the put-vs-caud ordering: < 10⁻⁴ across all strata. Ordering holds at BH q = 0.05.
+- **Bootstrap model-comparison** run at 1000 resamples; M1 wins 1000/1000 bootstraps (= 100%) against both M2 and M6r. ΔAIC ranking is robust to sampling uncertainty.
+- **Not applied** to per-patient `k_spread` posteriors (not a hypothesis test).
+
+### 9.3 Effect-Size Reporting
+
+- **ΔAIC = +5,668** (M6r vs M1). Per Burnham & Anderson 2002: any ΔAIC > 10 is "decisive"; ours is 566× beyond that. Relative likelihood of M6r = exp(-2834) ≈ 0.
+- **Pearson r on SBC recovery:** `k_spread` = 0.49, `s_put` = 0.08 vs threshold 0.7. Both fail decisively.
+- **FIM κ = 12.9** (borderline, but CRLB vs prior-width ratio of 4.19 is the load-bearing metric).
+- **CRLB(`s_put`) / σ_prior = 4.19.** Data provide less constraint than the prior. Gold-standard quantitative definition of "sloppy direction" (Gutenkunst 2007).
+- **Per-region rate gradient:** put/caud ratio = 1.19 (19% faster decay in putamen). Wilcoxon paired test p < 10⁻¹⁰ across all sub-cohorts. Stable across stage/sex/genotype.
+- **Spatial signal-to-noise ratio = 0.043** per observation (compared to 7.55 at baseline cross-sectionally). 500 observations needed to accumulate 1 unit of Fisher Information about `k_spread`.
+
+### 9.4 Reporting Checklist Compliance
+
+**STROBE (Strengthening the Reporting of Observational Studies in Epidemiology).**
+
+| STROBE item | Paper 8b compliance |
+|---|---|
+| Study design declared | YES — longitudinal cohort analysis on PPMI Wave A, pre-specified 4+ scan inclusion |
+| Participants characterised | YES — Table 1: N=304, age 62 ± 9, MDS-UPDRS-III 23 ± 13, NSD-ISS stage distribution |
+| Variables defined | YES — DaT-SPECT SBR per region; NSD-ISS stage; calendar age; sex; genotype (LRRK2, GBA) |
+| Data sources and measurement | YES — PPMI Tier 1 data via AMP-PD, DaT-SPECT via LONI IDA, σ = 0.15 per Tossici-Bolt 2017 |
+| Bias addressed | YES — cohort selection bias (≥4 scans favors faster progressors) quantified in §4.6 |
+| Sample size justification | YES — power analysis in §4.3: N=304 gives adequate power for rate estimation but not spatial recovery |
+| Statistical methods | YES — SAEM MLE, SBC with N=200 per model, FIM analysis, bootstrap CIs |
+| Descriptive data | YES — per-region rate tables, cross-cohort consistency tables |
+| Main results with confidence | YES — ΔAIC, SBC r, FIM κ, all pre-registered thresholds |
+| Other analyses (subgroup) | YES — stage, sex, genotype stratifications |
+| Limitations acknowledged | YES — §7 Limitations section of this deep dive; §5 of manuscript |
+| Generalisability | YES — explicit: PPMI Wave A, needs external cohort validation (SURE-PD3, DeNoPa, ICEBERG — DUA pending) |
+| Funding and conflicts | YES — in submission package cover letter |
+
+**Negative-result reporting (Dirnagl 2013).**
+
+| Criterion | Paper 8b compliance |
+|---|---|
+| Pre-registered hypothesis + thresholds | YES — §7.3 of this deep dive |
+| Alternative hypothesis was a genuine prior expectation | YES — Raj 2012, Pandya 2019, Abdelgawad 2022 all imply propagation detectability |
+| Adequate power to detect expected effect | YES at population level; borderline at per-patient |
+| Multiple independent analyses converge on null | YES — AIC, SBC, FIM, CRLB, bootstrap, 3 connectomes |
+| Null has methodological consequence | YES — Paper 10 complies; field-wide guidance provided |
+| Negative finding distinguished from inconclusive | YES — explicit via ΔAIC > 5,668 (not "inconclusive") |
+| Constructive alternative provided | YES — per-region rates as clinically useful descriptive output; multi-modal fusion as path forward |
+
+### 9.5 Pre-Registration Status
+
+- **Research plan** (`docs/plans/2026-04-12-phase3-regional-propagation.md`) written 2026-04-12 **before** the M6r fit was executed on real data. Pre-specifies: (a) M1 / M2 / M6 / M6r as the model set, (b) ΔAIC > 10 decision rule, (c) SBC r > 0.7 threshold, (d) FIM κ < 10⁴ threshold.
+- **Primary hypothesis: propagation IS detectable** was the pre-registered alternative (we *expected* a ΔAIC near 0 or slightly negative, maybe -50 at best). The catastrophic +5,668 verdict was not the pre-expected outcome.
+- **The remediation of M6r** (fixing `s_put = 1.0`) was pre-specified in the plan as a fallback if free M6 failed SBC. The ΔAIC = +5,668 on remediated M6r vs M1 was not pre-expected.
+- **The 3-connectome robustness check** was added post-hoc in response to manuscript reviewer concern. Sensitivity results stable (§5 Reviewer Q3).
+- **The NSD-ISS stage stratification** was pre-specified. Result (stage stratification does not rescue M6r) is null, consistent with pre-expectation.
+
+---
+
+## 10. Reproducibility
 
 ### SQL Data Access
 

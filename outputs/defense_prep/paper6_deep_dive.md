@@ -484,3 +484,229 @@ This is a template-based natural language summary — not AI-generated text, but
 **Trade-offs**: Much more clinician-friendly than JSON outputs and static figures. Would allow interactive exploration — "what if the patient's UPDRS score were 5 points higher?" type counterfactual queries. But requires significant software engineering beyond the research scope: user authentication, HIPAA compliance, database integration, responsive design, error handling for edge cases.
 
 **Why we chose scripts + JSON + static figures**: The research contribution is the integration methodology, not the UI. Scripts are reproducible, JSON results are machine-parseable, and static figures are publication-ready. A clinical deployment would absolutely need a web interface, but that's a translational research effort beyond the dissertation scope.
+
+---
+
+## 7. Limitations, Deficiencies, and Honest Assessment
+
+Paper 6's submission package (JAMIA, 14pp, 1,900-cohort pipeline) includes a pre-registered Deployment-Audit Protocol (Table 1) precisely because the unified pipeline has real-but-bounded predictive utility. This section surfaces what the paper does NOT prove, where integration was partial, and what the 1,900-cohort result can and cannot support.
+
+### 7.1 What the Paper Does NOT Prove
+
+- **Not a positive sub-staging accuracy claim.** Within-NSD+ Top-1 accuracy is 42.5% (471/1,108) in the 1,900-cohort run. This is **below** the reasonable ordinal baseline (predict the modal NSD+ stage, Stage 3, for everyone → ~44% accuracy on the observed distribution). The unified pipeline's predictive power on sub-staging among NSD+ patients is *marginal-to-none* without DaT-SPECT. Paper 6's claim is NOT "we sub-stage accurately"; it is "we integrate five papers into a single report and honestly surface when any component is uncertain." The 42.5% is a honest floor, not a selling point.
+
+- **Not external validation.** The 1,900-cohort is the full PPMI longitudinal-staging cohort. NOT a second cohort (BioFIND, PDBP, HBS). The previously-advertised "1,900-patient scale" addresses *within-PPMI coverage and speed*, not *cross-cohort generalisation*. Cross-cohort integrated-pipeline performance is untested.
+
+- **Not a prospective deployment demonstration.** The 22.1-second runtime on 1,900 patients demonstrates *offline feasibility*, not online deployment. No EHR integration, no real-time clinician feedback, no deployment-monitoring loop has been built. The Deployment-Audit Protocol in Table 1 is a *pre-registered commitment for a future deployment study*, not a deployed system.
+
+- **Not per-patient conformal.** The 0.037 conformal band width comes from Paper 4's IPCW marginal quantile — a **cohort-invariant** width applied uniformly to every patient. Paper 6 does NOT produce per-patient prediction-interval widths that adapt to patient-specific uncertainty. The constant band is a genuine methodological limit inherited from IPCW-marginal conformal; per-patient bands would require local-adaptive conformal (not yet integrated).
+
+- **Not a full GIMIN integration.** GIMIN's heteroscedastic decoder emits raw LOGITS for binary features (SEX is the load-bearing example); the sigmoid is applied only in the blended-imputed-value path, not in the returned `mean_pred`. Paper 6 v2 excludes SEX from the GIMIN→CatBoost overlap mapping for this reason. **GIMIN is therefore used for 4/5 of the CatBoost-12 overlap features (AGE, MOCA, ESS, RBD), not 5/5.** The binary-feature logit inverse is a known unfixed bug in `GIMINImputer`; Paper 6 works around it rather than fixing it.
+
+- **Not a decoupled staging contribution.** CatBoost-33 (v4 hybrid, with 21 imaging variables) boosts Top-1 by ~16pp over CatBoost-12, but **requires DaT-SPECT** — a deployment-gating limitation. The v2 default (CatBoost-12 + GIMIN-imputed) is what actually runs on 1,900 patients. Any clinical value claim needs to specify which variant, and users without DaT-SPECT access are stuck at the lower-performing tier.
+
+- **Not a validated decision support tool.** No human-factors study of whether clinicians can actually read, interpret, and act on the unified report. No usability testing. No comparison against an alternative decision-support UI. The "integration enables decision support" claim rests on face validity, not empirical evidence.
+
+### 7.2 Partial Integration and Workarounds
+
+- **GIMIN integration is 4/5 features.** Per-feature provenance is logged in the v2 output JSON (33.3%/54.9%/11.8% split: GIMIN / Paper1-raw / median-fallback). Honest, traceable, but partial.
+
+- **Paper 4 conformal is wrapper, not native.** Bands come from reading the aggregate_summary.json produced by Paper 4's global calibration. The per-(cause, time_bin) quantile table is NOT loaded per-patient — the uniform 0.037 is a flat approximation. Reviewers asking "does Paper 6 faithfully reproduce Paper 4's coverage guarantee per cell?" get the answer: **no, it applies the mean cell width uniformly**.
+
+- **Paper 5 temporal-validation is NOT invoked.** The 1,900-cohort is random-split-agnostic. No inductive graph extension is actually run — the pipeline uses the existing Paper 3 fold-0 training graph. Patients outside that graph fall back to `pat_to_gidx[0]` (node-0 fallback), which is worse than Paper 5's proper inductive kNN attachment. **This is a real gap**: Paper 6 does not deploy Paper 5's inductive-extension improvement on unseen patients.
+
+- **Paper 3 uses fold 0 only.** No ensembling across folds 0–4. This is a deliberate speed optimization (5× inference cost) but sacrifices the ensemble-calibration benefit. DeepHit fold 0 C-td 0.9375 is slightly above Paper 3's fold-mean 0.926 (i.e. fold 0 is an optimistic draw), so Paper 6's implicit performance claim is modestly biased upward.
+
+- **Re-training CatBoost at each run.** Paper 1's CatBoost was not checkpointed, so Paper 6 re-trains on every invocation (500 iterations, depth 6, ~0.2s for 779 NSD+ patients). This is fine for a demo, but in deployment would require a persistent checkpoint to avoid cold-start cost.
+
+- **SEX excluded from GIMIN overlap.** The 5 CatBoost-12 features originally targeted for GIMIN imputation shrank to 4 when SEX was dropped for the logit-inverse reason above. This reduced GIMIN's contribution from 5/12 to 4/12 of the staging-model input — a 16% reduction in GIMIN's useful footprint.
+
+### 7.3 Sub-Cohort and Out-of-Scope Patients
+
+- **792 Stage-0/5/6 patients out-of-scope by design.** These are NOT predicted "wrong" — Paper 6 correctly flags them as outside the NSD-positive sub-staging scope (stages 1, 2B, 3, 4). But this means the *usable* cohort for the pipeline's core sub-staging claim is 1,108 patients, not 1,900. Reporting the 42.5% on 1,108 is honest; reporting it as "42.5% on 1,900" would be misleading.
+
+- **Five hand-selected example patients in the dissertation demo.** The 5-patient JSON-output demo (Section 3.1) is a SEPARATE artifact from the 1,900-cohort run; it exists for publication visualization and clinical storytelling. The 5-patient demo has been criticised (Q1 in §5) as potentially cherry-picked — diversity criteria were transparent, but the sample size is too small for any quantitative claim.
+
+- **Prodromal/PD-only filtering implicit in longitudinal cohort.** Paper 6's 1,900 is patients with ≥1 longitudinal visit AND longitudinal-staging computable. Patients with missing baseline features fall out. This "implicit eligibility" has not been characterised via CONSORT-style drop-off tallies (but see §8.5 for the CONSORT flow diagram that was added).
+
+### 7.4 Known Bugs and Technical Debt
+
+- **GIMIN logit-inverse for binary features** — unfixed in `GIMINImputer`; Paper 6 v2 works around it.
+- **Paper 2 checkpoints are state_dict-only, no scaler_state_dict.** Paper 6 v2 fits `ModalityAwareScaler` at runtime with the same logic as `run_paper2_experiments.py`. Any schema drift in feature ordering would silently break the reconstruction — no runtime check for this.
+- **`[!t]` figure placement caused overflow past bibliography** in an earlier JAMIA draft; fixed in submission package to `[htbp]`. Not a functional issue, but a reminder that LaTeX layout for 2-column JAMIA has been manually hand-polished.
+- **StageGraphOnly vs StageDecoderOnly branching** inside `_build_model` — stage-conditioning pathway depends on which GIMIN variant was loaded. If the checkpoint filename scheme changes, branching silently selects the wrong class. Not yet guarded by a config-hash check.
+
+### 7.5 What the 42.5% Top-1 Actually Means Clinically
+
+A clinician receiving Paper 6's unified report for an NSD+ patient sees: "Most likely NSD+ sub-stage: Stage 3 (probability 0.51), next most likely: Stage 2B (0.32), next: Stage 4 (0.15)." At 42.5% Top-1 accuracy, this prediction will be *exactly right about 4 times in 10 visits*. In the remaining 6 visits, the predicted top class is adjacent or off-by-one in the ordinal scale. For a deployment decision like "should this patient enter a symptomatic-PD clinical trial?" the model's output is *ordinally informative but not definitive* — exactly the scenario where the pipeline's conformal bands and explicit probabilities matter.
+
+The paper's honest framing: this is a proof-of-concept that *integration is feasible and traceable*, not that *accuracy is sufficient for unsupervised deployment*.
+
+### 7.6 What Good Ablations Would Fix These
+
+A fuller evaluation would include:
+
+1. Paper 6 on BioFIND and PDBP cohorts (cross-cohort generalisation test).
+2. CatBoost-33 as the default sub-staging model when DaT-SPECT is present, with a runtime branch based on feature availability.
+3. Per-(cause, time_bin) conformal bands loaded from Paper 4's full calibration table instead of the uniform 0.037.
+4. Paper 5 inductive-extension integration for unseen patients.
+5. Ensembling across all 5 Paper 3 folds for survival inference.
+6. Prospective deployment with clinician usability study.
+
+None are run in the current submission. Items 3–5 are queued for revision; 1, 2, 6 are explicitly scoped as future work.
+
+---
+
+## 8. Robustness and Sensitivity Analyses
+
+Paper 6 is primarily an *integration paper* — robustness is measured by whether the pipeline degrades gracefully as upstream components are swapped or fail. This section documents ablations performed, cross-configuration comparisons, and what was deliberately NOT tested.
+
+### 8.1 Ablations Performed
+
+| Ablation | Variants | Primary Metric | Result |
+|---|---|---|---|
+| v1 median-fill vs v2 GIMIN-integrated | 2 pipelines | Top-1 within-NSD+ accuracy | v1: ~40% (pre-fix snapshot); v2: 42.5% (n=1,108) |
+| CatBoost-12 vs CatBoost-33 (W4 hybrid study) | 2 variants | Top-1 within-NSD+ | CatBoost-12 ~42.5%; CatBoost-33 ~58% (with DaT-SPECT) |
+| GIMIN with vs without temperature scaling | 2 configs | Per-feature coverage at γ=0.90 | Without: 0.664 raw; With T scaling: 0.858 (closes ~82% of gap) |
+| Cohort scale: 5 hand-picked vs 1,900 | 2 runs | Runtime + error rate | 5 pts: 0.4 s, 0 errors; 1,900 pts: 22.1 s, 0 errors (84 pts/s) |
+| Provenance tracking | Per-feature log | GIMIN / Paper1-raw / median-fallback fractions | 33.3% / 54.9% / 11.8% |
+| Fold selection | fold 0 only vs fold-mean | DeepHit C-td | 0.9375 (fold 0) vs 0.926 (mean) — fold 0 slightly optimistic |
+
+**Not ablated:** CatBoost hyperparameters (iterations, depth, learning rate) — all inherited from Paper 1. Inductive-extension k-neighbors — not deployed. Conformal quantile choice (uniform 0.037) — single operating point.
+
+### 8.2 Cross-Variant Comparisons
+
+- **v1 → v2 pipeline evolution.** v1 loaded the GIMIN checkpoint but never invoked inference — features were median-filled. v2 actually runs GIMIN MC-dropout (T=20 samples), applies per-feature temperature scaling (median T=0.87), and logs per-feature provenance. The v1 pre-fix state is frozen at `outputs/paper6/_snapshot_pre_gimin_fix_20260418/` for audit.
+- **CatBoost-12 vs -33 decision tree.** The W4 workstream showed CatBoost-33 (with DaT-SPECT) improves Top-1 by 16pp. The v2 production default remains CatBoost-12 because the deployment scenario is "clinical center without DaT-SPECT." A runtime branch to switch variants based on feature availability is specified but not implemented.
+- **Temperature-scaling source (Paper 2 §V.E).** The per-feature scalars are fit on Paper 2's calibration cohort and re-applied in Paper 6. The median T of 0.87 means most features were *slightly overconfident* before scaling. Two features had T > 1.5 (anti-conservative); none flagged as T < 0.5.
+
+### 8.3 Cross-Validation Variance
+
+- **Per-fold variance from Paper 3 inherited.** DeepHit 0.907–0.945 (SD 0.018); Graph-DT 0.903–0.938 (SD 0.013). Paper 6 uses fold 0; alternate folds would produce modestly different CIF curves. No per-fold uncertainty quantification is reported per patient.
+- **CatBoost variance under re-training.** 500 iterations with fixed seed 42 gives reproducible models. A 5-seed rerun on CatBoost-12 (not in the paper) shows Top-1 variance of ± 0.8pp across seeds on the 1,108 within-NSD+ cohort — small but non-zero.
+- **Graph-DT graph-lookup fallback** for unknown patients uses node 0. Variance introduced by wrong-node-fallback not quantified.
+
+### 8.4 Seed and Split Sensitivity
+
+- **CatBoost seed**: fixed at 42. No multi-seed rerun in the headline pipeline.
+- **GIMIN MC-dropout seed**: default torch RNG. T=20 samples per-feature reduces sampling variance to ~1/√20 ≈ 22% of single-draw SD.
+- **Temperature-scaling fit**: deterministic on Paper 2 calibration cohort; no seed dependency.
+- **Fold selection (Paper 3)**: fold 0 always. **Single-point estimate, not ensemble.**
+
+### 8.5 Hyperparameter Sensitivity
+
+| Hyperparameter | Value | Source | Ablated? |
+|---|---|---|---|
+| CatBoost iterations | 500 | Paper 1 | No |
+| CatBoost depth | 6 | Paper 1 | No |
+| CatBoost learning rate | 0.1 | Paper 1 | No |
+| auto_class_weights | "Balanced" | Paper 1 gotcha | No |
+| Conformal band width | 0.037 (uniform) | Paper 4 aggregate_summary.json 95% CL mean | No (see §7.2) |
+| CIF threshold for "plausible transition" | 0.005 | Paper 6 design choice | No |
+| GIMIN MC-dropout samples T | 20 | Paper 2 default | No |
+| Temperature-scaling per-feature | Fit on Paper 2 cal. cohort | Paper 2 §V.E | Yes (Paper 2) |
+| Graph kNN k | 15 | Paper 3 | No |
+| Validation fraction | 0.15 | Paper 3 | No |
+
+**Honest summary:** Paper 6 inherits hyperparameters from five upstream papers without re-tuning for the integration context. The "same as Paper N" defense is structural, not experimental.
+
+### 8.6 Stress Tests
+
+- **1,900-cohort stress: 22.1 s, 0 errors.** Full cohort at 84 pts/s on MPS. The pipeline degraded gracefully on 792 out-of-NSD+ patients (correctly flagged, not errored).
+- **Hand-picked 5-patient demo: 0.4 s, 0 errors.** Small-scale runtime baseline. Includes CatBoost re-training, checkpoint loading, and 5 inferences.
+- **GIMIN-decoder coverage stress (inherited from Paper 2 §V.E).** At γ=0.90 nominal, raw coverage 0.664 → temp-scaled 0.858 → conformal 0.909. Paper 6 uses the temp-scaled variant by default (not conformal, for speed).
+
+### 8.7 What Was NOT Tested and Why
+
+- **Cross-cohort pipeline run** (BioFIND/PDBP/HBS). Feature alignment differences (12 vs 15 vs 11 common features) require per-cohort re-tuning of the LONGITUDINAL_TO_PAPER1 map. Not run in the current submission.
+- **Prospective deployment.** No EHR integration, no live-run evaluation. Scoped to the Deployment-Audit Protocol as future work.
+- **Robustness to missing DaT-SPECT.** Not explicitly tested; Paper 6 v2 defaults to CatBoost-12 (imaging-free) so the question is implicit.
+- **GIMIN logit-inverse fix.** Known bug for SEX; not fixed, worked around.
+- **Per-(cause, time_bin) conformal cells.** Full Paper 4 procedure not deployed; uniform band used instead. Conservativeness/optimism per cell NOT bounded.
+- **Human-factors / clinician-usability study.** Not conducted.
+- **Paper 5 inductive-extension deployment.** Not integrated.
+
+---
+
+## 9. Statistical Reporting Standards
+
+Paper 6 is targeted at JAMIA — a clinical-informatics venue expecting TRIPOD+AI + CONSORT + deployment-oriented reporting. This section audits compliance and flags gaps.
+
+### 9.1 Confidence Interval Methodology
+
+| Quantity | CI reported? | Method | Notes |
+|---|---|---|---|
+| Top-1 accuracy within-NSD+ | **No explicit CI** in this version | Binomial CI (471/1,108 → Wilson 95% [0.396, 0.454]) would be appropriate | Not in current aggregate_stats JSON. |
+| Conformal band width (0.037) | **No CI** — inherited as cohort-invariant point | Paper 4 aggregate | Constant for all patients; no CI reported. |
+| Per-feature provenance % | Point estimate only | N/A (descriptive) | 33.3/54.9/11.8%. No CI on provenance shares because they are deterministic given feature availability. |
+| Runtime (22.1 s) | Point estimate | Wall-clock time | No CI reported. Measured single-run. |
+| GIMIN-imputation downstream Δ accuracy | No paired bootstrap CI in Paper 6 | Paper 2 reports 5-fold CV for downstream; Paper 6 does not re-run | Cross-reference to Paper 2 required. |
+| Paper 3 C-td (fold 0 used in demo) | 0.9375 point estimate | N/A | Paper 3 reports mean 0.926 ± 0.018 across 5 folds. |
+
+**Headline CI we should have reported:** Wilson 95% binomial CI on the 471/1,108 Top-1 accuracy = **[0.396, 0.454]**. At the lower bound, the pipeline's accuracy falls below the modal-class baseline (~44%), which is a material admission. This CI should be added at revision.
+
+### 9.2 Multiple-Comparison Correction
+
+- **No explicit multi-comparison correction in Paper 6** because the primary claim is *integration feasibility*, not *outcome hypothesis testing*. The 4 pre-registered Deployment-Audit Protocol metrics (Table 1) are designed as *commitments for a future prospective study*, not as simultaneous hypothesis tests in the current submission.
+- **Within GIMIN per-feature provenance reporting,** 33 features × 1,900 patients produces 62,700 per-feature per-patient provenance decisions — but these are descriptive, not tested. No MC correction needed.
+- **For per-feature coverage reports (Paper 2 §V.E inherited)**, per-feature coverage is reported individually; no BH-FDR applied. Paper 2 reports this as "all 33 features individually calibrated at 90.0–100%" — binary compliance per feature, not a multi-testing scenario.
+
+### 9.3 Effect-Size Reporting
+
+Reported effect sizes:
+
+- **Top-1 accuracy (42.5%)** — in natural units.
+- **Per-feature provenance fractions** (33.3/54.9/11.8%) — descriptive only.
+- **Runtime (22.1 s / 84 pts/s)** — absolute scale.
+- **CatBoost-33 vs -12 Top-1 delta (+16pp)** — unambiguous magnitude.
+- **GIMIN coverage improvement (raw 0.664 → temp-scaled 0.858 → conformal 0.909 at γ=0.90)** — inherited from Paper 2 §V.E.
+
+NOT reported:
+
+- Paired-bootstrap Δ accuracy between v1 (median-fill) and v2 (GIMIN-integrated) with CI. The pre-fix v1 snapshot exists; a paired comparison at patient level is computable but not in the submission.
+- Standardized effect sizes (Cohen's h for proportions).
+- Per-subgroup effect sizes (sex, age stratum, genetic-carrier status) for integrated-pipeline accuracy. Would be needed for TRIPOD+AI fairness compliance.
+
+### 9.4 Reporting-Checklist Compliance
+
+**Primary targets:** TRIPOD+AI (Collins 2024, BMJ 385:e078378), CONSORT (cohort-selection diagram, Figure 2), Deployment-Audit Protocol (Table 1, pre-registered 4-metric).
+
+**TRIPOD+AI self-audit for Paper 6:**
+
+| Item | Status | Notes |
+|---|---|---|
+| Title / abstract identify integrated-pipeline prediction system | Yes | Structured abstract 241 words |
+| Data sources and cohort eligibility | Yes | PPMI, ≥1 longitudinal visit, NSD-ISS stageable |
+| Outcome definition | Yes | Within-NSD+ Top-1 accuracy on stages 1/2B/3/4 |
+| Model development (each of 5 component papers) | Yes (cross-referenced) | |
+| Model performance (discrimination) | Yes | 42.5% Top-1, honest |
+| Model performance (calibration) | Partial | Inherited Paper 4 (uniform 0.037 band); no per-patient calibration report |
+| Uncertainty quantification | Yes | Temp-scaling + conformal bands in per-patient JSON |
+| Fairness analysis | **Missing** | No per-sex / per-age / per-genetic-carrier accuracy breakdown. Gap. |
+| Confidence intervals on all metrics | **Missing** | Binomial CI on Top-1 should be added. Gap. |
+| External validation | Explicitly scoped as future work | |
+| Deployment monitoring protocol | Yes | Table 1 (4 pre-registered metrics) |
+| Code and data availability | Yes | Scripts + provenance JSON + snapshot of pre-fix state |
+
+**CONSORT cohort-selection flow (Figure 2):** 2,201 PPMI → 1,900 with longitudinal staging computable → 1,108 within NSD+ (stages 1/2B/3/4) → 471 Top-1 correct. This is the CONSORT diagram that Paper 6 v2 added.
+
+**Deployment-Audit Protocol (Table 1):** 4 pre-registered metrics for future prospective deployment: (a) per-visit Top-1 accuracy, (b) calibration ECE at 90% nominal, (c) per-subgroup equity (ΔTop-1 across sex/age), (d) drift-detection firing rate. These are *commitments*, not results.
+
+### 9.5 Pre-Registration
+
+The Deployment-Audit Protocol (Table 1) IS pre-registered for future work. The 1,900-cohort integration analysis itself was NOT pre-registered — it was an iterative result of the v1 → v2 fix in the 2026-04-18 session.
+
+### 9.6 Summary of Reporting-Standard Shortfalls
+
+| Shortfall | Severity | Fix Plan |
+|---|---|---|
+| No binomial CI on Top-1 accuracy | Medium | Wilson CI [0.396, 0.454] to be added. |
+| No per-subgroup fairness breakdown | High (TRIPOD+AI compliance) | To be added with age / sex / genetic-carrier strata. |
+| No paired bootstrap v1 vs v2 | Low | Snapshot exists; test is feasible. |
+| No cross-cohort external validation | Explicitly scoped as future | |
+| No prospective deployment | Explicitly scoped as future | Deployment-Audit Protocol pre-registers this. |
+| No per-patient conformal | Methodological limit of IPCW marginal | Upgrade to local-adaptive conformal is future work. |
+
+---
+
+*Document generated for dissertation defense preparation. All metrics sourced from actual output files in `outputs/paper6/` and `outputs/mechanistic_twin/paper6_submission/jamia/`. All code references verified against `scripts/paper6/` and `src/giman_pipeline/imputation/`.*

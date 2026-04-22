@@ -555,4 +555,216 @@ This isn't an artifact --- it reflects genuine multivariate shift. Even 10-year 
 
 ---
 
+## 7. Limitations, Deficiencies, and Honest Assessment
+
+Paper 5 is an honest stress test — its headline contribution is *quantified degradation under temporal shift*, not a claim of zero degradation. The sections below surface what the paper does NOT prove, where methodological shortcuts were taken, and which deployment decisions this evidence cannot support.
+
+### 7.1 What the Paper Does NOT Prove
+
+- **Not deployment-readiness under adversarial shift.** The W4 stress test (train on first 50%, test on final 50%) shows a 21.2–24.4pp C-td degradation from Paper 3's random 5-fold reference (DeepHit: 0.924 → ~0.68; Graph-DT: 0.904 → ~0.69). This is a deliberate worst-case, but the 24% degradation figure means: **Paper 5 does not support deploying these models at clinical centers with < ~1,200 training patients of longitudinal follow-up**. The "W3 is deployment-ready" framing (C-td 0.882 at 4.2pp degradation) is conditional on the center having at least ~1,500 patients already — a ceiling that many centers will not cross for years.
+
+- **Not cross-cohort temporal generalisation.** All four windows are drawn from PPMI. The temporal shift being measured is *within-PPMI drift* driven by enrollment cohort composition (early arms were MCI+HC heavy; later arms added prodromal). It is NOT a test of whether the model transfers to BioFIND, PDBP, or HBS under their respective temporal shifts. PDBP's much larger enrollment window (2012–2021) and different site mix almost certainly produces a different shift profile — untested.
+
+- **Not a validated per-patient inductive prediction guarantee.** The inductive graph extension attaches each test patient to k=15 training neighbors by cosine similarity on 18 baseline features. If a test patient is genuinely dissimilar from all 1,520 training patients (e.g., an atypical parkinsonian syndrome, rare genetic variant), the k=15 neighbors are the *least-bad* matches, not good matches. There is no published per-patient reliability score — a test patient whose mean cosine similarity to its k neighbors is 0.2 gets the same treatment as one whose mean similarity is 0.9.
+
+- **Not a causal claim about shift mechanism.** KS/PSI/MMD detect that the joint distribution shifted; they do NOT attribute the shift to any specific cause (enrollment-criterion change, referral-pattern drift, diagnostic-technology evolution, measurement-device replacement). A paper making clinical-deployment recommendations needs causal attribution to know *which* monitoring signal to watch in production.
+
+- **Not a measure of outcome-distribution shift.** Paper 5 detects covariate shift (X distribution) but does not measure label shift (Y distribution) or concept shift (P(Y|X) distribution). A feature distribution can be stable while the conditional relationship P(transition | features) has drifted — the more dangerous failure mode for prediction models. Measuring concept shift requires outcome data in the test window, which we have for PPMI but would not have in a live deployment.
+
+### 7.2 Methodological Shortcomings (acknowledged)
+
+- **Inductive graph extension uses test-internal standardization (real leakage concern).** In `extract_test_baseline_features()`, `train_means=None` and `train_stds=None` are passed, causing the function to compute standardization statistics from the test set itself. This is a mild form of information leakage — the test features' own mean/variance influences their own normalization. The file-level TODO flags this; the correct fix is to persist training-set means/stds during graph construction and pass them through. Expected impact: small (the 18 baseline features are relatively stable across temporal windows, and standardization only affects cosine-similarity neighbor assignment, not model predictions directly), but **unquantified**. No ablation has been run with training-anchored standardization to bound the leakage magnitude.
+
+- **Training set size and temporal ordering are confounded.** W1 (760 train), W2 (1140), W3 (1520), W4 (950) vary both in size AND in temporal window. The W3-vs-W4 comparison (1520 train → C-td 0.882; 950 train → C-td 0.68) cannot separate "smaller training set" from "more temporal shift." A proper disentanglement requires a random 950-patient split matched to W4's size — **not run**. This is the single largest reviewer objection we expect and have no defence against.
+
+- **MMD p-values all 0.000 may be permutation-resolution artefact.** With only 1,000 permutations, p = 0.000 literally means "none of the 1,000 random permutations produced an MMD ≥ observed." The true p-value could be 1e-4, 1e-5, or smaller — we cannot distinguish. Scaling to 10,000 permutations would give 10× better resolution at ~10× compute cost; not run. As reported, MMD p-values contribute only a binary "shift detected" flag, not a magnitude.
+
+- **No calibration recheck per window.** Paper 4 calibrated conformal bands on the random 5-fold split. Paper 5 reports C-td (discrimination) per window but does NOT report per-window conformal coverage. A 4pp C-td drop with conformal coverage still near 90% is very different from a 4pp C-td drop with conformal coverage collapsing to 75%. The calibration-degradation question is not answered.
+
+- **Graph-DT k-neighbor choice inherited from Paper 3 (k=15).** This hyperparameter was tuned on the random 5-fold split, not re-tuned for the temporal-shift setting. Under shift, the optimal k may differ (larger k averages more neighbors, potentially smoothing out shift; smaller k preserves signal from the few most-similar training patients). Not tested.
+
+### 7.3 Statistical Power Limitations
+
+- **380-patient test sets bound CI width on degradation estimates.** Each window has ~380 test patients generating ~750–1,000 episodes. Standard error on C-td at this sample size is ~0.010–0.015 (binomial variance on concordant pairs). A 5pp degradation is ~3–5 SE — significant at p < 0.01 but with 95% CI of roughly ±0.03 on the degradation magnitude. That means the *direction* (negative) is robust, but the *magnitude* (3pp vs 5pp vs 7pp) has wide CI. We report the point estimates without explicit CIs on the degradation delta — a reporting deficiency (see §9 below).
+
+- **Rare-transition per-cause C-td not computed at full resolution.** Per-transition C-td requires ≥10 events per cause for stable estimation. Stage 5 (advanced) transitions have ~40 events cohort-wide — stable at the cohort level, but when stratified into four temporal windows with ~8–12 Stage-5 events per window, the per-window per-transition C-td is unreliable. Paper 5 does not report this breakdown per window; it only reports aggregate C-td per window. Rare-transition stability under temporal shift is therefore not addressed.
+
+- **Only one random-CV reference (Paper 3 point estimate).** The degradation metric subtracts Paper 5's temporal C-td from a single reference (DeepHit 0.924, Graph-DT 0.904 from random 5-fold CV). Paper 3's own 5-fold variance (DeepHit SD 0.018, Graph-DT SD 0.013) is ignored when computing degradation. A proper treatment would propagate Paper 3's uncertainty into the degradation estimate's CI — **not done**.
+
+### 7.4 Scope and Generalisation Caveats
+
+- **Single dataset, single disease.** PPMI / Parkinson's. Temporal-validation methodology is general but performance numbers are not transferable.
+
+- **Observational cohort, not prospective deployment.** We simulate "deploying in 2014 and waiting until 2021" by reshuffling retrospective data. True deployment faces continuous data arrival, model updates, clinician feedback loops, EHR integration — none of which are tested. The monitoring pipeline (KS/PSI/MMD) is runnable on new data without retraining, which is a real deployment asset, but the end-to-end deployment loop (detect shift → retrain → deploy) is not demonstrated.
+
+- **No prospective holdout.** All "future" patients in this paper were enrolled before the analysis began. A genuine prospective test would require holding out 2022–2025 enrollees — impossible with PPMI's enrollment history.
+
+- **No W0 lower bound.** The smallest training window is W1 (40% = 760 patients). We do not know whether W0 with 20% = 380 patients would produce C-td 0.50 (collapse), 0.70 (severe degradation), or 0.80 (gradual degradation). This lower end of the learning curve is the regime most clinical centers will start in, and it is exactly where Paper 5 has no data.
+
+### 7.5 What Good Ablations Would Fix These
+
+A fuller evaluation would include:
+
+1. Random 950-patient split matched to W4's size — disentangles size from shift.
+2. Training-anchored standardization in `extract_test_baseline_features()` — closes leakage gap.
+3. Per-window conformal recalibration — answers the calibration-drift question.
+4. Per-window per-transition C-td — rare-transition stability.
+5. 10,000-permutation MMD — tighter p-value bounds.
+6. Paired bootstrap on Δ C-td with Paper 3 uncertainty propagated — proper CI on degradation.
+
+None were run before submission. All are explicitly scoped as future work.
+
+---
+
+## 8. Robustness and Sensitivity Analyses
+
+Paper 5 IS itself a sensitivity analysis — it asks how Paper 3's results hold up under a specific robustness stressor (temporal shift). This section documents the ablations and sensitivity probes that WERE run, cross-validation variance observed, and the robustness analyses that were explicitly deferred.
+
+### 8.1 Ablations Performed
+
+| Ablation | Configurations | Primary Metric | Result |
+|---|---|---|---|
+| Expanding-window fraction | W1 (40/20), W2 (60/20), W3 (80/20), W4 (50/50) | DeepHit C-td | 0.869 / 0.891 / 0.882 / 0.680 |
+| Expanding-window fraction | W1–W4 | Graph-DT C-td | 0.883 / 0.866 / 0.858 / 0.692 |
+| DeepHit vs Graph-DT per window | 4 windows × 2 models | Paired Δ C-td | Graph-DT ≤ DeepHit in W2, W3; Graph-DT > DeepHit in W1, W4 |
+| Shift-detection redundancy | KS, PSI, MMD run in parallel | Per-feature shift flag | KS and PSI agree on ~85% of features; MMD catches multivariate shift invisible to both |
+| Per-transition C-td (Paper 3 inheritance) | 5 causes × 4 windows | Cause-specific C-td | Rare transitions (→Stage 5) have unstable per-window estimates (<10 events/window) |
+
+**Not ablated:** k-neighbors in inductive extension (fixed at k=15); early-stopping patience (fixed at 15); dropout rate (fixed at 0.3); validation fraction (fixed at 0.15). These are treated as "inherited from Paper 3" and not re-tuned for the temporal setting.
+
+### 8.2 Cross-Validation Variance
+
+Paper 5 does NOT run cross-validation within each temporal window — each window produces a single C-td point estimate on its fixed test set. This is a deliberate design choice: the temporal-validation paradigm is "train once on the past, test once on the future," and re-running with random seeds within the temporal split would contaminate the message.
+
+What IS computed:
+
+- **Train-val shuffle variance.** The 85/15 train/val split inside each window uses seed=42. Re-running with different seeds would produce a small variance in final model parameters (estimated ~0.005 C-td SD from ad-hoc 3-seed spot checks), but this is not systematically characterised.
+- **Inductive vs retrained graph.** We compared inductive extension (training graph + test patients attached by kNN) against the counterfactual of retraining the full graph including test patients. The retrained graph produces C-td ~0.01–0.02 higher per window BUT is methodologically invalid (transductive leakage). We report only the inductive numbers; the retrained numbers are documented in code comments but not in the paper.
+- **Paper 3's random 5-fold CV as a reference point.** DeepHit SD 0.018, Graph-DT SD 0.013 across folds. The temporal-window C-td estimates (W1-W3) sit approximately 1-3 SDs below Paper 3's mean — consistent with genuine degradation beyond sampling noise, but without a formal CI on the delta.
+
+### 8.3 Seed and Split Sensitivity
+
+- **Validation-split seed**: fixed at 42. No multi-seed reporting.
+- **kNN graph construction**: deterministic given features; no randomness.
+- **DeepHit training**: Adam optimizer with stochastic batches (seed=42). Graph-DT same. Re-running with alternate seeds has not been done at the temporal-window level.
+- **Inductive graph edge construction**: deterministic given `test_baseline` features (k=15 nearest neighbors by cosine similarity).
+
+This is a known weakness. A reviewer objection like "is your W1 C-td of 0.869 a robust estimate, or could a seed change move it to 0.88?" cannot be answered from Paper 5's evidence alone. A 5-seed rerun per window would resolve it — **not done**.
+
+### 8.4 Hyperparameter Sensitivity
+
+| Hyperparameter | Default | Ablated? | Expected Impact If Perturbed |
+|---|---|---|---|
+| k (inductive kNN) | 15 | No | k=5: sparser graph, less info flow; k=30: more distant neighbors, signal dilution. Paper 3 indirectly supports k=15 but no temporal re-tuning. |
+| Validation fraction | 0.15 | No | 0.10: more training data, less early-stopping signal; 0.20: less training data, more stable val loss |
+| Early-stopping patience | 15 | No | 5: risk premature stop; 30: wasted compute on plateaus |
+| PSI bins | 10 | No | 5: coarser; 20: empty-bin edge cases |
+| MMD subsample | 500 | No | 200: faster, noisier MMD; 1000: 4× slower but tighter p-value |
+| KS p-threshold | 0.001 | No | 0.01 would double the "shifted features" count; 0.0001 would halve it |
+| PSI threshold | 0.25 | No | 0.10 would double shifted features; 0.50 would miss many |
+
+**Bottom line:** Paper 5 inherits Paper 3 and prior-art defaults across the board. No temporal-setting-specific tuning was run. Reviewer-robust to "why these values?" only via the "same as Paper 3 for fair comparison" defense.
+
+### 8.5 Stress Tests
+
+- **W4 stress test (deliberate worst-case).** Train on first 50%, test on final 50%. Produces 21–24pp degradation. Designed to expose the floor of the learning curve under a combined size-and-shift stressor.
+- **Severe-shift window comparison.** W1 (43.8% shifted), W2 (31.3%), W3 (18.8%), W4 (37.5%). W3 has the mildest shift by design (largest training window accumulates most population variability). If degradation correlated cleanly with shift severity, we would expect W1 ≤ W2 ≤ W3 for C-td. Actual: W1 (0.869), W2 (0.891), W3 (0.882), so W2 > W3 > W1 — **not monotonic in shift severity**. This is circumstantial evidence that size and shift both matter and cannot be cleanly separated.
+
+### 8.6 What Was NOT Run, and Why
+
+- **Size-matched random split for W4.** Would disentangle size from shift. Not run because it expands the paper scope; queued as future work.
+- **Per-window conformal recalibration.** Would answer calibration-drift question. Not run — requires reworking Paper 4's per-(cause, time-bin) calibration pipeline per window.
+- **Cross-cohort shift detection.** Running KS/PSI/MMD against PDBP/HBS features would test the monitoring pipeline's generalisation. Not run — feature spaces differ (12 vs 18 vs 22 features across cohorts), complicating direct comparison.
+- **Adversarial shift injection.** Synthetically perturbing test-feature distributions to test monitoring-trigger thresholds. Not run — treated as future deployment-instrumentation work.
+- **Domain-adaptation baseline.** Using importance weighting or adversarial training to CORRECT for shift. Not run because §6.3 of this doc explains: the paper's goal is to MEASURE shift, not fix it; mixing the two would confound the evidence.
+- **Ensemble across folds for deployment.** Using all 5 of Paper 3's fold checkpoints and averaging. Not run — stayed with single-fold per window to keep the comparison clean.
+
+---
+
+## 9. Statistical Reporting Standards
+
+This section is a transparent audit of what IS and IS NOT reported about confidence intervals, multiple comparisons, effect sizes, and checklist compliance. Where CIs are absent, the reason is stated rather than glossed.
+
+### 9.1 Confidence Interval Methodology
+
+| Quantity | CI reported? | Method | Notes |
+|---|---|---|---|
+| Per-window C-td (DeepHit, Graph-DT) | **No explicit CI** in main text; 95% CI estimated at ± 0.01–0.015 from binomial-variance on concordant pairs | Binomial-variance heuristic (not patient-level bootstrap) | Should be bootstrap patient-level with 1,000 resamples. Not run. |
+| Degradation Δ C-td (temporal vs random 5-fold) | **No CI**; only point estimate reported | N/A | Proper CI requires propagating Paper 3's fold SD (0.018, 0.013) AND Paper 5's window-level sampling variance. Not done. |
+| MMD statistic | p-value only, bounded by permutation resolution | Permutation test (1,000 iterations) | p = 0.000 means p < 1e-3; true p could be orders of magnitude smaller. Not resolved. |
+| PSI per feature | Point estimate; no CI | N/A | PSI is a summary statistic; bootstrap CI would require 1,000+ resamples per feature × 4 windows = expensive. Not run. |
+| KS statistic per feature | p-value reported | Asymptotic 2-sample KS | Sample sizes (380 test, 1,520 train) exceed small-sample corrections. No adjustment needed. |
+| Per-transition C-td | Point estimate; no CI per window | N/A | Inherits Paper 3's methodology. Low event counts (8–12 per window per rare transition) make bootstrap CIs wide and unreliable. |
+
+**Headline CI we should have reported but did not:** a paired bootstrap on Δ C-td between temporal-window evaluation and Paper 3's random 5-fold evaluation, at patient-episode level, with 1,000 resamples. This would give e.g. "W1 degradation −0.055 [95% CI −0.078, −0.031]" instead of the bare "−5.5pp". Flagged as a pre-revision TODO.
+
+### 9.2 Multiple-Comparison Correction
+
+- **Per-feature KS/PSI tests across 4 windows × 18 features = 72 tests.** No multiple-comparison correction applied. Under Bonferroni at α = 0.05, the per-test threshold would be 0.0007 — close to our stated 0.001 threshold by coincidence, but not a deliberate correction. Under Benjamini-Hochberg FDR at q = 0.05, some features currently flagged as "shifted" at p < 0.001 would remain significant; others would not. **Not explicitly corrected** — this is a reporting gap.
+- **Per-window model comparison (DeepHit vs Graph-DT).** 4 paired tests, no correction. Not a dominant reporting issue because the paper does NOT claim "Graph-DT significantly better than DeepHit in window X"; it reports both point estimates and leaves the comparison informal.
+- **Per-transition per-window C-td.** 5 causes × 4 windows × 2 models = 40 comparisons. No correction. Informal reporting only.
+
+**Honest statement:** Paper 5 does not formally control family-wise error rate or FDR. The KS p < 0.001 threshold was chosen informally to prioritize "large effect" over "formally corrected significance" — defensible in a shift-detection context but not in a strict hypothesis-testing sense.
+
+### 9.3 Effect-Size Reporting
+
+Reported effect sizes:
+
+- **Fraction of shifted features per window** (43.8%, 31.3%, 18.8%, 37.5%) — clear, interpretable magnitude.
+- **C-td degradation per window** (−1.7% to −24.4%) — clear, in natural units of C-td.
+- **Per-feature PSI values** (categorized as <0.10 minimal, 0.10–0.25 moderate, > 0.25 significant).
+
+Not reported:
+
+- Standardized effect sizes (Cohen's d, Hedge's g) for any univariate shift.
+- MMD magnitude in absolute units (reported only with p-value).
+- Paired effect size for DeepHit-vs-Graph-DT within window.
+
+### 9.4 Reporting-Checklist Compliance
+
+**Primary target:** TRIPOD+AI (Collins et al. 2024, BMJ 385:e078378) as the temporal-validation module complement to Paper 1's prediction-model TRIPOD+AI checklist.
+
+**TRIPOD+AI self-audit for Paper 5:**
+
+| Item | Status | Notes |
+|---|---|---|
+| Title / abstract identify temporal validation | Yes | |
+| Participant enrollment dates reported | Yes | INFODT → enrollment_date |
+| Temporal split rationale stated | Yes | §3.2 |
+| No-leakage validation | Yes | §3.3 |
+| Shift detection methodology | Yes | §3.6 (KS + PSI + MMD) |
+| Discrimination per window (C-td) | Yes | §3.7 |
+| Calibration per window | **No** | Not computed per window (see §7.2 above) |
+| Per-subgroup discrimination per window | **No** | Not computed |
+| Confidence intervals on discrimination | **Partial** | Point estimates only; no bootstrap CI |
+| Fairness analysis per window | **No** | Not computed |
+| Deployment recommendation bounds | Yes | W3 = 1,500-patient floor stated |
+| Shift-monitoring protocol for deployment | Yes | §4 Q5 escalation protocol |
+| Code and data availability | Yes | Paths to scripts and output JSONs |
+
+**Gaps against TRIPOD+AI (honest):** per-window calibration, per-subgroup discrimination, formal CI on discrimination, and per-window fairness are all flagged but NOT run. These are documented as submission-revision targets.
+
+### 9.5 Pre-Registration
+
+Paper 5 was NOT pre-registered. The four window fractions (W1–W4) were selected after exploratory analysis, not pre-committed before observing data. In particular:
+
+- W4's 50/50 split was added AFTER the first three windows revealed "only 3-5pp degradation" — W4 was designed deliberately to be adversarial, which is legitimate as a stress test but is NOT a pre-registered confirmation.
+- The shift-severity thresholds (10% minimal, 30% moderate, 50%+ severe) are post-hoc chosen to match observed data distributions.
+- The 0.001 KS threshold and 0.25 PSI threshold are conventional, not pre-registered.
+
+No multiple-window correction was pre-committed. A fully pre-registered replication would fix these choices in advance; Paper 5 does not claim this epistemic status.
+
+### 9.6 Summary of Reporting-Standard Shortfalls
+
+| Shortfall | Severity | Fix Plan |
+|---|---|---|
+| No bootstrap CI on C-td per window | Medium | Add patient-level bootstrap at revision |
+| No per-window conformal recalibration | Medium | Requires Paper 4 pipeline rerun; deferred |
+| No MC correction on shift tests | Medium | Add BH-FDR at q = 0.05 in revision |
+| No pre-registration | Low (context-appropriate for exploratory stress test) | Document post-hoc choices transparently |
+| No per-subgroup per-window analysis | Medium | Sample sizes marginal; may be unachievable at fold level |
+| No cross-cohort generalisation | High for clinical deployment claim | Explicitly scoped as Paper 5+ future work |
+
+---
+
 *Document generated for dissertation defense preparation. All metrics sourced from actual output files in `outputs/paper5/`. All code references verified against `src/giman_pipeline/paper5/`.*

@@ -633,7 +633,263 @@ We also note that the ablation (StageDecoderOnly vs Vanilla) shows modest RMSE d
 
 ---
 
-## 6. Alternative Approaches
+## 6. Limitations, Deficiencies, and Honest Assessment
+
+Paper 2's central claim — the "imputation-utility paradox" — is counterintuitive enough that reviewers will probe it aggressively. This section surfaces Paper 2's known weaknesses explicitly rather than leaving them buried in the discussion. The narrative throughout the paper is that GIMIN + stage conditioning produces better clinical-task performance at a minor aggregate-RMSE cost; the section below catalogues where that claim is load-bearing, brittle, or explicitly deferred.
+
+### 6.1 Scope Limitations (What the Paper Does NOT Attempt — By Design)
+
+| Out-of-scope | Why deferred |
+|---|---|
+| **Missing Not At Random (MNAR) imputation** | Evaluation masks observed values at random (MCAR). Real-world missingness in PPMI correlates with disease stage (sicker patients decline tests), which is a form of MNAR. Our evaluation is optimistic under MCAR; we state this and note graph-based methods are relatively more robust. |
+| **Longitudinal imputation** | Paper 2 is single-visit imputation. Imputing longitudinal trajectories (impute-the-curve, not impute-the-point) is Paper 3's territory. |
+| **Full probabilistic calibration of the raw decoder** | The raw Gaussian decoder has a 23.6 pp gap at γ=0.90 (coverage 0.664 vs ideal 0.90). This is closed post-hoc (per-feature temperature B or per-feature conformal D1) rather than at training time. §V.E ablation confirms no decoder-architecture fix was found. |
+| **Causal imputation under intervention** | GIMIN is observational. It imputes what a patient's value likely *was*, not what it *would be under intervention*. Treatment counterfactuals are out of scope. |
+| **Federated / multi-site imputation** | All training is on PPMI. Cross-site harmonisation, federated learning, and scanner-harmonised imputation are deferred. |
+| **Imputation of stage labels themselves** | Stage labels are computed deterministically from biomarker inputs (NSD-ISS rules from Simuni 2024). Patients with missing biomarkers are staged as "unclassified" (embedding index 5) rather than having their stage imputed. |
+| **Full 39-feature or 12-feature model comparability** | Paper 1 uses a 22-feature or 12-feature set; Paper 2 uses 33 features (GIMIN scope). Direct feature-set comparability across Papers 1-3 is imperfect. Paper 6 (Unified Pipeline) bridges this with the 12-feature clinical-only CatBoost. |
+
+### 6.2 Methodological Deficiencies (Acknowledged Weaknesses)
+
+**D1 — StageConditioned's +2.9%/+3.1% downstream gain hinges on features that may cause Kapoor & Narayanan (2023) "leakage via pre-processing."** The stage label used to condition the decoder is computed from biomarkers (NP1COG, UPDRS, MOCA, SAA, DaT SBR). Four of these (UPDRS1/2/3 subscales, MOCA) are also *imputation targets* in the 33-feature set. The imputation model therefore has access to the stage label derived from the patient's own true biomarker values when predicting those same biomarkers' missing entries. This is not traditional label leakage (the stage is computed on the training set with observed values, not on the masked target itself), but it is in the Kapoor-Narayanan category "preprocessing uses information related to the prediction target." A fully leakage-free variant would hold out the staging-input features during calibration; we did not build that variant. The stage-aware *graph* (β = 0.3) is cleaner because it uses stage only to bias similarity, not to inform feature predictions directly.
+
+**D2 — Aggregate RMSE is worse for StageConditioned than Vanilla (113.8 vs 107.7 at frac = 0.1).** The paper frames this as a feature (capacity redistributed to minority stages). A reviewer could frame it as a bug (the model did worse on the aggregate metric it was trained to minimise). The defence — per-stage RMSE analysis — exists (`outputs/paper2_benchmark/per_stage_analysis.json`) but the counter-story is still available: "you added complexity and it cost you aggregate RMSE."
+
+**D3 — The 22% RMSE-improvement headline vs MissForest comes with wide fold-to-fold variance.** GIMIN Vanilla at frac = 0.1: 107.7 ± 6.1 across 3 runs. MissForest: 137.3 ± 8.8. The 22% margin is real but the 3-run SD of ±6 RMSE points is meaningful relative to the 30-point gap. More runs would tighten CIs but were not done (compute budget).
+
+**D4 — DL baselines (GAIN, SAITS, MIWAE) underperform classical methods; we use this to argue GIMIN is the "right" DL design.** This is correct but rhetorically dangerous — it invites the counter-claim "your strong performance reflects graph structure, not deep learning, so a graph + tree hybrid might beat GIMIN." We did not test graph-MICE or graph-MissForest hybrids. A reviewer could propose them.
+
+**D5 — The calibration ablation (§V.E) found that training-time regularisation (A: λ_cal = 0.1 + warmup = 0) gave ZERO improvement over raw coverage (both 0.664 at γ = 0.90).** This is a clean negative result for the training-time calibration hypothesis. It means per-feature temperature scaling (B: post-hoc, +0.194 coverage at γ=0.90) is load-bearing. If temperature scaling is miscalibrated for a new cohort, the conformal guarantee still holds marginally, but feature-wise coverage shifts.
+
+**D6 — Only 16 cross-modal pairs are hand-specified (bilateral, structure-function, biochemical). These are domain-informed but not exhaustive.** A graph-learned pairing (e.g., attention over all feature pairs) would be more flexible but was not implemented. The 16 pairs were chosen based on PPMI correlation analysis; pairs below r=0.5 were omitted. This is a discretionary choice.
+
+**D7 — The `min_overlap=3` threshold is not theoretically justified beyond "cosine similarity in d<3 is degenerate."** For rare-stage patients who have high missingness (Stage 4 median observed features ≈ 12/33), this threshold disconnects some legitimately similar pairs. A relaxation to `min_overlap=2` with tighter sqrt-penalty was tested informally but not reported.
+
+**D8 — The heteroscedastic decoder outputs logits for SEX (binary) and emits raw logits in the `mean_pred` field while applying sigmoid only in the blended-imputed-value path.** This caused a downstream bug in Paper 6 (unified_pipeline_demo_v1 used `mean_pred` directly, producing out-of-range SEX values). Fixed by excluding SEX from the GIMIN→CatBoost overlap mapping in Paper 6 v2, but the GIMIN API itself still has this inconsistency.
+
+### 6.3 Data Limitations
+
+| Limitation | Quantitative impact |
+|---|---|
+| **PPMI cohort only (n=2,197)** | Stage 0 = 1,418, Stage 1 = 67, Stage 2B = 208, Stage 3 = 487, Stage 4 = 17. Imbalance is 83:1 (Stage 0 vs Stage 4). Minority-stage evaluation is unstable. |
+| **~40% overall missingness across 33 features** | Varies per feature: SEX 0%, UPDRS1 27.4%, MOCA 83.5%, genetics 5.1%. Evaluation masks ADDITIONAL values at rates 0.1-0.5; true operating regime is further right. |
+| **MCAR evaluation, MNAR reality** | Real missingness is informative (stage-correlated). Our RMSE is optimistic under MCAR. |
+| **3 runs per (model, fraction) configuration** | Standard deviation of RMSE on GIMIN Vanilla at frac=0.1 is ±6.1 across 3 seeds. Proper power analysis would need ≥10 runs. |
+| **No external imputation validation on BioFIND/PDBP/HBS** | Paper 1 external-validated classifiers; Paper 2 did not externally validate imputation quality. BioFIND has 95.4% SAA+ and different feature-scale distributions; GIMIN's stage conditioning may not transfer. |
+| **Label noise from deterministic staging** | Missing SAA produces "unclassified" (embedding index 5) rather than true staging error. 12.6% SAA coverage means most patients are staged by D anchor alone. |
+| **GRS_TOTAL range = 0-50,000** | The feature-scale heterogeneity is extreme. Per-feature conformal handles this, but aggregate RMSE is dominated by genetic features even after normalisation. Median interval width (13.7) vs mean width reflects this. |
+
+### 6.4 External Validity and Domain Shift
+
+**Untested on BioFIND/PDBP/HBS for imputation quality directly.** We cannot currently claim GIMIN's RMSE improvements hold in external cohorts. Hypothesis: graph-based sharing would be more robust than MICE/MissForest to cohort shift (because the graph adapts to the new cohort's similarity structure), but the stage conditioning would likely *hurt* external performance (because PPMI's stage distribution differs from BioFIND's all-PD cohort). Not tested.
+
+**Stage conditioning fails under Stage-label drift.** If external cohort stages are distributed differently (e.g., BioFIND is 95.4% S+ and no healthy controls), the PPMI-learned stage embeddings may encode PPMI-specific bias. A reviewer who wants external-cohort evidence for the stage-conditioning benefit has a legitimate objection; we defer this to Paper 6 (unified pipeline validation).
+
+**Cross-scanner DaT SBR variability.** DaT SBR is sensitive to scanner model + reconstruction. PPMI's multi-site harmonisation is imperfect; GIMIN learns PPMI scanner distributions. Cross-scanner imputation is untested.
+
+**Paper 11 (hybrid twin) inherits GIMIN feature subset but NOT uncertainty.** The per-feature σ output from GIMIN's heteroscedastic decoder is not currently propagated to Paper 11's neural-ODE residual. Paper 10 L1 (bidirectional mechanistic update) is the intended infrastructure but has a characterised calibration gap (joint vs marginal coverage). See Paper 10 L1 session notes.
+
+### 6.5 What We Did NOT Do (and Would in v2)
+
+1. **Leakage-free stage-conditioning ablation.** Hold out staging-input features during conditioning, retrain the downstream CatBoost, measure whether +2.9%/+3.1% balanced accuracy gain survives. This is the single most important v2 experiment.
+2. **External validation of imputation quality** on BioFIND/PDBP/HBS. Even just reporting cross-cohort RMSE on a common feature subset would strengthen Paper 2 substantially.
+3. **MNAR evaluation.** Simulate stage-correlated missingness (sicker patients have more missing) and re-evaluate. Current MCAR evaluation is optimistic.
+4. **More runs per configuration** (10+ instead of 3). Would tighten CIs by ~sqrt(10/3) ≈ 1.8× and firm up the StageConditioned wins.
+5. **Pre-registration of the 4 mask fractions (0.1, 0.2, 0.3, 0.5)** and the 8 downstream-method comparison. Not deposited.
+6. **Graph-learned cross-modal pairs** instead of the 16 hand-specified pairs.
+7. **Joint-calibration analysis of the conformal intervals.** Current analysis is marginal (per-feature + per-stage); joint coverage across multiple imputed features per patient is not reported. Paper 10 L1 Pillar 8 showed this is non-trivial.
+8. **Benchmark against TabPFN, TabDDPM, DiffImpute.** Current baselines (5 classical + 3 DL) are defensible but not exhaustive; reviewers may ask for diffusion-based baselines.
+9. **Fairness analysis** of imputation quality by sex, age, race. Not reported.
+10. **Decision-theoretic evaluation** (e.g., expected cost under misimputation) rather than RMSE alone.
+
+---
+
+## 7. Robustness and Sensitivity Analyses
+
+### 7.1 Ablations Performed
+
+**Stage-conditioning ablations (4 GIMIN variants × 4 mask fractions × 3 runs):**
+
+| Variant | frac=0.1 RMSE | frac=0.5 RMSE | Key result |
+|---|---|---|---|
+| GIMIN Vanilla (neither) | **107.7 ± 6.1** | 169.0 ± 3.2 | Best aggregate RMSE at low frac |
+| StageGraphOnly (β=0.3, no decoder) | 109.2 ± 5.1 | **168.7 ± 4.7** | Best at high frac |
+| StageDecoderOnly (embed, no graph) | 107.1 ± 9.7 | 170.1 ± 4.5 | Close to Vanilla aggregate |
+| Full StageConditioned (both) | 113.8 ± 5.2 | 171.2 ± 3.4 | Worse aggregate, best downstream |
+
+The ablation separates the two mechanisms: graph-based stage affinity vs decoder embedding. Graph-only and decoder-only each marginally beat vanilla at frac=0.5 (graph-only) or ~match it at frac=0.1 (decoder-only). Full stage conditioning is consistently worse in aggregate RMSE but wins downstream balanced accuracy.
+
+**Baseline ablations (8 methods × 4 fractions × 3 runs):** 5 classical (Mean, Median, KNN, MICE, MissForest) and 3 DL (GAIN, SAITS, MIWAE). Full matrix reported in `outputs/paper2_benchmark/imputation_benchmark_results_combined.json`.
+
+**Calibration ablation (§V.E, 2026-04-18 session):** 5 conditions × 5 γ levels on all 48 Paper 2 benchmark checkpoints:
+
+| Target γ | D0 raw | B temp-scaled | D1 conformal | A retuned-raw | A+B combined |
+|---|---|---|---|---|---|
+| 0.90 | 0.664 | 0.858 | 0.909 | 0.664 | 0.858 |
+| 0.95 | 0.682 | 0.940 | 0.956 | 0.682 | 0.940 |
+
+B closes ~82% of the γ=0.90 gap. A (training-time) gives 0.000 improvement — a clean negative result.
+
+**Downstream ablations (8 imputation methods × 4 target types × 5-fold CV):** StageDecoder wins binary (+2.9%) and three-class (+3.1%); GAIN wins full_ordinal; Mean wins nsd_positive. No single method dominates all tasks.
+
+**Hyperparameter ablations (partial):** β ∈ {0.0, 0.1, 0.3, 0.5, 1.0} for stage-graph affinity; k ∈ {5, 10, 15, 20, 25} for neighbours; min_overlap ∈ {2, 3, 4, 5}; embed_dim ∈ {32, 64, 128}. Summary in §3.9 table (preserved above). Full grid not systematically reported.
+
+### 7.2 Cross-Validation Structure + Variance Across Folds
+
+**Primary evaluation:** 3 independent runs per configuration with different random seeds for the mask pattern. Each run uses the full 2,197-patient cohort (no fold-level split for imputation RMSE; imputation is self-supervised).
+
+**Downstream evaluation:** 5-fold stratified CV with CatBoost as the downstream classifier. Imputation is performed once on the full cohort; CatBoost is cross-validated on the imputed data. This is a subtle leakage-concern: if the imputation model has seen all patients (including test-fold patients), the downstream accuracy may be slightly inflated vs. a workflow where imputation is re-fit per fold. We did not implement per-fold imputation re-fitting due to compute cost (4 variants × 4 fracs × 3 runs × 5 folds = 240 training runs, each ~30 min). This is a known methodological gap.
+
+**Per-fold variance in downstream results:** StageDecoder binary bal-acc 0.818 ± 0.005 across 5 folds. No_Imputation: 0.774 ± 0.008. The SEs do not overlap, supporting the claim. However, this is "bal-acc variance across folds" not "end-to-end pipeline variance across (imputation-seed, CV-fold) combinations" — the latter would be larger.
+
+### 7.3 Seed/Split Sensitivity
+
+**3 runs per (variant, fraction).** SD of GIMIN Vanilla at frac=0.1 is ±6.1 RMSE points on a mean of 107.7 — coefficient of variation 5.7%, at the edge of "acceptable." For StageDecoderOnly at frac=0.1, SD is ±9.7 (CV 9.1%) — unambiguously unstable. A 10-run study would be needed to tighten this.
+
+**Downstream CV seed:** fixed at 42 for the CatBoost evaluation. Not multi-seeded.
+
+**Mask-pattern seed:** different per run, so the 3 runs provide some mask-pattern stability estimation. The RMSE CI band does account for mask-pattern variation.
+
+**Graph-construction determinism:** given the same feature matrix, `PartialObservationGraphBuilder` produces identical graphs (no random initialisation). Only the neural network training is seed-dependent.
+
+### 7.4 Sensitivity to Hyperparameters (Quantitative Deltas)
+
+Section 3.9 table is the canonical reference. Key headline deltas:
+
+| Parameter | Change | ΔRMSE (frac=0.1) | Decision rationale |
+|---|---|---|---|
+| embed_dim | 64 → 32 | +8-12% | Underfits (bottleneck too aggressive) |
+| embed_dim | 64 → 128 | <−2% | Overfits; 2× train time |
+| GNN layers | 3 → 2 | ~+3% on minority stages | Insufficient receptive field |
+| GNN layers | 3 → 4 | ~+3% | Over-smoothing |
+| num_heads | 4 → 2 | +1-2% | Less pattern diversity |
+| num_heads | 4 → 8 | +2-3% | head_dim=8 too small |
+| k_neighbors | 15 → 5 | +2-4% | Graph too sparse |
+| k_neighbors | 15 → 50 | +4% | Noise from dissimilar neighbours |
+| min_overlap | 3 → 2 | Not reported | Spurious edges risk |
+| min_overlap | 3 → 5 | +12% disconnect rate | Stage 4 isolated |
+| β (stage affinity) | 0.3 → 0.0 | −1.5 RMSE | Vanilla mode |
+| β (stage affinity) | 0.3 → 1.0 | +5-8% minority-stage RMSE | Partitioned graph; cross-stage info lost |
+| stage_embed_dim | 16 → 6 | RMSE ~equal, downstream worse | One-hot loses learned stage similarity |
+| stage_embed_dim | 16 → 64 | Aggregate RMSE worse | Stage dominates decoder input |
+| λ_dist | 0.1 → 0.5 | +5-8% RMSE | Distribution dominates |
+| λ_cross | 0.1 → 0.0 | +2% on paired features | Biological consistency lost |
+| λ_cal | 0.01 → 0.1 | +3% RMSE | Sacrifices accuracy for calibration |
+| cal_warmup | 50 → 0 | +1-2% | Calibrates on poor early predictions |
+| MC samples | 50 → 20 | Variance est ±5% unstable | Convergence at 30 |
+
+### 7.5 Adversarial Stress Tests
+
+**Mask-fraction sweep (0.1 → 0.5).** GIMIN Vanilla degrades from 107.7 → 169.0 RMSE (+57%); MissForest degrades from 137.3 → 179.2 (+30%). GIMIN's margin over MissForest shrinks from 22% → 6% at the extreme. At frac = 0.5, the graph-based advantage is largely eroded because each patient's overlap with neighbours is small. This is the paper's adversarial stress test for imputation.
+
+**Minority-stage stress test.** Per-stage RMSE analysis shows StageConditioned's advantage scales with stage rarity: +6.4 to +24.3 RMSE improvement on minority stages (1, 2B, 4); −7.9 to +0.3 on majority Stage 0.
+
+**DL baselines under normalisation stress.** Without z-score normalisation, SAITS + MIWAE RMSE degrades from ~240 to ~1,500 (negative R²). The normalisation sensitivity is a brittleness of those baselines, not GIMIN; reporting here to document how sensitive the comparison is to preprocessing choices.
+
+**Feature-scale stress.** Genetic features (GRS_TOTAL range 0-50,000) have 10-100× wider conformal intervals than clinical features. We report median interval width (13.7) not just mean to avoid the mean being dominated by genetics. Aggregate RMSE is similarly dominated.
+
+**Not stress-tested:** adversarial perturbation of observed features, out-of-distribution patient simulation, scanner-shift robustness.
+
+### 7.6 What We Did NOT Run (and Why)
+
+1. **Per-fold imputation re-fitting in the downstream eval.** Compute budget. Known methodological gap.
+2. **10+ runs per configuration.** Compute budget. CV of 5-9% remains.
+3. **External-cohort imputation quality.** No imputation ground truth available for BioFIND/PDBP/HBS at the 33-feature level.
+4. **Graph-tree hybrid baseline.** Plausible reviewer request; not tested.
+5. **TabDDPM, DiffImpute benchmarks.** Emerging methods; not included in baseline set.
+6. **MNAR simulation.** Would require a plausible missingness model (e.g., stage-conditional missing probability). Not built.
+7. **Joint conformal calibration across features-per-patient.** Marginal calibration only; joint is Paper 10 L1 Pillar 8 work.
+8. **Fairness audit.** Not run.
+
+---
+
+## 8. Statistical Reporting Standards
+
+### 8.1 Confidence Interval Methodology
+
+**Primary CI method for imputation RMSE:** mean ± SD across 3 runs (not a formal CI). A 95% CI via the t-distribution would be ±2.92×SD/√3 = ±3.37× SD for n=3. We report SD directly and leave CI computation to the reader, because with only 3 runs the t-distribution tail is conservative and the SD is more interpretable.
+
+**Primary CI method for downstream balanced accuracy:** mean ± SE across 5 CV folds. SE is SD/√5. We do not apply a bootstrap on the concatenated predictions (unlike Paper 1) because CatBoost is retrained per fold — the bootstrap resample on a single concatenated prediction vector would underestimate variance.
+
+**Conformal coverage CIs:** not reported. Coverage is a rate; we report the point estimate (0.908 at γ=0.9) and rely on the conformal theoretical guarantee (coverage ≥ 1−α) as the floor. A proper binomial CI around 0.908 with n=220 calibration patients would be [0.867, 0.939]; we omit this.
+
+**No paired-bootstrap comparison** between GIMIN variants or between GIMIN and baselines. A paired bootstrap on per-patient RMSE-contribution would tighten the significance argument but was not implemented.
+
+### 8.2 Multiple-Comparison Correction
+
+**Not applied.** The paper reports 12 models × 4 mask fractions × 3 runs = 144 imputation results and 8 methods × 4 targets = 32 downstream results. Under nominal α = 0.05, expect ~1-2 false positives from chance.
+
+**Defence:** the paper's headline claims are (a) "all GIMIN variants beat all 8 baselines at every mask fraction" — this is a direction-of-dominance claim across all 32 configs, not a "model A beats model B at p < 0.05" claim; and (b) StageDecoder wins binary + three-class downstream — this is 2 out of 4 target-specific results, and the paper explicitly notes no method dominates all 4. No single individual p-value is load-bearing.
+
+**Gap relative to TRIPOD+AI:** same as Paper 1 — we comply with item 18 (uncertainty estimates) via mean ± SD but not with formal item-17 inference.
+
+### 8.3 Effect-Size Reporting
+
+**Primary effect size (RMSE):** raw percentage improvement (e.g., "22% lower than MissForest at frac=0.1"). Raw differences (e.g., 107.7 − 137.3 = −29.6) are also reported. No Cohen's d or other standardised effect size reported — RMSE is already a continuous, unbounded metric.
+
+**Downstream effect size (bal-acc):** absolute delta (e.g., StageDecoder − No_Imputation = +4.4 pp balanced accuracy). No standardised effect size.
+
+**Conformal-gap effect size (§V.E):** coverage gap (ideal γ − observed coverage). At γ=0.9, D0 = −0.236; B = −0.042; D1 = +0.009. Raw percentage-point gaps are reported.
+
+**Not reported:** Cohen's d, η², any standardised statistic. All effect sizes are raw deltas.
+
+### 8.4 TRIPOD+AI Compliance Checklist (adapted for imputation)
+
+TRIPOD+AI is primarily a *prediction-model* standard. Imputation is a preprocessing step, so direct compliance is partial. We report on the items that apply:
+
+| Item | Description | Status | Location |
+|---|---|---|---|
+| 1 | Title identifies ML method | Pass | "Stage-Conditioned GIMIN Imputation" |
+| 2 | Abstract structured | Pass | abstract |
+| 3 | Introduction states research question | Pass | §1 |
+| 4a | Study design | Pass | §2.1 retrospective observational |
+| 4b | Source of data | Pass | PPMI |
+| 5a | Participants inclusion/exclusion | Pass | §2.2 (2,197 staged patients) |
+| 5b | Participant flow | **Partial** — no CONSORT-style imputation-specific flow diagram |
+| 6 | Outcome definition | **Different scope** — imputation has no clinical outcome; evaluation is RMSE on masked values + downstream staging |
+| 7a | Predictors (features) | Pass | 33 features across 7 modalities |
+| 7b | Predictor handling | Pass | z-score normalisation for DL baselines; per-modality encoders for GIMIN |
+| 8 | Sample size | **Partial** — no formal power calculation; cohort size is PPMI-fixed |
+| 9 | Missing data handling | Pass — this IS the paper's scope |
+| 10 | Statistical analysis | Pass | §2.6 |
+| 11 | Model development | Pass | §2.7 |
+| 12 | Model specification | Pass | §3 of deep-dive |
+| 13 | Performance measures | Pass | RMSE, R², per-feature conformal coverage |
+| 14 | Model evaluation (internal) | Pass | 4 mask fractions, 3 runs |
+| 14 | Model evaluation (external) | **Fail** — no external cohort imputation validation |
+| 15 | Baseline characteristics | Pass | §3.1 |
+| 16 | Model performance | Pass | §3.2 |
+| 17 | Subgroup performance | Pass | per-stage RMSE analysis |
+| 18 | Uncertainty estimates | Pass | Conformal intervals + MC dropout + heteroscedastic σ |
+| 19 | Clinical utility | **Partial** — downstream CatBoost evaluation is a proxy; no formal decision-curve analysis |
+| 20 | Limitations | Pass | §4 |
+| 21 | Implications | Pass | §5 |
+| 22 | Model transparency | Pass | Code public |
+| 23 | Interpretability | **Partial** — feature importance not systematically reported for GIMIN |
+| 24 | Fairness | **Fail** — no fairness audit |
+| 25 | Ethics | Pass | PPMI IRB-exempt, deidentified |
+| 26 | Funding / COI | Pass | front matter |
+| 27 | Data availability | Pass | via PPMI DUA |
+
+**Summary: 18/27 full, 5/27 partial, 4/27 fail (external validation, CONSORT-style flow diagram, fairness, full clinical-utility analysis).** The 4 fails are load-bearing for a clinical deployment claim but acceptable for a methods paper; we are explicit in the manuscript about all four.
+
+### 8.5 Pre-Registration Status
+
+**Not pre-registered.** The 4 GIMIN variants, 4 mask fractions (0.1, 0.2, 0.3, 0.5), 8 baselines, 3 runs per config, and 4 downstream targets were decided before runs but not deposited on OSF/AsPredicted.
+
+**Mitigation in the manuscript:**
+- Full 12-model × 4-fraction × 3-run grid reported (not cherry-picked cells).
+- Full 8-method × 4-target downstream grid reported.
+- Both the aggregate-RMSE result (Vanilla wins) AND the downstream result (StageDecoder wins) are reported — we do not hide the aggregate cost.
+- The calibration ablation (§V.E) explicitly reports the zero-effect of training-time λ_cal (A) as a negative result.
+- Per-stage RMSE analysis is deposited as `outputs/paper2_benchmark/per_stage_analysis.json`.
+- Runs directory (`outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/`) is timestamped and never overwritten — a lightweight form of pre-registration via artifact lineage.
+
+**What formal pre-registration would add:** protection against selective reporting of the 4 downstream target types (we report all 4; a pre-registration would force it); formal commitment to the 4 mask fractions before seeing results; transparency on whether the 16 cross-modal pairs were chosen before or after initial pilot runs.
+
+---
+
+## 9. Alternative Approaches
 
 ### Alternative 1: Multiple Imputation (Rubin, 1987)
 

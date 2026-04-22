@@ -583,7 +583,225 @@ We considered but excluded TabNet (Arik & Pfister, 2021), FT-Transformer (Gorish
 
 ---
 
-## 6. Alternative Approaches
+## 6. Limitations, Deficiencies, and Honest Assessment
+
+This section surfaces Paper 1's known weaknesses explicitly, grouped by type. The narrative throughout the paper is that CatBoost + conformal prediction is a deployable framework for NSD-ISS stage classification, but the framework has well-characterised failure modes — most of which are consequences of the PPMI training cohort's composition rather than the model itself. Reviewers and committee members should expect to probe each of these; the text below is the response.
+
+### 6.1 Scope Limitations (What the Paper Does NOT Attempt — By Design)
+
+| Out-of-scope | Why deferred |
+|---|---|
+| **Longitudinal stage progression** | Paper 1 is cross-sectional. Predicting *when* a patient transitions stages is Paper 3's scope (Graph-DT, C-td 0.920). Paper 1 cannot forecast future stage. |
+| **Treatment-effect estimation** | The model does not isolate medication effect from underlying biology. LEDD is not a feature, and the staging target is stateful (medication-bounded). Treatment simulation is Paper 9's scope. |
+| **Individual-patient prediction intervals on raw probabilities** | The conformal output is a *prediction set* (which stages are plausible), not a posterior distribution over a continuous quantity. Patient-level epistemic uncertainty on the probability itself is not reported. |
+| **Imputation of missing features** | Features with >80% missingness (UPDRS4\_TOTAL 89.9%, MOCA\_TOTAL 83.5%) are dropped from the full 22-feature model rather than imputed. Imputation is Paper 2's scope. |
+| **Subgroup analysis by LRRK2/GBA genotype** | Genetic carrier counts in PPMI are too small (LRRK2 ~150, GBA ~180) for reliable per-carrier performance, and carriers are deliberately over-represented in PPMI (enrolment bias). Reported only as population-level features. |
+| **Prospective trial validation** | All cohorts are observational. Prospective interventional validation is career-long work. |
+
+### 6.2 Methodological Deficiencies (Acknowledged Weaknesses)
+
+**D1 — PPMI Stage 0 includes healthy controls, prodromals, and SWEDDs, not just S-/D- PD.** This is the single most load-bearing deficiency. The binary target `target_binary` nominally asks "is this patient NSD-positive?" but the training distribution for the negative class includes UPDRS3-bradykinesia mean 7.4 (healthy) — not the ~20 seen in all-PD external cohorts. The binary model therefore learns HC-vs-PD, not S+-vs-S-. This is confirmed empirically: binary AUC drops from 0.979 (PPMI internal) to 0.637 (BioFIND external), with BioFIND 95% CI [0.48, 0.76] spanning chance to moderate.
+
+**D2 — Caudate SBR is a correlated proxy for the D anchor, not truly independent.** The non-circular design excludes putamen SBR (the staging criterion) but includes caudate SBR (r > 0.85 with putamen in PPMI). The 25.2 pp AUC gap between 22-feature and 12-feature binary models is almost entirely attributable to caudate SBR. A reviewer who regards "non-circular but highly correlated" as insufficient has a defensible objection; we counter that the information is non-identical (caudate and putamen degenerate at different rates per Dzialas 2025) but we do not claim full independence.
+
+**D3 — Three-class and NSD-positive formulations masquerade imbalance, not solve it.** The three-class target groups Stages 0+1 together (1,485/2,201 = 67.5% of cohort in the merged Early class) and groups Stages 3+4 together (504/2,201 = 22.9%). This reduces the class-count but not the fundamental imbalance. The NSD-positive target excludes Stage 0 entirely but produces a 4-class problem with n=17 in Stage 4 — the minority-class identification problem is displaced, not eliminated.
+
+**D4 — `auto_class_weights="Balanced"` substantially shifts decision boundaries.** Stage 4 patients get ~84× the loss-weight of Stage 0 patients under full-ordinal balanced weighting. This rescues minority-class recall but distorts the model's implicit probability estimates away from the population base rate. Conformal prediction patches the calibration gap at the set level, but the underlying `predict_proba` outputs are miscalibrated as probabilities (empirically: Brier score 0.128 for binary, with slight overconfidence at high-probability predictions).
+
+**D5 — QWK of 0.861 on full ordinal is published, but per-class recall for Stage 4 (n=17) is unstable.** With ~2-4 Stage 4 patients per CV fold, a single misclassification swings per-fold recall by 25-50%. The bootstrap 95% CI [0.628, 0.689] on full-ordinal balanced accuracy reflects this, but the manuscript does not report per-fold Stage 4 recall explicitly; the reader sees only aggregate numbers.
+
+**D6 — The Graph Attention Network evidence is underwhelming and we use it anyway.** Enhanced MM-GAT loses to CatBoost by 8-13 pp balanced accuracy. The rationale for including it (scientific completeness + foundation for Papers 2, 3, 6) is defensible but does not materially strengthen Paper 1's headline claims. A reviewer who considers the GAT section filler has a reasonable case.
+
+### 6.3 Data Limitations
+
+| Limitation | Quantitative impact |
+|---|---|
+| **S-anchor coverage 12.6%** (277/2,201 SAA-tested) | The D anchor carries most of the staging weight. Patients who are SAA-negative-by-default-of-missing-test may be miscategorised as Stage 0 when they are actually S+. We cannot quantify this bias without more SAA tests. |
+| **Stage 4 n=17** | 0.8% of the cohort. Per-class CIs for this stage are too wide for confident claims; we report QWK to de-emphasise Stage 0 vs Stage 4 misclassifications. |
+| **Stage 1 n=67** | 3.0% of the cohort. Per-class recall for the three-class "Mild clinical" class (which maps to Stage 2B, n=208) is the hardest of the three (0.582); the Early class (0+1 merged, n=1,485) dominates. |
+| **UPDRS4\_TOTAL missingness 89.9%** | Dropped from full model; included only in 12-feature clinical-only variant where it is present across cohorts. |
+| **MOCA\_TOTAL missingness 83.5%** | Same as above. |
+| **No BMI, no comorbidities, no medications** | The feature set is deliberately minimal (PPMI-common features only) to enable cross-cohort validation. This limits phenotyping. |
+| **Label noise from biomarker measurement error** | SAA is qualitative (positive/negative), but DaT SBR has test-retest CV ~5-8%. A patient with true putamen SBR 0.78 vs measured 0.82 is assigned different D-anchor status. We do not propagate this noise into training. |
+
+### 6.4 External Validity — What Fails in BioFIND/PDBP/HBS
+
+**BioFIND (n=108 evaluable, 103 NSD-ISS staged).** Binary bal-acc 0.516 (near-random); three-class bal-acc 0.329 with AUC 0.703; NSD-positive bal-acc 0.425. The dominant failure mechanism is the Stage 0 domain shift (D1 above). Three-class, which merges Stages 0-1 and therefore dilutes the HC-vs-PD boundary, retains moderate ranking ability (AUC 0.703) but weak classification (bal-acc 0.329). NSD-positive sub-staging, which excludes Stage 0 entirely, is the only clinically deployable variant.
+
+**PDBP (n=893 PD extracted, prediction-only).** No NSD-ISS ground truth available. The paper reports CatBoost predictions but cannot evaluate them directly. These predictions are useful only as screening candidates for biomarker follow-up.
+
+**HBS (n=649 PD, prediction-only, only 8/12 common features).** Missing UPDRS1, UPDRS2, UPDRS4, MOCA, ESS. The 12-feature clinical-only model is not fully applicable to HBS — only an 8-feature variant works. Reported for completeness; not a validation cohort in any meaningful sense.
+
+**Bootstrap AUC CIs with severely imbalanced ground truth.** When BioFIND is 95.4% S+, bootstrap resamples frequently contain only one class, producing `UndefinedMetricWarning`. We report CIs as NaN when this occurs. This is an inherent limitation of bootstrapping on imbalanced labels, not a code bug, but a reviewer could argue for stratified bootstrap or Bayesian credible intervals instead.
+
+### 6.5 What We Did NOT Do (and Would in v2)
+
+1. **Recalibrated training set excluding healthy controls and SWEDDs.** Would address D1 but at the cost of shrinking the PPMI cohort to ~780 S+/D+ patients. The NSD-positive sub-staging model is the current workaround, but a truly balanced "PD-only" training set was not built.
+2. **Pre-registration of analysis plan.** The 4-target formulation, CV seed, bootstrap resample count, and conformal confidence level were decided before final runs, but the analysis plan was not deposited publicly (e.g., on OSF) before results were generated. This is a gap relative to TRIPOD+AI best practice.
+3. **Formal paired statistical tests across 7 models.** We rely on bootstrap CI overlap instead of paired DeLong or paired bootstrap per fold. This is defensible (5-fold paired tests have very low power) but not strictly TRIPOD-compliant.
+4. **Temporal out-of-sample validation.** PPMI enrolment spans 2010-2024. We did not split on enrolment date; all CV splits are i.i.d. within the PPMI cohort. Paper 5 addresses this for Papers 3-4; Paper 1 does not.
+5. **Scanner-harmonisation analysis.** DaT SBR is sensitive to scanner model + reconstruction algorithm. Our features include PPMI-harmonised SBR but we did not test whether per-scanner residual bias meaningfully shifts predictions.
+6. **Error analysis on specific misclassified patients.** We report aggregate per-class recall but not "who fails and why." A review of the hardest 20 misclassifications would add clinical interpretability.
+7. **Cost-sensitive evaluation.** We use balanced accuracy as the primary metric. A clinical screening context might prefer false-negative-minimising cost (Stage 3 missed as Stage 0 is worse than the reverse). We do not implement explicit cost matrices.
+8. **Comparison against non-ML clinical baseline.** A geriatrician with access to the 22 features might achieve bal-acc ~0.80 on binary via clinical judgment alone. We have no head-to-head benchmark.
+
+---
+
+## 7. Robustness and Sensitivity Analyses
+
+This section consolidates what was tested, how, and with what quantitative outcome. Anything not listed was not tested.
+
+### 7.1 Ablations Performed
+
+**Feature ablations (22-feature vs 12-feature clinical-only, across all 4 targets):**
+
+| Target | 22-feat Bal Acc (CI) | 12-feat Bal Acc (CI) | Δ | Interpretation |
+|---|---|---|---|---|
+| Binary | 0.951 [0.940, 0.961] | 0.666 (no CI reported) | −0.285 | DaT-SBR essential |
+| Three-class | 0.783 [0.762, 0.803] | 0.594 | −0.189 | DaT-SBR important |
+| Full ordinal | 0.660 [0.628, 0.689] | 0.479 | −0.181 | DaT-SBR important |
+| NSD-positive | 0.664 [0.634, 0.691] | 0.615 | **−0.049** | Clinical-only viable |
+
+The NSD-positive sub-staging delta (−4.9 pp balanced accuracy, −0.4 pp AUC) is the critical finding: within NSD-positive patients, clinical features alone are nearly as predictive as the full imaging-augmented set.
+
+**Architecture ablations (7 tabular models + 2 graph models):**
+
+All 7 tabular models (CatBoost, XGBoost, LightGBM, Random Forest, SVM, Logistic Regression, ElasticNet) were evaluated on all 4 targets with identical CV splits and feature sets. CatBoost wins balanced accuracy on all 4; XGBoost wins AUC on 3/4. The graph baseline (AdaMedGraph) and Enhanced MM-GAT lose by 8-17 pp balanced accuracy across targets. Formal ablation of the GAT's components (cross-modal attention, per-fold graph construction, multi-head) was not performed.
+
+**Conformity-score ablation (LAC vs APS):**
+
+LAC produces 96.4% singletons on binary at 90% confidence; APS produces ~92%. Both meet coverage (≥90%); LAC preferred for clinical utility. A third option (RAPS, regularised APS) was not tested.
+
+### 7.2 Cross-Validation Structure + Variance Across Folds
+
+**5-fold stratified CV with shuffle + fixed seed=42.** Out-of-fold predictions are concatenated across folds for the primary bootstrap CI computation. Per-fold balanced accuracy ranges (CatBoost binary): fold 0 = 0.953, fold 1 = 0.949, fold 2 = 0.947, fold 3 = 0.956, fold 4 = 0.950. Standard deviation 0.0033, coefficient of variation 0.35%. Unusually stable — reflects the large majority-class in binary (Stage 0 = 64.4%) carrying most of the balanced-accuracy signal.
+
+Per-fold stability degrades on full ordinal: CatBoost fold-wise bal-acc 0.641-0.688 (SD 0.019, CV 2.9%). Still within acceptable range, but Stage 4's small per-fold count (~3-4 patients) means a single misclassification shifts a fold's Stage-4 recall by 25-33%.
+
+### 7.3 Seed/Split Sensitivity
+
+**Not systematically tested.** We fixed `random_state=42` for reproducibility but did not run the benchmark across multiple seeds. This is a gap. A reviewer could argue that the reported numbers reflect a single draw from the seed distribution, not a robust estimate.
+
+**Partial mitigation**: Bootstrap CIs on out-of-fold predictions implicitly capture resample variance in the *evaluation* step, though not in the fold-assignment step. The dominant source of variance in CV results is typically fold composition for minority classes, not the bootstrap resample step, so the reported CIs may underestimate total variance.
+
+**What a full multi-seed study would look like**: 10 seeds × 5 folds × 7 models × 4 targets = 1,400 training runs. Estimated compute: ~12 hours single-GPU. Not done due to the negligible per-fold variance observed on binary/three-class targets (CV < 3%), but worth doing for full-ordinal before any clinical deployment claim.
+
+### 7.4 Sensitivity to Hyperparameters (Quantitative Deltas)
+
+The Section 3.9 table (preserved above) is the canonical reference. Summary of the largest deltas:
+
+| Parameter | Change | ΔBal Acc (binary) | Decision rationale |
+|---|---|---|---|
+| CatBoost iterations | 500 → 100 | −1 to −2 pp | Underfits |
+| CatBoost iterations | 500 → 5000 | <+0.1 pp (10× compute) | Diminishing returns |
+| CatBoost depth | 6 → 3 | −3 pp | Loses interactions |
+| CatBoost depth | 6 → 10 | Overfit (leaves > samples) | Guaranteed overfitting |
+| `auto_class_weights` | "Balanced" → None | Binary ~−1 pp, ordinal Stage 4 recall → 0% | Minority class ignored |
+| `auto_class_weights` | "Balanced" → "SqrtBalanced" | −2 pp full ordinal | Too gentle for Stage 4 |
+| CV folds | 5 → 3 | ≈0 | Less reduction in variance |
+| CV folds | 5 → 10 | Stage 4 per-fold unstable (~2 pts/fold) | Too few minority per fold |
+| Bootstrap resamples | 1000 → 100 | CI jitter ±0.01 | Insufficient precision |
+| Conformal α | 0.1 → 0.05 | Sets +10-15% larger | Trade-off; 0.1 is clinical default |
+
+Quantitative sweeps for `embed_dim`, GAT k-NN, APPNP α were run during development but not included in the manuscript; the table above reports the cells that survived the model-selection pipeline.
+
+### 7.5 Adversarial Stress Tests
+
+**External cohort stress test (the primary stress test):** Apply the PPMI-trained model to BioFIND/PDBP/HBS. Binary fails by design (D1). Three-class AUC 0.703 on BioFIND. NSD-positive not directly evaluable on BioFIND (different label ontology).
+
+**Class-imbalance stress test:** Full ordinal (5 classes) vs binary (2 classes). CatBoost bal-acc drops from 0.951 → 0.660; AUC drops from 0.979 → 0.946. The large drop is driven by Stage 4's 17-patient sample size, not feature-space difficulty (QWK 0.861 confirms adjacent-stage errors dominate distant-stage errors).
+
+**Feature-removal stress test:** The 12-feature clinical-only model is, effectively, a stress test for "what if no imaging?" Binary fails (bal-acc 0.666); NSD-positive survives (bal-acc 0.615, AUC 0.900).
+
+**Not tested:** adversarial perturbation (e.g., adding Gaussian noise to features), out-of-distribution detection, fairness stress tests across site/year/subgroup.
+
+### 7.6 What We Did NOT Test (and Why)
+
+1. **Multi-seed CV.** Time-bounded. Mitigation: per-fold SD reported; CV < 3% for the headline binary/three-class results.
+2. **Temporal stress (enrolment-date split).** Paper 5's scope for Papers 3-4; not done for Paper 1.
+3. **Per-site stress (PPMI has ~50 sites).** Not done. Site effects in PPMI are modest but non-zero.
+4. **LRRK2/GBA per-genotype performance.** Carrier counts too small.
+5. **Calibration under distribution shift.** The conformal coverage guarantee assumes exchangeability; under external cohort shift it can fail. We did not explicitly measure external-cohort conformal coverage.
+6. **Sensitivity to the staging algorithm itself.** If Simuni et al. (2024) publishes a staging revision, all labels shift. We did not stress-test the downstream model's sensitivity to staging perturbations.
+
+---
+
+## 8. Statistical Reporting Standards
+
+### 8.1 Confidence Interval Methodology
+
+**Primary CI method:** nonparametric bootstrap with B = 1,000 resamples, percentile method ([2.5th, 97.5th]) for 95% CIs. Resampling is performed on the concatenated out-of-fold prediction vector (2,201 (true, predicted) pairs), not re-running CV within each bootstrap iteration. This is standard but has a subtle asymmetry: the model-fitting variance is captured only once (via CV folds) while the evaluation variance is captured 1,000 times. A stricter alternative — nested bootstrap with within-fold resampling — would approximately double CI widths but was not implemented.
+
+**Alternative CI method considered:** BCa (bias-corrected accelerated) bootstrap. Not used because: (a) standard percentile is adequate when the bootstrap distribution is approximately normal (verified empirically via Q-Q plot on a subset); (b) BCa requires influence-function computation, which is awkward for multiclass balanced accuracy; (c) for n ≈ 2,200 and B = 1,000, percentile-BCa differences are typically <0.003 on balanced accuracy.
+
+**No paired bootstrap between models.** CI overlap is used to assess model comparison significance rather than formal paired tests. This is conservative — it produces fewer "significant differences" than a paired test would — but avoids multiple-comparisons complications across 7 models × 4 targets = 28 comparisons.
+
+### 8.2 Multiple-Comparison Correction
+
+**Not applied.** We test 7 models × 4 targets = 28 model-target combinations on balanced accuracy + AUC, producing 56 point estimates. Under nominal α = 0.05 and a family-wise error framing, we would expect ~3 false positives from chance alone.
+
+**Defence:** The paper's claims are not based on "model X significantly beats model Y at p < 0.05." They are based on (a) overall ranking (CatBoost wins balanced accuracy on all 4 targets), and (b) CI overlap for the top-3 gradient-boosted models. No individual p-value is load-bearing.
+
+**Gap relative to TRIPOD+AI:** TRIPOD+AI item 17 (reporting of performance measures) implies per-comparison inference; item 18 (uncertainty estimates) implies CIs but is silent on multiplicity correction. We comply with 18 (bootstrap CIs reported) but not with 17 (no formal paired tests).
+
+### 8.3 Effect-Size Reporting
+
+**Primary effect size:** balanced-accuracy difference with bootstrap 95% CI (e.g., CatBoost − LightGBM binary bal-acc: 0.003, CI approximately [−0.015, +0.021] — overlap of zero; difference not significant). Cohen's d is not reported because balanced accuracy is a bounded metric and d is difficult to interpret on [0,1] scales.
+
+**Secondary effect sizes:** QWK (quadratic weighted kappa) for ordinal targets; Cohen's kappa for binary. Both correct for chance agreement.
+
+**Feature-ablation effect size:** ΔAUC (22-feat − 12-feat) reported; no formal CI on ΔAUC but both endpoint CIs are given.
+
+### 8.4 TRIPOD+AI Compliance Checklist
+
+TRIPOD+AI (Collins et al., BMJ 2024;385:e078378) is the reporting standard for ML prediction models. Compliance status per item:
+
+| Item | Description | Status | Location |
+|---|---|---|---|
+| 1 | Title identifies ML prediction model | Pass | manuscript title |
+| 2 | Abstract structured (background/methods/results/discussion) | Pass | abstract |
+| 3 | Introduction states research question | Pass | §1 |
+| 4a | Study design (retrospective/prospective) | Pass | §2.1 — retrospective observational |
+| 4b | Source of data (cohorts) | Pass | §2.1 — PPMI/BioFIND/PDBP/HBS |
+| 5a | Participants inclusion/exclusion | Pass | §2.2, Fig. 1 CONSORT |
+| 5b | Participant flow diagram | Pass | Fig. 1 |
+| 6 | Outcome definition (NSD-ISS targets) | Pass | §2.3 |
+| 7a | Predictors (features) | Pass | §2.4 |
+| 7b | Predictor handling (scaling, encoding) | Pass | §2.5 |
+| 8 | Sample size justification | **Partial** — sample size determined by available cohort; no formal power calculation |
+| 9 | Missing data handling | Pass | §2.5 — features with >80% missing dropped |
+| 10 | Statistical analysis | Pass | §2.6 |
+| 11 | Model development (train/test split, CV) | Pass | §2.7 — 5-fold stratified CV |
+| 12 | Model specification (CatBoost hyperparameters) | Pass | §2.7, §3.2 in this deep-dive |
+| 13 | Performance measures (AUC, bal-acc, QWK, Cohen's κ) | Pass | §3 |
+| 14 | Model evaluation (internal + external) | Pass | §3.5 external validation |
+| 15 | Results for participants | Pass | §3.1 baseline characteristics |
+| 16 | Model performance | Pass | §3.2-3.4 |
+| 17 | Performance in subgroups | **Partial** — no formal subgroup analysis by age, sex, genotype |
+| 18 | Uncertainty estimates (CIs) | Pass | Bootstrap 95% CIs throughout |
+| 19 | Clinical utility analysis | **Partial** — conformal sets discussed qualitatively; no formal decision-curve analysis |
+| 20 | Limitations | Pass | §4 |
+| 21 | Implications | Pass | §5 |
+| 22 | Model transparency (code, data availability) | Pass | code public; data via PPMI DUA |
+| 23 | Interpretability | Pass | CatBoost SHAP in supplementary |
+| 24 | Fairness | **Partial** — sex/age fairness plots (Figs 9-10) but no formal disparate-impact analysis |
+| 25 | Ethics | Pass | IRB-exempt, public deidentified data |
+| 26 | Funding / COI | Pass | manuscript front matter |
+| 27 | Data availability | Pass | AMP-PD Tier 1 via DUA |
+
+**Summary: 22/27 full, 5/27 partial, 0/27 failed.** The partial items are sample-size justification (item 8), formal subgroup inference (item 17), decision-curve analysis (item 19), and fairness (item 24). None are load-bearing for the primary claim.
+
+### 8.5 Pre-Registration Status
+
+**Not pre-registered.** The 4-target formulation, 22-feature set, 7-model benchmark plan, 5-fold CV with seed=42, and 1,000 bootstrap resamples were fixed before the final runs, but no analysis plan was deposited on OSF, ClinicalTrials.gov, or AsPredicted before results were generated. This is a standard gap in observational ML research.
+
+**What pre-registration would have added:** protection against selective reporting of best-performing models/targets; transparency about the feature-set decisions (especially the exclusion of putamen SBR); credibility for the negative external-validation finding.
+
+**Mitigation in this manuscript:** full benchmark results (all 7 models × 4 targets) are reported, not just the best. The ablation (22-feat vs 12-feat) is reported for all 4 targets. The negative external validation is reported prominently rather than buried.
+
+---
+
+## 9. Alternative Approaches
 
 ### What Else Could Have Solved This Problem?
 

@@ -530,7 +530,272 @@ CPT:PSP is the right venue because (a) Bakshi et al. 2018 and Ivanova & Karelina
 
 ---
 
-## 7. Where We Go From Here (Next Steps)
+## 7. Limitations, Deficiencies, and Honest Assessment
+
+Paper 7 (Phase 2) underwent an unusual amount of epistemic self-correction during development — Variant A's mass-conservation bug, NUTS false-convergence, and the α_tox/k_n slow-fast identifiability collapse each forced a public retreat from an earlier published position. The sections below make those retreats explicit, document residual limits, and surface what the Phase 2 posterior can and cannot support.
+
+### 7.1 What the Paper Does NOT Prove
+
+- **Not a per-patient identifiability claim for individual α_tox or k_n.** Under the slow-fast timescale collapse, `α_tox` and `k_n` are practically non-identifiable from longitudinal DaT-SPECT alone — the two parameters share a sloppy ridge in the parameter space (cor(log k_n, log α_tox) = −0.852 in the HIGH-INFO subset, −0.234 cohort-wide). We report only the **toxicity flux composite T_tox = α_tox · k_n · M_ss² / (k_conv + k_clear_O)**, which is the identifiable stiff direction. Any claim that "this patient's α_tox is X" is misleading; the claim is "this patient's T_tox is X, and α_tox is practically degenerate with k_n along a 1D ridge." This is a reframe we made public rather than hiding.
+
+- **Not a claim of truly per-patient informativeness across the full 304-patient cohort.** The ESS-stratified results show that only **33 of 304 patients (10.9%) are in the HIGH-INFO subset** where the IS likelihood genuinely constrains the posterior (ESS < 20%, cor = −0.852, T_tox SD 0.29 decades). 64 patients are MOD-INFO (ESS 20–50%), and **207 patients (68.1%) are LOW-INFO (ESS ≥ 50%)** where the posterior ≈ prior. Scientific conclusions should cite only HIGH-INFO evidence; the cohort-wide medians are inflated by prior-dominated patients.
+
+- **Not a validated forward model over all timescales.** The Variant B log-N SBR decay likelihood is calibrated at 1–4 year horizons (PPMI Wave A longitudinal scan spacing). Forward projections beyond ~10 years rely on the slow-fast-collapse regime holding indefinitely, which is an **extrapolation not directly tested**. The strict LOO forward validation (Block 5, Bürkner et al. 2019 LFO-CV) achieves 99.0% 95% PI coverage at the prediction horizon of the held-out last scan — but this is a short-horizon forecast (avg 1–2 yr), not a 10-year prognosis.
+
+- **Not an external validation.** All 304 Wave A patients (and 761 Wave B for phase completion) are from PPMI. The implied `3.29%/yr median neuron loss rate` is cohort-internal. No DeNoPa, ICEBERG, or SURE-PD3 validation has been run. The Fearnley & Lees 1991 2–5%/yr range is cited as literature consistency, **not** as independent external validation data.
+
+- **Not a causal structural identification.** We run structural identifiability (`StructuralIdentifiability.jl` + `SIAN.jl` cross-validation) and practical identifiability (FIM Step 2.7) tests on the reduced 3-parameter fit set `(k_n, α_tox, r_o)`. But the FULL 12-parameter ODE has **5 non-identifiable fibril-side parameters** (`k_e`, `k_conv`, `k_clear_O`, `k_frag`, `k_clear_F`, `β_tox`) pinned to literature values. This means we have **not validated the fibril-side mechanism from PPMI data** — we have validated only the oligomer-toxicity coupling conditional on literature-fixed fibril-side kinetics. This is honest — documented in §3.1 of the deep dive — but worth re-emphasizing here: Phase 2 proves much less than "the Cohen-Knowles aggregation framework fits PPMI."
+
+- **Not a spatial propagation claim.** Paper 8b's companion analysis (Phase 3, spatial propagation) showed **spatial propagation is NOT detectable with current data** (negative result, published as Paper 8b). The Phase 2 ODE assumes spatially homogeneous state variables. Any claim of regional spreading is unsupported by this framework.
+
+### 7.2 Bugs We Fixed, and Why They Matter
+
+The Variant B mass-conservation fix, the log-N state transform, the NUTS false-convergence diagnostic, and the T_tox reframe are ALL consequences of errors caught during development. The pattern matters:
+
+- **Variant A bug: linearly unstable fibril equation.** The Variant A formulation `dF/dt = k_conv·O + k_frag·F − k_clear_F·F` has a right-half-plane pole when `k_frag > k_clear_F`, producing `F(t=4yr) ≈ 10^75 nM` (galaxy-scale α-synuclein). Variant B removes `k_frag·F` because `k_frag` is a Cohen-Knowles end-count rate, not a mass source. **This was a units error** — fragmentation of a mass variable by its own value is not a physical process. Caught by SymPy closed-form analysis of the steady state. Published as a supplementary methods note.
+
+- **NUTS false-convergence (v2/v3 DEPRECATED).** Single-chain R̂ < 1.05 gave a false-positive convergence diagnostic on prior-dominated posteriors, because the likelihood gradient was dominated by prior curvature. The IS truth proxy revealed that the NUTS chains had failed to find the informative sloppy-ridge manifold. All v2/v3 NUTS results are now retained only for provenance; v4/v5 IS-weighted results are the canonical numerics. This is a **methodological contribution** (supplementary) on single-chain R̂ limits for weakly identified ODE problems — but also a published retraction of the v2/v3 posterior summary tables that an earlier draft reported.
+
+- **α_tox / k_n practical non-identifiability (T_tox reframe).** Variants of this paper drafted before 2026-04-08 reported individual-parameter posteriors for `α_tox` and `k_n`. A deep-research investigation identified the slow-fast timescale collapse as the cause of the degenerate posterior, and the paper's narrow novelty claim was rewritten to the T_tox composite. This is NOT a retraction — the underlying numerics were correct — but the *interpretation* changed materially.
+
+- **Prior-sensitivity triangulation as a rescue.** The α_tox prior went through four versions: (a) Phase 1 lumped value (physically impossible), (b) in-vitro TH+ anchor alone, (c) Winner 2011 primary-neuron anchor alone, (d) 3-anchor geometric mean (locked). Only version (d) survived adversarial pressure-testing. A reviewer objection "your prior drives your result" is valid for versions (a)–(c); version (d) withstands the objection because the three anchors span 2 orders of magnitude and the posterior moves away from every prior center in direction predicted by the data.
+
+Each of these was caught by internal audit, not by reviewers. The paper's honest framing: **this is a field-first-in-kind Bayesian PD mechanistic calibration; the errors surfaced here are generic to single-state in-vivo adaptations of Cohen-Knowles, and they will recur in anyone attempting this analysis without care.** The methods-letter companion paper is the vehicle for these warnings.
+
+### 7.3 Scope and Cohort Heterogeneity
+
+- **304 Wave A + 761 Wave B = 1,065 total.** Wave A is de-novo PD with strict enrollment (baseline DaT-SPECT, Y1/Y2/Y3 follow-ups). Wave B is a later enrollment with heterogeneous scan timing. **The Wave A vs Wave B performance heterogeneity has not been stratified** — we report a combined 1,065 posterior summary. A Wave-stratified re-analysis would test whether Wave B's less-structured longitudinal sampling degrades identifiability (we suspect yes, based on scan-density heuristics).
+
+- **277/304 Wave A have CSF.** Block 3's joint SBR + CSF calibration uses these 277 patients to break the degeneracy. The **27 patients without CSF have SBR-only posteriors** that are strictly weaker. They inherit the HIGH-INFO / MOD-INFO / LOW-INFO classification but not the CSF-based degeneracy-breaking. A minor caveat.
+
+- **Missing covariates.** LRRK2 / GBA / SNCA status are not incorporated into Phase 2. Patients with known genetic variants might have different α_tox distributions; we have not tested this. Genetic stratification deferred to Paper 12 / postdoc.
+
+### 7.4 Prior-Sensitivity Residual Concerns
+
+- **α_tox prior center moves posterior cohort-wide median.** The 3-anchor triangulated prior has a geometric-mean center at 1.8×10⁻⁵ nM⁻¹ hr⁻¹. Shifting the center up by 1 decade shifts the cohort-median T_tox up by ~0.7 decades; shifting down by 1 decade shifts T_tox down by ~0.7 decades. The **HIGH-INFO posterior is robust** (Δ T_tox cohort < 0.1 decades for 1-decade prior shifts), but the **LOW-INFO cohort-median is not** — it tracks the prior. The 3.29%/yr cohort-wide median is therefore prior-sensitive for the majority (207/304 LOW-INFO patients).
+
+- **Prior SD σ = 2.0 on α_tox.** The 95% credible interval is `[3.3×10⁻⁷, 9.7×10⁻⁴]`, spanning 3.5 decades. Reducing σ to 1.0 (factor-e prior width) tightens the LOW-INFO posteriors toward the prior center but has minimal effect on HIGH-INFO patients. We report σ = 2.0 as the default; σ sensitivity has been computed but not reported in the main text.
+
+- **r_o (CSF cross-reactivity scaling) is nuisance.** Prior is `r_o ~ LogNormal(log 1.0, 0.5)`. Posterior is essentially the prior for LOW-INFO patients, and moderately data-informed for HIGH-INFO. r_o is a known practical-identifiability soft spot (it multiplies an unobservable oligomer concentration).
+
+### 7.5 Other Bounded Admissions
+
+- **No k_frag sensitivity sweep yet.** We set `k_frag = 0` in Variant B. A sweep over `k_frag ∈ {0, 10⁻⁴, 10⁻³} hr⁻¹` is planned (§7 Next Steps) to show the T_tox posterior is invariant within the plausible in-vivo range. Until that sweep runs, "Variant B zero-fragmentation" is a modeling choice, not a demonstrated invariance.
+
+- **No γ (SBR ∝ N^γ exponent) sensitivity.** We use `γ = 0.7` from Lee 2019. Sweep over γ ∈ {0.5, 0.7, 1.0} has not been run. Shifting γ directly rescales the implied neuron loss rate.
+
+- **No β_tox sweep.** `β_tox = 0` from Winner 2011. Fibril toxicity is assumed to be zero. A sweep over `β_tox ∈ {0, 0.1·α_tox, α_tox}` has not been run.
+
+- **No prior-posterior circularity audit.** The α_tox prior uses Fearnley 1991 as one of three anchors. The cohort-median 3.29%/yr result is "consistent with Fearnley 2–5%/yr." A reviewer will ask: is this independent validation, or does the prior ensure the answer? The prior disclosure paragraph in the Methods addresses this, but the truly-independent test would require refitting with a non-Fearnley anchor set.
+
+- **Single-species observation model for CSF.** `y_csf ∝ M + r_o·O`. Biologically, other α-syn species contribute (phosphorylated, truncated, etc.). The observation model collapses these into M and O. Not tested.
+
+---
+
+## 8. Robustness and Sensitivity Analyses
+
+Phase 2 is more thoroughly sensitivity-tested than Phases 1, 3, or 5 — the validation discipline clause in `src/mechanistic_twin/CLAUDE.md` mandates formal identifiability analysis BEFORE calibration compute. This section documents the ablations performed, what they showed, and what is still pending.
+
+### 8.1 Ablations Performed (VALIDATED)
+
+| Ablation | Configurations | Primary Metric | Result |
+|---|---|---|---|
+| Variant A vs Variant B ODE | 2 ODEs | Forward simulation stability at t = 4 yr | A: F → 10^75 nM (unphysical); B: F → 0.38 nM (stable) |
+| T_tox fixed vs fit | Fix k_n·α_tox vs fit individually | Posterior cor(log k_n, log α_tox) | Individual: cor = −0.852 HIGH-INFO; T_tox composite: 6× tighter than α_tox |
+| 3-anchor α_tox prior triangulation | In-vitro TH+ / Winner / Fearnley anchors | α_tox posterior center stability | Prior center 1.8e-5 locked; σ=2.0 covers [3.3e-7, 9.7e-4] |
+| IS vs NUTS | 50k IS draws vs multi-chain NUTS | Posterior cor + SD | NUTS false-convergence documented; IS is canonical |
+| SBR-only (v4) vs SBR + CSF (v5) | 2 observable sets | Degeneracy-breaking: cor(log k_n, log α) | v4: −0.240; v5: **−0.113** (52% improvement) |
+| σ_CSF sensitivity | σ_CSF ∈ {100, 150, 250} pg/mL | Degeneracy-breaking | σ=150 (lit-validated) gives cor = −0.098, k_n ratio 0.577 |
+| ESS stratification | HIGH/MOD/LOW-INFO | T_tox posterior SD | HIGH: 0.29; MOD: 0.71; LOW: 0.87 decades (prior-dominated) |
+| LOO forward validation (Bürkner LFO-CV) | Leave-last-scan-out, ≥3 scans | 95% PI coverage | **99.0%** (vs Phase 1 93.75%, +5.3 pp) |
+| Phase 1 vs Phase 2 head-to-head | Same observable, different ODE | 95% PI coverage delta | Phase 2 + CSF: +0.6 pp vs Phase 2 SBR-only (Phase 1 parity) |
+| Prasinezumab counterfactual (S5) | η_abx ∈ {0.05, 0.15, 0.35} | HIGH-INFO delay in yr | 0.37 / 1.24 / 3.77 yr (PASADENA null DaT-SPECT validated) |
+
+### 8.2 Ablations PENDING
+
+| Ablation | Rationale | Status |
+|---|---|---|
+| k_frag ∈ {0, 1e-4, 1e-3} hr⁻¹ sweep | Show T_tox posterior invariant to in-vivo k_frag choice | Deferred to manuscript revision |
+| k_e ∈ {0.05, 0.09, 0.15} μM⁻¹ hr⁻¹ sweep | Test Iljina vs alternate elongation-rate pins | Deferred |
+| γ ∈ {0.5, 0.7, 1.0} sensitivity | Test SBR ∝ N^γ exponent | Deferred |
+| β_tox ∈ {0, 0.1·α_tox, α_tox} | Test fibril toxicity assumption | Deferred |
+| r_o prior σ sensitivity | Check CSF-cross-reactivity parameter influence | Partial; not in main text |
+| Permutation null (shuffled CSF IS) | Quantify expected degeneracy-breaking from uninformative observable | Deferred to extended manuscript |
+| Wave-stratified (A vs B) posterior | Test sampling-density effect on informativeness | Deferred to Block 6 |
+| Genetic stratification (LRRK2/GBA/SNCA) | Test per-variant T_tox distribution | Paper 12 scope |
+| Non-Fearnley prior anchor set | Close prior-posterior circularity audit | Future work |
+
+### 8.3 IS vs NUTS Comparison (Load-Bearing)
+
+The IS-vs-NUTS comparison is not a conventional ablation — it is the basis for the decision to **deprecate NUTS on this problem**. Key evidence:
+
+| Metric | NUTS (v3) | IS (v4/v5) |
+|---|---|---|
+| Cohort-wide cor(log k_n, log α_tox) | +0.12 (near zero, prior-like) | −0.234 (cohort) / **−0.852 (HIGH-INFO)** |
+| R̂ convergence diagnostic | < 1.05 (false positive) | N/A (non-sampler) |
+| Compute | ~90 min per cohort | ~10 sec per cohort |
+| Reproducibility | Chain-seed-dependent | Bitwise-identical under fixed RNG seed |
+| Informative posteriors detected? | 0% (all prior-dominated) | 10.9% HIGH-INFO / 21.1% MOD-INFO |
+
+The IS posterior found structure that NUTS missed. NUTS's R̂ < 1.05 gave a false-positive convergence diagnostic — documented as a supplementary methods finding.
+
+### 8.4 Seed Sensitivity
+
+- **IS RNG seed 202604091.** All v4/v5 IS posteriors are bitwise-reproducible under this seed. We verified this across 3 independent runs (combined chain SHA-256 `e052192db7b77d00`).
+- **NUTS chains**: seed-dependent; different seeds produce slightly different R̂ values and slightly different posterior means. We re-ran with 4 seeds during the v2/v3 audit — all exhibited the same prior-domination pattern. This is what told us the issue was not sampler tuning.
+- **Alternative Monte Carlo sizes**: 50k IS draws default; we also tested 25k and 100k. Results stable to within Monte Carlo error bounds (ESS-proportional).
+
+### 8.5 Hyperparameter Sensitivity
+
+| Hyperparameter | Value | Source / Rationale | Sensitivity Status |
+|---|---|---|---|
+| α_tox prior center | 1.8e-5 nM⁻¹ hr⁻¹ | 3-anchor geometric mean | LOW-INFO posterior-median tracks prior ± 0.7 decades |
+| α_tox prior σ | 2.0 | Spans 3.5 decades | HIGH-INFO robust to σ ∈ [1.0, 2.5] |
+| k_n prior | LogNormal(log 1e-4, 1.5) | Cohen 2013 literature | Not independently ablated |
+| r_o prior | LogNormal(log 1.0, 0.5) | Weakly informative | Nuisance; posterior ≈ prior for most patients |
+| σ_SBR | Truncated Normal, data-fit | Per-patient observation noise | Fit from data |
+| σ_CSF | 150 pg/mL | Kruse 2018 intra-lab CV 5-10% | Tested at {100, 150, 250}; robust |
+| k_conv | 0.095 hr⁻¹ (fixed) | Iljina 2016 | NOT sweeped (see §8.2) |
+| k_e | 0.09 μM⁻¹ hr⁻¹ (fixed) | Iljina 2016 | NOT sweeped |
+| k_clear_F | 0.005 hr⁻¹ (fixed) | Braak-derived | Enters only through F steady state |
+| k_age | 0.025 hr⁻¹ effective = ~2.2%/yr | Fearnley 1991 | Anchor-dependent via T_tox |
+| γ (SBR ∝ N^γ) | 0.7 | Lee 2019 | NOT sweeped |
+| β_tox | 0 | Winner 2011 | NOT sweeped |
+| IS draws | 50,000 | ESS-proportional | Stable at 25k, 100k |
+
+**Honest summary:** The 3 fitted parameters (k_n, α_tox, r_o) have been sensitivity-tested on prior form. The 5 literature-pinned parameters (k_conv, k_e, k_clear_F, γ, β_tox) have NOT been ablated — they are pinned. The fibril-side sub-algebra is therefore prior-dominated without data constraint from PPMI.
+
+### 8.6 Stress Tests
+
+- **304 Wave A + 761 Wave B at production.** Full 1,065 cohort IS posterior computes in ~10 seconds (IS) vs 90 minutes (NUTS).
+- **Per-forward-solve runtime**: ~3 ms at 4-year horizon after Variant B + log-N fixes (650× speedup vs Step 2.4 first smoke test).
+- **Extreme prior-shift stress**: `α_tox` prior center shifted ±3 decades. HIGH-INFO posterior center moves < 0.5 decades (data dominates). LOW-INFO posterior center tracks prior 1:1 (prior dominates).
+- **F → ∞ regression test**: Variant A-style mass-source terms re-introduced and tested to verify the diagnostic catches the instability. Passed (Jacobian eigenvalue analysis detects right-half-plane pole).
+
+### 8.7 What Was NOT Tested (and Why)
+
+- **Full 12-parameter non-reduced posterior.** Structurally non-identifiable; infeasible.
+- **Non-Cohen-Knowles aggregation models (Fisher-Kolmogorov, Meisl 2016 variants).** Explicitly rejected at scoping (Fisher-Kolmogorov does not support drug-specific counterfactuals — see §3.3 of the deep dive).
+- **Spatial propagation.** Paper 8b (Phase 3) shows it is not detectable with PPMI data.
+- **External validation on DeNoPa / ICEBERG.** Pending PI collaborations; scoped for Paper 11 / postdoc.
+- **MCMC sampler alternatives (HMC with mass matrix tuning, Stan, Pigeons.jl).** NUTS failure is about prior domination, not sampler specifics; IS resolves it.
+- **Hierarchical model.** Deferred to Phase 2.5 (see §6 of this doc).
+- **Time-varying treatment (LEDD) as a covariate.** Deferred to Phase 4.
+
+---
+
+## 9. Statistical Reporting Standards
+
+Paper 7 targets CPT:PSP as primary venue, with an optional companion methods letter at *Bull. Math. Biol.* / *J. Theor. Biol.*. This section audits compliance with Q-VVUQ (quantitative verification / validation / UQ), NASEM 2024 digital-twin criteria, and the standard Bayesian reporting norms.
+
+### 9.1 Confidence / Credible Interval Methodology
+
+| Quantity | CI / HDI reported? | Method | Notes |
+|---|---|---|---|
+| T_tox posterior (HIGH-INFO subset) | **Yes: 95% HDI** | IS-weighted equal-tail quantiles | SD 0.29 decades; 6× tighter than α_tox |
+| α_tox posterior (HIGH-INFO) | Yes: 95% HDI | IS-weighted | SD 2.13 decades (wide — identifiability limit) |
+| k_n posterior (HIGH-INFO) | Yes: 95% HDI | IS-weighted | Wide (identifiability limit) |
+| Cohort-median implied neuron loss rate (%/yr) | Yes: 95% HDI (bootstrapped over patients) | Patient-bootstrap 1,000 resamples | HIGH-INFO: 21.4%/yr; cohort: 3.29%/yr |
+| cor(log k_n, log α_tox) (HIGH-INFO) | **No explicit CI** (point estimate) | — | Should report Fisher-Z 95% CI at revision |
+| 95% PI coverage (LOO forward) | Binomial CI feasible (Wilson) | Not in current tables | Should report e.g. 99.0% [97.5, 99.7] |
+| Prasinezumab counterfactual delay | Point estimates at η ∈ {0.05, 0.15, 0.35} | Posterior-propagated | SD/CI via HIGH-INFO posterior spread |
+| Variant A vs B stability | Deterministic (linear-system eigenvalue) | Jacobian spectrum | No CI needed |
+| Paired Wilcoxon v4 vs v5 degeneracy-breaking | p = 1.3 × 10⁻⁴⁶ | Wilcoxon signed-rank (N=304 paired) | p reported; no effect-size CI |
+
+**Gap:** the cor(log k_n, log α_tox) values (−0.852 HIGH-INFO, −0.234 cohort) are reported as point estimates; a Fisher-Z transformation with 95% CI should be added for reviewer rigor. Similarly, the per-subset SDs (0.29 / 0.71 / 0.87 decades) should carry bootstrap CIs.
+
+### 9.2 Pre-Registration
+
+The α_tox prior 3-anchor triangulation was **pre-locked before any Step 2.6v2/v3/v4/v5 calibration run** — this is a genuine pre-registration. The three anchors (Ivanova 2024, Winner 2011, Fearnley 1991) were selected via three parallel research agents + consciousness-council adversarial pressure-test, and the geometric-mean center `1.8×10⁻⁵ nM⁻¹ hr⁻¹` was committed to `src/mechanistic_twin/scripts/calibrate_phase2_coupled.jl` with DOIs inline BEFORE any v4/v5 fit. The prior-sensitivity analysis (Step 2.5.5) was run AFTER calibration but tested sensitivity to the pre-locked prior, not to alternative priors selected post-hoc.
+
+The **Variant B mass-conservation fix and the log-N transform** were NOT pre-registered — they were caught during Step 2.4 failure diagnosis and introduced before v2/v3. Neither is a hypothesis test; both are modeling corrections whose justification is Jacobian stability analysis (§3.3).
+
+The **T_tox reframe** was NOT pre-registered — it was adopted after the 2026-04-08 deep-research finding on slow-fast timescale collapse. This is an interpretive reframe of the identifiable posterior quantity, not a hypothesis test.
+
+### 9.3 Multiple-Comparison Correction
+
+- **Per-patient gates (S1 through S5).** Each gate has its own acceptance criterion. No MC correction across 304 patients. **Not applicable** — each patient is a separate inference, and we report cohort-level summary statistics rather than per-patient p-values.
+- **Paired Wilcoxon (v4 SBR-only vs v5 SBR + CSF).** Single test, no correction needed. p = 1.3 × 10⁻⁴⁶.
+- **Prior-sensitivity table cells.** Each cell (per patient, per prior shift) is descriptive, not tested.
+- **ESS-stratification thresholds (20%, 50%).** Pre-set, no correction.
+
+Multiple-comparison correction is not a dominant concern in Phase 2 because the headline claims are summary statistics and posterior quantile reports, not simultaneous p-value tests.
+
+### 9.4 Effect-Size Reporting
+
+Reported effect sizes:
+
+- **T_tox posterior width (0.29 decades HIGH-INFO)** — natural units.
+- **Sloppy-ridge correlation (cor = −0.852 HIGH-INFO)** — Pearson correlation.
+- **Degeneracy-breaking delta v4 → v5**: cor improved from −0.240 to −0.113 (52% reduction in degeneracy).
+- **k_n posterior tightening v4 → v5**: ratio 0.571 (v5 SD is 43% smaller).
+- **Phase 2 vs Phase 1 95% PI coverage delta**: +5.3 pp (99.0% vs 93.75%).
+- **Prasinezumab delay per η**: 0.37 / 1.24 / 3.77 yr with clinical-trial-effect-size d ≈ 0.055 at η = 0.15.
+
+Not reported:
+
+- Cohen's d for any posterior-vs-prior shift.
+- Effect-size CI for the sloppy-ridge correlation.
+- Effect-size CI on Wilcoxon-paired degeneracy-breaking delta.
+
+### 9.5 Reporting-Checklist Compliance
+
+**Primary targets:** Q-VVUQ (Musuamba 2021 CPT:PSP; Viceconti 2020); NASEM 2024 digital-twin criteria; Bayesian-workflow reporting norms (Gelman et al. 2020 Bayesian Analysis).
+
+**Q-VVUQ self-audit (CPT:PSP standard):**
+
+| Criterion | Status | Notes |
+|---|---|---|
+| Structural identifiability analysis BEFORE calibration | **Yes** | §3.1; SI.jl + SIAN.jl cross-validation |
+| Practical identifiability (FIM) | Yes | Step 2.7 for 10 random patients |
+| Prior elicitation from literature | **Yes** | 3-anchor α_tox triangulation, documented |
+| Prior sensitivity analysis | Yes | Step 2.5.5 |
+| Posterior predictive check | **Yes** | Step 2.8v5: all 3 gates PASS |
+| Leave-future-out forward validation | **Yes** | Bürkner LFO-CV, 99.0% coverage |
+| Falsification test | **Yes** | Block 4 PASADENA counterfactual, explicit η > 0.23 threshold |
+| Model credibility statement | Yes | In Discussion |
+| Code availability | Yes | `src/mechanistic_twin/scripts/calibrate_phase2_coupled.jl` |
+| Data availability | Yes | PPMI-controlled + DUA |
+| Independent reproducibility check | Yes | SHA-256 combined-chain verification |
+
+**NASEM 2024 digital-twin criteria audit:**
+
+| Criterion | Current Phase 2 Status | Full NASEM Completion Target |
+|---|---|---|
+| Physiological constraints | Partial (4-state ODE, fibril-side literature-pinned) | Full 5-module ODE in Phase 3-5 |
+| Bidirectional flow | **Infrastructure-ready via IS posterior persistence** (PosteriorStore HDF5) | Paper 10 demonstrates per-visit update |
+| Continuous updating | Episodic (at each new scan) | Sensor-based in Phase 6 (MindMend) |
+| Patient-level validation | Internal LOO (Phase 2) | External (LCC + DeNoPa) in Paper 10/11 |
+| Uncertainty quantification | **Strong** (per-patient IS posterior + credible intervals) | Maintained |
+| Governance / pre-registration | **Partial** (α_tox prior pre-locked; model-choice modifications NOT pre-registered) | Full trial-registered design for Phase 6 |
+| Transparent limitations | **Yes** | This §7 is intentionally long |
+
+**Bayesian-workflow reporting (Gelman 2020) audit:**
+
+- Prior disclosure: **Yes** (inline in Methods §2.3)
+- Posterior summary: Yes (credible intervals per patient, stratified by ESS)
+- Convergence diagnostics: Yes (ESS primary, R̂ flagged as insufficient on this problem)
+- Posterior predictive check: Yes
+- Model criticism: Yes (Variant A → B; NUTS → IS; T_tox reframe)
+- Sensitivity to priors: Yes
+- Refit-without-anchor test: **Missing** — see §7.5
+
+### 9.6 Summary of Reporting-Standard Shortfalls
+
+| Shortfall | Severity | Fix Plan |
+|---|---|---|
+| No Fisher-Z CI on correlation estimates | Low | Add in revision |
+| No Wilson CI on PI coverage | Low | Add in revision |
+| No refit-without-Fearnley-anchor test | Medium | Close prior-posterior circularity audit |
+| No Wave A vs Wave B stratification | Medium | Block 6 |
+| No k_frag / k_e / γ / β_tox sweeps | Medium | Deferred to manuscript revision |
+| No genetic-variant stratification | Low (context-appropriate: not primary claim) | Paper 12 scope |
+| No external validation | High for clinical-deployment claims (NOT for methods-paper claims) | Paper 10/11 scope |
+| No permutation null for CSF degeneracy-breaking | Medium | Deferred to extended manuscript |
+
+---
+
+## 10. Where We Go From Here (Next Steps)
 
 This section was rewritten on 2026-04-08 after the three-skill devil's-advocate pass (§3.7) and peer-review pressure-test surfaced a specific set of blockers that must be cleared before any manuscript submission. The original "just run Step 2.7 and Step 2.8 and submit" plan has been replaced with a sequential, gated execution queue. Each item below has a concrete exit criterion, an estimated effort, and a dependency on previous items. No item in the manuscript draft phase starts until every blocking item in the validation phase has passed.
 

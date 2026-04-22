@@ -547,7 +547,293 @@ Paper 10 partially addresses (4) via the bidirectional twin with SIR updating; P
 
 ---
 
-## 7. Reproducibility Manifest
+## 7. Limitations, Deficiencies, and Honest Assessment
+
+Paper 9's three-pathway structure (2 positive + 2 informative-negative + 1 confirmed-sub-EC50) is itself a limitation-surfacing framework: each pathway's design is informative about what the data cannot support. The paper's honesty is systematic rather than relegated to a single limitations paragraph.
+
+### 7.1 What the Paper Does NOT Prove
+
+- **Not a randomized dose-escalation RCT.** Paper 9 is observational — an exposed/unexposed analysis of patients who were (or were not) on specific LEDDs at specific N_frac states. The Path B interaction (p = 0.044 after severity control) is robust to severity confounding but is NOT a causal claim. A randomized, blinded, within-patient dose-escalation trial is the gold standard; Paper 9 is a hypothesis-generating observational analysis.
+
+- **Not a claim that Path A (natural history) is biologically uninformative.** Path A fails because per-patient rate variation `r` is too small relative to shared temporal trends in OFF-UPDRS. It does NOT say neurodegeneration is irrelevant to motor decline — just that the rate is not the information carrier at population scale. Individual-patient N(t) trajectories may still predict OFF-UPDRS trajectories once the shared cohort temporal trend is removed (this is the intent of Path B's severity control).
+
+- **Not a claim that Path C (wearing-off) says anything about whether wearing-off is biologically PK-driven.** The C-index 0.515 and ρ = -0.05 both indicate that **neither** N(t) nor time is a useful predictor of wearing-off onset. The pharmacokinetic interpretation (wearing-off = half-life × dose, not neuron state) is an interpretation consistent with the null, but we did not directly test it. A PK-pathway analysis (plasma LEDD half-life × peak-trough ratio × formulation) would be the confirming test; we don't have plasma levodopa in PPMI.
+
+- **Not a claim that the Hill model is generally invalid.** H5 confirms sub-EC50 linear regime in PPMI (`h_free = 0.13`, FIM κ > 3.5 × 10⁶). This is specific to PPMI's early-stage cohort with median 500 mg/day LEDD. In advanced-PD cohorts with LEDD 1,500+ mg/day (post-DBS, STEADY-PD / SURE-PD3), the Hill sigmoid may separately identify. H5 is PPMI-specific finding with generalisable sub-EC50 mechanism, not a universal PD claim.
+
+- **Not a claim of external validity.** Paper 9 is single-cohort PPMI. DeNoPa / ICEBERG / SURE-PD3 external validation is explicitly scoped as Paper 10/11 / postdoc work. PDBP has SPECT only in 2 DLB studies (not standard PD).
+
+- **Not a claim about OFF-state UPDRS mechanism.** Path A's informative negative shows OFF-UPDRS is a monotone transform of time in this cohort. We do NOT claim this means OFF-UPDRS is mechanistically insensitive to N(t) — the cohort's enrollment structure (narrow window of early-stage PD) may be hiding heterogeneity.
+
+### 7.2 Specific Deficiencies (What the Paper Flags Explicitly)
+
+| Deficiency | Magnitude | Mitigation | Where documented |
+|---|---|---|---|
+| Path A informative negative (ΔAIC = -803 time beats N_frac) | Shows natural history ≠ N(t)-driven at population scale | Report as pre-specified H4, not as a failed primary hypothesis | §4.3 of deep-dive (Q3) |
+| Path C wearing-off C-index = 0.515 near random | Shows wearing-off ≠ neurodegeneration-driven | Report as pre-specified H3, reframes for Paper 10 framing | §4.3 of deep-dive (Q1); Paper 10 complementarity frame |
+| Path B primary hypothesis p = 0.044 (marginal survives severity control) | 34% shrinkage from M1 to M2 attenuates interaction | Report β3_M2 = 1.41 as primary; β3_M1 = 2.13 as sensitivity | §4.3 of deep-dive (Q5) |
+| Within-patient first-difference p = 0.533 (inconclusive, not refuting) | Underpowered due to small visit-to-visit Δn_frac | Primary inferential defense is severity-adjusted M2, not DID | §4.3 of deep-dive (Q6) |
+| Hill model fails → h_free = 0.13 (sub-EC50 linear regime) | Structural bound not reached in PPMI cohort | Use linear interaction instead; H5 pre-registered | §4.3 of deep-dive (Q4) |
+| Confounding by indication (LEDD ~ severity) | Partial correlation 0.180 between LEDD and UPDRS residuals | Severity-adjusted M2 survives (p = 0.044) | §4.3 Q5 |
+| Population-average PK (no plasma levodopa) | Cannot separate absorption/clearance heterogeneity | K-PD framework per Jacqmin 2007 appropriate for early PD | §6 Alternative Approaches |
+| Marginal R² on Path B = 0.051 (population-level) | Conditional R² = 0.491 is the clinically relevant figure | Report both; clarify conditional is appropriate for this heterogeneous disease | §5 Reviewer Q1 |
+| OFF-state UPDRS PDSTATE column may be misclassified in some visits | Small subset of patients with ambiguous state | Cross-validated against ON-state inversion analysis | §3.2 of deep-dive |
+| COMT inhibitor LEDD values ("LD x 0.33") | 613 rows dropped via `errors='coerce'` | Explicit in Methods | §CLAUDE.md gotcha |
+| LRRK2 / GBA genotype stratification underpowered | Subgroup N too small for reliable per-stratum interaction | Report aggregate; subgroup as sensitivity only | §5 Reviewer Q |
+
+### 7.3 What a POSITIVE vs NEGATIVE Path B Would Have Looked Like
+
+Paper 9 pre-registered the Path B primary hypothesis with ΔAIC and p-value thresholds before running the severity-control analysis:
+
+| Scenario | Result | Verdict |
+|---|---|---|
+| β3_M1 > 0, p < 0.05 | β3 = +2.13, p < 10⁻¹¹ | PASS primary |
+| β3_M2 > 0, p < 0.05 (severity-controlled) | β3_M2 = +1.41, p = 0.044 | PASS secondary (marginal) |
+| ΔAIC_interaction < -10 (interaction beats baselines) | ΔAIC = -72 | PASS decisive threshold |
+| β3_FD has same sign as cross-sectional | Δβ3 = -3.68 (opposite sign) | FAIL if interpreted literally |
+| β3_FD p < 0.05 (significantly opposite) | p = 0.533 | INCONCLUSIVE (not refuting) |
+
+The honest framing: PASS primary + secondary with ΔAIC = -72 (decisive), but within-patient first-difference inconclusive (p = 0.533) rather than refuting. A PRESENTATION of Path B as "clean positive" would be dishonest; a PRESENTATION as "failed" would also be dishonest. Paper 9's framing "positive with caveat" captures reality.
+
+### 7.4 Known Unknowns (What We Cannot Characterise Without More Data)
+
+- **Would prospective β3 validation on an external cohort reproduce the interaction?** Current β3 = +1.41 predicts a patient with N_frac = 0.6 gets 4.6 fewer UPDRS points of ON-state benefit than N_frac = 1.0 at the same 500 mg/day. Testable by enrolling advanced-PD patients with known DaT history. DeNoPa and ICEBERG candidates are DUA-pending.
+
+- **Would a cohort with LEDD > 1,000 mg/day recover Hill saturation?** Advanced-PD with DBS augmentation (LEDD 1,500–2,500 mg) samples the sigmoid regime. STEADY-PD / SURE-PD3 via BioSEND (~300 patients × 2 timepoints) might work. DUA-pending.
+
+- **What's the within-patient dose-escalation effect?** A pre-post design (+100 mg/day × 4 weeks, within-patient ON-OFF gap delta) directly tests the interaction without confounding by indication. Gold standard — but ethically constrained in advanced PD. Not currently feasible.
+
+- **How much of the 34% attenuation from M1 to M2 is due to residual confounding vs. biological co-dependence?** Severity adjustment removes the "sicker → more LEDD → stronger gap response" confound, but can't remove the biologically valid co-dependence (N_frac drops as disease progresses → severity increases → LEDD rises in parallel). The 34% attenuation is a blended estimate.
+
+- **Would item-level UPDRS analysis (IRT) change the interaction?** Paper 9 uses NP3TOT total. Gupta 2025 SBR-IRT framework uses item-level ordinal IRT. IRT might be more sensitive but would change the interaction interpretation (motor item-specific N_frac effects).
+
+- **Does the compound-decay N(t)/N₀ = (1 - r/100)^t approximation break at late disease?** At large t, the approximation may underestimate actual N_frac if rate r increases (accelerated late-stage decay). Not tested.
+
+### 7.5 Assumptions Made Without Validation
+
+1. **`pct_loss_per_yr_median` from Phase 2 posterior is the correct per-patient N(t) driver.** Inherits validity from Paper 7's calibration (93.75% LOO coverage; 3.29%/yr median within Fearnley-Lees 2-5%/yr canonical range).
+2. **LEDD dose equivalence formula** (Tomlinson 2010). Different formulas (Schade 2020) give slightly different LEDD values; sensitivity results not reported.
+3. **MDS-UPDRS-III validity** across clinical sites in PPMI. Rater-harmonisation is a known PPMI quality constraint.
+4. **OFF-state assessments reflect washout** per PPMI protocol. Some patients may have partial drug effect persisting.
+5. **Gap formula = OFF - ON** captures total treatment benefit. Alternative formulations (% improvement, relative benefit) not reported as primary.
+
+### 7.6 Who Needs to Read the Limitations Section
+
+- **Clinical trial designers**: Paper 9's β coefficients are a lower bound on interaction effect magnitude for advanced-PD cohorts. Stratified-by-N_frac enrichment should be based on conservative estimates.
+- **Deployment-focused teams**: Paper 6 wires Path B coefficients into the v2 pipeline on 1,065/1,900 patients (33.3% cohort coverage via imputation). Deployment should emphasise conditional R² = 0.491 as the relevant effect-size for individual-patient use.
+- **Regulatory / MIDD teams**: the severity-adjusted M2 interaction (not the unadjusted M1) is the appropriate basis for any regulatory filing claim. Marginal R² should not be cited as the primary effect size.
+- **Paper 10 users**: Paper 10's counterfactual calibration (slope 1.074, CI [0.88, 1.29]) uses Paper 9's β coefficients. Calibration slope CI excludes 0 but includes 1.0 — the calibration is meaningful but does not certify causality.
+
+---
+
+## 8. Robustness and Sensitivity Analyses
+
+### 8.1 Ablations Performed
+
+**Path A — OFF-UPDRS natural history (5 models tested).**
+
+| Model | Predictor set | ΔAIC vs A1 (baseline) | Verdict |
+|---|---|---|---|
+| A1: Baseline (random intercept only) | — | 0 | Reference |
+| A2: N_frac only | N_frac | +217 | Fails to improve |
+| A3: Time only | time | -586 | Strong improvement |
+| A4: Time + N_frac (additive) | time + N_frac | -595 | Marginal gain over A3 |
+| A5: Time × N_frac (interaction) | time + N_frac + interaction | -598 | Equivalent to A4 |
+
+N_frac is informative but does NOT add beyond time for OFF-UPDRS prediction. Verdict: Path A **informative negative**.
+
+**Path B — ON-OFF gap (6 models tested).**
+
+| Model | Predictor set | ΔAIC vs B1 (LEDD only) | Verdict |
+|---|---|---|---|
+| B1: LEDD only | LEDD_s | 0 | Reference |
+| B2: N_frac only | n_frac | +143 | Worse than LEDD alone |
+| B3: N_frac + LEDD (additive) | n_frac + LEDD_s | -44 | Better |
+| B4: Hill (3-param) | Hill(k_eff, EC50, h) | +161 | Degenerate (h non-ID) |
+| B4b: Hill (h free) | Hill(k_eff, EC50, h free) | +133 | Still degenerate |
+| B5: N_frac × LEDD (interaction) | n_frac + LEDD_s + interaction | -72 | Best |
+
+Interaction model wins decisively (ΔAIC = -72 vs LEDD-only; -28 vs additive). H1 pre-registered PASS.
+
+**Path C — Wearing-off timing (Cox + KM + Spearman).**
+
+| Test | Statistic | p-value | Verdict |
+|---|---|---|---|
+| Spearman ρ(n_frac, time-to-wearing-off) | ρ = -0.050 | p = 0.43 | NULL |
+| Cox proportional hazards on n_frac | HR = 0.87 | p = 0.28 | NULL |
+| C-index (model discrimination) | C = 0.515 | near-random | FAIL |
+| Kaplan-Meier stratified by n_frac quartile | log-rank | p = 0.31 | NULL |
+
+All four converge on null. Verdict: Path C informative negative, pharmacokinetics-driven.
+
+**Hill identifiability (structural + practical).**
+
+| Test | Result |
+|---|---|
+| Jacobian rank on (k_eff, EC50, h) | Rank 2 (not 3) — structural non-ID |
+| ρ = k_eff / EC50 reparametrisation | ρ structurally identifiable |
+| FIM κ on (ρ, h free) | 3.5 × 10⁶ — practical non-ID |
+| FIM κ on (ρ, h = 2 fixed) | 18 — practical ID |
+| Fit at 8 ρ × 5 orders of magnitude | All yield κ > 1,000 for free h |
+
+Confirms H5: sub-EC50 linear regime. Fix h = 2 per Holford 2006 convention.
+
+### 8.2 Within-Patient First-Difference as Robustness Check
+
+- First-difference β3 = -3.68, SE = 5.90, p = 0.533.
+- 95% CI on Δβ3: [-15.3, +7.9] — contains both null AND cross-sectional +2.13.
+- Sign is opposite but standard error is too large for reversal to be significant.
+- Design limitation: within-patient Δn_frac per visit ~0.03; Δ(n_frac × LEDD) tiny and noisy.
+- Interpretation: INCONCLUSIVE. Not refuting, not confirming.
+- Honest framing: primary defense is severity-adjusted M2 (p = 0.044); FD is sensitivity check.
+
+### 8.3 Severity-Control Model Specification Sensitivity
+
+Variants of M2 (severity adjustment) tested:
+
+| M2 variant | Severity covariate | β3 | p | Δβ3 vs M1 |
+|---|---|---|---|---|
+| M2a (primary) | updrs3_off_c (centered) | 1.41 | 0.044 | -34% |
+| M2b | updrs3_off baseline only | 1.68 | 0.019 | -21% |
+| M2c | updrs3_total_c | 1.52 | 0.031 | -29% |
+| M2d | updrs3_off_c + age + sex | 1.38 | 0.048 | -35% |
+| M2e | updrs3_off_c + time | 1.29 | 0.076 | -40% (drops to non-sig) |
+
+The interaction survives 4/5 severity-control specifications. Variant M2e (adding time) knocks p to 0.076 — the only failure, interpreted as collinearity between time and n_frac (Path A's informative negative). Primary M2a is the pre-registered specification.
+
+### 8.4 Cross-Validation and Variance
+
+- Path B β3 by 5-fold CV: 1.41 ± 0.38 (mean ± SD across folds), all folds β3 > 0.
+- Path B conditional R² by 5-fold CV: 0.491 ± 0.052.
+- Path B marginal R² by 5-fold CV: 0.051 ± 0.019.
+- Bootstrap β3 (1000 resamples of 1,220 patients): 1.39 [0.18, 2.73] 95% BCa CI — excludes 0 cleanly.
+- Bootstrap ΔAIC (1000 resamples): -72 [95% CI: -98, -49] — all resamples reject baseline.
+
+### 8.5 Hyperparameter Sensitivity (Phase 2 Posterior Choice)
+
+Paper 9 ingests `pct_loss_per_yr_median` from Paper 7 posterior. Tested alternatives:
+
+| Posterior quantile used | Path B β3 | p |
+|---|---|---|
+| Median (primary) | 1.41 | 0.044 |
+| Mean | 1.38 | 0.046 |
+| 25th percentile | 1.52 | 0.029 |
+| 75th percentile | 1.33 | 0.069 |
+
+Results stable across quantile choice. Median is the pre-registered primary.
+
+### 8.6 Seed Sensitivity
+
+- LME fits via `lmer` with REML: deterministic given data; no RNG.
+- Bootstrap resampling seed = 42; re-run with seed = 2026 gives β3 = 1.43, p = 0.041 (within 2% of primary).
+- Within-patient first-difference seed-independent (no RNG).
+- Kaplan-Meier / Cox seed-independent.
+
+### 8.7 What We Did NOT Run
+
+- **Full NLME PK/PD (Holford 2006 style)** with plasma levodopa. Requires plasma concentration data PPMI doesn't collect.
+- **Gupta 2025 SBR-IRT framework** extension. Would address item-level UPDRS structure but requires IRT infrastructure; deferred.
+- **Randomized dose-escalation RCT simulation.** Ethical constraints apply; not within Paper 9 scope.
+- **Genotype-stratified interaction** (LRRK2+, GBA+, GBA-N370S). Subgroups too small (23 LRRK2+, 31 GBA+); scoped to §12.6 of dissertation.
+- **Multiple-imputation sensitivity** for patients with missing PDSTATE. Fraction small (<3%); complete-case analysis primary.
+- **Alternative LEDD formulas** (Schade 2020 vs Tomlinson 2010). Not pre-registered; may add as supplement.
+- **Subgroup analyses on phenotype** (tremor-dominant vs PIGD). Scope for post-publication analysis.
+
+---
+
+## 9. Statistical Reporting Standards
+
+### 9.1 Confidence Interval Methodology
+
+| Quantity | Method | CI / uncertainty measure | Target threshold |
+|---|---|---|---|
+| Path B interaction β3 | LME with Kenward-Roger SE | 95% Wald CI on β3 | Excludes 0 for significance |
+| Conditional R² (Path B) | Nakagawa-Schielzeth R² via `performance::r2()` | Bootstrap 95% CI (1000 resamples) | No hard threshold |
+| Marginal R² (Path B) | Same | Bootstrap 95% CI | No hard threshold |
+| ΔAIC for model comparison | Sum of per-model log-likelihoods | Absolute value (no CI) | ΔAIC > 10 per Burnham & Anderson 2002 |
+| Cox HR (Path C) | Proportional hazards MLE | 95% profile-likelihood CI | Excludes 1 for significance |
+| KM survival function | Kaplan-Meier estimator | 95% Greenwood CI | — |
+| Spearman ρ (Path C) | Rank-based correlation | Bootstrap 95% CI (1000 resamples) | |ρ| > 0.2 for "meaningful" |
+| C-index (Path C) | Harrell's concordance | Bootstrap 95% CI | C > 0.55 for "meaningful" |
+| FIM condition number (Hill) | Eigenvalue decomposition at representative parameter | κ = λ_max / λ_min | κ < 10⁴ for "well-conditioned" |
+| Within-patient first-difference β3 | OLS on Δy vs Δx with patient FE | 95% Wald CI | Excludes 0 for significance |
+
+**Convention.** Paper 9 reports 95% CIs for all primary effect sizes, profile-likelihood CIs for Cox (more accurate than Wald at small events), BCa bootstrap CIs where sample size > 1000 and Gaussian assumptions may fail. Every quantitative claim carries a CI or an explicit "point estimate only" label.
+
+### 9.2 Multiple-Comparison Correction
+
+- **BH-FDR at q = 0.05** applied to H2–H5 (exploratory hypotheses): H3 Spearman p = 0.43, Cox p = 0.28 → both BH-adjusted p = 1.0 (no correction needed, they're not significant).
+- **Bonferroni threshold 0.01** reported for H1 (for transparency) — primary hypothesis pre-specified ΔAIC criterion, not p-value; Bonferroni irrelevant.
+- **H1 decision rule: ΔAIC > 10** (Burnham & Anderson 2002). No multiple-comparison correction applicable.
+- **Pairwise post-hoc tests** (e.g., by stage or genotype) corrected by BH-FDR when reported.
+- **Not applied** to the severity-control variant sweep (M2a/b/c/d/e) because these are sensitivity variants, not independent hypotheses.
+
+### 9.3 Effect-Size Reporting
+
+- **Path B β3** = 1.41 (severity-controlled) / 2.13 (unadjusted). 34% shrinkage is a defensible effect magnitude.
+- **Conditional R² (Path B)** = 0.491 — nearly half the gap variance captured. Primary effect size for individual-patient claims.
+- **Marginal R² (Path B)** = 0.051 — population-level variance. Transparent that population-level effect is modest; heterogeneity is carried by random intercepts.
+- **ΔAIC (interaction vs baselines)** = -72 (vs LEDD-only); -28 (vs additive). Decisive per Burnham 2002.
+- **Cohen's d (Path A, N_frac vs time)** not reported because informative-negative is about model comparison, not effect size.
+- **Clinical interpretation**: 10% drop in N_frac → ~1.16 UPDRS-III point gap widening, ~1/3 of the MDS-UPDRS-III MCID (3.25 points). Over 30% neuronal loss, ~3.5 points. Clinically meaningful over the disease course, modest per-visit.
+- **Within-patient FD β3** = -3.68, SE = 5.90 — deliberately reported with uncertainty to emphasise inconclusive.
+
+### 9.4 Reporting Checklist Compliance
+
+**Pharmacometric best-practices (NONMEM 7.5 reporting, Model Qualification per Friedrich 2016).**
+
+| Criterion | Paper 9 status |
+|---|---|
+| Model structure fully specified | YES — Path A/B/C equations in §3.1 |
+| Parameter estimation method documented | YES — `lmer` (LME), `coxph` (Cox), `lm` (OLS) |
+| Covariate selection justified | YES — pre-specified per hypothesis |
+| Data assembly traceable | YES — `phase4_assemble_ledd_updrs.py` with SHA-256 |
+| Identifiability analysis performed | YES — Jacobian + FIM for Hill; degeneracy diagnosed |
+| Model uncertainty characterized | YES — 95% CIs, bootstrap CIs |
+| Sensitivity analysis documented | YES — §8 of this deep dive |
+| Pre-registration documented | YES — hypotheses 1-5 pre-specified |
+| Data + code available | YES — all scripts in repo |
+
+**CPT:PSP venue-specific (Gupta 2025 precedent).**
+
+| Requirement | Status |
+|---|---|
+| Hypothesis-driven structure (positive + negative + confirmed) | YES — H1-H5 pre-registered |
+| Formal identifiability proof | YES — Jacobian + FIM |
+| Observable vs identifiable quantity | YES — ρ vs (k_eff, EC50) |
+| External validation or prospectively-planned | YES — scoped to Paper 10/11 |
+| Clinical interpretation plain-language | YES — 10% N_frac drop ≈ 1/3 MCID |
+| Honest null reporting | YES — Paths A and C as informative negatives |
+
+**MIDD-ready (ICH M15 / Galluppi 2024 harmonisation).**
+
+| Criterion | Status |
+|---|---|
+| Context of use declared | PARTIAL — "imaging-calibrated dose optimization for advanced PD" (informal) |
+| Regulatory impact characterised | NO — no FDA / EMA Paired Meeting submitted |
+| VVUQ plan pre-specified | YES — in Phase 4 plan document |
+| Full dose-response surface mapped | NO — only tested sub-EC50 regime |
+| External validation performed | NO — scoped to postdoc |
+
+Paper 9 is MIDD-aspirational; full MIDD packaging deferred to Paper 10 roadmap (Phase 6).
+
+### 9.5 Pre-Registration Status
+
+- **Phase 4 plan document** (`docs/plans/2026-04-11-phase4-scope.md`) written 2026-04-11 **before** the Path B severity-control analysis was executed. Pre-specifies:
+  - H1: Path B interaction is primary; ΔAIC < -10 threshold
+  - H2-H5: exploratory, BH-FDR q = 0.05
+  - Paths A and C as parallel independent hypotheses
+  - Compound-decay N(t)/N₀ formula (not T_tox, per Phase 4 gotcha)
+  - Severity-controlled M2 as pre-registered primary inferential basis
+- **The severity-control model specification (M2a, with updrs3_off centered)** was pre-specified; alternative specifications (M2b-e) added post-hoc as sensitivity.
+- **The within-patient first-difference test** was pre-specified as a sensitivity check, not a primary test.
+- **The Hill identifiability analysis** was pre-specified; fallback to linear interaction pre-specified.
+- **Sub-EC50 linear regime finding (H5) was NOT pre-expected** — we had expected Hill saturation to be separable. The data showed otherwise; the verdict is honest.
+- **Paper 9's tripathway decomposition was pre-specified** as the paper's organizing structure.
+
+---
+
+## 10. Reproducibility Manifest
 
 All artifacts for Paper 9 live at stable paths in the repository. Every claim in the manuscript maps to a producer script + output JSON.
 
