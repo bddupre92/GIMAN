@@ -75,7 +75,8 @@ BASELINE_FEATS = [
 # Data loading (identical filter + normalisation to the demo, no caps)
 # ─────────────────────────────────────────────────────────────────────
 
-def load_split(seed: int = 42) -> dict:
+def load_split(seed: int = 42, fold_index: int | None = None,
+               n_folds: int = 5) -> dict:
     """Load longitudinal features, filter to ≥3-scan patients, patient-level 70/15/15 split."""
     df = pd.read_csv(LONGITUDINAL, low_memory=False)
 
@@ -102,9 +103,26 @@ def load_split(seed: int = 42) -> dict:
     rng = np.random.default_rng(seed)
     rng.shuffle(patnos)
     n = len(patnos)
-    train_pats = set(patnos[: int(0.70 * n)])
-    val_pats = set(patnos[int(0.70 * n): int(0.85 * n)])
-    test_pats = set(patnos[int(0.85 * n):])
+    if fold_index is None:
+        # Classic random 70/15/15 split (repeated random subsampling)
+        train_pats = set(patnos[: int(0.70 * n)])
+        val_pats = set(patnos[int(0.70 * n): int(0.85 * n)])
+        test_pats = set(patnos[int(0.85 * n):])
+    else:
+        # Real k-fold CV: partition into n_folds non-overlapping test folds;
+        # for fold k, the k-th chunk is test, remainder is train+val (internal 82/18)
+        if not (0 <= fold_index < n_folds):
+            raise ValueError(f"fold_index {fold_index} out of range [0, {n_folds})")
+        # Deterministic fold boundaries from a single shuffle
+        folds = np.array_split(patnos, n_folds)
+        test_pats = set(folds[fold_index].tolist())
+        remainder = [p for i, f in enumerate(folds) if i != fold_index for p in f]
+        # Internal split of remainder into 82% train / 18% val (matches original 70/15
+        # train/val ratio from the 70/15/15 split: 70/(70+15) ≈ 82%)
+        n_rem = len(remainder)
+        n_val = int(0.18 * n_rem)
+        val_pats = set(remainder[:n_val])
+        train_pats = set(remainder[n_val:])
 
     def subset(pats: set) -> dict:
         sub = df[df["PATNO"].isin(pats)].sort_values(["PATNO", "t_years"])
@@ -716,6 +734,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--solver-step-size", type=float, default=None,
                    help="Fixed step size in years for fixed-step solvers (rk4, euler). "
                         "Default None means adaptive solvers only.")
+    p.add_argument("--fold-index", type=int, default=None,
+                   help="If set, use k-fold CV partition instead of 70/15/15 random "
+                        "split. fold_index ∈ [0, n_folds). Test set is this fold; "
+                        "remainder is train+val (internal 82/18).")
+    p.add_argument("--n-folds", type=int, default=5,
+                   help="Total folds for k-fold CV (ignored unless --fold-index set).")
     return p.parse_args()
 
 
@@ -746,7 +770,8 @@ def main() -> None:
     print(f"[cfg] epochs_max={args.epochs}  patience={args.patience}  bootstrap={args.bootstrap_resamples}")
     print(f"[cfg] models={args.models}")
 
-    splits = load_split(seed=args.seed)
+    splits = load_split(seed=args.seed, fold_index=args.fold_index,
+                        n_folds=args.n_folds)
     train_batch = prepare_batch(splits["train"])
     feat_norms = train_batch["feat_norms"]
     val_batch = prepare_batch(splits["val"], feat_norms=feat_norms)
@@ -947,6 +972,8 @@ def main() -> None:
         "solver_atol": float(args.solver_atol),
         "solver_rtol": float(args.solver_rtol),
         "solver_step_size": (None if args.solver_step_size is None else float(args.solver_step_size)),
+        "fold_index": (None if args.fold_index is None else int(args.fold_index)),
+        "n_folds": int(args.n_folds),
         "seed": int(args.seed),
         "epochs_max": int(args.epochs),
         "patience": int(args.patience),
