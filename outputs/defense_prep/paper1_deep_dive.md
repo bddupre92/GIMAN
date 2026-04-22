@@ -1,3 +1,13 @@
+---
+Last substantive update: 2026-04-12
+Last touched: 2026-04-21 (cross-ref refresh after Paper 11 + P3/P4 holdout session)
+Status: stable; refer to `Docs/NEXT_STEPS_2026-04-21.md` for dissertation-wide status
+Cross-refs added 2026-04-21:
+- Paper 11 (Ch 15 hybrid-twin preview) inherits the CatBoost-33 feature set as one baseline-covariate source for its physics-informed neural ODE on DaT-SBR trajectories — the "post-hoc mechanistic fusion" entry point.
+- Paper 7 supplies the calibrated neurodegeneration rate (3.29 %/yr median N(t) decay) consumed by Paper 1's Alt-5 null probe in §14.4.
+- 2026-04-21 validation pass confirms main stage-prediction claims hold (no AUC/bal-acc change).
+---
+
 # Paper 1: NSD-ISS Stage Prediction with Calibrated Uncertainty
 
 ## A Deep Dive for Dissertation Defense Preparation
