@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 718 MB · 187 tables across 14 schemas** (verified 2026-04-20 (post-paper11-sciml-load)).
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 731 MB · 187 tables across 14 schemas** (verified 2026-04-21 (post-p11-rigor-session)).
 
 **Schemas:**
 
@@ -34,7 +34,7 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `longitudinal` | 4 | `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | 1 | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | 2 | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
-| `mechanistic` | 29 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke results `paper12_w4_smoke_results` + Q2 gate verdict `paper12_q2_gate_verdict`, Paper 11 SciML (summary + per-patient)) |
+| `mechanistic` | 29 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke results `paper12_w4_smoke_results` + Q2 gate verdict `paper12_q2_gate_verdict`, Paper 11 SciML: grid + k-fold + ODE-sensitivity + prior-sensitivity + holdout configs (42 configs / 130 summary rows / 54,746 per-patient result rows as of 2026-04-21)) |
 | `reference` | 9 | LONI data dictionaries, harmonized code lists, biomarker dashboards, PPMI project catalog, `phase5_bibliography` |
 | `audit` | 12 | Defense-prep claim lineage — `chapter`, `citation`, `citation_use`, `claim`, `code_artifact`, `data_source` and link tables |
 
@@ -1472,3 +1472,46 @@ Per sub-plan `Docs/superpowers/plans/2026-04-20-paper12-phase2-competitor-baseli
 - W8: LagCNN clean-room as DL imputation baseline (NOT physics-regularized competitor).
 
 Each competitor must pass its 10% fidelity gate (from `outputs/paper12_scoping/clean_room_verification_protocol.md` §4) before admission to §V benchmark.
+
+## Session 2026-04-21 — Paper 11 full rigor validation (code + literature + data audits complete)
+
+Thirteen commits on `feat/ch9-6-multichannel` pushed Paper 11 to submission-ready. Three parallel reviewer audits (code correctness, literature validation, data pipeline) all passed. Key activities:
+
+1. **Constant-mean baseline + Option-B holdout + rate-misspec diagnostic** (`cfbbdd8`) — closed the "is pure-mech-fair really losing to a trivial baseline?" question. Confirmed real: rate-misspec is not the full story; baseline-anchor sensitivity is load-bearing.
+2. **ODE solver sensitivity sweep** (`98b2add`, `02c9799`) — 4 solvers (dopri5, rk4, dopri8, fixed_dopri5 variants) give max Δ MAE ≤ 0.0001. Solver choice is not a confound.
+3. **Real 5-fold cross-validation** (`d40977d`, `f36b6ad`) — non-overlapping test folds replace seed-42 single-split biased headline. New primary headline: **test MAE 0.141 ± 0.016 (n=428, pooled 95% CI [-0.065, -0.041] on Δ vs pure-mech)**.
+4. **BH-FDR correction** (`ab4951c`) — all 12 grid configs (λ_phys × λ_mono) survive at q=0.05. No cherry-picking.
+5. **Extended prior sensitivity** (`4cc9ed7`, `2aa1495`) — 8 k_age initialisations (lit anchor 0.032, 0.05, 0.075, 0.09, 0.12, 0.15, 0.20, 0.091-Dzialas). Accuracy invariant; learned rate inherits anchor in two regimes (below/above 0.075 threshold).
+6. **Unified 3-analysis validation table** (`6a78a90`) — transparent reporting of seed-42 holdout + 5-fold CV + 5-cohort-partition all side-by-side; demoted single-split to sensitivity analysis.
+7. **Parallel Paper 3 + Paper 4 holdout** (`d0c89a0`, `3bd7334`, `07b39ac`) — pre-registered seed-2026 holdout for P3 (ensemble-rescue narrative) and P4 (conformal confirm). Added to npj-DM primary submission package.
+8. **Phase 1 numerical convergence test** (`74a8bfe`) — closes phase1_report pending gate in P7 CPT:PSP submission.
+
+### Session findings (all validated as real, not artifacts)
+
+1. Pure-mech-fair losing to const-mean is due to baseline-anchor sensitivity (not just rate-misspec)
+2. 9.1%/yr empirical decay matches published PPMI SBR literature (Marek 2015, Nandhagopal 2009)
+3. UDE two-regime behaviour is textbook Philipps 2025 pathology
+4. Real 5-fold CV: test MAE 0.141 ± 0.016 (replaces biased 0.152 headline)
+5. ODE solver sensitivity negligible (MAE invariant to 4 decimals across dopri5/rk4/dopri8)
+6. All 12 grid configs survive BH-FDR at q=0.05
+
+### Manuscript updates (in flight via agent a01e5114089d57681)
+
+- 8 new citations added (Philipps 2025 UDE anchor; Marek 2015 + Nandhagopal 2009 decay rate; others)
+- Rate-misspec subsection reframed with baseline-anchor-sensitivity mechanism
+- Two-regime prior sensitivity subsection extended
+- Dzialas citation correction pending (not a 4-6%/yr rate — decay patterns only)
+
+### SQL tables populated this session (`mechanistic` schema, same 29 tables — rows grew)
+
+- `mechanistic.paper11_sciml_summary`: 42 configs, 130 rows
+- `mechanistic.paper11_sciml_results`: 54,746 per-patient result rows
+- Added columns via ALTER: `solver_*`, `fold_index`, `n_folds`, `gru_state_aware`, `gru_hidden`, `gru_dropout`, `k_age_init`
+
+### Submission readiness
+
+All 11 dissertation papers have submission packages under `outputs/mechanistic_twin/paper*_submission/`. **Paper 11 → npj Parkinson's Disease** is the primary deliverable of this session. Submittable after the manuscript-update agent's edits land.
+
+### Resume anchor
+
+See `Docs/NEXT_STEPS_2026-04-21.md` for post-compact resume actions + key numbers + reproduction SQL.
