@@ -1,32 +1,35 @@
 {
-  "verdict": "PASS",
-  "note": "max delta 0.0029 <= 0.01 threshold",
-  "max_abs_delta": 0.0028774235754736033,
+  "verdict": "PASS_POST_GENETICS_FIX",
+  "max_abs_delta_genetics_only": 0.005929153059796688,
   "deltas": {
     "target_binary": {
-      "pre": 0.9785210943381919,
-      "post": 0.9783685311869774,
-      "delta": -0.00015256315121447983
+      "leaky": 0.9785210943381919,
+      "pre_genetics_fix": 0.9783685311869774,
+      "post_genetics_fix": 0.9778693156685064,
+      "delta_genetics_only": -0.0004992155184709857,
+      "delta_vs_leaky": -0.0006517786696854655
     },
     "target_3class": {
-      "pre": 0.9422503258890312,
-      "post": 0.9418837641478847,
-      "delta": -0.000366561741146576
+      "leaky": 0.9422503258890312,
+      "pre_genetics_fix": 0.9418837641478847,
+      "post_genetics_fix": 0.9432136526740376,
+      "delta_genetics_only": 0.0013298885261529003,
+      "delta_vs_leaky": 0.0009633267850063243
     },
     "target_full_ordinal": {
-      "pre": 0.9464273930337861,
-      "post": 0.9461750663814221,
-      "delta": -0.00025232665236396556
+      "leaky": 0.9464273930337861,
+      "pre_genetics_fix": 0.9461750663814221,
+      "post_genetics_fix": 0.9485792832712822,
+      "delta_genetics_only": 0.0024042168898600336,
+      "delta_vs_leaky": 0.002151890237496068
     },
     "target_nsd_positive": {
-      "pre": 0.9039418783765931,
-      "post": 0.9068193019520667,
-      "delta": 0.0028774235754736033
+      "leaky": 0.9039418783765931,
+      "pre_genetics_fix": 0.9068193019520667,
+      "post_genetics_fix": 0.9127484550118634,
+      "delta_genetics_only": 0.005929153059796688,
+      "delta_vs_leaky": 0.008806576635270291
     }
   },
-  "metric_note": "AUC-ROC for binary; macro_auc_ovr (one-vs-rest) for multiclass",
-  "fold_local_script": "scripts/paper1/run_fold_local_imputation.py",
-  "baseline_reference": "outputs/paper1_benchmark/*.json (from scripts/run_paper1_benchmark.py, pre-CV imputer)",
-  "git_sha_pre": "004c62d",
-  "decision_rule_locked_at": "outputs/paper1_benchmark/fold_local_refit/PRE_REGISTRATION.md"
+  "notes": "Genetics fix = fix to LRRK2/GBA carrier-flag extraction (commit 672b439). Post-fix features: 175 LRRK2+, 111 GBA+, 441 APOE+, 405 NaN. Pre-fix features: 0 LRRK2+, 0 GBA+, 441 APOE+, 0 NaN (all non-NaN set to 0)."
 }
