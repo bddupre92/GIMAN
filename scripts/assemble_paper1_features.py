@@ -424,25 +424,23 @@ def extract_genetics(staged_patnos: set[int]) -> pd.DataFrame:
 
     features = bl[["PATNO"]].copy()
 
-    # LRRK2 mutation carrier status
-    if "LRRK2" in bl.columns:
-        features["LRRK2_CARRIER"] = (
-            bl["LRRK2"]
-            .str.upper()
-            .str.contains("CARRIER|POSITIVE|YES", na=False)
-            .astype(int)
-            .values
+    # LRRK2 mutation carrier status.
+    # IU Genetic Consensus stores variant names (e.g., "G2019S", "R1441G", "N1437H")
+    # for carriers and "0" / "NA" / blank for non-carriers. Detect carriers as
+    # anything that is not a non-carrier sentinel value.
+    def _is_carrier_flag(series: pd.Series) -> np.ndarray:
+        normalized = (
+            series.astype(str).str.strip().str.strip('"').str.upper()
         )
+        non_carrier_tokens = {"0", "NA", "NAN", "", "N/A", "NONE"}
+        return (~normalized.isin(non_carrier_tokens)).astype(int).values
 
-    # GBA mutation carrier status
+    if "LRRK2" in bl.columns:
+        features["LRRK2_CARRIER"] = _is_carrier_flag(bl["LRRK2"])
+
+    # GBA mutation carrier status — same sentinel logic as LRRK2.
     if "GBA" in bl.columns:
-        features["GBA_CARRIER"] = (
-            bl["GBA"]
-            .str.upper()
-            .str.contains("CARRIER|POSITIVE|YES", na=False)
-            .astype(int)
-            .values
-        )
+        features["GBA_CARRIER"] = _is_carrier_flag(bl["GBA"])
 
     # APOE status
     if "APOE" in bl.columns:
