@@ -154,6 +154,118 @@ Reproducibility:
 
 ---
 
+## 7. Paper Rigor Rubric (distilled from 2026-04-23 IEEE JBHI Paper 1 reviewer response)
+
+**Rule:** Every paper (Papers 1–12) must satisfy the eight rigor categories below BEFORE submission. Each category has a concrete "PASS" test and a "reviewer-preempt" artifact.
+
+This rubric was established after the 2026-04-23 IEEE JBHI Paper 1 review surfaced a coherent set of reviewer concerns that, taken together, define the minimum bar for clinical-ML benchmark papers in 2026. Applying the rubric retrospectively to Papers 2–11 is mandatory before their next submission pass (see §References below for paper-by-paper checklist).
+
+### 7.1 Leakage audit
+
+**PASS test:** for every model, explicit per-fold fitting of (a) missing-data imputer, (b) scaler/standardizer, (c) k-NN / similarity graphs, (d) feature selection, (e) class-balance resampling. No step from (a–e) may see test-fold samples during training.
+
+**Reviewer-preempt artifact:** a §Leakage Audit paragraph or table in the Methods section naming each leakage vector explicitly (even when the verdict is "clean"). For graph models, state whether the test-fold graph is built on test nodes only, or on train+test nodes with train-only edges — these are different designs with different generalization stories.
+
+**Canonical literature anchors (DOIs verified 2026-04-23):** Kapoor & Narayanan 2023 *Patterns* `10.1016/j.patter.2023.100804` (leakage taxonomy, 8 categories); Bernett 2024 *Nature Methods* `10.1038/s41592-024-02362-y` (graph / biological ML leakage specifically); Shadbahr 2023 *Commun Med* `10.1038/s43856-023-00356-z` (imputation leakage inflates AUC 0.03–0.10).
+
+**Paper 1 post-audit state (2026-04-23):** Enhanced MM-GAT pipeline is fold-clean (imputer + scaler + graph all per-fold; documented at `scripts/run_enhanced_gat_benchmark.py:506`). Simple GAT likewise (`scripts/run_giman_gat_benchmark.py:319`). **Tabular CatBoost benchmark has a mild pre-CV population-median imputation at `scripts/run_paper1_benchmark.py:107`** — expected bias ≤ 0.5pp AUC but requires a fold-local-imputation re-run to close the reviewer's concern.
+
+### 7.2 Hyperparameter optimization
+
+**PASS test:** for any non-default model, a constrained-search nested 5-fold CV with the top 2–3 competing models receiving equal HPO budget. Random-search or Bayesian-optimization over 20–50 points per model. Default-only baselines ARE acceptable IF explicitly stated and IF the top-k models get HPO — i.e., no hidden advantage for the favoured model.
+
+**Reviewer-preempt artifact:** an §HPO Protocol subsection with: search space specification, HPO budget per model, nested-CV fold count, best-hyperparameter-per-fold table, sensitivity-to-HP curve (expected AUC vs HP value). Prefer the recipe from Feurer & Hutter 2019 *Automated Machine Learning* Chapter 1.
+
+**Canonical literature anchors:** Cawley & Talbot 2010 *JMLR* (optimistic HPO bias on small datasets); Varma & Simon 2006 *BMC Bioinformatics* (nested-CV recipe); Vabalas 2019 *PLOS ONE* (small-sample overfit with HPO).
+
+**What NOT to do:** tune CatBoost while leaving competing models (GAT, MLP, TabPFN) at defaults. This is the single most common asymmetric-comparison reviewer trap.
+
+### 7.3 Ordinal-aware modeling (if target is ordinal)
+
+**PASS test:** for any ordinal target with K ≥ 3 classes, at least one ordinal-aware method benchmarked alongside the multiclass baseline. Acceptable methods: CORAL (Cao 2020), CORN (Shi 2023), ordinal logistic, cumulative-link model, ordinal CatBoost (`loss_function="YetiRank"` or similar).
+
+**Reviewer-preempt artifact:** per-class confusion matrix + quadratic-weighted-kappa (QWK) with bootstrap CI + mean absolute ordinal error (MAOE). Report ALL three — QWK can hide per-class failures; per-class accuracy can hide ordinal distance errors; MAOE doesn't say whether you're biased high or low.
+
+**Canonical literature anchors:** Cao / Mirjalili / Raschka 2020 *Pattern Recognition Letters* (CORAL, canonical); Shi 2023 AAAI (CORN, rank-consistent); Niculescu-Mizil 2005 (calibration for ordinal).
+
+### 7.4 Conformal prediction reporting
+
+**PASS test:** a single primary CL locked in the Methods section (we recommend 90% CL for clinical work, matching Diaz-Rincon 2025). In the main text, report marginal coverage, mean set size, and class-conditional coverage AT THAT CL. In Supplementary, sweep CL ∈ {0.80, 0.85, 0.90, 0.95} and present the coverage-efficiency tradeoff curve. For any model that can produce empty prediction sets (abstention), state the abstention frequency AND the clinical triage policy.
+
+**Reviewer-preempt artifact:** a §Conformal Implementation Checklist bullet list in Methods: (i) CL primary, (ii) CL sweep range, (iii) abstention allowed Y/N, (iv) abstention frequency table, (v) whether calibration set is shared across targets or stratified, (vi) external coverage + class-conditional external coverage (if external cohort exists).
+
+**Canonical literature anchors:** Angelopoulos & Bates 2023 *arXiv* Gentle Intro (§abstention); Sadinle 2019 *JASA* (LAC + abstention); Romano 2020 *NeurIPS* (APS ordinal variant); Einbinder 2022 *NeurIPS* (ordinal CP).
+
+**Paper 1 gotcha (from 2026-04-23 review):** current main text mixes "90% CL" and "95% CL" phrasing, and reports mean set size < 1 without explaining that this means empty sets (abstentions) exist. Fix in the next submission pass.
+
+### 7.5 Calibration metrics
+
+**PASS test:** ECE + Brier + reliability diagram reported in main text for the primary model on every target. Per-class calibration (ECE per class) reported when K ≥ 3. External-cohort calibration reported if any external cohort is evaluated.
+
+**Reviewer-preempt artifact:** Figure X "Calibration Diagnostics": 2×K grid of reliability diagrams (internal top row, external bottom row if applicable). ECE + Brier numbers captioned.
+
+**Canonical literature anchors:** Guo 2017 *ICML* (temperature scaling, canonical ECE); Niculescu-Mizil 2005 (Brier for ordinal); Roelofs 2022 AAAI (reliability-of-reliability — the ECE estimator variance story).
+
+### 7.6 Confounder sensitivity package
+
+**PASS test:** for any ML paper predicting a biological/clinical endpoint, a 5-analysis sensitivity package pre-registered BEFORE running:
+- A. Age (matched cohort or residual-adjustment)
+- B. Sex (stratified + bootstrap interaction test)
+- C. Enrollment wave / study era (leave-one-wave-out)
+- D. Scanner / acquisition protocol (leave-one-protocol-out if applicable)
+- E. Site (leave-one-site-out on the covered subsample, with pre-registered decision rule)
+
+Additional analyses as indicated by the target: medication status (for PD), genetic carrier status (for LRRK2 / GBA cohorts), comorbidities.
+
+**Reviewer-preempt artifact:** a §Confounder Sensitivity paragraph in Discussion + a §S-5 Supplementary section with per-analysis methodology, results, and pre-registered decision rule. FAIL verdicts are reported honestly without post-hoc retuning — see Paper 1 Analysis E at `outputs/paper1_site_loso/` for the template.
+
+**Canonical literature anchors:** Austin 2011 *Pharmaceutical Statistics* (caliper rule); Schmitz-Steinkrüger 2021 *EJNMMI* (DaT-SPECT age/sex variance explanation); Pfohl 2020 ML4H (subgroup fairness).
+
+**Paper 1 post-audit state (2026-04-23):** A+B+C+D PASS; E is a pre-registered FAIL driven by two small-N + extreme-class-imbalance folds — reported honestly in §S-5.6.
+
+### 7.7 Related-work coverage (by paper class)
+
+**PASS test:** for a clinical-ML benchmark paper, the related-work section must cite (a) the canonical target-domain benchmark of the last 5 years, (b) the state-of-the-art tabular foundation models (TabPFNv2, AutoGluon-Tabular) WITH an explanation of whether they were benchmarked or not, (c) the relevant deep-learning diagnostic literature specifically positioned as SIBLING not PARENT of the biological-staging task, (d) the ordinal ML literature if target is ordinal, (e) the conformal prediction literature with specific variant choices justified.
+
+**Reviewer-preempt artifact:** a §Related Work subsection with one paragraph per (a–e), each ending in a one-sentence "how our paper differs from this work" statement.
+
+**Canonical literature anchors vary by paper.** Paper 1's 2026-04-23 reviewer flagged TabPFNv2 (Hollmann 2024 *Nature Machine Intelligence*), AutoGluon-Tabular (Erickson 2020 *AutoML*), and ordinal CP (Romano 2020 / Einbinder 2022) as specific gaps. Add or explicitly waive each.
+
+### 7.8 Reproducibility package
+
+**PASS test:** at submission, the paper's `outputs/paper{N}_submission/{venue}/` directory contains (i) main.tex + chapter_content.tex + bibliography_extracted.tex, (ii) figures/, (iii) cover_letter.md, (iv) supplementary_*.md files, (v) A REPRODUCIBILITY_PACKAGE.md listing: SQL extract commands, fold-assignment JSONs, conformal calibration files (the per-fold calibration sets + quantiles), checkpoints where applicable, exact seeds, exact package versions (`uv.lock` or `requirements-frozen.txt`), a Zenodo DOI placeholder.
+
+**Reviewer-preempt artifact:** a §Data and Code Availability subsection (journals require this; some reject without it). State:
+- What is released publicly (code, aggregate results, figures)
+- What is gated (raw PPMI data behind DUA at ppmi-info.org)
+- Where the Zenodo DOI points (pre-register on submission; upload artifacts on accept)
+
+**Canonical literature anchors:** McDermott 2021 *Science Translational Medicine* (clinical ML reproducibility); Pineau 2020 *Communications of the ACM* (repro checklist).
+
+---
+
+### 7.9 Application to Papers 2–11 (mandatory retrospective sweep)
+
+Each paper's deep-dive document (`outputs/defense_prep/paper{N}_deep_dive.md`) must grow a §Rigor Rubric section reporting PASS/FAIL for each of 7.1–7.8 before that paper's next submission. Expected initial state:
+
+| Paper | Venue | Status | Known gaps vs rubric (pre-sweep estimate) |
+|---|---|---|---|
+| 1 | IEEE JBHI | submitted, revision pending | 7.1 mild leakage; 7.2 missing; 7.3 missing; 7.4 clarity; 7.5 missing; 7.7 partial; 7.8 partial |
+| 2 | IEEE JBHI | submitted | 7.2 missing; 7.3 n/a; 7.5 missing |
+| 3+4 | npj Digital Medicine (combined) | submitted | 7.2 partial (DeepHit defaults); 7.5 partial (calibration done); 7.6 partial |
+| 5 | (planning) | pre-submission | 7.1–7.8 all open |
+| 6 | JAMIA | submitted | 7.2 missing; 7.6 partial; 7.7 TabPFN missing |
+| 7 | CPT:PSP | submitted | 7.2 n/a (ODE calibration); 7.4 n/a |
+| 8a | PLoS Comput Biol | submitted | 7.1 needs audit; 7.4 partial |
+| 8b | Movement Disorders | submitted | — |
+| 9 | CPT:PSP | submitted | 7.5 n/a; 7.6 partial |
+| 10 | npj Parkinson's Disease | submitted | 7.2 partial; 7.8 partial |
+| 11 | npj Parkinson's Disease | submitted | 7.2 partial; 7.5 missing |
+
+Update column 3 after each paper's retrospective sweep. Column 4 becomes the concrete work-list.
+
+---
+
 ## References
 
 - `CLAUDE.md` — Project-wide instructions, Schemas registry, Audit DB protocol
@@ -161,7 +273,9 @@ Reproducibility:
 - `scripts/CLAUDE.md` — Script canonical run order + reproducibility risks
 - `scripts/defense_prep/` — Audit DB refresh pipeline
 - `docs/documentation_lifecycle_protocol.md` — Cycle A/B/C documentation discipline
+- `Docs/superpowers/plans/2026-04-23-paper1-reviewer-response.md` — Paper 1 IEEE JBHI R1 response plan (origin of §7)
+- `outputs/paper1_site_loso/PRE_REGISTRATION.md` — canonical pre-registration template for §7.6 analyses
 
 ---
 
-*Established 2026-04-22 after the Paper 1 feature-schema reality-check pass. Maintainers: update this file whenever a new convention is introduced or a prior convention is superseded.*
+*Established 2026-04-22 after the Paper 1 feature-schema reality-check pass. Extended 2026-04-23 with §7 Paper Rigor Rubric from the IEEE JBHI Paper 1 reviewer response. Maintainers: update this file whenever a new convention is introduced or a prior convention is superseded.*
