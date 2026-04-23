@@ -1,6 +1,6 @@
 # Zotero Re-Audit Queue (BΩ.1 — /find ezproxy pass)
 
-Total unverified citations: **376**
+Total unverified citations: **379**
 
 Sorted by claim usage (most-used first).
 
@@ -107,4 +107,4 @@ Sorted by claim usage (most-used first).
 | `buuren2011` | S.~van~Buuren and K.~Groothuis | 2011 | mice: Multivariate imputation by chained equations in R, | — | 1 |
 | `calabresi2023` | P. Calabresi | 2023 | [no title] | 10.1038/s41419-023-05672-9 | 1 |
 
-... (276 more rows omitted; see `defensibility_matrix.csv` for full list)
+... (279 more rows omitted; see `defensibility_matrix.csv` for full list)

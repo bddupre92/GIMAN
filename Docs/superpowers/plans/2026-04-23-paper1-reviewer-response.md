@@ -471,3 +471,26 @@ All 13 added to `bibliography_extracted.tex` + `outputs/dissertation/bibliograph
 ---
 
 *Part 9 locked 2026-04-23 via two Tavily deep passes + Crossref/arXiv metadata verification + Zotero insertion. Raw Tavily results at `/tmp/tavily_paper1_p2/*.json` and `/tmp/tavily_paper1_p3/*.json`. All bibitems committed atomically; audit.citation refresh via `scripts/defense_prep/01_extract_citations.py` in the next commit.*
+
+---
+
+## Part 10 — Pending citations (arXiv IDs the reviewer cited by number)
+
+The reviewer cited three arXiv papers by number without author names — they expect us to have read and positioned against them. Metadata verified via arXiv API 2026-04-23; FULL TEXTS are being pulled by subagents in parallel for proper methodology extraction before we write rebuttal prose. Bibitems will be added to both bibliography files + Zotero Review Queue (FPJM5RSS) in the next commit.
+
+| arXiv ID | First author / year | Title | Expected role in rebuttal |
+|---|---|---|---|
+| 1909.04142 | Quan J et al. 2019 (5 authors) | DaTscan SPECT Image Classification for Parkinson's Disease | Sibling diagnostic-task citation. Position our NSD-ISS biological staging against their HC-vs-PD diagnosis. Cite in §II Related Work. |
+| 2104.02066 | Ding J-E et al. 2021 (4 authors) | DaT SPECT Image Classification for Neurodegenerative Parkinsonism via Diffusion Maps and Machine Learning Classifiers | **This is the "classical manifold pipeline" (diffusion maps + LDA) the journal-style-audit flagged as missing.** Cite in §II as the classical-pipeline representative. |
+| 2311.14902 | Ding J-E et al. 2023 (3 authors) | PD Classification Using Contrastive Graph Cross-View Learning with Multimodal Fusion of SPECT Images and Clinical Features | The multimodal graph-fusion SOTA the reviewer asked us to acknowledge. Already flagged as "cite as inspiration, no verified code" in Part 3. |
+
+**Pending cite keys (placeholders until full-text reading completes):**
+- `quan2019datSpect`
+- `ding2021diffusionMaps`
+- `ding2023contrastiveMultimodal`
+
+**These must land in bibliography_extracted.tex + dissertation/bibliography.tex + Zotero FPJM5RSS before the revision submission.** Currently blocked on subagent full-text synthesis (dispatched 2026-04-23 PM). Subagent results save at `/tmp/paper1_ref_review_subagents/` if the user pivots away before synthesis completes.
+
+Additional gap: **no classical manifold/LDA pipeline is currently cited** beyond Ding 2021 (above). Towey 2011 *Eur J Nucl Med Mol Imaging* and Prashanth 2017 *Comput Biol Med* were flagged by the initial journal-style-audit pass as the canonical classical-pipeline references. Add only if the Ding 2021 single citation is deemed insufficient representation of the classical-pipeline literature.
+
+---
