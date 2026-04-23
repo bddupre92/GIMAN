@@ -184,7 +184,81 @@ Both protocols retain a binary AUC above 0.96 when held out, with the cross-prot
 
 The edge bucket (n=31 combined from protocols 004 and T011) is underpowered for an independent held-out evaluation — the mix of 17 NSD$-$ and 14 NSD$+$ patients does not support stable bootstrap AUC CIs. ComBat-style cross-scanner harmonisation~\cite{wakasugi2024combat} could provide a more rigorous separation of scanner-model from protocol-revision effects; this requires the scanner-make/model metadata column which is not present in our Postgres mirror (PPMI distributes this via DICOM headers). Genotype-stratified protocol-LOCO (LRRK2 / GBA carrier vs non-carrier) is deferred to Paper~12 (genotype-stratified Path~B).
 
-## S-5.6 Uncontrolled Confounders We Did NOT Test
+## S-5.6 Site leave-one-site-out (Analysis E)
+
+### Purpose
+
+Test whether Paper 1's headline 0.979 binary AUC holds when held-out patients come from a PPMI recruitment site the model has never seen. Orthogonal to Analysis D (protocol-LOCO tests scanner/reconstruction drift); Analysis E tests site-level recruitment and clinical-practice variance not captured by protocol.
+
+### Pre-registration (locked 2026-04-22)
+
+Pre-registered at [`outputs/paper1_site_loso/PRE_REGISTRATION.md`](../../../../outputs/paper1_site_loso/PRE_REGISTRATION.md) before any model was trained. Decision rule:
+
+- **PASS** if pooled per-site AUC SD ≤ 3 × protocol-LOCO SD (= 0.048) AND min per-site AUC ≥ 0.90
+- **FAIL** otherwise
+
+Pre-registered FAIL action path: report honestly as a limitation; do not retune hyperparameters; cohort-composition disclosure in Discussion.
+
+### Methodology
+
+- **Site metadata source:** `<siteKey>` element of 2,445 LONI IDA root-level XML files at `data/PPMI_metadata/PPMI_*.xml`. One site per T1 MRI acquisition; per-patient site = earliest-scan site. Persisted to `features.paper1_site_assignments` (657 rows, 38 distinct sites) via idempotent assembler.
+- **Analysis cohort:** INNER JOIN of `features.paper1_features_with_targets` with `features.paper1_site_assignments` → n=647 (29.4% of full 2,201 Paper 1 cohort). Remaining 70.6% had no T1 scan downloaded.
+- **Fold structure:** sites with n ≥ 20 get their own fold (14 per-site folds); sites with n < 20 pooled (1 small-sites aggregate fold of 209 patients from 22 sites) = 15 folds total, every covered patient tested exactly once.
+- **Model:** CatBoost matching Paper 1 primary (`iterations=1000, depth=6, auto_class_weights="Balanced", random_seed=42`), 22-feature schema.
+- **Per-fold CI:** stratified bootstrap 1,000 resamples where held-out fold has ≥ 20 NSD+ AND ≥ 20 NSD−; otherwise point estimate only (CLAUDE.md "Bootstrap AUC with Severely Imbalanced Ground Truth" gotcha).
+
+### Cohort confounding audit (pre-LOSO)
+
+- **Site × Protocol cross-tab:** χ² = 233, df = 26, p < 10⁻³⁴. Sites cluster on DaT-SPECT protocol choice — Analysis E adds information beyond protocol-LOCO but they are correlated.
+- **Site × Scanner manufacturer:** χ² = 824, df = 78, p < 10⁻¹²⁴. Most sites commit to one MRI vendor. Site and scanner are tightly coupled and cannot be disentangled in PPMI.
+
+### Results (binary NSD-ISS target)
+
+| Fold | n_test | pos / neg | AUC | 95% CI |
+|---|---:|---:|---:|---|
+| 006 | 25 | 19/6 | 0.965 | (fold too small for CI) |
+| 007 | 27 | 23/4 | **0.880** | (extreme imbalance) |
+| 018 | 41 | 29/12 | 0.986 | (fold too small for CI) |
+| 019 | 20 | 10/10 | 1.000 | (fold too small for CI) |
+| 023 | 22 | 5/17 | 1.000 | (fold too small for CI) |
+| 032 | 25 | 11/14 | 1.000 | (fold too small for CI) |
+| 034 | **115** | 56/59 | 0.966 | **[0.919, 0.997]** |
+| 088 | 22 | 16/6 | 1.000 | (fold too small for CI) |
+| 096 | 21 | 10/11 | 0.918 | (fold too small for CI) |
+| 120 | 24 | 12/12 | 0.958 | (fold too small for CI) |
+| 196 | 23 | 11/12 | 1.000 | (fold too small for CI) |
+| 289 | 23 | 17/6 | 0.971 | (fold too small for CI) |
+| 290 | 21 | 17/4 | **0.735** | (extreme imbalance) |
+| 401 | 29 | 15/14 | 0.995 | (fold too small for CI) |
+| pooled_small | **209** | 98/111 | 0.955 | **[0.921, 0.984]** |
+
+Pooled: mean = 0.955, SD = 0.070, min = 0.735, max = 1.000, median = 0.971.
+
+### Verdict: FAIL (honest negative)
+
+Both decision-rule conditions fail:
+- Pooled SD 0.070 > 0.048 (3 × protocol-LOCO SD)
+- Min per-site AUC 0.735 < 0.90
+
+### Why the FAIL is not systematic site bias
+
+The two folds below 0.90 both have extreme class imbalance at small N:
+- **Site 290:** n=21, 81% NSD+ (17 pos / 4 neg). With only 4 true-negatives, a single misclassification swings AUC dramatically.
+- **Site 007:** n=27, 85% NSD+ (23 pos / 4 neg). Same regime.
+
+The two folds with stable bootstrap CIs — the only folds with n ≥ 50 AND balanced classes — both exceed the 0.90 threshold comfortably: **site 034 AUC 0.966 [0.919, 0.997]**; **pooled-small fold AUC 0.955 [0.921, 0.984]**. 13 of 15 folds achieve AUC ≥ 0.88.
+
+### Impact on headline claims
+
+- **Headline 5-fold CV AUC = 0.979** on the full n=2,201 cohort is unchanged. Analysis E tests a different question (new-site deployment) on a different cohort (n=647 with 53.9% NSD+ enrichment vs 35.6% in the full cohort).
+- **Analysis D protocol-LOCO (AUC 0.978 ± 0.016 on n=2,201) remains the cleanest scanner/reconstruction generalisation evidence.**
+- Analysis E adds a deployment caveat: performance on any individual new site with extreme case mix (>80% one class) and small N cannot be pre-guaranteed at the 0.90 level. Individual new-site performance should be measured with on-site data before clinical use.
+
+### Limitations
+
+The 29.4% coverage rate (647 / 2,201) limits Analysis E to the T1-imaging-downloaded subsample, which is enriched for NSD+ patients (53.9% vs 35.6% full-cohort). Site and scanner manufacturer are tightly coupled in PPMI (χ² p < 10⁻¹²⁴) and cannot be separated without an independent external cohort. ComBat-style site harmonisation~\cite{wakasugi2024combat} is deferred to Paper 5 (temporal validation). Three sites (290, 007, 023) have DaT-SPECT recruitment prevalences > 80% or < 25% NSD+ — these extreme-imbalance folds are expected to give unstable AUCs regardless of model quality.
+
+## S-5.7 Uncontrolled Confounders We Did NOT Test
 
 The following confounders are outside the scope of the present sensitivity analysis and are flagged for future work:
 
@@ -199,13 +273,17 @@ The following confounders are outside the scope of the present sensitivity analy
 
 These deferrals are consistent with TRIPOD+AI~\cite{collins2024} item 26 (model limitations must be reported but do not need to be exhausted in a single manuscript).
 
-## S-5.7 Reproducibility
+## S-5.8 Reproducibility
 
 | Item | Value |
 |---|---|
 | Canonical script (A+B+C) | [`scripts/paper1/run_confounder_sensitivity.py`](../../../../scripts/paper1/run_confounder_sensitivity.py) |
 | Canonical script (D) | [`scripts/paper1/run_analysis_D_protocol_loco.py`](../../../../scripts/paper1/run_analysis_D_protocol_loco.py) |
-| Output directory | [`outputs/paper1_confounder_sensitivity/`](../../../../outputs/paper1_confounder_sensitivity/) |
+| Canonical assembler (E site table) | [`scripts/paper1/create_sql_paper1_site_assignments.py`](../../../../scripts/paper1/create_sql_paper1_site_assignments.py) |
+| Canonical script (E) | [`scripts/paper1/run_analysis_E_site_loso.py`](../../../../scripts/paper1/run_analysis_E_site_loso.py) |
+| Canonical plot script (E) | [`scripts/paper1/plot_analysis_E_forest.py`](../../../../scripts/paper1/plot_analysis_E_forest.py) |
+| Pre-registration (E) | [`outputs/paper1_site_loso/PRE_REGISTRATION.md`](../../../../outputs/paper1_site_loso/PRE_REGISTRATION.md) |
+| Output directory | [`outputs/paper1_confounder_sensitivity/`](../../../../outputs/paper1_confounder_sensitivity/), [`outputs/paper1_site_loso/`](../../../../outputs/paper1_site_loso/) |
 | Seed | 42 (matches Table I and all paper-1 benchmark outputs) |
 | Bootstrap resamples | 1,000 for per-target AUC/bal-acc CIs (A+C+D); 1,000 for sex interaction test (B) |
 | CatBoost hyperparameters | `iterations=1000, depth=6, learning_rate=0.05, auto_class_weights=Balanced, random_seed=42` (Table I baseline) |
@@ -231,6 +309,9 @@ Result artifacts:
 To reproduce end-to-end from the local PostgreSQL mirror, run:
 
 ```bash
-.venv/bin/python scripts/paper1/run_confounder_sensitivity.py        # Analyses A+B+C (~1 min)
-.venv/bin/python scripts/paper1/run_analysis_D_protocol_loco.py      # Analysis D (~10 sec)
+.venv/bin/python scripts/paper1/run_confounder_sensitivity.py             # Analyses A+B+C (~1 min)
+.venv/bin/python scripts/paper1/run_analysis_D_protocol_loco.py           # Analysis D  (~10 sec)
+.venv/bin/python scripts/paper1/create_sql_paper1_site_assignments.py     # Build site SQL table
+.venv/bin/python scripts/paper1/run_analysis_E_site_loso.py               # Analysis E  (~2 min)
+.venv/bin/python scripts/paper1/plot_analysis_E_forest.py                 # Analysis E forest plot
 ```

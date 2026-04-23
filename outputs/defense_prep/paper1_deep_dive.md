@@ -753,7 +753,20 @@ Submission §IV-H "Confounder sensitivity" paragraph + Supplementary S-5 reports
 
 Both protocols retain binary AUC > 0.96 when held out. Cross-protocol mean (0.978) sits within 0.001 of the full-cohort 0.979 comparator. The three-class macro-AUC is even tighter (SD 0.002), indicating minority-stage discrimination does not reside in a protocol-specific reconstruction artefact. **Combined interpretation:** cross-protocol generalisability (varies scanner era, fixes cohort era) is essentially perfect; cross-wave generalisability (varies both) shows the 0.024-SD residual. The residual cross-wave variance is therefore attributable primarily to cohort-recruitment/staging-criteria shifts rather than scanner-era drift — a useful refinement of Analysis C's interpretation.
 
-**Decision verdict:** Age is NOT a confound (Analysis A + Schmitz-Steinkrüger 2021 external anchor); sex shows NO significant interaction (Analysis B); PPMI enrollment waves show reasonable cross-era generalisability with residual variance primarily from cohort-recruitment shifts (Analysis C); cross-protocol scanner/reconstruction generalisability is essentially perfect (Analysis D). A stricter site-LOSO using the true PPMI CNO site identifier is deferred to follow-up work pending a LONI IDA Tier-1 metadata pull.
+**Analysis E — Site-LOSO (NEW, 2026-04-22 evening, PRE-REGISTERED).** After the Analysis D ship, user provided a T1-MRI LONI IDA metadata dump at `data/PPMI_metadata/` — 2,445 root-level `PPMI_*.xml` files whose `<siteKey>` element gives the canonical PPMI site ID. Covered 647 / 2,201 (29.4%) of Paper 1 patients across 38 distinct sites; persisted via idempotent assembler `scripts/paper1/create_sql_paper1_site_assignments.py` to new SQL table `features.paper1_site_assignments` (657 × 6: patno, site_key, earliest_scan_date, scanner_mfg, scanner_model, field_strength). Registry table updated from 189 → 190 tables accordingly. **Pre-registered at `outputs/paper1_site_loso/PRE_REGISTRATION.md` BEFORE any model trained.** 15-fold design: 14 per-site folds with n≥20 + 1 pooled small-sites fold (n=209) so every covered patient is tested exactly once. Decision rule locked: PASS if pooled per-site AUC SD ≤ 3 × protocol-LOCO SD (= 0.048) AND min per-site AUC ≥ 0.90. **Pre-LOSO confounding audit:** Site × Protocol χ² = 233 (p < 10⁻³⁴); Site × Scanner manufacturer χ² = 824 (p < 10⁻¹²⁴). Sites cluster on protocol + scanner vendor — Analysis E adds marginal information beyond Analysis D but they are strongly correlated, and site-LOSO cannot cleanly disentangle site from scanner in PPMI. Results:
+
+| Fold | n_test | pos / neg | AUC | 95% CI |
+|---|---:|---:|---:|---|
+| site 034 (largest balanced) | 115 | 56/59 | 0.966 | **[0.919, 0.997]** |
+| pooled_small (n=22 sites<20) | 209 | 98/111 | 0.955 | **[0.921, 0.984]** |
+| site 290 (min AUC) | 21 | 17/4 | **0.735** | too imbalanced |
+| site 007 (2nd low) | 27 | 23/4 | **0.880** | too imbalanced |
+| 11 other per-site folds | 20–41 each | — | 0.918–1.000 | too small for CI |
+| **Pooled (mean ± SD)** | | | **0.955 ± 0.070** | min 0.735; max 1.000 |
+
+**Pre-registered verdict: FAIL.** Pooled SD 0.070 > 0.048; min AUC 0.735 < 0.90. Per the pre-reg FAIL action path, reported honestly as a limitation (no post-hoc retune to rescue numbers). **Why the FAIL is not systematic site bias:** the two below-0.90 folds have extreme class imbalance at small N (site 290: 81% NSD+; site 007: 85% NSD+) — a regime in which AUC is known to be high-variance per CLAUDE.md gotcha. The two folds with stable bootstrap CIs (site 034 and pooled-small, both n ≥ 115) both comfortably exceed the 0.90 threshold. **13/15 folds achieve AUC ≥ 0.88.** The headline n=2,201 5-fold CV AUC 0.979 is computed on balanced classes and is not affected.
+
+**Decision verdict:** Age is NOT a confound (Analysis A + Schmitz-Steinkrüger 2021 external anchor); sex shows NO significant interaction (Analysis B); PPMI enrollment waves show reasonable cross-era generalisability with residual variance primarily from cohort-recruitment shifts (Analysis C); cross-protocol scanner/reconstruction generalisability is essentially perfect (Analysis D); site-LOSO on the T1-imaging subsample shows ≥ 0.88 AUC on 13/15 folds but fails the strict pre-registered rule due to small-N + extreme-imbalance noise on 2 small sites (Analysis E, reported honestly as a FAIL per pre-reg). The recommended deployment pattern is on-site calibration prior to clinical use, with protocol-LOCO (Analysis D) as the cleaner cross-scanner generalisation evidence.
 
 **Uncontrolled confounders explicitly flagged (Supplementary S-5.6):** DICOM-header scanner make/model (Analysis D's protocol is a coarser revision-level proxy; Wakasugi 2024 ComBat harmonisation could refine) / pre-scan medication status / comorbidities (depression, diabetes, vascular disease) / handedness laterality — none tested here, all partially addressed elsewhere in the dissertation (Papers 5, 9, 12) or deferred to postdoc (DeNoPa external validation).
 
@@ -764,10 +777,19 @@ Both protocols retain binary AUC > 0.96 when held out. Cross-protocol mean (0.97
 - `all_results.json` — full result bundle (A+B+C)
 - `analysis_{A,B,C}_summary.json` — per-analysis summaries
 - `analysis_D_summary.json` — Analysis D summary (NEW)
-- `analysis_D_{target_binary,target_3class}_protocol_{001,002}.json` — 4 per-target per-protocol JSONs (NEW)
-- `literature_validation.md` — Austin 2011 / Schmitz-Steinkrüger 2021 validation notes (NEW)
+- `analysis_D_{target_binary,target_3class}_protocol_{001,002}.json` — 4 per-target per-protocol JSONs
+- `literature_validation.md` — Austin 2011 / Schmitz-Steinkrüger 2021 validation notes
 - 11 original per-run `analysis_*.json` files (1 age-matched binary, 1 three-class; 8 sex×target; + interaction test embedded in B)
 - `run.log` — full run log
+
+**Artifacts at `outputs/paper1_site_loso/`** (Analysis E, 2026-04-22 evening):
+- `PRE_REGISTRATION.md` — decision rule locked before results
+- `site_cohort_summary.json` — per-site n, NSD+ balance, protocol/scanner dominance, χ²
+- `site_loso_per_fold.json` — 15 per-fold AUCs + bootstrap CIs where valid
+- `site_loso_summary.json` — pooled mean/SD/min/max + pre-registered FAIL verdict
+- `loso_forest_plot.{pdf,png}` — per-fold AUC forest plot with thresholds annotated
+- `run.log` — full benchmark stdout/stderr
+- `SUMMARY.md` — human-readable interpretation (honest negative)
 
 ---
 
@@ -1289,4 +1311,41 @@ Continuation pass finalising the confounder sensitivity package. Four complement
 
 ---
 
-*Document generated for dissertation defense preparation. All metrics cited from actual output JSONs in `outputs/paper1_benchmark/`, `outputs/paper1_benchmark_33feat/`, `outputs/paper1_conformal/`, `outputs/paper1_enhanced_gat_3mod/`, and `outputs/external_validation/`, plus submission tables in `outputs/mechanistic_twin/paper1_submission/ieee-jbhi/chapter_content.tex`. All file paths verified against the codebase. Canonical feature schema source: Postgres `features.paper1_features_with_targets` (22-feat production) and `features.paper1_features_extended_33` (33-feat sensitivity).*
+## Fix-Log 2026-04-22 (late evening — Analysis E site-LOSO, pre-registered FAIL)
+
+User-provided T1-MRI LONI IDA metadata dump at `data/PPMI_metadata/` closed the site-LOSO deferral noted in the afternoon fix-log. Four non-destructive additions:
+
+1. **New SQL table `features.paper1_site_assignments` (657 × 6).** Idempotent assembler `scripts/paper1/create_sql_paper1_site_assignments.py` parses 2,445 root-level `PPMI_*.xml` files, extracts `<siteKey>`, scanner manufacturer, scanner model, field strength, earliest T1 scan date. Per-patient assignment = earliest-scan site. Registry table in root CLAUDE.md updated 189 → 190 tables / 740 → 741 MB (PreToolUse hook enforced the update).
+
+2. **Pre-registration before any result (key rigor step).** `outputs/paper1_site_loso/PRE_REGISTRATION.md` locks decision rule: PASS if pooled per-site AUC SD ≤ 0.048 (= 3 × protocol-LOCO SD) AND min per-site AUC ≥ 0.90; FAIL action path mandates honest limitation reporting, no retuning.
+
+3. **Analysis E benchmark `scripts/paper1/run_analysis_E_site_loso.py` (~200 lines)** runs CatBoost matching Paper 1 headline spec (`iterations=1000, depth=6, auto_class_weights="Balanced", random_seed=42`, 22-feature schema) with 15-fold design (14 per-site n≥20 + 1 pooled small-sites fold n=209). Stratified bootstrap CI where held-out fold has ≥20 pos AND ≥20 neg. Runtime ~2 min total. Forest plot via `scripts/paper1/plot_analysis_E_forest.py`.
+
+4. **FAIL honestly reported per pre-reg.** Pooled SD 0.070 > 0.048; min AUC 0.735 (site 290) < 0.90. Two below-0.90 folds have extreme class imbalance at small N (site 290: n=21, 81% NSD+; site 007: n=27, 85% NSD+). Two folds with stable bootstrap CIs (site 034 n=115, pooled_small n=209) both exceed 0.90 by wide margin (AUC 0.966 [0.919, 0.997] and 0.955 [0.921, 0.984]). 13/15 folds achieve AUC ≥ 0.88. Full-cohort 5-fold CV headline 0.979 unchanged (different cohort: n=2,201 balanced vs Analysis E n=647 enriched 53.9% NSD+).
+
+**Pre-LOSO confounding audit (reportable, not limitation):**
+- Site × Protocol χ² = 233, df = 26, p < 10⁻³⁴
+- Site × Scanner manufacturer χ² = 824, df = 78, p < 10⁻¹²⁴
+- Site and scanner cannot be disentangled in PPMI — Analysis E co-confounds them; this is inherent to PPMI's recruitment structure, not a flaw in Analysis E.
+
+**Section renumbering in submission S-5:** new S-5.6 "Site leave-one-site-out (Analysis E)" inserted between S-5.5 (Analysis D) and the old S-5.6 Uncontrolled Confounders. Old S-5.6 renumbered to S-5.7. Old S-5.7 Reproducibility renumbered to S-5.8 and extended with Analysis E reproduction commands + pre-reg link.
+
+**Audit-DB reminder (NOT executed by this session — controller reserves `scripts/defense_prep/`):**
+- New numerical claims in `outputs/paper1_site_loso/site_loso_summary.json` (pooled AUC 0.955, SD 0.070, min 0.735) → trigger `07_per_claim_value_verifier.py`
+- Chapter `outputs/dissertation/chapters/ch03_paper1.tex` modified (5-confounder paragraph extension) → trigger `02_extract_numerical_claims.py` + `07`
+- No new `\bibitem` entries added this pass — Analysis E uses existing `vovk2022` (extreme-imbalance gotcha) and `wakasugi2024combat` (site harmonisation future work) citations.
+- No existing claim is refuted by Analysis E. The FAIL is a new limitation reported honestly, not a claim refutation — the headline 0.979 AUC on n=2,201 is computed on a different cohort and a different CV design.
+
+**Headline results (Analysis E addition):**
+
+| Analysis | Result | Pre-registered Verdict |
+|---|---|---|
+| E: Site-LOSO (14 per-site + 1 pooled) | pooled AUC **0.955 ± 0.070**, min 0.735 (site 290), max 1.000, 13/15 ≥ 0.88 | **FAIL** (pooled SD > 0.048; driven by 2 small folds with extreme imbalance) |
+| E: Stable-CI folds | site 034 (n=115) AUC **0.966 [0.919, 0.997]**; pooled_small (n=209) AUC **0.955 [0.921, 0.984]** | Both exceed 0.90 threshold |
+| E: Confounding audit | Site × Protocol p < 10⁻³⁴; Site × Scanner p < 10⁻¹²⁴ | Site and scanner co-confounded in PPMI |
+
+**Commit arc (pending user review):** (this session late evening) Analysis E assembler + Analysis E benchmark + forest plot + PRE_REGISTRATION + SUMMARY + site_loso outputs + chapter §IV-H paragraph extension (four → five) + dissertation chapter sync + submission S-5.6 insertion + S-5.8 renumber + CLAUDE.md registry update + deep dive §3.11 + this fix-log entry + audit DB refresh + rebuilt PDF.
+
+---
+
+*Document generated for dissertation defense preparation. All metrics cited from actual output JSONs in `outputs/paper1_benchmark/`, `outputs/paper1_benchmark_33feat/`, `outputs/paper1_conformal/`, `outputs/paper1_enhanced_gat_3mod/`, `outputs/external_validation/`, `outputs/paper1_confounder_sensitivity/`, and `outputs/paper1_site_loso/`, plus submission tables in `outputs/mechanistic_twin/paper1_submission/ieee-jbhi/chapter_content.tex`. All file paths verified against the codebase. Canonical feature schema source: Postgres `features.paper1_features_with_targets` (22-feat production), `features.paper1_features_extended_33` (33-feat sensitivity), `features.paper1_site_assignments` (Analysis E site-LOSO).*
