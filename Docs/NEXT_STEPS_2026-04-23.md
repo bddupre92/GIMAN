@@ -1,8 +1,8 @@
 # Post-Compact Resume Anchor — 2026-04-23 session
 
-**Session focus:** Paper 1 IEEE JBHI reviewer-response execution. External-reviewer pre-submission critique received at commit `3c2de97`; full revision plan + 7 parallel workstream dispatches + LRRK2/GBA bug fix + restart.
+**Session focus:** (1) Paper 1 IEEE JBHI reviewer-response execution (25-commit arc, HPO orphan running). (2) Paper 3+4 combined npj-DM revision planning (2 new plan docs committed at `2092706` — does NOT displace Paper 1; parallel workstream).
 
-**Branch:** `feat/ch9-6-multichannel` · **HEAD:** `1665911` (WS1.1 re-run post-genetics-fix PASS) · **25 commits ahead** of the session-start point `db9cbbb`.
+**Branch:** `feat/ch9-6-multichannel` · **HEAD:** `2092706` (P3+4 reviewer-response plans) · **27 commits ahead** of session-start point `db9cbbb`.
 
 ## One-shot resume commands
 
@@ -192,10 +192,84 @@ Any paper that cited LRRK2+ or GBA+ subgroup results before commit `672b439` is 
 - Pre-registrations locked: 7 (WS1.1, WS1.2, WS1.4, WS1.5, WS1.6, WS1.7, WS1.9 — WS1.8 has one too, bundled)
 - Standing rubric promoted: `Docs/CONVENTIONS.md §7` Paper Rigor Rubric + §7.9a package wrap rule
 
+## PAPER 3+4 COMBINED npj-DM REVISION — PLANNING COMPLETE (commit `2092706`)
+
+**Scope addition (not displacing Paper 1).** After the Paper 1 HPO orphan was running stably, user shared an external-reviewer critique of the combined P3+P4 submission at `outputs/mechanistic_twin/paper3plus4_submission/npj-dm/`. Same maximum-rigor approach as Paper 1 applied. 9 parallel research agents dispatched + consolidated into two plan docs:
+
+- **Research plan:** `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response.md` (450 lines)
+- **Execution plan:** `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response-execution.md` (560 lines)
+
+### Verification findings (before planning)
+
+Read the combined manuscript to cross-check reviewer claims against actual content:
+
+| Reviewer complaint | Status in manuscript |
+|---|---|
+| R8 "No calibration assessment" | **PARTIAL** — ECE table present (L211-223), H-L p-values mentioned, but NO reliability-diagram figure, NO time-Brier decomp, NO DCA |
+| R14 "LRRK2/GBA excluded (n<10)" | **CONFIRMED** (L229) — **artifact of Paper 1 LRRK2/GBA bug now fixed (175 LRRK2+ / 111 GBA+)**; strengthening revision |
+| R4 "No continuous-time alternative" | **CONFIRMED missing** |
+| R11 "References appear as [?]" | **NOT REPRODUCED** — zero undefined refs in `main.log`; likely stale-PDF artifact at reviewer's end |
+| R12 "Digital twin partially walked back" | **PARTIAL** — "digital twin" only appears inside "Graph-DT" acronym in prose |
+
+### PDBP external-validation feasibility **CONFIRMED** via SQL
+
+```
+PDBP patients with all 7 NSD-ISS inputs (UPDRS I/II/III + MoCA + RBD + PDMEDYN):
+  any visit:       1,382
+  ≥2 visits:         582
+  ≥3 visits:         493  ← PRIMARY EXTERNAL COHORT
+  total visit-rows: 2,906
+```
+
+PPMI Paper 3 cohort was 922 transitioning patients; **PDBP at 493 × ≥3 visits is 53% of that scale**. Ample for Hu 2025 *npj Digit Med* 8:290 style external validation. This means R16 becomes feasible IN the P3+P4 revision — NOT deferred to Paper 5. Paper 5 scope re-scoped to temporal-hold-out + inductive-graph infra only (no external-staging).
+
+### 21 workstreams mapped to reviewer concerns
+
+All 16 weaknesses (R1-R16), 11 questions (Q1-Q11), and 5 journal-style audit findings (S1-S5) have a numbered workstream with pre-registered decision rules (PASS / TRIGGER-RERUN / FAIL). Full matrix in the research plan §1.
+
+### 9-agent research synthesis (all completed)
+
+1. **R1 inductive graph** (agent `a4a37c6b`) — 12 citations + 5 repos; expected Δ C-td = −0.01 to −0.04; recommended protocol option (b) primary + option (a) sensitivity. Anchor precedent: Gouareb 2023 *Health Data Sci* 0.96→0.91 on similar patient-graph.
+2. **R2/R3 clustered bootstrap** (agent `a8087efa`) — Field-Welsh 2007 + Bouwmeester 2013 variance-inflation 1.3×-2.5×; 3 npj-DM/Nat Med precedents (Myers 2023, Carrasco-Zanini 2024, DNFCR 2025).
+3. **R7 modern deep baselines** (agent `a5ee0a3a`) — SurvTRACE / SurvLatent-ODE / CRISP-NAM all have shipped competing-risks support. Bonus TraCeR 2025 (arXiv:2512.18129) as SurvTRACE-longitudinal successor.
+4. **R7 classical baselines** (agent `a89b98fa`) — Fine-Gray TV + dynamic landmarking + **new `jmstate` Python package** (Laplante & Ambroise 2026 arXiv:2510.07128, PyPI v0.15.2). No rpy2 needed for jmstate.
+5. **R5 always-detach / DGI** (agent `a80f3f40`) — GraphMAE primary (mask_rate=0.5, scaled cosine loss), DGI runner-up. Survival-GNN field default is fully-joint; our always-detach IS unusual.
+6. **R10 HSMM misclassification** (agent `a787450a`) — msm R package (Jackson 2011) via rpy2; 3-variant sensitivity protocol (primary msm + drop-jumps-≥2 + semi-Markov flexsurv). Titman framing: DaT-SBR emission-likelihood check for 3→0 regressions.
+7. **github repo research** (agent `aba67634`) — pinned SHAs for all 5 vendored + 4 pip packages (lifelines@7a8fc34a, SurvivalEVAL@ab6db9c6, SurvTRACE@e6b354fd, survlatent_ode@c712bdc0, crisp-nam@e034c527, GraphMAE@b14f080c, DGI@61baf67d, thehanlab/dynamicLM@a444e853, chjackson/msm@024f685).
+8. **PDBP data-audit** (agent `a4b7266c`) — BioFIND infeasible (M0-only), HBS structurally impossible (missing UPDRS-I + MoCA), LCC cross-sectional, LBD DLB-contaminated, STEADY-PD3+SURE-PD3 feasible fallback. PDBP primary at 493/≥3-visit.
+9. **journal-style-audit** (agent `a94482fd`) — 5 submission-blockers (abstract 293→≤250, tab:main Markov dashes, tab:competitors +252pt, ≤5 main tables, Graph-DT footnote). ALL 34 citations resolve (reviewer's [?] claim is stale-PDF).
+
+### 24 new bibitems planned
+
+Key additions: `rosenblatt2024leakage` (*Nat Commun* precedent for leakage-quantification expectation), `gouareb2023patient` (closest Δ C-td anchor), `field_welsh_2007_clusterbootstrap`, `wang2022survtrace`, `moon2022survlatent`, `patel2025crispnam`, `hou2022graphmae`, `laplante2026jmstate`, `jackson2011msm`, `titman2010semimarkov`, `koh_liang_2017_influence` (R15 faithfulness), `vickers2006dca` (R8 net-benefit). Full list in research plan §9.
+
+### P3+4 execution phases (after Paper 1 lands)
+
+| Phase | Days | Focus | Compute |
+|---|---|---|---|
+| S | Day 1 | Submission-blockers (WS-P3-S1 through S5) | none (prose + LaTeX) |
+| R-A | Days 2-8 | PDBP staging + Markov metrics + LRRK2/GBA re-run + subject bootstrap | MPS |
+| R-B | Days 8-15 | SurvTRACE + SurvLatent-ODE + CRISP-NAM + Fine-Gray + landmarking + jmstate + inductive graph (R1) | Threadripper CUDA + MPS parallel |
+| R-C | Days 15-21 | GraphMAE pre-train + ablation grid (60 configs) + calibration + faithfulness + 5-seed stability | both machines |
+| W | Days 21-28 | Manuscript rewrite + rebuttal letter + PDF | writing |
+
+**Total wall-clock:** ~4 weeks with Threadripper CUDA + Mac MPS parallelism. If Threadripper unavailable, balloons to ~8 weeks.
+
+### Coordination with Paper 1
+
+- Paper 1 tree HPO orphan still running at session end (PPID=1, ~6/8 workers done, ~2-4h more for LGBM multiclass).
+- P3+4 work does NOT displace Paper 1. Executes in parallel branches if scope extends past 1 week.
+- Cross-paper reuse:
+  - WS-P3-14 LRRK2/GBA re-run directly benefits from Paper 1's `672b439` bug fix.
+  - WS-P3-8 calibration reuses `outputs/paper4/calibration/` existing module.
+  - WS-P3-2 subject-bootstrap pattern reused from Paper 1 WS1.1 fold-local.
+  - WS-P3-13 5-seed protocol identical to Paper 1 WS1.2 nested CV.
+  - §7 Paper Rigor Rubric (Docs/CONVENTIONS.md) applies to all P3+4 workstreams by default.
+
 ## Ready for /compact
 
-All session state captured. Fresh session starts by reading this file + `Docs/superpowers/plans/2026-04-23-paper1-reviewer-response-execution.md` + `Docs/CONVENTIONS.md §7`.
+All session state captured. Fresh session starts by reading this file + Paper 1 execution plan + P3+4 execution plan + `Docs/CONVENTIONS.md §7`.
 
 ---
 
-*Session 2026-04-23 focused on Paper 1 IEEE JBHI revision. Pre-submission external review surfaced weaknesses; this session built the response plan, dispatched 7 parallel robustness workstreams as pre-registered scripts, fixed a silent carrier-flag bug, verified the fix moves CatBoost NSD+ AUC by +0.006 (the expected direction), and queued a 7h tree HPO run on corrected features. Mempalace mining + git commits capture the knowledge for next session.*
+*Session 2026-04-23 delivered: (1) Paper 1 IEEE JBHI revision response (25-commit arc, LRRK2/GBA silent bug fixed, 7 pre-registered compute scripts, orphan HPO running) + (2) Paper 3+4 combined npj-DM revision planning (9 parallel research agents, PDBP 493-patient external-validation feasibility proven, 21-workstream execution plan with decision rules). Both papers now have reviewer-defensible revision paths mapped with maximum methodological rigor. Mempalace mining + git commits capture the knowledge for next session.*
