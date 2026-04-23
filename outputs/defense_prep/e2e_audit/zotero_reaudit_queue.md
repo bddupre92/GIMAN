@@ -1,6 +1,6 @@
 # Zotero Re-Audit Queue (BΩ.1 — /find ezproxy pass)
 
-Total unverified citations: **364**
+Total unverified citations: **376**
 
 Sorted by claim usage (most-used first).
 
@@ -92,6 +92,7 @@ Sorted by claim usage (most-used first).
 | `angelopoulos2021` | A.~N.~Angelopoulos and S.~Bate | 2021 | A gentle introduction to conformal prediction and distributi | — | 1 |
 | `angiolelli2024` | M.~Angiolelli \textit{et~al.} | 2024 | [no title] | — | 1 |
 | `asgari2021` | M.~Asgari and D.~Shafie | 2021 | [no title] | — | 1 |
+| `austin2011caliper` | P.~C.~Austin | 2011 | Optimal caliper widths for propensity-score matching when es | — | 1 |
 | `austin2020graphical` | P.~C.~Austin and E.~W.~Steyerb | 2020 | Graphical assessment of internal and external calibration of | — | 1 |
 | `baribault2023troubleshoot` | B.~Baribault and M.~D.~Lee | 2023 | Troubleshooting Bayesian cognitive models, | — | 1 |
 | `bentivoglio2026saaneg` | A.~Bentivoglio \textit{et~al.} | 2026 | [no title] | — | 1 |
@@ -105,6 +106,5 @@ Sorted by claim usage (most-used first).
 | `burnham2002` | K.P.~Burnham and D.R.~Anderson | 2002 | [no title] | — | 1 |
 | `buuren2011` | S.~van~Buuren and K.~Groothuis | 2011 | mice: Multivariate imputation by chained equations in R, | — | 1 |
 | `calabresi2023` | P. Calabresi | 2023 | [no title] | 10.1038/s41419-023-05672-9 | 1 |
-| `campbell2020` | M.~Campbell | 2020 | Synthesis without meta-analysis (SWiM) in systematic reviews | — | 1 |
 
-... (264 more rows omitted; see `defensibility_matrix.csv` for full list)
+... (276 more rows omitted; see `defensibility_matrix.csv` for full list)

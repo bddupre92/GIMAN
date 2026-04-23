@@ -1,7 +1,7 @@
 chapter_number,title,defensibility_score,total_claims,verified,partial,unverified
 1,Introduction,yellow,254,209,10,0
 2,Systematic Literature Review,yellow,813,788,15,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,643,564,8,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,646,564,8,0
 4,Paper 2: GIMIN Imputation,yellow,745,708,17,0
 5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,250,239,11,0
 6,Paper 4: Conformalized Survival Analysis,yellow,478,469,9,0

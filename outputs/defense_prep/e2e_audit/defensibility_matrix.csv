@@ -1709,6 +1709,9 @@ chapter_number,chapter_title,defensibility_score,claim_id,claim_type,claim_excer
 3,Paper 1: NSD-ISS Stage Classification,yellow,4982,numerical,[percentage] 25.2\%  --  This study establishes the first comprehensive benchmark for NSD-ISS biological-stage predictio,verified, | auto-linked by 07_per_claim_value_verifier,0,1,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,4983,numerical,"[percentage] 92\%  --  The Harvard Biomarkers Study (HBS, $n{=}649$ PD) was evaluated as a prediction-only cohort but is",verified, | auto-linked by 07_per_claim_value_verifier,0,1,0
 3,Paper 1: NSD-ISS Stage Classification,yellow,4984,numerical,"[percentage] 25\%  --  The Harvard Biomarkers Study (HBS, $n{=}649$ PD) was evaluated as a prediction-only cohort but is",verified, | auto-linked by 07_per_claim_value_verifier,0,1,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,5593,literature,Chapter 3 cites \cite{austin2011caliper},pending,,1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,5594,literature,Chapter 3 cites \cite{eusebi2017dat},pending,,1,0,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,5595,literature,Chapter 3 cites \cite{schmitzSteinkruger2021age},pending,,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,49,literature,Chapter 4 cites \cite{buuren2011},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
 4,Paper 2: GIMIN Imputation,yellow,50,literature,Chapter 4 cites \cite{diazrincon2025},verified,"Canonical reference (Phase 1-5 verified set); no DOI in bibitem (pre-DOI textbook, ISBN, or preprint).",1,0,0
 4,Paper 2: GIMIN Imputation,yellow,51,literature,Chapter 4 cites \cite{du2023},partial,Cite key not in Phase 5 verified set; needs ezproxy pass during BΩ.,1,0,0
