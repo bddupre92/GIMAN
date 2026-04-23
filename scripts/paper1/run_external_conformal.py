@@ -145,35 +145,60 @@ def load_ppmi_features() -> pd.DataFrame:
     Tries SQL (``features.paper1_features_with_targets``) first, then falls
     back to the CSV under ``data/05_features/paper1_features_with_targets.csv``
     so the script still works offline or when the local Postgres is down.
+
+    Normalizes clinical-feature columns to UPPER-CASE to match the canonical
+    CSV convention. The SQL table stores lower-case due to loader default.
     """
     try:
         from giman_pipeline.data.db import read_table  # noqa: E402
 
         df = read_table("features", "paper1_features_with_targets")
         logger.info("Loaded PPMI features from SQL (n=%d)", len(df))
-        return df
     except Exception as exc:  # pragma: no cover — fallback path
         logger.warning("SQL load failed (%s); falling back to CSV", exc)
         csv_path = ROOT / "data" / "05_features" / "paper1_features_with_targets.csv"
         df = pd.read_csv(csv_path)
         logger.info("Loaded PPMI features from CSV (n=%d)", len(df))
-        return df
+    rename_map: dict[str, str] = {}
+    for col in df.columns:
+        upper = col.upper()
+        if upper in set(COMMON_FEATURES) and col != upper:
+            rename_map[col] = upper
+    if rename_map:
+        df = df.rename(columns=rename_map)
+        logger.info("Normalised %d PPMI columns to UPPER-CASE", len(rename_map))
+    return df
 
 
 def load_biofind_features() -> pd.DataFrame:
-    """Load BioFIND clinical features (12-feature common subset minus ESS)."""
+    """Load BioFIND clinical features (12-feature common subset minus ESS).
+
+    Normalizes column names to UPPER-CASE to match PPMI `COMMON_FEATURES` list.
+    SQL `biofind_features` stores lower-case column names whereas the
+    CSV stores upper-case; normalising at load time lets downstream
+    projection code treat both sources identically.
+    """
     try:
         from giman_pipeline.data.db import read_table  # noqa: E402
 
         df = read_table("features", "biofind_features")
         logger.info("Loaded BioFIND features from SQL (n=%d)", len(df))
-        return df
     except Exception as exc:  # pragma: no cover — fallback path
         logger.warning("SQL load failed (%s); falling back to CSV", exc)
         csv_path = ROOT / "data" / "05_features" / "biofind_features.csv"
         df = pd.read_csv(csv_path)
         logger.info("Loaded BioFIND features from CSV (n=%d)", len(df))
-        return df
+    # Normalize clinical-feature columns to UPPER-CASE for COMMON_FEATURES match.
+    # participant_id / cohort / diagnosis / education_years / family_history_pd stay as-is.
+    rename_map: dict[str, str] = {}
+    for col in df.columns:
+        upper = col.upper()
+        if upper in set(COMMON_FEATURES) and col != upper:
+            rename_map[col] = upper
+    if rename_map:
+        df = df.rename(columns=rename_map)
+        logger.info("Normalised %d BioFIND columns to UPPER-CASE", len(rename_map))
+    return df
 
 
 def load_biofind_staging() -> pd.DataFrame:
