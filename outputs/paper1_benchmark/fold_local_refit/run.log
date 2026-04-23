@@ -1,0 +1,211 @@
+07:31:59 INFO: ======================================================================
+07:31:59 INFO: Paper 1 WS1.1: NSD-ISS Benchmark with FOLD-LOCAL Imputation
+07:31:59 INFO: ======================================================================
+07:31:59 INFO: Loaded 2201 patients, 38 columns
+07:31:59 INFO: 
+==================================================
+07:31:59 INFO: Target: BINARY (NSD-positive vs NSD-negative)
+07:31:59 INFO: ==================================================
+07:31:59 INFO: Prepared data (fold-local): 2201 samples, 20 features, target=target_binary, classes=[1422, 779], nan_cells=5523 (will be imputed per-fold)
+07:31:59 INFO: Fold-local benchmark 'binary': 2201 valid samples, 2 classes, distribution=[1422, 779]
+07:32:00 INFO:   Running logistic_regression...
+07:32:02 INFO:   logistic_regression: bal_acc=0.9024 [95% CI 0.8891-0.9148], wf1=0.8994, kappa=0.7834, qwk=0.7834, train=0.0s
+07:32:02 INFO:   Running random_forest...
+07:32:06 INFO:   random_forest: bal_acc=0.9311 [95% CI 0.9190-0.9427], wf1=0.9352, kappa=0.8586, qwk=0.8586, train=2.1s
+07:32:06 INFO:   Running svm_rbf...
+07:32:08 INFO:   svm_rbf: bal_acc=0.9226 [95% CI 0.9105-0.9333], wf1=0.9220, kappa=0.8310, qwk=0.8310, train=0.4s
+07:32:08 INFO:   Running elasticnet...
+07:32:10 INFO:   elasticnet: bal_acc=0.9044 [95% CI 0.8914-0.9168], wf1=0.9033, kappa=0.7911, qwk=0.7911, train=0.0s
+07:32:10 INFO:   Running xgboost...
+07:32:17 INFO:   xgboost: bal_acc=0.9481 [95% CI 0.9375-0.9578], wf1=0.9571, kappa=0.9056, qwk=0.9056, train=4.8s
+07:32:17 INFO:   Running catboost...
+07:32:20 INFO:   catboost: bal_acc=0.9466 [95% CI 0.9358-0.9570], wf1=0.9544, kappa=0.8999, qwk=0.8999, train=1.6s
+07:32:20 INFO:   Running lightgbm...
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+07:32:34 INFO:   lightgbm: bal_acc=0.9483 [95% CI 0.9381-0.9584], wf1=0.9566, kappa=0.9048, qwk=0.9048, train=11.6s
+07:32:34 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_benchmark/fold_local_refit/binary_results.json
+07:32:34 INFO: 
+==================================================
+07:32:34 INFO: Target: THREE-CLASS
+07:32:34 INFO: ==================================================
+07:32:34 INFO: Prepared data (fold-local): 2197 samples, 20 features, target=target_3class, classes=[1485, 208, 504], nan_cells=5452 (will be imputed per-fold)
+07:32:34 INFO: Fold-local benchmark 'three_class': 2197 valid samples, 3 classes, distribution=[1485, 208, 504]
+07:32:34 INFO:   Running logistic_regression...
+07:32:35 INFO:   logistic_regression: bal_acc=0.7595 [95% CI 0.7344-0.7846], wf1=0.8294, kappa=0.6401, qwk=0.7802, train=0.0s
+07:32:35 INFO:   Running random_forest...
+07:32:39 INFO:   random_forest: bal_acc=0.7572 [95% CI 0.7310-0.7817], wf1=0.8578, kappa=0.7053, qwk=0.7918, train=2.2s
+07:32:39 INFO:   Running svm_rbf...
+07:32:41 INFO:   svm_rbf: bal_acc=0.7583 [95% CI 0.7328-0.7846], wf1=0.8356, kappa=0.6551, qwk=0.7776, train=0.6s
+07:32:41 INFO:   Running elasticnet...
+07:32:43 INFO:   elasticnet: bal_acc=0.7252 [95% CI 0.6974-0.7512], wf1=0.8402, kappa=0.6686, qwk=0.7660, train=0.1s
+07:32:43 INFO:   Running xgboost...
+07:32:59 INFO:   xgboost: bal_acc=0.7662 [95% CI 0.7407-0.7919], wf1=0.8887, kappa=0.7701, qwk=0.8672, train=15.0s
+07:32:59 INFO:   Running catboost...
+07:33:06 INFO:   catboost: bal_acc=0.7748 [95% CI 0.7490-0.8015], wf1=0.8769, kappa=0.7438, qwk=0.8411, train=2.1s
+07:33:06 INFO:   Running lightgbm...
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+07:33:44 INFO:   lightgbm: bal_acc=0.7539 [95% CI 0.7278-0.7788], wf1=0.8831, kappa=0.7592, qwk=0.8563, train=35.9s
+07:33:44 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_benchmark/fold_local_refit/three_class_results.json
+07:33:44 INFO: 
+==================================================
+07:33:44 INFO: Target: FULL ORDINAL (5-class)
+07:33:44 INFO: ==================================================
+07:33:44 INFO: Prepared data (fold-local): 2197 samples, 20 features, target=target_full_ordinal, classes=[1418, 67, 208, 487, 17], nan_cells=5452 (will be imputed per-fold)
+07:33:44 INFO: Fold-local benchmark 'full_ordinal': 2197 valid samples, 5 classes, distribution=[1418, 67, 208, 487, 17]
+07:33:44 INFO:   Running logistic_regression...
+07:33:45 INFO:   logistic_regression: bal_acc=0.5640 [95% CI 0.5141-0.6198], wf1=0.7442, kappa=0.5031, qwk=0.7452, train=0.0s
+07:33:45 INFO:   Running random_forest...
+07:33:49 INFO:   random_forest: bal_acc=0.6363 [95% CI 0.5971-0.6756], wf1=0.8307, kappa=0.6822, qwk=0.7900, train=2.1s
+07:33:49 INFO:   Running svm_rbf...
+07:33:51 INFO:   svm_rbf: bal_acc=0.6028 [95% CI 0.5654-0.6445], wf1=0.7959, kappa=0.6135, qwk=0.7682, train=0.9s
+07:33:51 INFO:   Running elasticnet...
+07:33:53 INFO:   elasticnet: bal_acc=0.5399 [95% CI 0.4835-0.5966], wf1=0.7790, kappa=0.5671, qwk=0.7771, train=0.1s
+07:33:53 INFO:   Running xgboost...
+07:34:16 INFO:   xgboost: bal_acc=0.6312 [95% CI 0.5889-0.6794], wf1=0.8717, kappa=0.7587, qwk=0.8991, train=22.3s
+07:34:16 INFO:   Running catboost...
+07:34:25 INFO:   catboost: bal_acc=0.6543 [95% CI 0.6245-0.6863], wf1=0.8619, kappa=0.7402, qwk=0.8632, train=2.9s
+07:34:25 INFO:   Running lightgbm...
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+07:35:17 INFO:   lightgbm: bal_acc=0.6012 [95% CI 0.5699-0.6384], wf1=0.8727, kappa=0.7614, qwk=0.8977, train=51.3s
+07:35:17 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_benchmark/fold_local_refit/full_ordinal_results.json
+07:35:17 INFO: 
+==================================================
+07:35:17 INFO: Target: NSD-POSITIVE SUBGROUP (4-class)
+07:35:17 INFO: ==================================================
+07:35:17 INFO: Prepared data (fold-local): 779 samples, 20 features, target=target_nsd_positive, classes=[67, 208, 487, 17], nan_cells=1060 (will be imputed per-fold)
+07:35:17 INFO: Fold-local benchmark 'nsd_positive': 779 valid samples, 4 classes, distribution=[67, 208, 487, 17]
+07:35:17 INFO:   Running logistic_regression...
+07:35:19 INFO:   logistic_regression: bal_acc=0.5230 [95% CI 0.4545-0.5910], wf1=0.6116, kappa=0.3276, qwk=0.4137, train=0.0s
+07:35:19 INFO:   Running random_forest...
+07:35:22 INFO:   random_forest: bal_acc=0.6410 [95% CI 0.5999-0.6915], wf1=0.7711, kappa=0.5814, qwk=0.7269, train=2.0s
+07:35:22 INFO:   Running svm_rbf...
+07:35:23 INFO:   svm_rbf: bal_acc=0.5458 [95% CI 0.4974-0.6067], wf1=0.6791, kappa=0.4333, qwk=0.4653, train=0.2s
+07:35:23 INFO:   Running elasticnet...
+07:35:25 INFO:   elasticnet: bal_acc=0.4788 [95% CI 0.4117-0.5507], wf1=0.5953, kappa=0.2834, qwk=0.3564, train=0.1s
+07:35:25 INFO:   Running xgboost...
+07:35:42 INFO:   xgboost: bal_acc=0.6661 [95% CI 0.6048-0.7348], wf1=0.7648, kappa=0.5585, qwk=0.6737, train=16.4s
+07:35:42 INFO:   Running catboost...
+07:35:46 INFO:   catboost: bal_acc=0.6781 [95% CI 0.6241-0.7417], wf1=0.7850, kappa=0.6051, qwk=0.7194, train=2.0s
+07:35:46 INFO:   Running lightgbm...
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+07:36:16 INFO:   lightgbm: bal_acc=0.6147 [95% CI 0.5609-0.6739], wf1=0.7614, kappa=0.5523, qwk=0.6688, train=28.9s
+07:36:16 INFO: Saved benchmark results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_benchmark/fold_local_refit/nsd_positive_results.json
+07:36:16 INFO: Saved consolidated results to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_benchmark/fold_local_refit/all_results.json
+07:36:16 INFO: 
+Report saved to /Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_benchmark/fold_local_refit/paper1_fold_local_report.md
+
+======================================================================
+FOLD-LOCAL BENCHMARK SUMMARY
+======================================================================
+
+--- binary ---
+  logistic_regression       bal_acc=0.9024 [0.889-0.915], wF1=0.8994, QWK=0.7834, AUC=0.9706
+  random_forest             bal_acc=0.9311 [0.919-0.943], wF1=0.9352, QWK=0.8586, AUC=0.9745
+  svm_rbf                   bal_acc=0.9226 [0.911-0.933], wF1=0.9220, QWK=0.8310, AUC=0.9719
+  elasticnet                bal_acc=0.9044 [0.891-0.917], wF1=0.9033, QWK=0.7911, AUC=0.9599
+  xgboost                   bal_acc=0.9481 [0.938-0.958], wF1=0.9571, QWK=0.9056, AUC=0.9762
+  catboost                  bal_acc=0.9466 [0.936-0.957], wF1=0.9544, QWK=0.8999, AUC=0.9784
+  lightgbm                  bal_acc=0.9483 [0.938-0.958], wF1=0.9566, QWK=0.9048, AUC=0.9771
+
+--- three_class ---
+  logistic_regression       bal_acc=0.7595 [0.734-0.785], wF1=0.8294, QWK=0.7802, mAUC=0.9312
+  random_forest             bal_acc=0.7572 [0.731-0.782], wF1=0.8578, QWK=0.7918, mAUC=0.9379
+  svm_rbf                   bal_acc=0.7583 [0.733-0.785], wF1=0.8356, QWK=0.7776, mAUC=0.9387
+  elasticnet                bal_acc=0.7252 [0.697-0.751], wF1=0.8402, QWK=0.7660, mAUC=0.9151
+  xgboost                   bal_acc=0.7662 [0.741-0.792], wF1=0.8887, QWK=0.8672, mAUC=0.9427
+  catboost                  bal_acc=0.7748 [0.749-0.801], wF1=0.8769, QWK=0.8411, mAUC=0.9419
+  lightgbm                  bal_acc=0.7539 [0.728-0.779], wF1=0.8831, QWK=0.8563, mAUC=0.9402
+
+--- full_ordinal ---
+  logistic_regression       bal_acc=0.5640 [0.514-0.620], wF1=0.7442, QWK=0.7452, mAUC=0.8929
+  random_forest             bal_acc=0.6363 [0.597-0.676], wF1=0.8307, QWK=0.7900, mAUC=0.9412
+  svm_rbf                   bal_acc=0.6028 [0.565-0.644], wF1=0.7959, QWK=0.7682, mAUC=0.9321
+  elasticnet                bal_acc=0.5399 [0.483-0.597], wF1=0.7790, QWK=0.7771, mAUC=0.8821
+  xgboost                   bal_acc=0.6312 [0.589-0.679], wF1=0.8717, QWK=0.8991, mAUC=0.9476
+  catboost                  bal_acc=0.6543 [0.625-0.686], wF1=0.8619, QWK=0.8632, mAUC=0.9462
+  lightgbm                  bal_acc=0.6012 [0.570-0.638], wF1=0.8727, QWK=0.8977, mAUC=0.9423
+
+--- nsd_positive ---
+  logistic_regression       bal_acc=0.5230 [0.455-0.591], wF1=0.6116, QWK=0.4137, mAUC=0.7986
+  random_forest             bal_acc=0.6410 [0.600-0.692], wF1=0.7711, QWK=0.7269, mAUC=0.8964
+  svm_rbf                   bal_acc=0.5458 [0.497-0.607], wF1=0.6791, QWK=0.4653, mAUC=0.8347
+  elasticnet                bal_acc=0.4788 [0.412-0.551], wF1=0.5953, QWK=0.3564, mAUC=0.7387
+  xgboost                   bal_acc=0.6661 [0.605-0.735], wF1=0.7648, QWK=0.6737, mAUC=0.8882
+  catboost                  bal_acc=0.6781 [0.624-0.742], wF1=0.7850, QWK=0.7194, mAUC=0.9068
+  lightgbm                  bal_acc=0.6147 [0.561-0.674], wF1=0.7614, QWK=0.6688, mAUC=0.8923

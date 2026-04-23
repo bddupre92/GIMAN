@@ -1,0 +1,32 @@
+{
+  "verdict": "PASS",
+  "note": "max delta 0.0029 <= 0.01 threshold",
+  "max_abs_delta": 0.0028774235754736033,
+  "deltas": {
+    "target_binary": {
+      "pre": 0.9785210943381919,
+      "post": 0.9783685311869774,
+      "delta": -0.00015256315121447983
+    },
+    "target_3class": {
+      "pre": 0.9422503258890312,
+      "post": 0.9418837641478847,
+      "delta": -0.000366561741146576
+    },
+    "target_full_ordinal": {
+      "pre": 0.9464273930337861,
+      "post": 0.9461750663814221,
+      "delta": -0.00025232665236396556
+    },
+    "target_nsd_positive": {
+      "pre": 0.9039418783765931,
+      "post": 0.9068193019520667,
+      "delta": 0.0028774235754736033
+    }
+  },
+  "metric_note": "AUC-ROC for binary; macro_auc_ovr (one-vs-rest) for multiclass",
+  "fold_local_script": "scripts/paper1/run_fold_local_imputation.py",
+  "baseline_reference": "outputs/paper1_benchmark/*.json (from scripts/run_paper1_benchmark.py, pre-CV imputer)",
+  "git_sha_pre": "004c62d",
+  "decision_rule_locked_at": "outputs/paper1_benchmark/fold_local_refit/PRE_REGISTRATION.md"
+}
