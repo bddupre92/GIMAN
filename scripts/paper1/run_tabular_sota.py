@@ -226,12 +226,15 @@ def run_autogluon(X: np.ndarray, y: np.ndarray, target: str) -> dict:
             path=str(fold_out),
             verbosity=0,
         )
+        # Exclude NN-based models known to segfault on Apple Silicon + Python 3.13
+        # (NN_TORCH, FASTAI). Also exclude KNN (slow at n=2k with no tuning benefit).
         predictor.fit(
             tr_df,
             presets="medium_quality",
             time_limit=600,  # 10min/fold => 50min/target cap
             num_bag_folds=5,
             num_stack_levels=0,
+            excluded_model_types=["NN_TORCH", "FASTAI", "KNN"],
             ag_args_fit={"num_cpus": 4},
         )
         proba_df = predictor.predict_proba(te_df.drop(columns=["label"]))
