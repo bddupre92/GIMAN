@@ -6,7 +6,7 @@
 \chapter{NSD-ISS Stage Prediction with Calibrated Uncertainty}
 \label{ch:paper1}\label{p1:ch:paper1}
 
-The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease (PD) through two biological anchors---neuronal alpha-synuclein (S, assessed by seed amplification assay) and dopaminergic dysfunction (D, assessed by DaT-SPECT)---yet no computational models exist to predict NSD-ISS stages from routinely collected clinical data. Using the Parkinson's Progression Markers Initiative (PPMI, $n{=}2{,}201$), we benchmarked eight machine-learning models (seven gradient-boosted and kernel-based tabular classifiers and one graph-based Multimodal Graph Attention Network) across four clinically-motivated target formulations. Calibrated uncertainty was quantified by cross-conformal prediction (CV+), a distribution-free procedure that returns a small set of plausible labels rather than a single prediction with a mathematical coverage guarantee, using the Least Ambiguous set-valued Classifier (LAC) nonconformity score. CatBoost achieved 0.951 balanced accuracy (AUC 0.979) for binary NSD-ISS classification, outperforming the Multimodal GAT (0.825) by 12.6 percentage points, consistent with the known dominance of tree ensembles on medium-sized tabular datasets. CV+ conformal prediction achieved $>90\%$ marginal coverage with near-singleton prediction sets (mean size 0.96--1.27 labels per patient). Removing DaT-SPECT features reduced binary AUC by 25.2\%, while clinical features alone achieved AUC 0.900 for NSD-positive sub-staging---supporting a two-stage deployment pattern in which biological confirmation occurs once and subsequent clinical-only sub-staging supports sites lacking imaging access. External validation on BioFIND ($n{=}118$, PD-only cohort) revealed a training-label confound (binary balanced accuracy 0.516): PPMI's NSD-negative class mixes healthy controls with prodromal patients, causing the model to learn a healthy-vs-PD boundary. Retraining the binary classifier on PD-only subjects mitigates this confound (see \S\ref{p1:sec:results}). Taken together, these findings establish the first computational benchmark for NSD-ISS biological staging with calibrated uncertainty quantification and a deployment-realistic assessment of label-structure effects.
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease (PD) through two biological anchors---neuronal alpha-synuclein (S, assessed by seed amplification assay) and dopaminergic dysfunction (D, assessed by DaT-SPECT)---yet no computational models exist to predict NSD-ISS stages from routinely collected clinical data. Using the Parkinson's Progression Markers Initiative (PPMI, $n{=}2{,}201$), we benchmarked eight machine-learning models (seven gradient-boosted and kernel-based tabular classifiers and one graph-based Multimodal Graph Attention Network) across four clinically-motivated target formulations. Calibrated uncertainty was quantified by cross-conformal prediction (CV+), a distribution-free procedure that returns a small set of plausible labels rather than a single prediction with a mathematical coverage guarantee, using the Least Ambiguous set-valued Classifier (LAC) nonconformity score. CatBoost achieved 0.951 balanced accuracy (AUC 0.979) for binary NSD-ISS classification, outperforming the Multimodal GAT (0.825) by 12.6 percentage points, consistent with the known dominance of tree ensembles on medium-sized tabular datasets. CV+ conformal prediction achieved $>90\%$ marginal coverage with near-singleton prediction sets (mean size 0.96--1.27 labels per patient). Feature ablation supports a two-stage deployment pattern---biological confirmation once, then clinical-only sub-staging (AUC 0.900) at sites lacking imaging. External validation on BioFIND ($n{=}118$, PD-only cohort) revealed a training-label confound (binary balanced accuracy 0.516): PPMI's NSD-negative class mixes healthy controls with prodromal patients, causing the model to learn a healthy-vs-PD boundary. Retraining on PD-only subjects mitigates this confound. These findings establish the first computational benchmark for NSD-ISS biological staging with calibrated uncertainty quantification and a deployment-realistic assessment of label-structure effects.
 
 % ================================================================
 % I. INTRODUCTION
@@ -297,24 +297,24 @@ Of 2{,}201 PPMI participants the NSD-ISS distribution was: Stage~0 (NSD-negative
  & Random Forest & 0.914 [0.901, 0.927] & 0.971 [0.964, 0.978] & 0.821 [0.795, 0.847] \\
 \midrule
 \multirow{3}{*}{\textbf{Three-class}}
- & CatBoost & \textbf{0.783} [0.753, 0.803] & \textbf{0.944} & 0.836 [0.812, 0.857] \\
+ & CatBoost & \textbf{0.783} [0.753, 0.803] & \textbf{0.945} [0.937, 0.952] & 0.836 [0.812, 0.857] \\
  & XGBoost & 0.762 [0.738, 0.786] & 0.950 & \textbf{0.874} [0.854, 0.894] \\
  & Logistic Reg. & 0.760 [0.736, 0.786] & 0.928 & 0.774 [0.748, 0.798] \\
 \midrule
 \multirow{3}{*}{\textbf{Full ordinal}}
- & CatBoost & \textbf{0.658} [0.623, 0.697] & \textbf{0.954} & 0.850 [0.827, 0.869] \\
+ & CatBoost & \textbf{0.658} [0.623, 0.697] & \textbf{0.948} [0.943, 0.953] & 0.850 [0.827, 0.869] \\
  & XGBoost & 0.644 [0.601, 0.698] & 0.955 & \textbf{0.899} [0.880, 0.915] \\
  & Random Forest & 0.621 [0.593, 0.655] & 0.941 & 0.746 [0.712, 0.776] \\
 \midrule
 \multirow{3}{*}{\textbf{NSD+}}
- & CatBoost & \textbf{0.671} [0.624, 0.728] & \textbf{0.913} & \textbf{0.734} [0.686, 0.782] \\
+ & CatBoost & \textbf{0.671} [0.624, 0.728] & \textbf{0.910} [0.898, 0.921] & \textbf{0.734} [0.686, 0.782] \\
  & XGBoost & 0.669 [0.610, 0.736] & 0.911 & 0.712 [0.660, 0.756] \\
  & Random Forest & 0.634 [0.602, 0.672] & 0.903 & 0.726 [0.679, 0.771] \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
 
-\raggedright\scriptsize\textit{Note:} Bootstrap 95\% CIs computed from 1,000 resamples. AUC CIs available for binary target (ROC-AUC); multiclass AUC (macro one-vs-rest) CIs not included in bootstrap analysis.
+\raggedright\scriptsize\textit{Note:} Bootstrap 95\% CIs computed from 1,000 resamples. Multiclass AUC means and CIs (three-class, full-ordinal, NSD+) reflect a fresh 5-fold stratified CV (seed~42) with 1{,}000-resample bootstrap across fold AUCs (\texttt{scripts/paper1/compute\_multiclass\_auc\_ci.py}); values differ from an earlier report by up to 0.006 due to sampling.
 \end{table*}
 
 CatBoost achieved the highest balanced accuracy across all targets: 0.951 (binary), 0.783 (three-class), 0.660 (full ordinal), and 0.664 (NSD-positive subgroup). Performance decreased with finer staging granularity and increasing class imbalance (Stage~4: $n{=}17$).
@@ -338,17 +338,17 @@ CatBoost achieved the highest balanced accuracy across all targets: 0.951 (binar
  & Simple GAT & 0.832 $\pm$ 0.019 & 0.927 & $-$0.119 \\
 \midrule
 \multirow{3}{*}{\textbf{Three-class}}
- & CatBoost (tabular) & \textbf{0.783} & 0.944 & --- \\
+ & CatBoost (tabular) & \textbf{0.783} & 0.945 [0.937, 0.952] & --- \\
  & Enhanced MM-GAT & 0.705 $\pm$ 0.033 & 0.873 & $-$0.073 \\
  & Simple GAT & 0.666 $\pm$ 0.031 & 0.873 & $-$0.112 \\
 \midrule
 \multirow{3}{*}{\textbf{Full ordinal}}
- & CatBoost (tabular) & \textbf{0.658} & 0.954 & --- \\
+ & CatBoost (tabular) & \textbf{0.658} & 0.948 [0.943, 0.953] & --- \\
  & Enhanced MM-GAT & 0.549 $\pm$ 0.044 & 0.858 & $-$0.109 \\
  & Simple GAT & 0.521 $\pm$ 0.090 & 0.844 & $-$0.137 \\
 \midrule
 \multirow{3}{*}{\textbf{NSD+}}
- & CatBoost (tabular) & \textbf{0.671} & 0.913 & --- \\
+ & CatBoost (tabular) & \textbf{0.671} & 0.910 [0.898, 0.921] & --- \\
  & Enhanced MM-GAT & 0.544 $\pm$ 0.060 & 0.769 & $-$0.127 \\
  & Simple GAT & 0.493 $\pm$ 0.029 & 0.736 & $-$0.178 \\
 \bottomrule
@@ -380,7 +380,7 @@ NSD+ subgroup & 99.5\% & 1.27 & 1.27 labels/patient \\
 \end{tabular}
 \end{table}
 
-Cross-conformal CV+ with LAC scoring achieved ${>}90\%$ marginal coverage across all four targets, well above the nominal 90\% target, with prediction sets that remain near singleton (mean size 0.96--1.27 labels per patient; Table~\ref{p1:tab:conformal}). For binary classification the mean set size of 0.96 (below 1.0 because some patients are returned as ``abstain'' sets at the 90\% level rather than the 95\% used here) indicates that the conformal wrapper delivers a definitive single-label prediction for the vast majority of patients while still preserving coverage. Coverage and mean set size across all three confidence levels (80/90/95\%) are visualised in Fig.~\ref{p1:fig:conformal}. For binary classification, mean set size of 0.96 indicates most patients receive a definitive single-label prediction with guaranteed 95.5\% coverage. The NSD-positive subgroup showed larger sets (1.27), reflecting genuine uncertainty in fine-grained staging within the smaller population ($n{=}779$).
+Cross-conformal CV+ with LAC scoring achieved ${>}90\%$ marginal coverage across all four targets, well above the nominal 90\% target, with prediction sets that remain near singleton (mean size 0.96--1.27 labels per patient; Table~\ref{p1:tab:conformal}). For binary classification the mean set size of 0.96 (below 1.0 because some patients are returned as ``abstain'' sets at the 90\% CL used as the primary analysis; Supplementary~S-2 reports a 95\% sensitivity) indicates that the conformal wrapper delivers a definitive single-label prediction for the vast majority of patients while still preserving coverage. Coverage and mean set size across all three confidence levels (80/90/95\%) are visualised in Fig.~\ref{p1:fig:conformal}. For binary classification, mean set size of 0.96 indicates most patients receive a definitive single-label prediction with empirical coverage 95.5\% at the 90\% nominal CL. The NSD-positive subgroup showed larger sets (1.27), reflecting genuine uncertainty in fine-grained staging within the smaller population ($n{=}779$).
 
 % --- Conformal coverage figure ---
 \begin{figure}[!t]
@@ -521,11 +521,21 @@ Third, the PPMI-to-BioFIND external validation of the binary target (balanced ac
 Gradient-boosted tabular models consistently outperformed graph-based models by 7.3--17.8 percentage points across the four targets (min: three-class Multimodal GAT at $-$0.073 balanced accuracy; max: NSD-positive simple GAT at $-$0.178; see Table~\ref{p1:tab:gat}). The Multimodal GAT with GATConv and cross-modal attention improved over a simple single-stream GAT (particularly for multiclass: three-class 0.705 vs.\ 0.666), but the $k$-NN patient-similarity graph did not provide information beyond what tree ensembles capture directly from feature vectors. This aligns with Grinsztajn~\textit{et al.}~\cite{grinsztajn2022} and Shwartz-Ziv \& Armon~\cite{shwartzziv2022}, who independently showed that trees dominate on medium-sized tabular data. Graph models may become advantageous for inductive transfer to cohorts with incomplete features, where graph-informed imputation can leverage similar patients---the subject of ongoing work in Paper~2 of this dissertation series.
 
 \subsection{Conformal Prediction for Clinical Deployment}
-Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton sets (0.96--1.27), demonstrating well-calibrated uncertainty. For binary classification, clinicians receive a definitive prediction with guaranteed 95.5\% coverage. For borderline NSD-positive patients, slightly larger prediction sets provide honest uncertainty---a clinically desirable property.
+Cross-conformal prediction achieved ${>}90\%$ marginal coverage with near-singleton sets (0.96--1.27), demonstrating well-calibrated uncertainty. For binary classification, clinicians receive a definitive prediction with empirical coverage 95.5\% at the 90\% nominal CL (Supplementary~S-2 for 95\% sensitivity). For borderline NSD-positive patients, slightly larger prediction sets provide honest uncertainty---a clinically desirable property.
 
 \paragraph*{Confounder sensitivity}
 \label{p1:sec:discussion:confounders}
-Five pre-specified sensitivity analyses directly pre-empt the question of whether the 0.979 binary AUC is age-, sex-, scanner-, site-, or recruitment-era-confounded; full results are given in Supplementary~S-5. First, a 1:1 greedy age-matched cohort (n${=}1{,}558$, caliper $\pm 2$ years${\approx}0.2{\times}\mathrm{SD}$ per the canonical matching-caliper recommendation~\cite{austin2011caliper}, residual matched age~$\Delta{=}{-}0.002$ years vs.\ the full-cohort $+0.576$-year gap) yields binary CatBoost AUC~$0.969$ [95\% CI $0.960$--$0.978$], within $0.010$ of the full-cohort $0.979$, indicating that age is not a confound---consistent with the published finding that age and sex jointly explain $<\!10\,\%$ of DaT-SPECT SBR between-subjects variance versus the ${\sim}50\,\%$ reduction that defines pathological DaT loss~\cite{schmitzSteinkruger2021age,eusebi2017dat}. Second, sex-stratified CatBoost yields nearly identical male and female binary AUCs ($0.9770$ vs.\ $0.9766$; bootstrap interaction $\Delta{=}{+}0.0004$, 95\% CI~$[-0.013, +0.015]$, $p{=}0.914$). Third, a PPMI enrollment-wave leave-one-cohort-out analysis (early~2010--2013, middle~2014--2020, late~2021--2025 reflecting the PPMI~1.0 $\rightarrow$~2.0 transition) yields per-wave binary AUCs in $[0.947, 0.992]$ (mean~$0.965 \pm 0.024$ SD) and three-class macro-AUCs in $[0.930, 0.946]$ (SD~$0.008$), demonstrating cross-era generalisability. Fourth, a pre-registered DaT-SPECT protocol leave-one-cohort-out analysis (protocol $001$ $N{=}965$ vs.\ $002$ $N{=}1{,}141$ on the 2{,}137-patient analyzed-baseline-scan cohort) yields per-protocol binary AUCs of $0.967$ [$0.952$--$0.979$] and $0.989$ [$0.982$--$0.995$] with cross-protocol mean $0.978 \pm 0.016$ and three-class macro-AUC mean $0.937 \pm 0.002$---confirming cross-protocol robustness and partially disentangling the scanner/reconstruction-era effect from the cohort-recruitment-era shift absorbed in the enrollment-wave analysis. Fifth, a pre-registered site leave-one-site-out (site-LOSO) analysis on the T1-MRI imaging-covered subsample (n${=}647$ of 2{,}201, 29.4\%; site identifiers extracted from LONI IDA \texttt{PPMI\_*.xml} metadata and persisted as \texttt{features.paper1\_site\_assignments}) with decision rule locked before any result was inspected (PASS if pooled per-site AUC SD~${\le}$~$0.048$~${=}$~$3{\times}$~protocol-LOCO SD AND min per-site AUC~${\ge}$~$0.90$) \emph{FAILED} the pre-registered rule (pooled mean~$0.955$, SD~$0.070$, min~$0.735$). The failure was driven by two small folds with extreme class imbalance (site~290: n${=}21$, 81\% NSD$+$; site~007: n${=}27$, 85\% NSD$+$), a regime in which AUC is known to be high-variance. The two folds with stable bootstrap CIs both exceed the 0.90 threshold: site~034 (n${=}115$) AUC~$0.966$~[$0.919$--$0.997$] and the pooled-small-sites fold (n${=}209$) AUC~$0.955$~[$0.921$--$0.984$]. The headline AUC is unchanged by Analysis~E because it is computed on the balanced n${=}2{,}201$ cohort with $5$-fold CV; the recommended deployment pattern is on-site calibration prior to clinical use, with protocol-LOCO (Analysis~IV) serving as the cleaner cross-scanner generalisation evidence. Uncontrolled confounders not tested here (scanner make/model from DICOM headers, medication state at scan, comorbidities, handedness laterality) are enumerated in Supplementary~S-5 and are partially addressed elsewhere in this dissertation.
+Five pre-specified sensitivity analyses directly pre-empt the question of whether the 0.979 binary AUC is age-, sex-, scanner-, site-, or recruitment-era-confounded; full results are given in Supplementary~S-5.
+
+First, a 1:1 greedy age-matched cohort (n${=}1{,}558$, caliper $\pm 2$ years${\approx}0.2{\times}\mathrm{SD}$ per the canonical matching-caliper recommendation~\cite{austin2011caliper}, residual matched age~$\Delta{=}{-}0.002$ years vs.\ the full-cohort $+0.576$-year gap) yields binary CatBoost AUC~$0.969$ [95\% CI $0.960$--$0.978$], within $0.010$ of the full-cohort $0.979$, indicating that age is not a confound. This is consistent with the published finding that age and sex jointly explain $<\!10\,\%$ of DaT-SPECT SBR between-subjects variance versus the ${\sim}50\,\%$ reduction that defines pathological DaT loss~\cite{schmitzSteinkruger2021age,eusebi2017dat}.
+
+Second, sex-stratified CatBoost yields nearly identical male and female binary AUCs ($0.9770$ vs.\ $0.9766$; bootstrap interaction $\Delta{=}{+}0.0004$, 95\% CI~$[-0.013, +0.015]$, $p{=}0.914$).
+
+Third, a PPMI enrollment-wave leave-one-cohort-out analysis (early~2010--2013, middle~2014--2020, late~2021--2025 reflecting the PPMI~1.0 $\rightarrow$~2.0 transition) yields per-wave binary AUCs in $[0.947, 0.992]$ (mean~$0.965 \pm 0.024$ SD) and three-class macro-AUCs in $[0.930, 0.946]$ (SD~$0.008$), demonstrating cross-era generalisability.
+
+Fourth, a pre-registered DaT-SPECT protocol leave-one-cohort-out analysis was run on the 2{,}137-patient analyzed-baseline-scan cohort (protocol $001$ $N{=}965$ vs.\ $002$ $N{=}1{,}141$). Per-protocol binary AUCs were $0.967$ [$0.952$--$0.979$] and $0.989$ [$0.982$--$0.995$] with cross-protocol mean $0.978 \pm 0.016$ and three-class macro-AUC mean $0.937 \pm 0.002$. This confirms cross-protocol robustness and partially disentangles the scanner/reconstruction-era effect from the cohort-recruitment-era shift absorbed in the enrollment-wave analysis.
+
+Fifth, a pre-registered site leave-one-site-out (site-LOSO) analysis was run on the T1-MRI imaging-covered subsample (n${=}647$ of 2{,}201, 29.4\%). Site identifiers were extracted from LONI IDA \texttt{PPMI\_*.xml} metadata and persisted as \texttt{features.paper1\_site\_assignments}. The decision rule was locked before any result was inspected (PASS if pooled per-site AUC SD~${\le}$~$0.048$~${=}$~$3{\times}$~protocol-LOCO SD AND min per-site AUC~${\ge}$~$0.90$). The analysis \emph{FAILED} the pre-registered rule (pooled mean~$0.955$, SD~$0.070$, min~$0.735$). The failure was driven by two small folds with extreme class imbalance (site~290: n${=}21$, 81\% NSD$+$; site~007: n${=}27$, 85\% NSD$+$), a regime in which AUC is known to be high-variance. The two folds with stable bootstrap CIs both exceed the 0.90 threshold: site~034 (n${=}115$) AUC~$0.966$~[$0.919$--$0.997$] and the pooled-small-sites fold (n${=}209$) AUC~$0.955$~[$0.921$--$0.984$]. The headline AUC is unchanged by Analysis~E because it is computed on the balanced n${=}2{,}201$ cohort with $5$-fold CV. The recommended deployment pattern is on-site calibration prior to clinical use, with protocol-LOCO (Analysis~IV) serving as the cleaner cross-scanner generalisation evidence. Uncontrolled confounders not tested here (scanner make/model from DICOM headers, medication state at scan, comorbidities, handedness laterality) are enumerated in Supplementary~S-5 and are partially addressed elsewhere in this dissertation.
 
 \subsection{Limitations}
 \label{p1:sec:discussion:limitations}
@@ -539,6 +549,19 @@ Missing data presents an additional challenge for external deployment: median im
 
 \subsection{Future Directions}
 Two extensions of this work are currently under investigation. First, stage-conditioned graph-informed imputation leverages the observation that missingness patterns differ systematically between NSD-ISS stages; imputation models that account for stage-specific patterns may reduce bias and improve downstream prediction, particularly for external cohorts with incomplete features (Paper~2 of this dissertation). Second, longitudinal stage-transition modelling addresses the ultimate clinical goal of predicting \emph{when} patients will progress between NSD-ISS stages, moving beyond the cross-sectional snapshot framework of the present study (Paper~3). The third direction raised by earlier drafts---retraining binary classifiers on PD-only subjects to eliminate the healthy-control confound---has been incorporated into this paper (\S\ref{p1:sec:results:pdonly}) rather than deferred, in response to the Espay~\textit{et al.}~\cite{espay2025med} medication-status critique.
+
+\section*{Data Availability}
+\label{p1:sec:data-availability}
+Raw PPMI data is available at \url{https://www.ppmi-info.org/access-data-specimens/download-data} under the PPMI Data Use Agreement. Processed feature tables, fold assignments, and conformal calibration files required to reproduce this study's results are released with this submission at the Zenodo archive DOI (to be assigned at acceptance). SQL extract scripts are at \texttt{scripts/paper1/} in the authors' repository.
+
+\section*{Conflict of Interest}
+The authors declare no competing interests.
+
+\section*{Funding}
+No external grant funding was received for this work. The study was conducted within the Department of Biomedical Engineering, University of North Dakota.
+
+\section*{Author Contributions}
+B.D.\ contributed to all of: conceptualisation, methodology, software, formal analysis, investigation, data curation, writing (original draft and review), visualisation, and project administration.
 
 % ================================================================
 % VI. CONCLUSION
