@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan workstream-by-workstream. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Compute environment bring-up (if working on Threadripper / WSL2):** see the companion setup doc at `Docs/superpowers/plans/2026-04-24-threadripper-wsl2-cuda-setup.md`. That document covers Windows 11 + WSL2 Ubuntu + NVIDIA RTX A5000 provisioning, SSH/Tailscale from the Mac, PostgreSQL migration from the macOS host, Mempalace + Claude Code state port, and end-to-end validation (WS-P3-6 Markov). Run it to completion before starting Phase R workstreams on a fresh Threadripper.
+
 **Research predecessor:** `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response.md` (citations + decisions + PDBP feasibility)
 
 **Standing rubric:** `Docs/CONVENTIONS.md §7` (8-category rigor rubric applies)
