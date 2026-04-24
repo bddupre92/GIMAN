@@ -9,10 +9,27 @@
 
 ## Context
 
-**Repository:** `CSCI-FALL-2025` on branch `feat/ch9-6-multichannel`.
+**Repository:** `CSCI-FALL-2025`. Mac-side active branch: `feat/ch9-6-multichannel`. Threadripper-side compute lives on a dedicated branch `feat/paper3plus4-cuda-reruns` (cut from `feat/ch9-6-multichannel`) so Threadripper CUDA output doesn't collide with Mac text edits.
 **Primary user:** Blair Dupre, Department of Biomedical Engineering, University of North Dakota.
-**Target hardware:** Threadripper desktop, NVIDIA RTX A5000 (24 GB VRAM), Windows 11 with WSL2 Ubuntu.
+**Target hardware (confirmed):**
+
+- **Chassis:** Fractal Define 7 XL + SYS-WS-PRO-MAX-WRX90 Threadripper WRX90 workstation
+- **RAM:** 256 GB DDR5 ECC 5600 MT/s 8-channel (8 × 32 GB UDIMMs)
+- **GPU:** 3 × NVIDIA RTX A5000, 24 GB GDDR6 each, 8,192 CUDA cores / 256 Tensor cores / 64 RT cores per card — **72 GB total VRAM across 3 independent CUDA devices** (check for NVLink bridges; line items hint at possible pairing hardware)
+- **Storage (primary / compute):** 4 TB WD SN850X PCIe Gen4 NVMe
+- **Storage (cold archive):** 3 × 12 TB Seagate Ironwolf Pro 7200 rpm HDDs = 36 TB raw (likely RAID5 or JBOD)
+- **PSU + cooling:** 1200 W Platinum, 360 mm AIO liquid CPU cooler, full fan config
+- **OS:** Microsoft Windows 11 Pro (3 licenses — presumably 1 active + 2 spare)
+- **Warranty:** 3-year parts/labor + lifetime technical support
+
 **Companion machine:** macOS laptop (Apple M-series). The Mac is the original development host; this setup migrates + mirrors the compute environment to the Threadripper. State moves both directions but the Threadripper becomes the authoritative host for heavy CUDA runs and for the PostgreSQL database.
+
+### What the hardware enables
+
+- **Parallel CUDA workstreams (3 devices):** the Paper 3+4 critical path drops from ~14 days serial to ~5-6 days parallel. For example, `CUDA_VISIBLE_DEVICES=0 python ws_p3_16_pdbp.py` in one tmux + `CUDA_VISIBLE_DEVICES=1 python ws_p3_1_inductive.py` in another + `CUDA_VISIBLE_DEVICES=2 python ws_p3_4_survtrace.py` in a third, all concurrent.
+- **Memory headroom:** 192 GB allocatable to WSL2 (75% of 256 GB) covers any pandas DataFrame + multi-process DataLoader combination we'll hit. Leaves 64 GB for Windows + GPU driver overhead.
+- **Fast compute filesystem:** 4 TB NVMe gives ~6-7 GB/s sequential reads — eliminates I/O as a training bottleneck.
+- **Cold archive on 36 TB spinning disks:** raw PPMI/BioFIND/PDBP/HBS data + historical snapshots of the Google Drive mirror can live there indefinitely without eating the NVMe.
 
 **What this setup enables:**
 
@@ -44,17 +61,26 @@ Read these in order after finishing setup:
 
 6. **`~/.claude/projects/<project-dir>/memory/MEMORY.md`** — persisted conversation memory. Read this after Phase 8 to inherit project context.
 
-## Phase 0: Pre-flight inventory (user decision inputs)
+## Phase 0: Pre-flight inventory (already decided + residual inputs)
 
-Before starting, the user (Blair) needs to decide and report the following to the Claude instance running on Threadripper:
+The user has confirmed the following strategic decisions:
 
-- [ ] **Total system RAM** (e.g., 64 GB, 128 GB). Used to size `.wslconfig` memory cap.
+- ✅ **Postgres authority:** single-authoritative PostgreSQL hosted on WSL2. Mac tunnels in via Tailscale.
+- ✅ **Branching:** `feat/paper3plus4-cuda-reruns` branch cut from `feat/ch9-6-multichannel` on Threadripper. Clean separation from Mac text edits.
+- ✅ **Tailscale location:** inside WSL2 (not Windows) — so `ssh threadripper` from Mac lands directly in the Linux shell.
+- ✅ **WSL RAM cap:** 192 GB (of 256 GB total system RAM).
+- ✅ **Hardware:** 3 × A5000 GPUs, 4 TB NVMe primary, 36 TB HDD cold archive.
+
+Still needs to be captured once Threadripper is booted:
+
+- [ ] **Exact Threadripper CPU SKU** — `lscpu` inside WSL (tells us core count for WSL `processors=` cap).
 - [ ] **Windows version** — run `winver` in PowerShell. Target ≥ 22H2.
-- [ ] **Current NVIDIA Windows driver version** — `nvidia-smi` in Windows PowerShell. Target ≥ 535 (for CUDA 12.1+ support via WSL2). If older, update via GeForce Experience or manual download.
-- [ ] **Existing WSL2 installation status** — `wsl --version` and `wsl -l -v` in PowerShell. Need WSL 2.x with an Ubuntu distro (preferably 22.04 LTS).
+- [ ] **Current NVIDIA Windows driver version** — `nvidia-smi` in Windows PowerShell. Target ≥ 535 for CUDA 12.1+ support. Update via GeForce Experience or manual download if older.
+- [ ] **Existing WSL2 installation status** — `wsl --version` and `wsl -l -v` in PowerShell. Need WSL 2.x with Ubuntu 22.04 or 24.04 LTS.
+- [ ] **NVLink bridges present between A5000 cards?** — check with `nvidia-smi topo -m` inside WSL (shows NVLink in the inter-GPU matrix). If present, pairs give combined 48 GB VRAM pool; if absent, each GPU is independent.
+- [ ] **HDD mount plan:** RAID5 across the 3 × 12 TB disks for ~24 TB redundant capacity, or JBOD for 36 TB? RAID5 recommended (one-drive-failure tolerance with only 33% capacity overhead).
+- [ ] **NVMe partition plan:** whole 4 TB for WSL's ext4 home, or carve a Windows data partition first? Recommend: leave 200-300 GB for Windows, dedicate the remaining ~3.7 TB to WSL2 via `wsl --install --location`.
 - [ ] **Repo access method** — HTTPS with token, or SSH with existing key? Clone URL?
-- [ ] **Mac Tailscale installed?** — needed for cross-machine SSH. Free personal tier.
-- [ ] **Which branch to work on** — I recommend a new branch `feat/paper3plus4-cuda-reruns` cut from `feat/ch9-6-multichannel` to isolate Threadripper work from Mac work. Decide before Phase 8.
 
 ## Phase 1: Windows-side prep (15 min, one reboot)
 
@@ -70,22 +96,23 @@ wsl --shutdown
 
 Go to <https://www.nvidia.com/Download/index.aspx>, select RTX A5000 + Windows 11, install. **Do NOT install a Linux NVIDIA driver inside WSL.** CUDA in WSL2 uses the Windows driver via PCI passthrough (`/usr/lib/wsl/lib/libcuda.so.1`).
 
-### 1.3 Create `.wslconfig` with resource caps
+### 1.3 Create `.wslconfig` with resource caps (tuned for 256 GB / Threadripper)
 
 ```powershell
 # %USERPROFILE%\.wslconfig  (create if absent)
-# Replace memory / processors values with user-decided caps
+# Sized for 256 GB RAM, multi-GPU Threadripper
 Set-Content -Path "$env:USERPROFILE\.wslconfig" -Value @"
 [wsl2]
-memory=32GB
-processors=8
+memory=192GB
+processors=0
 vmIdleTimeout=-1
-swap=16GB
+swap=32GB
 localhostForwarding=true
+nestedVirtualization=true
 "@
 ```
 
-`vmIdleTimeout=-1` is the critical setting — without it WSL2 shuts down ~60 s after the last process exits, which kills tmux/postgres/tailscale.
+`processors=0` lets WSL2 use all available logical cores (adjust down to leave Windows headroom if the CPU SKU has <32 threads — for Threadripper Pro 7965WX / 7985WX / 7995WX this is fine as-is). `vmIdleTimeout=-1` is the critical setting — without it WSL2 shuts down ~60 s after the last process exits, which kills tmux/postgres/tailscale. `nestedVirtualization=true` enables Docker-in-WSL if needed later.
 
 ### 1.4 Reboot (or `wsl --shutdown` then re-enter)
 
@@ -130,19 +157,61 @@ ps -p 1 -o comm=   # should print: systemd
 
 **Validation criterion:** `ps -p 1 -o comm=` returns `systemd`.
 
-## Phase 3: GPU verification inside WSL2 (5 min)
+## Phase 3: Multi-GPU verification inside WSL2 (10 min)
 
 ```bash
+# Should list all 3 A5000 cards
 nvidia-smi
-# Expected: NVIDIA RTX A5000 listed + CUDA version ≥ 12.1
 
+# Topology: confirms NVLink presence (or absence)
+nvidia-smi topo -m
+# Legend: NV# = NVLink at gen #; PIX / PHB = PCIe hops; SYS = NUMA traversal
+# A5000 NVLink bridge (if present) shows as "NV1" between paired GPUs.
+
+# Sanity — WSL CUDA shim
 ls -l /usr/lib/wsl/lib/libcuda.so.1
-# Expected: symlink present, not "No such file"
+
+# Multi-GPU PyTorch check (run after Phase 5 venv exists, but the CUDA runtime itself
+# should be visible immediately):
+python3 -c "
+import subprocess
+r = subprocess.run(['nvidia-smi', '--query-gpu=index,name,memory.total,driver_version',
+                    '--format=csv,noheader'], capture_output=True, text=True)
+print(r.stdout.strip())
+# Expected three lines, one per GPU index 0, 1, 2:
+#   0, NVIDIA RTX A5000, 24564 MiB, 550.xx
+#   1, NVIDIA RTX A5000, 24564 MiB, 550.xx
+#   2, NVIDIA RTX A5000, 24564 MiB, 550.xx
+"
 ```
 
-**Validation criterion:** `nvidia-smi` lists the A5000 without error. If it fails,
-the problem is the **Windows driver**, not anything in WSL — update the driver
-via nvidia.com and retry.
+**Validation criteria:**
+
+- `nvidia-smi` lists all 3 A5000 cards without error
+- `nvidia-smi topo -m` reveals whether NVLink is wired between any pair (look for `NV1` / `NV2` entries; `PIX` / `PHB` mean no NVLink, just PCIe)
+- Driver version ≥ 535 on all 3 devices
+
+If `nvidia-smi` fails or shows fewer than 3 cards, the problem is the **Windows driver**, not anything in WSL — update the driver via nvidia.com and retry. If one card shows `ERR` or missing PCIe, physical reseat may be required (rare on first install).
+
+### Per-workstream GPU pinning pattern
+
+Set `CUDA_VISIBLE_DEVICES` to dedicate one GPU per workstream so runs don't contend. Convention for Paper 3+4 critical path:
+
+| Workstream | GPU | Rationale |
+|---|---|---|
+| WS-P3-16 PDBP external validation | `cuda:0` | Longest runtime (5-6 d), gets the first GPU |
+| WS-P3-1 Inductive graph retrain | `cuda:1` | 4 d GAT training |
+| WS-P3-4 SurvTRACE/SurvLatent-ODE/CRISP-NAM | `cuda:2` | 4-5 d, three vendored architectures run sequentially on one GPU |
+| WS-P3-5 GraphMAE | `cuda:0` (after P3-16 done) | Uses NVLink pair if available for larger batch |
+| WS-P3-13 5-seed variance | `cuda:1` (after P3-1 done) | Retrains DeepHit + Graph-DT 25× |
+
+Launch pattern:
+
+```bash
+tmux new -s ws_p3_16
+CUDA_VISIBLE_DEVICES=0 .venv/bin/python scripts/paper3plus4/run_pdbp_external_validation.py \
+  2>&1 | tee logs/ws_p3_16_$(date +%Y%m%d_%H%M).log
+```
 
 ## Phase 4: Base packages + SSH + Tailscale (20 min)
 
@@ -432,34 +501,72 @@ within CV-noise tolerance (typically < 0.001 per entry).
 
 Once this passes, the workstation is ready for CUDA-heavy work.
 
-## After-Setup — which workstream to run first
+## After-Setup — parallel workstream launch (3 GPUs)
 
 Open `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response-execution.md`
-and pick one of:
+for each workstream's pre-registered decision rules, output paths, and
+acceptance criteria. Launch the critical-path trio in parallel across the 3 A5000s:
 
-| Priority | WS | Effort | Why first |
-|---|---|---|---|
-| **1** | **WS-P3-16 PDBP external validation** | 5-6 d | Critical-path reviewer demand. NSD-ISS port on PDBP + external inference on all 10 Paper 3 checkpoints. |
-| **2** | WS-P3-1 Inductive graph retrain | 4 d | Methodological linchpin for transductive-leakage concern. 5×5-fold GAT retrains. |
-| **3** | WS-P3-4 SurvTRACE + SurvLatent-ODE + CRISP-NAM | 4-5 d | Three new survival-model baselines reviewer asked for. All vendored. |
-| **4** | WS-P3-5 GraphMAE pre-training | 3-4 d | Self-supervised encoder pre-training. |
-| **5** | WS-P3-13 5-seed variance | 2 d | Fold-stability evidence for all models. |
+### Day 0-6 (parallel on 3 GPUs)
 
-See the execution plan for pre-registered decision rules, output paths, and
-acceptance criteria per workstream.
+| GPU | tmux session | Workstream | Effort | Script |
+|---|---|---|---|---|
+| `cuda:0` | `ws_p3_16` | **WS-P3-16 PDBP external validation** | 5-6 d | `scripts/paper3plus4/run_pdbp_external_validation.py` |
+| `cuda:1` | `ws_p3_1` | WS-P3-1 Inductive graph retrain | 4 d | `scripts/paper3plus4/run_inductive_graph_retrain.py` |
+| `cuda:2` | `ws_p3_4` | WS-P3-4 SurvTRACE + SurvLatent-ODE + CRISP-NAM baselines | 4-5 d | 3 scripts under `scripts/paper3plus4/` |
 
-For the long CUDA runs, **use `tmux` on WSL2** so they survive SSH
-disconnects. Pattern:
+**Launch command (repeat for each with appropriate CUDA_VISIBLE_DEVICES):**
 
 ```bash
 tmux new -s ws_p3_16
 cd ~/Projects/CSCI-FALL-2025
-.venv/bin/python scripts/paper3plus4/run_pdbp_external_validation.py 2>&1 \
+mkdir -p logs
+CUDA_VISIBLE_DEVICES=0 .venv/bin/python \
+  scripts/paper3plus4/run_pdbp_external_validation.py 2>&1 \
   | tee logs/ws_p3_16_$(date +%Y%m%d_%H%M).log
-# Ctrl-B D to detach. tmux attach -t ws_p3_16 to reattach.
+# Ctrl-B D to detach. `tmux attach -t ws_p3_16` to reattach.
+# `tmux ls` to see all active sessions.
 ```
 
-Even simpler: `nohup` + background. Results survive shell exit.
+### Day 6-10 (second wave after first wave completes)
+
+| GPU | Workstream | Effort |
+|---|---|---|
+| `cuda:0` (freed from P3-16) | WS-P3-5 GraphMAE pre-training | 3-4 d |
+| `cuda:1` (freed from P3-1) | WS-P3-13 5-seed variance (DeepHit + Graph-DT + new baselines × 5 seeds) | 2 d |
+| `cuda:2` (freed from P3-4) | WS-P3-7c Fine-Gray + dynamic landmarking + jmstate (MPS-suitable but can use CUDA) | 3-4 d |
+
+### Day 10-14: MPS-suitable / CPU workstreams in parallel with whatever is still running
+
+| Runs well on | Workstream | Effort |
+|---|---|---|
+| Mac MPS | WS-P3-2 Subject-clustered bootstrap | 1-2 d |
+| CPU inside WSL | WS-P3-6 Markov predictive metrics (unblocks Table II S-3) | 0.5 d |
+| CPU inside WSL | WS-P3-8 Brier decomp + DCA + reliability diagrams | 1-2 d |
+| CPU inside WSL | WS-P3-9 5-dim ablation grid (60 configs) | 2-3 d |
+| CPU inside WSL | WS-P3-10 HSMM misclassification HMM | 2-3 d |
+| Mac | WS-P3-15 Faithfulness metrics | 1-2 d |
+| Mac prose | WS-P3-17 Imputation strategy disclosure | 0.5 d |
+
+**Total critical path with parallelism:** ~14 days wall-clock vs. ~40 days serial.
+
+### Monitoring pattern
+
+From **any** machine (Mac, phone, laptop on the road) via Tailscale:
+
+```bash
+ssh threadripper 'tmux ls'                # see all sessions
+ssh threadripper 'tail -n 50 ~/Projects/CSCI-FALL-2025/logs/ws_p3_16_*.log'
+ssh threadripper 'nvidia-smi'              # GPU load per device
+```
+
+VS Code Remote-SSH gives a richer experience — the tree + terminal + log tails all stream natively. TensorBoard (if used) auto-forwards from WSL:6006 to Windows:6006 to the Mac browser via SSH port forward:
+
+```bash
+# From Mac
+ssh -L 6006:localhost:6006 threadripper &
+# Then open http://localhost:6006 on the Mac browser
+```
 
 ## Ongoing sync strategy — both directions
 
