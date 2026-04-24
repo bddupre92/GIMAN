@@ -56,8 +56,10 @@ def prepare(df: pd.DataFrame, target: str) -> tuple[np.ndarray, np.ndarray, list
                               "3class" if target == "3class" else
                               "full_ordinal" if target == "full_ordinal" else
                               "nsd_positive")
+    # Exclude merged SAA columns (strings) and PATH3 circularity exclusions
     feat_cols = [c for c in df.columns if c not in STAGING_COLS and c not in HIGH_MISS_COLS
-                 and c not in PATH3_EXCLUDE]
+                 and c not in PATH3_EXCLUDE
+                 and c not in {"_saa_pos_flag", "s_positive", "s_positive_stage"}]
     mask = df[target_col] >= 0
     if target == "nsd_positive":
         mask = mask & (df["nsd_iss_stage"] != "0")
@@ -83,8 +85,11 @@ def run_cv_on_subset(sub_df, X_full, y_full, stratum_mask, target, label):
     if len(y) < 10 or n_classes < 2:
         log.warning("  skipping %s: n=%d, n_classes=%d", label, len(y), n_classes)
         return None
-    min_class = min(np.bincount(y))
+    min_class = int(min(np.bincount(y)))
     n_folds = min(N_FOLDS, min_class)
+    if n_folds < 2:
+        log.warning("  skipping %s: min_class=%d < 2 required for CV", label, min_class)
+        return None
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=CV_SEED)
     fold_aucs = []
     all_y, all_p = [], []
