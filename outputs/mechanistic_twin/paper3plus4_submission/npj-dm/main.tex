@@ -83,7 +83,7 @@ The PPMI cohort derivation and transition-extraction pipeline is shown in Fig.~\
 
 \subsection*{Transition-timing performance}
 
-Figure~\ref{fig:perf}a presents the Graph-Regularized Transition-Timing Model architecture: a 2-layer GRU temporal encoder with learned temporal-attention pooling, a 2-layer graph attention network over a $k{=}15$ nearest-neighbour patient-similarity graph, and a warm-start gated fusion layer. Figure~\ref{fig:perf}b--d reports 5-fold stratified cross-validation performance. Table~\ref{tab:main} reports the headline numbers: Dynamic-DeepHit achieves $C_{\mathrm{td}}{=}0.924 \pm 0.020$ and Graph-DT achieves $C_{\mathrm{td}}{=}0.904 \pm 0.034$. Pair-level bootstrap over 250{,}000 concordance-eligible pairs (1{,}000 resamples) gives $\Delta C_{\mathrm{td}}={-}0.020$ [95\% CI $-0.021$, $-0.019$] in DeepHit's favour; the earlier fold-level paired $t$-test ($p{=}0.108$ in the published run, $p{=}0.976$ in a reproduction under MPS non-determinism) is superseded by this more robust estimator. Graph-DT's contribution is therefore interpretability, not discrimination: its graph pathway surfaces per-patient nearest-neighbour trajectories for clinician-facing ``patients-like-you'' explanations, complementing DeepHit's pure temporal encoder.
+Figure~\ref{fig:perf}a presents the Graph-Regularized Transition-Timing Model architecture: a 2-layer GRU temporal encoder with learned temporal-attention pooling, a 2-layer graph attention network over a $k{=}15$ nearest-neighbour patient-similarity graph, and a warm-start gated fusion layer. Figure~\ref{fig:perf}b--d reports 5-fold stratified cross-validation performance. Table~\ref{tab:main} reports the headline numbers: Dynamic-DeepHit achieves $C_{\mathrm{td}}{=}0.924 \pm 0.020$ and Graph-DT\footnote{The ``DT'' suffix denotes \emph{Digital Twin} as named in our dissertation series for consistency with the Graph-Informed Digital Twin family of models. The model in this paper is a graph-regularised survival model; it does not make bidirectional digital-twin claims in the NASEM 2024 sense of a continuously-updating bidirectional simulator.} achieves $C_{\mathrm{td}}{=}0.904 \pm 0.034$. Pair-level bootstrap over 250{,}000 concordance-eligible pairs (1{,}000 resamples) gives $\Delta C_{\mathrm{td}}={-}0.020$ [95\% CI $-0.021$, $-0.019$] in DeepHit's favour; the earlier fold-level paired $t$-test ($p{=}0.108$ in the published run, $p{=}0.976$ in a reproduction under MPS non-determinism) is superseded by this more robust estimator. Graph-DT's contribution is therefore interpretability, not discrimination: its graph pathway surfaces per-patient nearest-neighbour trajectories for clinician-facing ``patients-like-you'' explanations, complementing DeepHit's pure temporal encoder.
 
 \begin{figure*}[!t]
 \centering
@@ -94,37 +94,19 @@ Figure~\ref{fig:perf}a presents the Graph-Regularized Transition-Timing Model ar
 
 \begin{table}[!t]
 \centering
-\caption{\textbf{Transition-prediction performance.} Mean $\pm$ SD across 5 stratified folds. C-td~\cite{uno2007evaluating}: time-dependent concordance. IBS~\cite{graf1999brier}: integrated Brier score. Markov reported as parametric reference.}
+\caption{\textbf{Transition-prediction performance.} Mean $\pm$ SD across 5 stratified folds. C-td~\cite{uno2007evaluating}: time-dependent concordance. IBS~\cite{graf1999brier}: integrated Brier score. The multi-state Markov model is a parametric sojourn-time reference (see \S\ref{sec:methods} and Supplementary Information) and is not directly comparable on transition-classifier discrimination metrics; its sojourn-time alignment with published Kaplan--Meier estimates (Simuni~\textit{et~al.}~\cite{simuni2025}) is the validation criterion and is reported in the Methods.}
 \label{tab:main}
 \begin{tabular}{@{}lccc@{}}
 \toprule
 \textbf{Model} & \textbf{C-td} & \textbf{IBS} & \textbf{Brier@5yr} \\
 \midrule
-Multi-state Markov (reference) & --- & --- & --- \\
 Dynamic-DeepHit~\cite{lee2018deephit} & $\mathbf{0.926 \pm 0.018}$ & $0.006 \pm 0.001$ & $0.005$ \\
 \textbf{Graph-DT} & $0.920 \pm \mathbf{0.013}$ & $0.006 \pm 0.001$ & $0.006$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Per-transition C-td analysis (Table~\ref{tab:per_trans}) shows both models achieve $>0.88$ on the most frequent transitions (Stage 2B, 3, 4), with Dynamic-DeepHit slightly leading on the rarer transitions to Stages 0 and 5. The Graph-DT is competitive on every cause and more consistent across folds. A Markov sojourn-time recomputation after filtering the cohort to PD and Prodromal participants per the Espay 2025 guidance yields Stage 0 sojourn 2.14 years (full-cohort 3.59 years) and Stage 1 sojourn 1.16 years (full-cohort 2.49 years); clinical Stages 2B through 6 are unchanged. This confirms that the transition-prediction results above are not confounded by healthy-control inclusion.
-
-\begin{table}[!t]
-\centering
-\caption{\textbf{Per-transition C-td (DeepHit vs Graph-DT).} $n$ events are the number of observed events of each destination stage across the cohort.}
-\label{tab:per_trans}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-\textbf{Destination} & \textbf{$n$ events} & \textbf{DeepHit} & \textbf{Graph-DT} \\
-\midrule
-$\to$~0 (regression)   & 228   & $\mathbf{0.902}$ & 0.856 \\
-$\to$~2B               & 566   & $\mathbf{0.943}$ & 0.935 \\
-$\to$~3                & 1{,}323 & $\mathbf{0.909}$ & 0.900 \\
-$\to$~4                & 518   & 0.944 & $\mathbf{0.941}$ \\
-$\to$~5 (advanced)     & 192   & $\mathbf{0.883}$ & 0.873 \\
-\bottomrule
-\end{tabular}
-\end{table}
+Per-transition C-td analysis (Supplementary Table~S-1; DeepHit/Graph-DT: $\to$0 0.902/0.856, $\to$2B 0.943/0.935, $\to$3 0.909/0.900, $\to$4 0.944/0.941, $\to$5 0.883/0.873) shows both models achieve $>0.88$ on the most frequent transitions (Stage 2B, 3, 4), with Dynamic-DeepHit slightly leading on the rarer transitions to Stages 0 and 5. The Graph-DT is competitive on every cause and more consistent across folds. A Markov sojourn-time recomputation after filtering the cohort to PD and Prodromal participants per the Espay 2025 guidance yields Stage 0 sojourn 2.14 years (full-cohort 3.59 years) and Stage 1 sojourn 1.16 years (full-cohort 2.49 years); clinical Stages 2B through 6 are unchanged. This confirms that the transition-prediction results above are not confounded by healthy-control inclusion.
 
 \subsection*{Pre-registered holdout validation}
 
@@ -180,29 +162,11 @@ Graph-DT  & 80\% & $0.626 \pm 0.040$ & $0.0045$ \\
 \end{tabular}
 \end{table}
 
-Ablation across four conformal procedures confirms that the cause-specific IPCW approach produces the narrowest bands while maintaining formal coverage (Table~\ref{tab:cf_ablation}). IPCW is 2.6$\times$ narrower than naive conformal at 90\% CL and approximately 70$\times$ narrower than a Bonferroni-corrected variant, at the cost of a small coverage shortfall (82\% at 90\% CL) attributable to the structural concentration of CIF values near zero for most cause--time combinations.
+Ablation across four conformal procedures confirms that the cause-specific IPCW approach produces the narrowest bands while maintaining formal coverage (Supplementary Table~S-2). IPCW is 2.6$\times$ narrower than naive conformal at 90\% CL and approximately 70$\times$ narrower than a Bonferroni-corrected variant, at the cost of a small coverage shortfall (82\% at 90\% CL) attributable to the structural concentration of CIF values near zero for most cause--time combinations.
 
 \subsection*{Conformal coverage on the pre-registered holdout}
 
 The same 380-patient holdout that validates the P3 ensemble finding also provides an independent evaluation of the conformal band discipline. Using the dev-set 50/50 calibration split (seed~=~2026), marginal coverage at 95\% confidence was 0.897 for DeepHit and 0.909 for Graph-DT---within 0.015 of the published CV means (0.911 and 0.914 respectively, Table~\ref{tab:conformal_cov}). At 90\% confidence the marginal coverage held at approximately 0.82 for both architectures, consistent with the documented CIF-clustering behaviour described above. Subgroup coverage stratified by sex and age bin was within 0.03 of the marginal figure at every strata $\times$ confidence-level combination, supporting the equity claim made in the primary analysis.
-
-\begin{table}[!t]
-\centering
-\caption{\textbf{Conformal method ablation.} Coverage and band width at two confidence levels.}
-\label{tab:cf_ablation}
-\begin{tabular}{@{}lcccc@{}}
-\toprule
-\textbf{Method} & \multicolumn{2}{c}{\textbf{90\% CL}} & \multicolumn{2}{c}{\textbf{95\% CL}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-& Coverage & Width & Coverage & Width \\
-\midrule
-IPCW (proposed) & 0.818 & $\mathbf{0.011}$ & $\mathbf{0.913}$ & $\mathbf{0.037}$ \\
-Marginal        & 0.901 & 0.015 & 0.949 & 0.052 \\
-Naive           & 0.903 & 0.029 & 0.950 & 0.079 \\
-Bonferroni      & 0.997 & 0.765 & 0.997 & 0.765 \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \subsection*{Calibration and directional coverage}
 
@@ -226,25 +190,7 @@ A novel directional analysis reveals a 7-percentage-point coverage gap between f
 
 \subsection*{Subgroup equity}
 
-Per-subgroup C-td is consistent across sex and age strata (Table~\ref{tab:subgroup}). Bootstrap interaction tests with Benjamini--Hochberg FDR correction yield no significant model$\times$subgroup interactions ($p_{\mathrm{FDR}} > 0.98$ across sex and age). LRRK2 and GBA carrier subgroups are underpowered ($n<10$) and excluded from the inferential analysis; we report only that no reliable per-subgroup estimate could be obtained and that multi-site data pooling is required for genetic equity assessment. Conditional conformal coverage at 90\% CL is stable within the narrow band 0.81--0.84 across all tested demographic subgroups, confirming that the distribution-free coverage guarantee extends to each subgroup rather than being a purely marginal property.
-
-\begin{table}[!t]
-\centering
-\caption{\textbf{Per-subgroup C-td (mean $\pm$ SD across 5 folds).} LRRK2 and GBA carrier subgroups excluded ($n<10$).}
-\label{tab:subgroup}
-\begin{tabular}{@{}llcc@{}}
-\toprule
-\textbf{Subgroup} & \textbf{Group} & \textbf{DeepHit} & \textbf{Graph-DT} \\
-\midrule
-\multirow{2}{*}{Sex} & Male & $0.922 \pm 0.019$ & $0.912 \pm 0.030$ \\
-                     & Female & $0.925 \pm 0.017$ & $0.899 \pm 0.033$ \\
-\midrule
-\multirow{3}{*}{Age} & $<$60  & $0.918 \pm 0.025$ & $0.903 \pm 0.026$ \\
-                     & 60--70 & $0.927 \pm 0.018$ & $0.900 \pm 0.036$ \\
-                     & $>$70  & $0.920 \pm 0.028$ & $0.900 \pm 0.030$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+Per-subgroup C-td is consistent across sex and age strata (Supplementary Table~S-3). Bootstrap interaction tests with Benjamini--Hochberg FDR correction yield no significant model$\times$subgroup interactions ($p_{\mathrm{FDR}} > 0.98$ across sex and age). LRRK2 and GBA carrier subgroups are underpowered ($n<10$) and excluded from the inferential analysis; we report only that no reliable per-subgroup estimate could be obtained and that multi-site data pooling is required for genetic equity assessment. Conditional conformal coverage at 90\% CL is stable within the narrow band 0.81--0.84 across all tested demographic subgroups, confirming that the distribution-free coverage guarantee extends to each subgroup rather than being a purely marginal property.
 
 \subsection*{Case studies: five featured patients from a 922-patient stratified phenotype analysis}
 
@@ -257,28 +203,7 @@ To demonstrate clinical utility at scale, we extended the original five-patient 
 \item \textbf{Stable} ($n = 35$): first forward transition after 24 months or later, representing the slow-progressing subgroup.
 \end{itemize}
 
-Per-class timing-interval coverage and median interval width are reported in Table~\ref{tab:phenotype_classes}. Three of four classes (rapid, regressor, skip) meet the nominal 90\% coverage target within sampling error; the stable class ($n = 35$) is under-covered (77\%), a small-sample limitation we disclose rather than remediate via class-conditional retuning. Median interval widths are clinically interpretable at 15--19 months for DeepHit and 19--27 months for Graph-DT. DeepHit yields systematically tighter intervals (3--8 months narrower median width) at comparable or higher coverage, consistent with its stronger single-model discrimination reported in \S\ref{sec:results}.
-
-\begin{table}[!t]
-\centering
-\caption{Per-phenotype-class conformal timing-interval coverage at 90\% confidence level ($n = 922$ transitioning patients, 2{,}822 uncensored records).}
-\label{tab:phenotype_classes}
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lcccccc@{}}
-\toprule
-\textbf{Class} & \textbf{Patients} & \textbf{Records} & \multicolumn{2}{c}{\textbf{DeepHit}} & \multicolumn{2}{c}{\textbf{Graph-DT}} \\
- & & & Coverage & Median width & Coverage & Median width \\
-\midrule
-Rapid      & 324 & 671 & \textbf{0.897} & 19.2 mo & 0.889 & 23.2 mo \\
-Regressor  & 221 & 469 & \textbf{0.908} & 15.6 mo & 0.902 & 19.4 mo \\
-Skip       & 140 & 256 & \textbf{0.895} & 16.8 mo & 0.849 & 21.3 mo \\
-Stable     &  23 &  30 & 0.767          & 16.9 mo & 0.698 & 26.8 mo \\
-\midrule
-\textbf{All} & 842 & 2{,}822 & \textbf{0.889} & 17.4 mo & 0.876 & 22.3 mo \\
-\bottomrule
-\end{tabular}
-\end{table}
+Per-class timing-interval coverage and median interval width are reported in Supplementary Table~S-4. Three of four classes (rapid, regressor, skip) meet the nominal 90\% coverage target within sampling error; the stable class ($n = 35$) is under-covered (77\%), a small-sample limitation we disclose rather than remediate via class-conditional retuning. Median interval widths are clinically interpretable at 15--19 months for DeepHit and 19--27 months for Graph-DT. DeepHit yields systematically tighter intervals (3--8 months narrower median width) at comparable or higher coverage, consistent with its stronger single-model discrimination reported in \S\ref{sec:results}.
 
 Five featured patients (Patient 3380, 3207, 3785, 3476, 3960) from the original vignette set are retained as illustrative examples spanning all four phenotype classes (Fig.~\ref{fig:cases}). Their individual timing intervals at 90\% confidence level are: Patient 3380 (rapid, Stage 2B$\to$3 at 0 months) $[0, 10]$; Patient 3207 (rapid, Stage 2B$\to$3 at 7 months) $[0, 13]$; Patient 3785 (stable, delayed Stage 2B$\to$3 at 54 months) $[41, 55]$; Patient 3476 (rapid, Stage 3$\to$4 at 0 months) $[0, 17]$; and Patient 3960 (skip, Stage 2B$\to$4 at 18 months) $[0, 26]$. In every case the observed transition falls inside the conformal interval. The underlying cause-specific IPCW conformal CIF band width is \emph{marginal}---cohort-invariant by construction, since IPCW uses a single global quantile per cause--time cell---and the apparent patient-to-patient variation in timing-interval width arises from the intersection of that marginal band with each patient's individual CIF curve, whose steepness differs by current stage and visit history. We therefore refer to these intervals as ``marginal cause-specific'' rather than ``per-patient adaptive.''
 
@@ -344,27 +269,11 @@ Third, the apparent LOFO-ensemble C-td uplift ($+0.05$ over baseline) must be in
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph*{Positioning relative to prior work} Table~\ref{tab:competitors} situates our contribution within the broader conformal/uncertainty literature for survival and neurology progression. We are the first to combine graph-informed temporal survival modelling with cause-specific IPCW conformal bands on NSD-ISS, and the first to report per-subgroup conformal coverage on a biological PD staging system.
-
-\begin{table}[!t]
-\centering
-\caption{Comparison with prior conformal / uncertainty frameworks for survival and neurology progression.}
-\label{tab:competitors}
-\footnotesize
-\begin{tabular}{@{}lcccc@{}}
-\toprule
-Study & Endpoint type & Method & Coverage & Per-subgroup equity \\
-\midrule
-Cand\`{e}s 2023~\cite{candes2023conformal} & Single-event survival & IPCW conformal & Marginal & No \\
-Sreenivasan 2025~\cite{sreenivasan2025} & MS RRMS$\to$SPMS binary & Conformal classification & Marginal & No \\
-\textbf{This work} & \textbf{Competing-risks CIF + timing} & \textbf{IPCW cause-specific + graph-informed backbone} & \textbf{91.1\% @ 95\% CL} & \textbf{Yes (sex/age/LRRK2/GBA)} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\paragraph*{Positioning relative to prior work} We situate this contribution within the broader conformal/uncertainty literature for survival and neurology progression (Supplementary Table~S-5). Cand\`{e}s~\textit{et~al.}~\cite{candes2023conformal} established IPCW conformal for single-event survival with marginal coverage and no per-subgroup equity analysis. Sreenivasan~\textit{et~al.}~\cite{sreenivasan2025} applied conformal classification to MS RRMS$\to$SPMS binary transitions with marginal coverage but without subgroup fairness. Our contribution extends both: we target competing-risks CIF prediction with timing intervals, combine cause-specific IPCW weighting with a graph-informed deep-learning backbone, and are the first to report per-subgroup conformal coverage (sex / age / LRRK2 / GBA) on a biological PD staging system, achieving 91.1\% marginal coverage at the 95\% confidence level.
 
 \paragraph*{Graph-informed vs.\ purely temporal survival modelling} The Graph-DT's patient-similarity graph does not increase discriminative accuracy over a carefully-tuned Dynamic-DeepHit, but it reduces fold-to-fold variance by 28\% and provides population-context at the individual-patient level (the ``patients-like-you'' trajectory overlays in our visualisation work). The two architectures are complementary: DeepHit is the sharper point-estimate model, while Graph-DT is the more stable and interpretable model for clinical deployment where the same model must serve many heterogeneous sites. The 28\% lower CV fold-to-fold variance of Graph-DT reflects output smoothness from the graph smoothing regulariser, not single-model training stability. The holdout analysis (Table~\ref{tab:holdout_validation}) shows Graph-DT's single-run training variance across weight initialisations (std 0.031 on a common holdout) exceeds DeepHit's (0.020). Practitioners should control for this by deploying either architecture as a 5-fold ensemble; our ensemble $\Delta$ of $-0.003$ demonstrates that the gap closes completely at deployment scale.
 
-\paragraph*{Conformal method selection} The ablation across IPCW, marginal, naive, and Bonferroni-corrected conformal procedures (Table~\ref{tab:cf_ablation}) demonstrates that cause-specific IPCW provides the optimal balance between coverage and band width. The structural undercoverage at 90\% CL (82\% marginal) reflects the concentration of CIF values near zero for most cause-time combinations; at 95\% CL this effect is mitigated and formal coverage is achieved.
+\paragraph*{Conformal method selection} The ablation across IPCW, marginal, naive, and Bonferroni-corrected conformal procedures (Supplementary Table~S-2) demonstrates that cause-specific IPCW provides the optimal balance between coverage and band width. The structural undercoverage at 90\% CL (82\% marginal) reflects the concentration of CIF values near zero for most cause-time combinations; at 95\% CL this effect is mitigated and formal coverage is achieved.
 
 \paragraph*{Directional asymmetry} The 7-percentage-point coverage gap between forward progressions (81.5\%) and backward regressions (74.5\%) is a novel finding with direct clinical implications. Backward transitions are driven by medication initiation, treatment optimisation, and drug response~\cite{espay2025refutation,tomlinson2010systematic}. Future models should incorporate explicit treatment covariates; clinical communication should reflect this asymmetry and flag regression predictions as carrying greater uncertainty.
 
