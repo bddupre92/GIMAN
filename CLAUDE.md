@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 741 MB · 190 tables across 14 schemas** (verified 2026-04-22 (post-paper1-site-assignments-load)).
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 741 MB · 192 tables across 14 schemas** (verified 2026-04-23 (post-paper1-r2-sensitivity-load)).
 
 **Schemas:**
 
@@ -30,7 +30,7 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `pdbp_raw` | 52 | PDBP tables (external prediction cohort + April 2026 LONI IDA reload: +34 tables, includes DLB SPECT metadata) |
 | `hbs_raw` | 11 | HBS tables (external prediction cohort) |
 | `staging` | 3 | `nsd_iss_staging_results` (PPMI 2,201), `biofind_nsd_iss_staging` (103), `nsd_iss_staging_enriched` |
-| `features` | 8 | `paper1_features_with_targets` (PPMI 2,201×22), **`paper1_features_extended_33` (PPMI 2,201×33, CANONICAL from 2026-04-22; 22 base + 11 extensions: 6 cortical thickness, 4 CSF biomarkers, 1 polygenic risk score; see [docs/CONVENTIONS.md](docs/CONVENTIONS.md) §1)**, **`paper1_site_assignments` (657×6; PPMI siteKey + scanner metadata from LONI IDA root XMLs for Analysis E site-LOSO)**, `biofind_features`, `pdbp_features`, `hbs_features`, `paper2_gimin_cohort` (35,687×40 GIMIN full cohort), `paper2_gimin_missingness_mask` (35,687×40 matching mask, 1=observed) |
+| `features` | 10 | `paper1_features_with_targets` (PPMI 2,201×22), **`paper1_features_extended_33` (PPMI 2,201×33, CANONICAL from 2026-04-22; 22 base + 11 extensions: 6 cortical thickness, 4 CSF biomarkers, 1 polygenic risk score; see [docs/CONVENTIONS.md](docs/CONVENTIONS.md) §1)**, **`paper1_site_assignments` (657×6; PPMI siteKey + scanner metadata from LONI IDA root XMLs for Analysis E site-LOSO)**, **`paper1_r2_sensitivity` (28 rows; Q1 label-var + Q2 putamen-ratio + Q5 SAA-stratified reviewer-response artifacts, loaded 2026-04-23)**, **`paper1_r2_abstention` (96 rows; Q7 empty/singleton/multi-label fractions × internal+external × 4 targets × 3 models × split+cross × 3 CLs)**, `biofind_features`, `pdbp_features`, `hbs_features`, `paper2_gimin_cohort` (35,687×40 GIMIN full cohort), `paper2_gimin_missingness_mask` (35,687×40 matching mask, 1=observed) |
 | `longitudinal` | 4 | `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | 1 | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | 2 | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |

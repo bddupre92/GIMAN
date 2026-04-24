@@ -147,7 +147,7 @@ def main():
     df["_saa_pos_flag"] = df["s_positive"].map({"t": "SAA_POS", "f": "SAA_NEG", True: "SAA_POS", False: "SAA_NEG"}).fillna("NOT_TESTED")
 
     results = {"strata": {}, "full": {}, "delta": {}}
-    for target in ("binary", "3class", "nsd_positive"):
+    for target in ("binary", "3class", "full_ordinal", "nsd_positive"):
         log.info("===== %s =====", target)
         sub, X, y, feats = prepare(df, target)
         # Full-cohort reference
