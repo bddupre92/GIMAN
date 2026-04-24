@@ -143,3 +143,85 @@ Sincerely,
 Blair Dupre
 Department of Biomedical Engineering, University of North Dakota
 blair.dupre@und.edu
+
+---
+
+# Round 2 addendum — point-by-point response to the second reviewer round
+
+**Revision commits:** `f6d0d86` (Q7) · `c484a69` (Q5) · `2c7e794` (SQL refresh) · `683446f` (Q6+Q9) · `252bc02` (Q4) · `750a46f` (Q3/Q8/Q10 prose) · `[R2-path3]` (Path 3 manuscript rewrite)
+
+We thank the reviewer for the second round of critique. The most consequential change is that the Round 2 concerns converge on a single structural recommendation---the reviewer-maximal "Path 3" strict-circularity specification---which we adopt as the primary feature set throughout the revised manuscript. The previously-reported 22-feature specification is retained in Table~III purely to exhibit tabular-SOTA convergence across four methods; every claim in the abstract, Discussion, and rebuttal uses the 21-feature strict-exclusion primary. Each question below lists the verdict, the evidence, and the exact location of the integrated text or SQL record.
+
+### Q1 — Strict label-variable ablation (UPDRS-I, UPDRS-II, MoCA as Simuni threshold inputs)
+
+**Verdict:** `NO_LABEL_REDISCOVERY`. Removing UPDRS1\_TOTAL and UPDRS2\_TOTAL from the 21-feature primary (MoCA is already excluded as `HIGH_MISS`) changes AUC by $\Delta{=}0.003$ (binary), $0.002$ (three-class), $-0.002$ (full ordinal), $0.001$ (NSD+). Maximum $|\Delta| = 0.003$, far below the pre-registered $0.05$ LABEL\_REDISCOVERY threshold. The 21-feature model is therefore not rediscovering Simuni threshold rules through UPDRS totals; residual predictive signal comes from non-staging variables.
+
+Evidence: `outputs/paper1_r2_responses/q1_label_var_ablation.json` · SQL `features.paper1_r2_sensitivity WHERE run_id='q1_label_var'` · prose at §II.D Circularity audit.
+
+### Q2 — Putamen leakage via CAUDATE\_PUTAMEN\_RATIO
+
+**Verdict:** `MATERIAL`. Re-fitting the 22-feature reference specification without the caudate/putamen ratio (yielding the 21-feature primary) reduces binary AUC by $\Delta{=}0.077$, three-class by $0.047$, full-ordinal by $0.033$, and NSD+ by $0.005$. Three of four targets cross the pre-registered $0.03$ MATERIAL threshold, so the ratio is excluded from the primary specification and the paper's primary headline binary AUC is $0.901$ [0.887, 0.915]. The 22-feature result is preserved in Table~III as the reference specification.
+
+Evidence: `outputs/paper1_circularity_audit/{PRE_REGISTRATION.md, sensitivity_putamen_ratio.json}` · SQL `features.paper1_r2_sensitivity WHERE run_id='q2_putamen_ratio'` · prose at §II.D Circularity audit + §IV.B Strict-circularity primary + abstract.
+
+### Q3 — Inductive vs transductive graph evaluation
+
+**Verdict:** Evaluation was already inductive in code; the revision makes the protocol explicit in prose. The $k$-NN patient-similarity graph is constructed within each outer CV training partition; held-out test patients are attached as new nodes at inference with outgoing edges only to training nodes. Because GATConv uses a shared edge-wise attention mechanism (Velickovic 2018), the encoder and attention weights generalise to unseen nodes without retraining. This matches the fold-local imputation/standardisation discipline of §III.E and closes the transductive-leakage pathway that undermines graph-ML benchmarks which build a single graph on the combined train-plus-test node set.
+
+Evidence: prose at §III.C "Per-fold graph construction (inductive evaluation)" paragraph.
+
+### Q4 — Quantitative temperature scaling (pre/post ECE, Brier, NLL, conformal)
+
+**Verdict:** Binary calibration improved substantially; other targets were already well-calibrated. Per-target temperature optimisation (L-BFGS on NLL) yields $T^*_{\text{binary}}{=}1.43$, $T^*_{\text{3-class}}{=}1.15$, $T^*_{\text{full-ord}}{=}1.01$, $T^*_{\text{NSD+}}{=}1.03$, and shared $T^*{=}1.15$ (per-target spread $0.42$ — above our $0.2$ task-heterogeneity threshold, confirming that binary benefits from its own scalar). Binary ECE drops from $0.053$ to $0.020$ (−63\%), binary NLL from $0.412$ to $0.389$, with Brier essentially unchanged. Refit LAC split-conformal on the temperature-scaled probabilities preserves coverage to within 0.2 percentage points at the 90\% confidence level, consistent with the theoretical invariance of LAC to strictly monotonic score transformations (Sadinle 2019).
+
+Evidence: `outputs/paper1_r2_responses/{q4_temperature_scaling.json, q4_temperature_table.md}` · prose at §V.D Internal Versus External Deployment Calibration + Paper~6 deployment recommendation.
+
+### Q5 — SAA-anchor stratified sensitivity
+
+**Verdict:** PASS on 3-class and NSD+ sub-staging; mechanical limits preclude two strata for the binary and full-ordinal targets. Among the three SAA strata (confirmed positive $n{=}102$, confirmed negative $n{=}175$, not tested $n{=}1{,}924$), three-class AUC ranges $0.909$--$0.917$ (max $|\Delta|$ vs.\ full-cohort $=0.021$) and NSD+ AUC ranges $0.903$--$0.917$ (max $|\Delta|=0.010$); both within the pre-registered $0.03$ threshold for D-anchor label substitutability. Binary "fails" by $\Delta{=}0.036$ because the SAA-confirmed-negative stratum is \emph{easier} to discriminate ($0.937$ vs.\ full $0.901$)---a favourable direction indicating that D-anchor-inferred labels are not an accuracy-limiting factor. Full-ordinal skips both SAA-tested strata on class-count ($n{=}102$ and $n{=}175$ lack the three-plus stratification-class quorum needed for 5-class CV); the NOT\_TESTED stratum ($n{=}1{,}920$ AUC $0.928$) is reported descriptively.
+
+Evidence: `outputs/paper1_r2_responses/q5_saa_stratified.json` · SQL `features.paper1_r2_sensitivity WHERE run_id='q5_saa_stratified'`.
+
+### Q6 — Rule-based Simuni threshold baseline on NSD+ sub-staging
+
+**Verdict:** `RULE_WINS_BY_TAUTOLOGY`. The Simuni 2024 thresholds are the labelling rule for both PPMI and BioFIND NSD-ISS stages (Russo 2025 replication); applying the rule to its own defining variables is tautologically 100\% accurate. Paper~1's ML value proposition is therefore (a) classifying NSD-positivity (Stage~0 vs.\ 1+) from non-circular biomarkers---where no rule exists and binary AUC $0.901$ is the operative number---and (b) generalising to external cohorts where rule-defining variables may be missing or measured differently (MoCA, NP1COG, PDMEDYN). The NSD+ sub-staging AUC of $0.908$ on the strict-exclusion 21-feature set is reported honestly as "residual signal beyond the three rule-defining variables held out from training" rather than as a rule-beating accuracy claim.
+
+Evidence: `outputs/paper1_r2_responses/q6_rule_based_baseline.json` · prose at §V.A Principal Findings (second paragraph, ML value proposition).
+
+### Q7 — Abstention rate at 80\% / 90\% / 95\% confidence levels, internal and external
+
+**Verdict:** Archived all along in `outputs/paper1_conformal/*.json`; previously mined only from the external cohort. A single comprehensive extractor now emits $96$ rows covering internal (PPMI cross-conformal) and external (PPMI→BioFIND split-conformal pooled across 5 folds) for 4 targets × 3 models × {split, cross} × 3 confidence levels. Headline: PPMI internal CV+ at 90\% CL yields empty-set rates $4.5\%$ (binary), $0.0\%$ (3-class), $0.0\%$ (full ordinal), $0.0\%$ (NSD+) and multi-label rates $0.0\%$, $2.8\%$, $9.7\%$, $26.6\%$ respectively. External BioFIND at 90\% CL: empty-set $0\%$, multi-label $66\%$ (binary), $79\%$ (3-class), $42\%$ (NSD+)---the large external multi-label fractions are the conformal-theoretic expression of the domain shift documented in §V.D.
+
+Evidence: `outputs/paper1_r2_responses/q7_abstention_rates.json` + `q7_abstention_table.md` · SQL `features.paper1_r2_abstention`.
+
+### Q8 — Domain-shift mitigation beyond temperature scaling
+
+**Verdict:** New paragraph in §V.D enumerates three mitigations that layer on top of temperature scaling: (i) ComBat empirical-Bayes harmonisation for multi-site imaging features (Wakasugi 2024); (ii) density-ratio importance weighting for covariate shift, of which the paper's PD-only retraining (§IV.E) is a hard 0/1 special case; and (iii) Saerens-style prior-probability shift correction, directly relevant to BioFIND's 95.4\% SAA+ prevalence vs.\ PPMI's 3.0\%. These are not applied in the primary results because the labelled BioFIND external set ($n{=}103$) produces unstable density-ratio estimates; their absence is why the external-deployment numbers in §IV should be read as lower bounds rather than ceilings for sites that can budget a local calibration cohort.
+
+Evidence: prose at §V.D Internal Versus External Deployment Calibration ("Domain-shift mitigation" paragraph).
+
+### Q9 — Extended subgroup analysis (age bands, disease duration, site)
+
+**Verdict:** PASS on age, sex, and site; expected diagnostic confound on a disease-progression proxy. Age bands (\textless60, 60–70, $\geq$70), sex, and top-4 PPMI sites (joined from `features.paper1_site_assignments`) all show max $|\Delta|$ vs.\ main AUC $<$ 0.02 and BH-FDR-adjusted interaction $p > 0.05$. The UPDRS-3 bradykinesia+rigidity progression-proxy tertile produces a significant interaction (binary max $|\Delta|=0.037$, 3-class max $|\Delta|=0.098$, $p_{\text{FDR}}<0.001$), which we interpret as an expected confound (higher-progression patients cluster in Stages 3–4 where discriminating adjacent late stages is an intrinsically harder problem) rather than a fairness bias. A cleaner disease-duration variable than a UPDRS-3 severity proxy would disentangle the confound; we flag this as future work.
+
+Evidence: `outputs/paper1_r2_responses/q9_extended_subgroup.json`.
+
+### Q10 — Redacted reproducibility artifact list
+
+**Verdict:** Delivered as `outputs/mechanistic_twin/paper1_submission/ieee-jbhi/REPRODUCIBILITY_PACKAGE.md`, a standalone 150-line artifact enumerating (1) data access through PPMI + AMP-PDRD DUAs, (2) the canonical pipeline across nine analysis stages (feature assembly → benchmark → nested HPO → tabular SOTA → GAT → conformal → external validation → calibration → circularity audit), (3) SQL database (192 tables / 14 schemas / 741 MB), (4) random seeds and reproducibility invariants including the MPS nondeterminism advisory, (5) software-environment manifest for both the primary and AutoGluon sidecar virtualenvs, (6) audit trail via `audit.claim` lineage, (7) round-2 reviewer-response artifacts with direct paths, and (8) point of contact. Pointer sentences added to §III.F Software and Reproducibility and §Data Availability.
+
+Evidence: `REPRODUCIBILITY_PACKAGE.md` (submission directory) · prose at §III.F + §Data Availability.
+
+---
+
+### Round 2 summary
+
+All ten Round 2 concerns are addressed with seven concrete empirical JSONs, one standalone reproducibility package, four integrated prose additions (circularity audit subsection, inductive-graph paragraph, domain-shift mitigation paragraph, reproducibility pointer), and an SQL-backed sensitivity register (`features.paper1_r2_sensitivity` + `features.paper1_r2_abstention`, 28 + 96 rows) that reviewers can query directly. The central structural change is the Path~3 commitment that makes the strict-circularity 21-feature specification the primary throughout the manuscript; this simultaneously resolves Q2 (putamen-ratio leakage), tightens Q1 (no residual label rediscovery at strict exclusion), and sharpens §V.A Principal Findings (binary AUC $0.901$ on non-staging variables is the operative number, with the 22-feature reference retained in Table~III only to show tabular-architecture convergence). The remaining compute items (Q4 temperature scaling, Q5 SAA stratified, Q9 extended subgroup) are reported as reviewer-facing sensitivities rather than as changes to the headline numbers.
+
+Full audit trail: every numerical result cited above is reproducible from the eight artifacts listed in §7 of `REPRODUCIBILITY_PACKAGE.md`, and every claim verdict is mirrored in the `audit.claim` table of the project's defense-prep SQLite (`outputs/defense_prep/e2e_audit/claim_lineage.sqlite3`).
+
+Sincerely,
+Blair Dupre
+Department of Biomedical Engineering, University of North Dakota
+blair.dupre@und.edu
+
