@@ -1,0 +1,247 @@
+{
+  "by_cohort_target_alpha": [
+    {
+      "cohort": "internal",
+      "target": "binary",
+      "alpha": 0.05,
+      "confidence_level_pct": 95,
+      "mean_set_size": 1.7255885384456817,
+      "coverage": 0.9513821892393322,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "binary",
+      "alpha": 0.05,
+      "confidence_level_pct": 95,
+      "mean_set_size": 1.8116504854368933,
+      "coverage": 0.9631067961165047,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "binary",
+      "alpha": 0.1,
+      "confidence_level_pct": 90,
+      "mean_set_size": 1.5542681921253352,
+      "coverage": 0.9041228612657184,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "binary",
+      "alpha": 0.1,
+      "confidence_level_pct": 90,
+      "mean_set_size": 1.6601941747572817,
+      "coverage": 0.9145631067961165,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "binary",
+      "alpha": 0.15,
+      "confidence_level_pct": 85,
+      "mean_set_size": 1.4279529993815707,
+      "coverage": 0.8591372912801484,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "binary",
+      "alpha": 0.15,
+      "confidence_level_pct": 85,
+      "mean_set_size": 1.5029126213592234,
+      "coverage": 0.8660194174757281,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "binary",
+      "alpha": 0.2,
+      "confidence_level_pct": 80,
+      "mean_set_size": 1.294385693671408,
+      "coverage": 0.8150742115027828,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "binary",
+      "alpha": 0.2,
+      "confidence_level_pct": 80,
+      "mean_set_size": 1.3650485436893205,
+      "coverage": 0.8135922330097088,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "3class",
+      "alpha": 0.05,
+      "confidence_level_pct": 95,
+      "mean_set_size": 1.9144367363843444,
+      "coverage": 0.9481196935183268,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "3class",
+      "alpha": 0.05,
+      "confidence_level_pct": 95,
+      "mean_set_size": 2.0543689320388347,
+      "coverage": 0.5262135922330098,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "3class",
+      "alpha": 0.1,
+      "confidence_level_pct": 90,
+      "mean_set_size": 1.6950445226755022,
+      "coverage": 0.8971453717125699,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "3class",
+      "alpha": 0.1,
+      "confidence_level_pct": 90,
+      "mean_set_size": 1.8582524271844663,
+      "coverage": 0.4990291262135923,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "3class",
+      "alpha": 0.15,
+      "confidence_level_pct": 85,
+      "mean_set_size": 1.5280202940567407,
+      "coverage": 0.8443466556222822,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "3class",
+      "alpha": 0.15,
+      "confidence_level_pct": 85,
+      "mean_set_size": 1.6640776699029125,
+      "coverage": 0.47766990291262135,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "3class",
+      "alpha": 0.2,
+      "confidence_level_pct": 80,
+      "mean_set_size": 1.3887461172085316,
+      "coverage": 0.797004555808656,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "3class",
+      "alpha": 0.2,
+      "confidence_level_pct": 80,
+      "mean_set_size": 1.4990291262135922,
+      "coverage": 0.45048543689320386,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "nsd_positive",
+      "alpha": 0.05,
+      "confidence_level_pct": 95,
+      "mean_set_size": 1.7649048800661702,
+      "coverage": 0.9601902398676593,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "nsd_positive",
+      "alpha": 0.05,
+      "confidence_level_pct": 95,
+      "mean_set_size": 1.8174757281553398,
+      "coverage": 0.7747572815533981,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "nsd_positive",
+      "alpha": 0.1,
+      "confidence_level_pct": 90,
+      "mean_set_size": 1.4748966087675766,
+      "coverage": 0.9268320926385443,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "nsd_positive",
+      "alpha": 0.1,
+      "confidence_level_pct": 90,
+      "mean_set_size": 1.4485436893203882,
+      "coverage": 0.7067961165048544,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "nsd_positive",
+      "alpha": 0.15,
+      "confidence_level_pct": 85,
+      "mean_set_size": 1.3144086021505377,
+      "coverage": 0.8870554177005789,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "nsd_positive",
+      "alpha": 0.15,
+      "confidence_level_pct": 85,
+      "mean_set_size": 1.2485436893203885,
+      "coverage": 0.6563106796116506,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "internal",
+      "target": "nsd_positive",
+      "alpha": 0.2,
+      "confidence_level_pct": 80,
+      "mean_set_size": 1.1451033912324236,
+      "coverage": 0.8254755996691481,
+      "note": "from aggregate stats; raw distribution not archived"
+    },
+    {
+      "cohort": "external",
+      "target": "nsd_positive",
+      "alpha": 0.2,
+      "confidence_level_pct": 80,
+      "mean_set_size": 1.130097087378641,
+      "coverage": 0.6019417475728155,
+      "note": "from aggregate stats; raw distribution not archived"
+    }
+  ],
+  "note": "Abstention = empty set; multi-label = set size > 1. Extracted from existing conformal JSONs; per-patient set-size distributions stored only for external cohorts via paper1_external_conformal runs (aggregates for internal). Internal-only per-patient distribution requires rerun of cross-conformal with per-patient export; flagged as follow-up.",
+  "printable_table": [
+    "internal   binary         alpha=0.05 CL=95%  empty=n/a      multi=n/a      mean|C|=1.726",
+    "external   binary         alpha=0.05 CL=95%  empty=n/a      multi=n/a      mean|C|=1.812",
+    "internal   binary         alpha=0.10 CL=90%  empty=n/a      multi=n/a      mean|C|=1.554",
+    "external   binary         alpha=0.10 CL=90%  empty=n/a      multi=n/a      mean|C|=1.660",
+    "internal   binary         alpha=0.15 CL=85%  empty=n/a      multi=n/a      mean|C|=1.428",
+    "external   binary         alpha=0.15 CL=85%  empty=n/a      multi=n/a      mean|C|=1.503",
+    "internal   binary         alpha=0.20 CL=80%  empty=n/a      multi=n/a      mean|C|=1.294",
+    "external   binary         alpha=0.20 CL=80%  empty=n/a      multi=n/a      mean|C|=1.365",
+    "internal   3class         alpha=0.05 CL=95%  empty=n/a      multi=n/a      mean|C|=1.914",
+    "external   3class         alpha=0.05 CL=95%  empty=n/a      multi=n/a      mean|C|=2.054",
+    "internal   3class         alpha=0.10 CL=90%  empty=n/a      multi=n/a      mean|C|=1.695",
+    "external   3class         alpha=0.10 CL=90%  empty=n/a      multi=n/a      mean|C|=1.858",
+    "internal   3class         alpha=0.15 CL=85%  empty=n/a      multi=n/a      mean|C|=1.528",
+    "external   3class         alpha=0.15 CL=85%  empty=n/a      multi=n/a      mean|C|=1.664",
+    "internal   3class         alpha=0.20 CL=80%  empty=n/a      multi=n/a      mean|C|=1.389",
+    "external   3class         alpha=0.20 CL=80%  empty=n/a      multi=n/a      mean|C|=1.499",
+    "internal   nsd_positive   alpha=0.05 CL=95%  empty=n/a      multi=n/a      mean|C|=1.765",
+    "external   nsd_positive   alpha=0.05 CL=95%  empty=n/a      multi=n/a      mean|C|=1.817",
+    "internal   nsd_positive   alpha=0.10 CL=90%  empty=n/a      multi=n/a      mean|C|=1.475",
+    "external   nsd_positive   alpha=0.10 CL=90%  empty=n/a      multi=n/a      mean|C|=1.449",
+    "internal   nsd_positive   alpha=0.15 CL=85%  empty=n/a      multi=n/a      mean|C|=1.314",
+    "external   nsd_positive   alpha=0.15 CL=85%  empty=n/a      multi=n/a      mean|C|=1.249",
+    "internal   nsd_positive   alpha=0.20 CL=80%  empty=n/a      multi=n/a      mean|C|=1.145",
+    "external   nsd_positive   alpha=0.20 CL=80%  empty=n/a      multi=n/a      mean|C|=1.130"
+  ]
+}
