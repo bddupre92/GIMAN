@@ -15,7 +15,7 @@
 
 - **Chassis:** Fractal Define 7 XL + SYS-WS-PRO-MAX-WRX90 Threadripper WRX90 workstation
 - **RAM:** 256 GB DDR5 ECC 5600 MT/s 8-channel (8 × 32 GB UDIMMs)
-- **GPU:** 3 × NVIDIA RTX A5000, 24 GB GDDR6 each, 8,192 CUDA cores / 256 Tensor cores / 64 RT cores per card — **72 GB total VRAM across 3 independent CUDA devices** (check for NVLink bridges; line items hint at possible pairing hardware)
+- **GPU:** 1 × NVIDIA RTX A5000, 24 GB GDDR6, 8,192 CUDA cores / 256 Tensor cores / 64 RT cores, 4× DisplayPort 1.4a (the additional A5000 line items in the BOM are cable/bracket accessories for the same card, not additional GPUs)
 - **Storage (primary / compute):** 4 TB WD SN850X PCIe Gen4 NVMe
 - **Storage (cold archive):** 3 × 12 TB Seagate Ironwolf Pro 7200 rpm HDDs = 36 TB raw (likely RAID5 or JBOD)
 - **PSU + cooling:** 1200 W Platinum, 360 mm AIO liquid CPU cooler, full fan config
@@ -26,8 +26,9 @@
 
 ### What the hardware enables
 
-- **Parallel CUDA workstreams (3 devices):** the Paper 3+4 critical path drops from ~14 days serial to ~5-6 days parallel. For example, `CUDA_VISIBLE_DEVICES=0 python ws_p3_16_pdbp.py` in one tmux + `CUDA_VISIBLE_DEVICES=1 python ws_p3_1_inductive.py` in another + `CUDA_VISIBLE_DEVICES=2 python ws_p3_4_survtrace.py` in a third, all concurrent.
-- **Memory headroom:** 192 GB allocatable to WSL2 (75% of 256 GB) covers any pandas DataFrame + multi-process DataLoader combination we'll hit. Leaves 64 GB for Windows + GPU driver overhead.
+- **Single-GPU CUDA compute with comfortable VRAM headroom:** 24 GB on one A5000 accommodates any Paper 3+4 workstream without swapping (the largest batch — GraphMAE self-supervised pre-training on the ~1,900-patient graph — fits well under 24 GB). Workstreams run **sequentially** on `cuda:0`, not in parallel.
+- **Memory headroom:** 192 GB allocatable to WSL2 (75% of 256 GB) covers any pandas DataFrame + multi-process DataLoader combination we'll hit. Leaves 64 GB for Windows + GPU driver overhead. Generous RAM also enables using multiple parallel `DataLoader` workers (`num_workers=16`) without I/O stalls during training.
+- **High CPU parallelism:** Threadripper WRX90 SKUs range from 24 to 96 cores. CPU-bound workstreams (clustered bootstrap, Markov refits, ablation grid) can run concurrently with the CUDA workstream as long as we don't saturate CPU RAM.
 - **Fast compute filesystem:** 4 TB NVMe gives ~6-7 GB/s sequential reads — eliminates I/O as a training bottleneck.
 - **Cold archive on 36 TB spinning disks:** raw PPMI/BioFIND/PDBP/HBS data + historical snapshots of the Google Drive mirror can live there indefinitely without eating the NVMe.
 
@@ -77,7 +78,6 @@ Still needs to be captured once Threadripper is booted:
 - [ ] **Windows version** — run `winver` in PowerShell. Target ≥ 22H2.
 - [ ] **Current NVIDIA Windows driver version** — `nvidia-smi` in Windows PowerShell. Target ≥ 535 for CUDA 12.1+ support. Update via GeForce Experience or manual download if older.
 - [ ] **Existing WSL2 installation status** — `wsl --version` and `wsl -l -v` in PowerShell. Need WSL 2.x with Ubuntu 22.04 or 24.04 LTS.
-- [ ] **NVLink bridges present between A5000 cards?** — check with `nvidia-smi topo -m` inside WSL (shows NVLink in the inter-GPU matrix). If present, pairs give combined 48 GB VRAM pool; if absent, each GPU is independent.
 - [ ] **HDD mount plan:** RAID5 across the 3 × 12 TB disks for ~24 TB redundant capacity, or JBOD for 36 TB? RAID5 recommended (one-drive-failure tolerance with only 33% capacity overhead).
 - [ ] **NVMe partition plan:** whole 4 TB for WSL's ext4 home, or carve a Windows data partition first? Recommend: leave 200-300 GB for Windows, dedicate the remaining ~3.7 TB to WSL2 via `wsl --install --location`.
 - [ ] **Repo access method** — HTTPS with token, or SSH with existing key? Clone URL?
@@ -157,61 +157,49 @@ ps -p 1 -o comm=   # should print: systemd
 
 **Validation criterion:** `ps -p 1 -o comm=` returns `systemd`.
 
-## Phase 3: Multi-GPU verification inside WSL2 (10 min)
+## Phase 3: GPU verification inside WSL2 (5 min)
 
 ```bash
-# Should list all 3 A5000 cards
+# Should list the A5000
 nvidia-smi
-
-# Topology: confirms NVLink presence (or absence)
-nvidia-smi topo -m
-# Legend: NV# = NVLink at gen #; PIX / PHB = PCIe hops; SYS = NUMA traversal
-# A5000 NVLink bridge (if present) shows as "NV1" between paired GPUs.
 
 # Sanity — WSL CUDA shim
 ls -l /usr/lib/wsl/lib/libcuda.so.1
 
-# Multi-GPU PyTorch check (run after Phase 5 venv exists, but the CUDA runtime itself
-# should be visible immediately):
-python3 -c "
-import subprocess
-r = subprocess.run(['nvidia-smi', '--query-gpu=index,name,memory.total,driver_version',
-                    '--format=csv,noheader'], capture_output=True, text=True)
-print(r.stdout.strip())
-# Expected three lines, one per GPU index 0, 1, 2:
-#   0, NVIDIA RTX A5000, 24564 MiB, 550.xx
-#   1, NVIDIA RTX A5000, 24564 MiB, 550.xx
-#   2, NVIDIA RTX A5000, 24564 MiB, 550.xx
-"
+# Topology (single-GPU but confirms PCIe lane width)
+nvidia-smi topo -m
 ```
 
 **Validation criteria:**
 
-- `nvidia-smi` lists all 3 A5000 cards without error
-- `nvidia-smi topo -m` reveals whether NVLink is wired between any pair (look for `NV1` / `NV2` entries; `PIX` / `PHB` mean no NVLink, just PCIe)
-- Driver version ≥ 535 on all 3 devices
+- `nvidia-smi` lists the A5000 with 24576 MiB memory
+- Driver version ≥ 535
+- No `ERR` / missing PCIe indicators
 
-If `nvidia-smi` fails or shows fewer than 3 cards, the problem is the **Windows driver**, not anything in WSL — update the driver via nvidia.com and retry. If one card shows `ERR` or missing PCIe, physical reseat may be required (rare on first install).
+If `nvidia-smi` fails, the problem is the **Windows driver**, not anything in WSL — update the driver via nvidia.com and retry.
 
-### Per-workstream GPU pinning pattern
+### VRAM management on a single GPU
 
-Set `CUDA_VISIBLE_DEVICES` to dedicate one GPU per workstream so runs don't contend. Convention for Paper 3+4 critical path:
-
-| Workstream | GPU | Rationale |
-|---|---|---|
-| WS-P3-16 PDBP external validation | `cuda:0` | Longest runtime (5-6 d), gets the first GPU |
-| WS-P3-1 Inductive graph retrain | `cuda:1` | 4 d GAT training |
-| WS-P3-4 SurvTRACE/SurvLatent-ODE/CRISP-NAM | `cuda:2` | 4-5 d, three vendored architectures run sequentially on one GPU |
-| WS-P3-5 GraphMAE | `cuda:0` (after P3-16 done) | Uses NVLink pair if available for larger batch |
-| WS-P3-13 5-seed variance | `cuda:1` (after P3-1 done) | Retrains DeepHit + Graph-DT 25× |
-
-Launch pattern:
+With one 24 GB GPU, workstreams run **sequentially** — launch the next one only after the previous finishes (or monitor VRAM with `nvidia-smi -l 5` if you want to overlap small jobs). Workstream pattern:
 
 ```bash
 tmux new -s ws_p3_16
-CUDA_VISIBLE_DEVICES=0 .venv/bin/python scripts/paper3plus4/run_pdbp_external_validation.py \
+.venv/bin/python scripts/paper3plus4/run_pdbp_external_validation.py \
   2>&1 | tee logs/ws_p3_16_$(date +%Y%m%d_%H%M).log
+# Ctrl-B D to detach. Reattach with: tmux attach -t ws_p3_16
 ```
+
+**VRAM budgets by workstream (estimated):**
+
+| Workstream | VRAM peak | Notes |
+|---|---|---|
+| WS-P3-16 PDBP external validation | ~4 GB | Inference-only on existing checkpoints |
+| WS-P3-1 Inductive graph retrain | ~8 GB | GAT + attention on 1,900-node patient graph |
+| WS-P3-4 SurvTRACE / SurvLatent-ODE / CRISP-NAM | ~12-16 GB | Transformer-based survival models; may need batch-size tuning |
+| WS-P3-5 GraphMAE pre-training | ~14-18 GB | Largest consumer; check after first epoch |
+| WS-P3-13 5-seed variance | ~8 GB | Retrains DeepHit + Graph-DT sequentially |
+
+All fit comfortably under 24 GB. If a workstream OOMs, reduce `batch_size` or enable gradient-checkpointing — document the reduction in the workstream JSON.
 
 ## Phase 4: Base packages + SSH + Tailscale (20 min)
 
@@ -501,54 +489,60 @@ within CV-noise tolerance (typically < 0.001 per entry).
 
 Once this passes, the workstation is ready for CUDA-heavy work.
 
-## After-Setup — parallel workstream launch (3 GPUs)
+## After-Setup — sequential CUDA workstreams + parallel CPU workstreams
 
 Open `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response-execution.md`
 for each workstream's pre-registered decision rules, output paths, and
-acceptance criteria. Launch the critical-path trio in parallel across the 3 A5000s:
+acceptance criteria.
 
-### Day 0-6 (parallel on 3 GPUs)
+With a single A5000, the CUDA workstreams run **sequentially on the GPU**,
+but Threadripper's high CPU core count lets the CPU/MPS-suitable workstreams
+run **in parallel on the CPU** alongside the active CUDA run. Layout:
 
-| GPU | tmux session | Workstream | Effort | Script |
+### CUDA lane (one active at a time, sequential)
+
+| Day | tmux session | Workstream | Effort | Script |
 |---|---|---|---|---|
-| `cuda:0` | `ws_p3_16` | **WS-P3-16 PDBP external validation** | 5-6 d | `scripts/paper3plus4/run_pdbp_external_validation.py` |
-| `cuda:1` | `ws_p3_1` | WS-P3-1 Inductive graph retrain | 4 d | `scripts/paper3plus4/run_inductive_graph_retrain.py` |
-| `cuda:2` | `ws_p3_4` | WS-P3-4 SurvTRACE + SurvLatent-ODE + CRISP-NAM baselines | 4-5 d | 3 scripts under `scripts/paper3plus4/` |
+| 0-6 | `ws_p3_16` | **WS-P3-16 PDBP external validation** | 5-6 d | `scripts/paper3plus4/run_pdbp_external_validation.py` |
+| 6-10 | `ws_p3_1` | WS-P3-1 Inductive graph retrain (methodological linchpin) | 4 d | `scripts/paper3plus4/run_inductive_graph_retrain.py` |
+| 10-15 | `ws_p3_4` | WS-P3-4 SurvTRACE + SurvLatent-ODE + CRISP-NAM baselines | 4-5 d | 3 scripts under `scripts/paper3plus4/` |
+| 15-19 | `ws_p3_5` | WS-P3-5 GraphMAE pre-training + fine-tune | 3-4 d | `scripts/paper3plus4/run_graphmae_pretrain.py` |
+| 19-21 | `ws_p3_13` | WS-P3-13 5-seed variance (DeepHit + Graph-DT + new baselines) | 2 d | `scripts/paper3plus4/run_5seed_stability.py` |
 
-**Launch command (repeat for each with appropriate CUDA_VISIBLE_DEVICES):**
+**Launch pattern (one at a time):**
 
 ```bash
 tmux new -s ws_p3_16
 cd ~/Projects/CSCI-FALL-2025
 mkdir -p logs
-CUDA_VISIBLE_DEVICES=0 .venv/bin/python \
-  scripts/paper3plus4/run_pdbp_external_validation.py 2>&1 \
+.venv/bin/python scripts/paper3plus4/run_pdbp_external_validation.py 2>&1 \
   | tee logs/ws_p3_16_$(date +%Y%m%d_%H%M).log
 # Ctrl-B D to detach. `tmux attach -t ws_p3_16` to reattach.
-# `tmux ls` to see all active sessions.
 ```
 
-### Day 6-10 (second wave after first wave completes)
+### CPU lane (multiple concurrent sessions, running alongside the CUDA lane)
 
-| GPU | Workstream | Effort |
-|---|---|---|
-| `cuda:0` (freed from P3-16) | WS-P3-5 GraphMAE pre-training | 3-4 d |
-| `cuda:1` (freed from P3-1) | WS-P3-13 5-seed variance (DeepHit + Graph-DT + new baselines × 5 seeds) | 2 d |
-| `cuda:2` (freed from P3-4) | WS-P3-7c Fine-Gray + dynamic landmarking + jmstate (MPS-suitable but can use CUDA) | 3-4 d |
+These workstreams don't need GPU; Threadripper's many cores let them run in parallel with whatever the GPU is chewing on:
 
-### Day 10-14: MPS-suitable / CPU workstreams in parallel with whatever is still running
+| tmux session | Runs on | Workstream | Effort |
+|---|---|---|---|
+| `ws_p3_6` | WSL CPU | WS-P3-6 Markov predictive metrics (unblocks Table II S-3) | 0.5 d — **run first; quickest win** |
+| `ws_p3_2` | WSL CPU | WS-P3-2 Subject-clustered bootstrap + frailty | 1-2 d |
+| `ws_p3_7c` | WSL CPU | WS-P3-7c Fine-Gray + dynamic landmarking + jmstate | 3-4 d |
+| `ws_p3_8` | WSL CPU | WS-P3-8 Brier decomp + DCA + reliability diagrams | 1-2 d |
+| `ws_p3_9` | WSL CPU | WS-P3-9 5-dim ablation grid (60 configs) | 2-3 d |
+| `ws_p3_10` | WSL CPU | WS-P3-10 HSMM misclassification HMM + sensitivity | 2-3 d |
+| `ws_p3_15` | WSL CPU | WS-P3-15 Faithfulness metrics | 1-2 d |
+| (Mac-side) | Mac | WS-P3-17 Imputation strategy disclosure (prose) | 0.5 d |
 
-| Runs well on | Workstream | Effort |
-|---|---|---|
-| Mac MPS | WS-P3-2 Subject-clustered bootstrap | 1-2 d |
-| CPU inside WSL | WS-P3-6 Markov predictive metrics (unblocks Table II S-3) | 0.5 d |
-| CPU inside WSL | WS-P3-8 Brier decomp + DCA + reliability diagrams | 1-2 d |
-| CPU inside WSL | WS-P3-9 5-dim ablation grid (60 configs) | 2-3 d |
-| CPU inside WSL | WS-P3-10 HSMM misclassification HMM | 2-3 d |
-| Mac | WS-P3-15 Faithfulness metrics | 1-2 d |
-| Mac prose | WS-P3-17 Imputation strategy disclosure | 0.5 d |
+### Timeline envelope
 
-**Total critical path with parallelism:** ~14 days wall-clock vs. ~40 days serial.
+- **CUDA-bound critical path (serial):** ~21 days for all 5 CUDA workstreams.
+- **CPU workstreams (parallel with CUDA):** ~15 days total CPU time, but runs concurrently, so adds little wall-clock to the critical path.
+- **Prose + manuscript integration (after all compute):** ~5 days.
+- **Realistic total:** ~25 days from Threadripper bring-up to submission-ready npj DM revision.
+
+If timing matters more than budget, the **WS-P3-4 vendored-baselines triad** is the best candidate to offload to Lightning.ai (like your FastSurfer pattern) — buying back ~4-5 days of GPU time.
 
 ### Monitoring pattern
 
@@ -557,7 +551,7 @@ From **any** machine (Mac, phone, laptop on the road) via Tailscale:
 ```bash
 ssh threadripper 'tmux ls'                # see all sessions
 ssh threadripper 'tail -n 50 ~/Projects/CSCI-FALL-2025/logs/ws_p3_16_*.log'
-ssh threadripper 'nvidia-smi'              # GPU load per device
+ssh threadripper 'nvidia-smi'              # A5000 load + memory
 ```
 
 VS Code Remote-SSH gives a richer experience — the tree + terminal + log tails all stream natively. TensorBoard (if used) auto-forwards from WSL:6006 to Windows:6006 to the Mac browser via SSH port forward:
