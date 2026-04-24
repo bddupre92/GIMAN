@@ -1,275 +1,215 @@
 # Post-Compact Resume Anchor — 2026-04-23 session
 
-**Session focus:** (1) Paper 1 IEEE JBHI reviewer-response execution (25-commit arc, HPO orphan running). (2) Paper 3+4 combined npj-DM revision planning (2 new plan docs committed at `2092706` — does NOT displace Paper 1; parallel workstream).
+**Session focus:** Paper 1 Round 1 + Round 2 reviewer response, Paper 3+4 npj-DM consolidation + Phase S blockers + WS-P3-14 LRRK2/GBA subgroup re-run.
 
-**Branch:** `feat/ch9-6-multichannel` · **HEAD:** `2092706` (P3+4 reviewer-response plans) · **27 commits ahead** of session-start point `db9cbbb`.
+**Branch:** `feat/ch9-6-multichannel` · **HEAD:** `a65635d` · Session arc = **`9da20fd` → `a65635d` (14 commits)**.
 
 ## One-shot resume commands
 
 ```bash
 cd /Users/blair.dupre/Projects/CSCI-FALL-2025
 
-# Full session context
-cat Docs/NEXT_STEPS_2026-04-23.md                                  # this file
-cat Docs/superpowers/plans/2026-04-23-paper1-reviewer-response.md  # research plan (10 parts)
-cat Docs/superpowers/plans/2026-04-23-paper1-reviewer-response-execution.md  # execution plan
-cat Docs/CONVENTIONS.md                                            # §7 Paper Rigor Rubric
+# Read the key plan docs in order
+cat Docs/NEXT_STEPS_2026-04-23.md                                                # this file
+cat Docs/superpowers/plans/2026-04-23-paper1-reviewer-response-execution.md      # Round 1 execution
+cat Docs/superpowers/plans/2026-04-23-paper1-R2-reviewer-response.md             # Round 2 NEW
+cat Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response-execution.md # P3+4 execution
+cat Docs/paper1_revision/distillation_2026-04-23.md                              # Round 1 distillation memo
 
-# Commit arc this session (25 commits)
-git log --oneline db9cbbb..HEAD | head -30
+# Check what's running in background
+ps aux | grep -E "run_subgroup_with|run_saa|run_label_var|run_putamen" | grep -v grep
 
-# What's RUNNING in background when session ended
-ps aux | grep -E "run_nested_cv_hpo|mempalace mine" | grep -v grep
-tail -f outputs/paper1_hpo/logs/master.log                         # tree HPO progress
-tail -f /private/tmp/claude-501/.../tasks/bmszcr2fu.output         # same via controller log
-tail -f /private/tmp/claude-501/.../tasks/bpny4ni4l.output         # mempalace mining
+# WS-P3-14 sentinel (decision_verdict.json means done)
+ls outputs/paper4/subgroup_carriers/decision_verdict.json 2>/dev/null && echo "WS-P3-14 DONE" || echo "still running"
 
-# Tree HPO progress (actual trial counts)
-for f in outputs/paper1_hpo/trials_*.jsonl; do
-  echo "$(basename $f .jsonl): $(wc -l < $f) trials"
-done
+# Commit history this session
+git log --oneline 9da20fd..HEAD
 ```
 
-## What is DONE
+## 14-commit arc this session
 
-### Plans + standing conventions
+| # | SHA | What |
+|---|-----|------|
+| 1 | `9da20fd` | Post-compact resume anchor (prev session) |
+| 2 | `2092706` | P3+4 research + execution plans (21 workstreams) |
+| 3 | `6444781` | NEXT_STEPS P3+4 addendum |
+| 4 | `5c6d4a1` | pyproject.toml version pins (numpy 2.x, torch 2.8+) |
+| 5 | `72707a8` | Phase A batch + WS1.3 TabPFN + SQL column-case fix |
+| 6 | `bc12758` | AutoGluon NN exclusion workaround (superseded) |
+| 7 | `7c04ebf` | AutoGluon sidecar venv — libomp collision fix |
+| 8 | `b283e19` | Phase B distillation memo |
+| 9 | `59a4d57` | Phase C manuscript rewrite |
+| 10 | `f5df96f` | Phase D polish (abstract trim, Fig 7 + Fig 9, rebuttal) |
+| 11 | `9016787` | Phase D+ table consolidation 9→6 per JBHI norms |
+| 12 | `c39e70a` | P3+4 Phase S blockers (10→5 tables, Graph-DT footnote) |
+| 13 | — | (WS-P3-14 compute in background, uncommitted) |
+| 14 | **`a65635d`** | **R2 reviewer response Q1 + Q2 + Q7** |
 
-- `Docs/superpowers/plans/2026-04-23-paper1-reviewer-response.md` — research plan (10 parts, 26+ verified citations, devil's-advocate defense, full 4-subagent synthesis)
-- `Docs/superpowers/plans/2026-04-23-paper1-reviewer-response-execution.md` — execution plan (14 workstreams, TDD bite-sized, pre-registered decision rules per Analysis E template)
-- `Docs/CONVENTIONS.md §7 Paper Rigor Rubric` — 8 categories × PASS test × literature anchor × §7.9a "wrap canonical packages, don't hand-roll" rule × §7.9 Papers 2-11 retrospective sweep
+## What's RUNNING at compaction time
 
-### 16 new citations in bibliography_extracted.tex + dissertation/bibliography.tex + Zotero FPJM5RSS
-
-Tavily-surfaced (13): `shokrpour2025mlpdreview`, `sar2025multimodal`, `zhang2025ordinalcp`, `khosousi2024ddcDat`, `muhammad2026trustworthyPD`, `gonzalezLatapi2024elevenYears`, `simuni2025reply`, `dam2024nsdValidation` (KEY positioning citation), `gorishniy2021revisiting`, `zabergja2024dltabular`, `ye2024closertabular`, `bonnier2022ordinal`, `gnnNestedCv2025`.
-
-Reviewer-cited (3): `quan2019datSpect`, `ding2021diffusionMaps`, `ding2023contrastiveMultimodal`.
-
-### Workstream pre-regs + scripts committed (all 7 Phase A scripts ready)
-
-| WS | Pre-reg | Script | Status |
+| Process | PID | Purpose | ETA |
 |---|---|---|---|
-| WS0.1-0.5 Tier 0 | — | — | **DONE** at `94010e5` (amended) + spec PASS + code-quality APPROVED (2 minor Phase D issues) |
-| WS1.1 fold-local imputation | `7fd2036` | `128f5e1` (pre-fix) → `1665911` (post-genetics-fix) | **DONE** spec PASS; re-run post LRRK2/GBA fix shows Δ AUC ≤ 0.006 (NSD+ biggest gain) |
-| WS1.2 HPO | `be8fd0c` | `efd0211` | Script ready; **HPO compute restarted** at `bmszcr2fu` after genetics fix |
-| WS1.4 CORAL/CORN/ord-CatBoost | `fcc81d7` | bundled in `35bf264` | Script ready; compute queued |
-| WS1.5 ordinal CP (xrty/OCP wrap) | `b5ccd11` | `bcfaedc` | Script ready + xrty/OCP vendored at `third_party/OCP_vendored/` |
-| WS1.6 medication 3 arms | bundled in `043254f` | `8ba5506` | Script ready |
-| WS1.7 external conformal (BioFIND) | `6f05b9c` | `2c22a7d` | Script ready; MAPIE SplitConformalClassifier + LAC |
-| WS1.8 calibration (ECE+Brier+reliability+Q5) | bundled in `043254f` | bundled in `35bf264` | Script ready; `netcal` installed |
-| WS1.9 SHAP + LRRK2/GBA/APOE subgroup | `84d7977` | `32a6b90` | Script ready; agent re-derived carriers from raw IU (workaround for the bug we later fixed) |
+| WS-P3-14 subgroup bootstrap | 4023 | P3+4 Paper 4 LRRK2/GBA subgroup re-run | unknown; ~22min elapsed, in 1000-bootstrap phase |
 
-### LRRK2/GBA carrier-flag bug FIX (commit `672b439`)
+**Q5 SAA-stratified runner:** killed at compaction (had PATNO KeyError on staging merge; fix already applied in `scripts/paper1/run_saa_stratified.py` lines 107-112 — re-dispatch post-compact).
 
-**Root cause:** `scripts/assemble_paper1_features.py:extract_genetics()` used `str.contains("CARRIER|POSITIVE|YES")` on the IU Genetic Consensus file, but IU stores actual variant names (`G2019S`, `R1441G`, `N409S`, `L483P`). Regex never matched → all 2,201 patients had `LRRK2_CARRIER=0`, `GBA_CARRIER=0`.
+## R2 key findings (LOCKED)
 
-**Pre-fix SQL verification:**
-```
-lrrk2_pos=0, gba_pos=0, apoe_pos=441, lrrk2_null=0, total=2,201
-```
+### Q2 putamen-ratio sensitivity — **VERDICT: MATERIAL** (commit `a65635d`)
 
-**Fix:** new `_is_carrier_flag()` helper treats carrier = value NOT in `{"0", "NA", "NaN", "", "N/A", "None"}`. Handles quoted/unquoted/case-insensitive/whitespace.
+`CAUDATE_PUTAMEN_RATIO` carries **+0.077 AUC on binary** from putamen-SBR leakage we claimed to exclude. Reviewer was right.
 
-**Post-fix SQL verification:**
-```
-lrrk2_pos=175 (9.7%), gba_pos=111 (6.2%), apoe_pos=441 (unchanged), lrrk2_null=405 (18.4%, ungenotyped)
-```
-
-**Impact on predictions:** Pre-fix CatBoost AUCs were bit-identical to what you'd get from a 20-feature model (constant features contribute 0 info gain). Post-fix, NSD+ sub-staging gains +0.006 AUC (biologically coherent — LRRK2/GBA carriers differentiate progression within PD). Binary loses tiny −0.0005.
-
-**Downstream audit ripple — Papers 2-11 AUDIT PENDING.** These files read from SQL and will auto-benefit when re-run, but any PAPER that already cited LRRK2/GBA subgroup analysis is WRONG and needs re-running:
-- `scripts/paper1/compute_multiclass_auc_ci.py` — auto-fixed via SQL
-- `scripts/paper1/run_analysis_E_site_loso.py` — auto-fixed via SQL (was using carrier flags but they were all zero anyway)
-- `scripts/paper1/run_fold_local_imputation.py` — re-ran at `1665911`
-- `scripts/paper1/bootstrap_revision_analyses.py` — auto-fixed via SQL
-- `src/giman_pipeline/paper3/dynamic_deephit.py` — Paper 3 consumer; audit needed
-- `src/giman_pipeline/paper3/graph_digital_twin.py` — Paper 3 consumer; audit needed
-- `src/giman_pipeline/paper4/subgroup.py` — Paper 4 consumer; audit needed
-- Papers 2/6/10 — audit queued
-
-### Audit DB state
-
-- `7,393 claims · 95% verified · 0 contradicted · 0 critical flags` before HPO kill
-- Refresh post-HPO-results with `01_extract_citations.py` + `07_per_claim_value_verifier.py` + `99_defensibility_scorer.py`
-
-## What is RUNNING at session end
-
-| Job | ID | What | ETA |
+| Target | 22-feat (leaky) | 21-feat (Path 3) | Δ AUC |
 |---|---|---|---|
-| Tree HPO (2 models × 4 targets, 8 parallel) | `bmszcr2fu` | Nested 5×3 CV on CORRECTED genetics features | ~7h (LightGBM multiclass is bottleneck at ~105s/trial × ~250 trials per outer) |
-| Mempalace mining | `bpny4ni4l` | Mining this session's conversation + project files into paper1-reviewer-response-2026-04-23 wing | ~10-20 min |
+| binary | 0.978 | **0.901** | +0.077 |
+| three-class | 0.943 | 0.897 | +0.047 |
+| full-ordinal | 0.949 | 0.915 | +0.033 |
+| NSD+ | 0.913 | 0.908 | +0.005 (within noise) |
 
-**Tree HPO output paths when it finishes:**
-- `outputs/paper1_hpo/trials_<model>_<target>.jsonl` — per-trial records
-- `outputs/paper1_hpo/results/nested_cv_<model>_<target>.json` — per-fold test scores + mean AUC + bootstrap CI + modal HP
-- `outputs/paper1_hpo/logs/hpo_<model>_<target>.log` — per-job log
-- `outputs/paper1_hpo/logs/master.log` — master orchestrator log
+**Path 3 adopted:** strict-exclusion 21-feat becomes primary. Binary headline drops from 0.979 → 0.901, remaining above 12-feat clinical-only ceiling (0.900) — shows dopaminergic-imaging signal at the caudate-alone level is real, not circularity-driven.
 
-Stale pre-fix trial logs archived at `outputs/paper1_hpo/_stale_pre_genetics_fix/` (for reference only; do not use).
+### Q1 strict label-variable ablation — **VERDICT: NO_LABEL_REDISCOVERY**
 
-## What is PENDING (post-compact)
+Removed UPDRS1_TOTAL + UPDRS2_TOTAL (Simuni threshold variables; MoCA already out via HIGH_MISS). Max |Δ| across all 4 targets = 0.003. Model is NOT rediscovering threshold rules.
 
-### Phase A residuals (all compute, queue after tree HPO)
+### Q7 abstention rates
 
-1. **MM-GAT HPO scope decision** — user deferred until tree HPO results. Options: full 45h / accelerated 10h / skip with Grinsztajn+Gorishniy citation.
-2. **Batch launch WS1.4-1.9 compute** once tree HPO frees CPU. Commands:
-   ```bash
-   # in parallel
-   .venv/bin/python scripts/paper1/run_ordinal_benchmarks.py --method coral --target full_ordinal &
-   .venv/bin/python scripts/paper1/run_ordinal_benchmarks.py --method corn --target full_ordinal &
-   .venv/bin/python scripts/paper1/run_ordinal_benchmarks.py --method ord_catboost --target full_ordinal &
-   .venv/bin/python scripts/paper1/run_ordinal_conformal.py --target full_ordinal &
-   .venv/bin/python scripts/paper1/run_medication_sensitivity.py --arm 1 --target binary &
-   .venv/bin/python scripts/paper1/run_medication_sensitivity.py --arm 2 --target binary &
-   .venv/bin/python scripts/paper1/run_medication_sensitivity.py --arm 3 --target binary &
-   .venv/bin/python scripts/paper1/run_external_conformal.py --target binary &
-   .venv/bin/python scripts/paper1/run_external_conformal.py --target 3class &
-   .venv/bin/python scripts/paper1/run_external_conformal.py --target nsd_positive &
-   .venv/bin/python scripts/paper1/run_calibration_analysis.py &
-   .venv/bin/python scripts/paper1/run_shap_subgroup.py --part both --target binary &
-   # ... etc for all targets
-   wait
-   ```
-   Install any missing deps first: `.venv/bin/pip install shap coral-pytorch` (`netcal` already installed this session).
+Mean set sizes extracted from R1 conformal JSONs. **Per-patient empty/multi-label distributions not archived;** flag as follow-up.
 
-3. **WS1.3 TabPFN cloud + AutoGluon** — Task 4. Wait for fresh UTC day for the 100M credit quota to reset. API key goes at `~/.config/paper1/tabpfn_api_key` (0600, user to populate). Use `tabpfn-client` (Apache 2.0) not local `tabpfn` (research-only). Script TBD — agent dispatch for pre-reg+script pending.
+## What remains for R2 (next session)
 
-4. **Spec + code-quality reviews** on all 7 WS scripts. Task 1 CQ already APPROVED; WS1.1 spec passed. Remaining: WS1.4/1.5/1.6/1.7/1.8/1.9 need spec + CQ review pairs.
+**Batch 1 completion (compute, fast):**
+- **Q5** SAA-stratified: **re-dispatch** (PATNO fix applied at `scripts/paper1/run_saa_stratified.py:107-112`). Run: `.venv/bin/python scripts/paper1/run_saa_stratified.py`.
+- **Q6** rule-based Simuni baseline: write script + run. Uses `scripts/stage_biofind_nsd_iss.py` threshold logic applied to BioFIND features + compare vs Russo 2025 ground truth.
+- **Q9** extended subgroup: age bands, disease duration, site. Extend `outputs/paper1_shap_subgroup/` pattern.
 
-### Phase B — Distillation memo (~2 hrs)
+**Batch 2 (post-B1):**
+- **Q4** temperature scaling quantitative on external BioFIND. Pre/post ECE + Brier + conformal coverage + set sizes.
 
-Single synthesis document across all 9 experiment outputs:
-- What's the actual headline AUC comparison? (CatBoost vs TabPFN vs AutoGluon vs tuned GAT)
-- Does "tree dominance" survive or fall per real numbers?
-- Calibration decay on BioFIND external?
-- Which subgroup shows biggest disparity?
-- Did WS1.6 medication produce a promotable Analysis F or null?
-- Did CORAL/CORN beat multiclass CatBoost or confirm Bonnier 2022?
+**Batch 3 (prose-only):**
+- **Q3** graph inductive/transductive clarification (verify already fold-local, document in §Methods)
+- **Q8** domain-shift mitigation discussion (ComBat, reweighting — prose-first; compute pilot only if time)
+- **Q10** REPRODUCIBILITY_PACKAGE.md (redacted artifact list now, not just at acceptance)
 
-Output: `outputs/paper1_distillation_2026-04-23.md` — one-page "what Paper 1 actually says now" memo.
+**Batch 4 (manuscript integration):**
+- **Path 3 rewrite** — all headline numbers: abstract + Table III + §III Methods (add "Circularity Audit" subsection with putamen-ratio finding) + §IV Results + §V Discussion (reframe "DaT-SPECT essential" → "DaT-SPECT caudate-alone suffices above clinical ceiling") + §VI Conclusion
+- **Rebuttal letter R2 addendum** addressing all 10 questions with concrete numbers and section/line references
 
-### Phase C — Paper rewrite (~6 hrs)
+## P3+4 execution plan state
 
-Only after Phase B locks:
-- §II Related Work rewrite (add tabular SOTA reframe per Part 9.3 of research plan; cite `dam2024nsdValidation` for "NSD-ISS is defined on tabular anchors" defense)
-- §III Methods updated to narrate what we actually ran (HPO protocol, fold-local imputation, ordinal methods, medication sensitivity, calibration, subgroup)
-- §IV Results driven by real numbers
-- §V Discussion with honest positioning (tree-dominance vs foundation-model-era per Zabërgja 2024 / Ye 2024 / Hollmann 2025)
-- Abstract rewritten LAST
-
-### Phase D — Format polish (~3 hrs)
-
-- Tables: consolidated results (use WS1.1 post-genetics-fix patient-level bootstrap CIs consistently; deprecate fold-level CI asymmetry flagged in Task 1 code review)
-- Figures: new Fig 7 (calibration reliability 2×4), Fig 8 (LogReg external NSD+ diagnostics), Fig 9 (SHAP + subgroup forest)
-- Word count trim (body target ≤7,500; abstract already at 249 ≤250)
-- Fix 2 Task 1 CQ issues: add `\label{}` to CoI / Funding / Author Contributions; decide bootstrap-method asymmetry (use WS1.1 patient-level throughout)
-- Commit-msg drift cleanup: commits `35bf264`, `043254f` bundled multiple agents' files
-- Rebuttal letter: point-by-point, driven by defense matrix in Part 3.4 of the research plan
-- Zenodo DOI registration (Q8 deliverable)
-
-### Phase C/D — downstream ripple audit (Papers 2-11)
-
-Any paper that cited LRRK2+ or GBA+ subgroup results before commit `672b439` is based on an all-zero feature set. Re-run needed for:
-- Paper 3 Graph-DT `genetic` node features (if used) — `outputs/paper3_graph_dt/graph_dt_results.json` may need re-run
-- Paper 4 conditional-conformal subgroups (`outputs/paper4/subgroup/subgroup_ctd.json`)
-- Paper 6 clinical-only 12-feat cohort uses APOE (fine — APOE was correct)
-- Paper 10 mechanistic twin `genetic` module
-- Any other cross-paper genetic-stratification claim
-
-## Key open decisions for next session
-
-1. **MM-GAT HPO scope:** 45h full / 10h accelerated / skip with citation
-2. **TabPFN API key:** user to populate `~/.config/paper1/tabpfn_api_key`
-3. **WS1.4 branch log:** if `YetiRank` on CatBoostClassifier fails, the agent's fallback switches to `CatBoostRegressor(QueryRMSE)` — review which branch fires
-4. **Papers 2-11 downstream audit:** schedule the ripple; decide whether to block Paper 1 submission on fixing them all, OR ship Paper 1 post-audit with a "Papers 2-11 will be updated in a forthcoming revision" note
-
-## Session metric summary
-
-- Commits: 25 (a68daa0 → 1665911)
-- New citations added: 16 (to bibliography + Zotero Review Queue FPJM5RSS)
-- Bugs fixed: 1 load-bearing (LRRK2/GBA extraction)
-- Subagents dispatched: 12+ (pre-reg/script writers, reviewers, spec reviewers, CQ reviewers)
-- Compute runs: 2× WS1.1 (pre- and post-genetics-fix), 1× failed+restarted tree HPO
-- Pre-registrations locked: 7 (WS1.1, WS1.2, WS1.4, WS1.5, WS1.6, WS1.7, WS1.9 — WS1.8 has one too, bundled)
-- Standing rubric promoted: `Docs/CONVENTIONS.md §7` Paper Rigor Rubric + §7.9a package wrap rule
-
-## PAPER 3+4 COMBINED npj-DM REVISION — PLANNING COMPLETE (commit `2092706`)
-
-**Scope addition (not displacing Paper 1).** After the Paper 1 HPO orphan was running stably, user shared an external-reviewer critique of the combined P3+P4 submission at `outputs/mechanistic_twin/paper3plus4_submission/npj-dm/`. Same maximum-rigor approach as Paper 1 applied. 9 parallel research agents dispatched + consolidated into two plan docs:
-
-- **Research plan:** `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response.md` (450 lines)
-- **Execution plan:** `Docs/superpowers/plans/2026-04-23-paper3plus4-reviewer-response-execution.md` (560 lines)
-
-### Verification findings (before planning)
-
-Read the combined manuscript to cross-check reviewer claims against actual content:
-
-| Reviewer complaint | Status in manuscript |
+| Phase | Status |
 |---|---|
-| R8 "No calibration assessment" | **PARTIAL** — ECE table present (L211-223), H-L p-values mentioned, but NO reliability-diagram figure, NO time-Brier decomp, NO DCA |
-| R14 "LRRK2/GBA excluded (n<10)" | **CONFIRMED** (L229) — **artifact of Paper 1 LRRK2/GBA bug now fixed (175 LRRK2+ / 111 GBA+)**; strengthening revision |
-| R4 "No continuous-time alternative" | **CONFIRMED missing** |
-| R11 "References appear as [?]" | **NOT REPRODUCED** — zero undefined refs in `main.log`; likely stale-PDF artifact at reviewer's end |
-| R12 "Digital twin partially walked back" | **PARTIAL** — "digital twin" only appears inside "Graph-DT" acronym in prose |
+| S: Submission-blockers (10→5 tables, Graph-DT footnote, Markov row fix) | ✅ commit `c39e70a` |
+| R-A/WS-P3-14: LRRK2/GBA subgroup re-run | 🔄 in progress (PID 4023, bootstrap phase) |
+| R-A/Markov predictive metrics (WS-P3-6) | ✅ implicit via Phase S |
+| R-A/LRRK2 GBA re-run (WS-P3-14) | 🔄 compute running in background |
+| R-A/subject-level bootstrap (WS-P3-2) | ⏳ pending |
+| R-A/PDBP longitudinal staging (WS-P3-16, 5-6 days) | ⏳ pending |
+| R-B: new baselines + R1 inductive graph | ⏳ pending (Days 8-15) |
+| R-C: GraphMAE + ablations + 5-seed + faithfulness + calibration | ⏳ pending (Days 15-21) |
+| W: manuscript rewrite | ⏳ pending (Days 21-28) |
 
-### PDBP external-validation feasibility **CONFIRMED** via SQL
+## 🔴 POST-COMPACT PRIORITY 1 — Q7 per-patient set-size archaeology
 
+**User flagged:** "per-patient distributions weren't archived — this has to be somewhere."
+
+**Where to dig** (in order of likelihood):
+
+1. **`outputs/paper1_conformal/`** — `conformal_results.json` likely has per-fold aggregated stats; check if per-patient label-vector or set-indicator arrays are in any subdirectory.
+2. **`outputs/paper1_conformal/` subdirectories** (if any) — original MAPIE run may have dumped per-call outputs.
+3. **`outputs/paper1_external_conformal/results/{binary,3class,nsd_positive}.json`** — has `per_fold` arrays; `efficiency_coverage_curve` may contain per-patient data.
+4. **SQL tables** — check if `features.paper1_conformal_predictions` or similar exists: `psql giman_research -Atc "SELECT table_name FROM information_schema.tables WHERE table_schema='features' AND table_name ILIKE '%conformal%';"`
+5. **Predictor fit artifacts** — MAPIE `SplitConformalClassifier` + `CrossConformalClassifier` fit objects may be pickled somewhere under `outputs/paper1_conformal/checkpoints/`.
+6. **If NONE of the above:** we have to re-run the conformal procedure with explicit per-patient JSON dump. Script: port `scripts/paper1/run_conformal_benchmark.py` to add per-patient set-indicator matrices. Fast rerun (~20 min).
+
+**Why this matters:** Reviewer Q7 is asking for the distribution of set sizes (empty / singleton / multi-label), not just the mean. Mean alone doesn't tell you the abstention rate. Without archived data OR a targeted rerun, we can only give approximate fractions via a Poisson-binomial argument (unsatisfying for a top-tier rebuttal).
+
+**Command to start:**
+```bash
+find outputs -name "*.json" -newer /dev/null 2>/dev/null | xargs grep -l "set_size\|empty.*set\|per_patient_set" 2>/dev/null | head
 ```
-PDBP patients with all 7 NSD-ISS inputs (UPDRS I/II/III + MoCA + RBD + PDMEDYN):
-  any visit:       1,382
-  ≥2 visits:         582
-  ≥3 visits:         493  ← PRIMARY EXTERNAL COHORT
-  total visit-rows: 2,906
-```
-
-PPMI Paper 3 cohort was 922 transitioning patients; **PDBP at 493 × ≥3 visits is 53% of that scale**. Ample for Hu 2025 *npj Digit Med* 8:290 style external validation. This means R16 becomes feasible IN the P3+P4 revision — NOT deferred to Paper 5. Paper 5 scope re-scoped to temporal-hold-out + inductive-graph infra only (no external-staging).
-
-### 21 workstreams mapped to reviewer concerns
-
-All 16 weaknesses (R1-R16), 11 questions (Q1-Q11), and 5 journal-style audit findings (S1-S5) have a numbered workstream with pre-registered decision rules (PASS / TRIGGER-RERUN / FAIL). Full matrix in the research plan §1.
-
-### 9-agent research synthesis (all completed)
-
-1. **R1 inductive graph** (agent `a4a37c6b`) — 12 citations + 5 repos; expected Δ C-td = −0.01 to −0.04; recommended protocol option (b) primary + option (a) sensitivity. Anchor precedent: Gouareb 2023 *Health Data Sci* 0.96→0.91 on similar patient-graph.
-2. **R2/R3 clustered bootstrap** (agent `a8087efa`) — Field-Welsh 2007 + Bouwmeester 2013 variance-inflation 1.3×-2.5×; 3 npj-DM/Nat Med precedents (Myers 2023, Carrasco-Zanini 2024, DNFCR 2025).
-3. **R7 modern deep baselines** (agent `a5ee0a3a`) — SurvTRACE / SurvLatent-ODE / CRISP-NAM all have shipped competing-risks support. Bonus TraCeR 2025 (arXiv:2512.18129) as SurvTRACE-longitudinal successor.
-4. **R7 classical baselines** (agent `a89b98fa`) — Fine-Gray TV + dynamic landmarking + **new `jmstate` Python package** (Laplante & Ambroise 2026 arXiv:2510.07128, PyPI v0.15.2). No rpy2 needed for jmstate.
-5. **R5 always-detach / DGI** (agent `a80f3f40`) — GraphMAE primary (mask_rate=0.5, scaled cosine loss), DGI runner-up. Survival-GNN field default is fully-joint; our always-detach IS unusual.
-6. **R10 HSMM misclassification** (agent `a787450a`) — msm R package (Jackson 2011) via rpy2; 3-variant sensitivity protocol (primary msm + drop-jumps-≥2 + semi-Markov flexsurv). Titman framing: DaT-SBR emission-likelihood check for 3→0 regressions.
-7. **github repo research** (agent `aba67634`) — pinned SHAs for all 5 vendored + 4 pip packages (lifelines@7a8fc34a, SurvivalEVAL@ab6db9c6, SurvTRACE@e6b354fd, survlatent_ode@c712bdc0, crisp-nam@e034c527, GraphMAE@b14f080c, DGI@61baf67d, thehanlab/dynamicLM@a444e853, chjackson/msm@024f685).
-8. **PDBP data-audit** (agent `a4b7266c`) — BioFIND infeasible (M0-only), HBS structurally impossible (missing UPDRS-I + MoCA), LCC cross-sectional, LBD DLB-contaminated, STEADY-PD3+SURE-PD3 feasible fallback. PDBP primary at 493/≥3-visit.
-9. **journal-style-audit** (agent `a94482fd`) — 5 submission-blockers (abstract 293→≤250, tab:main Markov dashes, tab:competitors +252pt, ≤5 main tables, Graph-DT footnote). ALL 34 citations resolve (reviewer's [?] claim is stale-PDF).
-
-### 24 new bibitems planned
-
-Key additions: `rosenblatt2024leakage` (*Nat Commun* precedent for leakage-quantification expectation), `gouareb2023patient` (closest Δ C-td anchor), `field_welsh_2007_clusterbootstrap`, `wang2022survtrace`, `moon2022survlatent`, `patel2025crispnam`, `hou2022graphmae`, `laplante2026jmstate`, `jackson2011msm`, `titman2010semimarkov`, `koh_liang_2017_influence` (R15 faithfulness), `vickers2006dca` (R8 net-benefit). Full list in research plan §9.
-
-### P3+4 execution phases (after Paper 1 lands)
-
-| Phase | Days | Focus | Compute |
-|---|---|---|---|
-| S | Day 1 | Submission-blockers (WS-P3-S1 through S5) | none (prose + LaTeX) |
-| R-A | Days 2-8 | PDBP staging + Markov metrics + LRRK2/GBA re-run + subject bootstrap | MPS |
-| R-B | Days 8-15 | SurvTRACE + SurvLatent-ODE + CRISP-NAM + Fine-Gray + landmarking + jmstate + inductive graph (R1) | Threadripper CUDA + MPS parallel |
-| R-C | Days 15-21 | GraphMAE pre-train + ablation grid (60 configs) + calibration + faithfulness + 5-seed stability | both machines |
-| W | Days 21-28 | Manuscript rewrite + rebuttal letter + PDF | writing |
-
-**Total wall-clock:** ~4 weeks with Threadripper CUDA + Mac MPS parallelism. If Threadripper unavailable, balloons to ~8 weeks.
-
-### Coordination with Paper 1
-
-- Paper 1 tree HPO orphan still running at session end (PPID=1, ~6/8 workers done, ~2-4h more for LGBM multiclass).
-- P3+4 work does NOT displace Paper 1. Executes in parallel branches if scope extends past 1 week.
-- Cross-paper reuse:
-  - WS-P3-14 LRRK2/GBA re-run directly benefits from Paper 1's `672b439` bug fix.
-  - WS-P3-8 calibration reuses `outputs/paper4/calibration/` existing module.
-  - WS-P3-2 subject-bootstrap pattern reused from Paper 1 WS1.1 fold-local.
-  - WS-P3-13 5-seed protocol identical to Paper 1 WS1.2 nested CV.
-  - §7 Paper Rigor Rubric (Docs/CONVENTIONS.md) applies to all P3+4 workstreams by default.
-
-## Ready for /compact
-
-All session state captured. Fresh session starts by reading this file + Paper 1 execution plan + P3+4 execution plan + `Docs/CONVENTIONS.md §7`.
 
 ---
 
-*Session 2026-04-23 delivered: (1) Paper 1 IEEE JBHI revision response (25-commit arc, LRRK2/GBA silent bug fixed, 7 pre-registered compute scripts, orphan HPO running) + (2) Paper 3+4 combined npj-DM revision planning (9 parallel research agents, PDBP 493-patient external-validation feasibility proven, 21-workstream execution plan with decision rules). Both papers now have reviewer-defensible revision paths mapped with maximum methodological rigor. Mempalace mining + git commits capture the knowledge for next session.*
+## 🔴 POST-COMPACT PRIORITY 2 — SQL DB refresh with all new runs
+
+**User flagged:** "our SQL should be updated with EVERYthing we are doing. new runs, run outputs, etc. right?"
+
+**Yes — current state:** new Q1/Q2/Q7/WS-P3-14 results are JSON-only at `outputs/paper1_r2_responses/` and `outputs/paper1_circularity_audit/` and `outputs/paper4/subgroup_carriers/`. The PostgreSQL `giman_research` DB is NOT updated with any of these.
+
+**Per CLAUDE.md §Registry-freshness-protocol:**
+
+> "Update the registry table whenever you: Run `scripts/load_csvs_to_local_pg.py --schema <name>` ... Write a new persistent `mechanistic.*` or `features.*` or `paper3.*` table"
+
+**Deliverables post-compact:**
+
+1. **Create new `features.paper1_r2_sensitivity` table** — stores per-target × feature-set AUC + CI for putamen-ratio + label-var ablations. Schema:
+   ```sql
+   CREATE TABLE features.paper1_r2_sensitivity (
+     run_id          TEXT,              -- 'q1_label_var' | 'q2_putamen_ratio'
+     target          TEXT,              -- binary | 3class | full_ordinal | nsd_positive
+     feature_set     TEXT,              -- 'full_22' | 'path3_21' | 'strict_17' | 'strict_19'
+     n_features      INT,
+     pooled_auc      DOUBLE PRECISION,
+     ci95_low        DOUBLE PRECISION,
+     ci95_high       DOUBLE PRECISION,
+     fold_mean_auc   DOUBLE PRECISION,
+     fold_std_auc    DOUBLE PRECISION,
+     verdict         TEXT,              -- MATERIAL | MARGINAL | COSMETIC | NO_LABEL_REDISCOVERY | etc.
+     commit_sha      TEXT,
+     run_date        DATE,
+     PRIMARY KEY (run_id, target, feature_set)
+   );
+   ```
+
+2. **Create `features.paper4_subgroup_carriers` table** — once WS-P3-14 finishes, load its JSONs.
+
+3. **Update CLAUDE.md Schemas table** at the end of each new-table load (per the registry-freshness-protocol hook).
+
+4. **Post-commit audit DB refresh:**
+   ```bash
+   .venv/bin/python scripts/defense_prep/07_per_claim_value_verifier.py
+   .venv/bin/python scripts/defense_prep/99_defensibility_scorer.py
+   .venv/bin/python scripts/vault_sync.py
+   ```
+
+5. **Mark audit.claim row for "binary AUC 0.979"** as `verdict='modified'` per §7.9b:
+   ```sql
+   UPDATE audit.claim
+   SET verdict = 'modified',
+       verdict_notes = 'commit a65635d: CAUDATE_PUTAMEN_RATIO putamen-leakage found; 22-feat 0.979 replaced by 21-feat Path 3 primary 0.901 [0.887, 0.915] under strict circularity exclusion (Q2 MATERIAL verdict per outputs/paper1_circularity_audit/PRE_REGISTRATION.md)'
+   WHERE paper = 'P1' AND claim_text LIKE '%0.979%binary%';
+   ```
+
+**Write a one-shot loader script:** `scripts/load_paper1_r2_to_pg.py` that reads the 3 JSONs from `outputs/paper1_r2_responses/` + `outputs/paper1_circularity_audit/` and UPSERTs into the new SQL tables. Mirror pattern from `scripts/load_paper11_to_pg.py`.
+
+---
+
+## Audit DB refresh (DEFERRED — hook warned but not blocking)
+
+Post-compact, for commit `a65635d`:
+- **MATERIAL Q2 verdict** refutes claim "binary CatBoost AUC = 0.979 [0.970, 0.986]"; update to `verdict='modified'` with note "post-22feat-putamen-leakage-fix commit a65635d: 0.901 [0.887, 0.915] under strict exclusion (Path 3 primary)"
+- **NO_LABEL_REDISCOVERY Q1 verdict** strengthens claims about non-circular NSD+ sub-staging performance
+- Run `scripts/defense_prep/07_per_claim_value_verifier.py` + `99_defensibility_scorer.py`
+- Regen `outputs/defense_prep/e2e_audit/claim_lineage.sqlite3`
+
+## Paper 1 Round 2 rebuttal talking points (pre-drafted)
+
+For each of the 10 questions, here's the status and where the answer lives:
+
+| # | Reviewer Q | Status | Artifact |
+|---|---|---|---|
+| Q1 | Circularity (UPDRS-II, MoCA) label ablation | ✅ DONE | `outputs/paper1_r2_responses/q1_label_var_ablation.json`; VERDICT: NO_LABEL_REDISCOVERY |
+| Q2 | Putamen leakage (CAUDATE_PUTAMEN_RATIO) | ✅ DONE | `outputs/paper1_circularity_audit/sensitivity_putamen_ratio.json`; VERDICT: MATERIAL, Path 3 adopted |
+| Q3 | Graph inductive/transductive splits | ⏳ prose | will verify fold-local; already implemented that way per scripts/paper1/run_fold_local_imputation.py logic |
+| Q4 | Temperature scaling quantitative | ⏳ compute | pending (Batch 2) |
+| Q5 | S-anchor stratified sensitivity | ⏳ re-dispatch | script fix applied; re-run next session |
+| Q6 | Rule-based Simuni baseline for NSD+ | ⏳ compute | pending (Batch 1) |
+| Q7 | Abstention rates 80/90/95 CL int+ext | ⚠️ partial | mean set sizes done; per-patient distributions not archived |
+| Q8 | Domain shift mitigation (ComBat, reweighting) | ⏳ prose | pending (Batch 3) |
+| Q9 | Extended subgroup (age bands, disease duration, site) | ⏳ compute | pending (Batch 1) |
+| Q10 | Redacted artifact list now (Zenodo prep) | ⏳ prose | pending (Batch 3) |
+
+## Ready for /compact
+
+Fresh session starts by reading this file + Round 1 distillation memo + R2 plan doc + CONVENTIONS.md §7.
