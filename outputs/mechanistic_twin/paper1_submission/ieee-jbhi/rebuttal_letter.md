@@ -220,6 +220,62 @@ All ten Round 2 concerns are addressed with seven concrete empirical JSONs, one 
 
 Full audit trail: every numerical result cited above is reproducible from the eight artifacts listed in §7 of `REPRODUCIBILITY_PACKAGE.md`, and every claim verdict is mirrored in the `audit.claim` table of the project's defense-prep SQLite (`outputs/defense_prep/e2e_audit/claim_lineage.sqlite3`).
 
+---
+
+# Round 3 addendum — point-by-point response to the third reviewer round
+
+**Revision commits:** `51a098b` (TOST 21-feat 5-way SOTA convergence) · `9cd66f0` (Table III 5-way primary block + abstract refresh) · `2d781f3` (R3 Q1–Q7 manuscript edits + 3 new compute experiments)
+
+We thank the reviewer for the third round of constructive critique and the "recommend publication after revision" verdict. Round 3 raised seven specific questions, each closed below with verdict, evidence path, and exact integrated-text location. The most consequential additions are three new compute experiments (Q3 caudate residualization, Q4 BioFIND post-hoc prior-shift, Q7 staging-flow decomposition); the other four questions are clarifications addressed via prose.
+
+### R3-Q1 — Conformal empty-set / abstention semantics
+
+**Verdict:** Clarified. Empty prediction sets arise by construction in Sadinle 2019 LAC when no class accumulates posterior mass above the per-fold $\hat{q}_{1-\alpha}$ threshold. We report **strict marginal coverage** per Vovk *et al.* 2022 Theorem 2.1: an empty set on a true-positive instance is counted as **non-covered**. This is the conservative convention that preserves the distribution-free finite-sample guarantee; selective-coverage variants conditioning on $|C|>0$ would inflate reported coverage by 1–3pp but lose the guarantee. Clinician action on $|C|<1$ is documented: route patient to (i) repeat biomarker assessment, (ii) movement-disorder specialist review, or (iii) longitudinal follow-up. The abstention rate is therefore a deployment feature, not a defect.
+
+Evidence: new §V.C "Empty-set semantics and clinician action" paragraph in the manuscript; per-target abstention rates at `outputs/paper1_r2_responses/q7_abstention_rates.json`.
+
+### R3-Q2 — Missingness policy reconciliation (CatBoost native vs. dropped features)
+
+**Verdict:** Reconciled with explicit per-model preprocessing detail. UPDRS4_TOTAL (89.9% missing) and MOCA_TOTAL (83.5% missing) are dropped **universally across all model families**, including CatBoost. The reason is subtle and now documented: at $\geq 80$% missingness CatBoost's split-finding routine effectively encodes a selection-effect signal (PPMI patients who skip MoCA/UPDRS-IV are systematically older or earlier-stage; the "missing" bin reflects collection protocol, not biology) rather than a clinical measurement. Dropping yields the cleanest cross-model comparison and avoids attributing accuracy to a non-clinical artifact. For non-CatBoost models, fold-local median imputation at $>80$% missingness collapses the feature to a near-constant. Both features are retained in the 12-feature common subset for external validation because BioFIND/PDBP supply them at $\sim$60–92% coverage, where median imputation does not collapse the feature.
+
+Evidence: rewritten §III.C "High-missingness handling" paragraph; per-model preprocessing now explicit.
+
+### R3-Q3 — Residual D-anchor signal in caudate features (residualization sensitivity)
+
+**Verdict:** Quantified and **SUBSTANTIAL on binary, MINIMAL on NSD+ sub-staging** — an asymmetry that strengthens rather than weakens the deployment narrative. Partial Pearson correlation between caudate-mean SBR and putamen-mean SBR (age- and sex-adjusted) on the 2,201-patient cohort is $r = 0.851$ ($R^2 = 0.73$, mutual information 1.16 bits). After OLS-orthogonalising all four caudate features against putamen-L, putamen-R, putamen-mean SBR, age, and sex, retraining CatBoost on the residualized 21-feature primary yields binary AUC $0.901 \rightarrow 0.794$ ($\Delta = -10.68$pp), three-class $-6.45$pp, full-ordinal $-5.05$pp, and **NSD+ sub-staging $+0.53$pp** (within bootstrap noise). The asymmetry is biologically appropriate: binary NSD-positive detection is, and should be, dopaminergic-anchor-driven (this is what biological NSD-positive identification *means*); within-NSD+ sub-staging is genuinely clinical. The residualization-robust separation directly supports the two-stage deployment narrative.
+
+Evidence: new §V.A "Caudate residualization sensitivity (R3-Q3)" paragraph; abstract sentence with sensitivity caveat; `outputs/paper1_r2_responses/q_r3_q3_caudate_residualization.json`; SQL `features.paper1_r2_sensitivity` run_id `q_r3_q3_caudate_residualize` (4 rows).
+
+### R3-Q4 — External calibration improvement via post-hoc prior-shift correction
+
+**Verdict:** Executed. **MATERIAL but ASYMMETRIC** finding worth reporting. Saerens 2002 EM-based prior-shift correction: binary external ECE $0.072 \rightarrow 0.043$ ($\Delta = -0.029$, modest improvement); three-class ECE $0.301 \rightarrow 0.650$ ($\Delta = +0.349$, **material degradation**); NSD+ ECE $0.278 \rightarrow 0.386$ ($\Delta = +0.108$, degradation). Density-ratio reweighting (logistic-regression domain classifier with clipped weights) was bounded in all three targets ($|\Delta\text{ECE}| \leq 0.072$) but did not improve any target materially. Mechanism: BioFIND has near-pure NSD+ class composition (95.4% S+ vs PPMI's 35.6%), so the binary domain shift is dominated by class-prior shift; for multiclass, BioFIND prior shifts mass into Stage 2B (PPMI training $n=208$), and EM amplifies a noisy middle-class posterior. Deployment recommendation now in §V.B: prior-shift is appropriate for binary when target priors are known, but multiclass external deployment requires richer corrections (ComBat, Mondrian recalibration on labelled BioFIND subset).
+
+Evidence: new §V.B "Post-hoc external recalibration: Saerens 2002 prior-shift" paragraph; `outputs/paper1_r2_responses/q_r3_q4_biofind_prior_shift.json`; SQL run_id `q_r3_q4_biofind_prior_shift` (6 rows: 3 targets × 2 methods).
+
+### R3-Q5 — Ordinal-distance uncertainty: clinical value of min-CPS and CORN pairing
+
+**Verdict:** Discussed and recommendation provided. Min-CPS produces +9.5% wider sets than LAC at matched coverage but in exchange offers contiguity along the ordinal axis (sets like $\{2B, 3, 4\}$, never $\{1, 4\}$ skipping intermediate stages). For proximity-first deployments where actionable uncertainty is "how far off could we be?" (e.g., trial enrolment of moderate-stage patients), this contiguity guarantee is a clinically valuable signal LAC does not provide. We recommend a hybrid pipeline pairing **CORN** (lowest MAOE 0.213 in Table III) with **min-CPS** for proximity-first deployments while retaining multiclass CatBoost + LAC as the headline for binary and three-class targets.
+
+Evidence: new §V.C "Ordinal-distance uncertainty" paragraph.
+
+### R3-Q6 — Site-LOSO XML site-identifier recovery beyond MRI subsample
+
+**Verdict:** Acknowledged with explicit DUA-restriction documentation and concrete follow-up plan. PPMI's Site Number (CNO) column is suppressed under the PPMI Data Use Agreement; the `site_aprv` field is a site-approval date, not a site identifier. The recovery pathway is per-modality LONI IDA XML metadata extraction. The T1-MRI loader (`scripts/load_paper1_site_assignments_full.py`, committed 2026-04-24) is generalisable to DaT-SPECT XMLs which carry the same `siteKey` field; the corresponding 2,137-patient DaT-SPECT recovery is in our R3 follow-up plan but not in the current submission because cross-modality consistency requires manual verification per LONI collection-level metadata schema.
+
+Evidence: rewritten §V.D site-LOSO paragraph with two explicit caveats (subsample selection bias + DUA restriction).
+
+### R3-Q7 — Staging-assignment flow chart with counts per decision path
+
+**Verdict:** Delivered. The 2,201 PPMI cohort partitions into **26 unique decision paths** (S-status × D-status × clinical-signs × functional-impairment). Anchor availability: SAA available for 12.6% (n=277), DaT-SPECT for 97.1% (n=2,137). The reviewer's specific concern—the SAA-missing + D-positive stratum—has $n = 647$ patients (29.4% of cohort) assigned via D anchor alone, then sub-staged by clinical signs and functional-impairment thresholds: Stage 1 (n=35), Stage 2B (n=162), Stage 3 (n=433), Stage 4 (n=17). This single decision-path stratum contributes **94% of all Stage 3 assignments and 78% of all Stage 2B assignments**. SAA-missing-and-D-negative (n=1,273) collapses to Stage 0; only 4 patients with both anchors missing remain unclassified. PPMI staging in NSD-positive PD is therefore overwhelmingly D-anchor-driven, mechanistically consistent with the Q3 residualization finding.
+
+Evidence: new §III.A "Anchor-availability decision paths (R3-Q7)" paragraph; full 26-row decision-path table at `outputs/paper1_r2_responses/q_r3_q7_staging_flow_table.md`.
+
+---
+
+### Round 3 summary
+
+All seven Round 3 questions are addressed with three concrete empirical JSONs (Q3 + Q4 + Q7), six manuscript paragraph additions/rewrites (Q1 + Q2 + Q3 + Q5 + Q6 + Q7) plus the §V.B Q4 paragraph, two new bibliography entries (Saerens 2002 prior-shift; Boström-Johansson 2025 Mondrian CP), and SQL-backed reproducibility registers (`features.paper1_r2_sensitivity` extended by 10 rows for Q3 + Q4). The central substantive new finding is the Q3 caudate residualization asymmetry: caudate features inherit substantial D-anchor signal via biological correlation, but only on binary detection (where it is biologically appropriate); NSD+ sub-staging is residualization-robust, directly supporting the two-stage deployment narrative. The central substantive new methodological warning is the Q4 prior-shift asymmetry: a single global EM correction is appropriate for binary-prior-shift-dominated external deployment but actively degrades multiclass external calibration, so labelled-subset Mondrian recalibration is the correct strategy for multiclass external deployment. We believe these findings strengthen rather than weaken the paper.
+
 Sincerely,
 Blair Dupre
 Department of Biomedical Engineering, University of North Dakota
