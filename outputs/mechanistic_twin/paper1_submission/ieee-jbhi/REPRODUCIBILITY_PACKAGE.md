@@ -10,6 +10,10 @@ This document enumerates every artifact, script, data table, and SQL object
 required to reproduce the claims of the submitted manuscript. All paths are
 relative to the repository root.
 
+For the minimal **deployable** subset (model card, decision thresholds,
+calibration curves, example conformal outputs, licensing matrix), see the
+companion [DEPLOYMENT_KIT.md](DEPLOYMENT_KIT.md) (R5-Q9 response).
+
 ## 1. Data access
 
 | Cohort | Source | DUA required | Raw location in repo |
