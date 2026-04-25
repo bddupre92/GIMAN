@@ -476,6 +476,72 @@ Evidence: new §IV.D paragraph "Temperature scaling and conformal-coverage prese
 
 Seven of ten R6 questions closed empirically (Q1 multiclass calibration negative result + Q2 Mondrian CP positive fix + Q4 site-LOSO breakdown + Q5 SHAP + Q8 age deciles + Q10 temp/conformal ordering, plus Q7 deferral with strengthened language); Q9 implicitly resolved by Q2's sample-size sweep; Q3 (ComBat) and Q6 (temporal) deferred for editor/author choice. The single load-bearing methodological addition is **Q2 Mondrian conformal prediction**, which closes the 3-reviewer ask and restores per-class coverage on multiclass external deployment. The four substantive new findings are: \emph{(i)} marginal multiclass calibration cannot fix BioFIND ECE (Q1) → \emph{(ii)} but Mondrian CP can (Q2, $0.131 \to 0.944$ three-class); \emph{(iii)} the imaging/clinical modality complementarity validating the two-stage deployment is mechanistically confirmed by TreeSHAP (Q5: caudate DaT-SBR drives binary, UPDRS-III motor subscales drive sub-staging); and \emph{(iv)} site-LOSO failure is concentrated on small + class-imbalanced sites and class-symmetric, ruling out single-class collapse (Q4). Bibliography +Kull 2019 Dirichlet calibration. PDF: 23 pages, compiles clean, 0 broken refs. Abstract 236 words. SQL audit trail $\sim$150 rows across $\sim$28 run\_ids.
 
+---
+
+# Round 7 addendum — point-by-point response to the seventh reviewer round
+
+**Revision commits:** `7d51f89` (R6 Q3+Q6 follow-ups: ComBat negative + temporal validation) + `36f4f55` (R7 Tier 0 visibility + Tier 1 extensions).
+
+We thank Reviewer 7 for the careful and constructive review. Several R7 questions overlap with R5/R6 work that the reviewer may not have seen; for these we have raised visibility (new executive-summary deployment-personas table, new Supplementary subsection for the SHAP analysis, explicit imaging-agnostic Stage-B emphasis in §V.A) rather than re-running. Genuinely-new questions are addressed via Q4 wave-grouped CV + Q7/Q8/Q10 prose extensions. Four questions (Q1 missingness alternatives, Q2 BBSE, Q5 cascade DCA, Q6 alternative subsets) are deferred to a Tier 2 follow-up batch pending editor/author triage of camera-ready scope.
+
+### R7-Q1 — Unified missingness strategy (missing-indicator / IP-weighting) — DEFERRED
+
+**Verdict:** R3-Q2 already explained the rationale for dropping MoCA + UPDRS-IV at $>$80\% missingness universally (avoiding selection-effect signal). R7's alternative strategies (missing-indicator modeling, IP-weighting, MICE) are substantive and would unify internal/external feature handling but require careful causality-sensitive design that we defer to a dedicated future paper. The current R3-Q2 paragraph in §III.D documents the rationale and the comparability mismatch.
+
+### R7-Q2 — BBSE / modern label-shift estimators — DEFERRED with R6-Q2 cross-reference
+
+**Verdict:** R3-Q4 ran Saerens 2002 EM (failed multiclass) and density-ratio (failed). R6-Q2 ran Mondrian CP (succeeded with labelled $n_{\rm cal}{\geq}40$--$50$). BBSE (Lipton et al. 2018) is the unlabeled-target alternative; it would be informative for deployments without any labelled local cohort, but the §V.D Mondrian CP recommendation already operationalizes the labelled-target case which is the deployment recommendation we make. BBSE deferred to camera-ready / R8.
+
+### R7-Q3 — SHAP / permutation importance — ALREADY DONE; VISIBILITY RAISED
+
+**Verdict:** Already executed in R6-Q5 (top-3 SHAP for 21-feat binary: caudate DaT-SBR variants 1.40/0.68/0.49; for 12-feat NSD$+$: UPDRS-III motor subscales 0.46/0.45/0.37). Reviewer may have missed the integration in the Fig 8 caption. R7 has prompted us to: (a) split the SHAP analysis into its own Supplementary subsection §S-1e for visibility, (b) cross-link from the new deployment-personas executive-summary table (Table~\ref{p1:tab:deployment-personas}), and (c) add explicit two-stage modality-complementarity framing in §V.B.
+
+Evidence: Supplementary §\ref{p1:sec:supp:shap}; \texttt{outputs/paper1\_r2\_responses/q\_r6\_q5\_shap\_analysis.json}.
+
+### R7-Q4 — Site-level / wave-level grouped CV on full dataset
+
+**Verdict:** RUN. 3-fold GroupKFold (1 fold per wave) $\times$ 5 shuffle seeds = 15 fold-AUCs on the full $n{=}1{,}845$ cohort with non-null enrollment date. Mean AUC $\mathbf{0.879 \pm 0.008}$ across the 15 folds, reproducing the §V.C R2 single-shuffle wave-LOCO range $[0.871, 0.891]$ with 6$\times$ tighter variance estimate. Per-wave: early 2010-2013 $0.890 \pm 0.001$, middle 2014-2020 $0.872 \pm 0.004$, late 2021-2025 $0.875 \pm 0.002$. Unconditional wave-ICC $= 0.082$ (linear-scale MixedLM) places enrollment wave in the same ``meaningful confounder'' band ($0.05$--$0.20$) as the R5-Q5 site-ICC of $0.059$. \emph{Verdict:} discrimination is invariant across PPMI eras (mean $0.879 > 0.85$ deployment-readiness threshold), but raw between-wave variance share ($8.2\%$) motivates era-aware recalibration for prospective deployment.
+
+Evidence: extension to §V.C wave-LOCO paragraph; \texttt{q\_r7\_q4\_wave\_grouped\_cv.json} + strip-plot PNG; SQL run\_id \texttt{q\_r7\_q4\_wave\_grouped\_cv} (1 row, n\_folds\_used=15).
+
+### R7-Q5 — Decision-curve analysis on Stage-A/Stage-B cascade — DEFERRED
+
+**Verdict:** R5-Q4 already ran DCA on the single-stage 21-feat primary (positive net benefit across $p_t \in [0.03, 0.99]$ for binary). R5-Q10 ran the cascade with operating-point sensitivity sweep. Cascade-specific DCA (combining the two) is Tier 2 work deferred to camera-ready / R8.
+
+### R7-Q6 — Alternative clinical-only subset sensitivity — DEFERRED with R5-Q3 cross-reference
+
+**Verdict:** R4-Q6 established the 12-feat clinical-only baseline (NSD$+$ AUC 0.899 vs 21-feat 0.908). R5-Q3 striatal-free upper bound established the $\Delta = +0.5$pp invariance under removal of \emph{all} caudate features. The 12-feat is already the lowest common denominator across PPMI/BioFIND/PDBP/HBS. Additional alternative-subset sensitivities (e.g., excluding UPDRS-III subscales together) are Tier 2 and deferred.
+
+### R7-Q7 — Calibration / drift-monitoring SOP
+
+**Verdict:** New \texttt{DEPLOYMENT\_KIT.md} §8 added with explicit recalibration + drift-monitoring SOP. Sections cover: (8.1) initial site-onboarding calibration with sample-size requirements (Mondrian CP $n_{\rm cal}{\geq}40$--$50$ per R6-Q2 sweep) and acceptance gates (ECE $<$ 0.05 per Guo 2017; per-class coverage $\geq$ 0.90 per Vovk 2022); (8.2) recalibration cadence (quarterly Stage-A per R6-Q6 temporal drift; annual Stage-B per R6-Q6 stability; Mondrian CP recompute per R6-Q2 quantile heuristic); (8.3) drift-detection triggers operationalizing the R6-Q6 finding that Stage-A is the load-bearing failure mode; (8.4) concise deployment checklist. \textbf{Important framing}: the SOP explicitly identifies thresholds as ``derived recommendations'' combining R6 empirical findings + standard clinical-ML deployment literature (Guo 2017, Vovk 2022, Boström \& Johansson 2025, Sahiner 2023); thresholds are not separately empirically validated as deployment triggers and require prospective revalidation at each site.
+
+Evidence: new \texttt{DEPLOYMENT\_KIT.md} §8 with explicit literature anchors and conservative framing.
+
+### R7-Q8 — Standardize ordinal results reporting
+
+**Verdict:** Done. Table~\ref{p1:tab:benchmark} ordinal-specific subblock now explicitly labels primary metric (macro-AUC) with QWK + MAOE in brackets. The note already documented this; the row format was inconsistent with the description. Single-line presentation fix.
+
+Evidence: Table~\ref{p1:tab:benchmark} ordinal-specific block + caption update.
+
+### R7-Q9 — Imaging-agnostic screening variant — ALREADY DONE; VISIBILITY RAISED
+
+**Verdict:** Already executed in R4-Q6 (12-feat clinical-only NSD$+$ AUC 0.899 [0.874, 0.923]) + R5-Q3 striatal-free upper bound ($\Delta = +0.5$pp under full caudate removal). R7 may have missed the explicit framing. New §V.A sentence makes this explicit: \emph{``Operationally, the clinical-only sub-staging model at AUC $0.899$ \textbf{is the imaging-agnostic Stage-B variant requested by R7-Q9}: it can support trial stratification and recruitment screening at community-practice sites that lack DaT-SPECT or SAA access...the R5-Q3 striatal-free upper-bound sensitivity confirms that within-NSD$+$ sub-staging is genuinely independent of imaging-anchor information; an imaging-agnostic deployment is therefore not merely a fallback for resource-limited sites but a principled clinical pipeline backed by the residualization-robust NSD$+$ result.''} Cross-linked from the new deployment-personas executive-summary table (community-clinic persona).
+
+Evidence: extended §V.A "Principal Findings" paragraph; new Table~\ref{p1:tab:deployment-personas}.
+
+### R7-Q10 — Additional external PD-only cohorts with NSD-ISS ground truth
+
+**Verdict:** Honest future-cohort plan added to §V.D Limitations. Two near-term cohort additions are planned (LBC + LBD with longitudinal DaT-SPECT but NSD-ISS staging adapter not yet executed; DeNoPa pending PI collaboration); SURE-PD3 mentioned as a candidate requiring independent assessment of NSD-ISS staging feasibility under its DUA. We explicitly do not provide misleading sample-size or assay-coverage details that we have not verified; the path forward is concrete but timing depends on DUA and collaboration approval cycles outside the scope of this paper.
+
+Evidence: new §V.D Limitations paragraph "Future external-cohort plans (R7-Q10)".
+
+---
+
+### Round 7 summary
+
+Five of ten R7 questions closed empirically or via visibility raises (Q3 SHAP visibility + Q4 wave-grouped CV + Q7 SOP + Q8 metric standardization + Q9 imaging-agnostic visibility). Q10 future-cohort plans documented honestly. Four (Q1 missingness alternatives, Q2 BBSE, Q5 cascade DCA, Q6 alternative subsets) deferred to Tier 2 / camera-ready. The single load-bearing methodological addition is the Q4 wave-grouped CV result confirming that discrimination is invariant across PPMI eras (mean 0.879 ± 0.008) but the wave-ICC of 0.082 places enrollment era in the "meaningful confounder" band, supporting the era-aware recalibration recommendation in the new \texttt{DEPLOYMENT\_KIT.md} §8 SOP. The clearest pattern across R7: 3 of the 10 questions ask for things we already have (Q3 SHAP, Q9 imaging-agnostic, parts of Q7 SOP); we addressed this not by re-running but by raising visibility through a new executive-summary deployment-personas table at the top of §V Discussion + a new Supplementary §S-1e for the SHAP analysis + explicit imaging-agnostic Stage-B framing in §V.A. PDF: 24 pages, compiles clean, 0 broken refs. Abstract 236 words. SQL audit trail extended to ~185 rows across ~31 run\_ids.
+
 Sincerely,
 Blair Dupre
 Department of Biomedical Engineering, University of North Dakota
