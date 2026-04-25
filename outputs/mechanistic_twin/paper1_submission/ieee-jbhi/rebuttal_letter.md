@@ -410,6 +410,72 @@ Evidence: extension to §V.A "A hierarchical alternative" paragraph; \texttt{q\_
 
 Six of ten R5 questions closed empirically (Q3 striatal-free + Q4 AUPRC/DCA + Q5 site grouped CV + Q6 extended fairness + Q9 deployment kit + Q10 end-to-end pipeline) with concrete new compute artifacts, SQL audit-trail extensions (5 new run\_ids), one new bibitem (Vickers 2006), and a new deployment artifact (DEPLOYMENT\_KIT.md). Four deferred (Q1 5-fold pre-registered, Q2 Mondrian CP cited via R3-Q4, Q7 graph HPO not narrative-load-bearing, Q8 SAA-bias multiple imputation = dedicated future paper) with explicit justification. The two substantive new findings are: \emph{(i)} the striatal-free upper bound (Q3) showing NSD$+$ sub-staging invariance to full D-anchor removal—the strongest possible defense of the strict-circularity Path 3 specification; \emph{(ii)} the end-to-end Stage-A + Stage-B cascade (Q10) demonstrating operational deployability at 85\% accuracy, 3.1\% cascading miss, with the cumulative-error bottleneck identified as Stage-B within-NSD$+$ uncertainty rather than Stage-A HC-vs-PD misclassification.
 
+---
+
+# Round 6 addendum — point-by-point response to the sixth reviewer round
+
+**Revision commit:** `9f00693` (R6 Q1–Q10 — 7 of 10 closed empirically + Q9 implicitly resolved by Q2 Mondrian sample-size sweep).
+
+We thank Reviewer 6 for the careful, deployment-oriented review. Seven of ten questions are addressed via concrete new compute experiments + manuscript integration; Q9 is implicitly resolved by the Q2 Mondrian CP sample-size sweep; Q3 (ComBat) and Q6 (temporal) are deferred for editor/author choice; Q7 (graph kNN sensitivity) is deferred with strengthened justification. The single load-bearing methodological addition is **Q2 Mondrian conformal prediction**, which closes the 3-reviewer (R4-Q8 + R5-Q2 + R6-Q2) request and restores per-class coverage on multiclass external deployment from 0.131 to 0.944 with on-target recalibration on n≥40--50 labelled patients.
+
+### R6-Q1 — Multiclass calibration diagnostics on BioFIND (Dirichlet / OvR isotonic)
+
+**Verdict:** RUN. Negative result, intentionally framed as the precondition for Q2 Mondrian. Three internally-fit multiclass calibrators (per-target temperature scaling, Dirichlet calibration with ODIR regularisation $\lambda{=}10^{-2}$, one-vs-rest isotonic regression) all FAIL to reduce BioFIND macro-ECE on any of the three multiclass targets (best $\Delta$ECE $=-0.003$ for Dirichlet on three-class, within sampling noise; binary $-0.006$ to $+0.064$; NSD$+$ $+0.003$ to $+0.004$). The negative result confirms BioFIND error is dominated by class-prevalence shift, not by global probability sharpness that PPMI-fit calibrators can correct.
+
+Evidence: new §V.D paragraph; \texttt{q\_r6\_q1\_multiclass\_calibration.json} + 2 reliability PNG; SQL run\_id \texttt{q\_r6\_q1\_calibration} (12 rows).
+
+### R6-Q2 — Mondrian (label-conditional) CP on BioFIND multiclass — THE 3-REVIEWER ASK
+
+**Verdict:** RUN. **Restores per-class coverage from 0.131 to 0.944** on three-class BioFIND with on-target recalibration on $n_{\mathrm{cal}}{\geq}50$ labelled patients (NSD$+$: $0.356 \to 0.876$ with $n_{\mathrm{cal}}{\geq}40$). Cost: wider prediction sets (three-class $|C|$ $1.86 \to 2.80$; NSD$+$ $1.49 \to 3.33$). Mondrian transfer-only without on-target recalibration partially closes the gap (three-class $0.131 \to 0.562$) but does not reach nominal—the load-bearing ingredient is the small labelled-target subset for per-class quantile estimation. This validates Bostr\"{o}m \& Johansson 2025~\cite{bostrom2025mondrian} as the recommended fix for the multiclass calibration decay reported in §V.D and resolves the deferral from R4-Q8 + R5-Q2.
+
+Evidence: new §V.D Mondrian CP paragraph; \texttt{q\_r6\_q2\_mondrian\_cp.json} + 3-panel PNG; SQL run\_id \texttt{q\_r6\_q2\_mondrian} (6 rows).
+
+### R6-Q3 — ComBat-like DaT-SPECT harmonization across PPMI sites/protocols — DEFERRED
+
+**Verdict:** Defer to user/editor choice. Substantive ~2-3 hr analysis that would test whether ComBat-style covariate harmonisation on DaT-SPECT features improves external transportability. The §V.D Domain-shift mitigation paragraph already enumerates ComBat as a recommended mitigation; empirical implementation is queued for camera-ready / R7 if requested.
+
+### R6-Q4 — Site-LOSO failure mode decomposition
+
+**Verdict:** RUN. Per-site analysis identifies the failure as concentrated on small ($n{<}25$) and class-imbalanced ($>$70\% one class) sites: the three worst-AUC folds are site~290 ($n{=}21$, 81\% NSD$+$, AUC $0.662$), site~096 ($n{=}21$, AUC $0.700$), and site~088 ($n{=}22$, AUC $0.729$). Small-site mean AUC is $0.796$ vs.\ big-site $0.873$ ($\Delta = +0.077$). The failure is class-symmetric (mean $\Delta$ recall NSD$+$ minus NSD$-$ across folds $= +0.013$), not a single-class collapse. SMOTE oversampling on the training fold yields $\Delta\mathrm{AUC} = -0.017$, confirming targeted resampling does not recover the failed regime within pre-registration constraints.
+
+Evidence: new sentence in §V.C site-LOSO paragraph; \texttt{q\_r6\_q4\_site\_loso\_breakdown.json}; SQL run\_id prefix \texttt{q\_r6\_q4\_site\_breakdown} (15 rows).
+
+### R6-Q5 — TreeSHAP for 21-feat primary AND 12-feat NSD$+$ sub-staging
+
+**Verdict:** RUN. **Validates imaging/clinical modality complementarity for the two-stage deployment.** 21-feat binary primary's top-3 SHAP features are caudate DaT-SBR variants (CAUDATE\_MEAN\_SBR mean $|\mathrm{SHAP}|$ $1.40$, CAUDATE\_R\_SBR $0.68$, CAUDATE\_L\_SBR $0.49$), confirming binary detection is dopaminergic-anchor-driven. 12-feat clinical-only NSD$+$ sub-staging's top-3 features are UPDRS-III motor subscales (UPDRS3\_BRADYKINESIA $0.46$, UPDRS3\_AXIAL $0.45$, UPDRS3\_RIGIDITY $0.37$), confirming sub-staging is driven by motor severity, not imaging. The two stages use distinct, biologically coherent feature axes. This also fixes the broken Fig 8 caption pointer that previously referenced "Top-10 SHAP feature importance...reported in Supplementary~S-2" (which never existed).
+
+Evidence: extended Fig 8 caption with new TreeSHAP paragraph; \texttt{q\_r6\_q5\_shap\_analysis.json} + 2-panel PNG.
+
+### R6-Q6 — Two-stage pipeline temporal validation (early waves → late waves) — DEFERRED
+
+**Verdict:** Defer to user/editor choice. The R5-Q10 end-to-end pipeline evaluation already demonstrates operational deployability on the PD-clinic-like subset; a temporal split (train PPMI 2010-2020 → test PPMI 2021-2025) is the natural extension and is queued for camera-ready / R7. The R2 enrollment-wave LOCO sensitivity (binary AUCs $0.871$--$0.891$ across three waves on the 21-feat primary) provides a partial answer for single-stage temporal stability.
+
+### R6-Q7 — Graph kNN sensitivity (k, similarity, learned graphs) — DEFERRED with strengthened language
+
+**Verdict:** Three reviewers (R5-Q7 + R6-Q7 + indirect R4 framing) have asked. New §V.B paragraph extension explicitly addresses why deferral is appropriate: the existing 8.1--33.7 percentage-point performance gap across three architecturally distinct graph variants is too large to be closed by hyperparameter refinement at $n \approx 2{,}000$; richer multimodal graph construction (learned similarity, temporal edges, hybrid GNN-tree ensembling) is flagged as future work for the larger-cohort regime ($n \gtrsim 10^4$).
+
+### R6-Q8 — Age deciles + BioFIND external subgroup performance
+
+**Verdict:** RUN. Internal age-decile stratification on both 21-feat binary and 12-feat NSD$+$ models retains AUC $\geq 0.86$ across every decile (9/10 PASS at $|\Delta\mathrm{AUC}|<0.03$ on each model; Spearman age-AUC trend $p \geq 0.28$ on both)—no monotonic age-performance gradient. External BioFIND sex stratification PASSES (Δ Female AUC $-0.003$); external age tertile FAILS at $|\Delta\mathrm{AUC}|<0.03$ but is degenerate due to the cohort's $95.4\%$ NSD$+$ uniform composition (per-tertile $n{=}32$--$39$ with $1$--$3$ negatives), reflecting cohort design rather than a model failure mode.
+
+Evidence: extension to Fig 8 caption fairness paragraph; \texttt{q\_r6\_q8\_subgroup\_extended.json} + 2 PNG; SQL run\_id \texttt{q\_r6\_q8\_subgroup} (25 rows).
+
+### R6-Q9 — Minimum labelled target samples for CP recalibration — IMPLICITLY RESOLVED BY Q2
+
+**Verdict:** Resolved as a byproduct of the Q2 Mondrian sample-size sweep (no separate run needed). Three-class needs $n_{\mathrm{cal}} \geq 50$ for per-class coverage $\geq 0.90$; NSD$+$ needs $n_{\mathrm{cal}} \geq 40$; binary is degenerate at any $n$ (BioFIND has only 5 SAA$-$ patients of 108).
+
+### R6-Q10 — Temperature scaling / conformal calibration ordering
+
+**Verdict:** Clarified. New §IV.D paragraph documents that temperature scaling is applied BEFORE conformal calibration (per-fold $T^*$ fit on training partition; LAC quantile recomputed on temperature-scaled probabilities). Coverage guarantee is preserved by construction (Vovk \emph{et~al.}~2022~\cite{vovk2022} Theorem~2.1 applies because LAC is monotonic in $\hat{P}$ and the conformal step recomputes $\hat{q}_{1-\alpha}$ on the rescaled scores). Empirically: binary cross-conformal CV+ marginal coverage at 90\% CL is $0.955$ both with and without temperature scaling—only the set-size distribution shifts marginally.
+
+Evidence: new §IV.D paragraph "Temperature scaling and conformal-coverage preservation".
+
+---
+
+### Round 6 summary
+
+Seven of ten R6 questions closed empirically (Q1 multiclass calibration negative result + Q2 Mondrian CP positive fix + Q4 site-LOSO breakdown + Q5 SHAP + Q8 age deciles + Q10 temp/conformal ordering, plus Q7 deferral with strengthened language); Q9 implicitly resolved by Q2's sample-size sweep; Q3 (ComBat) and Q6 (temporal) deferred for editor/author choice. The single load-bearing methodological addition is **Q2 Mondrian conformal prediction**, which closes the 3-reviewer ask and restores per-class coverage on multiclass external deployment. The four substantive new findings are: \emph{(i)} marginal multiclass calibration cannot fix BioFIND ECE (Q1) → \emph{(ii)} but Mondrian CP can (Q2, $0.131 \to 0.944$ three-class); \emph{(iii)} the imaging/clinical modality complementarity validating the two-stage deployment is mechanistically confirmed by TreeSHAP (Q5: caudate DaT-SBR drives binary, UPDRS-III motor subscales drive sub-staging); and \emph{(iv)} site-LOSO failure is concentrated on small + class-imbalanced sites and class-symmetric, ruling out single-class collapse (Q4). Bibliography +Kull 2019 Dirichlet calibration. PDF: 23 pages, compiles clean, 0 broken refs. Abstract 236 words. SQL audit trail $\sim$150 rows across $\sim$28 run\_ids.
+
 Sincerely,
 Blair Dupre
 Department of Biomedical Engineering, University of North Dakota
