@@ -347,7 +347,56 @@ version string `CatBoost-default-21feat-NSDISS-v1.0`.
 
 ---
 
-## 8. Point-of-contact
+## 8. Recalibration + drift-monitoring SOP (R7-Q7)
+
+This section consolidates operational guidance for site-onboarding calibration and post-deployment monitoring. **Scope:** thresholds and cadences below are **derived recommendations** that combine our empirical findings (R6-Q2 sample-size sweep, R6-Q6 temporal validation, R7-Q4 wave-grouped CV) with standard clinical-ML deployment literature. They are not separately empirically validated as deployment thresholds; prospective revalidation at each site is required.
+
+### 8.1. Initial site-onboarding calibration
+
+| Component | Empirical anchor | Sample-size requirement | Procedure |
+|---|---|---|---|
+| Per-target temperature scaling | R2-Q4 (binary internal ECE 0.053→0.020) | $n \geq 50$ labelled local cases per target | L-BFGS NLL minimisation on local logits (Guo et al. 2017) |
+| Mondrian conformal recalibration (multiclass) | R6-Q2 sample-size sweep: per-class coverage ≥0.90 achieved at $n_{\rm cal}{\geq}50$ (three-class), $n_{\rm cal}{\geq}40$ (NSD+) | $n_{\rm cal} \geq 40$–$50$ labelled local NSD-staged patients | Per-class LAC nonconformity scores + per-class quantiles (Boström & Johansson 2025) |
+| Acceptance gate: ECE < 0.05 | Guo et al. 2017 ("well-calibrated clinical models") | — | Pre-registered before site go-live |
+| Acceptance gate: per-class coverage ≥ 0.90 | Vovk et al. 2022 nominal coverage convention at α=0.10 | — | Empirical evaluation on held-out local cohort |
+
+### 8.2. Drift-monitoring cadence
+
+The R6-Q6 temporal validation (train PPMI 2010-2020, test 2021-2025) found that **cascading miss rate triples (0.031 → 0.094)** under temporal split, with the drift driver being **Stage-A** (HC-vs-PD detector); Stage-B (NSD-ISS classifier) is temporally stable (ΔAUC = -0.007). The R7-Q4 wave-grouped CV finding adds that the unconditional wave-ICC of 0.082 places enrollment era in the same "meaningful confounder" band as site (R5-Q5 site-ICC=0.059).
+
+| Component | Recommended cadence | Empirical anchor |
+|---|---|---|
+| Stage-A recalibration | Quarterly | R6-Q6 temporal Stage-A drift |
+| Stage-B recalibration | Annual | R6-Q6 Stage-B temporal stability (ΔAUC -0.007) |
+| Mondrian CP per-class quantile recompute | Whenever labelled cohort grows by ≥20 patients OR ≥6 months elapse | R6-Q2 quantile-stability heuristic |
+
+**Note:** these cadences are derived from observed temporal stability patterns in PPMI; they are not separately tested in a prospective deployment cohort. Site-specific recalibration cadence should be informed by local cohort dynamics + clinical-ML governance literature (e.g., Sahiner et al. 2023 on biomedical-ML deployment monitoring).
+
+### 8.3. Drift-detection triggers (recommended; not separately validated)
+
+The following triggers operationalize the R6-Q6 finding that Stage-A drift is the load-bearing failure mode. Thresholds are recommendations from the observed PPMI temporal-split deltas + standard SPC (statistical process control) practice:
+
+- **Coverage drift:** rolling 3-month conformal coverage < 0.85 (binary) or < 0.80 (multiclass) → trigger Stage-A recalibration. Rationale: 5pp tolerance below nominal R6-Q2 baselines.
+- **Cascading miss alert:** rolling 3-month cascading miss rate > 5% → trigger investigation. Rationale: R5-Q10 baseline is 3.1%; 1.9pp tolerance.
+- **Composition shift:** local cohort PD-Prodromal composition drifts ≥ 5pp from the calibration cohort → trigger Stage-A recalibration. Rationale: R6-Q6 documented 6pp composition shift (80% → 86%) that drove the 3× miss-rate increase.
+- **Stage-A AUC alarm:** rolling 3-month Stage-A AUC < 0.90 on labelled local validation → trigger immediate recalibration. Rationale: R5-Q10 baseline is 0.929.
+
+### 8.4. Concise deployment checklist
+
+- [ ] PPMI DUA chain validated for trained-weight redistribution
+- [ ] Local labelled cohort assembled ($n \geq 50$ for each Stage-A / Stage-B / Mondrian-CP)
+- [ ] Per-target temperature scalars $T^\star$ fit on local logits
+- [ ] Mondrian CP quantiles fit per class on local labelled subset (multiclass deployments only)
+- [ ] Acceptance gates passed (ECE < 0.05, per-class coverage ≥ 0.90)
+- [ ] Drift-monitoring dashboard wired to coverage / miss rate / composition / AUC triggers (§8.3)
+- [ ] Quarterly Stage-A recalibration cadence on calendar
+- [ ] Empty-set abstention escalation policy documented for clinicians (singleton → report; multi → present alternatives; empty → repeat assessment / specialist referral)
+- [ ] Licensing constraints reviewed (CatBoost Apache-2.0 OK; **TabPFN v2 weights CC-BY-NC-SA 4.0 — non-commercial only**)
+- [ ] PPMI Data Coordination Center notified of trained-weight redistribution (per DUA)
+
+---
+
+## 9. Point-of-contact
 
 Correspondence to Blair Dupre <blair.dupre@und.edu>. Trained CatBoost
 weights, $T^\star$ calibration scalars, and local-deployment templates
