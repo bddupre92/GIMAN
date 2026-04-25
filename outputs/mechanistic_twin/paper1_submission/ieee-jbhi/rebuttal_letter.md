@@ -344,6 +344,72 @@ Evidence: Supplementary §S-1d; full per-stage table at `outputs/paper1_r2_respo
 
 All 7 paper-critical R4 questions are addressed (Q1 HPO hierarchy, Q2 numerical audit, Q3 graph 21-feat, Q4 BioFIND consolidated, Q5 reframing already done, Q6 12-feat internal, Q10 confusion matrices); 3 enhancement requests are explicitly deferred with justification (Q7 SHAP, Q8 Mondrian CP, Q9 DaT-SPECT site-LOSO) all with concrete future-work commitments. The two paper-critical fixes are the Table IV procedure-mislabelling correction (a reviewer recomputing from JSONs would now get matching numbers in both pipelines) and the §IV.D prose reconciliation. The two substantive new findings are: \emph{(i)} graph conclusions are qualitatively intact under the 21-feature strict-circularity primary (Q3, 7/8 cells stable); and \emph{(ii)} TabPFN-v2 does not surpass tree baselines on external BioFIND transfer (Q4)—external transport depends more on cohort-composition robustness than architectural sophistication. The R4 round consolidates the manuscript's empirical evidence on a single feature substrate per analysis tier and standardises the conformal procedure labelling so the published numbers are directly reproducible from the on-disk JSONs.
 
+---
+
+# Round 5 addendum — point-by-point response to the fifth reviewer round
+
+**Revision commit:** `4309048` (R5 Q3–Q10 — 6 of 10 questions closed empirically; 4 deferred with explicit justification).
+
+We thank Reviewer 5 for the careful, deployment-oriented review. Six of ten questions are addressed via concrete new compute experiments + manuscript integration; four are deferred with explicit justification (R5-Q1, Q2, Q7, Q8). The two most substantive new findings are: \emph{(i)} the striatal-free upper-bound sensitivity (R5-Q3) showing that NSD$+$ sub-staging is invariant to the most aggressive possible D-anchor removal while binary detection degrades as expected for a dopaminergic-anchor-driven task; and \emph{(ii)} the end-to-end Stage-A + Stage-B pipeline evaluation (R5-Q10) showing the two-stage deployment is operationally viable at 85\% coverage accuracy + 3.1\% cascading miss rate.
+
+### R5-Q1 — Repeated CV / 10-fold to strengthen TOST equivalence — DEFERRED
+
+**Verdict:** Pre-registered protocol from R1 was 5-fold, matching the field standard (Russo 2025, Hu 2025 npj DM, AdaMedGraph, Punchhi 2026 J Med Internet Res, Kohavi 1995 foundational). §V.B already openly reports the n=5 underpower at $\varepsilon{=}0.01$ (Schuirmann 1987 power analysis: 5-fold has $\sim$30\% power to reject inequivalence at $\varepsilon{=}0.01$ when $\sigma_{\mathrm{per-fold}} \approx 0.012$); the practical-equivalence verdict at $\varepsilon{=}0.02$ (34/40 pairs) is the headline. Changing fold count post-hoc to chase a tighter strict result would invite a re-spec optics critique exactly of the kind R1 reviewers care about. Field standard preserved; honest power limitation disclosed in §V.B.
+
+### R5-Q2 — Class-conditional / Mondrian conformal prediction — DEFERRED with R3-Q4 cross-reference
+
+**Verdict:** R3-Q4 already documented the multiclass external-calibration failure (Saerens EM degraded three-class ECE from 0.301 to 0.650) and explicitly cited Bostr\"{o}m-Johansson 2025 (Mach. Learn. 114(3):1217--1248) Mondrian conformal classifiers for multiclass-external recalibration as the recommended fix. Implementing Mondrian CP requires a 30--50\% labelled BioFIND calibration split that we do not have in the n=103 external set. The §V.B Q4 paragraph already tells deployers \emph{what to do} (use Mondrian recalibration on a labelled local subset); empirical implementation is queued for R6 / camera-ready.
+
+### R5-Q3 — Striatal-free sensitivity (drop ALL caudate features)
+
+**Verdict:** RUN. **NSD$+$ sub-staging is INVARIANT** to the most aggressive possible striatal removal (AUC $0.908 \rightarrow 0.913$, $\Delta{=}+0.5$~pp, within bootstrap noise), confirming sub-staging is genuinely clinical-signal-driven. **Binary degrades by $-17.5$~pp** (worse than R3-Q3 OLS residualization's $-10.7$~pp), establishing that caudate retains \emph{nonlinear} D-anchor information beyond the linearly putamen-correlated component the residualization captures. Three-class $-9.7$~pp, full-ordinal $-9.0$~pp. The asymmetry is the strongest possible defense of the strict-circularity Path 3 specification: binary HC-vs-PD detection is, and should be, dopaminergic-anchor-driven; NSD$+$ sub-staging is genuinely independent of imaging anchors.
+
+Evidence: §V.A R3-Q3 paragraph extension; \texttt{outputs/paper1\_r2\_responses/q\_r5\_q3\_striatal\_free.json}; SQL run\_id \texttt{q\_r5\_q3\_striatal\_free} (4 rows).
+
+### R5-Q4 — AUPRC + per-class operating points + decision-curve analysis (Vickers 2006)
+
+**Verdict:** Surfaced. Macro-AUPRC: binary 0.977 [0.967, 0.984], three-class 0.797 [0.769, 0.825], full-ordinal 0.650 [0.615, 0.710], NSD$+$ 0.709 [0.657, 0.780]. Binary NSD$+$ operating point at Youden's $J$: sensitivity 0.922, specificity 0.982, $F_1$ 0.943. Decision-curve analysis confirms positive net benefit relative to ``treat all'' / ``treat none'' across $0.03 \leq p_t \leq 0.99$ for binary (essentially the entire clinically plausible range), with peak NB 0.337 at $p_t{=}0.03$. Multi-class targets carry positive net benefit on every dominant class out to $p_t \geq 0.96$; lone exception is Stage~4 ($n{=}17$).
+
+Evidence: new §IV.D AUPRC + DCA paragraph; \texttt{q\_r5\_q4\_auprc\_dca.json} + 4-panel DCA PNG + Vickers 2006 bibitem; SQL run\_id \texttt{q\_r5\_q4\_auprc} (4 rows).
+
+### R5-Q5 — Site-LOSO grouped repeated CV reframe
+
+**Verdict:** Run. Site-aware GroupKFold $\times$ 5 shuffle seeds (25 fold-AUCs total) reduces fold variance by 45\% (SD $0.091 \rightarrow 0.050$) and lifts the minimum from $0.500 \rightarrow 0.748$, but mean grouped-CV AUC 0.817 \emph{still trails} the 0.85 deployment-readiness threshold and the unconditional site $\mathrm{ICC}{=}0.059$ falls in the ``meaningful confounder'' band (0.05--0.20). The softer methodology therefore CONFIRMS the strict-LOSO failure was \emph{not} a methodological artifact---site is a genuine source of variance and prospective external-site validation is required before deployment.
+
+Evidence: extension to §V.C site-LOSO paragraph; \texttt{q\_r5\_q5\_site\_grouped\_cv.json} + strip-plot PNG; SQL run\_id \texttt{q\_r5\_q5\_site\_grouped\_cv}.
+
+### R5-Q6 — Extended fairness on 21-feat binary AND 12-feat NSD$+$ sub-staging
+
+**Verdict:** Run. 6 axes total (sex / age tertile / genetic carrier $\times$ 2 models). \textbf{4/6 PASS} at $|\Delta\mathrm{AUC}|{<}0.03$ (sex + age tertile on both models). \textbf{2/6 FAIL} on the LRRK2$+$ stratum: $|\Delta|{=}0.046$ on 21-feat binary ($n{=}175$); $|\Delta|{=}0.049$ on 12-feat NSD$+$ ($n{=}104$). The $\sim$5pp gap is consistent across both deployment models and consistent with the documented distinct neurodegeneration trajectory of LRRK2 carriers. Deployment recommendation: targeted LRRK2$+$ recalibration before clinical use; sex and age tertile transport without recalibration on both models.
+
+Evidence: extension to Fig 8 caption; \texttt{q\_r5\_q6\_fairness\_extended.json} + 6-panel forest PNG; SQL run\_id \texttt{q\_r5\_q6\_fairness} (18 rows).
+
+### R5-Q7 — Symmetric HPO budget for graph baselines + learned similarity / k ablations — DEFERRED
+
+**Verdict:** Defer. Graph baselines underperform tree boosters by 8--34 pp balanced accuracy across 4 targets (Table~III); a more symmetric HPO budget would not change the qualitative conclusion that trees beat graphs at $n \approx 2{,}000$ clinical cohorts (Grinsztajn 2022, Shwartz-Ziv 2022). R4-Q3 separately confirmed that graph conclusions are qualitatively intact under the 21-feat primary spec. We acknowledge this is a deferred question and flag richer multimodal graph construction (learned similarity, temporal edges, metric-learning embeddings) as future work.
+
+### R5-Q8 — SAA coverage bias (12.6\%) — IPW / multiple imputation — DEFERRED
+
+**Verdict:** Defer. R3-Q7 staging-flow analysis already documents the SAA-coverage skew (n=277 of 2,201, 12.6\%) and its load-bearing role in stage assignment (647 SAA-missing+D-positive patients drive 94\% of Stage 3 assignments). Inverse-probability-weighted reweighting on SAA-availability and multiple imputation for anchor uncertainty are substantive analyses requiring additional methodological scaffolding; we flag this as future work for a dedicated NSD-ISS-prediction-under-anchor-uncertainty paper.
+
+### R5-Q9 — Deployment kit (model card + thresholds + calibration curves + example conformal outputs)
+
+**Verdict:** Delivered. New file \texttt{DEPLOYMENT\_KIT.md} (cross-linked from \texttt{REPRODUCIBILITY\_PACKAGE.md}) with 6 sections: (a) model card (Mitchell 2019 schema), (b) decision thresholds (binary $p^* = 0.560$ post temperature scaling, $T^* = 1.43$, balanced accuracy 0.951), (c) calibration curves (pointer to Fig 7 + per-target ECE table), (d) 5 example conformal outputs spanning high-confidence NSD$+$, high-confidence NSD$-$, borderline three-class abstention, NSD$+$ sub-staging mid-range, and rare Stage~4, (e) licensing matrix (CatBoost/MAPIE/sklearn/PyTorch all permissive Apache-2.0/BSD-3; \textbf{TabPFN v2 weights are CC-BY-NC-SA 4.0 — clinical-deployment caveat}), and (f) 3-step deployable workflow.
+
+Evidence: \texttt{outputs/mechanistic\_twin/paper1\_submission/ieee-jbhi/DEPLOYMENT\_KIT.md}.
+
+### R5-Q10 — End-to-end Stage-A + Stage-B pipeline on PD-clinic-like subset
+
+**Verdict:** Delivered. PD-clinic-like subset $n{=}1{,}747$ (PD + Prodromal). Stage-A (12-feat HC-vs-PD CatBoost) pooled OOF AUC 0.929; Stage-B (21-feat NSD-ISS binary) AUC 0.878 on the cascade input. Split-conformal cascade @ 90\% confidence: end-to-end coverage accuracy 0.850, specialist-referral rate 0.276, \textbf{cascading miss rate 0.031} (3.1\% of true NSD$+$ patients incorrectly routed as healthy controls). At a 20\% referral budget ($\tau{=}0.75$): coverage accuracy 0.822, miss rate 0.134. The cumulative error is dominated by Stage-B abstention (22.3pp of the 27.6\% budget), not Stage-A misclassification—the deployment-throughput bottleneck is the within-NSD$+$ multiclass uncertainty, not the upstream HC-vs-PD gate.
+
+Evidence: extension to §V.A "A hierarchical alternative" paragraph; \texttt{q\_r5\_q10\_end\_to\_end\_pipeline.json} + 2-panel PNG; SQL run\_id \texttt{q\_r5\_q10\_end\_to\_end}.
+
+---
+
+### Round 5 summary
+
+Six of ten R5 questions closed empirically (Q3 striatal-free + Q4 AUPRC/DCA + Q5 site grouped CV + Q6 extended fairness + Q9 deployment kit + Q10 end-to-end pipeline) with concrete new compute artifacts, SQL audit-trail extensions (5 new run\_ids), one new bibitem (Vickers 2006), and a new deployment artifact (DEPLOYMENT\_KIT.md). Four deferred (Q1 5-fold pre-registered, Q2 Mondrian CP cited via R3-Q4, Q7 graph HPO not narrative-load-bearing, Q8 SAA-bias multiple imputation = dedicated future paper) with explicit justification. The two substantive new findings are: \emph{(i)} the striatal-free upper bound (Q3) showing NSD$+$ sub-staging invariance to full D-anchor removal—the strongest possible defense of the strict-circularity Path 3 specification; \emph{(ii)} the end-to-end Stage-A + Stage-B cascade (Q10) demonstrating operational deployability at 85\% accuracy, 3.1\% cascading miss, with the cumulative-error bottleneck identified as Stage-B within-NSD$+$ uncertainty rather than Stage-A HC-vs-PD misclassification.
+
 Sincerely,
 Blair Dupre
 Department of Biomedical Engineering, University of North Dakota
