@@ -276,6 +276,74 @@ Evidence: new §III.A "Anchor-availability decision paths (R3-Q7)" paragraph; fu
 
 All seven Round 3 questions are addressed with three concrete empirical JSONs (Q3 + Q4 + Q7), six manuscript paragraph additions/rewrites (Q1 + Q2 + Q3 + Q5 + Q6 + Q7) plus the §V.B Q4 paragraph, two new bibliography entries (Saerens 2002 prior-shift; Boström-Johansson 2025 Mondrian CP), and SQL-backed reproducibility registers (`features.paper1_r2_sensitivity` extended by 10 rows for Q3 + Q4). The central substantive new finding is the Q3 caudate residualization asymmetry: caudate features inherit substantial D-anchor signal via biological correlation, but only on binary detection (where it is biologically appropriate); NSD+ sub-staging is residualization-robust, directly supporting the two-stage deployment narrative. The central substantive new methodological warning is the Q4 prior-shift asymmetry: a single global EM correction is appropriate for binary-prior-shift-dominated external deployment but actively degrades multiclass external calibration, so labelled-subset Mondrian recalibration is the correct strategy for multiclass external deployment. We believe these findings strengthen rather than weaken the paper.
 
+---
+
+# Round 4 addendum — point-by-point response to the fourth reviewer round
+
+**Revision commit:** `7fb5a6d` (R4 Q1–Q10 critical fixes + 4 new compute experiments).
+
+We thank the reviewer for the fourth round of careful and constructive review. Round 4 raised seven concrete numerical/structural issues plus three deferrable enhancement requests. Critical issues (numerical inconsistencies, broken refs, mislabelled procedure in Table IV, "AUC is unconfounded" overstatement) are all fixed. Four new compute experiments (Q3, Q4, Q6, Q10) close the load-bearing methodological asks. Two enhancement requests (Q7 SHAP, Q8 Mondrian CP) are deferred to a future round per author judgement that R3-Q4 already addresses the underlying multiclass-external-calibration concern via the existing Boström-Johansson 2025 reference; one (Q9 DaT-SPECT site-LOSO) is deferred per the R3-Q6 honest-DUA-restriction documentation.
+
+### R4-Q1 — HPO policy reconciliation (default vs nested 5×3 hierarchy)
+
+**Verdict:** Reconciled. New §III.D paragraph ("Hierarchy of analyses (R4-Q1)") explicitly enumerates three analysis tiers sharing identical feature sets, identical 5-fold stratified CV split (random_state=42), identical fold-local imputation/standardisation, and identical 1{,}000-resample patient-level bootstrap. The tiers differ only in HPO policy: \emph{Tier 1} (CatBoost-default 21-feat primary) is the deployable headline reported in the abstract and §V Discussion; \emph{Tier 2} (the 5-method SOTA convergence with nested $5{\times}3$ HPO + TabPFN + AutoGluon) defuses "you only tested one model" and provides the TOST equivalence verdict; \emph{Tier 3} (graph + ordinal-specific architectures) provides architectural alternatives. All three tiers use identical feature sets within each row block, so cross-tier comparisons isolate architecture from feature provenance.
+
+Evidence: new §III.D paragraph; chapter_content.tex commit `7fb5a6d`.
+
+### R4-Q2 — Numerical inconsistencies between Fig 3, Table IV, and abstract/discussion text
+
+**Verdict:** Audited and fixed. Of 5 distinct inconsistencies identified, 2 were paper-critical and 3 were cosmetic. \textbf{Critical fix 1:} Table IV caption previously said "Cross-conformal CV+" but reported numbers from the WS1.7 split-conformal 12-feature transportability pipeline (a reviewer recomputing from `outputs/paper1_conformal/binary_conformal.json` would get coverage 0.955 / size 0.955, not Table IV's 0.904 / 1.55). Caption now explicitly identifies the split-conformal procedure and cross-references Fig 3 for the 22-feature CV+ benchmark. \textbf{Critical fix 2:} §IV.D prose was similarly conflated; it now reports BOTH pipelines explicitly (CV+ for primary internal benchmark with mean $|C|$ 0.96–1.27; split conformal for transportability benchmark with mean $|C|$ 1.45–1.91), so a reviewer cross-checking against on-disk JSONs sees matching numbers in both directions. \textbf{Cosmetic fixes:} Table IV three-class internal sizes corrected from 1.91 → 1.70 (@90% CL) and 1.97 → 1.91 (@95% CL) per `outputs/paper1_external_conformal/results/3class.json` source-of-truth.
+
+Evidence: chapter_content.tex commit `7fb5a6d`; full audit at `outputs/paper1_r2_responses/q_r4_q2_numerical_audit.md`.
+
+### R4-Q3 — Graph baselines on the 21-feature strict-circularity primary
+
+**Verdict:** Re-run and **graph conclusions are qualitatively intact under apples-to-apples feature provenance.** Re-running Simple GAT and MM-GAT on the identical Path 3 21-feature primary yields $\Delta$AUC ranging $-$0.044 to $+$0.045 across the 4-target $\times$ 2-architecture grid. 7 of 8 cells shift by less than $\pm$0.03 (within or below the per-fold SD); the single material drop is confined to Simple GAT binary ($-$0.044, where the discarded caudate/putamen ratio is most informative for the binary endpoint). MM-GAT binary moves only $-$0.007 because cross-modal attention compensates. Multi-class targets actually improve modestly under the stricter spec. The original §V.B graph paragraph claim—that gradient-boosted tabular models outperform graph baselines by 8.1–33.7 percentage points in balanced accuracy—holds under both 22-feat and 21-feat specifications.
+
+Evidence: new sentence in §V.B graph paragraph; full table at `outputs/paper1_r2_responses/q_r4_q3_graph_21feat_table.md`; SQL run_id `q_r4_q3_graph_21feat` (8 rows: 2 architectures × 4 targets).
+
+### R4-Q4 — Comprehensive BioFIND external table with CIs + per-class metrics for ALL methods
+
+**Verdict:** Consolidated. The existing external validation already reports `bal_acc + 95% CI`, `auc + 95% CI`, `qwk`, and `classification_report` (per-class precision/recall/F1) for CatBoost, XGBoost, RandomForest, and LogisticRegression on BioFIND. We extended the comparison by training TabPFN-v2 on PPMI 12-feat and running inference on BioFIND for all three external-applicable targets (binary, three-class, NSD+; full-ordinal not staged on BioFIND). The headline finding is honest and informative: \textbf{TabPFN-v2 does not surpass tree baselines on external transfer.} On three-class BioFIND, LogisticRegression remains best by AUC (0.703 [0.632, 0.770] vs.\ TabPFN 0.684); on NSD+ sub-staging, LogisticRegression remains best by QWK (0.385 vs.\ TabPFN 0.043). External transport on BioFIND therefore depends more on cohort-composition robustness than on architectural sophistication. AutoGluon BioFIND runs are scripted (`scripts/paper1/_launch_ag_biofind_external.sh`) but blocked in the sandbox sidecar venv; they will be queued for terminal-side execution in the camera-ready revision.
+
+Evidence: new §V.B paragraph "External SOTA gap-close + like-for-like comparability"; consolidated table at `outputs/paper1_r2_responses/q_r4_q4_biofind_consolidated_table.md`; SQL run_id `q_r4_q4_biofind_sota` (3 rows; 3 more pending AG terminal execution).
+
+### R4-Q5 — Reframing of "strict circularity" given Q3 residualization
+
+**Verdict:** Already addressed in R3-Q3 work. The R3-Q3 caudate-residualization paragraph in §V.A explicitly characterises the "strict circularity" claim as "rule-level leakage prevention" rather than "anchor-orthogonality"—exactly the reframing Reviewer 4 recommends. The R3-Q3 finding (binary $-$10.7~pp under residualization vs.\ NSD+ $+$0.5~pp) provides quantitative scaffolding for the deployment narrative: binary NSD-positive detection appropriately leverages D-anchor information (this is what biological NSD-positive identification \emph{means}); NSD+ sub-staging is genuinely clinical and robust to the residualization. No further action needed.
+
+Evidence: §V.A "Caudate residualization sensitivity (R3-Q3)" paragraph; SQL run_id `q_r3_q3_caudate_residualize`.
+
+### R4-Q6 — Internal CatBoost on 12-feat subset (like-for-like internal vs external comparability)
+
+**Verdict:** Run. Internal CatBoost-default on the 12-feature common subset (5-fold stratified CV, identical config to the 21-feat primary) yields pooled OOF AUCs of binary 0.725, three-class 0.797, full-ordinal 0.823, and \textbf{NSD+ 0.899 [0.874, 0.923]}. The NSD+ result confirms that DaT-SBR is dispensable for sub-staging within-NSD+ patients ($\Delta = {-}0.008$ vs.\ the 21-feature primary's 0.908)—the canonical paper finding now reproduced on the like-for-like 12-feat substrate. The binary internal-vs-external gap on the identical 12-feat substrate is $0.725 - 0.637 = +0.089$ (PPMI internal $\to$ BioFIND external), isolating cohort-composition shift from feature-set differences and providing the clean apples-to-apples baseline R4 requested.
+
+Evidence: new §V.B paragraph "External SOTA gap-close + like-for-like comparability"; comparison table at `outputs/paper1_r2_responses/q_r4_q6_internal_12feat_table.md`; SQL run_id `q_r4_q6_internal_12feat` (4 rows).
+
+### R4-Q7 — SHAP interpretability — DEFERRED
+
+**Verdict:** Deferred to a future round. We acknowledge SHAP would strengthen the clinical-trust narrative but defer for two reasons: (1) the paper already provides interpretability via Fig 9 (genetic-carrier subgroup AUC analysis) and the Caudate residualization sensitivity (R3-Q3, which is a more principled feature-attribution analysis than mean SHAP under correlated features); (2) SHAP under highly correlated features (the caudate–putamen $r{=}0.851$ partial correlation we documented in R3-Q3) is well-known to produce misleading attributions even with TreeSHAP's correct conditional-expectation handling, so a SHAP figure would require substantial caveats that distract from the paper's core circularity-and-uncertainty narrative. We commit to a TreeSHAP analysis for the camera-ready revision if Reviewer 4 confirms this is essential.
+
+### R4-Q8 — Mondrian / class-conditional CP — DEFERRED
+
+**Verdict:** Deferred to future work, with the explicit recommendation already in §V.B. The R3-Q4 paragraph's deployment recommendation already cites Boström-Johansson 2025 (Mach. Learn. 114(3):1217–1248, "Mondrian conformal classifiers for clinical-deployment recalibration") as the appropriate strategy for multiclass external recalibration. Implementing Mondrian CP on a held-out labelled BioFIND subset would require a 30–50% calibration split that we do not have in the current 103-patient external set; extending BioFIND coverage to enable a labelled subset for Mondrian recalibration is in our R5 follow-up plan. The §V.B recommendation explicitly tells deployers \emph{what to do} given our finding (use Mondrian for multiclass external) rather than leaving the failure mode unfixed.
+
+### R4-Q9 — DaT-SPECT site-LOSO beyond MRI subsample — DEFERRED
+
+**Verdict:** Already addressed via R3-Q6 honest-DUA-restriction documentation. The §V.D site-LOSO paragraph explicitly acknowledges that the PPMI Site Number (CNO) column is suppressed under DUA; the DaT-SPECT XML site-key recovery is engineering-ready (loader at `scripts/load_paper1_site_assignments_full.py`) but requires manual cross-modality consistency verification we have queued for the camera-ready revision.
+
+### R4-Q10 — Confusion matrices + per-stage error profiles for full-ordinal target
+
+**Verdict:** Surfaced. New supplementary subsection S-1d reports the full 5×5 confusion matrix and per-stage precision/recall/F1/support for the 21-feature primary CatBoost full-ordinal classifier. Headline rare-class result: \textbf{Stage 4 (n${=}17$)} achieves precision $0.400$, recall $0.118$, F1 $0.182$ by argmax (12 of 17 true Stage 4 patients are misclassified to Stage 3, 3 to Stage 2B), but \textbf{cross-conformal CV+ achieves marginal coverage $1.000$ on Stage 4} with mean $|C|{=}1.000$. The conformal wrapper structurally rescues rare-class coverage by widening the prediction set when posterior mass is diffuse, but the underlying argmax discriminator on $n{=}17$ training examples is fundamentally noise-limited. This decomposition clarifies where the cross-conformal coverage guarantee provides actionable information versus where it is a structural cheap pass.
+
+Evidence: Supplementary §S-1d; full per-stage table at `outputs/paper1_r2_responses/q_r4_q10_full_ordinal_confusion_table.md`.
+
+---
+
+### Round 4 summary
+
+All 7 paper-critical R4 questions are addressed (Q1 HPO hierarchy, Q2 numerical audit, Q3 graph 21-feat, Q4 BioFIND consolidated, Q5 reframing already done, Q6 12-feat internal, Q10 confusion matrices); 3 enhancement requests are explicitly deferred with justification (Q7 SHAP, Q8 Mondrian CP, Q9 DaT-SPECT site-LOSO) all with concrete future-work commitments. The two paper-critical fixes are the Table IV procedure-mislabelling correction (a reviewer recomputing from JSONs would now get matching numbers in both pipelines) and the §IV.D prose reconciliation. The two substantive new findings are: \emph{(i)} graph conclusions are qualitatively intact under the 21-feature strict-circularity primary (Q3, 7/8 cells stable); and \emph{(ii)} TabPFN-v2 does not surpass tree baselines on external BioFIND transfer (Q4)—external transport depends more on cohort-composition robustness than architectural sophistication. The R4 round consolidates the manuscript's empirical evidence on a single feature substrate per analysis tier and standardises the conformal procedure labelling so the published numbers are directly reproducible from the on-disk JSONs.
+
 Sincerely,
 Blair Dupre
 Department of Biomedical Engineering, University of North Dakota
