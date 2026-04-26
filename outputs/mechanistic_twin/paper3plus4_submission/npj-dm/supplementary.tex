@@ -494,6 +494,75 @@ This finding tightens the scope of the Graph-DT interpretability claim. The main
 \end{itemize}
 
 % ================================================================
+% S-WS-P3-10 — HSMM SENSITIVITY CHECK ON CTMC SOJOURN ASSUMPTION
+% ================================================================
+
+\section*{S-WS-P3-10. Hidden Semi-Markov Model (HSMM) Sensitivity Check on the CTMC Sojourn Assumption}
+
+\subsection*{Motivation}
+
+The multi-state Markov baseline reported in Methods~\S Multi-state Markov model (Table~II row 1) is a continuous-time Markov chain (CTMC) parameterised by a $7\times 7$ generator matrix $Q$, with the implicit assumption that per-state sojourn times follow an Exponential distribution (the memoryless property of the CTMC). Reviewer~\#3 (round 2, item \#10) requested a sensitivity check on this assumption: are sojourns in NSD-ISS stages actually exponentially distributed, or is the CTMC's memoryless assumption rejected by the data? The standard relaxation is to fit a hidden semi-Markov model (HSMM)~\cite{yu2010hidden} with a parametric Gamma sojourn distribution; if the fitted Gamma shape parameters cluster near $1$ then the Exponential CTMC assumption is empirically supported, and if the shape parameters depart systematically from $1$ then the Exponential assumption is violated.
+
+\subsection*{Methodology}
+
+Implementation: \texttt{R 4.5.1} with the \texttt{mhsmm 0.4.21} package~\cite{omalley2015mhsmm}, fitted via the EM-style algorithm in \texttt{hsmmfit()} with a per-state Gamma sojourn distribution and a 7-state observed-stage emission model. Each patient contributes a sequence of observed NSD-ISS stages from baseline through final visit; sequences with fewer than 2 observations are dropped (yielding $1{,}798$ patient sequences from the original 1{,}900-patient cohort). Initial values: uniform initial-state probability vector $\pi_0 = 1/7$, transition matrix off-diagonal entries $1/(7-1)$ (with no self-transitions, as the HSMM sojourn distribution handles dwell time), Gamma sojourn shape$_0 = 2$ and scale$_0 = 2$ per state, identity-like emission confusion matrix (diagonal $0.95$, off-diagonal $0.05/6$). The model is fitted with \texttt{maxit~$=50$} iterations; runtime $\approx 1$~second on a Mac~M1. Runner: \texttt{scripts/paper3plus4/hsmm\_fit.R}; output JSON: \texttt{outputs/paper3plus4/hsmm/hsmm\_results.json}; random seed 42.
+
+\subsection*{Results: per-state Gamma sojourn parameters}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{HSMM Gamma sojourn fit per NSD-ISS stage.} Shape and scale parameters per state, mean sojourn in visits (1 visit~$\approx$~12 months), and the implied half-life under the Gamma. A shape parameter near $1$ would empirically support the CTMC's Exponential assumption; values $>1$ indicate sojourns are LESS dispersed than Exponential (more concentrated around the mean), and values $<1$ indicate heavier tails. \emph{All seven NSD-ISS stages have shape $> 1$, with mean shape $2.49 \pm 1.04$, decisively rejecting the Exponential CTMC assumption.}}
+\label{tab:s_wsp310_hsmm}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Stage} & \textbf{Gamma shape} & \textbf{Gamma scale} & \textbf{Mean sojourn (visits)} & \textbf{Mean sojourn (months)} & \textbf{Departure from Exponential} \\
+\midrule
+0  & $1.73$ & $2.92$ & $5.05$ & $\approx 60$ & shape $> 1$: less dispersed \\
+1  & $3.86$ & $0.85$ & $3.30$ & $\approx 40$ & shape $> 1$: less dispersed \\
+2B & $1.57$ & $1.75$ & $2.74$ & $\approx 33$ & shape $> 1$: less dispersed \\
+3  & $1.87$ & $2.08$ & $3.90$ & $\approx 47$ & shape $> 1$: less dispersed \\
+4  & $3.76$ & $0.37$ & $1.41$ & $\approx 17$ & shape $> 1$: less dispersed \\
+5  & $3.37$ & $0.45$ & $1.51$ & $\approx 18$ & shape $> 1$: less dispersed \\
+6  & $1.27$ & $1.45$ & $1.83$ & $\approx 22$ & shape $> 1$: less dispersed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent HSMM aggregate fit: log-likelihood $-10{,}989$, AIC $22{,}200$, $50$ EM iterations. Per-state Gamma shape parameters range from $1.27$ (Stage 6) to $3.86$ (Stage 1), with no shape near $1$. Empirically, sojourns at every NSD-ISS stage are tighter (more concentrated around the mean) than the CTMC's Exponential assumption permits.
+
+\subsection*{Comparison to the CTMC sojourn estimates}
+
+The CTMC sojourn estimates reported in Table~II row 1 of the main paper (mean $1/q_{ii}$ in years) are derived from the Exponential assumption. Comparing them to the HSMM Gamma means (converted to years assuming $\sim 12$~months per visit):
+
+\begin{itemize}\itemsep=0.2em
+  \item \textbf{Stages with shorter HSMM sojourn}: Stage 0 (CTMC $13.3$~yr vs HSMM $\sim 5.0$~yr), Stage 4 (CTMC $1.42$~yr vs HSMM $\sim 1.4$~yr --- close), Stage 5 (CTMC $1.38$~yr vs HSMM $\sim 1.5$~yr --- close).
+  \item \textbf{Stages with longer HSMM sojourn}: Stage 2B (CTMC $0.68$~yr vs HSMM $\sim 2.7$~yr), Stage 3 (CTMC $1.85$~yr vs HSMM $\sim 3.9$~yr).
+\end{itemize}
+
+The Stage~0 difference reflects the long-tailed Exponential's mean being driven by a small number of very long survivors (healthy controls who never transition), whereas the Gamma fit tracks the typical sojourn duration. The Stage~2B and Stage~3 differences reflect the opposite phenomenon: Exponential underestimates the typical dwell time when the empirical sojourn distribution has substantial mass concentrated near the mean (high shape parameter). This is a methodologically important finding: the CTMC sojourn estimates should be interpreted as Exponential-MLE means, not as empirical typical dwell times. \emph{The CTMC remains a valid baseline for transition-rate inference (the Q-matrix transition rates are robust to the sojourn distribution choice), but the per-state mean sojourn times under the HSMM are a more accurate description of typical patient experience.}
+
+\subsection*{Verdict and impact on manuscript framing}
+
+The HSMM sensitivity check supports the conclusion that:
+
+\begin{itemize}\itemsep=0.2em
+  \item The CTMC's Exponential sojourn assumption is empirically violated for all 7 NSD-ISS stages (Gamma shape $\in [1.27, 3.86]$, all $> 1$).
+  \item Transition-rate inference from the CTMC Q-matrix remains valid as a transition-pattern descriptor.
+  \item Per-state mean sojourn times reported as $1/q_{ii}$ should be interpreted under the Exponential assumption, not as universal typical-dwell estimates.
+  \item For deployment-quality individual-patient sojourn predictions, an HSMM (or alternative parametric / non-parametric sojourn model) is preferable.
+\end{itemize}
+
+We retain the CTMC sojourn-times in Table~II row 1 of the main paper as the canonical Markov baseline (consistent with the original submission and with the broader survival-analysis Markov literature) and disclose this HSMM sensitivity in the present supplementary section.
+
+\subsection*{Files and reproducibility}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{scripts/paper3plus4/hsmm\_fit.R} (new): Rscript-callable HSMM fitter with per-state Gamma sojourn + multinomial confusion-matrix emission. Requires \texttt{mhsmm} (CRAN) and \texttt{jsonlite}. Execution: \texttt{Rscript scripts/paper3plus4/hsmm\_fit.R} from project root; reads \texttt{data/06\_longitudinal\_staging/longitudinal\_nsd\_iss.csv}; writes \texttt{outputs/paper3plus4/hsmm/hsmm\_results.json}.
+  \item \texttt{outputs/paper3plus4/hsmm/hsmm\_results.json}: full fit summary including log-likelihood history, transition matrix, emission confusion, per-state Gamma parameters, and AIC.
+  \item Reproducibility: \texttt{set.seed(42)} in R, \texttt{maxit~$=50$} in \texttt{hsmmfit()}, \texttt{mhsmm 0.4.21} on R 4.5.1.
+\end{itemize}
+
+% ================================================================
 % Bibliography (only references cited in S-3)
 % ================================================================
 \begin{thebibliography}{9}
@@ -526,6 +595,12 @@ S.~Jain and B.~C.~Wallace, ``Attention is not explanation,'' in \textit{Proc.\ N
 
 \bibitem{wiegreffe2019attention}
 S.~Wiegreffe and Y.~Pinter, ``Attention is not not explanation,'' in \textit{Proc.\ EMNLP-IJCNLP}, 2019, pp.~11--20.
+
+\bibitem{yu2010hidden}
+S.-Z.~Yu, ``Hidden semi-Markov models,'' \textit{Artif.\ Intell.}, vol.~174, no.~2, pp.~215--243, 2010. doi:\,10.1016/j.artint.2009.11.011.
+
+\bibitem{omalley2015mhsmm}
+J.~O'Connell and S.~H{\o}jsgaard, ``Hidden semi-Markov models for multiple observation sequences: the \texttt{mhsmm} package for R,'' \textit{J.\ Stat.\ Softw.}, vol.~39, no.~4, pp.~1--22, 2011. doi:\,10.18637/jss.v039.i04.
 \end{thebibliography}
 
 \end{document}
