@@ -29,6 +29,7 @@ from giman_pipeline.paper3.dynamic_deephit import (
 from giman_pipeline.paper3.multistate_markov import N_STATES, STAGE_LABELS
 from giman_pipeline.paper4.conformal_survival import (
     IPCW_MIN_G,
+    compute_per_observation_ipcw_weight,
     estimate_censoring_survival,
 )
 
@@ -100,9 +101,22 @@ def _compute_observed_status(
     events_binary = (~censored).astype(int)
     censoring_kmf = estimate_censoring_survival(durations, events_binary)
 
+    # WS-P3-CRIT-A (Reviewer #2, npj-DM 2026):
+    # Apply the Candès, Lei, Ren (2023, JRSS-B) per-(observation, t_j) IPCW
+    # weight formula. The original implementation used 1/G(C_i) for censored
+    # survivors and 1.0 for uncensored events, which biased the weighted
+    # empirical distribution. Correct formula:
+    #   Uncensored event T_i <= horizon:  w = 1 / G(T_i)
+    #   Survivor X_i > horizon:           w = 1 / G(horizon)
+    #   Censored before horizon:          EXCLUDE
     for i in range(n):
-        if censored[i] and durations[i] < horizon_months:
-            # Censored before horizon — can't observe outcome
+        weight_i = compute_per_observation_ipcw_weight(
+            duration_i=float(durations[i]),
+            censored_i=bool(censored[i]),
+            t_j=float(horizon_months),
+            censoring_kmf=censoring_kmf,
+        )
+        if np.isnan(weight_i):
             valid_mask[i] = False
             continue
 
@@ -115,10 +129,7 @@ def _compute_observed_status(
         else:
             observed[i] = 0.0
 
-        # IPCW weight
-        if censored[i]:
-            g_val = max(censoring_kmf.predict(durations[i]), IPCW_MIN_G)
-            weights[i] = 1.0 / g_val
+        weights[i] = weight_i
 
     return observed, weights, valid_mask
 

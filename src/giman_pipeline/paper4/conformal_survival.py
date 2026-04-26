@@ -118,7 +118,15 @@ def compute_ipcw_weights(
     censoring_kmf: KaplanMeierFitter,
     min_g: float = IPCW_MIN_G,
 ) -> np.ndarray:
-    """Compute IPCW weights 1/G(T_i) for each observation.
+    """Compute IPCW weights 1/G(T_i) for each observation (per-T_i).
+
+    DEPRECATED for use inside the cause-specific conformal calibration loop.
+    The Candès, Lei, Ren (2023, JRSS-B) formula for fixed-time-point
+    conformal evaluation requires per-(observation, t_j) weights — see
+    :func:`compute_per_observation_ipcw_weight`. This helper is preserved
+    only for code paths that genuinely want a single 1/G(T_i) weight per
+    observation (none currently in the conformal pipeline; it remains
+    exported for backward compatibility).
 
     Args:
         durations: Observation times, shape (n,).
@@ -135,6 +143,69 @@ def compute_ipcw_weights(
     g_values = np.maximum(g_values, min_g)
 
     return 1.0 / g_values
+
+
+def compute_per_observation_ipcw_weight(
+    duration_i: float,
+    censored_i: bool,
+    t_j: float,
+    censoring_kmf: KaplanMeierFitter,
+    min_g: float = IPCW_MIN_G,
+) -> float:
+    """Per-observation IPCW weight at evaluation horizon t_j.
+
+    Implements the Candès, Lei, Ren (2023, JRSS-B) formula for fixed-time
+    conformal evaluation under right-censoring. For each observation
+    contributing to the calibration set at horizon t_j:
+
+      Uncensored event before t_j (T_i <= t_j):       w = 1 / G(T_i)
+      Survivor past t_j  (X_i > t_j, censored or not): w = 1 / G(t_j)
+      Censored before t_j (C_i < t_j, censored=True):  EXCLUDED (returns NaN)
+
+    where G is the Kaplan-Meier estimate of the censoring survival
+    function. The original implementation incorrectly returned 1.0 for
+    uncensored events and 1/G(C_i) for censored survivors, which biased
+    the weighted empirical distribution of nonconformity scores and
+    compromised marginal coverage guarantees (Reviewer #2, npj-DM 2026).
+
+    Args:
+        duration_i: Observed duration X_i for this observation
+            (event time T_i if uncensored, censoring time C_i if censored).
+        censored_i: True if this observation is censored, False if it's
+            an uncensored event.
+        t_j: The evaluation horizon (time bin endpoint) in months.
+        censoring_kmf: Fitted KM for the censoring distribution.
+        min_g: Floor for G(t) to prevent weight explosion.
+
+    Returns:
+        IPCW weight (positive scalar). Returns ``np.nan`` to signal that
+        the observation must be excluded from the calibration set at
+        horizon t_j (censored observation with C_i < t_j).
+
+    References
+    ----------
+    Candès, E., Lei, L., & Ren, Z. (2023). Conformal prediction under
+    covariate shift / under censoring. *Journal of the Royal Statistical
+    Society: Series B (Statistical Methodology)*. (Same canonical
+    treatment also discussed in Cand\\`{e}s et al., *Annals of Statistics*
+    2023, vol.~51, no.~4, pp.~1461--1485.)
+    """
+    if censored_i and duration_i < t_j:
+        # Censored before evaluation horizon: outcome unobservable -> exclude.
+        return float("nan")
+
+    if (not censored_i) and duration_i <= t_j:
+        # Uncensored event before t_j: weight by 1 / G(T_i^-).
+        # We approximate G(T_i^-) by G(T_i); for KM step functions this is
+        # exact at non-event-time points and a small approximation at jump
+        # points (left-continuous version differs by one row).
+        g = max(float(censoring_kmf.predict(duration_i)), min_g)
+        return 1.0 / g
+
+    # Survivor past t_j (either uncensored with T_i > t_j, or censored with
+    # C_i >= t_j). Weight by 1 / G(t_j^-).
+    g = max(float(censoring_kmf.predict(t_j)), min_g)
+    return 1.0 / g
 
 
 # ---------------------------------------------------------------------------
@@ -204,12 +275,20 @@ class CauseSpecificConformal:
 
                 for i in range(n_cal):
                     dur_i = durations[i]
-                    cens_i = censored[i]
+                    cens_i = bool(censored[i])
                     event_k_i = event_idxs[i]
 
-                    if cens_i and dur_i < t_months:
-                        # Censored before time t — cannot observe outcome, skip
-                        continue
+                    # Per Candès, Lei, Ren (2023, JRSS-B): the per-(i, t_j)
+                    # weight depends on (X_i, censored_i, t_j). NaN signals
+                    # exclusion (censored before t_j).
+                    weight = compute_per_observation_ipcw_weight(
+                        duration_i=float(dur_i),
+                        censored_i=cens_i,
+                        t_j=float(t_months),
+                        censoring_kmf=censoring_kmf,
+                    )
+                    if np.isnan(weight):
+                        continue  # Censored before time t — cannot observe outcome
 
                     # Compute observed CIF value
                     if not cens_i and event_k_i == k and dur_i <= t_months:
@@ -225,15 +304,7 @@ class CauseSpecificConformal:
 
                     score = abs(cif_pred[i, k, t_idx] - cif_obs)
                     scores.append(score)
-
-                    # IPCW weight
-                    if cens_i:
-                        # Censored at dur_i >= t: weight by 1/G(dur_i)
-                        g_val = max(censoring_kmf.predict(dur_i), IPCW_MIN_G)
-                        weights.append(1.0 / g_val)
-                    else:
-                        # Uncensored: weight = 1 (always observed)
-                        weights.append(1.0)
+                    weights.append(weight)
 
                 if len(scores) == 0:
                     # No valid calibration data for this (k, t)
