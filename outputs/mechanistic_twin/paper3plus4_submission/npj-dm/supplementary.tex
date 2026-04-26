@@ -125,17 +125,17 @@ Reviewer~\#3 (reviewer3.com) flagged that combining per-fold interaction $p$-val
 \toprule
 \textbf{Model} & \textbf{Stratum} & \textbf{$\Delta C_\mathrm{td}^{\text{pooled}}$} & \textbf{$p_\mathrm{pooled}$ (CRIT-B)} & \textbf{$p_\mathrm{Fisher}$ (legacy)} & \textbf{$p_\mathrm{FDR,pooled}$} & \textbf{$p_\mathrm{FDR,Fisher}$} \\
 \midrule
-DeepHit  & LRRK2+              & TBD & TBD & 0.236 & TBD & 0.372 \\
-DeepHit  & GBA+~only           & TBD & TBD & 0.355 & TBD & 0.426 \\
-DeepHit  & APOE~$\varepsilon4$+~only & TBD & TBD & 0.683 & TBD & 0.683 \\
-Graph-DT & LRRK2+              & TBD & TBD & 0.163 & TBD & 0.372 \\
-Graph-DT & GBA+~only           & TBD & TBD & 0.049 & TBD & 0.295 \\
-Graph-DT & APOE~$\varepsilon4$+~only & TBD & TBD & 0.248 & TBD & 0.372 \\
+DeepHit  & LRRK2+              & $-0.017$ & 0.120 & 0.236 & 0.719 & 0.372 \\
+DeepHit  & GBA+~only           & $+0.004$ & 0.856 & 0.355 & 0.856 & 0.426 \\
+DeepHit  & APOE~$\varepsilon4$+~only & $+0.003$ & 0.774 & 0.683 & 0.856 & 0.683 \\
+Graph-DT & LRRK2+              & $-0.014$ & 0.273 & 0.163 & 0.737 & 0.372 \\
+Graph-DT & GBA+~only           & $-0.017$ & 0.431 & 0.049 & 0.737 & 0.295 \\
+Graph-DT & APOE~$\varepsilon4$+~only & $-0.009$ & 0.491 & 0.248 & 0.737 & 0.372 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent\textbf{Verdict.} The post-WS-P3-CRIT-B FDR-corrected pooled-OOF $p$-values are reported in column $p_\mathrm{FDR,pooled}$ (post-fix). The H2 PASS verdict from the original analysis -- no significant model$\times$subgroup interactions after BH--FDR correction -- is preserved iff every pooled $p_\mathrm{FDR}$ exceeds the pre-registered $\alpha{=}0.05$ threshold; the §S-CRIT-B audit table below reports the change for each cell. The legacy Fisher pipeline produced a marginal Graph-DT $\times$ GBA+~only $p_\mathrm{Fisher}{=}0.049$ (which did not survive FDR correction); the pooled-OOF re-test characterises whether this borderline cell was genuine signal or a multiple-comparison artifact amplified by the per-fold positive dependence.
+\noindent\textbf{Verdict.} \textbf{The H2 PASS verdict is preserved under the methodologically-correct pooled-OOF re-test.} All six $p_\mathrm{FDR,pooled}$ values exceed the pre-registered $\alpha{=}0.05$ threshold, with the smallest equal to $0.719$ (DeepHit$\times$LRRK2+, $\Delta C_\mathrm{td}{=}-0.017$). The legacy Fisher pipeline produced a marginal Graph-DT$\times$GBA+~only $p_\mathrm{Fisher}{=}0.049$ that did not survive FDR correction; the pooled-OOF re-test relabels this borderline cell as $p_\mathrm{pooled}{=}0.431$ ($p_\mathrm{FDR,pooled}{=}0.737$), which is the correct inferential statistic for dependent per-fold $p$-values and confirms the pre-fix $p_\mathrm{Fisher}{=}0.049$ was a multiple-comparison artifact amplified by the positive dependence between CV folds (the failure mode reviewer3.com~\#3 anticipated). The §S-CRIT-B audit table below reports the per-cell change.
 
 \subsection*{H3 --- Conditional conformal coverage (per stratum)}
 
@@ -313,12 +313,12 @@ where $\Delta_b^{*}$ is the bootstrapped statistic obtained by permuting the (ca
 \toprule
 \textbf{Model} & \textbf{Stratum} & \textbf{$p_\mathrm{Fisher}$ (pre)} & \textbf{$p_\mathrm{pooled}$ (post)} & \textbf{$p_\mathrm{FDR,Fisher}$ (pre)} & \textbf{$p_\mathrm{FDR,pooled}$ (post)} \\
 \midrule
-DeepHit  & LRRK2+              & 0.236 & TBD & 0.372 & TBD \\
-DeepHit  & GBA+~only           & 0.355 & TBD & 0.426 & TBD \\
-DeepHit  & APOE~$\varepsilon4$+~only & 0.683 & TBD & 0.683 & TBD \\
-Graph-DT & LRRK2+              & 0.163 & TBD & 0.372 & TBD \\
-Graph-DT & GBA+~only           & 0.049 & TBD & 0.295 & TBD \\
-Graph-DT & APOE~$\varepsilon4$+~only & 0.248 & TBD & 0.372 & TBD \\
+DeepHit  & LRRK2+              & 0.236 & 0.120 & 0.372 & 0.719 \\
+DeepHit  & GBA+~only           & 0.355 & 0.856 & 0.426 & 0.856 \\
+DeepHit  & APOE~$\varepsilon4$+~only & 0.683 & 0.774 & 0.683 & 0.856 \\
+Graph-DT & LRRK2+              & 0.163 & 0.273 & 0.372 & 0.737 \\
+Graph-DT & GBA+~only           & 0.049 & 0.431 & 0.295 & 0.737 \\
+Graph-DT & APOE~$\varepsilon4$+~only & 0.248 & 0.491 & 0.372 & 0.737 \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -1,17 +1,17 @@
 chapter_number,title,defensibility_score,total_claims,verified,partial,unverified
-1,Introduction,yellow,380,317,10,0
-2,Systematic Literature Review,yellow,1209,1178,15,0
-3,Paper 1: NSD-ISS Stage Classification,yellow,1000,891,8,0
-4,Paper 2: GIMIN Imputation,yellow,1111,1062,17,0
-5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,367,356,11,0
-6,Paper 4: Conformalized Survival Analysis,yellow,712,703,9,0
-7,Paper 5: Temporal Validation,yellow,391,381,10,0
-8,Paper 6: Unified Clinical Decision Support,yellow,347,341,5,0
-9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,444,439,4,0
-10,Paper 8a: Spatial Propagation Identifiability,yellow,333,323,2,0
-11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,375,365,2,0
-12,Paper 9: Three-Pathway PK-PD Analysis,yellow,320,293,3,0
-13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,327,325,0,0
-14,"Discussion (Unified, Papers 1-10)",yellow,204,204,0,0
-15,Conclusion + Future Work Catalog,yellow,78,70,0,0
-99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,695,624,15,0
+1,Introduction,yellow,422,353,10,0
+2,Systematic Literature Review,yellow,1341,1308,15,0
+3,Paper 1: NSD-ISS Stage Classification,yellow,1118,1000,8,0
+4,Paper 2: GIMIN Imputation,yellow,1233,1180,17,0
+5,Paper 3: Graph-Informed Digital Twin (Transition Timing),yellow,406,395,11,0
+6,Paper 4: Conformalized Survival Analysis,yellow,790,781,9,0
+7,Paper 5: Temporal Validation,yellow,433,423,10,0
+8,Paper 6: Unified Clinical Decision Support,yellow,385,379,5,0
+9,Paper 7: Per-Patient Bayesian Calibration of Coupled ODE,yellow,492,487,4,0
+10,Paper 8a: Spatial Propagation Identifiability,yellow,366,355,2,0
+11,Paper 8b: Regional DaT-SPECT Decline Rates,yellow,414,403,2,0
+12,Paper 9: Three-Pathway PK-PD Analysis,yellow,353,323,3,0
+13,Paper 10: Bidirectional-Ready Mechanistic Twin + NASEM Audit,yellow,360,358,0,0
+14,"Discussion (Unified, Papers 1-10)",yellow,226,226,0,0
+15,Conclusion + Future Work Catalog,yellow,86,77,0,0
+99,Appendix D: Mechanistic Digital Twin Mathematical Reference,yellow,768,690,15,0
