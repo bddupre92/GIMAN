@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 763 MB · 196 tables across 14 schemas** (verified 2026-04-24 (post-paper12-wang-destrieux-load)).
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 763 MB · 197 tables across 14 schemas** (verified 2026-04-25 (post-paper12-phase3-milestone1-vtable-load)).
 
 **Schemas:**
 
@@ -34,7 +34,7 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `longitudinal` | 4 | `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | 1 | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | 2 | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
-| `mechanistic` | 33 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke + Q2 gate verdict, Paper 11 SciML configs, **Paper 12 W6 Wang FastSurfer Phase 1 `paper12_wang_features` (400 scans × 161 pts × 109 structures = 43,600 rows, 2026-04-22)**, **Paper 12 W6 Wang FastSurfer Phase 2 surface recon `paper12_wang_dkt_thickness` (24,304 rows = 392 scans × 31 DKT regions × 2 hemis, 158 pts, 5 scans qc_flag='low_entorhinal_thickness_review', 2026-04-24)** + **`paper12_wang_aseg_postrecon` (25,480 rows = 392 scans × 65 post-recon aseg structures)** + **`paper12_wang_destrieux_thickness` (58,164 rows = 393 scans × 74 Destrieux regions × 2 hemis, 158 pts, Wang 2025's 148-feature atlas, 2026-04-24)**) |
+| `mechanistic` | 34 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke + Q2 gate verdict, Paper 11 SciML configs, **Paper 12 W6 Wang FastSurfer Phase 1 `paper12_wang_features` (400 scans × 161 pts × 109 structures = 43,600 rows, 2026-04-22)**, **Paper 12 W6 Wang FastSurfer Phase 2 surface recon `paper12_wang_dkt_thickness` (24,304 rows = 392 scans × 31 DKT regions × 2 hemis, 158 pts, 5 scans qc_flag='low_entorhinal_thickness_review', 2026-04-24)** + **`paper12_wang_aseg_postrecon` (25,480 rows = 392 scans × 65 post-recon aseg structures)** + **`paper12_wang_destrieux_thickness` (58,164 rows = 393 scans × 74 Destrieux regions × 2 hemis, 158 pts, Wang 2025's 148-feature atlas, 2026-04-24)** + **Paper 12 Phase 3 milestone 1 `paper12_v_table_results` (10 rows = mean/median/knn/mice/missforest/gain/saits/miwae/derooij/phys_gimin_lit at frac=0.25 from validation grid; tracks variant_label + prior_source_hash + tautology_eligible for §V Section C audit, 2026-04-25)**) |
 | `reference` | 9 | LONI data dictionaries, harmonized code lists, biomarker dashboards, PPMI project catalog, `phase5_bibliography` |
 | `audit` | 12 | Defense-prep claim lineage — `chapter`, `citation`, `citation_use`, `claim`, `code_artifact`, `data_source` and link tables |
 
@@ -1552,3 +1552,113 @@ Five commits on `feat/ch9-6-multichannel`. Subagent-driven-development workflow 
 ### Resume anchor
 
 See `Docs/NEXT_STEPS_2026-04-26.md` for post-compact resume + Tier 0/1/2 queue + commit arc.
+
+## Session 2026-04-26 (early hours) — Paper 3+4 resume; CRIT-B running detached at compact-time
+
+User resumed the queue execution after the prior session compact. Executed Tier 0 critical (WS-P3-CRIT-B Fisher's→pooled-OOF) + 5 other Mac-doable workstreams + audit DB refresh. **10 commits pushed to origin** (`9ce04cd → c0cbdbf`).
+
+### Resume-session commit arc
+
+| Commit | Workstream | Note |
+|---|---|---|
+| `9ce04cd` | WS-P3-CRIT-B (code-only) | Fisher's→pooled-OOF function + 3/3 tests + manuscript prose; numbers TBD |
+| `3326b82` | WS-P3-17 | Imputation strategy disclosure (Reviewer Q8) |
+| `d2283eb` | WS-P3-6 + WS-P3-S3 | Markov C-td 0.654 ± 0.015 / IBS 0.296 ± 0.005; Table II Markov row populated |
+| `9edead9` | Tier 2 prose | IRB statement + 18-feature explicit list + HPO description + graph-survival lit |
+| `d95f734` | Tier 2 extended | Discussion/Limitations expansion (R3 #6/7/8/9/10/11/12) |
+| `239d4f8` | rigorous nits | Abstract sentence split + novelty softening + treatment-driven hypothesis |
+| `4dcaa12` | Helper script | `scripts/paper3plus4/run_crit_b_pooled_only.py` (skips slow per-fold bootstrap) |
+| `f8eea55` | Audit DB refresh | 8293 claims, 7872 verified (95%), 0 critical flags |
+| `c0cbdbf` | NEXT_STEPS update | Resume-session addendum + CRIT-B status + post-CRIT-B integration tasks |
+
+### Background process state at compact-time
+
+- **`nohup .venv/bin/python scripts/paper3plus4/run_crit_b_pooled_only.py`** running detached as PID 28016
+- Log: `/tmp/crit_b_pooled.log`
+- Started 00:17:45 PDT; on first of 6 pooled-OOF cells at 6:20 elapsed CPU time
+- ETA total: 30-90 min (helper skips the slow per-fold bootstrap that took down the original full runner)
+- Output target: `outputs/paper4/subgroup_carriers/interaction_tests_carriers.json` will be refreshed with pooled-OOF p-values + BH-FDR
+
+### Why a helper script was needed
+
+Original full runner `run_subgroup_with_lrrk2_gba_fix.py` was killed by VSCode reset at 23:52 mid-bootstrap-interaction step (after C-td step finished cleanly; that JSON saved). Re-running the full runner from scratch wastes ~3h. Helper at `scripts/paper3plus4/run_crit_b_pooled_only.py` reuses the existing checkpoints, regenerates per-fold predictions (~5-10 sec, just inference), and runs only the pooled-OOF compute. Detached via `nohup` so it survives any future IDE/shell resets.
+
+### Post-CRIT-B integration (when background finishes)
+
+1. Read refreshed `interaction_tests_carriers.json` for the 6 cells of pooled-OOF Δ C-td + p_pooled + p_FDR
+2. Update H2 verdict numbers in `main.tex` and `supplementary.tex` §S-3 H2 + §S-CRIT-B (currently TBD)
+3. Re-compile main.pdf + supplementary.pdf
+4. Re-run audit pipeline 02 → 07 → 99
+5. Commit + push (template in `revision_analyses/WS-P3-CRIT-B_RESULTS.md`)
+
+### Resume anchor
+
+See `Docs/NEXT_STEPS_2026-04-26.md` (RESUME SESSION ADDENDUM section) for full post-compact instructions including fallback procedures if CRIT-B stalls again.
+
+## Session 2026-04-25 (continued) — Paper 12 Phase 2 (W5–W8) competitor baselines closed
+
+Phase 2 of `Docs/superpowers/plans/2026-04-20-paper12-phase2-competitor-baselines.md` is complete. Five competitor clean-rooms run through pre-registered fidelity protocols.
+
+### W5–W8 final state
+
+| Step | Competitor | Verdict |
+|---|---|---|
+| W5 | de Rooij 2025 PLOS Comp Biol (MIT vendored, no fidelity needed) | ✅ ADMITTED to §V |
+| W6 | Wang 2025 CNODE (arXiv 2511.04789) | ❌ FAIL → Related Work (R²=0.51 vs gate [0.74, 0.91]) |
+| W7a | Demirkaya 2021 EMBC CKF + ODE-RNN (PMC9901159) | ❌ FAIL → Related Work (NRMSE=0.174 vs gate [0.084, 0.102]) |
+| W7b | Zou 2025 MNODE-HGS (arXiv 2505.18996) | 🟡 PROXY-PARTIAL → §V (synthetic algorithmic claim verified, T1DEXI Vivli DUA pending) |
+| W8 | Li 2024 LagCNN (CIKM 2024) | ❌ FAIL → Related Work (Weather MSE=0.098 vs gate [0.025, 0.031]) |
+
+### §V benchmark slot final assignment
+
+- **Classical**: Mean / Median / KNN / MICE / MissForest (admitted, Paper 2 inheritance)
+- **DL imputation**: GAIN / SAITS / MIWAE (admitted, Paper 2 inheritance)
+- **Physics-regularized**: de Rooij 2025 (vendored MIT) + Zou 2025 MNODE-HGS (PROXY-PARTIAL)
+- **phys-GIMIN** (ours, Phase 3+)
+- 4 papers documented in Related Work with reproducibility verdicts: Wang 2025, Demirkaya 2021, LagCNN 2024 (FAIL); Zou 2025 (PROXY-PARTIAL with synthetic-only validation note)
+
+### Methodological pattern (worth a paragraph in Paper 12 Discussion)
+
+| Paper | Code release | Original metric reproducible? | Algorithm verifiable on open synthetic? |
+|---|---|---|---|
+| Wang 2025 CNODE | ❌ no public repo | ❌ | not testable (PPMI cohort gated) |
+| Demirkaya 2021 CKF | ❌ partial repo, no LICENSE, no data | ❌ (4.6× gap) | testable, failed (R²=0.5 vs paper 0.038 NRMSE) |
+| Li 2024 LagCNN | ❌ no public repo | ❌ (3.5× gap) | testable on Weather, failed (MSE 0.098 vs paper 0.028) |
+| Zou 2025 MNODE-HGS | ❌ no LICENSE | T1DEXI gated 8-12 wk via Vivli | ✅ HGS algorithmic claim (-22% MSE on synthetic) verified |
+| de Rooij 2025 | ✅ MIT | ✅ vendored | ✅ — |
+
+**4 of 5 hybrid-ODE / neural-ODE papers from arxiv 2021-2025 are unreproducible from text alone via clean-room protocol.** Only Zou's testable-on-synthetic algorithmic claim (graph sparsification beats unreduced MNODE) verifies. Pattern strongly suggests publishing reproducibility deficit in the field.
+
+### Files written this session (this segment)
+
+Paper 12 baselines (in worktree `feat/paper12-phys-gimin`):
+- `paper12_phys_gimin/baselines/zou_2025_mnode_hgs/` — Tier 1 (3040 LOC, 10 tests) + Tier 2 UVA-Padova 13-state expansion + tests/
+- `paper12_phys_gimin/baselines/demirkaya_2021_ckf/guidoboni_retinal.py` (252 LOC, NEW) — Guidoboni 4-ODE retinal vasculature for Demirkaya §III synthetic benchmark
+
+Cohort builders:
+- `scripts/paper12_phys_gimin/build_wang_cohort_npz.py` (v1) + `build_wang_cohort_v3.py` (paper-faithful)
+- `scripts/paper12_phys_gimin/train_wang_cnode_v2.py`, `v3.py`, `v4.py`, `sweep_wang_cnode_v3.py`, `sweep_wang_cnode_v4.py`
+- `scripts/paper12_phys_gimin/preprocess_weather_for_lagcnn.py` (Weather MPI Jena)
+- `scripts/paper12_phys_gimin/build_demirkaya_guidoboni_cohort.py` (Guidoboni cohort)
+
+Verdicts (`outputs/paper12_*_fidelity/`):
+- `paper12_wang_cnode_fidelity/FIDELITY_VERDICT.md` (16-attempt ladder)
+- `paper12_lagcnn_fidelity/W8_VERDICT.md`
+- `paper12_zou_fidelity/W7b_VERDICT.md`
+- `paper12_demirkaya_fidelity/W7a_VERDICT.md`
+
+Test count for Paper 12 baseline suite: **155/155 passing** across Wang + Demirkaya + LagCNN + Zou clean-rooms.
+
+### Author outreach drafts (next-session action item)
+
+3 outreach emails drafted at `outputs/paper12_outreach/draft_emails/` for Wang (Emory), Demirkaya/Erdogmus (Northeastern), LagCNN authors. Goal: request code release to enable fair §V benchmark inclusion. If authors respond with code, re-run fidelity gate; if no response, current Related Work demotions stand.
+
+### SQL / audit-DB hygiene
+
+- No SQL schema changes this segment (registry unchanged: 14 schemas / 196 tables / 763 MB)
+- All Phase 2 work landed in code + verdict docs, not new tables
+- Audit DB refresh NOT required (no chapter .tex edits, no model-failure claim invalidation)
+
+### Resume anchor
+
+Paper 12 Phase 3 is now unblocked: phys-GIMIN proper implementation. Plan still at `Docs/superpowers/plans/2026-04-19-paper12-postdoc-execution-v1.md`. Phase 2 closes; Phase 3 begins with phys-GIMIN core implementation (lit-prior + self-prior variants).
