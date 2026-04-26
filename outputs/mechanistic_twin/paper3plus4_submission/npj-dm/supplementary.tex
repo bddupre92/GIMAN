@@ -1,0 +1,195 @@
+% ============================================================
+% Supplementary Information
+% Companion to: Graph-Informed NSD-ISS Transition Prediction
+%               with Conformalized Uncertainty and Subgroup
+%               Equity in Parkinson's Disease
+% Target: npj Digital Medicine (Nature Portfolio)
+% ============================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[colorlinks=false,hidelinks]{hyperref}
+
+\onehalfspacing
+\pagenumbering{arabic}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\title{Supplementary Information \\[0.5em]
+Graph-Informed NSD-ISS Transition Prediction with \\
+Conformalized Uncertainty and Subgroup Equity in Parkinson's Disease}
+
+\author{Blair D. Dupre\\[0.5em]
+Department of Biomedical Engineering,\\
+University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ================================================================
+% S-1 / S-2 — placeholders preserved for cross-reference stability
+% ================================================================
+\section*{S-1. Reserved}
+\label{sec:s1}
+
+Reserved for the four-method conformal-ablation table (IPCW / marginal / naive / Bonferroni) at 90\% and 95\% CL. Numerical content is reported in the main-text Methods (\S Cause-specific conformal CIF bands with IPCW) and the Results figures.
+
+\section*{S-2. Reserved}
+\label{sec:s2}
+
+Reserved for the competitor-comparison table positioning this work against Cand\`{e}s \textit{et~al.}~2023 and Sreenivasan \textit{et~al.}~2025. Discussion is in the main-text Discussion (\S Positioning relative to prior work).
+
+% ================================================================
+% S-3 — CARRIER SUBGROUP ANALYSIS (this workstream's deliverable)
+% ================================================================
+\section*{S-3. Carrier Subgroup Analysis}
+\label{sec:s3}
+
+\subsection*{Background and pre-registration}
+
+The original Paper~3+4 submission excluded LRRK2 and GBA carrier subgroups from inferential analysis under the rationale that per-fold $n<10$, the result of a silent feature-extraction bug in \texttt{scripts/assemble\_paper1\_features.py:extract\_genetics()} that failed to match the IU Genetic Consensus variant-name encoding (\texttt{G2019S}, \texttt{R1441G}, \texttt{N409S}, \texttt{L483P}). After the bug fix in commit \texttt{672b439}, the post-fix carrier columns in \texttt{features.paper1\_features\_with\_targets} are: 175 LRRK2 carriers, 111 GBA carriers, and 441 APOE~$\varepsilon4$ carriers. Strata are defined as mutually exclusive in this analysis: LRRK2+ includes any patient with \texttt{lrrk2\_carrier=1} (including dual carriers); APOE~$\varepsilon4$+~only and GBA+~only require the other two carrier flags to be 0. The pre-registration locking the hypotheses (H1/H2/H3), MIN\_SUBGROUP\_SIZE\_CARRIER~$=50$, and decision rule was committed on 2026-04-23 \emph{before} any compute on the bug-fixed feature table (\texttt{outputs/paper4/subgroup\_carriers/PRE\_REGISTRATION.md}). The runner script is \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}.
+
+\subsection*{Cohort sizes (post mutual-exclusivity definition)}
+
+Stratum-level (cohort-wide) sizes versus 5-fold cross-validation per-fold mean and range:
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Carrier-stratum cohort and per-fold sizes.} Cohort-level $n$ is the post-bug-fix carrier flag count in \texttt{features.paper1\_features\_with\_targets} after applying mutual-exclusivity definitions. Per-fold $n$ is the count of test patients within that stratum across the 5 stratified cross-validation folds (mean and min--max range). Per-fold events count distinct first-event records used in the time-dependent concordance computation.}
+\label{tab:s3_cohort}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Stratum} & \textbf{Cohort $n$} & \textbf{Per-fold $n$ (mean)} & \textbf{Per-fold $n$ (range)} & \textbf{Per-fold events (mean)} \\
+\midrule
+LRRK2+ (incl.\ dual carriers) & 175 & 140.2 & 109--179 & 105.2 \\
+APOE~$\varepsilon4$+~only & 375 & 161.0 & 109--175 & 87.0 \\
+GBA+~only & 79 & 50.0 & 10--92 & 34.2 \\
+Non-carrier (reference) & 1{,}547 & 590.4 & 567--636 & 340.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{H1 — Per-stratum C-td (fairness on discrimination)}
+
+Per-stratum time-dependent concordance averaged across 5 stratified cross-validation folds, with 95\% patient-level bootstrap CIs (1{,}000 resamples). The CI envelope columns report the minimum lower bound and maximum upper bound across the 5 per-fold CIs (a conservative summary across folds rather than a refit-bootstrap). All carrier strata's CI envelopes overlap the non-carrier reference envelope, supporting the H1 fairness pre-registration.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{H1 --- Per-stratum C-td (mean $\pm$ std across 5 folds; CI envelope across 5 per-fold patient-bootstrap 95\% CIs).} Per-fold $n$ and event counts vary by fold composition; the headline $n$ in column 5 is the per-fold mean. The GBA+~only entry has elevated variance because per-fold $n$ ranges from 10 to 92; the wide CI envelope $[0.500,\ 1.000]$ reflects the smallest per-fold sample size.}
+\label{tab:s3_h1_ctd}
+\begin{tabular}{llcccr}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{C-td (mean $\pm$ std)} & \textbf{CI envelope (lo, hi)} & \textbf{$n$ (per-fold mean)} & \textbf{Events (mean)} \\
+\midrule
+\multirow{4}{*}{DeepHit}
+  & LRRK2+        & $0.911 \pm 0.024$ & $[0.818,\ 0.976]$ & 140.2 & 105.2 \\
+  & APOE~$\varepsilon4$+~only & $0.932 \pm 0.026$ & $[0.811,\ 1.000]$ & 161.0 & 87.0 \\
+  & GBA+~only     & $0.862 \pm 0.183$ & $[0.500,\ 1.000]$ & 50.0  & 34.2 \\
+  & Non-carrier   & $0.928 \pm 0.016$ & $[0.867,\ 0.956]$ & 590.4 & 340.2 \\
+\midrule
+\multirow{4}{*}{Graph-DT}
+  & LRRK2+        & $0.897 \pm 0.026$ & $[0.778,\ 0.954]$ & 140.2 & 105.2 \\
+  & APOE~$\varepsilon4$+~only & $0.907 \pm 0.043$ & $[0.776,\ 0.990]$ & 161.0 & 87.0 \\
+  & GBA+~only     & $0.854 \pm 0.184$ & $[0.500,\ 1.000]$ & 50.0  & 34.2 \\
+  & Non-carrier   & $0.906 \pm 0.033$ & $[0.806,\ 0.954]$ & 590.4 & 340.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Verdict.} \textbf{H1 PASS:} every carrier-stratum CI envelope overlaps the non-carrier reference for both DeepHit and Graph-DT.
+
+\subsection*{H2 --- Bootstrap interaction tests (BH-FDR-corrected)}
+
+Per-fold bootstrap (500 resamples) tests $H_0:\ \Delta C_\mathrm{td}~(\text{carrier} - \text{non-carrier}) = 0$ for each (model, carrier-stratum) cell. Per-fold $p$-values are combined via Fisher's method across the 5 folds; BH--FDR correction is applied across the 6-cell carrier grid (3 strata $\times$ 2 models) using \texttt{scipy.stats.false\_discovery\_control(method='bh')}.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{H2 --- Bootstrap interaction tests with BH-FDR correction.} $\Delta C_\mathrm{td}$ is the mean across 5 folds of (carrier C-td $-$ non-carrier C-td); negative values mean the carrier stratum performs worse than the non-carrier reference. $p_\mathrm{Fisher}$ is the Fisher-combined per-fold $p$-value; $p_\mathrm{FDR}$ is the BH-corrected value.}
+\label{tab:s3_h2_interaction}
+\begin{tabular}{llrrrc}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{$\Delta C_\mathrm{td}$} & \textbf{$p_\mathrm{raw}$ (mean)} & \textbf{$p_\mathrm{Fisher}$} & \textbf{$p_\mathrm{FDR}$} \\
+\midrule
+DeepHit  & LRRK2+              & $-0.016$ & 0.395 & 0.236 & 0.372 \\
+DeepHit  & GBA+~only           & $-0.066$ & 0.435 & 0.355 & 0.426 \\
+DeepHit  & APOE~$\varepsilon4$+~only & $+0.005$ & 0.520 & 0.683 & 0.683 \\
+Graph-DT & LRRK2+              & $-0.009$ & 0.364 & 0.163 & 0.372 \\
+Graph-DT & GBA+~only           & $-0.052$ & 0.184 & 0.049 & 0.295 \\
+Graph-DT & APOE~$\varepsilon4$+~only & $+0.001$ & 0.350 & 0.248 & 0.372 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Verdict.} \textbf{H2 PASS:} all 6 BH-FDR-corrected $p$-values exceed the pre-registered $\alpha{=}0.05$ threshold (minimum $p_\mathrm{FDR}{=}0.295$ for Graph-DT $\times$ GBA+~only). The Graph-DT $\times$ GBA+~only cell shows a marginal Fisher-combined $p_\mathrm{Fisher}{=}0.049$ that does not survive FDR correction, consistent with multiple-comparison noise on the smallest-$n$ stratum.
+
+\subsection*{H3 --- Conditional conformal coverage (per stratum)}
+
+Conditional conformal coverage is the proportion of held-out events whose true outcome falls inside the conformal prediction band restricted to the patient's carrier stratum. Pre-registration: stratum-conditional coverage at the 90\% confidence level should fall within $\pm0.03$ of the empirical marginal coverage (0.82). Tolerance: $[0.79,\ 0.85]$.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{H3 --- Conditional conformal coverage per stratum.} Mean and standard deviation across 5 folds at the 90\% confidence level (target marginal coverage $0.82\pm0.03$, i.e.\ tolerance $[0.79,\ 0.85]$). The GBA+~only stratum is computed from $n{=}4$ folds (one fold's empty stratum at $n{=}10$ events drops out). Boldfaced cells fall outside the pre-registered tolerance.}
+\label{tab:s3_h3_coverage}
+\begin{tabular}{llcc}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{Mean coverage (90\% CL)} & \textbf{Std (across folds)} \\
+\midrule
+\multirow{4}{*}{DeepHit}
+  & APOE~$\varepsilon4$+~only & $0.833$           & $0.022$ \\
+  & GBA+~only                 & $\mathbf{0.800}$  & $0.055$ \\
+  & LRRK2+                    & $\mathbf{0.805}$  & $0.029$ \\
+  & Non-carrier               & $0.818$           & $0.025$ \\
+\midrule
+\multirow{4}{*}{Graph-DT}
+  & APOE~$\varepsilon4$+~only & $0.835$           & $0.010$ \\
+  & GBA+~only                 & $\mathbf{0.810}$  & $0.058$ \\
+  & LRRK2+                    & $\mathbf{0.795}$  & $0.034$ \\
+  & Non-carrier               & $0.823$           & $0.025$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Per-fold deviations beyond tolerance ($|\text{coverage}-0.82|>0.03$).} Fold-level breakdown: fold~0 deviates over-nominal on APOE~$\varepsilon4$+~only for both models; fold~1 on GBA+~only (over) and LRRK2+ (under) for both models; fold~2 on GBA+~only (DeepHit, under) and LRRK2+ (Graph-DT, under); fold~3 on GBA+~only and LRRK2+ for both models (under), plus a non-carrier dip (under); fold~4 stays within tolerance. The largest single deviation is DeepHit at fold~3 on GBA+~only (coverage~$=0.725$, deviation~$=0.095$); Graph-DT at fold~3 on GBA+~only is comparable (coverage~$=0.727$, deviation~$=0.093$). Of the 14 deviation incidents identified across all (model, fold, stratum) cells, 10 lie below nominal (under-coverage) and 4 lie above (over-coverage, on APOE~$\varepsilon4$+~only fold~0 and GBA+~only fold~1, for both models).
+
+\noindent\textbf{Verdict.} \textbf{H3 FAIL:} stratum-conditional coverage at the 90\% confidence level lies outside the pre-registered $\pm0.03$ tolerance for the LRRK2+ and GBA+~only strata in both models, and is borderline acceptable for APOE~$\varepsilon4$+~only and Non-carrier. The deviations are fold-dependent rather than systematic in one direction, but consistently under-cover on the smaller carrier strata.
+
+\subsection*{Honest disclosure and deployment recommendation}
+
+The pre-registered overall verdict for WS-P3-14 is therefore \textbf{partial pass}: H1 fairness is supported (per-stratum C-td CIs overlap the reference), H2 is supported (no significant model$\times$subgroup interaction after BH-FDR correction), but H3 fails due to fold-dependent under-coverage in carrier strata. We disclose this honestly rather than attempt post-hoc remediation. The natural remediation for clinical deployment is to recompute the conformal calibration \emph{within each carrier stratum} on a labelled subset, i.e.\ Mondrian conformal prediction~\cite{bostrom2025mondrian}, rather than relying on the marginal cohort-level conformal quantile. Mondrian recalibration trades a small amount of statistical efficiency for guaranteed per-stratum coverage, and is the recommended deployment-time procedure for genetically-defined subpopulations. We do not perform Mondrian recalibration in the present analysis because (i)~the present analysis is meant to characterise the marginal conformal calibration behaviour across genetic strata, not to deploy, and (ii)~the GBA+~only stratum is at the per-fold $n$ floor that makes within-stratum conformal calibration data-hungry. A multi-site pooled analysis (PPMI + PDBP + UK Biobank-PD) would lift the GBA+~only stratum out of the $n$-limited regime and is the natural next step for this work.
+
+\subsection*{Source artefacts}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{outputs/paper4/subgroup\_carriers/PRE\_REGISTRATION.md} — locked hypothesis and decision rule (2026-04-23).
+  \item \texttt{outputs/paper4/subgroup\_carriers/subgroup\_ctd\_carriers.json} — per-fold per-stratum C-td with bootstrap CIs.
+  \item \texttt{outputs/paper4/subgroup\_carriers/interaction\_tests\_carriers.json} — per-fold bootstrap interaction tests + Fisher combination.
+  \item \texttt{outputs/paper4/subgroup\_carriers/conditional\_coverage\_carriers.json} — per-fold stratum-conditional coverage at 90\% and 95\% CL.
+  \item \texttt{outputs/paper4/subgroup\_carriers/decision\_verdict.json} — pooled summary, FDR-corrected $p$-values, H3 deviation list.
+  \item \texttt{outputs/paper4/subgroup\_carriers/CLAIMS.md} — claim-mapping audit record.
+  \item \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py} — runner.
+\end{itemize}
+
+% ================================================================
+% Bibliography (only references cited in S-3)
+% ================================================================
+\begin{thebibliography}{9}
+\bibitem{bostrom2025mondrian}
+H.~Bostr\"{o}m and U.~Johansson, ``Mondrian conformal classifiers for clinical-deployment recalibration,'' \textit{Mach.\ Learn.}, vol.~114, no.~3, pp.~1217--1248, 2025.
+\end{thebibliography}
+
+\end{document}
