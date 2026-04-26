@@ -1,0 +1,61 @@
+{
+  "title": "Paper 1 R2 \u2014 Venuto-2025 deep exploration",
+  "purpose": "Two follow-on Venuto analyses: (1) PPMI-tuned re-fit to verify construct-validity defense robustness; (2) Q.E.D. OPTION 1 stratified anchor analysis on the Venuto-imputed full cohort.",
+  "off_the_shelf_venuto_on_ppmi_tested": {
+    "n": 138,
+    "auroc": 0.8100765306122449,
+    "venuto_reference_auroc": 0.92
+  },
+  "ppmi_tuned_refit": {
+    "n_train": 138,
+    "n_pos": 40,
+    "n_neg": 98,
+    "fold_auc_mean": 0.797828947368421,
+    "fold_auc_std": 0.05691468243669472,
+    "fold_aucs": [
+      0.715625,
+      0.778125,
+      0.8375,
+      0.7763157894736843,
+      0.881578947368421
+    ],
+    "ppmi_tuned_intercept": -0.622668697738495,
+    "ppmi_tuned_coefficients": {
+      "upsit_pctile": -0.07168727133950319,
+      "male_sex": 0.9205156293122608,
+      "constipation_freq": 1.2018319029992715,
+      "lrrk2_g2019s_share_0.9": 0.0,
+      "lrrk2_r1441_share_0.1": 0.0,
+      "gba_carrier": 0.0
+    },
+    "venuto_reference_coefficients": {
+      "intercept": 2.33,
+      "upsit_pctile": -0.07,
+      "male_sex": 0.45,
+      "constipation_freq": 0.96,
+      "lrrk2_g2019s_i2020t": -0.43,
+      "lrrk2_r1441_n1437": -2.01,
+      "gba_carrier": 1.01
+    }
+  },
+  "stratified_anchor_analysis": {
+    "n_full_cohort": 2201,
+    "n_with_observed_s": 277,
+    "n_with_venuto_imputed_s": 752,
+    "n_still_unknown_s": 1172,
+    "n_with_d_anchor": 2137,
+    "n_with_both_anchors_after_imputation": 969,
+    "stratum_counts": {
+      "S+D\u2212": 431,
+      "S+D+": 271,
+      "S\u2212D\u2212": 215,
+      "S\u2212D+": 52
+    },
+    "stratum_counts_compared_to_observed_only": {
+      "observed_only": "138 patients with both SAA tested and UPSIT (q_gap_a_venuto_saa)",
+      "with_imputation": 969,
+      "expansion_factor": 3.4981949458483754
+    },
+    "interpretation": "By using Venuto-imputed S anchors for the SAA-untested patients with UPSIT data, we expand the dual-anchor-classified cohort from 138 (observed SAA only) to the count above. Per-stratum NSD+ AUC could be evaluated next; a comparable AUC across S+D+ vs S\u2212D+ strata would confirm the model is not dependent on a particular anchor configuration. Discordant strata (S+D\u2212, S\u2212D+) directly probe construct validity for non-canonical phenotypes."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "title": "Paper 1 R2 Gap 2 \u2014 NSD+ 21-feat vs 12-feat modality robustness consolidation",
+  "purpose": "Pseudo-external head-to-head modality comparison (Q.E.D. OPTION 1) across four CV regimes: standard 5-fold stratified, enrollment-wave GroupKFold, DaT-SPECT protocol-bucket LOCO, T1-MRI site-LOSO. Pre-registered tolerance \u03b5=0.02 (paper primary).",
+  "n_patients": 779,
+  "epsilon": 0.02,
+  "regimes": {
+    "standard_5fold": {
+      "auc_21feat": 0.9060697942170568,
+      "auc_12feat": 0.9067740923205511,
+      "delta_21_minus_12": -0.0007042981034942608,
+      "tost": {
+        "delta_a_minus_b_mean": -0.0007505787603446605,
+        "ci_90_lo": -0.00824661711329946,
+        "ci_90_hi": 0.00648195753309873,
+        "tost_equivalent_at_eps": true,
+        "epsilon": 0.02
+      }
+    },
+    "wave_groupkfold": {
+      "auc_21feat": 0.6689173824884656,
+      "auc_12feat": 0.7211409778647677,
+      "delta_21_minus_12": -0.05222359537630217,
+      "tost": {
+        "delta_a_minus_b_mean": -0.052210373379946044,
+        "ci_90_lo": -0.07188638722923445,
+        "ci_90_hi": -0.033025735834120516,
+        "tost_equivalent_at_eps": false,
+        "epsilon": 0.02
+      }
+    },
+    "era_loco_proxy": {
+      "auc_21feat": 0.7159768567191584,
+      "auc_12feat": 0.7560499615998129,
+      "delta_21_minus_12": -0.04007310488065441,
+      "tost": {
+        "delta_a_minus_b_mean": -0.039760782241175366,
+        "ci_90_lo": -0.06408089054718608,
+        "ci_90_hi": -0.016935961706556788,
+        "tost_equivalent_at_eps": false,
+        "epsilon": 0.02
+      },
+      "comment": "2-bucket era LOCO (pre-2014 vs 2014+) as proxy for the canonical protocol-LOCO which needs DICOM metadata."
+    }
+  },
+  "verdict": "PARTIAL_EQUIVALENCE"
+}

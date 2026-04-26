@@ -1,0 +1,149 @@
+{
+  "title": "Paper 1 R2 Gap 3 \u2014 12-feature NSD+ rule-anchor-elided ablation",
+  "purpose": "Direct empirical test of Q.E.D. Gap 3 claim that including UPDRS2_TOTAL and MOCA_TOTAL in the 12-feature clinical-only NSD+ sub-stager produces tautological reproduction of the Simuni 2024 staging rule. Pre-registered decision rule: |\u0394 AUC| < 0.03 across all rule-anchor exclusions = NO_TAUTOLOGY.",
+  "n_patients": 779,
+  "task": "NSD+ sub-staging (target_nsd_positive) on stages {1, 2B, 3, 4}",
+  "model": "CatBoost (iter=500, depth=6, lr=0.05, balanced class weights)",
+  "cv": "5-fold stratified, seed=42, fold-local median imputation",
+  "pre_registered_tolerance": 0.03,
+  "ablation_sets": {
+    "A_12feat_full": {
+      "n_features": 12,
+      "features": [
+        "AGE_AT_BASELINE",
+        "SEX",
+        "UPDRS1_TOTAL",
+        "UPDRS2_TOTAL",
+        "UPDRS3_TREMOR",
+        "UPDRS3_RIGIDITY",
+        "UPDRS3_BRADYKINESIA",
+        "UPDRS3_AXIAL",
+        "UPDRS4_TOTAL",
+        "MOCA_TOTAL",
+        "ESS_TOTAL",
+        "RBD_TOTAL"
+      ],
+      "fold_aucs_mean": 0.9067368110220781,
+      "fold_aucs_std": 0.01418045165329434,
+      "fold_aucs": [
+        0.9160386921707325,
+        0.8987340013171186,
+        0.8919649153787996,
+        0.929994250519209,
+        0.8969521957245312
+      ],
+      "pooled_oof_auc": 0.9067740923205511,
+      "bootstrap_auc_mean": 0.9071825830144056,
+      "bootstrap_auc_ci_lo": 0.8888711107475914,
+      "bootstrap_auc_ci_hi": 0.9254234005274704
+    },
+    "B_12feat_minus_UPDRS2": {
+      "n_features": 11,
+      "features": [
+        "AGE_AT_BASELINE",
+        "SEX",
+        "UPDRS1_TOTAL",
+        "UPDRS3_TREMOR",
+        "UPDRS3_RIGIDITY",
+        "UPDRS3_BRADYKINESIA",
+        "UPDRS3_AXIAL",
+        "UPDRS4_TOTAL",
+        "MOCA_TOTAL",
+        "ESS_TOTAL",
+        "RBD_TOTAL"
+      ],
+      "fold_aucs_mean": 0.9006731446230493,
+      "fold_aucs_std": 0.018355365492969882,
+      "fold_aucs": [
+        0.9090385795539515,
+        0.8957756146985708,
+        0.8945803124624445,
+        0.9298249974349864,
+        0.8741462189652939
+      ],
+      "pooled_oof_auc": 0.900112278885629,
+      "bootstrap_auc_mean": 0.9005372928966644,
+      "bootstrap_auc_ci_lo": 0.8773025689736111,
+      "bootstrap_auc_ci_hi": 0.9211854544019515
+    },
+    "C_12feat_minus_UPDRS2_minus_MOCA": {
+      "n_features": 10,
+      "features": [
+        "AGE_AT_BASELINE",
+        "SEX",
+        "UPDRS1_TOTAL",
+        "UPDRS3_TREMOR",
+        "UPDRS3_RIGIDITY",
+        "UPDRS3_BRADYKINESIA",
+        "UPDRS3_AXIAL",
+        "UPDRS4_TOTAL",
+        "ESS_TOTAL",
+        "RBD_TOTAL"
+      ],
+      "fold_aucs_mean": 0.9016326823124444,
+      "fold_aucs_std": 0.01700722048986666,
+      "fold_aucs": [
+        0.9053658020082862,
+        0.9009351103974392,
+        0.897576773104848,
+        0.928740174793123,
+        0.8755455512585262
+      ],
+      "pooled_oof_auc": 0.9009918571279687,
+      "bootstrap_auc_mean": 0.9013624943138,
+      "bootstrap_auc_ci_lo": 0.8794107009081045,
+      "bootstrap_auc_ci_hi": 0.9217578275141657
+    },
+    "D_minus_all_three_rule_anchors": {
+      "n_features": 9,
+      "features": [
+        "AGE_AT_BASELINE",
+        "SEX",
+        "UPDRS3_TREMOR",
+        "UPDRS3_RIGIDITY",
+        "UPDRS3_BRADYKINESIA",
+        "UPDRS3_AXIAL",
+        "UPDRS4_TOTAL",
+        "ESS_TOTAL",
+        "RBD_TOTAL"
+      ],
+      "fold_aucs_mean": 0.897659499009829,
+      "fold_aucs_std": 0.018783881935578284,
+      "fold_aucs": [
+        0.9014506235144126,
+        0.8966551500318881,
+        0.8967423790666034,
+        0.9262729439762651,
+        0.8671763984599761
+      ],
+      "pooled_oof_auc": 0.8982153296527507,
+      "bootstrap_auc_mean": 0.898719243148621,
+      "bootstrap_auc_ci_lo": 0.8728153931297832,
+      "bootstrap_auc_ci_hi": 0.9207115903268328
+    }
+  },
+  "pairwise_deltas_vs_set_A": {
+    "B_12feat_minus_UPDRS2_vs_A": {
+      "delta_mean": -0.006987168904782589,
+      "ci_lo": -0.015704614946843387,
+      "ci_hi": -0.00041746284114455354,
+      "p_two_sided": 0.042,
+      "passes_pre_registered_tolerance": true
+    },
+    "C_12feat_minus_UPDRS2_minus_MOCA_vs_A": {
+      "delta_mean": -0.006091812091080286,
+      "ci_lo": -0.013840908240723366,
+      "ci_hi": 0.0003480409357546065,
+      "p_two_sided": 0.064,
+      "passes_pre_registered_tolerance": true
+    },
+    "D_minus_all_three_rule_anchors_vs_A": {
+      "delta_mean": -0.009096709777358306,
+      "ci_lo": -0.02018917502865302,
+      "ci_hi": -0.0007911436203248955,
+      "p_two_sided": 0.028,
+      "passes_pre_registered_tolerance": true
+    }
+  },
+  "verdict": "NO_TAUTOLOGY"
+}
