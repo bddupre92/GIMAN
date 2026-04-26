@@ -1,11 +1,11 @@
 {
-  "n_candidates": 942,
+  "n_candidates": 949,
   "n_linked": 866,
-  "n_unlinked": 76,
+  "n_unlinked": 83,
   "by_chapter": {
     "1": {
       "linked": 36,
-      "unlinked": 10
+      "unlinked": 11
     },
     "2": {
       "linked": 130,
@@ -41,11 +41,11 @@
     },
     "10": {
       "linked": 32,
-      "unlinked": 11
+      "unlinked": 12
     },
     "11": {
       "linked": 38,
-      "unlinked": 11
+      "unlinked": 12
     },
     "12": {
       "linked": 30,
@@ -65,12 +65,12 @@
     },
     "99": {
       "linked": 66,
-      "unlinked": 44
+      "unlinked": 48
     }
   },
   "linked_details": [
     {
-      "claim_id": 9196,
+      "claim_id": 10096,
       "chapter_id": 1,
       "value": 93.0,
       "unit": "percentage",
@@ -79,7 +79,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9197,
+      "claim_id": 10097,
       "chapter_id": 1,
       "value": 6.5,
       "unit": "percentage",
@@ -88,7 +88,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9198,
+      "claim_id": 10098,
       "chapter_id": 1,
       "value": 27.0,
       "unit": "percentage",
@@ -97,7 +97,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9199,
+      "claim_id": 10099,
       "chapter_id": 1,
       "value": 10.0,
       "unit": "percentage",
@@ -106,7 +106,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9200,
+      "claim_id": 10100,
       "chapter_id": 1,
       "value": 90.0,
       "unit": "percentage",
@@ -115,7 +115,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9201,
+      "claim_id": 10101,
       "chapter_id": 1,
       "value": 87.5,
       "unit": "percentage",
@@ -124,7 +124,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9202,
+      "claim_id": 10102,
       "chapter_id": 1,
       "value": 9.4,
       "unit": "percentage",
@@ -133,7 +133,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9203,
+      "claim_id": 10103,
       "chapter_id": 1,
       "value": 17.0,
       "unit": "percentage",
@@ -142,7 +142,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9204,
+      "claim_id": 10104,
       "chapter_id": 1,
       "value": 7.0,
       "unit": "percentage",
@@ -151,7 +151,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9205,
+      "claim_id": 10105,
       "chapter_id": 1,
       "value": 31.0,
       "unit": "percentage",
@@ -160,7 +160,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9206,
+      "claim_id": 10106,
       "chapter_id": 1,
       "value": 118.0,
       "unit": "sample_size",
@@ -169,7 +169,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9207,
+      "claim_id": 10107,
       "chapter_id": 1,
       "value": 893.0,
       "unit": "sample_size",
@@ -178,7 +178,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9208,
+      "claim_id": 10108,
       "chapter_id": 1,
       "value": 649.0,
       "unit": "sample_size",
@@ -187,7 +187,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9209,
+      "claim_id": 10109,
       "chapter_id": 1,
       "value": 39.1,
       "unit": "percentage",
@@ -196,7 +196,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9211,
+      "claim_id": 10111,
       "chapter_id": 1,
       "value": 90.0,
       "unit": "percentage",
@@ -205,7 +205,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9212,
+      "claim_id": 10112,
       "chapter_id": 1,
       "value": 22.0,
       "unit": "percentage",
@@ -214,7 +214,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9213,
+      "claim_id": 10113,
       "chapter_id": 1,
       "value": 3.1,
       "unit": "percentage",
@@ -223,7 +223,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9216,
+      "claim_id": 10116,
       "chapter_id": 1,
       "value": 39.1,
       "unit": "percentage",
@@ -232,7 +232,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9217,
+      "claim_id": 10117,
       "chapter_id": 1,
       "value": 91.1,
       "unit": "percentage",
@@ -241,7 +241,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9218,
+      "claim_id": 10118,
       "chapter_id": 1,
       "value": 95.0,
       "unit": "percentage",
@@ -250,7 +250,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9219,
+      "claim_id": 10119,
       "chapter_id": 1,
       "value": 9.3,
       "unit": "percentage",
@@ -259,7 +259,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9220,
+      "claim_id": 10120,
       "chapter_id": 1,
       "value": 9.0,
       "unit": "percentage",
@@ -268,7 +268,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9221,
+      "claim_id": 10121,
       "chapter_id": 1,
       "value": 3.29,
       "unit": "percentage",
@@ -277,7 +277,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9222,
+      "claim_id": 10122,
       "chapter_id": 1,
       "value": 5.0,
       "unit": "percentage",
@@ -286,7 +286,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9223,
+      "claim_id": 10123,
       "chapter_id": 1,
       "value": 29.0,
       "unit": "percentage",
@@ -295,7 +295,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9225,
+      "claim_id": 10125,
       "chapter_id": 1,
       "value": 4.7,
       "unit": "percentage",
@@ -304,7 +304,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9226,
+      "claim_id": 10126,
       "chapter_id": 1,
       "value": 19.0,
       "unit": "percentage",
@@ -313,7 +313,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9227,
+      "claim_id": 10127,
       "chapter_id": 1,
       "value": 72.0,
       "unit": "percentage",
@@ -322,7 +322,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9228,
+      "claim_id": 10128,
       "chapter_id": 1,
       "value": 33.0,
       "unit": "percentage",
@@ -331,7 +331,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9229,
+      "claim_id": 10129,
       "chapter_id": 1,
       "value": 95.0,
       "unit": "percentage",
@@ -340,7 +340,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9230,
+      "claim_id": 10130,
       "chapter_id": 1,
       "value": 76.2,
       "unit": "percentage",
@@ -349,7 +349,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9233,
+      "claim_id": 10133,
       "chapter_id": 1,
       "value": 91.1,
       "unit": "percentage",
@@ -358,7 +358,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9234,
+      "claim_id": 10134,
       "chapter_id": 1,
       "value": 3.29,
       "unit": "percentage",
@@ -367,7 +367,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9235,
+      "claim_id": 10135,
       "chapter_id": 1,
       "value": 4.7,
       "unit": "percentage",
@@ -376,7 +376,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9236,
+      "claim_id": 10136,
       "chapter_id": 1,
       "value": 19.0,
       "unit": "percentage",
@@ -385,7 +385,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9237,
+      "claim_id": 10137,
       "chapter_id": 1,
       "value": 72.0,
       "unit": "percentage",
@@ -394,7 +394,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9238,
+      "claim_id": 10138,
       "chapter_id": 2,
       "value": 40.0,
       "unit": "percentage",
@@ -403,7 +403,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9239,
+      "claim_id": 10139,
       "chapter_id": 2,
       "value": 20.0,
       "unit": "percentage",
@@ -412,7 +412,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9240,
+      "claim_id": 10140,
       "chapter_id": 2,
       "value": 13.0,
       "unit": "percentage",
@@ -421,7 +421,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9241,
+      "claim_id": 10141,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -430,7 +430,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9242,
+      "claim_id": 10142,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -439,7 +439,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9243,
+      "claim_id": 10143,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -448,7 +448,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9244,
+      "claim_id": 10144,
       "chapter_id": 2,
       "value": 6.1,
       "unit": "percentage",
@@ -457,7 +457,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9245,
+      "claim_id": 10145,
       "chapter_id": 2,
       "value": 46.7,
       "unit": "percentage",
@@ -466,7 +466,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9246,
+      "claim_id": 10146,
       "chapter_id": 2,
       "value": 14.0,
       "unit": "percentage",
@@ -475,7 +475,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9247,
+      "claim_id": 10147,
       "chapter_id": 2,
       "value": 55.0,
       "unit": "percentage",
@@ -484,7 +484,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9248,
+      "claim_id": 10148,
       "chapter_id": 2,
       "value": 31.0,
       "unit": "percentage",
@@ -493,7 +493,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9249,
+      "claim_id": 10149,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -502,7 +502,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9250,
+      "claim_id": 10150,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -511,7 +511,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9251,
+      "claim_id": 10151,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "sample_size",
@@ -520,7 +520,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9252,
+      "claim_id": 10152,
       "chapter_id": 2,
       "value": 20.0,
       "unit": "percentage",
@@ -529,7 +529,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9253,
+      "claim_id": 10153,
       "chapter_id": 2,
       "value": 2.0,
       "unit": "percentage",
@@ -538,7 +538,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9254,
+      "claim_id": 10154,
       "chapter_id": 2,
       "value": 100.0,
       "unit": "percentage",
@@ -547,7 +547,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9255,
+      "claim_id": 10155,
       "chapter_id": 2,
       "value": 0.0,
       "unit": "percentage",
@@ -556,7 +556,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9256,
+      "claim_id": 10156,
       "chapter_id": 2,
       "value": 100.0,
       "unit": "percentage",
@@ -565,7 +565,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9257,
+      "claim_id": 10157,
       "chapter_id": 2,
       "value": 175.0,
       "unit": "sample_size",
@@ -574,7 +574,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9258,
+      "claim_id": 10158,
       "chapter_id": 2,
       "value": 287.0,
       "unit": "sample_size",
@@ -583,7 +583,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9259,
+      "claim_id": 10159,
       "chapter_id": 2,
       "value": 336.0,
       "unit": "sample_size",
@@ -592,7 +592,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9260,
+      "claim_id": 10160,
       "chapter_id": 2,
       "value": 336.0,
       "unit": "sample_size",
@@ -601,7 +601,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9261,
+      "claim_id": 10161,
       "chapter_id": 2,
       "value": 286.0,
       "unit": "sample_size",
@@ -610,7 +610,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9262,
+      "claim_id": 10162,
       "chapter_id": 2,
       "value": 50.0,
       "unit": "sample_size",
@@ -619,7 +619,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9263,
+      "claim_id": 10163,
       "chapter_id": 2,
       "value": 20.0,
       "unit": "sample_size",
@@ -628,7 +628,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9264,
+      "claim_id": 10164,
       "chapter_id": 2,
       "value": 30.0,
       "unit": "sample_size",
@@ -637,7 +637,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9265,
+      "claim_id": 10165,
       "chapter_id": 2,
       "value": 60.0,
       "unit": "percentage",
@@ -646,7 +646,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9266,
+      "claim_id": 10166,
       "chapter_id": 2,
       "value": 18.0,
       "unit": "sample_size",
@@ -655,7 +655,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9267,
+      "claim_id": 10167,
       "chapter_id": 2,
       "value": 14.0,
       "unit": "sample_size",
@@ -664,7 +664,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9268,
+      "claim_id": 10168,
       "chapter_id": 2,
       "value": 60.0,
       "unit": "percentage",
@@ -673,7 +673,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9269,
+      "claim_id": 10169,
       "chapter_id": 2,
       "value": 38.0,
       "unit": "percentage",
@@ -682,7 +682,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9270,
+      "claim_id": 10170,
       "chapter_id": 2,
       "value": 12.0,
       "unit": "percentage",
@@ -691,7 +691,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9271,
+      "claim_id": 10171,
       "chapter_id": 2,
       "value": 60.0,
       "unit": "percentage",
@@ -700,7 +700,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9272,
+      "claim_id": 10172,
       "chapter_id": 2,
       "value": 18.0,
       "unit": "sample_size",
@@ -709,7 +709,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9273,
+      "claim_id": 10173,
       "chapter_id": 2,
       "value": 40.0,
       "unit": "percentage",
@@ -718,7 +718,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9274,
+      "claim_id": 10174,
       "chapter_id": 2,
       "value": 20.0,
       "unit": "percentage",
@@ -727,7 +727,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9275,
+      "claim_id": 10175,
       "chapter_id": 2,
       "value": 13.0,
       "unit": "percentage",
@@ -736,7 +736,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9276,
+      "claim_id": 10176,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -745,7 +745,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9277,
+      "claim_id": 10177,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -754,7 +754,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9278,
+      "claim_id": 10178,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -763,7 +763,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9279,
+      "claim_id": 10179,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -772,7 +772,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9280,
+      "claim_id": 10180,
       "chapter_id": 2,
       "value": 12.0,
       "unit": "sample_size",
@@ -781,7 +781,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9281,
+      "claim_id": 10181,
       "chapter_id": 2,
       "value": 40.0,
       "unit": "percentage",
@@ -790,7 +790,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9282,
+      "claim_id": 10182,
       "chapter_id": 2,
       "value": 20.0,
       "unit": "percentage",
@@ -799,7 +799,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9283,
+      "claim_id": 10183,
       "chapter_id": 2,
       "value": 43.0,
       "unit": "percentage",
@@ -808,7 +808,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9284,
+      "claim_id": 10184,
       "chapter_id": 2,
       "value": 27.0,
       "unit": "percentage",
@@ -817,7 +817,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9285,
+      "claim_id": 10185,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -826,7 +826,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9286,
+      "claim_id": 10186,
       "chapter_id": 2,
       "value": 13.0,
       "unit": "percentage",
@@ -835,7 +835,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9287,
+      "claim_id": 10187,
       "chapter_id": 2,
       "value": 13.0,
       "unit": "sample_size",
@@ -844,7 +844,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9288,
+      "claim_id": 10188,
       "chapter_id": 2,
       "value": 27.0,
       "unit": "percentage",
@@ -853,7 +853,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9289,
+      "claim_id": 10189,
       "chapter_id": 2,
       "value": 73.0,
       "unit": "percentage",
@@ -862,7 +862,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9290,
+      "claim_id": 10190,
       "chapter_id": 2,
       "value": 14.0,
       "unit": "sample_size",
@@ -871,7 +871,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9291,
+      "claim_id": 10191,
       "chapter_id": 2,
       "value": 14.0,
       "unit": "percentage",
@@ -880,7 +880,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9292,
+      "claim_id": 10192,
       "chapter_id": 2,
       "value": 55.0,
       "unit": "percentage",
@@ -889,7 +889,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9293,
+      "claim_id": 10193,
       "chapter_id": 2,
       "value": 31.0,
       "unit": "percentage",
@@ -898,7 +898,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9294,
+      "claim_id": 10194,
       "chapter_id": 2,
       "value": 77.0,
       "unit": "percentage",
@@ -907,7 +907,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9295,
+      "claim_id": 10195,
       "chapter_id": 2,
       "value": 47.0,
       "unit": "percentage",
@@ -916,7 +916,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9296,
+      "claim_id": 10196,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -925,7 +925,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9297,
+      "claim_id": 10197,
       "chapter_id": 2,
       "value": 30.0,
       "unit": "percentage",
@@ -934,7 +934,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9298,
+      "claim_id": 10198,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -943,7 +943,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9299,
+      "claim_id": 10199,
       "chapter_id": 2,
       "value": 27.0,
       "unit": "percentage",
@@ -952,7 +952,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9300,
+      "claim_id": 10200,
       "chapter_id": 2,
       "value": 57.0,
       "unit": "percentage",
@@ -961,7 +961,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9301,
+      "claim_id": 10201,
       "chapter_id": 2,
       "value": 57.0,
       "unit": "percentage",
@@ -970,7 +970,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9302,
+      "claim_id": 10202,
       "chapter_id": 2,
       "value": 27.0,
       "unit": "percentage",
@@ -979,7 +979,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9303,
+      "claim_id": 10203,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -988,7 +988,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9304,
+      "claim_id": 10204,
       "chapter_id": 2,
       "value": 30.0,
       "unit": "sample_size",
@@ -997,7 +997,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9305,
+      "claim_id": 10205,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -1006,7 +1006,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9306,
+      "claim_id": 10206,
       "chapter_id": 2,
       "value": 57.0,
       "unit": "percentage",
@@ -1015,7 +1015,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9307,
+      "claim_id": 10207,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -1024,7 +1024,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9308,
+      "claim_id": 10208,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -1033,7 +1033,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9309,
+      "claim_id": 10209,
       "chapter_id": 2,
       "value": 50.0,
       "unit": "percentage",
@@ -1042,7 +1042,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9310,
+      "claim_id": 10210,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -1051,7 +1051,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9311,
+      "claim_id": 10211,
       "chapter_id": 2,
       "value": 0.0,
       "unit": "percentage",
@@ -1060,7 +1060,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9312,
+      "claim_id": 10212,
       "chapter_id": 2,
       "value": 0.0,
       "unit": "percentage",
@@ -1069,7 +1069,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9313,
+      "claim_id": 10213,
       "chapter_id": 2,
       "value": 27.0,
       "unit": "percentage",
@@ -1078,7 +1078,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9314,
+      "claim_id": 10214,
       "chapter_id": 2,
       "value": 87.5,
       "unit": "percentage",
@@ -1087,7 +1087,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9315,
+      "claim_id": 10215,
       "chapter_id": 2,
       "value": 46.7,
       "unit": "percentage",
@@ -1096,7 +1096,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9316,
+      "claim_id": 10216,
       "chapter_id": 2,
       "value": 12.5,
       "unit": "percentage",
@@ -1105,7 +1105,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9317,
+      "claim_id": 10217,
       "chapter_id": 2,
       "value": 6.1,
       "unit": "percentage",
@@ -1114,7 +1114,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9318,
+      "claim_id": 10218,
       "chapter_id": 2,
       "value": 0.0,
       "unit": "percentage",
@@ -1123,7 +1123,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9319,
+      "claim_id": 10219,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -1132,7 +1132,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9320,
+      "claim_id": 10220,
       "chapter_id": 2,
       "value": 6.1,
       "unit": "percentage",
@@ -1141,7 +1141,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9321,
+      "claim_id": 10221,
       "chapter_id": 2,
       "value": 46.7,
       "unit": "percentage",
@@ -1150,7 +1150,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9322,
+      "claim_id": 10222,
       "chapter_id": 2,
       "value": 100.0,
       "unit": "percentage",
@@ -1159,7 +1159,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9323,
+      "claim_id": 10223,
       "chapter_id": 2,
       "value": 90.7,
       "unit": "percentage",
@@ -1168,7 +1168,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9324,
+      "claim_id": 10224,
       "chapter_id": 2,
       "value": 84.3,
       "unit": "percentage",
@@ -1177,7 +1177,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9325,
+      "claim_id": 10225,
       "chapter_id": 2,
       "value": 72.0,
       "unit": "percentage",
@@ -1186,7 +1186,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9326,
+      "claim_id": 10226,
       "chapter_id": 2,
       "value": 65.0,
       "unit": "percentage",
@@ -1195,7 +1195,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9327,
+      "claim_id": 10227,
       "chapter_id": 2,
       "value": 9.8,
       "unit": "percentage",
@@ -1204,7 +1204,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9328,
+      "claim_id": 10228,
       "chapter_id": 2,
       "value": 12.4,
       "unit": "percentage",
@@ -1213,7 +1213,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9329,
+      "claim_id": 10229,
       "chapter_id": 2,
       "value": 9.0,
       "unit": "percentage",
@@ -1222,7 +1222,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9330,
+      "claim_id": 10230,
       "chapter_id": 2,
       "value": 8.9,
       "unit": "percentage",
@@ -1231,7 +1231,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9331,
+      "claim_id": 10231,
       "chapter_id": 2,
       "value": 10.8,
       "unit": "percentage",
@@ -1240,7 +1240,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9332,
+      "claim_id": 10232,
       "chapter_id": 2,
       "value": 6.1,
       "unit": "percentage",
@@ -1249,7 +1249,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9333,
+      "claim_id": 10233,
       "chapter_id": 2,
       "value": 7.6,
       "unit": "percentage",
@@ -1258,7 +1258,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9334,
+      "claim_id": 10234,
       "chapter_id": 2,
       "value": 46.7,
       "unit": "percentage",
@@ -1267,7 +1267,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9335,
+      "claim_id": 10235,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -1276,7 +1276,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9336,
+      "claim_id": 10236,
       "chapter_id": 2,
       "value": 6.1,
       "unit": "percentage",
@@ -1285,7 +1285,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9337,
+      "claim_id": 10237,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -1294,7 +1294,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9338,
+      "claim_id": 10238,
       "chapter_id": 2,
       "value": 87.5,
       "unit": "percentage",
@@ -1303,7 +1303,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9339,
+      "claim_id": 10239,
       "chapter_id": 2,
       "value": 9.2,
       "unit": "percentage",
@@ -1312,7 +1312,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9340,
+      "claim_id": 10240,
       "chapter_id": 2,
       "value": 8.4,
       "unit": "percentage",
@@ -1321,7 +1321,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9341,
+      "claim_id": 10241,
       "chapter_id": 2,
       "value": 6.8,
       "unit": "percentage",
@@ -1330,7 +1330,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9342,
+      "claim_id": 10242,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "sample_size",
@@ -1339,7 +1339,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9344,
+      "claim_id": 10244,
       "chapter_id": 2,
       "value": 12.0,
       "unit": "sample_size",
@@ -1348,7 +1348,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9346,
+      "claim_id": 10246,
       "chapter_id": 2,
       "value": 13.0,
       "unit": "sample_size",
@@ -1357,7 +1357,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9347,
+      "claim_id": 10247,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "sample_size",
@@ -1366,7 +1366,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9348,
+      "claim_id": 10248,
       "chapter_id": 2,
       "value": 26.0,
       "unit": "sample_size",
@@ -1375,7 +1375,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9349,
+      "claim_id": 10249,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -1384,7 +1384,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9350,
+      "claim_id": 10250,
       "chapter_id": 2,
       "value": 87.5,
       "unit": "percentage",
@@ -1393,7 +1393,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9351,
+      "claim_id": 10251,
       "chapter_id": 2,
       "value": 0.0,
       "unit": "percentage",
@@ -1402,7 +1402,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9352,
+      "claim_id": 10252,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -1411,7 +1411,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9353,
+      "claim_id": 10253,
       "chapter_id": 2,
       "value": 14.0,
       "unit": "percentage",
@@ -1420,7 +1420,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9354,
+      "claim_id": 10254,
       "chapter_id": 2,
       "value": 55.0,
       "unit": "percentage",
@@ -1429,7 +1429,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9355,
+      "claim_id": 10255,
       "chapter_id": 2,
       "value": 31.0,
       "unit": "percentage",
@@ -1438,7 +1438,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9356,
+      "claim_id": 10256,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -1447,7 +1447,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9357,
+      "claim_id": 10257,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -1456,7 +1456,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9358,
+      "claim_id": 10258,
       "chapter_id": 2,
       "value": 5.0,
       "unit": "percentage",
@@ -1465,7 +1465,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9359,
+      "claim_id": 10259,
       "chapter_id": 2,
       "value": 10.0,
       "unit": "percentage",
@@ -1474,7 +1474,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9360,
+      "claim_id": 10260,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -1483,7 +1483,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9361,
+      "claim_id": 10261,
       "chapter_id": 2,
       "value": 23.0,
       "unit": "percentage",
@@ -1492,7 +1492,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9362,
+      "claim_id": 10262,
       "chapter_id": 2,
       "value": 0.0,
       "unit": "percentage",
@@ -1501,7 +1501,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9363,
+      "claim_id": 10263,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -1510,7 +1510,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9364,
+      "claim_id": 10264,
       "chapter_id": 2,
       "value": 83.0,
       "unit": "percentage",
@@ -1519,7 +1519,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9365,
+      "claim_id": 10265,
       "chapter_id": 2,
       "value": 86.0,
       "unit": "percentage",
@@ -1528,7 +1528,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9366,
+      "claim_id": 10266,
       "chapter_id": 2,
       "value": 9.4,
       "unit": "percentage",
@@ -1537,7 +1537,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9367,
+      "claim_id": 10267,
       "chapter_id": 2,
       "value": 87.5,
       "unit": "percentage",
@@ -1546,7 +1546,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9368,
+      "claim_id": 10268,
       "chapter_id": 2,
       "value": 17.0,
       "unit": "percentage",
@@ -1555,7 +1555,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9369,
+      "claim_id": 10269,
       "chapter_id": 2,
       "value": 7.0,
       "unit": "percentage",
@@ -1564,7 +1564,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9372,
+      "claim_id": 10272,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -1573,7 +1573,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9373,
+      "claim_id": 10273,
       "chapter_id": 3,
       "value": 12.6,
       "unit": "percentage",
@@ -1582,7 +1582,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9374,
+      "claim_id": 10274,
       "chapter_id": 3,
       "value": 97.1,
       "unit": "percentage",
@@ -1591,7 +1591,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9375,
+      "claim_id": 10275,
       "chapter_id": 3,
       "value": 80.0,
       "unit": "percentage",
@@ -1600,7 +1600,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9376,
+      "claim_id": 10276,
       "chapter_id": 3,
       "value": 89.9,
       "unit": "percentage",
@@ -1609,7 +1609,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9377,
+      "claim_id": 10277,
       "chapter_id": 3,
       "value": 83.5,
       "unit": "percentage",
@@ -1618,7 +1618,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9378,
+      "claim_id": 10278,
       "chapter_id": 3,
       "value": 80.0,
       "unit": "percentage",
@@ -1627,7 +1627,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9379,
+      "claim_id": 10279,
       "chapter_id": 3,
       "value": 80.0,
       "unit": "percentage",
@@ -1636,7 +1636,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9380,
+      "claim_id": 10280,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -1645,7 +1645,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9381,
+      "claim_id": 10281,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -1654,7 +1654,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9382,
+      "claim_id": 10282,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -1663,7 +1663,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9383,
+      "claim_id": 10283,
       "chapter_id": 3,
       "value": 64.4,
       "unit": "percentage",
@@ -1672,7 +1672,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9384,
+      "claim_id": 10284,
       "chapter_id": 3,
       "value": 3.0,
       "unit": "percentage",
@@ -1681,7 +1681,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9385,
+      "claim_id": 10285,
       "chapter_id": 3,
       "value": 9.5,
       "unit": "percentage",
@@ -1690,7 +1690,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9386,
+      "claim_id": 10286,
       "chapter_id": 3,
       "value": 22.1,
       "unit": "percentage",
@@ -1699,7 +1699,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9387,
+      "claim_id": 10287,
       "chapter_id": 3,
       "value": 0.8,
       "unit": "percentage",
@@ -1708,7 +1708,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9388,
+      "claim_id": 10288,
       "chapter_id": 3,
       "value": 0.2,
       "unit": "percentage",
@@ -1717,7 +1717,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9389,
+      "claim_id": 10289,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -1726,7 +1726,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9390,
+      "claim_id": 10290,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -1735,7 +1735,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9391,
+      "claim_id": 10291,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -1744,7 +1744,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9392,
+      "claim_id": 10292,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -1753,7 +1753,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9393,
+      "claim_id": 10293,
       "chapter_id": 3,
       "value": 0.941,
       "unit": "ci_bracket",
@@ -1762,7 +1762,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9394,
+      "claim_id": 10294,
       "chapter_id": 3,
       "value": 0.97,
       "unit": "ci_bracket",
@@ -1771,7 +1771,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9395,
+      "claim_id": 10295,
       "chapter_id": 3,
       "value": 0.887,
       "unit": "ci_bracket",
@@ -1780,7 +1780,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9396,
+      "claim_id": 10296,
       "chapter_id": 3,
       "value": 0.94,
       "unit": "ci_bracket",
@@ -1789,7 +1789,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9397,
+      "claim_id": 10297,
       "chapter_id": 3,
       "value": 0.972,
       "unit": "ci_bracket",
@@ -1798,7 +1798,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9398,
+      "claim_id": 10298,
       "chapter_id": 3,
       "value": 0.891,
       "unit": "ci_bracket",
@@ -1807,7 +1807,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9399,
+      "claim_id": 10299,
       "chapter_id": 3,
       "value": 0.941,
       "unit": "ci_bracket",
@@ -1816,7 +1816,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9400,
+      "claim_id": 10300,
       "chapter_id": 3,
       "value": 0.972,
       "unit": "ci_bracket",
@@ -1825,7 +1825,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9401,
+      "claim_id": 10301,
       "chapter_id": 3,
       "value": 0.895,
       "unit": "ci_bracket",
@@ -1834,7 +1834,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9402,
+      "claim_id": 10302,
       "chapter_id": 3,
       "value": 0.901,
       "unit": "ci_bracket",
@@ -1843,7 +1843,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9403,
+      "claim_id": 10303,
       "chapter_id": 3,
       "value": 0.964,
       "unit": "ci_bracket",
@@ -1852,7 +1852,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9404,
+      "claim_id": 10304,
       "chapter_id": 3,
       "value": 0.795,
       "unit": "ci_bracket",
@@ -1861,7 +1861,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9405,
+      "claim_id": 10305,
       "chapter_id": 3,
       "value": 0.753,
       "unit": "ci_bracket",
@@ -1870,7 +1870,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9406,
+      "claim_id": 10306,
       "chapter_id": 3,
       "value": 0.937,
       "unit": "ci_bracket",
@@ -1879,7 +1879,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9407,
+      "claim_id": 10307,
       "chapter_id": 3,
       "value": 0.812,
       "unit": "ci_bracket",
@@ -1888,7 +1888,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9408,
+      "claim_id": 10308,
       "chapter_id": 3,
       "value": 0.738,
       "unit": "ci_bracket",
@@ -1897,7 +1897,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9409,
+      "claim_id": 10309,
       "chapter_id": 3,
       "value": 0.854,
       "unit": "ci_bracket",
@@ -1906,7 +1906,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9410,
+      "claim_id": 10310,
       "chapter_id": 3,
       "value": 0.736,
       "unit": "ci_bracket",
@@ -1915,7 +1915,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9411,
+      "claim_id": 10311,
       "chapter_id": 3,
       "value": 0.748,
       "unit": "ci_bracket",
@@ -1924,7 +1924,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9412,
+      "claim_id": 10312,
       "chapter_id": 3,
       "value": 0.623,
       "unit": "ci_bracket",
@@ -1933,7 +1933,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9413,
+      "claim_id": 10313,
       "chapter_id": 3,
       "value": 0.943,
       "unit": "ci_bracket",
@@ -1942,7 +1942,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9414,
+      "claim_id": 10314,
       "chapter_id": 3,
       "value": 0.827,
       "unit": "ci_bracket",
@@ -1951,7 +1951,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9415,
+      "claim_id": 10315,
       "chapter_id": 3,
       "value": 0.601,
       "unit": "ci_bracket",
@@ -1960,7 +1960,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9416,
+      "claim_id": 10316,
       "chapter_id": 3,
       "value": 0.88,
       "unit": "ci_bracket",
@@ -1969,7 +1969,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9417,
+      "claim_id": 10317,
       "chapter_id": 3,
       "value": 0.593,
       "unit": "ci_bracket",
@@ -1978,7 +1978,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9418,
+      "claim_id": 10318,
       "chapter_id": 3,
       "value": 0.712,
       "unit": "ci_bracket",
@@ -1987,7 +1987,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9419,
+      "claim_id": 10319,
       "chapter_id": 3,
       "value": 0.624,
       "unit": "ci_bracket",
@@ -1996,7 +1996,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9420,
+      "claim_id": 10320,
       "chapter_id": 3,
       "value": 0.898,
       "unit": "ci_bracket",
@@ -2005,7 +2005,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9421,
+      "claim_id": 10321,
       "chapter_id": 3,
       "value": 0.686,
       "unit": "ci_bracket",
@@ -2014,7 +2014,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9422,
+      "claim_id": 10322,
       "chapter_id": 3,
       "value": 0.61,
       "unit": "ci_bracket",
@@ -2023,7 +2023,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9423,
+      "claim_id": 10323,
       "chapter_id": 3,
       "value": 0.66,
       "unit": "ci_bracket",
@@ -2032,7 +2032,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9424,
+      "claim_id": 10324,
       "chapter_id": 3,
       "value": 0.602,
       "unit": "ci_bracket",
@@ -2041,7 +2041,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9425,
+      "claim_id": 10325,
       "chapter_id": 3,
       "value": 0.679,
       "unit": "ci_bracket",
@@ -2050,7 +2050,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9426,
+      "claim_id": 10326,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2059,7 +2059,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9427,
+      "claim_id": 10327,
       "chapter_id": 3,
       "value": 0.937,
       "unit": "ci_bracket",
@@ -2068,7 +2068,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9428,
+      "claim_id": 10328,
       "chapter_id": 3,
       "value": 0.943,
       "unit": "ci_bracket",
@@ -2077,7 +2077,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9429,
+      "claim_id": 10329,
       "chapter_id": 3,
       "value": 0.898,
       "unit": "ci_bracket",
@@ -2086,7 +2086,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9430,
+      "claim_id": 10330,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2095,7 +2095,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9431,
+      "claim_id": 10331,
       "chapter_id": 3,
       "value": 95.5,
       "unit": "percentage",
@@ -2104,7 +2104,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9432,
+      "claim_id": 10332,
       "chapter_id": 3,
       "value": 98.9,
       "unit": "percentage",
@@ -2113,7 +2113,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9433,
+      "claim_id": 10333,
       "chapter_id": 3,
       "value": 98.1,
       "unit": "percentage",
@@ -2122,7 +2122,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9434,
+      "claim_id": 10334,
       "chapter_id": 3,
       "value": 99.5,
       "unit": "percentage",
@@ -2131,7 +2131,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9435,
+      "claim_id": 10335,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2140,7 +2140,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9436,
+      "claim_id": 10336,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2149,7 +2149,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9437,
+      "claim_id": 10337,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2158,7 +2158,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9438,
+      "claim_id": 10338,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2167,7 +2167,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9439,
+      "claim_id": 10339,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2176,7 +2176,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9440,
+      "claim_id": 10340,
       "chapter_id": 3,
       "value": 95.5,
       "unit": "percentage",
@@ -2185,7 +2185,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9441,
+      "claim_id": 10341,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2194,7 +2194,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9442,
+      "claim_id": 10342,
       "chapter_id": 3,
       "value": 80.0,
       "unit": "percentage",
@@ -2203,7 +2203,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9443,
+      "claim_id": 10343,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2212,7 +2212,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9444,
+      "claim_id": 10344,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2221,7 +2221,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9445,
+      "claim_id": 10345,
       "chapter_id": 3,
       "value": 25.2,
       "unit": "percentage",
@@ -2230,7 +2230,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9446,
+      "claim_id": 10346,
       "chapter_id": 3,
       "value": 1.4,
       "unit": "percentage",
@@ -2239,7 +2239,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9447,
+      "claim_id": 10347,
       "chapter_id": 3,
       "value": 25.2,
       "unit": "percentage",
@@ -2248,7 +2248,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9448,
+      "claim_id": 10348,
       "chapter_id": 3,
       "value": 15.6,
       "unit": "percentage",
@@ -2257,7 +2257,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9449,
+      "claim_id": 10349,
       "chapter_id": 3,
       "value": 13.1,
       "unit": "percentage",
@@ -2266,7 +2266,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9450,
+      "claim_id": 10350,
       "chapter_id": 3,
       "value": 1.4,
       "unit": "percentage",
@@ -2275,7 +2275,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9451,
+      "claim_id": 10351,
       "chapter_id": 3,
       "value": 1.4,
       "unit": "percentage",
@@ -2284,7 +2284,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9452,
+      "claim_id": 10352,
       "chapter_id": 3,
       "value": 49.3,
       "unit": "percentage",
@@ -2293,7 +2293,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9453,
+      "claim_id": 10353,
       "chapter_id": 3,
       "value": 36.8,
       "unit": "percentage",
@@ -2302,7 +2302,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9454,
+      "claim_id": 10354,
       "chapter_id": 3,
       "value": 81.3,
       "unit": "percentage",
@@ -2311,7 +2311,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9455,
+      "claim_id": 10355,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2320,7 +2320,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9459,
+      "claim_id": 10359,
       "chapter_id": 3,
       "value": 30.0,
       "unit": "percentage",
@@ -2329,7 +2329,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9460,
+      "claim_id": 10360,
       "chapter_id": 3,
       "value": 65.0,
       "unit": "percentage",
@@ -2338,7 +2338,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9461,
+      "claim_id": 10361,
       "chapter_id": 3,
       "value": 30.2,
       "unit": "percentage",
@@ -2347,7 +2347,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9462,
+      "claim_id": 10362,
       "chapter_id": 3,
       "value": 65.3,
       "unit": "percentage",
@@ -2356,7 +2356,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9463,
+      "claim_id": 10363,
       "chapter_id": 3,
       "value": 10.0,
       "unit": "percentage",
@@ -2365,7 +2365,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9464,
+      "claim_id": 10364,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2374,7 +2374,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9465,
+      "claim_id": 10365,
       "chapter_id": 3,
       "value": 25.4,
       "unit": "percentage",
@@ -2383,7 +2383,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9468,
+      "claim_id": 10368,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2392,7 +2392,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9469,
+      "claim_id": 10369,
       "chapter_id": 3,
       "value": 95.5,
       "unit": "percentage",
@@ -2401,7 +2401,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9470,
+      "claim_id": 10370,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2410,7 +2410,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9471,
+      "claim_id": 10371,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2419,7 +2419,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9472,
+      "claim_id": 10372,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2428,7 +2428,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9473,
+      "claim_id": 10373,
       "chapter_id": 3,
       "value": 95.0,
       "unit": "percentage",
@@ -2437,7 +2437,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9474,
+      "claim_id": 10374,
       "chapter_id": 3,
       "value": 0.947,
       "unit": "ci_bracket",
@@ -2446,7 +2446,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9475,
+      "claim_id": 10375,
       "chapter_id": 3,
       "value": 0.93,
       "unit": "ci_bracket",
@@ -2455,7 +2455,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9476,
+      "claim_id": 10376,
       "chapter_id": 3,
       "value": 29.4,
       "unit": "percentage",
@@ -2464,7 +2464,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9477,
+      "claim_id": 10377,
       "chapter_id": 3,
       "value": 81.0,
       "unit": "percentage",
@@ -2473,7 +2473,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9478,
+      "claim_id": 10378,
       "chapter_id": 3,
       "value": 85.0,
       "unit": "percentage",
@@ -2482,7 +2482,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9479,
+      "claim_id": 10379,
       "chapter_id": 3,
       "value": 0.8,
       "unit": "percentage",
@@ -2491,7 +2491,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9480,
+      "claim_id": 10380,
       "chapter_id": 3,
       "value": 12.6,
       "unit": "percentage",
@@ -2500,7 +2500,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9481,
+      "claim_id": 10381,
       "chapter_id": 3,
       "value": 87.4,
       "unit": "percentage",
@@ -2509,7 +2509,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9484,
+      "claim_id": 10384,
       "chapter_id": 3,
       "value": 90.0,
       "unit": "percentage",
@@ -2518,7 +2518,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9485,
+      "claim_id": 10385,
       "chapter_id": 3,
       "value": 25.2,
       "unit": "percentage",
@@ -2527,7 +2527,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9486,
+      "claim_id": 10386,
       "chapter_id": 3,
       "value": 92.0,
       "unit": "percentage",
@@ -2536,7 +2536,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9487,
+      "claim_id": 10387,
       "chapter_id": 3,
       "value": 25.0,
       "unit": "percentage",
@@ -2545,7 +2545,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9488,
+      "claim_id": 10388,
       "chapter_id": 4,
       "value": 39.6,
       "unit": "percentage",
@@ -2554,7 +2554,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9489,
+      "claim_id": 10389,
       "chapter_id": 4,
       "value": 90.8,
       "unit": "percentage",
@@ -2563,7 +2563,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9490,
+      "claim_id": 10390,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2572,7 +2572,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9491,
+      "claim_id": 10391,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -2581,7 +2581,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9492,
+      "claim_id": 10392,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2590,7 +2590,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9493,
+      "claim_id": 10393,
       "chapter_id": 4,
       "value": 22.0,
       "unit": "percentage",
@@ -2599,7 +2599,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9494,
+      "claim_id": 10394,
       "chapter_id": 4,
       "value": 49.0,
       "unit": "percentage",
@@ -2608,7 +2608,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9495,
+      "claim_id": 10395,
       "chapter_id": 4,
       "value": 5.6,
       "unit": "percentage",
@@ -2617,7 +2617,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9496,
+      "claim_id": 10396,
       "chapter_id": 4,
       "value": 5.1,
       "unit": "percentage",
@@ -2626,7 +2626,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9497,
+      "claim_id": 10397,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -2635,7 +2635,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9498,
+      "claim_id": 10398,
       "chapter_id": 4,
       "value": 39.6,
       "unit": "percentage",
@@ -2644,7 +2644,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9499,
+      "claim_id": 10399,
       "chapter_id": 4,
       "value": 39.6,
       "unit": "percentage",
@@ -2653,7 +2653,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9500,
+      "claim_id": 10400,
       "chapter_id": 4,
       "value": 5.1,
       "unit": "percentage",
@@ -2662,7 +2662,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9501,
+      "claim_id": 10401,
       "chapter_id": 4,
       "value": 39.6,
       "unit": "percentage",
@@ -2671,7 +2671,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9502,
+      "claim_id": 10402,
       "chapter_id": 4,
       "value": 5.0,
       "unit": "percentage",
@@ -2680,7 +2680,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9503,
+      "claim_id": 10403,
       "chapter_id": 4,
       "value": 60.0,
       "unit": "percentage",
@@ -2689,7 +2689,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9504,
+      "claim_id": 10404,
       "chapter_id": 4,
       "value": 64.5,
       "unit": "percentage",
@@ -2698,7 +2698,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9505,
+      "claim_id": 10405,
       "chapter_id": 4,
       "value": 0.8,
       "unit": "percentage",
@@ -2707,7 +2707,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9506,
+      "claim_id": 10406,
       "chapter_id": 4,
       "value": 90.8,
       "unit": "percentage",
@@ -2716,7 +2716,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9507,
+      "claim_id": 10407,
       "chapter_id": 4,
       "value": 0.3,
       "unit": "beta_coef",
@@ -2725,7 +2725,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9508,
+      "claim_id": 10408,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -2734,7 +2734,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9509,
+      "claim_id": 10409,
       "chapter_id": 4,
       "value": 90.8,
       "unit": "percentage",
@@ -2743,7 +2743,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9510,
+      "claim_id": 10410,
       "chapter_id": 4,
       "value": 0.3,
       "unit": "beta_coef",
@@ -2752,7 +2752,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9511,
+      "claim_id": 10411,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -2761,7 +2761,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9512,
+      "claim_id": 10412,
       "chapter_id": 4,
       "value": 70.0,
       "unit": "percentage",
@@ -2770,7 +2770,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9513,
+      "claim_id": 10413,
       "chapter_id": 4,
       "value": 80.0,
       "unit": "percentage",
@@ -2779,7 +2779,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9514,
+      "claim_id": 10414,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -2788,7 +2788,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9515,
+      "claim_id": 10415,
       "chapter_id": 4,
       "value": 95.0,
       "unit": "percentage",
@@ -2797,7 +2797,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9516,
+      "claim_id": 10416,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2806,7 +2806,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9517,
+      "claim_id": 10417,
       "chapter_id": 4,
       "value": 20.0,
       "unit": "percentage",
@@ -2815,7 +2815,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9518,
+      "claim_id": 10418,
       "chapter_id": 4,
       "value": 30.0,
       "unit": "percentage",
@@ -2824,7 +2824,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9519,
+      "claim_id": 10419,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -2833,7 +2833,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9520,
+      "claim_id": 10420,
       "chapter_id": 4,
       "value": 39.6,
       "unit": "percentage",
@@ -2842,7 +2842,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9521,
+      "claim_id": 10421,
       "chapter_id": 4,
       "value": 20.0,
       "unit": "percentage",
@@ -2851,7 +2851,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9522,
+      "claim_id": 10422,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2860,7 +2860,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9523,
+      "claim_id": 10423,
       "chapter_id": 4,
       "value": 21.6,
       "unit": "percentage",
@@ -2869,7 +2869,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9524,
+      "claim_id": 10424,
       "chapter_id": 4,
       "value": 26.0,
       "unit": "percentage",
@@ -2878,7 +2878,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9525,
+      "claim_id": 10425,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -2887,7 +2887,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9526,
+      "claim_id": 10426,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2896,7 +2896,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9527,
+      "claim_id": 10427,
       "chapter_id": 4,
       "value": 53.0,
       "unit": "percentage",
@@ -2905,7 +2905,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9528,
+      "claim_id": 10428,
       "chapter_id": 4,
       "value": 20.0,
       "unit": "percentage",
@@ -2914,7 +2914,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9529,
+      "claim_id": 10429,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2923,7 +2923,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9534,
+      "claim_id": 10434,
       "chapter_id": 4,
       "value": 22.0,
       "unit": "percentage",
@@ -2932,7 +2932,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9535,
+      "claim_id": 10435,
       "chapter_id": 4,
       "value": 26.0,
       "unit": "percentage",
@@ -2941,7 +2941,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9536,
+      "claim_id": 10436,
       "chapter_id": 4,
       "value": 49.0,
       "unit": "percentage",
@@ -2950,7 +2950,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9537,
+      "claim_id": 10437,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2959,7 +2959,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9538,
+      "claim_id": 10438,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2968,7 +2968,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9539,
+      "claim_id": 10439,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -2977,7 +2977,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9540,
+      "claim_id": 10440,
       "chapter_id": 4,
       "value": 49.0,
       "unit": "percentage",
@@ -2986,7 +2986,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9541,
+      "claim_id": 10441,
       "chapter_id": 4,
       "value": 22.0,
       "unit": "percentage",
@@ -2995,7 +2995,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9542,
+      "claim_id": 10442,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3004,7 +3004,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9543,
+      "claim_id": 10443,
       "chapter_id": 4,
       "value": 64.5,
       "unit": "percentage",
@@ -3013,7 +3013,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9544,
+      "claim_id": 10444,
       "chapter_id": 4,
       "value": 17.4,
       "unit": "percentage",
@@ -3022,7 +3022,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9545,
+      "claim_id": 10445,
       "chapter_id": 4,
       "value": 13.4,
       "unit": "percentage",
@@ -3031,7 +3031,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9546,
+      "claim_id": 10446,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3040,7 +3040,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9547,
+      "claim_id": 10447,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -3049,7 +3049,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9548,
+      "claim_id": 10448,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3058,7 +3058,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9549,
+      "claim_id": 10449,
       "chapter_id": 4,
       "value": 90.8,
       "unit": "percentage",
@@ -3067,7 +3067,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9550,
+      "claim_id": 10450,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -3076,7 +3076,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9551,
+      "claim_id": 10451,
       "chapter_id": 4,
       "value": 90.9,
       "unit": "percentage",
@@ -3085,7 +3085,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9552,
+      "claim_id": 10452,
       "chapter_id": 4,
       "value": 94.0,
       "unit": "percentage",
@@ -3094,7 +3094,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9553,
+      "claim_id": 10453,
       "chapter_id": 4,
       "value": 92.3,
       "unit": "percentage",
@@ -3103,7 +3103,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9554,
+      "claim_id": 10454,
       "chapter_id": 4,
       "value": 91.0,
       "unit": "percentage",
@@ -3112,7 +3112,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9555,
+      "claim_id": 10455,
       "chapter_id": 4,
       "value": 100.0,
       "unit": "percentage",
@@ -3121,7 +3121,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9556,
+      "claim_id": 10456,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -3130,7 +3130,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9557,
+      "claim_id": 10457,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -3139,7 +3139,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9558,
+      "claim_id": 10458,
       "chapter_id": 4,
       "value": 100.0,
       "unit": "percentage",
@@ -3148,7 +3148,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9559,
+      "claim_id": 10459,
       "chapter_id": 4,
       "value": 17.0,
       "unit": "sample_size",
@@ -3157,7 +3157,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9560,
+      "claim_id": 10460,
       "chapter_id": 4,
       "value": 45.0,
       "unit": "sample_size",
@@ -3166,7 +3166,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9561,
+      "claim_id": 10461,
       "chapter_id": 4,
       "value": 45.0,
       "unit": "sample_size",
@@ -3175,7 +3175,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9562,
+      "claim_id": 10462,
       "chapter_id": 4,
       "value": 45.0,
       "unit": "sample_size",
@@ -3184,7 +3184,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9563,
+      "claim_id": 10463,
       "chapter_id": 4,
       "value": 52.1,
       "unit": "percentage",
@@ -3193,7 +3193,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9564,
+      "claim_id": 10464,
       "chapter_id": 4,
       "value": 71.9,
       "unit": "percentage",
@@ -3202,7 +3202,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9565,
+      "claim_id": 10465,
       "chapter_id": 4,
       "value": 81.5,
       "unit": "percentage",
@@ -3211,7 +3211,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9566,
+      "claim_id": 10466,
       "chapter_id": 4,
       "value": 90.8,
       "unit": "percentage",
@@ -3220,7 +3220,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9567,
+      "claim_id": 10467,
       "chapter_id": 4,
       "value": 95.6,
       "unit": "percentage",
@@ -3229,7 +3229,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9568,
+      "claim_id": 10468,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -3238,7 +3238,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9569,
+      "claim_id": 10469,
       "chapter_id": 4,
       "value": 70.0,
       "unit": "percentage",
@@ -3247,7 +3247,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9570,
+      "claim_id": 10470,
       "chapter_id": 4,
       "value": 80.0,
       "unit": "percentage",
@@ -3256,7 +3256,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9571,
+      "claim_id": 10471,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -3265,7 +3265,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9572,
+      "claim_id": 10472,
       "chapter_id": 4,
       "value": 95.0,
       "unit": "percentage",
@@ -3274,7 +3274,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9573,
+      "claim_id": 10473,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -3283,7 +3283,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9574,
+      "claim_id": 10474,
       "chapter_id": 4,
       "value": 2.9,
       "unit": "percentage",
@@ -3292,7 +3292,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9575,
+      "claim_id": 10475,
       "chapter_id": 4,
       "value": 3.1,
       "unit": "percentage",
@@ -3301,7 +3301,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9576,
+      "claim_id": 10476,
       "chapter_id": 4,
       "value": 17.0,
       "unit": "sample_size",
@@ -3310,7 +3310,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9577,
+      "claim_id": 10477,
       "chapter_id": 4,
       "value": 779.0,
       "unit": "sample_size",
@@ -3319,7 +3319,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9578,
+      "claim_id": 10478,
       "chapter_id": 4,
       "value": 2.9,
       "unit": "percentage",
@@ -3328,7 +3328,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9579,
+      "claim_id": 10479,
       "chapter_id": 4,
       "value": 3.1,
       "unit": "percentage",
@@ -3337,7 +3337,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9580,
+      "claim_id": 10480,
       "chapter_id": 4,
       "value": 779.0,
       "unit": "sample_size",
@@ -3346,7 +3346,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9581,
+      "claim_id": 10481,
       "chapter_id": 4,
       "value": 5.8,
       "unit": "percentage",
@@ -3355,7 +3355,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9582,
+      "claim_id": 10482,
       "chapter_id": 4,
       "value": 5.8,
       "unit": "percentage",
@@ -3364,7 +3364,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9583,
+      "claim_id": 10483,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3373,7 +3373,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9584,
+      "claim_id": 10484,
       "chapter_id": 4,
       "value": 22.0,
       "unit": "percentage",
@@ -3382,7 +3382,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9585,
+      "claim_id": 10485,
       "chapter_id": 4,
       "value": 26.0,
       "unit": "percentage",
@@ -3391,7 +3391,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9586,
+      "claim_id": 10486,
       "chapter_id": 4,
       "value": 49.0,
       "unit": "percentage",
@@ -3400,7 +3400,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9587,
+      "claim_id": 10487,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3409,7 +3409,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9588,
+      "claim_id": 10488,
       "chapter_id": 4,
       "value": 1.0,
       "unit": "percentage",
@@ -3418,7 +3418,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9589,
+      "claim_id": 10489,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3427,7 +3427,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9590,
+      "claim_id": 10490,
       "chapter_id": 4,
       "value": 5.8,
       "unit": "percentage",
@@ -3436,7 +3436,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9591,
+      "claim_id": 10491,
       "chapter_id": 4,
       "value": 5.6,
       "unit": "percentage",
@@ -3445,7 +3445,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9592,
+      "claim_id": 10492,
       "chapter_id": 4,
       "value": 96.0,
       "unit": "percentage",
@@ -3454,7 +3454,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9593,
+      "claim_id": 10493,
       "chapter_id": 4,
       "value": 64.5,
       "unit": "percentage",
@@ -3463,7 +3463,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9594,
+      "claim_id": 10494,
       "chapter_id": 4,
       "value": 17.7,
       "unit": "percentage",
@@ -3472,7 +3472,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9595,
+      "claim_id": 10495,
       "chapter_id": 4,
       "value": 7.6,
       "unit": "percentage",
@@ -3481,7 +3481,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9596,
+      "claim_id": 10496,
       "chapter_id": 4,
       "value": 100.0,
       "unit": "percentage",
@@ -3490,7 +3490,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9597,
+      "claim_id": 10497,
       "chapter_id": 4,
       "value": 17.0,
       "unit": "sample_size",
@@ -3499,7 +3499,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9598,
+      "claim_id": 10498,
       "chapter_id": 4,
       "value": 17.0,
       "unit": "sample_size",
@@ -3508,7 +3508,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9599,
+      "claim_id": 10499,
       "chapter_id": 4,
       "value": 50.0,
       "unit": "percentage",
@@ -3517,7 +3517,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9600,
+      "claim_id": 10500,
       "chapter_id": 4,
       "value": 17.0,
       "unit": "sample_size",
@@ -3526,7 +3526,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9601,
+      "claim_id": 10501,
       "chapter_id": 4,
       "value": 5.1,
       "unit": "percentage",
@@ -3535,7 +3535,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9602,
+      "claim_id": 10502,
       "chapter_id": 4,
       "value": 39.6,
       "unit": "percentage",
@@ -3544,7 +3544,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9603,
+      "claim_id": 10503,
       "chapter_id": 4,
       "value": 22.0,
       "unit": "percentage",
@@ -3553,7 +3553,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9604,
+      "claim_id": 10504,
       "chapter_id": 4,
       "value": 26.0,
       "unit": "percentage",
@@ -3562,7 +3562,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9605,
+      "claim_id": 10505,
       "chapter_id": 4,
       "value": 49.0,
       "unit": "percentage",
@@ -3571,7 +3571,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9606,
+      "claim_id": 10506,
       "chapter_id": 4,
       "value": 10.0,
       "unit": "percentage",
@@ -3580,7 +3580,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9607,
+      "claim_id": 10507,
       "chapter_id": 4,
       "value": 5.8,
       "unit": "percentage",
@@ -3589,7 +3589,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9608,
+      "claim_id": 10508,
       "chapter_id": 4,
       "value": 5.6,
       "unit": "percentage",
@@ -3598,7 +3598,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9609,
+      "claim_id": 10509,
       "chapter_id": 4,
       "value": 90.0,
       "unit": "percentage",
@@ -3607,7 +3607,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9610,
+      "claim_id": 10510,
       "chapter_id": 5,
       "value": 39.1,
       "unit": "percentage",
@@ -3616,7 +3616,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9611,
+      "claim_id": 10511,
       "chapter_id": 5,
       "value": 30.0,
       "unit": "percentage",
@@ -3625,7 +3625,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9612,
+      "claim_id": 10512,
       "chapter_id": 5,
       "value": 51.0,
       "unit": "percentage",
@@ -3634,7 +3634,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9613,
+      "claim_id": 10513,
       "chapter_id": 5,
       "value": 50.0,
       "unit": "percentage",
@@ -3643,7 +3643,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9614,
+      "claim_id": 10514,
       "chapter_id": 5,
       "value": 16699.0,
       "unit": "large_count",
@@ -3652,7 +3652,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9615,
+      "claim_id": 10515,
       "chapter_id": 5,
       "value": 60.9,
       "unit": "percentage",
@@ -3661,7 +3661,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9616,
+      "claim_id": 10516,
       "chapter_id": 5,
       "value": 39.1,
       "unit": "percentage",
@@ -3670,7 +3670,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9617,
+      "claim_id": 10517,
       "chapter_id": 5,
       "value": 2892.0,
       "unit": "large_count",
@@ -3679,7 +3679,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9618,
+      "claim_id": 10518,
       "chapter_id": 5,
       "value": 48.5,
       "unit": "percentage",
@@ -3688,7 +3688,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9619,
+      "claim_id": 10519,
       "chapter_id": 5,
       "value": 60.9,
       "unit": "percentage",
@@ -3697,7 +3697,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9620,
+      "claim_id": 10520,
       "chapter_id": 5,
       "value": 39.1,
       "unit": "percentage",
@@ -3706,7 +3706,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9621,
+      "claim_id": 10521,
       "chapter_id": 5,
       "value": 2892.0,
       "unit": "large_count",
@@ -3715,7 +3715,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9622,
+      "claim_id": 10522,
       "chapter_id": 5,
       "value": 95.0,
       "unit": "percentage",
@@ -3724,7 +3724,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9623,
+      "claim_id": 10523,
       "chapter_id": 5,
       "value": 1900.0,
       "unit": "large_count",
@@ -3733,7 +3733,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9624,
+      "claim_id": 10524,
       "chapter_id": 5,
       "value": 39.1,
       "unit": "percentage",
@@ -3742,7 +3742,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9625,
+      "claim_id": 10525,
       "chapter_id": 5,
       "value": 3.2,
       "unit": "percentage",
@@ -3751,7 +3751,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9626,
+      "claim_id": 10526,
       "chapter_id": 5,
       "value": 38.8,
       "unit": "percentage",
@@ -3760,7 +3760,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9627,
+      "claim_id": 10527,
       "chapter_id": 5,
       "value": 80.1,
       "unit": "percentage",
@@ -3769,7 +3769,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9628,
+      "claim_id": 10528,
       "chapter_id": 5,
       "value": 90.5,
       "unit": "percentage",
@@ -3778,7 +3778,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9629,
+      "claim_id": 10529,
       "chapter_id": 5,
       "value": 60.9,
       "unit": "percentage",
@@ -3787,7 +3787,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9630,
+      "claim_id": 10530,
       "chapter_id": 5,
       "value": 39.1,
       "unit": "percentage",
@@ -3796,7 +3796,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9631,
+      "claim_id": 10531,
       "chapter_id": 5,
       "value": 95.0,
       "unit": "percentage",
@@ -3805,7 +3805,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9632,
+      "claim_id": 10532,
       "chapter_id": 5,
       "value": 95.0,
       "unit": "percentage",
@@ -3814,7 +3814,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9633,
+      "claim_id": 10533,
       "chapter_id": 5,
       "value": 95.0,
       "unit": "percentage",
@@ -3823,7 +3823,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9634,
+      "claim_id": 10534,
       "chapter_id": 5,
       "value": 40.0,
       "unit": "percentage",
@@ -3832,7 +3832,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9635,
+      "claim_id": 10535,
       "chapter_id": 5,
       "value": 0.9,
       "unit": "percentage",
@@ -3841,7 +3841,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9636,
+      "claim_id": 10536,
       "chapter_id": 5,
       "value": 30.0,
       "unit": "percentage",
@@ -3850,7 +3850,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9637,
+      "claim_id": 10537,
       "chapter_id": 5,
       "value": 51.0,
       "unit": "percentage",
@@ -3859,7 +3859,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9638,
+      "claim_id": 10538,
       "chapter_id": 5,
       "value": 52.0,
       "unit": "percentage",
@@ -3868,7 +3868,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9639,
+      "claim_id": 10539,
       "chapter_id": 5,
       "value": 94.0,
       "unit": "percentage",
@@ -3877,7 +3877,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9640,
+      "claim_id": 10540,
       "chapter_id": 5,
       "value": 52.0,
       "unit": "percentage",
@@ -3886,7 +3886,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9641,
+      "claim_id": 10541,
       "chapter_id": 5,
       "value": 80.1,
       "unit": "percentage",
@@ -3895,7 +3895,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9642,
+      "claim_id": 10542,
       "chapter_id": 5,
       "value": 39.0,
       "unit": "percentage",
@@ -3904,7 +3904,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9643,
+      "claim_id": 10543,
       "chapter_id": 5,
       "value": 91.0,
       "unit": "percentage",
@@ -3913,7 +3913,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9644,
+      "claim_id": 10544,
       "chapter_id": 5,
       "value": 30.0,
       "unit": "percentage",
@@ -3922,7 +3922,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9645,
+      "claim_id": 10545,
       "chapter_id": 5,
       "value": 51.0,
       "unit": "percentage",
@@ -3931,7 +3931,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9646,
+      "claim_id": 10546,
       "chapter_id": 5,
       "value": 4.8,
       "unit": "percentage",
@@ -3940,7 +3940,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9647,
+      "claim_id": 10547,
       "chapter_id": 5,
       "value": 39.1,
       "unit": "percentage",
@@ -3949,7 +3949,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9648,
+      "claim_id": 10548,
       "chapter_id": 5,
       "value": 30.0,
       "unit": "percentage",
@@ -3958,7 +3958,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9649,
+      "claim_id": 10549,
       "chapter_id": 6,
       "value": 91.3,
       "unit": "percentage",
@@ -3967,7 +3967,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9650,
+      "claim_id": 10550,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -3976,7 +3976,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9651,
+      "claim_id": 10551,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -3985,7 +3985,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9652,
+      "claim_id": 10552,
       "chapter_id": 6,
       "value": 81.5,
       "unit": "percentage",
@@ -3994,7 +3994,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9653,
+      "claim_id": 10553,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4003,7 +4003,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9654,
+      "claim_id": 10554,
       "chapter_id": 6,
       "value": 74.5,
       "unit": "percentage",
@@ -4012,7 +4012,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9655,
+      "claim_id": 10555,
       "chapter_id": 6,
       "value": 30.0,
       "unit": "percentage",
@@ -4021,7 +4021,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9656,
+      "claim_id": 10556,
       "chapter_id": 6,
       "value": 30.0,
       "unit": "percentage",
@@ -4030,7 +4030,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9657,
+      "claim_id": 10557,
       "chapter_id": 6,
       "value": 39.1,
       "unit": "percentage",
@@ -4039,7 +4039,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9658,
+      "claim_id": 10558,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4048,7 +4048,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9659,
+      "claim_id": 10559,
       "chapter_id": 6,
       "value": 80.0,
       "unit": "percentage",
@@ -4057,7 +4057,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9660,
+      "claim_id": 10560,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4066,7 +4066,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9661,
+      "claim_id": 10561,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4075,7 +4075,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9662,
+      "claim_id": 10562,
       "chapter_id": 6,
       "value": 80.0,
       "unit": "percentage",
@@ -4084,7 +4084,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9663,
+      "claim_id": 10563,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4093,7 +4093,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9664,
+      "claim_id": 10564,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4102,7 +4102,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9665,
+      "claim_id": 10565,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4111,7 +4111,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9666,
+      "claim_id": 10566,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4120,7 +4120,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9667,
+      "claim_id": 10567,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4129,7 +4129,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9668,
+      "claim_id": 10568,
       "chapter_id": 6,
       "value": 91.1,
       "unit": "percentage",
@@ -4138,7 +4138,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9669,
+      "claim_id": 10569,
       "chapter_id": 6,
       "value": 91.4,
       "unit": "percentage",
@@ -4147,7 +4147,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9670,
+      "claim_id": 10570,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4156,7 +4156,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9671,
+      "claim_id": 10571,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4165,7 +4165,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9672,
+      "claim_id": 10572,
       "chapter_id": 6,
       "value": 82.0,
       "unit": "percentage",
@@ -4174,7 +4174,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9673,
+      "claim_id": 10573,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4183,7 +4183,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9674,
+      "claim_id": 10574,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4192,7 +4192,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9675,
+      "claim_id": 10575,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4201,7 +4201,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9676,
+      "claim_id": 10576,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4210,7 +4210,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9677,
+      "claim_id": 10577,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4219,7 +4219,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9678,
+      "claim_id": 10578,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4228,7 +4228,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9679,
+      "claim_id": 10579,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4237,7 +4237,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9680,
+      "claim_id": 10580,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4246,7 +4246,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9681,
+      "claim_id": 10581,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4255,7 +4255,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9682,
+      "claim_id": 10582,
       "chapter_id": 6,
       "value": 82.0,
       "unit": "percentage",
@@ -4264,7 +4264,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9683,
+      "claim_id": 10583,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4273,7 +4273,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9684,
+      "claim_id": 10584,
       "chapter_id": 6,
       "value": 91.3,
       "unit": "percentage",
@@ -4282,7 +4282,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9685,
+      "claim_id": 10585,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4291,7 +4291,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9686,
+      "claim_id": 10586,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4300,7 +4300,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9687,
+      "claim_id": 10587,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4309,7 +4309,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9688,
+      "claim_id": 10588,
       "chapter_id": 6,
       "value": 90.1,
       "unit": "percentage",
@@ -4318,7 +4318,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9689,
+      "claim_id": 10589,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4327,7 +4327,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9690,
+      "claim_id": 10590,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4336,7 +4336,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9691,
+      "claim_id": 10591,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4345,7 +4345,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9692,
+      "claim_id": 10592,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4354,7 +4354,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9693,
+      "claim_id": 10593,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4363,7 +4363,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9694,
+      "claim_id": 10594,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4372,7 +4372,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9695,
+      "claim_id": 10595,
       "chapter_id": 6,
       "value": 85.4,
       "unit": "percentage",
@@ -4381,7 +4381,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9696,
+      "claim_id": 10596,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4390,7 +4390,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9697,
+      "claim_id": 10597,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4399,7 +4399,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9698,
+      "claim_id": 10598,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4408,7 +4408,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9699,
+      "claim_id": 10599,
       "chapter_id": 6,
       "value": 39.1,
       "unit": "percentage",
@@ -4417,7 +4417,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9700,
+      "claim_id": 10600,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4426,7 +4426,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9701,
+      "claim_id": 10601,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4435,7 +4435,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9702,
+      "claim_id": 10602,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4444,7 +4444,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9703,
+      "claim_id": 10603,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4453,7 +4453,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9704,
+      "claim_id": 10604,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4462,7 +4462,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9705,
+      "claim_id": 10605,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4471,7 +4471,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9706,
+      "claim_id": 10606,
       "chapter_id": 6,
       "value": 91.1,
       "unit": "percentage",
@@ -4480,7 +4480,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9707,
+      "claim_id": 10607,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4489,7 +4489,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9708,
+      "claim_id": 10608,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4498,7 +4498,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9709,
+      "claim_id": 10609,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4507,7 +4507,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9710,
+      "claim_id": 10610,
       "chapter_id": 6,
       "value": 0.1,
       "unit": "ci_bracket",
@@ -4516,7 +4516,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9711,
+      "claim_id": 10611,
       "chapter_id": 6,
       "value": 0.35,
       "unit": "ci_bracket",
@@ -4525,7 +4525,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9712,
+      "claim_id": 10612,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4534,7 +4534,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9713,
+      "claim_id": 10613,
       "chapter_id": 6,
       "value": 82.0,
       "unit": "percentage",
@@ -4543,7 +4543,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9714,
+      "claim_id": 10614,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4552,7 +4552,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9715,
+      "claim_id": 10615,
       "chapter_id": 6,
       "value": 81.5,
       "unit": "percentage",
@@ -4561,7 +4561,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9716,
+      "claim_id": 10616,
       "chapter_id": 6,
       "value": 74.5,
       "unit": "percentage",
@@ -4570,7 +4570,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9717,
+      "claim_id": 10617,
       "chapter_id": 6,
       "value": 39.1,
       "unit": "percentage",
@@ -4579,7 +4579,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9718,
+      "claim_id": 10618,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4588,7 +4588,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9719,
+      "claim_id": 10619,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4597,7 +4597,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9720,
+      "claim_id": 10620,
       "chapter_id": 6,
       "value": 82.0,
       "unit": "percentage",
@@ -4606,7 +4606,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9721,
+      "claim_id": 10621,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4615,7 +4615,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9722,
+      "claim_id": 10622,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4624,7 +4624,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9723,
+      "claim_id": 10623,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4633,7 +4633,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9724,
+      "claim_id": 10624,
       "chapter_id": 6,
       "value": 74.5,
       "unit": "percentage",
@@ -4642,7 +4642,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9725,
+      "claim_id": 10625,
       "chapter_id": 6,
       "value": 90.0,
       "unit": "percentage",
@@ -4651,7 +4651,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9726,
+      "claim_id": 10626,
       "chapter_id": 6,
       "value": 95.0,
       "unit": "percentage",
@@ -4660,7 +4660,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9727,
+      "claim_id": 10627,
       "chapter_id": 7,
       "value": 80.0,
       "unit": "percentage",
@@ -4669,7 +4669,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9728,
+      "claim_id": 10628,
       "chapter_id": 7,
       "value": 9.3,
       "unit": "percentage",
@@ -4678,7 +4678,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9729,
+      "claim_id": 10629,
       "chapter_id": 7,
       "value": 9.0,
       "unit": "percentage",
@@ -4687,7 +4687,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9730,
+      "claim_id": 10630,
       "chapter_id": 7,
       "value": 3.0,
       "unit": "percentage",
@@ -4696,7 +4696,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9731,
+      "claim_id": 10631,
       "chapter_id": 7,
       "value": 15.0,
       "unit": "percentage",
@@ -4705,7 +4705,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9732,
+      "claim_id": 10632,
       "chapter_id": 7,
       "value": 40.0,
       "unit": "percentage",
@@ -4714,7 +4714,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9733,
+      "claim_id": 10633,
       "chapter_id": 7,
       "value": 20.0,
       "unit": "percentage",
@@ -4723,7 +4723,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9734,
+      "claim_id": 10634,
       "chapter_id": 7,
       "value": 60.0,
       "unit": "percentage",
@@ -4732,7 +4732,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9735,
+      "claim_id": 10635,
       "chapter_id": 7,
       "value": 20.0,
       "unit": "percentage",
@@ -4741,7 +4741,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9736,
+      "claim_id": 10636,
       "chapter_id": 7,
       "value": 80.0,
       "unit": "percentage",
@@ -4750,7 +4750,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9737,
+      "claim_id": 10637,
       "chapter_id": 7,
       "value": 20.0,
       "unit": "percentage",
@@ -4759,7 +4759,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9738,
+      "claim_id": 10638,
       "chapter_id": 7,
       "value": 50.0,
       "unit": "percentage",
@@ -4768,7 +4768,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9739,
+      "claim_id": 10639,
       "chapter_id": 7,
       "value": 50.0,
       "unit": "percentage",
@@ -4777,7 +4777,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9740,
+      "claim_id": 10640,
       "chapter_id": 7,
       "value": 15.0,
       "unit": "percentage",
@@ -4786,7 +4786,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9741,
+      "claim_id": 10641,
       "chapter_id": 7,
       "value": 0.001,
       "unit": "p_value",
@@ -4795,7 +4795,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9742,
+      "claim_id": 10642,
       "chapter_id": 7,
       "value": 0.001,
       "unit": "p_value",
@@ -4804,7 +4804,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9743,
+      "claim_id": 10643,
       "chapter_id": 7,
       "value": 10.0,
       "unit": "percentage",
@@ -4813,7 +4813,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9744,
+      "claim_id": 10644,
       "chapter_id": 7,
       "value": 30.0,
       "unit": "percentage",
@@ -4822,7 +4822,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9745,
+      "claim_id": 10645,
       "chapter_id": 7,
       "value": 30.0,
       "unit": "percentage",
@@ -4831,7 +4831,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9746,
+      "claim_id": 10646,
       "chapter_id": 7,
       "value": 7.0,
       "unit": "percentage",
@@ -4840,7 +4840,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9747,
+      "claim_id": 10647,
       "chapter_id": 7,
       "value": 24.4,
       "unit": "percentage",
@@ -4849,7 +4849,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9748,
+      "claim_id": 10648,
       "chapter_id": 7,
       "value": 21.6,
       "unit": "percentage",
@@ -4858,7 +4858,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9749,
+      "claim_id": 10649,
       "chapter_id": 7,
       "value": 43.8,
       "unit": "percentage",
@@ -4867,7 +4867,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9750,
+      "claim_id": 10650,
       "chapter_id": 7,
       "value": 31.2,
       "unit": "percentage",
@@ -4876,7 +4876,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9751,
+      "claim_id": 10651,
       "chapter_id": 7,
       "value": 18.8,
       "unit": "percentage",
@@ -4885,7 +4885,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9752,
+      "claim_id": 10652,
       "chapter_id": 7,
       "value": 37.5,
       "unit": "percentage",
@@ -4894,7 +4894,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9753,
+      "claim_id": 10653,
       "chapter_id": 7,
       "value": 0.001,
       "unit": "p_value",
@@ -4903,7 +4903,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9754,
+      "claim_id": 10654,
       "chapter_id": 7,
       "value": 18.8,
       "unit": "percentage",
@@ -4912,7 +4912,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9755,
+      "claim_id": 10655,
       "chapter_id": 7,
       "value": 43.8,
       "unit": "percentage",
@@ -4921,7 +4921,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9756,
+      "claim_id": 10656,
       "chapter_id": 7,
       "value": 80.0,
       "unit": "percentage",
@@ -4930,7 +4930,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9757,
+      "claim_id": 10657,
       "chapter_id": 7,
       "value": 20.0,
       "unit": "percentage",
@@ -4939,7 +4939,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9758,
+      "claim_id": 10658,
       "chapter_id": 7,
       "value": 3.0,
       "unit": "percentage",
@@ -4948,7 +4948,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9759,
+      "claim_id": 10659,
       "chapter_id": 7,
       "value": 0.001,
       "unit": "p_value",
@@ -4957,7 +4957,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9760,
+      "claim_id": 10660,
       "chapter_id": 7,
       "value": 15.0,
       "unit": "percentage",
@@ -4966,7 +4966,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9761,
+      "claim_id": 10661,
       "chapter_id": 7,
       "value": 8.0,
       "unit": "percentage",
@@ -4975,7 +4975,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9762,
+      "claim_id": 10662,
       "chapter_id": 7,
       "value": 9.3,
       "unit": "percentage",
@@ -4984,7 +4984,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9763,
+      "claim_id": 10663,
       "chapter_id": 7,
       "value": 4.3,
       "unit": "percentage",
@@ -4993,7 +4993,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9764,
+      "claim_id": 10664,
       "chapter_id": 7,
       "value": 4.8,
       "unit": "percentage",
@@ -5002,7 +5002,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9765,
+      "claim_id": 10665,
       "chapter_id": 7,
       "value": 80.0,
       "unit": "percentage",
@@ -5011,7 +5011,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9766,
+      "claim_id": 10666,
       "chapter_id": 7,
       "value": 30.0,
       "unit": "percentage",
@@ -5020,7 +5020,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9767,
+      "claim_id": 10667,
       "chapter_id": 7,
       "value": 9.3,
       "unit": "percentage",
@@ -5029,7 +5029,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9768,
+      "claim_id": 10668,
       "chapter_id": 7,
       "value": 9.0,
       "unit": "percentage",
@@ -5038,7 +5038,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9769,
+      "claim_id": 10669,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5047,7 +5047,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9770,
+      "claim_id": 10670,
       "chapter_id": 8,
       "value": 100.0,
       "unit": "percentage",
@@ -5056,7 +5056,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9771,
+      "claim_id": 10671,
       "chapter_id": 8,
       "value": 22.0,
       "unit": "percentage",
@@ -5065,7 +5065,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9772,
+      "claim_id": 10672,
       "chapter_id": 8,
       "value": 3.0,
       "unit": "percentage",
@@ -5074,7 +5074,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9773,
+      "claim_id": 10673,
       "chapter_id": 8,
       "value": 39.1,
       "unit": "percentage",
@@ -5083,7 +5083,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9774,
+      "claim_id": 10674,
       "chapter_id": 8,
       "value": 16699.0,
       "unit": "large_count",
@@ -5092,7 +5092,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9775,
+      "claim_id": 10675,
       "chapter_id": 8,
       "value": 1900.0,
       "unit": "large_count",
@@ -5101,7 +5101,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9776,
+      "claim_id": 10676,
       "chapter_id": 8,
       "value": 0.3,
       "unit": "beta_coef",
@@ -5110,7 +5110,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9777,
+      "claim_id": 10677,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5119,7 +5119,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9778,
+      "claim_id": 10678,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5128,7 +5128,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9779,
+      "claim_id": 10679,
       "chapter_id": 8,
       "value": 8.6,
       "unit": "percentage",
@@ -5137,7 +5137,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9780,
+      "claim_id": 10680,
       "chapter_id": 8,
       "value": 26.7,
       "unit": "percentage",
@@ -5146,7 +5146,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9781,
+      "claim_id": 10681,
       "chapter_id": 8,
       "value": 62.5,
       "unit": "percentage",
@@ -5155,7 +5155,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9782,
+      "claim_id": 10682,
       "chapter_id": 8,
       "value": 2.2,
       "unit": "percentage",
@@ -5164,7 +5164,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9783,
+      "claim_id": 10683,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5173,7 +5173,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9784,
+      "claim_id": 10684,
       "chapter_id": 8,
       "value": 94.7,
       "unit": "percentage",
@@ -5182,7 +5182,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9785,
+      "claim_id": 10685,
       "chapter_id": 8,
       "value": 99.8,
       "unit": "percentage",
@@ -5191,7 +5191,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9786,
+      "claim_id": 10686,
       "chapter_id": 8,
       "value": 60.8,
       "unit": "percentage",
@@ -5200,7 +5200,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9787,
+      "claim_id": 10687,
       "chapter_id": 8,
       "value": 93.9,
       "unit": "percentage",
@@ -5209,7 +5209,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9788,
+      "claim_id": 10688,
       "chapter_id": 8,
       "value": 98.7,
       "unit": "percentage",
@@ -5218,7 +5218,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9789,
+      "claim_id": 10689,
       "chapter_id": 8,
       "value": 100.0,
       "unit": "percentage",
@@ -5227,7 +5227,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9790,
+      "claim_id": 10690,
       "chapter_id": 8,
       "value": 50.0,
       "unit": "percentage",
@@ -5236,7 +5236,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9791,
+      "claim_id": 10691,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5245,7 +5245,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9792,
+      "claim_id": 10692,
       "chapter_id": 8,
       "value": 0.914,
       "unit": "ci_bracket",
@@ -5254,7 +5254,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9793,
+      "claim_id": 10693,
       "chapter_id": 8,
       "value": 0.0,
       "unit": "ci_bracket",
@@ -5263,7 +5263,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9794,
+      "claim_id": 10694,
       "chapter_id": 8,
       "value": 0.044,
       "unit": "p_value",
@@ -5272,7 +5272,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9795,
+      "claim_id": 10695,
       "chapter_id": 8,
       "value": 56.1,
       "unit": "percentage",
@@ -5281,7 +5281,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9796,
+      "claim_id": 10696,
       "chapter_id": 8,
       "value": 95.0,
       "unit": "percentage",
@@ -5290,7 +5290,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9797,
+      "claim_id": 10697,
       "chapter_id": 8,
       "value": 241.0,
       "unit": "sample_size",
@@ -5299,7 +5299,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9798,
+      "claim_id": 10698,
       "chapter_id": 8,
       "value": 3.3,
       "unit": "percentage",
@@ -5308,7 +5308,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9799,
+      "claim_id": 10699,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5317,7 +5317,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9800,
+      "claim_id": 10700,
       "chapter_id": 8,
       "value": 95.0,
       "unit": "percentage",
@@ -5326,7 +5326,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9801,
+      "claim_id": 10701,
       "chapter_id": 8,
       "value": 100.0,
       "unit": "percentage",
@@ -5335,7 +5335,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9802,
+      "claim_id": 10702,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5344,7 +5344,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9803,
+      "claim_id": 10703,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5353,7 +5353,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9804,
+      "claim_id": 10704,
       "chapter_id": 8,
       "value": 60.8,
       "unit": "percentage",
@@ -5362,7 +5362,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9805,
+      "claim_id": 10705,
       "chapter_id": 8,
       "value": 90.0,
       "unit": "percentage",
@@ -5371,7 +5371,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9806,
+      "claim_id": 10706,
       "chapter_id": 8,
       "value": 98.7,
       "unit": "percentage",
@@ -5380,7 +5380,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9807,
+      "claim_id": 10707,
       "chapter_id": 9,
       "value": 5.0,
       "unit": "percentage",
@@ -5389,7 +5389,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9808,
+      "claim_id": 10708,
       "chapter_id": 9,
       "value": 91.1,
       "unit": "percentage",
@@ -5398,7 +5398,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9809,
+      "claim_id": 10709,
       "chapter_id": 9,
       "value": 0.05,
       "unit": "ci_bracket",
@@ -5407,7 +5407,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9810,
+      "claim_id": 10710,
       "chapter_id": 9,
       "value": 3.29,
       "unit": "percentage",
@@ -5416,7 +5416,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9811,
+      "claim_id": 10711,
       "chapter_id": 9,
       "value": 12.0,
       "unit": "percentage",
@@ -5425,7 +5425,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9812,
+      "claim_id": 10712,
       "chapter_id": 9,
       "value": 5.0,
       "unit": "percentage",
@@ -5434,7 +5434,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9813,
+      "claim_id": 10713,
       "chapter_id": 9,
       "value": 3.3,
       "unit": "percentage",
@@ -5443,7 +5443,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9814,
+      "claim_id": 10714,
       "chapter_id": 9,
       "value": 5.0,
       "unit": "percentage",
@@ -5452,7 +5452,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9815,
+      "claim_id": 10715,
       "chapter_id": 9,
       "value": 20.0,
       "unit": "percentage",
@@ -5461,7 +5461,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9816,
+      "claim_id": 10716,
       "chapter_id": 9,
       "value": 20.0,
       "unit": "percentage",
@@ -5470,7 +5470,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9817,
+      "claim_id": 10717,
       "chapter_id": 9,
       "value": 50.0,
       "unit": "percentage",
@@ -5479,7 +5479,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9818,
+      "claim_id": 10718,
       "chapter_id": 9,
       "value": 50.0,
       "unit": "percentage",
@@ -5488,7 +5488,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9819,
+      "claim_id": 10719,
       "chapter_id": 9,
       "value": 96.0,
       "unit": "percentage",
@@ -5497,7 +5497,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9820,
+      "claim_id": 10720,
       "chapter_id": 9,
       "value": 29.0,
       "unit": "percentage",
@@ -5506,7 +5506,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9821,
+      "claim_id": 10721,
       "chapter_id": 9,
       "value": 49.0,
       "unit": "percentage",
@@ -5515,7 +5515,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9822,
+      "claim_id": 10722,
       "chapter_id": 9,
       "value": 106.0,
       "unit": "sample_size",
@@ -5524,7 +5524,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9823,
+      "claim_id": 10723,
       "chapter_id": 9,
       "value": 96.0,
       "unit": "percentage",
@@ -5533,7 +5533,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9824,
+      "claim_id": 10724,
       "chapter_id": 9,
       "value": 100.0,
       "unit": "percentage",
@@ -5542,7 +5542,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9825,
+      "claim_id": 10725,
       "chapter_id": 9,
       "value": 2.3,
       "unit": "percentage",
@@ -5551,7 +5551,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9826,
+      "claim_id": 10726,
       "chapter_id": 9,
       "value": 4.8,
       "unit": "percentage",
@@ -5560,7 +5560,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9827,
+      "claim_id": 10727,
       "chapter_id": 9,
       "value": 24.3,
       "unit": "percentage",
@@ -5569,7 +5569,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9828,
+      "claim_id": 10728,
       "chapter_id": 9,
       "value": 90.0,
       "unit": "percentage",
@@ -5578,7 +5578,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9829,
+      "claim_id": 10729,
       "chapter_id": 9,
       "value": 2.3,
       "unit": "percentage",
@@ -5587,7 +5587,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9830,
+      "claim_id": 10730,
       "chapter_id": 9,
       "value": 4.8,
       "unit": "percentage",
@@ -5596,7 +5596,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9831,
+      "claim_id": 10731,
       "chapter_id": 9,
       "value": 24.3,
       "unit": "percentage",
@@ -5605,7 +5605,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9832,
+      "claim_id": 10732,
       "chapter_id": 9,
       "value": 90.0,
       "unit": "percentage",
@@ -5614,7 +5614,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9833,
+      "claim_id": 10733,
       "chapter_id": 9,
       "value": 29.0,
       "unit": "percentage",
@@ -5623,7 +5623,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9834,
+      "claim_id": 10734,
       "chapter_id": 9,
       "value": 49.0,
       "unit": "percentage",
@@ -5632,7 +5632,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9835,
+      "claim_id": 10735,
       "chapter_id": 9,
       "value": 100.0,
       "unit": "percentage",
@@ -5641,7 +5641,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9836,
+      "claim_id": 10736,
       "chapter_id": 9,
       "value": 5.0,
       "unit": "percentage",
@@ -5650,7 +5650,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9837,
+      "claim_id": 10737,
       "chapter_id": 9,
       "value": 99.5,
       "unit": "percentage",
@@ -5659,7 +5659,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9838,
+      "claim_id": 10738,
       "chapter_id": 9,
       "value": 95.0,
       "unit": "percentage",
@@ -5668,7 +5668,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9839,
+      "claim_id": 10739,
       "chapter_id": 9,
       "value": 50.0,
       "unit": "percentage",
@@ -5677,7 +5677,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9840,
+      "claim_id": 10740,
       "chapter_id": 9,
       "value": 110.0,
       "unit": "sample_size",
@@ -5686,7 +5686,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9841,
+      "claim_id": 10741,
       "chapter_id": 9,
       "value": 50.0,
       "unit": "percentage",
@@ -5695,7 +5695,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9842,
+      "claim_id": 10742,
       "chapter_id": 9,
       "value": 110.0,
       "unit": "sample_size",
@@ -5704,7 +5704,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9843,
+      "claim_id": 10743,
       "chapter_id": 9,
       "value": 5.3,
       "unit": "percentage",
@@ -5713,7 +5713,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9844,
+      "claim_id": 10744,
       "chapter_id": 9,
       "value": 17.6,
       "unit": "percentage",
@@ -5722,7 +5722,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9845,
+      "claim_id": 10745,
       "chapter_id": 9,
       "value": 53.8,
       "unit": "percentage",
@@ -5731,7 +5731,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9846,
+      "claim_id": 10746,
       "chapter_id": 9,
       "value": 17.6,
       "unit": "percentage",
@@ -5740,7 +5740,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9847,
+      "claim_id": 10747,
       "chapter_id": 9,
       "value": 30.0,
       "unit": "percentage",
@@ -5749,7 +5749,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9848,
+      "claim_id": 10748,
       "chapter_id": 9,
       "value": 105.0,
       "unit": "sample_size",
@@ -5758,7 +5758,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9849,
+      "claim_id": 10749,
       "chapter_id": 9,
       "value": 3.29,
       "unit": "percentage",
@@ -5767,7 +5767,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9850,
+      "claim_id": 10750,
       "chapter_id": 9,
       "value": 5.0,
       "unit": "percentage",
@@ -5776,7 +5776,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9851,
+      "claim_id": 10751,
       "chapter_id": 9,
       "value": 29.0,
       "unit": "percentage",
@@ -5785,7 +5785,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9852,
+      "claim_id": 10752,
       "chapter_id": 9,
       "value": 49.0,
       "unit": "percentage",
@@ -5794,7 +5794,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9853,
+      "claim_id": 10753,
       "chapter_id": 9,
       "value": 5.0,
       "unit": "percentage",
@@ -5803,7 +5803,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9854,
+      "claim_id": 10754,
       "chapter_id": 9,
       "value": 99.5,
       "unit": "percentage",
@@ -5812,7 +5812,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9855,
+      "claim_id": 10755,
       "chapter_id": 10,
       "value": 5668.0,
       "unit": "delta_aic",
@@ -5821,7 +5821,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9856,
+      "claim_id": 10756,
       "chapter_id": 10,
       "value": 15.0,
       "unit": "percentage",
@@ -5830,7 +5830,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9857,
+      "claim_id": 10757,
       "chapter_id": 10,
       "value": 200.0,
       "unit": "sample_size",
@@ -5839,7 +5839,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9858,
+      "claim_id": 10758,
       "chapter_id": 10,
       "value": 95.0,
       "unit": "percentage",
@@ -5848,7 +5848,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9859,
+      "claim_id": 10759,
       "chapter_id": 10,
       "value": 51.6,
       "unit": "percentage",
@@ -5857,7 +5857,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9860,
+      "claim_id": 10760,
       "chapter_id": 10,
       "value": 83.9,
       "unit": "percentage",
@@ -5866,7 +5866,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9862,
+      "claim_id": 10762,
       "chapter_id": 10,
       "value": 3.0,
       "unit": "percentage",
@@ -5875,7 +5875,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9863,
+      "claim_id": 10763,
       "chapter_id": 10,
       "value": 0.01,
       "unit": "beta_coef",
@@ -5884,7 +5884,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9864,
+      "claim_id": 10764,
       "chapter_id": 10,
       "value": 228.0,
       "unit": "percentage",
@@ -5893,7 +5893,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9865,
+      "claim_id": 10765,
       "chapter_id": 10,
       "value": 4.1,
       "unit": "percentage",
@@ -5902,7 +5902,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9866,
+      "claim_id": 10766,
       "chapter_id": 10,
       "value": 22.8,
       "unit": "percentage",
@@ -5911,7 +5911,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9867,
+      "claim_id": 10767,
       "chapter_id": 10,
       "value": 38.5,
       "unit": "percentage",
@@ -5920,7 +5920,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9868,
+      "claim_id": 10768,
       "chapter_id": 10,
       "value": 6.2,
       "unit": "percentage",
@@ -5929,7 +5929,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9869,
+      "claim_id": 10769,
       "chapter_id": 10,
       "value": 58.4,
       "unit": "percentage",
@@ -5938,7 +5938,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9870,
+      "claim_id": 10770,
       "chapter_id": 10,
       "value": 31.7,
       "unit": "percentage",
@@ -5947,7 +5947,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9871,
+      "claim_id": 10771,
       "chapter_id": 10,
       "value": 228.3,
       "unit": "percentage",
@@ -5956,7 +5956,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9872,
+      "claim_id": 10772,
       "chapter_id": 10,
       "value": 15.2,
       "unit": "percentage",
@@ -5965,7 +5965,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9873,
+      "claim_id": 10773,
       "chapter_id": 10,
       "value": 115.4,
       "unit": "percentage",
@@ -5974,7 +5974,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9874,
+      "claim_id": 10774,
       "chapter_id": 10,
       "value": 10.0,
       "unit": "percentage",
@@ -5983,7 +5983,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9875,
+      "claim_id": 10775,
       "chapter_id": 10,
       "value": 4.7,
       "unit": "percentage",
@@ -5992,7 +5992,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9876,
+      "claim_id": 10776,
       "chapter_id": 10,
       "value": 1.0,
       "unit": "percentage",
@@ -6001,7 +6001,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9877,
+      "claim_id": 10777,
       "chapter_id": 10,
       "value": 1.5,
       "unit": "percentage",
@@ -6010,7 +6010,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9878,
+      "claim_id": 10778,
       "chapter_id": 10,
       "value": 100.0,
       "unit": "percentage",
@@ -6019,7 +6019,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9879,
+      "claim_id": 10779,
       "chapter_id": 10,
       "value": 100.0,
       "unit": "percentage",
@@ -6028,7 +6028,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9880,
+      "claim_id": 10780,
       "chapter_id": 10,
       "value": 304.0,
       "unit": "sample_size",
@@ -6037,7 +6037,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9881,
+      "claim_id": 10781,
       "chapter_id": 10,
       "value": 6542.0,
       "unit": "delta_aic",
@@ -6046,7 +6046,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9882,
+      "claim_id": 10782,
       "chapter_id": 10,
       "value": 1507.0,
       "unit": "delta_aic",
@@ -6055,7 +6055,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9883,
+      "claim_id": 10783,
       "chapter_id": 10,
       "value": 10703.0,
       "unit": "delta_aic",
@@ -6064,7 +6064,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9884,
+      "claim_id": 10784,
       "chapter_id": 10,
       "value": 5668.0,
       "unit": "delta_aic",
@@ -6073,7 +6073,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9885,
+      "claim_id": 10785,
       "chapter_id": 10,
       "value": 19.0,
       "unit": "percentage",
@@ -6082,7 +6082,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9886,
+      "claim_id": 10786,
       "chapter_id": 10,
       "value": 19.0,
       "unit": "percentage",
@@ -6091,7 +6091,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9887,
+      "claim_id": 10787,
       "chapter_id": 10,
       "value": 5668.0,
       "unit": "delta_aic",
@@ -6100,7 +6100,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9888,
+      "claim_id": 10788,
       "chapter_id": 11,
       "value": 19.0,
       "unit": "percentage",
@@ -6109,7 +6109,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9889,
+      "claim_id": 10789,
       "chapter_id": 11,
       "value": 0.1,
       "unit": "percentage",
@@ -6118,7 +6118,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9890,
+      "claim_id": 10790,
       "chapter_id": 11,
       "value": 4.8,
       "unit": "percentage",
@@ -6127,7 +6127,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9891,
+      "claim_id": 10791,
       "chapter_id": 11,
       "value": 4.7,
       "unit": "percentage",
@@ -6136,7 +6136,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9892,
+      "claim_id": 10792,
       "chapter_id": 11,
       "value": 298.0,
       "unit": "delta_aic",
@@ -6145,7 +6145,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9893,
+      "claim_id": 10793,
       "chapter_id": 11,
       "value": 3856.0,
       "unit": "delta_aic",
@@ -6154,7 +6154,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9895,
+      "claim_id": 10795,
       "chapter_id": 11,
       "value": 65.8,
       "unit": "percentage",
@@ -6163,7 +6163,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9896,
+      "claim_id": 10796,
       "chapter_id": 11,
       "value": 65.8,
       "unit": "percentage",
@@ -6172,7 +6172,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9897,
+      "claim_id": 10797,
       "chapter_id": 11,
       "value": 0.01,
       "unit": "beta_coef",
@@ -6181,7 +6181,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9898,
+      "claim_id": 10798,
       "chapter_id": 11,
       "value": 100.0,
       "unit": "percentage",
@@ -6190,7 +6190,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9899,
+      "claim_id": 10799,
       "chapter_id": 11,
       "value": 3558.0,
       "unit": "delta_aic",
@@ -6199,7 +6199,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9900,
+      "claim_id": 10800,
       "chapter_id": 11,
       "value": 3856.0,
       "unit": "delta_aic",
@@ -6208,7 +6208,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9901,
+      "claim_id": 10801,
       "chapter_id": 11,
       "value": 0.056,
       "unit": "ci_bracket",
@@ -6217,7 +6217,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9902,
+      "claim_id": 10802,
       "chapter_id": 11,
       "value": 0.058,
       "unit": "ci_bracket",
@@ -6226,7 +6226,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9903,
+      "claim_id": 10803,
       "chapter_id": 11,
       "value": 0.045,
       "unit": "ci_bracket",
@@ -6235,7 +6235,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9904,
+      "claim_id": 10804,
       "chapter_id": 11,
       "value": 0.06,
       "unit": "ci_bracket",
@@ -6244,7 +6244,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9905,
+      "claim_id": 10805,
       "chapter_id": 11,
       "value": 19.0,
       "unit": "percentage",
@@ -6253,7 +6253,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9906,
+      "claim_id": 10806,
       "chapter_id": 11,
       "value": 72.0,
       "unit": "percentage",
@@ -6262,7 +6262,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9907,
+      "claim_id": 10807,
       "chapter_id": 11,
       "value": 304.0,
       "unit": "sample_size",
@@ -6271,7 +6271,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9908,
+      "claim_id": 10808,
       "chapter_id": 11,
       "value": 0.001,
       "unit": "p_value",
@@ -6280,7 +6280,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9909,
+      "claim_id": 10809,
       "chapter_id": 11,
       "value": 19.0,
       "unit": "percentage",
@@ -6289,7 +6289,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9910,
+      "claim_id": 10810,
       "chapter_id": 11,
       "value": 50.0,
       "unit": "percentage",
@@ -6298,7 +6298,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9911,
+      "claim_id": 10811,
       "chapter_id": 11,
       "value": 0.1,
       "unit": "percentage",
@@ -6307,7 +6307,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9912,
+      "claim_id": 10812,
       "chapter_id": 11,
       "value": 4.8,
       "unit": "percentage",
@@ -6316,7 +6316,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9913,
+      "claim_id": 10813,
       "chapter_id": 11,
       "value": 68.0,
       "unit": "percentage",
@@ -6325,7 +6325,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9914,
+      "claim_id": 10814,
       "chapter_id": 11,
       "value": 72.0,
       "unit": "percentage",
@@ -6334,7 +6334,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9915,
+      "claim_id": 10815,
       "chapter_id": 11,
       "value": 40.0,
       "unit": "percentage",
@@ -6343,7 +6343,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9916,
+      "claim_id": 10816,
       "chapter_id": 11,
       "value": 96.0,
       "unit": "percentage",
@@ -6352,7 +6352,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9917,
+      "claim_id": 10817,
       "chapter_id": 11,
       "value": 4.7,
       "unit": "percentage",
@@ -6361,7 +6361,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9918,
+      "claim_id": 10818,
       "chapter_id": 11,
       "value": 19.0,
       "unit": "percentage",
@@ -6370,7 +6370,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9919,
+      "claim_id": 10819,
       "chapter_id": 11,
       "value": 10.0,
       "unit": "percentage",
@@ -6379,7 +6379,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9920,
+      "claim_id": 10820,
       "chapter_id": 11,
       "value": 11.9,
       "unit": "percentage",
@@ -6388,7 +6388,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9921,
+      "claim_id": 10821,
       "chapter_id": 11,
       "value": 14.2,
       "unit": "percentage",
@@ -6397,7 +6397,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9922,
+      "claim_id": 10822,
       "chapter_id": 11,
       "value": 72.0,
       "unit": "percentage",
@@ -6406,7 +6406,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9923,
+      "claim_id": 10823,
       "chapter_id": 11,
       "value": 4.7,
       "unit": "percentage",
@@ -6415,7 +6415,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9924,
+      "claim_id": 10824,
       "chapter_id": 11,
       "value": 19.0,
       "unit": "percentage",
@@ -6424,7 +6424,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9925,
+      "claim_id": 10825,
       "chapter_id": 11,
       "value": 4.7,
       "unit": "percentage",
@@ -6433,7 +6433,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9926,
+      "claim_id": 10826,
       "chapter_id": 11,
       "value": 3856.0,
       "unit": "delta_aic",
@@ -6442,7 +6442,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9927,
+      "claim_id": 10827,
       "chapter_id": 12,
       "value": 1674.0,
       "unit": "large_count",
@@ -6451,7 +6451,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9928,
+      "claim_id": 10828,
       "chapter_id": 12,
       "value": 10.0,
       "unit": "percentage",
@@ -6460,7 +6460,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9929,
+      "claim_id": 10829,
       "chapter_id": 12,
       "value": 5014.0,
       "unit": "large_count",
@@ -6469,7 +6469,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9930,
+      "claim_id": 10830,
       "chapter_id": 12,
       "value": 1674.0,
       "unit": "large_count",
@@ -6478,7 +6478,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9931,
+      "claim_id": 10831,
       "chapter_id": 12,
       "value": 1065.0,
       "unit": "large_count",
@@ -6487,7 +6487,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9932,
+      "claim_id": 10832,
       "chapter_id": 12,
       "value": 1678.0,
       "unit": "large_count",
@@ -6496,7 +6496,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9933,
+      "claim_id": 10833,
       "chapter_id": 12,
       "value": 5014.0,
       "unit": "large_count",
@@ -6505,7 +6505,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9934,
+      "claim_id": 10834,
       "chapter_id": 12,
       "value": 1220.0,
       "unit": "large_count",
@@ -6514,7 +6514,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9935,
+      "claim_id": 10835,
       "chapter_id": 12,
       "value": 3.6,
       "unit": "percentage",
@@ -6523,7 +6523,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9936,
+      "claim_id": 10836,
       "chapter_id": 12,
       "value": 1610.0,
       "unit": "large_count",
@@ -6532,7 +6532,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9937,
+      "claim_id": 10837,
       "chapter_id": 12,
       "value": 4.79,
       "unit": "percentage",
@@ -6541,7 +6541,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9938,
+      "claim_id": 10838,
       "chapter_id": 12,
       "value": 5.0,
       "unit": "percentage",
@@ -6550,7 +6550,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9939,
+      "claim_id": 10839,
       "chapter_id": 12,
       "value": 4772.0,
       "unit": "large_count",
@@ -6559,7 +6559,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9940,
+      "claim_id": 10840,
       "chapter_id": 12,
       "value": 1220.0,
       "unit": "large_count",
@@ -6568,7 +6568,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9941,
+      "claim_id": 10841,
       "chapter_id": 12,
       "value": 90.2,
       "unit": "percentage",
@@ -6577,7 +6577,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9942,
+      "claim_id": 10842,
       "chapter_id": 12,
       "value": 80.0,
       "unit": "percentage",
@@ -6586,7 +6586,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9943,
+      "claim_id": 10843,
       "chapter_id": 12,
       "value": 5.1,
       "unit": "percentage",
@@ -6595,7 +6595,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9944,
+      "claim_id": 10844,
       "chapter_id": 12,
       "value": 15.5,
       "unit": "percentage",
@@ -6604,7 +6604,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9945,
+      "claim_id": 10845,
       "chapter_id": 12,
       "value": 95.0,
       "unit": "percentage",
@@ -6613,7 +6613,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9946,
+      "claim_id": 10846,
       "chapter_id": 12,
       "value": 3058.0,
       "unit": "large_count",
@@ -6622,7 +6622,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9947,
+      "claim_id": 10847,
       "chapter_id": 12,
       "value": 10.0,
       "unit": "percentage",
@@ -6631,7 +6631,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9948,
+      "claim_id": 10848,
       "chapter_id": 12,
       "value": 90.2,
       "unit": "percentage",
@@ -6640,7 +6640,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9949,
+      "claim_id": 10849,
       "chapter_id": 12,
       "value": 90.2,
       "unit": "percentage",
@@ -6649,7 +6649,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9950,
+      "claim_id": 10850,
       "chapter_id": 12,
       "value": 95.0,
       "unit": "percentage",
@@ -6658,7 +6658,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9952,
+      "claim_id": 10852,
       "chapter_id": 12,
       "value": -11.62,
       "unit": "beta_coef",
@@ -6667,7 +6667,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9954,
+      "claim_id": 10854,
       "chapter_id": 12,
       "value": 10.0,
       "unit": "percentage",
@@ -6676,7 +6676,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9955,
+      "claim_id": 10855,
       "chapter_id": 12,
       "value": 90.0,
       "unit": "percentage",
@@ -6685,7 +6685,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9956,
+      "claim_id": 10856,
       "chapter_id": 12,
       "value": 90.2,
       "unit": "percentage",
@@ -6694,7 +6694,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9957,
+      "claim_id": 10857,
       "chapter_id": 12,
       "value": 93.75,
       "unit": "percentage",
@@ -6703,7 +6703,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9959,
+      "claim_id": 10859,
       "chapter_id": 12,
       "value": 10.0,
       "unit": "percentage",
@@ -6712,7 +6712,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9960,
+      "claim_id": 10860,
       "chapter_id": 13,
       "value": 30.0,
       "unit": "percentage",
@@ -6721,7 +6721,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9961,
+      "claim_id": 10861,
       "chapter_id": 13,
       "value": 43.0,
       "unit": "sample_size",
@@ -6730,7 +6730,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9962,
+      "claim_id": 10862,
       "chapter_id": 13,
       "value": 595.0,
       "unit": "sample_size",
@@ -6739,7 +6739,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9963,
+      "claim_id": 10863,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6748,7 +6748,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9964,
+      "claim_id": 10864,
       "chapter_id": 13,
       "value": 33.0,
       "unit": "percentage",
@@ -6757,7 +6757,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9965,
+      "claim_id": 10865,
       "chapter_id": 13,
       "value": 1.3,
       "unit": "percentage",
@@ -6766,7 +6766,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9966,
+      "claim_id": 10866,
       "chapter_id": 13,
       "value": 60.0,
       "unit": "percentage",
@@ -6775,7 +6775,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9967,
+      "claim_id": 10867,
       "chapter_id": 13,
       "value": 90.0,
       "unit": "percentage",
@@ -6784,7 +6784,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9968,
+      "claim_id": 10868,
       "chapter_id": 13,
       "value": 50.0,
       "unit": "sample_size",
@@ -6793,7 +6793,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9969,
+      "claim_id": 10869,
       "chapter_id": 13,
       "value": 88.0,
       "unit": "percentage",
@@ -6802,7 +6802,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9970,
+      "claim_id": 10870,
       "chapter_id": 13,
       "value": 90.0,
       "unit": "percentage",
@@ -6811,7 +6811,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9971,
+      "claim_id": 10871,
       "chapter_id": 13,
       "value": 17.5,
       "unit": "percentage",
@@ -6820,7 +6820,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9972,
+      "claim_id": 10872,
       "chapter_id": 13,
       "value": 114.0,
       "unit": "percentage",
@@ -6829,7 +6829,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9973,
+      "claim_id": 10873,
       "chapter_id": 13,
       "value": 200.0,
       "unit": "percentage",
@@ -6838,7 +6838,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9974,
+      "claim_id": 10874,
       "chapter_id": 13,
       "value": 17.5,
       "unit": "percentage",
@@ -6847,7 +6847,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9975,
+      "claim_id": 10875,
       "chapter_id": 13,
       "value": 114.0,
       "unit": "percentage",
@@ -6856,7 +6856,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9976,
+      "claim_id": 10876,
       "chapter_id": 13,
       "value": 200.0,
       "unit": "percentage",
@@ -6865,7 +6865,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9977,
+      "claim_id": 10877,
       "chapter_id": 13,
       "value": 43.0,
       "unit": "sample_size",
@@ -6874,7 +6874,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9978,
+      "claim_id": 10878,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6883,7 +6883,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9979,
+      "claim_id": 10879,
       "chapter_id": 13,
       "value": 0.443,
       "unit": "ci_bracket",
@@ -6892,7 +6892,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9980,
+      "claim_id": 10880,
       "chapter_id": 13,
       "value": 0.485,
       "unit": "ci_bracket",
@@ -6901,7 +6901,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9981,
+      "claim_id": 10881,
       "chapter_id": 13,
       "value": -0.085,
       "unit": "ci_bracket",
@@ -6910,7 +6910,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9982,
+      "claim_id": 10882,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6919,7 +6919,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9983,
+      "claim_id": 10883,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6928,7 +6928,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9984,
+      "claim_id": 10884,
       "chapter_id": 13,
       "value": 0.877,
       "unit": "ci_bracket",
@@ -6937,7 +6937,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9985,
+      "claim_id": 10885,
       "chapter_id": 13,
       "value": -0.631,
       "unit": "ci_bracket",
@@ -6946,7 +6946,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9986,
+      "claim_id": 10886,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6955,7 +6955,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9987,
+      "claim_id": 10887,
       "chapter_id": 13,
       "value": 0.877,
       "unit": "ci_bracket",
@@ -6964,7 +6964,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9988,
+      "claim_id": 10888,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6973,7 +6973,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9989,
+      "claim_id": 10889,
       "chapter_id": 13,
       "value": 95.0,
       "unit": "percentage",
@@ -6982,7 +6982,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9990,
+      "claim_id": 10890,
       "chapter_id": 13,
       "value": 8.0,
       "unit": "percentage",
@@ -6991,7 +6991,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9991,
+      "claim_id": 10891,
       "chapter_id": 13,
       "value": 76.2,
       "unit": "percentage",
@@ -7000,7 +7000,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9992,
+      "claim_id": 10892,
       "chapter_id": 13,
       "value": 17.5,
       "unit": "percentage",
@@ -7009,7 +7009,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9993,
+      "claim_id": 10893,
       "chapter_id": 14,
       "value": 90.0,
       "unit": "percentage",
@@ -7018,7 +7018,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9994,
+      "claim_id": 10894,
       "chapter_id": 14,
       "value": 91.1,
       "unit": "percentage",
@@ -7027,7 +7027,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9995,
+      "claim_id": 10895,
       "chapter_id": 14,
       "value": 95.0,
       "unit": "percentage",
@@ -7036,7 +7036,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9996,
+      "claim_id": 10896,
       "chapter_id": 14,
       "value": 9.0,
       "unit": "percentage",
@@ -7045,7 +7045,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9997,
+      "claim_id": 10897,
       "chapter_id": 14,
       "value": 29.0,
       "unit": "percentage",
@@ -7054,7 +7054,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9998,
+      "claim_id": 10898,
       "chapter_id": 14,
       "value": 3.29,
       "unit": "percentage",
@@ -7063,7 +7063,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 9999,
+      "claim_id": 10899,
       "chapter_id": 14,
       "value": 14.0,
       "unit": "percentage",
@@ -7072,7 +7072,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10000,
+      "claim_id": 10900,
       "chapter_id": 14,
       "value": 12.0,
       "unit": "percentage",
@@ -7081,7 +7081,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10001,
+      "claim_id": 10901,
       "chapter_id": 14,
       "value": 0.044,
       "unit": "p_value",
@@ -7090,7 +7090,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10002,
+      "claim_id": 10902,
       "chapter_id": 14,
       "value": 0.43,
       "unit": "p_value",
@@ -7099,7 +7099,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10003,
+      "claim_id": 10903,
       "chapter_id": 14,
       "value": 33.0,
       "unit": "percentage",
@@ -7108,7 +7108,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10004,
+      "claim_id": 10904,
       "chapter_id": 14,
       "value": 95.0,
       "unit": "percentage",
@@ -7117,7 +7117,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10005,
+      "claim_id": 10905,
       "chapter_id": 14,
       "value": 0.43,
       "unit": "p_value",
@@ -7126,7 +7126,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10006,
+      "claim_id": 10906,
       "chapter_id": 14,
       "value": 0.044,
       "unit": "p_value",
@@ -7135,7 +7135,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10007,
+      "claim_id": 10907,
       "chapter_id": 14,
       "value": 95.0,
       "unit": "percentage",
@@ -7144,7 +7144,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10008,
+      "claim_id": 10908,
       "chapter_id": 14,
       "value": 1.41,
       "unit": "beta_coef",
@@ -7153,7 +7153,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10009,
+      "claim_id": 10909,
       "chapter_id": 14,
       "value": 91.1,
       "unit": "percentage",
@@ -7162,7 +7162,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10010,
+      "claim_id": 10910,
       "chapter_id": 14,
       "value": 90.0,
       "unit": "percentage",
@@ -7171,7 +7171,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10011,
+      "claim_id": 10911,
       "chapter_id": 14,
       "value": 95.0,
       "unit": "percentage",
@@ -7180,7 +7180,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10012,
+      "claim_id": 10912,
       "chapter_id": 14,
       "value": 56.1,
       "unit": "percentage",
@@ -7189,7 +7189,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10013,
+      "claim_id": 10913,
       "chapter_id": 14,
       "value": 90.0,
       "unit": "percentage",
@@ -7198,7 +7198,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10014,
+      "claim_id": 10914,
       "chapter_id": 14,
       "value": 19.0,
       "unit": "percentage",
@@ -7207,7 +7207,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10015,
+      "claim_id": 10915,
       "chapter_id": 15,
       "value": 90.0,
       "unit": "percentage",
@@ -7216,7 +7216,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10016,
+      "claim_id": 10916,
       "chapter_id": 15,
       "value": 3.0,
       "unit": "percentage",
@@ -7225,7 +7225,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10017,
+      "claim_id": 10917,
       "chapter_id": 15,
       "value": 0.044,
       "unit": "p_value",
@@ -7234,7 +7234,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10018,
+      "claim_id": 10918,
       "chapter_id": 15,
       "value": 95.0,
       "unit": "percentage",
@@ -7243,7 +7243,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10019,
+      "claim_id": 10919,
       "chapter_id": 15,
       "value": 1.41,
       "unit": "beta_coef",
@@ -7252,7 +7252,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10020,
+      "claim_id": 10920,
       "chapter_id": 15,
       "value": 100.0,
       "unit": "percentage",
@@ -7261,7 +7261,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10021,
+      "claim_id": 10921,
       "chapter_id": 15,
       "value": 1900.0,
       "unit": "large_count",
@@ -7270,7 +7270,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10024,
+      "claim_id": 10924,
       "chapter_id": 99,
       "value": 91.1,
       "unit": "percentage",
@@ -7279,7 +7279,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10025,
+      "claim_id": 10925,
       "chapter_id": 99,
       "value": 12.6,
       "unit": "percentage",
@@ -7288,7 +7288,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10026,
+      "claim_id": 10926,
       "chapter_id": 99,
       "value": 2201.0,
       "unit": "large_count",
@@ -7297,7 +7297,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10028,
+      "claim_id": 10928,
       "chapter_id": 99,
       "value": 95.0,
       "unit": "percentage",
@@ -7306,7 +7306,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10029,
+      "claim_id": 10929,
       "chapter_id": 99,
       "value": 60.0,
       "unit": "percentage",
@@ -7315,7 +7315,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10030,
+      "claim_id": 10930,
       "chapter_id": 99,
       "value": 97.1,
       "unit": "percentage",
@@ -7324,7 +7324,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10031,
+      "claim_id": 10931,
       "chapter_id": 99,
       "value": 5.0,
       "unit": "percentage",
@@ -7333,7 +7333,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10032,
+      "claim_id": 10932,
       "chapter_id": 99,
       "value": 0.6,
       "unit": "ci_bracket",
@@ -7342,7 +7342,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10034,
+      "claim_id": 10934,
       "chapter_id": 99,
       "value": 16699.0,
       "unit": "large_count",
@@ -7351,7 +7351,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10035,
+      "claim_id": 10935,
       "chapter_id": 99,
       "value": 30.0,
       "unit": "percentage",
@@ -7360,7 +7360,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10036,
+      "claim_id": 10936,
       "chapter_id": 99,
       "value": 39.1,
       "unit": "percentage",
@@ -7369,7 +7369,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10037,
+      "claim_id": 10937,
       "chapter_id": 99,
       "value": 50.0,
       "unit": "percentage",
@@ -7378,7 +7378,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10039,
+      "claim_id": 10939,
       "chapter_id": 99,
       "value": 16699.0,
       "unit": "large_count",
@@ -7387,7 +7387,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10042,
+      "claim_id": 10942,
       "chapter_id": 99,
       "value": 10.0,
       "unit": "sample_size",
@@ -7396,7 +7396,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10043,
+      "claim_id": 10943,
       "chapter_id": 99,
       "value": 100.0,
       "unit": "sample_size",
@@ -7405,7 +7405,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10044,
+      "claim_id": 10944,
       "chapter_id": 99,
       "value": 118.0,
       "unit": "sample_size",
@@ -7414,7 +7414,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10045,
+      "claim_id": 10945,
       "chapter_id": 99,
       "value": 893.0,
       "unit": "sample_size",
@@ -7423,7 +7423,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10046,
+      "claim_id": 10946,
       "chapter_id": 99,
       "value": 649.0,
       "unit": "sample_size",
@@ -7432,7 +7432,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10047,
+      "claim_id": 10947,
       "chapter_id": 99,
       "value": 93.75,
       "unit": "percentage",
@@ -7441,7 +7441,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10048,
+      "claim_id": 10948,
       "chapter_id": 99,
       "value": 0.001,
       "unit": "p_value",
@@ -7450,7 +7450,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10049,
+      "claim_id": 10949,
       "chapter_id": 99,
       "value": 19.0,
       "unit": "percentage",
@@ -7459,7 +7459,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10050,
+      "claim_id": 10950,
       "chapter_id": 99,
       "value": 20.0,
       "unit": "percentage",
@@ -7468,7 +7468,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10051,
+      "claim_id": 10951,
       "chapter_id": 99,
       "value": 50.0,
       "unit": "percentage",
@@ -7477,7 +7477,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10052,
+      "claim_id": 10952,
       "chapter_id": 99,
       "value": 50.0,
       "unit": "percentage",
@@ -7486,7 +7486,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10053,
+      "claim_id": 10953,
       "chapter_id": 99,
       "value": 3.29,
       "unit": "percentage",
@@ -7495,7 +7495,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10054,
+      "claim_id": 10954,
       "chapter_id": 99,
       "value": 5.0,
       "unit": "percentage",
@@ -7504,7 +7504,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10055,
+      "claim_id": 10955,
       "chapter_id": 99,
       "value": 99.5,
       "unit": "percentage",
@@ -7513,7 +7513,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10056,
+      "claim_id": 10956,
       "chapter_id": 99,
       "value": 95.0,
       "unit": "percentage",
@@ -7522,7 +7522,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10057,
+      "claim_id": 10957,
       "chapter_id": 99,
       "value": 98.9,
       "unit": "percentage",
@@ -7531,7 +7531,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10058,
+      "claim_id": 10958,
       "chapter_id": 99,
       "value": 33.0,
       "unit": "sample_size",
@@ -7540,7 +7540,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10059,
+      "claim_id": 10959,
       "chapter_id": 99,
       "value": 0.0001,
       "unit": "p_value",
@@ -7549,7 +7549,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10060,
+      "claim_id": 10960,
       "chapter_id": 99,
       "value": 0.51,
       "unit": "p_value",
@@ -7558,7 +7558,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10061,
+      "claim_id": 10961,
       "chapter_id": 99,
       "value": 78.0,
       "unit": "percentage",
@@ -7567,7 +7567,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10062,
+      "claim_id": 10962,
       "chapter_id": 99,
       "value": 19.6,
       "unit": "percentage",
@@ -7576,7 +7576,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10063,
+      "claim_id": 10963,
       "chapter_id": 99,
       "value": 33.0,
       "unit": "sample_size",
@@ -7585,7 +7585,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10064,
+      "claim_id": 10964,
       "chapter_id": 99,
       "value": 91.1,
       "unit": "percentage",
@@ -7594,7 +7594,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10065,
+      "claim_id": 10965,
       "chapter_id": 99,
       "value": 29.0,
       "unit": "percentage",
@@ -7603,7 +7603,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10066,
+      "claim_id": 10966,
       "chapter_id": 99,
       "value": 49.0,
       "unit": "percentage",
@@ -7612,7 +7612,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10067,
+      "claim_id": 10967,
       "chapter_id": 99,
       "value": 96.0,
       "unit": "percentage",
@@ -7621,7 +7621,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10068,
+      "claim_id": 10968,
       "chapter_id": 99,
       "value": 100.0,
       "unit": "percentage",
@@ -7630,7 +7630,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10069,
+      "claim_id": 10969,
       "chapter_id": 99,
       "value": 5.0,
       "unit": "percentage",
@@ -7639,7 +7639,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10070,
+      "claim_id": 10970,
       "chapter_id": 99,
       "value": 33.0,
       "unit": "percentage",
@@ -7648,7 +7648,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10071,
+      "claim_id": 10971,
       "chapter_id": 99,
       "value": 20.0,
       "unit": "percentage",
@@ -7657,7 +7657,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10072,
+      "claim_id": 10972,
       "chapter_id": 99,
       "value": 49.0,
       "unit": "percentage",
@@ -7666,7 +7666,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10073,
+      "claim_id": 10973,
       "chapter_id": 99,
       "value": 10.0,
       "unit": "sample_size",
@@ -7675,7 +7675,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10074,
+      "claim_id": 10974,
       "chapter_id": 99,
       "value": 10.0,
       "unit": "sample_size",
@@ -7684,7 +7684,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10075,
+      "claim_id": 10975,
       "chapter_id": 99,
       "value": 106.0,
       "unit": "sample_size",
@@ -7693,7 +7693,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10076,
+      "claim_id": 10976,
       "chapter_id": 99,
       "value": 28.0,
       "unit": "sample_size",
@@ -7702,7 +7702,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10077,
+      "claim_id": 10977,
       "chapter_id": 99,
       "value": 0.01,
       "unit": "ci_bracket",
@@ -7711,7 +7711,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10078,
+      "claim_id": 10978,
       "chapter_id": 99,
       "value": 110.0,
       "unit": "sample_size",
@@ -7720,7 +7720,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10079,
+      "claim_id": 10979,
       "chapter_id": 99,
       "value": 50.0,
       "unit": "percentage",
@@ -7729,7 +7729,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10080,
+      "claim_id": 10980,
       "chapter_id": 99,
       "value": 50.0,
       "unit": "percentage",
@@ -7738,7 +7738,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10081,
+      "claim_id": 10981,
       "chapter_id": 99,
       "value": 17.6,
       "unit": "percentage",
@@ -7747,7 +7747,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10082,
+      "claim_id": 10982,
       "chapter_id": 99,
       "value": 8.0,
       "unit": "percentage",
@@ -7756,7 +7756,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10083,
+      "claim_id": 10983,
       "chapter_id": 99,
       "value": 65.0,
       "unit": "percentage",
@@ -7765,7 +7765,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10084,
+      "claim_id": 10984,
       "chapter_id": 99,
       "value": 105.0,
       "unit": "sample_size",
@@ -7774,7 +7774,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10085,
+      "claim_id": 10985,
       "chapter_id": 99,
       "value": 17.6,
       "unit": "percentage",
@@ -7783,7 +7783,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10086,
+      "claim_id": 10986,
       "chapter_id": 99,
       "value": 96.0,
       "unit": "percentage",
@@ -7792,7 +7792,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10087,
+      "claim_id": 10987,
       "chapter_id": 99,
       "value": 32.7,
       "unit": "percentage",
@@ -7801,7 +7801,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10089,
+      "claim_id": 10989,
       "chapter_id": 99,
       "value": 1678.0,
       "unit": "large_count",
@@ -7810,7 +7810,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10090,
+      "claim_id": 10990,
       "chapter_id": 99,
       "value": 1065.0,
       "unit": "large_count",
@@ -7819,7 +7819,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10091,
+      "claim_id": 10991,
       "chapter_id": 99,
       "value": 3.29,
       "unit": "percentage",
@@ -7828,7 +7828,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10092,
+      "claim_id": 10992,
       "chapter_id": 99,
       "value": 29.0,
       "unit": "percentage",
@@ -7837,7 +7837,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10093,
+      "claim_id": 10993,
       "chapter_id": 99,
       "value": 49.0,
       "unit": "percentage",
@@ -7846,7 +7846,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10094,
+      "claim_id": 10994,
       "chapter_id": 99,
       "value": 2.93,
       "unit": "percentage",
@@ -7855,7 +7855,7 @@
       "verdict_now": "verified"
     },
     {
-      "claim_id": 10095,
+      "claim_id": 10995,
       "chapter_id": 99,
       "value": 42.0,
       "unit": "percentage",

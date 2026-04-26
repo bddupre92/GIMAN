@@ -22,13 +22,14 @@ import logging
 from dataclasses import dataclass, field
 
 import numpy as np
+import pandas as pd
 
 from giman_pipeline.paper3.dynamic_deephit import compute_ctd
 from giman_pipeline.paper3.multistate_markov import N_STATES
 
 logger = logging.getLogger(__name__)
 
-# Subgroup definitions
+# Subgroup definitions (original sex / age / LRRK2 / GBA binary splits for legacy runner)
 SUBGROUP_VARS = {
     "lrrk2": {"column": "lrrk2_carrier", "groups": {0: "Non-carrier", 1: "Carrier"}},
     "gba": {"column": "gba_carrier", "groups": {0: "Non-carrier", 1: "Carrier"}},
@@ -41,7 +42,14 @@ SUBGROUP_VARS = {
     },
 }
 
-MIN_SUBGROUP_SIZE = 10  # Skip subgroups with fewer patients
+MIN_SUBGROUP_SIZE = 10  # Legacy default for the pre-existing sex/age runner
+
+# WS-P3-14: LRRK2/GBA/APOE carrier-stratum definitions (pre-registered 2026-04-23).
+# LRRK2+ includes dual carriers; GBA+only / APOE+only explicitly exclude the other two flags;
+# Non-carrier is all-three-zero. See outputs/paper4/subgroup_carriers/PRE_REGISTRATION.md §3.1.
+CARRIER_STRATA = ("LRRK2+", "GBA+ only", "APOE+ only", "Non-carrier")
+
+MIN_SUBGROUP_SIZE_CARRIER = 50  # Locked by pre-reg (post-672b439 bug fix)
 
 
 # ---------------------------------------------------------------------------
@@ -448,4 +456,323 @@ def interaction_test_to_dict(r: InteractionTestResult) -> dict:
         "fdr_corrected_p": r.fdr_corrected_p,
         "n_bootstrap": r.n_bootstrap,
         "n_valid_iterations": r.n_valid_iterations,
+    }
+
+
+# ---------------------------------------------------------------------------
+# WS-P3-14: LRRK2/GBA/APOE carrier stratification extensions
+# ---------------------------------------------------------------------------
+
+
+def assign_carrier_subgroups(
+    patnos: list[int],
+    features_df: pd.DataFrame,
+) -> dict[int, str]:
+    """Assign patients to the 4 pre-registered carrier strata.
+
+    See PRE_REGISTRATION.md §3.1 for locked definitions.
+
+    Args:
+        patnos: Patient IDs to classify (duplicates allowed — returned once).
+        features_df: DataFrame containing ``patno`` + ``lrrk2_carrier`` + ``gba_carrier``
+            + ``apoe_e4_carrier`` columns. NA → treated as 0 (no-known-carrier).
+
+    Returns:
+        ``{patno: stratum_label}`` where stratum_label ∈ CARRIER_STRATA.
+        Patients not matching any stratum are omitted (should never happen with
+        the pre-reg definitions, which are exhaustive over the 8 carrier tuples).
+    """
+    # Canonicalise: dedup to first record per patno, fill NA with 0
+    view = features_df[["patno", "lrrk2_carrier", "gba_carrier", "apoe_e4_carrier"]].copy()
+    view = view.fillna({"lrrk2_carrier": 0, "gba_carrier": 0, "apoe_e4_carrier": 0})
+    view = view.drop_duplicates(subset=["patno"], keep="first")
+    view = view.set_index("patno")
+
+    out: dict[int, str] = {}
+    for patno in set(patnos):
+        if patno not in view.index:
+            continue
+        lrrk2 = int(view.loc[patno, "lrrk2_carrier"])
+        gba = int(view.loc[patno, "gba_carrier"])
+        apoe = int(view.loc[patno, "apoe_e4_carrier"])
+
+        if lrrk2 == 1:
+            out[patno] = "LRRK2+"
+        elif gba == 1 and lrrk2 == 0 and apoe == 0:
+            out[patno] = "GBA+ only"
+        elif apoe == 1 and lrrk2 == 0 and gba == 0:
+            out[patno] = "APOE+ only"
+        elif lrrk2 == 0 and gba == 0 and apoe == 0:
+            out[patno] = "Non-carrier"
+        else:
+            # Dual GBA+ + APOE+ (with no LRRK2) — not in pre-reg strata; skip per §5.
+            continue
+    return out
+
+
+def bootstrap_ctd_ci(
+    preds: dict,
+    n_bootstrap: int = 1000,
+    random_state: int = 42,
+) -> np.ndarray:
+    """Episode-level bootstrap of the time-dependent concordance index.
+
+    NOTE: this is the *iid* episode-level bootstrap. Each episode (stage
+    occupancy period) is resampled independently with replacement. When a
+    patient contributes multiple episodes (the typical case in the Paper~3
+    longitudinal cohort: 1{,}900 patients yielding 4{,}792 episodes), this
+    treats those as independent observations, under-estimating sampling
+    variability of any per-patient summary statistic. Use ``cluster_bootstrap_ctd_ci``
+    below for the subject-level (cluster) variant required by reviewer3.com~\\#5.
+
+    Args:
+        preds: dict with 'cif' (Tensor, N×K×T), 'event_idxs' (N,), 'time_bins' (N,),
+            'censored' (N,). Tensors may be torch or numpy; we handle both.
+        n_bootstrap: Number of bootstrap resamples.
+        random_state: Seed.
+
+    Returns:
+        np.ndarray of shape (n_bootstrap,) with C-td per resample.
+    """
+    import torch
+
+    def _as_tensor(x):
+        return x if isinstance(x, torch.Tensor) else torch.as_tensor(x)
+
+    cif = _as_tensor(preds["cif"])
+    ev = _as_tensor(preds["event_idxs"])
+    tb = _as_tensor(preds["time_bins"])
+    cens = _as_tensor(preds["censored"]).to(dtype=torch.bool)
+
+    n = cif.shape[0]
+    rng = np.random.RandomState(random_state)
+    out = np.empty(n_bootstrap, dtype=float)
+
+    for b in range(n_bootstrap):
+        idx = rng.randint(0, n, size=n)
+        sub = {
+            "cif": cif[idx],
+            "event_idxs": ev[idx],
+            "time_bins": tb[idx],
+            "censored": cens[idx],
+        }
+        out[b] = compute_ctd(sub)
+    return out
+
+
+def cluster_bootstrap_ctd_ci(
+    preds: dict,
+    patnos: list[int] | np.ndarray,
+    n_bootstrap: int = 1000,
+    random_state: int = 42,
+) -> np.ndarray:
+    """Subject-level (cluster) bootstrap of the time-dependent concordance index.
+
+    Resamples *unique patnos* with replacement (Davison \\& Hinkley 1997
+    §3.8 cluster bootstrap; Field \\& Welsh 2007 for survival-specific
+    properties). For each sampled patno, ALL of its episodes are included
+    in the resample. This preserves within-patient correlation between
+    episodes (multi-stage longitudinal trajectories) and is the
+    inferentially-correct bootstrap variant when the unit of statistical
+    independence is the patient, not the episode.
+
+    Implementation: for a fold with U unique patnos contributing N total
+    episodes, each resample draws U patnos with replacement and then
+    includes all of each sampled patno's episodes. The resampled episode
+    count varies bootstrap-to-bootstrap (mean = N if patno cluster sizes
+    are independent of cluster identity).
+
+    Args:
+        preds: same shape as ``bootstrap_ctd_ci``: dict with 'cif',
+            'event_idxs', 'time_bins', 'censored', shape leading dim N.
+        patnos: length-N list/array of patient IDs (one per episode).
+            ``patnos[i]`` identifies the cluster of the i-th episode.
+        n_bootstrap: Number of bootstrap resamples.
+        random_state: Seed.
+
+    Returns:
+        np.ndarray of shape (n_bootstrap,) with C-td per resample.
+    """
+    import torch
+
+    def _as_tensor(x):
+        return x if isinstance(x, torch.Tensor) else torch.as_tensor(x)
+
+    cif = _as_tensor(preds["cif"])
+    ev = _as_tensor(preds["event_idxs"])
+    tb = _as_tensor(preds["time_bins"])
+    cens = _as_tensor(preds["censored"]).to(dtype=torch.bool)
+
+    patnos_arr = np.asarray(patnos)
+    if patnos_arr.shape[0] != cif.shape[0]:
+        raise ValueError(
+            f"patnos length ({patnos_arr.shape[0]}) must equal preds rows "
+            f"({cif.shape[0]})"
+        )
+
+    unique_patnos = np.unique(patnos_arr)
+    # Pre-compute patno -> list of row indices (saves O(N) per bootstrap)
+    patno_to_rows: dict[int, np.ndarray] = {
+        int(p): np.where(patnos_arr == p)[0] for p in unique_patnos
+    }
+
+    rng = np.random.RandomState(random_state)
+    n_unique = len(unique_patnos)
+    out = np.empty(n_bootstrap, dtype=float)
+
+    for b in range(n_bootstrap):
+        sampled = rng.choice(unique_patnos, size=n_unique, replace=True)
+        # Concatenate all rows for the sampled patnos (with episode multiplicity
+        # preserved: a patno sampled k times contributes k copies of its episodes)
+        rows = np.concatenate([patno_to_rows[int(p)] for p in sampled])
+        sub = {
+            "cif": cif[rows],
+            "event_idxs": ev[rows],
+            "time_bins": tb[rows],
+            "censored": cens[rows],
+        }
+        out[b] = compute_ctd(sub)
+    return out
+
+
+def apply_fdr_correction_scipy(raw_p: list[float] | np.ndarray) -> np.ndarray:
+    """Benjamini-Hochberg FDR via scipy (canonical), filling NaN p-values with 1.0.
+
+    Wraps ``scipy.stats.false_discovery_control(method='bh')`` so we match the stats
+    community's canonical implementation exactly (monotonic, rank-normalised).
+
+    Args:
+        raw_p: list or array of p-values. NaN → treated as 1.0.
+
+    Returns:
+        Array of BH-adjusted p-values, same shape as input.
+    """
+    from scipy.stats import false_discovery_control
+
+    arr = np.asarray([1.0 if (p is None or np.isnan(p)) else float(p) for p in raw_p])
+    return false_discovery_control(arr, method="bh")
+
+
+# ---------------------------------------------------------------------------
+# SubgroupAnalyzer — new class for carrier re-run (extends, doesn't replace)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class SubgroupCTDResultWithCI:
+    """Extension of SubgroupCTDResult with bootstrap CIs and underpower flags."""
+
+    model_name: str
+    subgroup_var: str
+    per_group_ctd: dict[str, float] = field(default_factory=dict)
+    per_group_ctd_lo: dict[str, float] = field(default_factory=dict)
+    per_group_ctd_hi: dict[str, float] = field(default_factory=dict)
+    per_group_n: dict[str, int] = field(default_factory=dict)
+    per_group_n_events: dict[str, int] = field(default_factory=dict)
+    flagged_groups: list[str] = field(default_factory=list)
+    n_bootstrap: int = 0
+    random_state: int = 42
+
+
+class SubgroupAnalyzer:
+    """Fairness analyser for carrier-stratified predictions (WS-P3-14).
+
+    Designed as an extension of the legacy functional API — does NOT replace the
+    existing ``compute_subgroup_ctd`` / ``bootstrap_interaction_test`` functions,
+    which remain in use by ``scripts/paper4/run_subgroup_analysis.py``.
+
+    Args:
+        min_subgroup_size: Minimum N to avoid the ``flagged_groups`` under-power flag.
+            Default 50 (pre-reg for carrier strata). For sex/age analyses use 10.
+    """
+
+    def __init__(self, min_subgroup_size: int = MIN_SUBGROUP_SIZE_CARRIER) -> None:
+        self.min_subgroup_size = int(min_subgroup_size)
+
+    def compute_subgroup_ctd_with_ci(
+        self,
+        preds: dict,
+        patnos: list[int],
+        subgroup_assignments: dict[int, str],
+        model_name: str,
+        subgroup_var: str,
+        n_bootstrap: int = 1000,
+        random_state: int = 42,
+    ) -> SubgroupCTDResultWithCI:
+        """Per-subgroup C-td with patient-level bootstrap 95% CIs.
+
+        NOTE: Subgroups smaller than ``min_subgroup_size`` ARE still evaluated
+        (point estimate + CI) but appear in ``flagged_groups`` so the caller
+        can report them honestly rather than silently excluding them — a
+        distinction that matters for PRE_REGISTRATION §3.5 decision rule.
+        """
+        import torch
+
+        result = SubgroupCTDResultWithCI(
+            model_name=model_name,
+            subgroup_var=subgroup_var,
+            n_bootstrap=n_bootstrap,
+            random_state=random_state,
+        )
+
+        groups = sorted(set(subgroup_assignments.values()))
+
+        for group in groups:
+            indices = np.asarray(
+                [i for i, p in enumerate(patnos) if subgroup_assignments.get(p) == group],
+                dtype=int,
+            )
+            n_g = int(indices.size)
+            result.per_group_n[group] = n_g
+            if n_g < self.min_subgroup_size:
+                result.flagged_groups.append(group)
+
+            if n_g < 2:
+                # Not even resolvable; record NaNs
+                result.per_group_ctd[group] = float("nan")
+                result.per_group_ctd_lo[group] = float("nan")
+                result.per_group_ctd_hi[group] = float("nan")
+                result.per_group_n_events[group] = 0
+                continue
+
+            cif = preds["cif"]
+            ev = preds["event_idxs"]
+            tb = preds["time_bins"]
+            cens = preds["censored"]
+
+            # Convert to tensors uniformly
+            def _t(x):
+                return x if isinstance(x, torch.Tensor) else torch.as_tensor(x)
+
+            sub = {
+                "cif": _t(cif)[indices],
+                "event_idxs": _t(ev)[indices],
+                "time_bins": _t(tb)[indices],
+                "censored": _t(cens)[indices].to(dtype=torch.bool),
+            }
+            point = compute_ctd(sub)
+            boot = bootstrap_ctd_ci(sub, n_bootstrap=n_bootstrap, random_state=random_state)
+
+            result.per_group_ctd[group] = float(point)
+            result.per_group_ctd_lo[group] = float(np.quantile(boot, 0.025))
+            result.per_group_ctd_hi[group] = float(np.quantile(boot, 0.975))
+            result.per_group_n_events[group] = int(
+                (~sub["censored"].cpu().numpy().astype(bool)).sum()
+            )
+
+        return result
+
+
+def subgroup_ctd_with_ci_to_dict(r: SubgroupCTDResultWithCI) -> dict:
+    return {
+        "model_name": r.model_name,
+        "subgroup_var": r.subgroup_var,
+        "per_group_ctd": r.per_group_ctd,
+        "per_group_ctd_ci_lower": r.per_group_ctd_lo,
+        "per_group_ctd_ci_upper": r.per_group_ctd_hi,
+        "per_group_n": r.per_group_n,
+        "per_group_n_events": r.per_group_n_events,
+        "flagged_groups": r.flagged_groups,
+        "n_bootstrap": r.n_bootstrap,
+        "random_state": r.random_state,
     }
