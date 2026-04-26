@@ -17,7 +17,7 @@ All PPMI/BioFIND/PDBP/HBS raw tables, NSD-ISS staging, features, longitudinal tr
 ```
 postgresql+psycopg2://blair.dupre@localhost:5432/giman_research
 ```
-Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 741 MB · 193 tables across 14 schemas** (verified 2026-04-24 (post-paper1-site-assignments-full-load)).
+Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre` · Password: `giman_local_2026` (TCP only; local socket = trust auth) · **Size: 763 MB · 196 tables across 14 schemas** (verified 2026-04-24 (post-paper12-wang-destrieux-load)).
 
 **Schemas:**
 
@@ -34,7 +34,7 @@ Host: `localhost` · Port: `5432` · DB: `giman_research` · User: `blair.dupre`
 | `longitudinal` | 4 | `longitudinal_nsd_iss` (16,699 visits), `transition_events` (2,859), `stage_episodes`, `censored_patients` |
 | `paper3` | 1 | `longitudinal_features` (16,699 rows × 48 cols) |
 | `ledd` | 2 | `concomitant_medication_ledd` (9,583 rows, Apr 2026), `use_of_pd_medication` |
-| `mechanistic` | 30 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke + Q2 gate verdict, Paper 11 SciML configs, **Paper 12 W6 Wang FastSurfer features `paper12_wang_features` (400 scans × 161 pts × 109 structures = 43,600 rows, 2026-04-22)**) |
+| `mechanistic` | 33 | Phase 1–5 outputs (posteriors, LOO, counterfactuals, Phase 4 assembled data, Phase 5 Blocks 4/5, ch9.6 GFAP longitudinal, Paper 12 Phase 1 v6 smoke + Q2 gate verdict, Paper 11 SciML configs, **Paper 12 W6 Wang FastSurfer Phase 1 `paper12_wang_features` (400 scans × 161 pts × 109 structures = 43,600 rows, 2026-04-22)**, **Paper 12 W6 Wang FastSurfer Phase 2 surface recon `paper12_wang_dkt_thickness` (24,304 rows = 392 scans × 31 DKT regions × 2 hemis, 158 pts, 5 scans qc_flag='low_entorhinal_thickness_review', 2026-04-24)** + **`paper12_wang_aseg_postrecon` (25,480 rows = 392 scans × 65 post-recon aseg structures)** + **`paper12_wang_destrieux_thickness` (58,164 rows = 393 scans × 74 Destrieux regions × 2 hemis, 158 pts, Wang 2025's 148-feature atlas, 2026-04-24)**) |
 | `reference` | 9 | LONI data dictionaries, harmonized code lists, biomarker dashboards, PPMI project catalog, `phase5_bibliography` |
 | `audit` | 12 | Defense-prep claim lineage — `chapter`, `citation`, `citation_use`, `claim`, `code_artifact`, `data_source` and link tables |
 
@@ -1515,3 +1515,40 @@ All 11 dissertation papers have submission packages under `outputs/mechanistic_t
 ### Resume anchor
 
 See `Docs/NEXT_STEPS_2026-04-21.md` for post-compact resume actions + key numbers + reproduction SQL.
+
+## Session 2026-04-25 — Paper 1 R8 closure → Paper 3+4 critical fixes (subagent-driven-development)
+
+Five commits on `feat/ch9-6-multichannel`. Subagent-driven-development workflow per `Docs/documentation_lifecycle_protocol.md` Cycles A/B/C.
+
+### Paper 1 R8 (rigorous.review by ETH Zurich) — closed
+- **`5029f7d`** R8 15-item triage: 14 addressed (prose + IRB + Severson 2021 cite + Riley 2020 sample-size + define jargon + soften "no ML model" novelty), 1 N/A (prospective design infeasible — NSD-ISS is a 2024 framework, no prospective cohort exists).
+- **`5209028`** SEO follow-on: title hybrid (spell out NSD-ISS), IEEEkeywords block (8 terms), abstract environment wrap. PDF: 25 pages, clean compile.
+
+### Paper 3+4 npj-DM — WS-P3-14 + WS-P3-CRIT-A
+- **`6a718d8`** WS-P3-14 LRRK2/GBA/APOE carrier subgroup integration. **PARTIAL verdict**: H1 fairness ✓, H2 interaction ✓, H3 conditional coverage ✗ (3-9pp deviations on carrier strata). Per-stratum N (mutual-exclusive defs): LRRK2+ 175, APOE+only 375, GBA+only 79 (per-fold mean 50, range 10-92), Non-carrier 1547. Created `supplementary.tex` §S-3 with 4 tables. Added `bostrom2025mondrian` to bibliography.
+- **`62afa83`** WS-P3-14 micro-fixes per code-quality review (8→6 hypothesis grid + SHA placeholder substitution).
+- **`f8a7c54`** **WS-P3-CRIT-A IPCW formula fix** per Candès 2023 — load-bearing methodological correction. Reviewer3.com #2 flagged that censored-survivor weight `1/G(C_i)` and uncensored-event weight `1.0` violated Candès 2023 Section 3 (correct: 3-case formula). **Coverage impact (mean across 5 folds):**
+
+  | Model | CL | Pre-fix | Post-fix | Δ |
+  |---|---|---|---|---|
+  | DeepHit | 90% | 0.817 | **0.902** | +8.47 pp |
+  | DeepHit | 95% | 0.911 | **0.951** | +3.93 pp |
+  | Graph-DT | 90% | 0.818 | **0.905** | +8.67 pp |
+  | Graph-DT | 95% | 0.914 | **0.953** | +3.88 pp |
+
+  All 14 (model × cause) cells improved 7-10 pp; ALL now within ±0.01 of nominal. `calibration.py` had same bug pattern — fixed; ECE max updated `<0.009` → `<0.012`. Forward-vs-backward gap narrowed: 7.0 → 5.7 pp; forward now meets nominal (0.910); backward still below (0.854). Pre-fix outputs snapshotted to `outputs/paper4/conformal/_pre_ipcw_fix/`. 4 new TDD unit tests at `tests/paper4/test_conformal_ipcw.py`.
+
+### Reviewer-feedback inventory NEW this session
+- **rigorous.review (ETH Zurich) Paper 3+4: 15 items** delivered mid-session — all DEFERRED to next-session prose batch (mirror Paper-1 R8 pattern).
+- **reviewer3.com Paper 3+4: 15 items** delivered same — 2 ADDRESSED (#2 IPCW = CRIT-A; #4 partial via WS-P3-14 Mondrian recommendation), 13 DEFERRED. Critical deferred: #1 LOFO contamination (needs Threadripper for nested CV), #3 Fisher's method (CRIT-B Mac, 0.5d), #4 Mondrian implementation (14b Mac, 1d), #5 LOFO variance (Threadripper).
+
+### Mac-doable workstream queue (deferred to next session)
+**Tier 0 critical:** WS-P3-CRIT-B Fisher's replacement; WS-P3-14b Mondrian impl. **Tier 1 (existing plan):** WS-P3-17 imputation, WS-P3-6 Markov metrics, WS-P3-S3 Markov row, WS-P3-8 calibration suite (must use post-CRIT-A IPCW), WS-P3-2 subject bootstrap, WS-P3-15 faithfulness, WS-P3-10 HSMM (rpy2; R 4.5.1 confirmed), WS-P3-7c Fine-Gray (rpy2). **Tier 2 prose batch:** 9 rigorous.review items + IRB + 18-feature list + HPO description.
+
+### SQL / audit-DB hygiene
+- No SQL schema changes this session (registry unchanged at 14 schemas / 196 tables / 763 MB)
+- **Audit DB refresh DEFERRED**: WS-P3-CRIT-A changed numbers in 8+ chapter cells. On resume run `scripts/defense_prep/02_extract_numerical_claims.py` → `07_per_claim_value_verifier.py` → `99_defensibility_scorer.py` before npj-DM resubmission.
+
+### Resume anchor
+
+See `Docs/NEXT_STEPS_2026-04-26.md` for post-compact resume + Tier 0/1/2 queue + commit arc.
