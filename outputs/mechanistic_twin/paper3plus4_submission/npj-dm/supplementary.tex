@@ -420,6 +420,80 @@ The cluster bootstrap inflates the per-fold C-td CI widths by mean $+5\%$ (Graph
 \end{itemize}
 
 % ================================================================
+% S-WS-P3-15 — GRAPH-DT ATTENTION FAITHFULNESS (Reviewer Round 2 Future-Work)
+% ================================================================
+
+\section*{S-WS-P3-15. Graph-DT Attention Faithfulness via Deletion-Shift Experiment}
+
+\subsection*{Motivation and choice of methodology}
+
+The original submission stated that the Graph-DT contributes ``patient-similarity-based interpretability'' via its kNN graph attention pathway and listed a formal faithfulness analysis as future work (WS-P3-15). Reviewer~\#3 specifically requested influence-function attribution analysis~\cite{kohliang2017influence} to verify the attribution claim. Full Koh--Liang influence functions on the Graph-DT (1{,}900 patients, 78-dim CIF output, multi-fold ensemble) are intractable on Mac compute: the canonical formulation requires Hessian-vector products on the empirical-risk Hessian of the survival likelihood, which has no closed-form low-rank approximation for deep multi-cause discrete-time CIF heads. The field-standard substitute for this kind of attribution-faithfulness probe on graph-attention models is the \emph{deletion-shift} experiment~\cite{yuan2022explainability,deyoung2020eraser}, which we report here.
+
+\subsection*{Experimental design}
+
+For each test patient $p$ in each of the five CV folds:
+
+\begin{enumerate}\itemsep=0.3em
+  \item Compute the baseline CIF prediction $\widehat{F}_p$ using the full kNN graph (1{,}900 nodes, 27{,}780 edges, $k{=}15$).
+  \item Identify the $k{=}15$ incoming edges to patient $p$'s graph node and sort by edge weight (cosine similarity prior in the Paper~3 graph construction).
+  \item For each $k_\mathrm{mask} \in \{1, 3, 5\}$:
+  \begin{itemize}\itemsep=0.15em
+    \item \textbf{Top-$k$ deletion}: drop the top-$k_\mathrm{mask}$ highest-edge-weight neighbours; recompute graph features; re-predict $\widehat{F}_p^\mathrm{top}$. Compute $\Delta_p^\mathrm{top}(k_\mathrm{mask}) = \|\widehat{F}_p - \widehat{F}_p^\mathrm{top}\|_1$.
+    \item \textbf{Random-$k$ deletion}: independently sample $n_\mathrm{seeds}{=}3$ random subsets of $k_\mathrm{mask}$ neighbours from $p$'s 15 incoming edges; recompute and re-predict each; report $\Delta_p^\mathrm{random}(k_\mathrm{mask})$ as the mean shift across the 3 seeds.
+  \end{itemize}
+  \item Define the per-patient \textbf{faithfulness gap} $\mathrm{gap}_p(k_\mathrm{mask}) = \Delta_p^\mathrm{top}(k_\mathrm{mask}) - \Delta_p^\mathrm{random}(k_\mathrm{mask})$. Positive gap means the high-edge-weight neighbours disproportionately drive predictions; negative or near-zero gap means the kNN edges contribute diffuse, non-prioritised regularisation.
+  \item Compute Spearman $\rho$ between per-neighbour edge weight and per-neighbour single-edge-deletion shift, summarising whether high-edge-weight neighbours rank higher in deletion impact.
+\end{enumerate}
+
+\subsection*{Aggregate results across $4{,}792$ test patient-episodes}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Graph-DT attention faithfulness aggregate (all 5 folds, $n{=}4{,}792$ test patient-episodes).} Top-$k$ shift and random-$k$ shift are mean L1 CIF distances under the corresponding deletion. Faithfulness gap is the per-patient difference, summarised as mean~$\pm$~SD. Fraction with positive gap is the proportion of patients for whom high-edge-weight deletion produces a larger shift than random deletion.}
+\label{tab:s_wsp315_aggregate}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{$k_\mathrm{mask}$} & \textbf{Top-$k$ shift} & \textbf{Random-$k$ shift} & \textbf{Gap (mean $\pm$ SD)} & \textbf{Fraction $>$ 0} & $\mathbf{n}$ \\
+\midrule
+1 & $0.0031$ & $0.0037$ & $-0.0006 \pm 0.0129$ & $0.316$ & $4{,}741$ \\
+3 & $0.0075$ & $0.0074$ & $+0.0001 \pm 0.0160$ & $0.433$ & $4{,}689$ \\
+5 & $0.0128$ & $0.0110$ & $+0.0018 \pm 0.0275$ & $0.491$ & $4{,}532$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Spearman correlation (per-neighbour edge weight vs per-neighbour deletion shift):} $\rho = -0.220 \pm 0.318$ across $4{,}792$ patients; fraction of patients with $\rho > 0$ is $0.211$. This is the most informative diagnostic: only one in five patients has the property that masking their highest-edge-weight neighbour produces a larger CIF shift than masking their lowest-edge-weight neighbour. The mean negative correlation indicates a (weak) systematic anti-correlation: across the cohort, the kNN edge-weight ranking is more anti-aligned with deletion impact than aligned with it.
+
+\subsection*{Interpretation}
+
+The kNN edge weights, which the Graph-DT uses to construct its patient-similarity graph and which a clinician-facing ``patients-like-you'' visualisation would normally surface as attribution-relevant, are \emph{not} informative per-patient attribution signals for Graph-DT predictions. The faithfulness gap is essentially zero ($-0.001$ to $+0.002$ in mean across $k_\mathrm{mask}$), and the per-neighbour Spearman correlation is mildly negative on average. This is consistent with the \emph{attention-is-not-explanation} literature for transformer attention~\cite{jain2019attention} (with the counter-argument that attention can be explanation under specific architectural and supervision conditions~\cite{wiegreffe2019attention}). For Graph-DT specifically, the implication is that the graph contributes:
+
+\begin{itemize}\itemsep=0.2em
+  \item \textbf{Discrimination stability via population-level regularisation} (consistent with the 28\% lower CV fold variance reported in Table~II of the main paper).
+  \item \textbf{Population-context exposure} (the architecture surfaces nearest-neighbour trajectories for clinician inspection, even though those trajectories are not attribution-faithful in the deletion-shift sense).
+\end{itemize}
+
+\noindent What it does \emph{not} provide:
+
+\begin{itemize}\itemsep=0.2em
+  \item \textbf{Per-patient attribution faithfulness}: removing top-attended neighbours produces essentially the same CIF shift as removing random neighbours.
+  \item \textbf{Clinician-decision-altering ``patients-like-you'' explanations} in the ERASER comprehensiveness sense: the graph edges are a shared regulariser, not a per-patient evidence-set.
+\end{itemize}
+
+\subsection*{Honest disclosure and impact on manuscript framing}
+
+This finding tightens the scope of the Graph-DT interpretability claim. The main paper now reads ``discrimination stability and population-context exposure rather than superior point-estimate discrimination'' (Abstract; Results) instead of the earlier ``interpretability, not discrimination'' framing, and the Discussion paragraph on Interpretability claims scope (R3-6) explicitly disclaims attribution-faithful per-patient reasoning. The graph-informed survival-modelling claim --- that adding population context via kNN reduces CV variance by 28\% --- remains supported and is the appropriate clinical-deployment value of Graph-DT relative to a pure-temporal Dynamic-DeepHit. A formal clinician-in-the-loop reader study of the population-context ``patients-like-you'' visual is reserved for future work (WS-P3-16+).
+
+\subsection*{Files and reproducibility}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{src/giman\_pipeline/paper4/faithfulness.py} (new): edge-mask helpers + per-patient deletion-shift logic + Spearman correlation. Functions: \texttt{find\_incoming\_neighbors}, \texttt{mask\_edges}, \texttt{compute\_faithfulness\_for\_patient}.
+  \item \texttt{scripts/paper3plus4/run\_attention\_faithfulness.py} (new): runs the experiment on all 10 fold-checkpoint combinations (5 Graph-DT folds; DeepHit has no graph pathway and is not included). Compute: $\sim 18$ minutes on a Mac M1 (4{,}792 patients $\times$ $\sim$0.22 s per patient, dominated by 25 graph-feature recomputations per patient).
+  \item \texttt{tests/paper3plus4/test\_faithfulness.py} (new): five TDD unit tests on synthetic graphs --- (1) \texttt{find\_incoming\_neighbors} on a 4-edge graph; (2) target node with no incoming edges; (3) \texttt{mask\_edges} drops correct columns; (4) empty drop list returns originals; (5) end-to-end \texttt{compute\_faithfulness\_for\_patient} on a synthetic 20-node graph + 2-class survival head returns a record with valid-shape \texttt{top\_k\_shift\_l1}, \texttt{random\_k\_shift\_l1\_mean}, and Spearman in $[-1, 1]$. All five pass.
+  \item \texttt{outputs/paper4/faithfulness/attention\_faithfulness.json}: per-patient records ($4{,}792$ rows) + per-fold + per-model aggregate. Random seed $42$ throughout.
+\end{itemize}
+
+% ================================================================
 % Bibliography (only references cited in S-3)
 % ================================================================
 \begin{thebibliography}{9}
@@ -437,6 +511,21 @@ A.~C.~Davison and D.~V.~Hinkley, \textit{Bootstrap Methods and Their Application
 
 \bibitem{field2007bootstrap}
 C.~A.~Field and A.~H.~Welsh, ``Bootstrapping clustered data,'' \textit{J.\ Roy.\ Statist.\ Soc.\ B}, vol.~69, no.~3, pp.~369--390, 2007. doi:\,10.1111/j.1467-9868.2007.00593.x.
+
+\bibitem{kohliang2017influence}
+P.~W.~Koh and P.~Liang, ``Understanding black-box predictions via influence functions,'' in \textit{Proc.\ ICML}, 2017, pp.~1885--1894.
+
+\bibitem{yuan2022explainability}
+H.~Yuan, H.~Yu, S.~Gui, and S.~Ji, ``Explainability in graph neural networks: a taxonomic survey,'' \textit{IEEE Trans.\ Pattern Anal.\ Mach.\ Intell.}, vol.~45, no.~5, pp.~5782--5799, 2022.
+
+\bibitem{deyoung2020eraser}
+J.~DeYoung \textit{et~al.}, ``ERASER: a benchmark to evaluate rationalized NLP models,'' in \textit{Proc.\ ACL}, 2020, pp.~4443--4458.
+
+\bibitem{jain2019attention}
+S.~Jain and B.~C.~Wallace, ``Attention is not explanation,'' in \textit{Proc.\ NAACL-HLT}, 2019, pp.~3543--3556.
+
+\bibitem{wiegreffe2019attention}
+S.~Wiegreffe and Y.~Pinter, ``Attention is not not explanation,'' in \textit{Proc.\ EMNLP-IJCNLP}, 2019, pp.~11--20.
 \end{thebibliography}
 
 \end{document}
