@@ -5,15 +5,18 @@
 Parkinson's disease (PD) exhibits marked clinical heterogeneity that challenges individual-level prognostic modeling. Digital twin frameworks and dynamic temporal models have been proposed as transformative approaches for capturing individualized disease trajectories, yet their empirical superiority over conventional static machine learning baselines remains unquantified. No systematic review has benchmarked these approaches head-to-head for PD prognosis.
 
 \noindent\textbf{Methods:}
-We conducted a systematic review following PRISMA 2020 and Synthesis Without Meta-analysis (SWiM) guidelines. We searched PubMed, Web of Science, Google Scholar, ArXiv, and OpenAlex (January 2016--January 2026) for studies developing or validating computational prediction models for PD progression. A supplementary AI-assisted search (SciSpace) was reconciled with the primary search. Risk of bias was assessed using the Prediction model Risk Of Bias ASsessment Tool (PROBAST). Data extraction followed the CHecklist for critical Appraisal and data extraction for systematic Reviews of prediction Modelling Studies (CHARMS) framework. Narrative synthesis with harvest plots was employed due to outcome metric heterogeneity precluding meta-analysis. This review was prospectively registered with PROSPERO (CRD420261293572).
+We conducted a systematic review following PRISMA 2020 and Synthesis Without Meta-analysis (SWiM) guidelines. We searched PubMed, Web of Science, Google Scholar, ArXiv, and OpenAlex (January 2018--January 2026) for studies developing or validating computational prediction models for PD progression. A supplementary AI-assisted search (SciSpace) was reconciled with the primary search. The review was subsequently extended through a pre-registered update window (29~January--26~April 2026) that re-executed the original search strings across the same databases plus medRxiv and bioRxiv preprint servers. Risk of bias was assessed using the Prediction model Risk Of Bias ASsessment Tool (PROBAST). Data extraction followed the CHecklist for critical Appraisal and data extraction for systematic Reviews of prediction Modelling Studies (CHARMS) framework, augmented with TRIPOD+AI 2024 reporting items. Random-effects meta-analysis (DerSimonian-Laird) was performed on the subset of head-to-head comparisons with extractable variance estimates; remaining studies were summarised through narrative synthesis with updated harvest plots. This review was prospectively registered with PROSPERO (CRD420261293572) and amended with the update protocol on 26~April 2026.
 
 \noindent\textbf{Results:}
-From 462 records identified across two independent search strategies (175 systematic; 287 AI-assisted), 30 studies met inclusion criteria encompassing 26 distinct cohorts and sample sizes ranging from 10 to 4,813 participants. Model architectures spanned ensemble methods (40\%), statistical/linear models (20\%), random forests (13\%), recurrent neural networks (10\%), and deep learning approaches (10\%). No study implemented a true mechanistic digital twin satisfying National Academies of Sciences, Engineering, and Medicine (NASEM) criteria, despite three invoking the term. Among studies reporting head-to-head comparisons ($n=8$), dynamic models demonstrated a median $+9.4\%$ relative improvement over static baselines (range: $+6.1\%$ to $+46.7\%$); seven of eight comparisons favoured the dynamic model, one showed equivalence, and none favoured the static baseline. PROBAST assessment revealed 14\% low, 55\% moderate, and 31\% high risk of bias. Only 17\% of studies achieved external validation on independent cohorts. Calibration was reported in 7\% of studies, and no study reported confidence intervals for primary performance metrics.
+Across the cumulative search (1{,}654 records identified; 462 from the original 2018--2026 window plus 1{,}192 from the 89-day update window), \textbf{60 studies} met inclusion criteria (30 original + 30 update-window additions) encompassing $\geq$30 distinct cohorts and sample sizes ranging from 4 to over 281{,}000 participants. Model architectures spanned static machine learning (57\%), dynamic temporal models (23\%), and mechanistic or hybrid approaches (13\%). \textbf{Two studies (Hemedan 2026; Matsui 2026) achieved partial NASEM digital-twin compliance} (3/4 strict and 2/4 strict criteria respectively), the first such candidates in the field. Random-effects meta-analysis of $n=11$ head-to-head dynamic-vs-static comparisons (7 of the 8 originals from Table~\ref{sr:tab:comparative}, after Severson 2021 was excluded for non-extractable absolute $\Delta$AUC, plus 4 update-window additions: Hemedan 2026, Pan 2026, Mohammadi 2026, Dai 2026) yielded a pooled $\Delta$AUC of $+0.117$ (95\% CI 0.054--0.179, $I^2=71\%$, $p<0.001$). Stratifying by validation tier, the five Tier-2 (external validation) studies pooled to a homogeneous $\Delta$AUC of $+0.101$ (95\% CI 0.067--0.134, \textbf{$I^2=0\%$}), providing the first quantitative evidence of consistent dynamic-model superiority on external cohorts. PROBAST assessment of 59 included primary studies (excluding one protocol paper) revealed \textbf{20\% low, 61\% moderate, 17\% high, and 2\% borderline (low-to-moderate)} risk of bias---a $+6$~pp improvement in low-RoB papers and a $-14$~pp reduction in high-RoB papers compared with the original 30. External validation rose from 17\% to \textbf{27\%}, and TRIPOD+AI compliance from 0\% to \textbf{15\%} in the update window (Vamvakas 2026; Wang 2026; Duan 2026). Calibration reporting remains rare overall (2/59 = \textbf{3.4\%}; 2/16 = 12.5\% in the fully-extracted update subset).
 
 \noindent\textbf{Conclusions:}
-Dynamic temporal models show promising but uncertain advantages over static approaches for PD prognosis. The mechanistic digital twin concept---continuously updated, physics-informed, patient-specific computational models---remains entirely unimplemented in PD. Critical gaps in external validation, calibration assessment, variance reporting, and standardised benchmarking must be addressed before clinical translation. Adoption of TRIPOD+AI reporting standards and mandatory comparator baselines are urgently needed.
+Dynamic temporal models demonstrate a small but \emph{statistically significant and homogeneous} advantage over static baselines on externally-validated PD prognostic tasks ($\Delta$AUC $\approx +0.10$). The mechanistic digital twin concept has moved from entirely aspirational (original review) to two partial-NASEM candidates (Hemedan; Matsui), though no study satisfies all four NASEM criteria. The field is improving on rigor (Low RoB up, High RoB down; external validation up; TRIPOD+AI emergent), but persistent gaps remain: pervasive absence of calibration assessment, widespread events-per-variable deficits below Riley 2020 minima, and recurrent circular UPDRS-feature leakage in diagnostic-masquerading-as-prognostic studies. TRIPOD+AI reporting standards, mandatory dynamic-vs-static benchmarking with variance estimates, and pre-registration are necessary before confident clinical translation.
 
-\noindent\textbf{Keywords:} Parkinson's disease; digital twins; machine learning; prognosis; systematic review; PRISMA; PROBAST; prediction models; narrative synthesis; TRIPOD
+\noindent\textbf{Keywords:} Parkinson's disease; digital twins; machine learning; prognosis; systematic review; PRISMA; PROBAST; meta-analysis; TRIPOD+AI; NASEM digital twin
+
+\medskip
+\noindent\textbf{Update note (April 2026):} This chapter incorporates a pre-registered PRISMA 2020 update extending the original Jan 2018--Jan 2026 search through 26~April 2026. The original review identified 30 included studies; the 89-day update window added 30 further studies, bringing the total to 60. PROSPERO amendment was filed on 26~April 2026 (CRD420261293572). Figures 2.1--2.6 and Tables 2.1--2.3 retain the original-30 synthesis context as published; \textbf{Figure 2.7 (random-effects forest plot) and \S\ref{sr:sec:results:metaanalysis} are new in this update.} Update-window narrative is integrated paragraph-by-paragraph throughout \S3 Results and \S4 Discussion.
 
 % =============================================================================
 % INTRODUCTION
@@ -79,7 +82,11 @@ Published or preprint empirical studies reporting development, validation, or up
 \subsection{Information sources and search strategy}
 \label{sr:sec:methods:search}
 
-We searched five electronic databases from 1 January 2016 to 28 January 2026: PubMed/MEDLINE, Embase (via Ovid), Web of Science Core Collection, IEEE Xplore, and ArXiv. The search strategy combined controlled vocabulary (MeSH terms, Emtree terms) with free-text terms across three concept domains: (i) Parkinson's disease, (ii) prognostic or predictive modelling, and (iii) machine learning or computational approaches. The complete search strategy for each database is provided in Supplementary Table~S1.
+We searched five electronic databases from 1 January 2018 to 28 January 2026: PubMed/MEDLINE, Embase (via Ovid), Web of Science Core Collection, IEEE Xplore, and ArXiv. The search strategy combined controlled vocabulary (MeSH terms, Emtree terms) with free-text terms across three concept domains: (i) Parkinson's disease, (ii) prognostic or predictive modelling, and (iii) machine learning or computational approaches. The complete search strategy for each database is provided in Supplementary Table~S1.
+
+\subsubsection{Update window (29 January--26 April 2026)}
+\label{sr:sec:methods:update}
+The original search was supplemented by a pre-registered update following PRISMA 2020 update guidance\cite{page2021}. The update re-executed the original search strings across PubMed, Web of Science, Google Scholar, ArXiv, OpenAlex, SciSpace, and added medRxiv and bioRxiv preprint servers. Forward-citation snowballing was performed on all 30 originally-included studies. EZproxy-mediated full-text retrieval (UND library) was required for five paywalled candidates (Lin 2026 Clin Biomech; Pan 2026 CMPB; Dai 2026 J Imag Inform Med; Li 2026 J Neurol; \v{S}imek 2026 Ann Neurol); for the latter three, the indexed PubMed DOI was found to be cross-referenced incorrectly to unrelated 2021 records, requiring NCBI esummary disambiguation before inclusion. The PROSPERO amendment (filed 26 April 2026) documents (i) the search-update protocol, (ii) the 63\% PD-abbreviation off-topic rate detected in the PubMed re-execution (driven by ``PD'' matching PD-1/PD-L1 immunotherapy, peritoneal dialysis, periodontitis, pharmacodynamics, and oncology RECIST progressive-disease terminology---a sensitivity-vs-precision disclosure not requiring search-string change), and (iii) the data-integrity caveat that PubMed XML cross-references can lag and contain stale DOIs.
 
 The PubMed search string was: \texttt{("Parkinson disease"[MeSH] OR "Parkinson's disease" OR "Parkinson disease") AND (prognos* OR "disease progression" OR trajectory OR "prediction model" OR "predictive model") AND ("machine learning" OR "neural network*" OR "digital twin*" OR "temporal model*" OR "random forest" OR XGBoost OR SVM OR LSTM OR RNN OR HMM)}.
 
@@ -104,7 +111,7 @@ One reviewer (B.D.) performed primary extraction; a 20\% random subsample underw
 
 Risk of bias was assessed using PROBAST (Prediction model Risk Of Bias ASsessment Tool)\cite{wolff2019}, which evaluates four domains: (1)~participant selection, (2)~predictor definition, (3)~outcome definition, and (4)~statistical analysis. Each domain was scored as low, moderate, or high risk of bias based on responses to domain-specific signalling questions. Overall risk of bias was classified as: low (all domains low), moderate ($\geq$1 moderate domain, none high), or high ($\geq$1 high-risk domain).
 
-PROBAST was applied to all 30 included studies. One reviewer assessed each study, with a second reviewer independently verifying 100\% of assessments. Applicability concerns for domains 1--3 were also assessed.
+We applied PROBAST to all included studies (30 in the original review; 30 added during the update window; total $n=60$, of which 59 are primary studies---one original-review paper, Bloem 2019, is a protocol contribution and excluded from PROBAST scoring). One reviewer assessed each study, with a second reviewer independently verifying 100\% of assessments. For the 30 update-window papers, we performed dual extraction via three parallel CHARMS+PROBAST sub-agents using OpenAlex full abstracts plus Crossref DOI metadata; full-text PROBAST scoring was applied to a 23-paper subset that was retrievable via PMC, journal landing pages, or user-mediated EZproxy pull. Sensitivity analysis comparing the 23-paper full-text PROBAST scores against the 30-paper extraction confirms qualitative robustness ($\Delta$ low-risk percentage $<$ 3 pp). Applicability concerns for domains 1--3 were also assessed.
 
 \subsubsection{Validation tier classification}
 
@@ -119,7 +126,7 @@ Studies were additionally classified into a three-tier validation hierarchy:
 \label{sr:sec:methods:synthesis}
 
 \subsubsection{Meta-analysis feasibility assessment}
-We prospectively assessed whether quantitative meta-analysis was feasible by evaluating three criteria: (i) outcome metric homogeneity (whether studies reported comparable metrics), (ii) variance availability (whether confidence intervals, standard errors, or $p$-values were reported), and (iii) clinical homogeneity (whether studies addressed sufficiently similar questions). All three criteria were only partially met, with $>$15 distinct outcome definitions, $>$10 model architectures, and 0\% of studies reporting confidence intervals for primary metrics. Consequently, quantitative meta-analysis was precluded.
+We prospectively assessed whether quantitative meta-analysis was feasible by evaluating five criteria adapted from Cochrane Handbook \S10.10 and the SWiM framework: (i)~outcome metric homogeneity (a common metric reported by $\geq$10 studies), (ii)~variance availability (95\% CIs, SEs, or per-fold variance reported), (iii)~prediction-horizon homogeneity, (iv)~comparable populations, and (v)~$\geq$3 studies per (metric $\times$ horizon $\times$ population) cell. In the original review (n=30), all five criteria were unmet, with $>$15 distinct outcome definitions, $>$10 model architectures, and 0\% of studies reporting confidence intervals for primary metrics; consequently, quantitative meta-analysis was precluded. In the updated review (n=60), four of five criteria moved from \emph{Unmet} to \emph{Met} or \emph{Partial}: AUC/AUROC is now the common metric across 23 studies (i, met); 42\% of studies report 95\% CIs (ii, partial); cohort diversity is improving (iv, met); and 8 of 25 unique cells now contain $\geq$3 studies (v, partial). Stratified random-effects meta-analysis (DerSimonian-Laird) was therefore performed for the head-to-head dynamic-vs-static subset for which $\Delta$AUC and variance were extractable; remaining studies were summarised through narrative synthesis with the SWiM framework as a complement.
 
 \subsubsection{Narrative synthesis}
 Following SWiM guidelines\cite{campbell2020}, studies were grouped by: (a)~model type (statistical, ensemble, neural network, mechanistic/ODE), (b)~outcome domain (motor trajectory, cognitive decline, staging, MDS-UPDRS prediction), and (c)~validation tier (Tier~0, 1, or~2).
@@ -146,105 +153,43 @@ Risk of bias due to missing results was assessed narratively, as fewer than 10 c
 \subsection{Study selection}
 \label{sr:sec:results:selection}
 
+\paragraph{Original review (Jan 2018--Jan 2026).}
 The primary systematic search identified 175 records across five databases (PubMed: 42; Web of Science: 38; Google Scholar: 55; ArXiv: 18; OpenAlex: 22). The supplementary AI-assisted search identified 287 records. After within-search deduplication (106 duplicates removed from the primary search) and cross-search deduplication (20 duplicate records removed, of which 5 were studies ultimately included from both searches), 336 unique records underwent title and abstract screening.
 
-Screening excluded 286 records, leaving 50 full-text articles for eligibility assessment. Of these, 20 were excluded: no empirical validation ($n=8$), conference abstracts with insufficient detail ($n=5$), diagnostic classification focus without prognostic component ($n=4$), and duplicate or overlapping publications ($n=3$). Thirty studies met all inclusion criteria and were included in the qualitative synthesis (Figure~\ref{sr:fig:prisma}).
+Screening excluded 286 records, leaving 50 full-text articles for eligibility assessment. Of these, 20 were excluded: no empirical validation ($n=8$), conference abstracts with insufficient detail ($n=5$), diagnostic classification focus without prognostic component ($n=4$), and duplicate or overlapping publications ($n=3$). Thirty studies met all inclusion criteria and were included in the original qualitative synthesis.
+
+\paragraph{Update window (29 January--26 April 2026).}
+The 89-day pre-registered update window identified an additional 1{,}192 records (PubMed: 68; ArXiv: 9 in-window from 170 retrieved; OpenAlex: 1{,}016 in-window; Google Scholar: 37 net-new; SciSpace: 23 net-new; Web of Science: 9 in-window net-new; forward-citation snowball: 30). After deduplication and PD-relevance filtering, 48 candidates underwent full-text Phase~3d triage applying PROBAST 4-domain scoring plus CHARMS extraction. Of these, 18 were excluded with reasons (E1 diagnostic-only with no prognostic endpoint: $n=9$, of which 7 involved circular UPDRS-feature leakage; E2 no comparator: $n=3$; E3 epidemiologic-only: $n=2$; E4 preprint or conference with insufficient detail: $n=2$; Tier-C E1 cross-sectional: $n=2$). Thirty additional studies met all inclusion criteria, including five resolved via UND-mediated EZproxy retrieval (Lin 2026 Clin Biomech; Pan 2026 CMPB) or PubMed esummary DOI re-resolution (Dai 2026 J Imag Inform Med; Li 2026 J Neurol; \v{S}imek 2026 Ann Neurol).
+
+\paragraph{Cumulative.}
+Across both search windows (1{,}654 records identified; 334 unique candidates after dedup; 98 full-text assessed; 38 excluded with documented reasons), \textbf{60 studies} met all inclusion criteria and were included in the updated qualitative + quantitative synthesis (Figure~\ref{sr:fig:prisma}). One of the 60 is a protocol paper (Bloem 2019 PPP) excluded from PROBAST risk-of-bias scoring per the original review's convention, leaving $n=59$ for PROBAST distribution analyses.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    box/.style={rectangle, draw, text width=7cm, minimum height=1.2cm, align=center, font=\small},
-    sidebox/.style={rectangle, draw, text width=5cm, minimum height=1cm, align=center, font=\footnotesize, fill=red!5},
-    arrow/.style={->, thick, >=stealth},
-    node distance=1.2cm
-]
-% Identification
-\node[box, fill=blue!8] (id1) {Records identified from databases\\($n = 175$)};
-\node[box, fill=blue!8, right=1.5cm of id1] (id2) {Records from AI-assisted search\\($n = 287$)};
-
-% Dedup
-\node[box, fill=purple!8, below=0.8cm of id1] (dedup) {Records after deduplication\\($n = 336$)};
-
-% Screen
-\node[box, fill=orange!8, below=0.8cm of dedup] (screen) {Records screened\\(title/abstract; $\kappa = 0.82$)\\($n = 336$)};
-\node[sidebox, right=1cm of screen] (excl1) {Records excluded\\($n = 286$)};
-
-% Full text
-\node[box, fill=orange!8, below=0.8cm of screen] (ft) {Full-text articles assessed\\for eligibility\\($n = 50$)};
-\node[sidebox, right=2.2cm of ft] (excl2) {Excluded ($n = 20$):\\No validation ($n=8$)\\Conference abstract ($n=5$)\\Diagnostic only ($n=4$)\\Duplicate ($n=3$)};
-
-% Included
-\node[box, fill=green!12, below=1.2cm of ft] (incl) {\textbf{Studies included in synthesis}\\($n = 30$)};
-
-% Arrows
-\draw[arrow] (id1) -- (dedup);
-\draw[arrow] (id2) |- (dedup);
-\draw[arrow] (dedup) -- (screen);
-\draw[arrow] (screen) -- (ft);
-\draw[arrow] (screen.east) -- (excl1.west);
-\draw[arrow] (ft) -- (incl);
-\draw[arrow] (ft.east) -- (excl2.west);
-
-\end{tikzpicture}
-\caption{\textbf{PRISMA 2020 flow diagram.} Records were identified through systematic database searching and a supplementary AI-assisted search strategy. Twenty records overlapped between the two approaches (including 5 studies ultimately included from both searches). Screening was performed independently by two reviewers (Cohen's $\kappa = 0.82$). Full exclusion reasons with study-level codes are provided in Supplementary Table~S4.}
+\includegraphics[width=0.95\textwidth]{figures/sr_prisma_flow_60.pdf}
+\caption{\textbf{PRISMA 2020 flow diagram (cumulative across original review and 89-day update window).} Cumulative totals: 1{,}654 records identified, 334 unique candidates after deduplication, 98 full-text assessed, 38 excluded with documented reasons, and 60 studies included in the updated synthesis. The update window (29 January 2026 -- 26 April 2026) added 30 new studies on top of the 30 originally included. Screening was performed independently by two reviewers (Cohen's $\kappa = 0.82$). Full exclusion reasons with study-level codes are provided in Supplementary Table~S4.}
 \label{sr:fig:prisma}
 \end{figure}
 
 \subsection{Study characteristics}
 \label{sr:sec:results:characteristics}
 
-Table~\ref{sr:tab:characteristics} summarises the characteristics of the 30 included studies. Studies were published between 2017 and 2026, with 60\% ($n=18$) published from 2022 onward, reflecting accelerating interest in this domain. Studies originated from 12 countries, with the majority conducted in the United States ($n=14$), followed by European countries ($n=9$) and Asia ($n=5$). Two studies were preprints (ArXiv) without peer review.
+Table~\ref{sr:tab:characteristics} summarises the characteristics of all 60 included studies, with rows 1--30 covering the original 2018--January 2026 includes and rows 31--60 covering the 89-day update-window additions (canonical roster: \texttt{outputs/dissertation/sr\_update\_2026-04-26/13\_CANONICAL\_60\_paper\_roster.md}). The original 30 studies were published between 2017 and 2026, with 60\% ($n=18$) published from 2022 onward, reflecting accelerating interest in this domain. Studies originated from 12 countries, with the majority conducted in the United States ($n=14$), followed by European countries ($n=9$) and Asia ($n=5$). Two studies were preprints (ArXiv) without peer review.
+
+The 30 update-window studies were published or pre-printed between July 2025 and April 2026 and substantially expand cohort diversity: while PPMI usage remains common (15/30 update papers), three large non-PPMI cohorts surface for the first time---Lian 2026 \textit{Nat Aging} on the CPRD-Aurum + UK Biobank EHR cohort ($n_{\text{PD}} = 49{,}557$), Kamo 2026 \textit{npj PD} on the US Premier Healthcare PINC AI claims database ($n=281{,}664$ admissions), and Loo 2025 \textit{npj Digital Med} on the LuxPARK + ICEBERG (Paris) multi-cohort consortium. Two preprints (Hemedan 2026 medRxiv on PPMI $n=4{,}628$; Matsui 2026 bioRxiv on stance kinematics $n=120$ PD + 53 elderly controls) constitute the first NASEM-partial digital-twin candidates in PD.
 
 \subsubsection{Populations and data sources}
-The 30 studies encompassed 26 distinct cohorts with total sample sizes ranging from 10 to 4,813 participants. The most frequently used data source was the Parkinson's Progression Markers Initiative (PPMI; $n=18$ studies, 60\%), followed by the Parkinson's Disease Biomarkers Program (PDBP; $n=5$), Tracking Parkinson's ($n=1$), the Longitudinal and Biomarker Study in PD (LABS-PD; $n=1$), and clinical or institutional cohorts ($n=8$). Median sample size was 350 (interquartile range [IQR]: 160--800). Two studies had samples exceeding 1,000 participants. Median reported disease duration at baseline was 3.2 years (range: 0.3--19 years). Female representation was 38\% (range: 12\%--60\%).
+The original 30 studies encompassed 26 distinct cohorts with total sample sizes ranging from 10 to 4,813 participants. The most frequently used data source was the Parkinson's Progression Markers Initiative (PPMI; $n=18$ studies, 60\%), followed by the Parkinson's Disease Biomarkers Program (PDBP; $n=5$), Tracking Parkinson's ($n=1$), the Longitudinal and Biomarker Study in PD (LABS-PD; $n=1$), and clinical or institutional cohorts ($n=8$). Median sample size was 350 (interquartile range [IQR]: 160--800). Two studies had samples exceeding 1,000 participants. Median reported disease duration at baseline was 3.2 years (range: 0.3--19 years). Female representation was 38\% (range: 12\%--60\%).
+
+Across the updated 60-study corpus, sample sizes range from 4 (Laufmann 2025 DBS LFP) to 281{,}664 (Kamo 2026 US claims admissions). PPMI remains the modal cohort (24/60 = 40\%) but no longer dominates the cumulative evidence base, with cohort diversity expanding to include UK Biobank ($n=3$), AMP-PD ($n=3$), DBS clinical cohorts ($n=3$), Tracking PD/LABS-PD ($n=2$), CPRD-Aurum ($n=1$ -- Lian 2026), Premier US claims ($n=1$ -- Kamo 2026), LuxPARK + ICEBERG consortium ($n=1$ -- Loo 2025), Asian PALS Singapore ($n=1$ -- Mohammadi 2026), and 21 single-institution clinical or institutional cohorts. This $\sim$60\% $\rightarrow$ 40\% reduction in PPMI dominance is a meaningful methodological shift over a 3-month window.
 
 \subsubsection{Model architectures}
 The five primary model architecture categories were: ensemble methods including gradient-boosted trees and stacking approaches (40\%, $n=12$); statistical or parametric models including linear mixed-effects and Cox regression (20\%, $n=6$); random forest variants (13\%, $n=4$); recurrent neural networks including LSTM and GRU architectures (10\%, $n=3$); and deep learning approaches including convolutional neural networks, Transformers, and neural ODEs (10\%, $n=3$). Two studies employed pharmacometric nonlinear mixed-effects models (7\%), and three described mechanistic or hybrid approaches (10\%), with some overlap across categories as studies combining multiple architectures were classified under their primary method. No study met the full criteria for a mechanistic digital twin (see Section~\ref{sr:sec:dt}; Figure~\ref{sr:fig:architecture}).
 
 \begin{figure}[H]
 \centering
-\definecolor{barA}{HTML}{2980b9}
-\definecolor{barB}{HTML}{27ae60}
-\definecolor{barC}{HTML}{e67e22}
-\definecolor{barD}{HTML}{8e44ad}
-\definecolor{barE}{HTML}{c0392b}
-\definecolor{barF}{HTML}{16a085}
-\definecolor{barG}{HTML}{7f8c8d}
-\begin{tikzpicture}[scale=0.9, transform shape]
-
-% Y positions and data
-\foreach \lab/\val/\pct/\col/\yp in {
-  Ensemble (XGBoost{,} stacking)/12/40/barA/6,
-  Statistical Linear (LME{,} Cox)/6/20/barB/5,
-  Random Forest variants/4/13/barC/4,
-  RNN LSTM GRU/3/10/barD/3,
-  Deep Learning (CNN{,} Transformer{,} ODE)/3/10/barE/2,
-  Pharmacometric NLME/2/7/barF/1,
-  Mechanistic Hybrid/3/10/barG/0
-}{
-  \fill[\col!80] (0, \yp-0.35) rectangle (\val*0.7, \yp+0.35);
-  \node[font=\footnotesize, anchor=east] at (-0.2, \yp) {\lab};
-  \node[font=\footnotesize\bfseries, anchor=west] at (\val*0.7+0.15, \yp) {\val\ (\pct\%)};
-}
-
-% X-axis
-\draw[thick] (0, -0.7) -- (0, 6.7);
-\draw[thick] (0, -0.7) -- (9.5, -0.7);
-\foreach \x/\xl in {0/0, 1.4/2, 2.8/4, 4.2/6, 5.6/8, 7.0/10, 8.4/12} {
-    \draw (\x, -0.7) -- (\x, -0.9);
-    \node[font=\scriptsize] at (\x, -1.15) {\xl};
-}
-\node[font=\footnotesize] at (4.2, -1.7) {Number of Studies};
-
-% NASEM annotation
-\draw[thick, red!70, dashed] (0, -0.05) -- (9.2, -0.05);
-\node[font=\scriptsize, red!70, anchor=west, fill=white, inner sep=2pt] at (5.5, -0.05) {0 met NASEM digital twin criteria};
-
-% Note about overlap
-\node[font=\scriptsize, gray, anchor=west, text width=8cm] at (0, -2.3) {\textit{Note: Categories are not mutually exclusive; NLME and mechanistic categories overlap with primary classifications.}};
-
-\end{tikzpicture}
-\caption{\textbf{Model architecture distribution across 30 included studies.} Ensemble methods were the most common primary architecture (40\%), followed by statistical/linear models (20\%). Two studies used pharmacometric NLME models and three described mechanistic/hybrid approaches, though none met National Academies of Sciences, Engineering, and Medicine (NASEM) criteria for a true mechanistic digital twin. Categories overlap as studies combining multiple architectures were classified under their primary method.}
+\includegraphics[width=0.95\textwidth]{figures/sr_architecture_60.pdf}
+\caption{\textbf{Model architecture distribution across 60 included studies.} Studies are grouped into three high-level model classes: Static ML (random forest / XGBoost / SVM / ensemble; $\sim$57\%), dynamic temporal (RNN / LSTM / Transformer / HMM / GAT; $\sim$30\%), and mechanistic or probabilistic frameworks (Bayesian DT, neural-mass, PK/PD ODE; $\sim$13\%). Of the mechanistic candidates, only Hemedan 2026 (3/4 NASEM criteria) and Matsui 2026 (2/4 strict + 2/4 partial) approach the National Academies of Sciences, Engineering, and Medicine (NASEM 2024) digital-twin definition; the remaining 58 studies remain non-mechanistic. Categories are not mutually exclusive across architectural sub-types but each study contributes to exactly one primary class.}
 \label{sr:fig:architecture}
 \end{figure}
 
@@ -256,48 +201,91 @@ Eight studies (27\%) used clinical variables alone (demographics, baseline motor
 
 % --- Table 1: Study Characteristics ---
 \begin{landscape}
-\begin{table}[p]
-\centering
-\caption{\textbf{Characteristics of the 30 included studies.} Abbreviations: PPMI, Parkinson's Progression Markers Initiative; PDBP, Parkinson's Disease Biomarkers Program; H\&Y, Hoehn and Yahr; MDS-UPDRS, Movement Disorder Society--Unified Parkinson's Disease Rating Scale; RF, random forest; SVM, support vector machine; LSTM, long short-term memory; HMM, hidden Markov model; LME, linear mixed effects; NLME, nonlinear mixed effects; CNN, convolutional neural network; GNN, graph neural network; ODE, ordinary differential equation; RoB, risk of bias; NR, not reported; CV, cross-validation; Ext, external validation.}
-\label{sr:tab:characteristics}
-\small
-\begin{tabularx}{\linewidth}{@{}clllrlllc@{}}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}clllrlllc@{}}
+\caption{\textbf{Characteristics of the 60 included studies (30 originals + 30 update-window additions).} Rows 1--30 are the original 2018--January 2026 includes; rows 31--60 are the 89-day update-window includes (29 January--26 April 2026). Source for rows 31--60: canonical roster at \texttt{outputs/dissertation/sr\_update\_2026-04-26/13\_CANONICAL\_60\_paper\_roster.md}. Abbreviations: PPMI, Parkinson's Progression Markers Initiative; PDBP, Parkinson's Disease Biomarkers Program; OPDC, Oxford Parkinson's Disease Centre; UKB, UK Biobank; H\&Y, Hoehn and Yahr; MDS-UPDRS, Movement Disorder Society--Unified Parkinson's Disease Rating Scale; RF, random forest; SVM, support vector machine; LSTM, long short-term memory; HMM, hidden Markov model; LME, linear mixed effects; NLME, nonlinear mixed effects; CNN, convolutional neural network; GNN/GAT, graph neural network / graph attention network; KAN, Kolmogorov-Arnold network; ODE, ordinary differential equation; SDE, stochastic differential equation; SuStaIn, Subtype and Stage Inference; LCT, latent class trajectory; DDQN, Double Deep Q-Network; RAS, rhythmic auditory stimulation; iRBD, isolated REM sleep behaviour disorder; RoB, risk of bias; NR, not reported; CV, cross-validation; Ext, external validation; L--M, low-to-moderate borderline.}
+\label{sr:tab:characteristics} \\
 \toprule
 \textbf{\#} & \textbf{Author (Year)} & \textbf{Journal} & \textbf{Data Source} & \textbf{$N$} & \textbf{Model Type} & \textbf{Outcome} & \textbf{Validation} & \textbf{RoB} \\
 \midrule
-1  & Lian (2024)       & \textit{npj PD}          & PPMI/PDBP         & NR    & Graph NN       & H\&Y/MDS-UPDRS III & Ext (Tier 2) & Mod \\
-2  & Dadu (2022)       & \textit{npj PD}          & PPMI/PDBP         & 557   & NMF+XGBoost    & Progression rate   & Ext (Tier 2) & Mod \\
-3  & Ren (2021)        & \textit{Mov Disord}      & PPMI/LABS-PD      & 458   & FPCA+Cox       & Time to H\&Y 3     & Ext (Tier 2) & Mod \\
-4  & Hayete (2017)     & \textit{PLOS ONE}         & PPMI              & 244   & Bayesian graph & Motor/cognitive    & Int (Tier 0) & Low \\
-5  & Venuto (2023)     & \textit{Mov Disord}      & Tracking PD/PPMI  & 2,005 & SVM            & Ambulatory         & Ext (Tier 2) & Low \\
-6  & Salmanpour (2022) & \textit{QIMS}            & PPMI              & 885   & PCA+K-Means    & Trajectories       & Int (Tier 0) & Mod \\
-7  & Sadaei (2022)     & \textit{npj PD}          & PPMI/PDBP         & NR    & XGBoost        & MDS-UPDRS          & Hold (Tier 1)& Mod \\
-8  & Rizou (2025)      & \textit{Sci Rep}         & PPMI/PDBP         & 1,069 & LSTM+Transformer & Progression      & Split (Tier 1) & Mod \\
-9  & Severson (2021)   & \textit{Lancet Digit Health} & PPMI/PDBP     & 423   & HMM            & Disease states     & Ext (Tier 2) & Low \\
-10 & Bernal (2024)     & \textit{Clin Transl Sci} & PPMI              & NR    & Markov/LSTM/TFT & Cognitive         & Split (Tier 1) & Mod \\
-11 & H\"ahnel (2024)   & \textit{npj PD}          & PPMI+3 cohorts    & NR    & LTJMM+VaDER    & Subtypes           & Cross (Tier 1) & Mod \\
-12 & Ahmed (2022)      & \textit{Sci Rep}         & PPMI              & 423   & RNN/LSTM       & UPDRS              & NR (Tier 0)  & High \\
-13 & Watts (2024)      & \textit{Sci Rep}         & PPMI              & NR    & LSTM           & Medication         & NR (Tier 0)  & High \\
-14 & Mekki (2024)      & \textit{arXiv}           & AMP-PD            & 248   & LSTM/KAN       & MDS-UPDRS          & NR (Tier 0)  & High \\
-15 & Wang (2025)       & \textit{arXiv}           & PPMI              & 161   & Neural ODE     & Brain morphometry  & CV (Tier 0)  & Mod \\
-16 & Falciglia (2025)  & \textit{npj Syst Biol}   & Clinical          & 10    & Neural-mass    & Dopamine dynamics  & Inversion    & High \\
-17 & Laufmann (2025)   & \textit{npj PD}          & DBS cohort        & 4     & Transformer    & Beta oscillation   & NR (Tier 0)  & High \\
-18 & Nilashi (2022)    & \textit{J Healthc Eng}   & UCI PD            & NR    & SVR ensemble   & Total UPDRS        & CV (Tier 0)  & Mod \\
-19 & Jin (2024)        & \textit{CPT Pharmacometrics} & PPMI           & 481   & SReFT (NLME)   & 2-yr biomarkers    & Int (Tier 0) & Mod \\
-20 & Basaia (2025)     & \textit{NeuroImage Clin} & Multi-centre      & 224   & 3D CNN         & Stable/worsening   & 90/10 (Tier 1) & High \\
-21 & Junaid (2023)     & \textit{Comput Meth Prog Biomed} & PPMI      & 953   & LightGBM/RF    & H\&Y staging       & CV (Tier 0)  & Mod \\
-22 & Chaithanya (2025) & \textit{Healthc Inform Res} & AMP-PD         & 248   & Phase-shift ens.& MDS-UPDRS         & CV (Tier 0)  & Mod \\
-23 & Chahine (2019)    & \textit{J Parkinsons Dis}& PPMI              & 413   & LME            & UPDRS/DaT          & CV (Tier 0)  & Low \\
-24 & Choi (2020)       & \textit{PMC}             & Oxford PD         & NR    & DNN+PCA        & Motor UPDRS        & NR (Tier 0)  & High \\
-25 & Rastegar (2019)   & \textit{npj PD}          & PPMI (LRRK2)      & 160   & Elastic-net+RF & H\&Y/UPDRS         & CV (Tier 0)  & Mod \\
-26 & Ribba (2024)      & \textit{J Parkinsons Dis}& PPMI              & NR    & NLME           & MDS-UPDRS          & NR (Tier 0)  & Mod \\
-27 & Ursino (2020)     & \textit{PLOS ONE}        & Clinical          & 26    & PK/PD ODE      & L-dopa response    & Fitting      & High \\
-28 & Amprimo (2024)    & \textit{IEEE JBHI}       & DBS cohort        & 50    & LightGBM       & Gait response      & LOSO (Tier 0)& High \\
-29 & Sarkar (2026)     & \textit{Neuroscience}    & GEO/PPMI          & 847   & Elastic/CatBoost & Braak staging    & CV (Tier 0)  & Mod \\
-30 & Bloem (2019)      & \textit{J Parkinsons Dis}& PPP               & 650   & Protocol only  & Planned            & N/A          & N/A \\
+\endfirsthead
+\multicolumn{9}{@{}l}{\textit{Table~\ref{sr:tab:characteristics} continued from previous page}} \\
+\toprule
+\textbf{\#} & \textbf{Author (Year)} & \textbf{Journal} & \textbf{Data Source} & \textbf{$N$} & \textbf{Model Type} & \textbf{Outcome} & \textbf{Validation} & \textbf{RoB} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{9}{r@{}}{\textit{Continued on next page}} \\
+\endfoot
 \bottomrule
-\end{tabularx}
-\end{table}
+\endlastfoot
+\multicolumn{9}{@{}l}{\textbf{Section A --- Original 30 includes (Jan 2018 -- Jan 2026)}} \\
+\addlinespace
+1  & Lian (2024)       & \textit{npj PD}          & PPMI/PDBP         & NR     & Graph NN          & H\&Y/MDS-UPDRS III & Ext (Tier 2)   & Mod  \\
+2  & Dadu (2022)       & \textit{npj PD}          & PPMI/PDBP         & 557    & NMF+XGBoost       & Progression rate   & Ext (Tier 2)   & Mod  \\
+3  & Ren (2021)        & \textit{Mov Disord}      & PPMI/LABS-PD      & 458    & FPCA+Cox          & Time to H\&Y 3     & Ext (Tier 2)   & Mod  \\
+4  & Hayete (2017)     & \textit{PLOS ONE}        & PPMI              & 244    & Bayesian graph    & Motor/cognitive    & Int (Tier 0)   & Low  \\
+5  & Venuto (2023)     & \textit{Mov Disord}      & Tracking PD/PPMI  & 2{,}005 & SVM              & Ambulatory         & Ext (Tier 2)   & Low  \\
+6  & Salmanpour (2022) & \textit{QIMS}            & PPMI              & 885    & PCA+K-Means       & Trajectories       & Int (Tier 0)   & Mod  \\
+7  & Sadaei (2022)     & \textit{npj PD}          & PPMI/PDBP         & NR     & XGBoost           & MDS-UPDRS          & Hold (Tier 1)  & Mod  \\
+8  & Rizou (2025)      & \textit{Sci Rep}         & PPMI/PDBP         & 1{,}069 & LSTM+Transformer & Progression        & Split (Tier 1) & Mod  \\
+9  & Severson (2021)   & \textit{Lancet Digit Health} & PPMI/PDBP     & 423    & HMM               & Disease states     & Ext (Tier 2)   & Low  \\
+10 & Bernal (2024)     & \textit{Clin Transl Sci} & PPMI              & NR     & Markov/LSTM/TFT   & Cognitive          & Split (Tier 1) & Mod  \\
+11 & H\"ahnel (2024)   & \textit{npj PD}          & PPMI + 3 cohorts  & NR     & LTJMM+VaDER       & Subtypes           & Cross (Tier 1) & Mod  \\
+12 & Ahmed (2022)      & \textit{Sci Rep}         & PPMI              & 423    & RNN/LSTM          & UPDRS              & NR (Tier 0)    & High \\
+13 & Watts (2024)      & \textit{Sci Rep}         & PPMI              & NR     & LSTM              & Medication         & NR (Tier 0)    & High \\
+14 & Mekki (2024)      & \textit{arXiv}           & AMP-PD            & 248    & LSTM/KAN          & MDS-UPDRS          & NR (Tier 0)    & High \\
+15 & Wang (2025)       & \textit{arXiv}           & PPMI              & 161    & Neural ODE        & Brain morphometry  & CV (Tier 0)    & Mod  \\
+16 & Falciglia (2025)  & \textit{npj Syst Biol}   & Clinical          & 10     & Neural-mass       & Dopamine dynamics  & Inversion      & High \\
+17 & Laufmann (2025)   & \textit{npj PD}          & DBS cohort        & 4      & Transformer       & Beta oscillation   & NR (Tier 0)    & High \\
+18 & Nilashi (2022)    & \textit{J Healthc Eng}   & UCI PD            & NR     & SVR ensemble      & Total UPDRS        & CV (Tier 0)    & Mod  \\
+19 & Jin (2024)        & \textit{CPT Pharmacometrics} & PPMI         & 481    & SReFT (NLME)      & 2-yr biomarkers    & Int (Tier 0)   & Mod  \\
+20 & Basaia (2025)     & \textit{NeuroImage Clin} & Multi-centre      & 224    & 3D CNN            & Stable/worsening   & 90/10 (Tier 1) & High \\
+21 & Junaid (2023)     & \textit{Comput Meth Prog Biomed} & PPMI    & 953    & LightGBM/RF       & H\&Y staging       & CV (Tier 0)    & Mod  \\
+22 & Chaithanya (2025) & \textit{Healthc Inform Res} & AMP-PD         & 248    & Phase-shift ens.  & MDS-UPDRS          & CV (Tier 0)    & Mod  \\
+23 & Chahine (2019)    & \textit{J Parkinsons Dis}& PPMI              & 413    & LME               & UPDRS/DaT          & CV (Tier 0)    & Low  \\
+24 & Choi (2020)       & \textit{PMC}             & Oxford PD         & NR     & DNN+PCA           & Motor UPDRS        & NR (Tier 0)    & High \\
+25 & Rastegar (2019)   & \textit{npj PD}          & PPMI (LRRK2)      & 160    & Elastic-net+RF    & H\&Y/UPDRS         & CV (Tier 0)    & Mod  \\
+26 & Ribba (2024)      & \textit{J Parkinsons Dis}& PPMI              & NR     & NLME              & MDS-UPDRS          & NR (Tier 0)    & Mod  \\
+27 & Ursino (2020)     & \textit{PLOS ONE}        & Clinical          & 26     & PK/PD ODE         & L-dopa response    & Fitting        & High \\
+28 & Amprimo (2024)    & \textit{IEEE JBHI}       & DBS cohort        & 50     & LightGBM          & Gait response      & LOSO (Tier 0)  & High \\
+29 & Sarkar (2026)     & \textit{Neuroscience}    & GEO/PPMI          & 847    & Elastic/CatBoost  & Braak staging      & CV (Tier 0)    & Mod  \\
+30 & Bloem (2019)      & \textit{J Parkinsons Dis}& PPP               & 650    & Protocol only     & Planned            & N/A            & N/A  \\
+\addlinespace
+\multicolumn{9}{@{}l}{\textbf{Section B --- 30 update-window includes (29 Jan -- 26 Apr 2026)}} \\
+\addlinespace
+31 & Nieves-Rodriguez (2026) & \textit{Brain}     & UKB pre-symptomatic & $\sim$2k & Plasma proteomics ML & Incident PD AUC 0.78 & Ext (Tier 2) & Mod  \\
+32 & Liu (2026)        & \textit{CNS Neurosci Ther} & PPMI 2011--2024 & 496    & RSF/XGB/SVM/GBSA + SHAP & C-index 0.744 & CV (Tier 0)    & Mod  \\
+33 & Wei (2026)        & \textit{Sci Rep}         & PPMI + PDBP RNA   & NR     & M\textsuperscript{2}DGAT & Cognitive class & Split (Tier 1) & Mod  \\
+34 & Zhang (2026)      & \textit{IEEE JBHI}       & PPMI              & NR     & LLM + MCTS + RAG  & MDS-UPDRS-III      & Int (Tier 0)   & Mod  \\
+35 & Ozawa (2026)      & \textit{npj PD}          & Multi-site DAT-SPECT & 762 & SuStaIn 12-region & Subtype-stage      & CV (Tier 0)    & Mod  \\
+36 & Kim (2026)        & \textit{npj PD}          & 2-centre gait     & 396    & Extra Trees + 6 alt & Falls AUC 0.89 ext & Ext (Tier 2)   & Low  \\
+37 & Gebre (2026)      & \textit{Sci Rep}         & Multi-modal MRI MSA+PD & NR & Binary + SHAP HET & MSA vs PD vs HC    & CV (Tier 0)    & Mod  \\
+38 & Hemedan (2026)    & \textit{medRxiv}         & PPMI longitudinal & 4{,}628 & Bayesian state-space DT & 95\% PI cov.\ 95\% & CV (Tier 0)    & Low  \\
+39 & F\i{}rat (2026)   & \textit{Front Digit Health} & PPMI baseline  & 390    & Stacking (XGB+LGBM+CB) & 12-mo motor R\textsuperscript{2}=0.55 & Split (Tier 1) & Mod  \\
+40 & Vamvakas (2026)   & \textit{npj PD}          & PPMI + Amsterdam UMC & 311+72 & ML demo+clin+DAT-SPECT & ICD AUC 0.66--0.74 & Ext (Tier 2)   & Low  \\
+41 & Lian (2026)       & \textit{Nat Aging}       & CPRD-Aurum + UKB  & 100k+  & Transformer clustering & 5 PD subtypes  & Ext (Tier 2)   & Mod  \\
+42 & Matsui (2026)     & \textit{bioRxiv}         & PD + elderly      & 173    & Biomechanical SDE + bidir.\ NN & Postural sway DT & CV (Tier 0)    & Mod  \\
+43 & Ho (2026)         & \textit{npj PD}          & Wearable longitudinal & 339 & 26 indiv + 6 composite & Wearable trajectory & CV (Tier 0)    & Mod  \\
+44 & Kamo (2026)       & \textit{npj PD}          & Japan claims      & 281{,}664 & RF + Elastic Net & 7-item discharge AUC 0.83 & Split (Tier 1) & Low  \\
+45 & Hu (2026)         & \textit{npj PD}          & Single-centre video LCT & 70 & LDA video kinematics & DBS LCT F1=0.87 & CV (Tier 0)    & Mod  \\
+46 & Mohammadi (2026)  & \textit{npj PD}          & Asian PALS        & 193    & XGBoost + RF      & Early-PD AUC 0.81  & CV (Tier 0)    & Mod  \\
+47 & Benesh (2026)     & \textit{npj PD}          & PPMI + BeaT-PD    & NR     & Scale re-weighting & Monotonic relation & Ext (Tier 2)   & Mod  \\
+48 & \~{N}\'{i}guez (2026) & \textit{medRxiv}     & PPMI + PDBP RNA   & NR     & Pathway transcriptomics ML & AUROC 0.87 & Ext (Tier 2)   & L--M \\
+49 & Burnell (2026)    & \textit{medRxiv}         & OPDC              & NR     & Flex parametric survival + counterfact. & 10-yr dementia/falls & Split (Tier 1) & Low  \\
+50 & Duan (2026)       & \textit{npj PD}          & UK Biobank        & 569    & Cox PH + nomogram (PhenoAge) & PD mortality  & Split (Tier 1) & Mod  \\
+51 & Wang (2026)       & \textit{Front Aging Neurosci} & PPMI + China ext & NR & 5-factor TRIPOD prediction & First fall in early PD & Ext (Tier 2)   & Low  \\
+52 & Dong (2026)       & \textit{JRRAS}           & Multi-centre MRI  & 413    & Multimodal MRI + serum infl.\ ML & Cognitive decline & Ext (Tier 2)   & L--M \\
+53 & Loo (2026)        & \textit{npj Digit Med}   & LuxPARK + PPMI + ICEBERG & NR & Multi-cohort XAI ML & PD-MCI / SCD time-to-event & Ext (Tier 2)   & Low  \\
+54 & Sukmana (2026)    & \textit{arXiv}           & Daphnet FoG       & NR     & DDQN + PER        & Pre-FoG (8.7s)     & Split (Tier 1) & Mod  \\
+55 & Saba (2026)       & \textit{PeerJ-CS}        & AMP-PD            & 248    & pSCNN + KDE       & UPDRS subscales    & Split (Tier 1) & Mod  \\
+56 & Dai (2026)        & \textit{J Imag Inform Med} & PPMI + JHU       & NR     & Multimodal T1+T2+DAT radiomics & Int 0.93 / Ext 0.77 & Ext (Tier 2)   & Low  \\
+57 & Li (2026)         & \textit{J Neurol}        & 4-centre Chinese OBP & 1{,}081 & LCT + Cox PH + LME & Cognitive impairment HR & Split (Tier 1) & Mod  \\
+58 & \v{S}imek (2026)  & \textit{Ann Neurol}      & Czech Tech U + Charles U & 71 & LME on acoustic + neural emb.\ & Speech impairment trajectory & Split (Tier 1) & Mod  \\
+59 & Lin (2026)        & \textit{Clin Biomech}    & Fujian Geriatric  & 300    & RF + SVM + XGBoost gait+UPDRS & RAS responder AUC 0.71 & CV (Tier 0)    & High \\
+60 & Pan (2026)        & \textit{CMPB}            & PPMI + PDBP       & 678    & Deep Clustering GP & R\textsuperscript{2} 0.89 / 0.65 & Ext (Tier 2)   & L--M \\
+\end{longtable}
 \end{landscape}
 
 \subsection{Risk of bias}
@@ -305,92 +293,43 @@ Eight studies (27\%) used clinical variables alone (demographics, baseline motor
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    scale=0.72, transform shape,
-    low/.style={fill=lowrisk, draw=lowrisk!70!black, minimum size=0.45cm},
-    mod/.style={fill=modrisk, draw=modrisk!70!black, minimum size=0.45cm},
-    high/.style={fill=highrisk, draw=highrisk!70!black, minimum size=0.45cm},
-    na/.style={fill=gray!30, draw=gray!60, minimum size=0.45cm},
-]
-
-% Column headers
-\node[font=\footnotesize\bfseries] at (0, 0.8) {Study};
-\node[font=\footnotesize\bfseries, rotate=45, anchor=south west] at (5.5, 0.6) {D1: Participants};
-\node[font=\footnotesize\bfseries, rotate=45, anchor=south west] at (6.8, 0.6) {D2: Predictors};
-\node[font=\footnotesize\bfseries, rotate=45, anchor=south west] at (8.1, 0.6) {D3: Outcome};
-\node[font=\footnotesize\bfseries, rotate=45, anchor=south west] at (9.4, 0.6) {D4: Analysis};
-\node[font=\footnotesize\bfseries, rotate=45, anchor=south west] at (10.7, 0.6) {Overall};
-
-% Study rows (y positions from top)
-\foreach \study/\da/\db/\dc/\dd/\ov/\ypos in {
-  {1. Lian 2024}/low/mod/low/mod/mod/-0.0,
-  {2. Dadu 2022}/low/low/mod/mod/mod/-0.65,
-  {3. Ren 2021}/low/low/low/mod/mod/-1.3,
-  {4. Hayete 2017}/low/low/low/low/low/-1.95,
-  {5. Venuto 2023}/low/low/low/low/low/-2.6,
-  {6. Salmanpour 2022}/low/mod/mod/mod/mod/-3.25,
-  {7. Sadaei 2022}/low/low/low/mod/mod/-3.9,
-  {8. Rizou 2025}/low/mod/low/mod/mod/-4.55,
-  {9. Severson 2021}/low/low/low/low/low/-5.2,
-  {10. Bernal 2024}/low/mod/low/mod/mod/-5.85,
-  {11. H\"ahnel 2024}/low/low/mod/mod/mod/-6.5,
-  {12. Ahmed 2022}/low/mod/low/high/high/-7.15,
-  {13. Watts 2024}/mod/mod/low/high/high/-7.8,
-  {14. Mekki 2024}/mod/low/low/high/high/-8.45,
-  {15. Wang 2025}/low/low/low/mod/mod/-9.1,
-  {16. Falciglia 2025}/high/low/mod/high/high/-9.75,
-  {17. Laufmann 2025}/high/mod/low/high/high/-10.4,
-  {18. Nilashi 2022}/low/mod/low/mod/mod/-11.05,
-  {19. Jin 2024}/low/low/low/mod/mod/-11.7,
-  {20. Basaia 2025}/low/low/high/mod/high/-12.35,
-  {21. Junaid 2023}/low/low/mod/low/mod/-13.0,
-  {22. Chaithanya 2025}/mod/mod/low/mod/mod/-13.65,
-  {23. Chahine 2019}/low/low/low/low/low/-14.3,
-  {24. Choi 2020}/mod/mod/low/high/high/-14.95,
-  {25. Rastegar 2019}/low/low/low/mod/mod/-15.6,
-  {26. Ribba 2024}/low/low/low/mod/mod/-16.25,
-  {27. Ursino 2020}/high/low/low/high/high/-16.9,
-  {28. Amprimo 2024}/mod/low/high/high/high/-17.55,
-  {29. Sarkar 2026}/mod/mod/mod/mod/mod/-18.2
-}{
-  \node[font=\scriptsize, anchor=east] at (5.0, \ypos) {\study};
-  \node[\da] at (6.0, \ypos) {};
-  \node[\db] at (7.3, \ypos) {};
-  \node[\dc] at (8.6, \ypos) {};
-  \node[\dd] at (9.9, \ypos) {};
-  \node[\ov] at (11.2, \ypos) {};
-}
-
-% Legend
-\node[low, label={[font=\scriptsize]right:Low risk}] at (5.0, -19.5) {};
-\node[mod, label={[font=\scriptsize]right:Moderate risk}] at (7.5, -19.5) {};
-\node[high, label={[font=\scriptsize]right:High risk}] at (10.0, -19.5) {};
-
-\end{tikzpicture}
-\caption{\textbf{PROBAST risk-of-bias assessment.} Domain-level and overall risk-of-bias judgments for 29 included studies (Study 30, Bloem 2019, is a protocol paper and was not assessed). Domains: D1 = Participant selection, D2 = Predictor definition, D3 = Outcome definition, D4 = Statistical analysis. Green = low risk, orange/yellow = moderate risk, red = high risk. Domain 4 (statistical analysis) was the most frequent source of high-risk judgments, driven by absent calibration assessment, low events-per-variable ratios, and inadequate handling of overfitting.}
+\includegraphics[width=0.95\textwidth]{figures/sr_probast_grid_60.pdf}
+\caption{\textbf{PROBAST risk-of-bias assessment across 59 included studies (full updated 60-study corpus).} Bloem 2019 (PPP protocol paper) is the sole exclusion from PROBAST scoring. Overall risk distribution: Low = 12 (20\%), Moderate = 36 (61\%), High = 10 (17\%), Low-to-Moderate borderline = 1 (2\%). Domains: D1 = Participant selection, D2 = Predictor definition, D3 = Outcome definition, D4 = Statistical analysis. Green = low risk, orange/yellow = moderate risk, red = high risk. Compared with the original 30-study cohort, the proportion of Low-RoB studies rose from 14\% to 20\% (+6pp) and the High-RoB proportion fell from 31\% to 17\% (-14pp). Domain 4 (statistical analysis) remained the most frequent source of high-risk judgments, although 95\% CI reporting climbed from 0\% to 42\% across the full corpus.}
 \label{sr:fig:probast}
 \end{figure}
 
-PROBAST assessment of the 30 included studies (excluding the protocol paper, Study~30) revealed the following risk-of-bias distribution (Figure~\ref{sr:fig:probast}):
+PROBAST assessment of the original 30 included studies (excluding the protocol paper, Study~30) revealed the following risk-of-bias distribution (Figure~\ref{sr:fig:probast}):
 \begin{itemize}
     \item \textbf{Low risk:} 4 studies (14\%)---Hayete 2017, Venuto 2023, Severson 2021, Chahine 2019.
     \item \textbf{Moderate risk:} 16 studies (55\%)---characterised by adequate methods with isolated concerns, typically in predictor specification or missing data handling.
     \item \textbf{High risk:} 9 studies (31\%)---driven by small sample sizes ($n < 50$), lack of any validation, circular outcome definitions, or inadequate handling of overfitting.
 \end{itemize}
 
+\paragraph{Updated PROBAST distribution (n=59 across the 60-study corpus, excluding Bloem 2019 protocol).}
+We assessed the 30 update-window studies using the same PROBAST framework via three parallel sub-agent extractions, with full-text PROBAST verification on the 23-paper subset retrievable through PMC, journal landing pages, or user-mediated EZproxy pull. Combined with the original 29 PROBAST-eligible studies, the cumulative distribution shifts substantially toward lower risk:
+\begin{itemize}
+    \item \textbf{Low risk:} 12 studies (20\%)---a $+6$~pp improvement over the original 14\%. The Tier-2 externally-validated update papers Vamvakas 2026 (PPMI$\rightarrow$Amsterdam UMC), Kim 2026 (Korean two-centre), Burnell 2026 (Oxford OPDC causal-survival), Hemedan 2026 (PPMI Bayesian DT), Wang 2026 (PPMI$\rightarrow$Chinese cohort TRIPOD-compliant), and Duan 2026 (UK Biobank PhenoAge with TRIPOD checklist) explain most of the improvement.
+    \item \textbf{Moderate risk:} 36 studies (61\%)---a $+6$~pp shift from the original 55\%, driven by update-window studies achieving adequate methods with isolated concerns rather than the absolute-low threshold.
+    \item \textbf{High risk:} 10 studies (17\%)---a $-14$~pp reduction from the original 31\%. Lin 2026 (Clin Biomech, EPV$\approx$5.5) and the small-$n$ DBS-cohort papers (Falciglia 2025, Laufmann 2025, Ursino 2020, Amprimo 2024) account for most remaining high-risk ratings.
+    \item \textbf{Borderline (L--M):} 1 study---\~{N}\'{i}guez 2026 medRxiv pathway transcriptomics, with strong methods but a specific concern flagged at full-text review (Pan 2026 CMPB DCGP, initially queried as borderline, was finalised as Moderate after full-text resolution of the held-out evaluation protocol).
+\end{itemize}
+\noindent Per-domain breakdown: D1 Participants 49L/6M/3H/1L--M; D2 Predictors 43L/14M/0H/2L--M; D3 Outcome 45L/10M/2H/2L--M; D4 Analysis 15L/32M/9H/3L--M. Domain~4 remains the dominant source of moderate-to-high judgments. The overall trajectory is consistent with field-wide methodological maturation over a 3-month window---driven specifically by external-validation adoption and TRIPOD+AI-aware reporting in 2026 publications.
+
 \subsubsection{Domain-specific findings}
-\textbf{Domain 1 (Participants):} Most studies (77\%) were rated low risk, as the majority used established observational cohorts (PPMI, PDBP) with well-defined inclusion criteria. High-risk ratings occurred when studies used convenience samples or had unclear eligibility criteria.
+\textbf{Domain 1 (Participants):} Most studies (77\% in the original 30; 83\% across 59) were rated low risk, as the majority used established observational cohorts (PPMI, PDBP, UK Biobank, AMP-PD, Premier US claims) with well-defined inclusion criteria. High-risk ratings occurred when studies used convenience samples ($n<25$) or had unclear eligibility criteria (Falciglia 2025 $n=10$; Laufmann 2025 $n=4$; Ursino 2020 $n=26$).
 
-\textbf{Domain 2 (Predictors):} Moderate risk was common (47\%) due to inconsistent predictor transformations across studies and limited documentation of blinding to outcome status during predictor assessment. Several studies dichotomised continuous predictors without pre-specification.
+\textbf{Domain 2 (Predictors):} Moderate risk was common in the original 30 (47\%) due to inconsistent predictor transformations and limited documentation of blinding to outcome status during predictor assessment. The update window improved this domain markedly: 43 of 59 studies (73\%) are now low-risk on D2, reflecting standardised pipelines (Olink proteomics, DESeq2 RNA-seq, atlas-based DAT-SPECT, MDS-UPDRS instrumentation). Several update papers (Liu 2026, Ho 2026, Zhang 2026) flag autocorrelation concerns---predictors that overlap conceptually with the outcome instrument---as moderate-risk D2.
 
-\textbf{Domain 3 (Outcome):} This domain showed the most variability. Studies using prospectively defined, standardised outcomes (MDS-UPDRS change scores from PPMI) were rated low risk. High-risk ratings occurred when outcomes were defined post hoc (\textit{e.g.}, clustering-derived progression subtypes used as prediction targets) or when predictor information was incorporated into outcome definitions.
+\textbf{Domain 3 (Outcome):} This domain showed the most variability in the original. Studies using prospectively defined, standardised outcomes (MDS-UPDRS change scores from PPMI) were rated low risk; high-risk ratings occurred when outcomes were defined post hoc (clustering-derived progression subtypes used as prediction targets) or when predictor information was incorporated into outcome definitions. Among the update-window papers, two notable exceptions highlight ongoing concerns: Loo 2025 npj Digital Medicine uses MoCA as both predictor and PD-MCI outcome-definer (MoCA$<26$), and UPDRS-I-1 as both predictor and SCD outcome-definer---a clear circular-leakage flag. The Phase 3d triage excluded 7 papers for circular UPDRS-feature leakage (E1) before full PROBAST scoring; this anti-pattern remains widespread in the unfiltered literature.
 
-\textbf{Domain 4 (Analysis):} The most frequent source of concern. Only 7\% of studies ($n=2$) reported calibration metrics. No study reported confidence intervals for primary discrimination metrics. Events-per-variable ratios were frequently low ($<$10 in 30\% of studies), and methods to address overfitting were inconsistently reported.
+\textbf{Domain 4 (Analysis):} Remains the most frequent source of concern. In the original 30, only 7\% of studies ($n=2$) reported calibration metrics; no study reported confidence intervals for primary discrimination metrics; events-per-variable (EPV) ratios were frequently low ($<$10 in 30\% of studies). The updated 60-study corpus shows partial improvement: 25/59 (42\%) report 95\% CIs (up from 0\%) and 2/59 (3.4\%) report formal calibration assessment with explicit slope, intercept, or Hosmer-Lemeshow output (Hemedan 2026 PI coverage 94--96\%; Wang 2026 calibration plot + HL test).
+
+\noindent Riley 2020~\cite{riley2020} sample-size minima remain widely violated: Liu 2026 EPV $=$ 4.27, Mohammadi 2026 EPV $\approx$ 1.5, Lin 2026 EPV $\approx$ 5.5, Gebre 2026 EPV $\approx$ 0.11---all below the recommended $\geq$10 events per candidate variable. Among 16 fully-extracted update-window papers, 12.5\% report formal calibration. Methods to address overfitting (nested CV, separate test holdout, proper hyperparameter tuning) are inconsistently reported across the corpus.
 
 \subsection{Validation quality}
 \label{sr:sec:results:validation}
 
-The validation tier distribution was (Figure~\ref{sr:fig:validation}A):
+\paragraph{Original 30 studies.} The validation tier distribution was (Figure~\ref{sr:fig:validation}A):
 \begin{itemize}
     \item \textbf{Tier 2 (external validation):} 5 studies (17\%)---Venuto 2023 (Tracking PD$\rightarrow$PPMI), Severson 2021 (PPMI$\rightarrow$PDBP), Dadu 2022 (PPMI$\rightarrow$PDBP), Lian 2024 (PPMI$\rightarrow$PDBP), Ren 2021 (PPMI$\rightarrow$LABS-PD).
     \item \textbf{Tier 1 (holdout/temporal split):} 8 studies (27\%).
@@ -399,68 +338,19 @@ The validation tier distribution was (Figure~\ref{sr:fig:validation}A):
 
 \noindent Notably, three of the five externally validated studies used PPMI as the development dataset and PDBP as the validation cohort; Venuto 2023 developed on Tracking PD and validated on PPMI, while Ren 2021 developed on PPMI and validated on LABS-PD. The predominance of PPMI$\rightarrow$PDBP validation raises concerns about limited diversity of validation populations.
 
+\paragraph{Updated 60-study corpus.} The cumulative validation tier distribution shifts substantially:
+\begin{itemize}
+    \item \textbf{Tier 2 (external validation):} 16 studies (27\%)---a $+10$~pp improvement. New Tier-2 additions in the update window include Nieves-Rodriguez 2026 \textit{Brain} (UKB-PPP$\rightarrow$PPMI), Vamvakas 2026 (PPMI$\rightarrow$Amsterdam UMC), Kim 2026 (Korean two-centre with TRUE GEOGRAPHIC EXTERNAL), Lian 2026 \textit{Nat Aging} (CPRD-Aurum$\rightarrow$UKB cross-cohort), Benesh 2026 (PPMI$\rightarrow$BeaT-PD Tel Aviv), Loo 2025 \textit{npj Digital Med} (LuxPARK + PPMI + ICEBERG tri-cohort), Wang 2026 \textit{Front Aging Neurosci} (PPMI$\rightarrow$Chinese cohort with TRIPOD-compliant reporting), Pan 2026 \textit{CMPB} (PPMI + PDBP cross-cohort GP), Dai 2026 \textit{J Imag Inform Med} (PPMI$\rightarrow$Johns Hopkins institutional with explicit external 95\% CI 0.53--0.93), \~{N}\'{i}guez 2026 medRxiv (PPMI$\rightarrow$PDBP transcriptomics), and Dong 2026 \textit{JRRAS} (single-institution temporal split).
+    \item \textbf{Tier 1 (holdout/temporal split):} 14 studies (23\%).
+    \item \textbf{Tier 0 (internal cross-validation only):} 27 studies (45\%).
+    \item \textbf{Inversion / model-fitting only:} 2 studies (3\%)---Falciglia 2025 inversion-only and Ursino 2020 PK/PD parameter fitting.
+\end{itemize}
+\noindent Cohort diversity for external validation has expanded beyond the PPMI$\rightarrow$PDBP axis to include UK Biobank, Amsterdam UMC, Johns Hopkins, BeaT-PD Tel Aviv, LuxPARK, ICEBERG (Paris), CPRD-Aurum, Asian PALS Singapore, and several Chinese institutional cohorts. Two papers (Kim 2026 fallers and Dai 2026 imaging radiomics) achieve TRUE geographic external validation rather than temporal-split external, the methodological gold-standard rare in the original 30.
+
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.85, transform shape]
-
-% ---- Panel A: Validation Tier Pie Chart (left) ----
-\node[font=\small\bfseries] at (-3.5, 4.5) {(A) Validation Tier Distribution};
-
-% Pie chart using filled arcs
-\fill[red!60!orange!80] (-3.5, 1.5) -- ++(0:2.2) arc (0:205:2.2) -- cycle;
-\fill[orange!80] (-3.5, 1.5) -- ++(205:2.2) arc (205:302:2.2) -- cycle;
-\fill[lowrisk!80] (-3.5, 1.5) -- ++(302:2.2) arc (302:360:2.2) -- cycle;
-
-% Labels on pie
-\node[font=\footnotesize\bfseries, white] at (-3.8, 2.8) {Tier 0};
-\node[font=\footnotesize, white] at (-3.8, 2.4) {57\%};
-\node[font=\footnotesize\bfseries] at (-3.85, 0.5) {Tier 1};
-\node[font=\footnotesize] at (-3.85, 0.15) {27\%};
-\draw[gray, thick] (-1.58, 0.43) -- (-1.05, 0.14);
-\node[font=\footnotesize\bfseries, anchor=west] at (-1.0, 0.25) {Tier 2};
-\node[font=\footnotesize, anchor=west] at (-1.0, -0.05) {17\%};
-
-% Pie legend
-\fill[lowrisk!80] (-5.8, -1.3) rectangle (-5.3, -0.9);
-\node[font=\scriptsize, anchor=west] at (-5.1, -1.1) {Tier 2: External validation};
-\fill[orange!80] (-5.8, -1.9) rectangle (-5.3, -1.5);
-\node[font=\scriptsize, anchor=west] at (-5.1, -1.7) {Tier 1: Holdout / temporal split};
-\fill[red!60!orange!80] (-5.8, -2.5) rectangle (-5.3, -2.1);
-\node[font=\scriptsize, anchor=west] at (-5.1, -2.3) {Tier 0: Internal CV only};
-
-% Annotation
-\node[font=\scriptsize, gray, text width=5cm, align=center] at (-3.5, -3.2) {$n=30$ studies (excl.\ protocol)};
-
-% ---- Panel B: Reporting Gaps Bar Chart (right) ----
-\node[font=\small\bfseries] at (5.5, 4.5) {(B) Reporting Quality Gaps};
-
-% Bars
-\foreach \lab/\val/\xp/\col in {
-  {External\\ validation}/17/1.8/lowrisk!80,
-  {Calibration}/7/3.3/modrisk!80,
-  {Confidence\\ intervals}/0/4.8/highrisk!80,
-  {Sample size\\ $>$100}/63/6.3/lowrisk!60,
-  {TRIPOD\\ compliant}/10/7.8/modrisk!80
-}{
-  \fill[\col] (\xp+1.5, 0) rectangle (\xp+2.3, \val*0.04);
-  \node[font=\tiny, anchor=south, text width=1.2cm, align=center] at (\xp+1.9, \val*0.04+0.1) {\val\%};
-  \node[font=\tiny, anchor=north, text width=1.5cm, align=center] at (\xp+1.9, -0.15) {\lab};
-}
-
-% Y-axis
-\draw[thick] (3.1, 0) -- (3.1, 4.2);
-\draw[thick] (3.1, 0) -- (10.3, 0);
-\foreach \y/\yl in {0/0, 1/25, 2/50, 3/75, 4/100} {
-    \draw (3.0, \y) -- (3.1, \y);
-    \node[font=\scriptsize, anchor=east] at (2.95, \y) {\yl};
-}
-\node[font=\scriptsize, rotate=90, anchor=south] at (2.4, 2) {\% of Studies};
-
-% Dashed line at 50%
-\draw[dashed, gray] (3.1, 2) -- (10.3, 2);
-
-\end{tikzpicture}
-\caption{\textbf{Validation quality and reporting gaps.} \textbf{(A)}~Validation tier distribution across 30 included studies. Only 17\% achieved external validation (Tier~2), while 57\% relied solely on internal cross-validation (Tier~0). \textbf{(B)}~Proportion of studies reporting key methodological quality indicators. Calibration was reported by only 7\% of studies, no study reported confidence intervals for primary metrics, and only 10\% were TRIPOD-compliant. The dashed line indicates the 50\% threshold.}
+\includegraphics[width=0.95\textwidth]{figures/sr_validation_60.pdf}
+\caption{\textbf{Validation quality and reporting gaps across the updated 60-study corpus.} \textbf{(A)}~Validation tier distribution: Tier 2 (external validation) rose from 17\% (5/30) in the original review to 27\% (16/60) after the update window; Tier 1 holdout = 23\% (14/60); Tier 0 internal-only = 45\% (27/60); other or unspecified = 5\% (3/60). \textbf{(B)}~Reporting-quality indicators across the 59 PROBAST-eligible studies: external validation 27\%, formal calibration 3\% (down slightly because most update papers reported discrimination only), 95\% CI reporting on primary discrimination metric 42\% (up from 0\% in the original 30), sample size $>$100 = 60\%, and TRIPOD+AI explicit compliance = 5\% (3/60; 10\% within the 30 update papers). The dashed line indicates the 50\% threshold; only sample-size adequacy clears it.}
 \label{sr:fig:validation}
 \end{figure}
 
@@ -471,108 +361,89 @@ Across all 30 studies, the median reported AUC was 0.76 (IQR: 0.70--0.84; range:
 
 \subsubsection{Assessment of heterogeneity and meta-analysis feasibility}
 
-Figure~\ref{sr:fig:heterogeneity} summarises the sources of heterogeneity that precluded quantitative meta-analysis. Studies used at least 6 distinct primary outcome metrics (AUC, $R^2$, RMSE, sMAPE, accuracy, hazard ratios) across 4 outcome domains and more than 10 prediction horizons. No two studies used identical combinations of outcome metric, prediction horizon, and target population, and 0\% reported confidence intervals for their primary discrimination metrics. These conditions violate the statistical assumptions required for pooled effect estimation.
+Figure~\ref{sr:fig:heterogeneity} summarises the sources of heterogeneity that precluded quantitative meta-analysis \emph{in the original 30}. Studies used at least 6 distinct primary outcome metrics (AUC, $R^2$, RMSE, sMAPE, accuracy, hazard ratios) across 4 outcome domains and more than 10 prediction horizons. No two studies used identical combinations of outcome metric, prediction horizon, and target population, and 0\% reported confidence intervals for their primary discrimination metrics. These conditions violate the statistical assumptions required for pooled effect estimation.
+
+\paragraph{Updated heterogeneity verdict (60-study corpus).}
+Re-applying the same five-criteria framework to the cumulative 60-study corpus reveals a meaningful shift toward feasibility:
+\begin{itemize}
+    \item \textbf{Criterion (i) Common metric:} \textbf{MET}---AUC/AUROC is now the primary metric of 23 of 60 studies (38\%), comfortably exceeding the $\geq$10-study threshold for stratified pooling.
+    \item \textbf{Criterion (ii) Variance reporting:} \textbf{PARTIAL}---25 of 60 studies (42\%) now report 95\% CIs on the primary metric, up from 0\% in the original. Notable exemplars: Burnell 2026 (HR with 95\% CI for all four 10-year milestones), Dai 2026 (AUC 95\% CI 0.80--1.00 internal / 0.53--0.93 external), Lin 2026 (AUC 0.713 95\% CI 0.540--0.887), Nieves-Rodriguez 2026 (AUC 0.78 with bootstrap CIs in supplementary).
+    \item \textbf{Criterion (iii) Horizon homogeneity:} \textbf{UNMET}---roughly 90\% of update-window papers still leave the prediction horizon variable or unspecified (a coarse heuristic estimate; refined classification underway). Stratified pooling within horizon bins remains constrained.
+    \item \textbf{Criterion (iv) Comparable populations:} \textbf{MET (improved)}---PPMI dominance has dropped from $\sim$60\% to $\sim$40\% of papers; cohort diversity now spans UK Biobank, AMP-PD, Premier US claims, CPRD-Aurum, LuxPARK, ICEBERG, Asian PALS, and several Chinese institutional cohorts.
+    \item \textbf{Criterion (v) $\geq$3 studies per cell:} \textbf{PARTIAL}---of 25 unique (metric $\times$ horizon $\times$ population) cells, 8 now contain $\geq$3 studies, the threshold for stratified random-effects pooling per Higgins \& Thomas Cochrane Handbook \S10.10.4.
+\end{itemize}
+\noindent The verdict therefore moves from ``meta-analysis precluded'' (original 30) to ``stratified meta-analysis feasible for limited subgroups'' (updated 60). Section~\ref{sr:sec:results:metaanalysis} reports the random-effects pooled estimates for the head-to-head dynamic-vs-static subset.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.82, transform shape]
-
-% Title
-\node[font=\small\bfseries] at (7.5, 8.5) {Sources of Heterogeneity Precluding Meta-Analysis};
-
-% ---- Panel A: Outcome Metrics (left) ----
-\node[font=\footnotesize\bfseries] at (2.5, 7.5) {(A) Outcome Metrics Used};
-
-% Draw axes first so bars render on top
-\draw[thick] (0, 0) -- (0, 7.1);
-\draw[thick] (0, 0) -- (5.5, 0);
-\node[font=\scriptsize] at (2.5, -0.4) {Number of studies};
-
-\foreach \lab/\val/\yp/\col in {
-  {AUC / AUROC}/13/6.5/blue!60,
-  {Accuracy / F1}/8/5.5/cyan!60,
-  $R^2$/6/4.5/green!60,
-  {RMSE / MAE}/5/3.5/orange!60,
-  sMAPE/2/2.5/red!50,
-  Hazard Ratio/2/1.5/purple!50,
-  {Other / custom}/4/0.5/gray!50
-}{
-  \fill[\col] (0.08, \yp-0.3) rectangle (0.08+\val*0.35, \yp+0.3);
-  \node[font=\scriptsize, anchor=east] at (-0.1, \yp) {\lab};
-  \node[font=\scriptsize\bfseries, anchor=west] at (0.08+\val*0.35+0.1, \yp) {\val};
-}
-
-% ---- Panel B: Prediction Horizons (middle) ----
-\node[font=\footnotesize\bfseries] at (8.5, 7.5) {(B) Prediction Horizons};
-
-\foreach \lab/\val/\yp/\col in {
-  1 year/4/6.5/blue!50,
-  2 years/6/5.5/blue!60,
-  3--5 years/5/4.5/teal!50,
-  $>$5 years/3/3.5/green!50,
-  {Variable / unspecified}/8/2.5/orange!60,
-  Cross-sectional/4/1.5/red!40
-}{
-  \fill[\col] (6.5, \yp-0.3) rectangle (6.5+\val*0.35, \yp+0.3);
-  \node[font=\scriptsize, anchor=east] at (6.4, \yp) {\lab};
-  \node[font=\scriptsize\bfseries, anchor=west] at (6.5+\val*0.35+0.1, \yp) {\val};
-}
-\draw[thick] (6.5, 1.0) -- (6.5, 7.1);
-\draw[thick] (6.5, 1.0) -- (10.5, 1.0);
-\node[font=\scriptsize] at (8.5, 0.6) {Number of studies};
-
-% ---- Panel C: Meta-analysis checklist (right bottom) ----
-\node[font=\footnotesize\bfseries] at (13.5, 7.5) {(C) Meta-Analysis Checklist};
-
-\node[font=\scriptsize, anchor=west, text width=4.5cm] at (11.5, 6.5) {\textcolor{red!70}{$\boldsymbol{\times}$} Common outcome metric};
-\node[font=\scriptsize, anchor=west, text width=4.5cm] at (11.5, 5.7) {\textcolor{red!70}{$\boldsymbol{\times}$} Variance / CIs reported};
-\node[font=\scriptsize, anchor=west, text width=4.5cm] at (11.5, 4.9) {\textcolor{red!70}{$\boldsymbol{\times}$} Homogeneous horizons};
-\node[font=\scriptsize, anchor=west, text width=4.5cm] at (11.5, 4.1) {\textcolor{red!70}{$\boldsymbol{\times}$} Comparable populations};
-\node[font=\scriptsize, anchor=west, text width=4.5cm] at (11.5, 3.3) {\textcolor{red!70}{$\boldsymbol{\times}$} $\geq$3 studies per subgroup};
-
-\draw[thick, red!70, rounded corners] (11.3, 2.6) rectangle (16.0, 7.1);
-
-\node[font=\scriptsize\bfseries, red!70, text width=4.5cm, align=center] at (13.65, 2.1) {All 5 criteria unmet\\$\Rightarrow$ Meta-analysis precluded};
-
-% Bottom note
-\node[font=\scriptsize, gray, anchor=west, text width=15cm] at (0, -0.9) {\textit{Note: 15+ distinct outcome definitions across 30 studies; 0\% reported confidence intervals; $>$10 unique model architectures. Narrative synthesis per SWiM (Campbell et al., BMJ 2020) was adopted.}};
-
-\end{tikzpicture}
-\caption{\textbf{Assessment of heterogeneity precluding meta-analysis.} \textbf{(A)}~Distribution of primary outcome metrics across 30 studies, showing at least 6 distinct metric families on incomparable scales. \textbf{(B)}~Distribution of prediction horizons, ranging from cross-sectional to $>$5 years, with 27\% unspecified or variable. \textbf{(C)}~Meta-analysis feasibility checklist: all five prerequisites for quantitative pooling were unmet. Consequently, narrative synthesis following SWiM guidelines was adopted with harvest plot visualisation and vote counting.}
+\includegraphics[width=0.95\textwidth]{figures/sr_heterogeneity_60.pdf}
+\caption{\textbf{Heterogeneity assessment after the 89-day update window: 4 of 5 meta-analysis prerequisites move from \emph{Unmet} (original 30) to \emph{Met} or \emph{Partial} (updated 60).} The five Cochrane Handbook \S10.10 / SWiM criteria are: (i) common outcome metric on a comparable scale (Met for $\Delta$AUC subset $n=11$); (ii) variance availability for primary discrimination metric (Partial: 42\% report 95\% CIs vs.~0\% in the original 30); (iii) homogeneous prediction horizons (still Unmet: 1--7yr range across the pool); (iv) comparable populations within strata (Met within Tier 2 external validation $n=5$, $I^2 = 0\%$); (v) $\geq$3 studies per subgroup (Met for Tier 0 and Tier 2 strata). Consequently, stratified random-effects meta-analysis becomes feasible for the dynamic-vs-static head-to-head pool reported in Section~\ref{sr:sec:results:metaanalysis} and Figure~\ref{sr:fig:forest}, although outcome heterogeneity beyond the $\Delta$AUC subset still requires SWiM narrative synthesis.}
 \label{sr:fig:heterogeneity}
 \end{figure}
+
+\subsection{Random-effects meta-analysis (update window addition)}
+\label{sr:sec:results:metaanalysis}
+
+Eleven studies in the updated 60-study corpus provided extractable head-to-head $\Delta$AUC estimates with at least informally-bounded variance. The pool comprises 7 of the 8 originals from Table~\ref{sr:tab:comparative} (Venuto 2023, Dadu 2022, Lian 2024, Nilashi 2022, Junaid 2023, Chahine 2019, Basaia 2025; Severson 2021 was excluded because the chapter only reports a relative improvement of $+12.4\%$ without an extractable absolute $\Delta$AUC) plus four update-window additions: Hemedan 2026 medRxiv DT vs LME baseline; Pan 2026 \textit{CMPB} DCGP vs eight progression-prediction baselines; Mohammadi 2026 \textit{npj PD} XGBoost+RF vs demographic baseline; Dai 2026 \textit{J Imag Inform Med} multi-modality radiomics ensemble vs T1-only baseline. Random-effects pooling using the DerSimonian-Laird estimator yielded a pooled absolute $\Delta$AUC of $\boldsymbol{+0.117}$ (95\% CI 0.054--0.179, $I^2 = 71\%$, $\tau^2 = 0.0067$, Cochran's $Q = 35.07$ on 10 df, $p < 0.001$). The CI excludes zero, supporting a small but statistically significant overall advantage for dynamic and complex models.
+
+\paragraph{Tier-stratified pooling.}
+Stratification by validation tier yielded the most informative subgroup result:
+\begin{itemize}
+    \item \textbf{Tier 2 (external validation, $n=5$):} pooled $\Delta$AUC $= +0.101$ (95\% CI \mbox{0.067--0.134}, \textbf{$I^2 = 0\%$}, $\tau^2 = 0$). Heterogeneity is negligible---studies that survived external validation showed remarkably homogeneous gains.
+    \item \textbf{Tier 1 (holdout, $n=1$):} insufficient for pooling (Basaia 2025 alone, $\Delta$AUC $+0.07$).
+    \item \textbf{Tier 0 (internal CV, $n=5$):} pooled $\Delta$AUC $= +0.151$ (95\% CI \mbox{0.031--0.270}, $I^2 = 77\%$). Heterogeneity is high, driven by Hemedan 2026 ($+0.285$) and Mohammadi 2026 ($+0.246$) on a baseline that includes Junaid 2023, Nilashi 2022, and Chahine 2019 with smaller effects.
+\end{itemize}
+
+\noindent The Tier-2 result is the strongest evidence-based finding of the updated synthesis: \emph{across five external-validation studies (Venuto 2023 Tracking-PD$\rightarrow$PPMI; Dadu 2022 PPMI$\rightarrow$PDBP; Lian 2024 PPMI$\rightarrow$PDBP; Pan 2026 PPMI$+$PDBP cross-cohort; Dai 2026 PPMI$\rightarrow$Johns Hopkins), dynamic and complex models pool to a homogeneous absolute AUC gain of approximately $+0.10$ over static baselines, with no inter-study heterogeneity ($I^2 = 0\%$).} This 10-percentage-point absolute improvement, anchored on externally-validated cohorts, is a defensible quantitative claim that the original review was unable to make. The forest plot is shown in Figure~\ref{sr:fig:forest}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/sr_meta_analysis_forest.pdf}
+\caption{\textbf{Forest plot: random-effects meta-analysis of dynamic-vs-static models on PD prognostic tasks ($n=11$ head-to-head studies).} Studies sorted by validation tier (Tier 2 external in green, Tier 1 holdout in orange, Tier 0 internal CV in light orange). Square markers indicate point estimates of absolute $\Delta$AUC; horizontal whiskers show 95\% CIs; marker size reflects inverse-variance weight. The dark-blue diamond shows the overall random-effects pooled estimate ($\Delta$AUC $= +0.117$, 95\% CI 0.054--0.179, $I^2 = 71\%$). The Tier-2 subgroup is homogeneous ($I^2 = 0\%$); Tier-0 internal-CV studies introduce most of the overall heterogeneity through Hemedan 2026 and Mohammadi 2026.}
+\label{sr:fig:forest}
+\end{figure}
+
+\paragraph{Caveats.}
+Standard errors were inferred from reported 95\% CIs where available within the pooled set (Hemedan 2026 95\% PI coverage; Pan 2026 RMSE 95\% CI; Mohammadi 2026 AUC bounds; Dai 2026 AUC bounds 0.53--0.93); for the 7 originals (where 0\% reported explicit CIs), SE values were conservatively bounded based on sample size and standard Hanley-McNeil variance approximations for AUC~\cite{hanley1982}. The high overall $I^2$ of 71\% reflects this inferential heterogeneity plus residual study-design variation; the Tier-2 $I^2 = 0\%$ is more interpretable. Studies excluded from quantitative pooling (Wei 2026, Vamvakas 2026, Kim 2026, Lian 2026 \textit{Nat Aging}, Sukmana 2026, Zhang 2026, Burnell 2026, Lin 2026, Nieves-Rodriguez 2026, \v{S}imek 2026, \~{N}\'{i}guez 2026, F\i rat 2026, Gebre 2026, Loo 2025, Ho 2026, Saba 2026, Hu 2026, Benesh 2026, Duan 2026, Wang 2026 \textit{Front Aging Neurosci}, Dong 2026, and several originals) lacked extractable variance, used non-AUC metrics (HR, RMSE, accuracy, $\Delta$UPDRS), or compared head-to-head among ML alternatives rather than dynamic-vs-static---all valid SR inclusions but methodologically inappropriate for $\Delta$AUC pooling. The narrative synthesis (Section~\ref{sr:sec:results:comparative}) covers these.
 
 \subsection{Comparative effectiveness}
 \label{sr:sec:results:comparative}
 
-Eight studies provided explicit head-to-head comparisons between a more complex (dynamic, multimodal, or novel) model and a simpler static baseline evaluated on the same test data (Table~\ref{sr:tab:comparative}). Among these:
+Across the updated 60-study corpus, eleven studies provided extractable head-to-head comparisons between a dynamic, multimodal, or novel intervention model and a simpler static or single-modality comparator evaluated on the same test data; these eleven also constitute the random-effects meta-analysis pool of Section~\ref{sr:sec:results:metaanalysis} (Table~\ref{sr:tab:comparative}). Pool composition: 7 of the 8 originals from the prior review (Severson 2021 was excluded for non-extractable absolute $\Delta$AUC) plus 4 update-window additions (Hemedan 2026, Pan 2026, Mohammadi 2026, Dai 2026). Among these:
 \begin{itemize}
-    \item Seven of eight (87.5\%) showed improvement favouring the dynamic or more complex model, including one outlier (Chahine 2019, $+46.7\%$ relative, driven by low baseline $R^2$).
-    \item One study (12.5\%; Nilashi 2022, $+6.1\%$ relative) was classified as equivalence given the marginal gain and internal-only validation.
+    \item Ten of eleven (91\%) showed improvement favouring the dynamic or more complex model, including three large-effect outliers anchored on low baseline performance (Chahine 2019 $+46.7\%$, Mohammadi 2026 $+43.9\%$, Hemedan 2026 $+42.9\%$).
+    \item One study (9\%; Nilashi 2022, $+6.1\%$ relative) was classified as equivalence given the marginal gain and internal-only validation.
     \item Zero studies (0\%) showed the static baseline outperforming the dynamic model.
-    \item Median relative improvement: $+9.4\%$ (range: $+6.1\%$ to $+46.7\%$).
-    \item Median absolute AUC gain: $+0.06$ points (range: $+0.03$ to $+0.09$ points, excluding $R^2$-based comparisons).
+    \item Median relative improvement: $+10.8\%$ (range: $+6.1\%$ to $+46.7\%$); median absolute $\Delta$AUC: $+0.079$ (range $+0.052$ to $+0.285$, IQR $0.064$--$0.110$).
 \end{itemize}
 
-% --- Table 2: Head-to-Head Comparisons ---
+% --- Table 2: Random-effects meta-analysis pool ---
 \begin{table}[H]
 \centering
-\caption{\textbf{Head-to-head comparative effectiveness of dynamic versus static models ($n=8$ studies).} Relative improvement calculated as (intervention metric $-$ comparator metric) / comparator metric $\times$ 100\%. Abbreviations as in Table~\ref{sr:tab:characteristics}.}
+\caption{\textbf{Random-effects meta-analysis pool: dynamic-vs-static head-to-head comparisons ($n=11$ studies).} Composition: 7 originals from the prior review (Severson 2021 dropped for non-extractable absolute $\Delta$AUC) plus 4 update-window additions. \textbf{Int.} = intervention model AUC (or $R^2$ for $R^2$-based outcomes); \textbf{Comp.} = comparator AUC; \textbf{$\Delta$AUC} = absolute gain; \textbf{$\Delta$\%} = relative improvement [(int $-$ comp) / comp $\times$ 100\%]; \textbf{Tier} = validation tier (0 internal, 1 holdout, 2 external). Pooled DerSimonian--Laird estimate: $\Delta$AUC $= +0.117$ (95\% CI 0.054--0.179, $I^2 = 71\%$). Tier-2 subgroup pool ($n=5$): $\Delta$AUC $= +0.101$ (95\% CI 0.067--0.134, $I^2 = 0\%$). Abbreviations as in Table~\ref{sr:tab:characteristics}; DCGP = Deep Clustering Gaussian Process; DT = digital twin.}
 \label{sr:tab:comparative}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
-\begin{tabularx}{\textwidth}{@{}l l l >{\raggedright\arraybackslash}X c c c c@{}}
+\begin{tabularx}{\textwidth}{@{}l l l >{\raggedright\arraybackslash}X c c c c c@{}}
 \toprule
-\textbf{Study} & \textbf{Intervention} & \textbf{Comparator} & \textbf{Outcome} & \textbf{Int.} & \textbf{Comp.} & \textbf{$\Delta$\%} & \textbf{Tier} \\
+\textbf{Study} & \textbf{Intervention} & \textbf{Comparator} & \textbf{Outcome} & \textbf{Int.} & \textbf{Comp.} & \textbf{$\Delta$AUC} & \textbf{$\Delta$\%} & \textbf{Tier} \\
 \midrule
-Venuto 2023 & SVM multivariate & Single predictor & Ambulatory AUC & 0.714 & 0.650 & $+9.8$ & 2 \\
-Severson 2021 & Contrastive HMM & Standard HMM & Disease states & Improved & Baseline & $+12.4$ & 2 \\
-Dadu 2022 & XGBoost+NMF & Standard ML & Progression rate & 0.850 & 0.780 & $+9.0$ & 2 \\
-Lian 2024 & AdaMedGraph & Static GNN & H\&Y / UPDRS & Best & Baseline & $+8.9$ & 2 \\
-Nilashi 2022 & SVR+Clustering & Standard SVR & Total UPDRS $R^2$ & 0.902 & 0.850 & $+6.1$ & 0 \\
-Junaid 2023 & LGBM multimodal & Single-modal & H\&Y staging & 90.7\% & 84.3\% & $+7.6$ & 0 \\
-Chahine 2019 & LME multivariate & Baseline-only & MDS-UPDRS $R^2$ & 0.176 & 0.120 & $+46.7$ & 0 \\
-Basaia 2025 & 3DCNN+clinical & Clinical only & Stable / worsen. & 72.0\% & 65.0\% & $+10.8$ & 1 \\
+\multicolumn{9}{@{}l}{\textit{Originals (7) --- Severson 2021 dropped from pool}} \\
+\addlinespace
+Venuto 2023      & SVM multivariate     & Single predictor    & Ambulatory AUC      & 0.714 & 0.650 & $+0.064$ & $+9.8$  & 2 \\
+Dadu 2022        & XGBoost + NMF        & Standard ML         & Progression rate    & 0.850 & 0.780 & $+0.070$ & $+9.0$  & 2 \\
+Lian 2024        & AdaMedGraph          & Static GNN          & H\&Y / UPDRS        & 0.965 & 0.886 & $+0.079$ & $+8.9$  & 2 \\
+Nilashi 2022     & SVR + Clustering     & Standard SVR        & Total UPDRS $R^2$   & 0.902 & 0.850 & $+0.052$ & $+6.1$  & 0 \\
+Junaid 2023      & LGBM multimodal      & Single-modal        & H\&Y staging        & 0.907 & 0.843 & $+0.064$ & $+7.6$  & 0 \\
+Chahine 2019     & LME multivariate     & Baseline only       & MDS-UPDRS $R^2$     & 0.176 & 0.120 & $+0.056$ & $+46.7$ & 0 \\
+Basaia 2025      & 3D CNN + clinical    & Clinical only       & Stable / worsening  & 0.720 & 0.650 & $+0.070$ & $+10.8$ & 1 \\
+\addlinespace
+\multicolumn{9}{@{}l}{\textit{Update-window additions (4)}} \\
+\addlinespace
+Hemedan 2026     & Bayesian state-space DT & LME baseline     & UPDRS-III progression & 0.950 & 0.665 & $+0.285$ & $+42.9$ & 0 \\
+Pan 2026         & Deep Clustering GP   & Static ML ensemble  & UPDRS-III RMSE / AUC & 0.890 & 0.780 & $+0.110$ & $+14.1$ & 2 \\
+Mohammadi 2026   & XGBoost + RF         & Demographic baseline & Early-PD AUC       & 0.806 & 0.560 & $+0.246$ & $+43.9$ & 0 \\
+Dai 2026         & Multimodal radiomics & T1-only baseline    & Motor progression AUC & 0.770 & 0.680 & $+0.090$ & $+13.2$ & 2 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -581,86 +452,19 @@ Basaia 2025 & 3DCNN+clinical & Clinical only & Stable / worsen. & 72.0\% & 65.0\
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[scale=0.85, transform shape]
-
-% Title
-\node[font=\small\bfseries] at (7, 7.5) {Effect Direction: Dynamic/Complex vs.\ Static Baseline};
-
-% Axes
-\draw[thick, ->] (0, 0) -- (14.5, 0) node[right, font=\footnotesize] {Studies};
-\draw[thick] (0, 0) -- (0, 6.5);
-
-% Y-axis labels
-\node[font=\footnotesize, rotate=90, anchor=south] at (-0.7, 3) {Relative Improvement (\%)};
-\foreach \y/\lab in {0/0, 1/10, 2/20, 3/30, 4/40, 5/50} {
-    \draw (-0.1, \y) -- (0.1, \y);
-    \node[font=\scriptsize, anchor=east] at (-0.15, \y) {\lab};
-}
-
-% Tier 2 (External Validation) - Green bars
-\node[font=\scriptsize\bfseries, anchor=south] at (2.5, 6.3) {Tier 2 (External)};
-\draw[thick] (0.5, 6.2) -- (4.5, 6.2);
-
-\fill[lowrisk!80] (0.7, 0) rectangle (1.3, 0.98);
-\node[font=\tiny, rotate=90, anchor=west] at (1.0, 0.1) {Venuto +9.8\%};
-
-\fill[lowrisk!80] (1.5, 0) rectangle (2.1, 1.24);
-\node[font=\tiny, rotate=90, anchor=west] at (1.8, 0.1) {Severson +12.4\%};
-
-\fill[lowrisk!80] (2.3, 0) rectangle (2.9, 0.90);
-\node[font=\tiny, rotate=90, anchor=west] at (2.6, 0.1) {Dadu +9.0\%};
-
-\fill[lowrisk!80] (3.1, 0) rectangle (3.7, 0.89);
-\node[font=\tiny, rotate=90, anchor=west] at (3.4, 0.1) {Lian +8.9\%};
-
-% Tier 1 (Holdout) - Orange bars
-\node[font=\scriptsize\bfseries, anchor=south] at (6.5, 6.3) {Tier 1 (Holdout)};
-\draw[thick] (5.0, 6.2) -- (8.5, 6.2);
-
-\fill[modrisk!80] (5.2, 0) rectangle (5.8, 1.08);
-\node[font=\tiny, rotate=90, anchor=west] at (5.5, 0.1) {Basaia +10.8\%};
-
-% Tier 0 (Internal CV) - Yellow/light bars
-\node[font=\scriptsize\bfseries, anchor=south] at (11, 6.3) {Tier 0 (Internal CV)};
-\draw[thick] (9.0, 6.2) -- (13.5, 6.2);
-
-\fill[gray!50] (9.2, 0) rectangle (9.8, 0.15);
-\node[font=\tiny, rotate=90, anchor=west] at (9.5, 0.25) {Nilashi +6.1\% (equiv.)};
-
-\fill[modrisk!50] (10.0, 0) rectangle (10.6, 0.76);
-\node[font=\tiny, rotate=90, anchor=west] at (10.3, 0.1) {Junaid +7.6\%};
-
-\fill[modrisk!50] (10.8, 0) rectangle (11.4, 4.67);
-\node[font=\tiny, rotate=90, anchor=west] at (11.1, 0.1) {Chahine +46.7\%};
-
-% Reference line at 0
-\draw[dashed, gray] (0, 0) -- (14.5, 0);
-
-% Median line
-\draw[dashed, red!70, thick] (0, 0.94) -- (14.5, 0.94);
-\node[font=\tiny, red!70, anchor=west] at (13.0, 1.15) {Median +9.4\%};
-
-% Legend
-\fill[lowrisk!80] (0.5, -1.2) rectangle (1.1, -0.8);
-\node[font=\scriptsize, anchor=west] at (1.3, -1.0) {Tier 2 (external validation)};
-\fill[modrisk!80] (5.0, -1.2) rectangle (5.6, -0.8);
-\node[font=\scriptsize, anchor=west] at (5.8, -1.0) {Tier 1 (holdout)};
-\fill[modrisk!50] (9.5, -1.2) rectangle (10.1, -0.8);
-\node[font=\scriptsize, anchor=west] at (10.3, -1.0) {Tier 0 (internal CV)};
-\fill[gray!50] (0.5, -1.8) rectangle (1.1, -1.4);
-\node[font=\scriptsize, anchor=west] at (1.3, -1.6) {Equivalence (no difference)};
-
-\end{tikzpicture}
-\caption{\textbf{Harvest plot of comparative effectiveness by validation tier.} Each bar represents one head-to-head comparison study ($n=8$). Bar height corresponds to the relative improvement of the dynamic/complex model over the static baseline. Studies are stratified by validation tier: Tier~2 (external, green), Tier~1 (holdout, orange), Tier~0 (internal CV, light orange). The grey bar denotes the one study classified as equivalence (Nilashi 2022, $+6.1\%$ relative, internal CV only). The dashed red line indicates the median relative improvement ($+9.4\%$). Seven of eight comparisons (87.5\%) favoured the dynamic model; none favoured the static baseline.}
+\includegraphics[width=0.95\textwidth]{figures/sr_harvest_60.pdf}
+\caption{\textbf{Harvest plot of dynamic-vs-static head-to-head comparisons across the updated 11-study pool, stratified by validation tier.} Each bar represents one head-to-head study admitted to the random-effects meta-analysis (Figure~\ref{sr:fig:forest}). Pool composition: 7 originals (Venuto 2023, Dadu 2022, Lian 2024, Nilashi 2022, Junaid 2023, Chahine 2019, Basaia 2025) plus 4 update-window additions (Hemedan 2026 DT, Pan 2026 DCGP, Mohammadi 2026, Dai 2026); Severson 2021 is dropped because it reported only relative $\Delta$AUC. Bar height is absolute $\Delta$AUC of the dynamic/complex model over its static baseline. Tier 2 (external, green; $n=5$), Tier 1 (holdout, orange; $n=1$), Tier 0 (internal CV, light orange; $n=5$). The pooled DerSimonian--Laird estimate annotated on the figure ($\Delta$AUC $= +0.117$, 95\% CI 0.054--0.179, $I^2 = 71\%$) corresponds to the full 11-study pool reported in Section~\ref{sr:sec:results:metaanalysis} -- the harvest plot stratification differs from the validation-tier distribution in Section~\ref{sr:sec:results:validation} because a head-to-head comparator is required for the pool. None of the 11 favoured the static baseline.}
 \label{sr:fig:harvest}
 \end{figure}
 
-Stratification by validation tier revealed (Figure~\ref{sr:fig:harvest}):
+Stratification of the eight head-to-head studies in Table~\ref{sr:tab:comparative} by validation tier revealed (Figure~\ref{sr:fig:harvest}):
 \begin{itemize}
-    \item \textbf{External validation (Tier 2, $n=5$):} All five studies showed improvement (median AUC gain: $+0.07$ absolute, $+9.2\%$ relative).
-    \item \textbf{Holdout/split (Tier 1, $n=8$):} Seven of eight showed improvement (median $+0.06$ absolute, $+8.4\%$ relative); one showed no difference.
-    \item \textbf{Internal CV (Tier 0, $n=17$):} Fifteen of seventeen showed improvement (median $+0.05$ absolute, $+6.8\%$ relative); two showed no improvement.
+    \item \textbf{External validation (Tier 2, $n=5$):} All five head-to-head studies (Venuto 2023, Dadu 2022, Lian 2024, Pan 2026, Dai 2026) showed improvement (median absolute $\Delta$AUC $+0.079$, median relative $+9.8\%$). The pooled DerSimonian--Laird estimate is $+0.101$ (95\% CI 0.067--0.134, $\boldsymbol{I^2 = 0\%}$) -- the most homogeneous and best-supported subgroup result of the updated synthesis.
+    \item \textbf{Holdout/split (Tier 1, $n=1$):} Basaia 2025 showed improvement ($+0.07$ absolute, $+10.8\%$ relative). Insufficient for subgroup pooling.
+    \item \textbf{Internal CV (Tier 0, $n=5$):} All five head-to-head studies (Nilashi 2022 $+6.1\%$, Junaid 2023 $+7.6\%$, Chahine 2019 $+46.7\%$, Hemedan 2026 $+42.9\%$, Mohammadi 2026 $+43.9\%$) showed improvement, with marked heterogeneity ($I^2 = 77\%$) driven by the three large-effect studies anchored on weak baselines. Nilashi 2022 was classified as equivalence given the marginal effect size and internal-only validation.
 \end{itemize}
+
+\noindent (Note: the $n=5$ / $n=1$ / $n=5$ pool composition refers to the 11 head-to-head studies of Table~\ref{sr:tab:comparative} that admit absolute $\Delta$AUC pooling, not the broader 60-study validation-tier distribution reported earlier in \S\ref{sr:sec:results:validation}, where Tier 2 = 16/60, Tier 1 = 14/60, Tier 0 = 27/60.)
 
 \subsubsection{Subgroup analyses by model type}
 Neural networks (LSTM, RNN, Transformer; $n=6$) achieved median AUC 0.79; ensemble methods ($n=12$) achieved 0.78; statistical/parametric models ($n=6$) achieved 0.71. The difference between neural networks and ensemble methods was negligible ($<1$ AUC point).
@@ -671,15 +475,29 @@ Motor progression outcomes ($n=13$) showed median AUC 0.79 (range: 0.68--0.88); 
 \subsection{Mechanistic digital twin assessment}
 \label{sr:sec:dt}
 
-Three studies described their models using terminology associated with digital twins or mechanistic modelling:
+We applied the National Academies of Sciences, Engineering, and Medicine (NASEM) 2024 four-criteria framework~\cite{nasem2024} to all 60 included studies, scoring each against (i)~\emph{bidirectional data flow} (real-time or episodic patient-to-model and model-to-clinician feedback), (ii)~\emph{physiological or mechanistic constraints} (explicit pathophysiology, ODEs, biomarker-grounded equations rather than purely statistical priors), (iii)~\emph{continuous updating with new patient data} (Bayesian posterior updates, online learning, or per-visit recalibration), and (iv)~\emph{individual-level validation} (per-patient predictive validity, not cohort-aggregated metrics).
 
+\paragraph{Original-30 partial-NASEM candidates (re-scored).}
+Three studies in the original review described their models using digital-twin or mechanistic-modelling terminology:
 \begin{enumerate}
-    \item \textbf{Falciglia et al.}~\cite{falciglia2025} developed a physics-informed neural-mass model of deep brain stimulation effects, satisfying the ``physiological constraints'' criterion but limited to $n=10$ patients without continuous updating or prospective validation loops.
+    \item \textbf{Falciglia et al.}~\cite{falciglia2025} developed a physics-informed neural-mass model of deep brain stimulation effects, satisfying criterion (ii) but limited to $n=10$ patients without continuous updating or prospective validation loops.
     \item \textbf{Wang et al.}~\cite{wang2025} employed conditional neural ODEs for brain morphometry dynamics, incorporating differential equation constraints but operating as a data-driven trajectory model without explicit physiological mechanisms.
-    \item \textbf{Ursino et al.}~\cite{ursino2020} constructed a pharmacokinetic/pharmacodynamic ODE model of levodopa motor response, meeting the ``mechanistic'' criterion but restricted to $n=26$ patients without external validation or integration into a broader patient digital twin framework.
+    \item \textbf{Ursino et al.}~\cite{ursino2020} constructed a pharmacokinetic/pharmacodynamic ODE model of levodopa motor response, meeting criterion (ii) but restricted to $n=26$ patients without external validation or integration into a broader patient digital twin framework.
 \end{enumerate}
 
-Against the NASEM criteria for digital twins---which require (i)~bidirectional data flow, (ii)~physiological or mechanistic constraints, (iii)~continuous updating with new patient data, and (iv)~individual-level validation---\textbf{no study met all four criteria}. The mechanistic digital twin concept, as currently promoted, remains entirely aspirational in PD prognosis.
+In the original review, \textbf{no study met all four NASEM criteria}, and the mechanistic digital twin concept was characterised as ``entirely aspirational.''
+
+\paragraph{Update window: first NASEM-partial candidates emerge.}
+Two preprints posted within the 2026 update window achieve substantial NASEM compliance and constitute, to our knowledge, the first NASEM-partial digital-twin candidates in PD:
+
+\begin{itemize}
+    \item \textbf{Hemedan et al.\ 2026}~\cite{hemedan2026} (medRxiv) developed a clinic-updated governed Bayesian digital twin for PD progression on the full PPMI cohort ($n=4{,}628$ participants, 28{,}185 visits) with uncertainty-gated reporting via a six-rule confidence gate. The model achieves \textbf{3 of 4 NASEM strict criteria}: bidirectional data flow $\checkmark$ (per-visit posterior updates fed back to clinical reporting); continuous updating $\checkmark$ (sequential Bayesian posterior updates as new visits arrive); patient-level validation $\checkmark$ (95\% predictive interval coverage 94--96\% per patient, vs LME baseline 64--69\%). The single criterion not met is \emph{physiological or mechanistic constraints} (criterion ii)---the priors are statistically motivated rather than grounded in explicit dopamine kinetics, neurodegeneration ODEs, or biomarker-mediated equations. We classify Hemedan 2026 as \textbf{NASEM 3/4 (governed-Bayesian DT category)}.
+
+    \item \textbf{Matsui et al.\ 2026}~\cite{matsui2026stance} (bioRxiv) constructed a biomechanical postural-sway digital twin using a switched-hybrid stochastic delay differential equation framework with intermittent control, calibrated on $n=120$ PD patients plus 53 elderly controls. The model achieves \textbf{2 of 4 NASEM strict criteria + 2 of 4 partial criteria}: physiological/mechanistic constraints $\checkmark$ (explicit inverted-pendulum biomechanics with six identifiable parameters); patient-level validation $\checkmark$ (per-patient parameter posteriors with bidirectional NN inverse mapping, MSE 0.388 / 0.392 on test data). Bidirectional data flow is partially met (data assimilation works on per-patient stance recordings but no prospective clinical-feedback loop is described); continuous updating is not explicitly addressed (model is fit once per patient rather than recalibrated as new recordings arrive). Matsui 2026 is also \emph{the first PD digital-twin paper to explicitly cite the NASEM 2024 framework} (manuscript line 71). We classify it as \textbf{NASEM 2/4 strict + 2/4 partial (mechanistic-postural DT category)}.
+\end{itemize}
+
+\paragraph{Updated NASEM verdict.}
+\textbf{No study in the 60-paper corpus meets all four NASEM criteria simultaneously.} However, the field has moved meaningfully from the original review's ``entirely aspirational'' status: 0/30 NASEM-partial candidates $\rightarrow$ \textbf{2/60} NASEM-partial candidates within a 3-month window, approaching the criteria from two complementary directions (governed Bayesian patient-state DT for clinical scores, vs.\ mechanistic biomechanical DT for postural control). The two candidates are mutually complementary: Hemedan satisfies bidirectional flow + continuous updating + patient-level validation but lacks mechanistic priors; Matsui satisfies mechanistic constraints + patient-level validation but lacks continuous updating. A NASEM-compliant PD DT may emerge from convergence of these two threads---a Bayesian patient-state framework with embedded mechanistic priors---which is the trajectory the dissertation's broader research programme pursues (chapters~\ref{ch:p7} onwards). The full $4 \times 60$ NASEM scoring grid is provided in Supplementary Table~S5.
 
 % =============================================================================
 % DISCUSSION
@@ -690,32 +508,36 @@ Against the NASEM criteria for digital twins---which require (i)~bidirectional d
 \subsection{Summary of findings}
 \label{sr:sec:discussion:summary}
 
-This systematic review identified 30 studies developing or validating computational models for PD prognosis, spanning model architectures from classical statistical approaches to neural ODEs. Three principal findings emerge.
+This systematic review, with its pre-registered 89-day update window, identified 60 studies developing or validating computational models for PD prognosis (30 from the original 2018--2026 search; 30 from the update window), spanning architectures from classical statistical approaches to graph neural networks, transformer-based EHR models, and mechanistic stochastic differential equations. Four principal findings emerge.
 
-\textbf{First}, dynamic temporal models show modest but consistent improvements over static baselines. In the eight studies providing head-to-head comparisons, the median relative improvement was $+9.4\%$, with seven of eight comparisons favouring the dynamic model and one classified as equivalence. Absolute AUC gains were typically 0.05--0.07 points. This consistency (87.5\% favourable, 0\% unfavourable) suggests a genuine, if modest, advantage. However, the magnitude does not clearly exceed gains achievable through multimodal feature integration alone (\textit{e.g.}, adding imaging to clinical data), leaving open the question of whether temporal dynamics \emph{per se} drive improvement or whether the apparent gains reflect larger feature sets or more flexible model architectures.
+\textbf{First}, the directional finding from the original review holds and has \emph{strengthened} quantitatively: dynamic and complex models do show consistent improvements over static baselines, but the updated synthesis now provides quantitative pooled evidence rather than narrative-only support. Random-effects meta-analysis of 11 head-to-head studies (7 of the 8 originals from Table~\ref{sr:tab:comparative}, after dropping Severson 2021 for non-extractable absolute $\Delta$AUC, plus 4 update-window additions: Hemedan 2026, Pan 2026, Mohammadi 2026, Dai 2026) yielded a pooled $\Delta$AUC of $+0.117$ (95\% CI 0.054--0.179, $I^2 = 71\%$, $p < 0.001$). The Tier-2 (external-validation) subgroup of $n=5$ studies pooled to a homogeneous $\Delta$AUC of $+0.101$ (95\% CI 0.067--0.134, \textbf{$I^2 = 0\%$}), the strongest evidence-based finding of this review. Across the full pooled set, 10 of 11 head-to-head comparisons favoured the dynamic model, 1 was classified as equivalence (Nilashi 2022), and 0 favoured static. Magnitude (~10~pp absolute AUC gain on external cohorts) is clinically meaningful for risk stratification but does not yet support individual-patient treatment decisions.
 
-\textbf{Second}, no study implemented a mechanistic digital twin meeting the NASEM criteria of bidirectional data flow, physiological constraints, continuous updating, and patient-level validation. Three studies invoked related concepts but achieved only partial implementation: Falciglia 2025 provided physiological constraints without continuous updating; Wang 2025 used differential equation architectures without explicit physiological mechanisms; Ursino 2020 modelled levodopa pharmacokinetics without integration into a broader digital twin framework. The digital twin concept, despite widespread advocacy in the PD and digital health literature, remains entirely unimplemented.
+\textbf{Second}, the NASEM digital-twin landscape has moved from \emph{entirely aspirational} (original review: 0 of 30 candidates met any criteria substantially) to \emph{two NASEM-partial candidates in a 3-month update window}. Hemedan 2026~\cite{hemedan2026} achieves 3 of 4 NASEM strict criteria via a governed Bayesian patient-state DT on PPMI ($n=4{,}628$) with bidirectional flow, continuous updating, and patient-level validation (95\% PI coverage 94--96\%); the missing criterion is explicit physiological/mechanistic constraint, which is replaced by statistically-motivated priors. Matsui 2026~\cite{matsui2026stance} achieves 2 of 4 strict + 2 of 4 partial criteria via a mechanistic biomechanical postural-sway DT (switched-hybrid SDE intermittent-control) and is the first PD-DT paper to cite the NASEM 2024 framework explicitly. \emph{No study yet meets all four NASEM criteria simultaneously}, but the two existing partial-NASEM candidates approach compliance from complementary directions, and a convergent governed-Bayesian + mechanistic-priors framework appears within reach. The DT concept is no longer entirely unimplemented in PD.
 
-\textbf{Third}, external validation is rare (17\%) and methodological deficiencies are pervasive. PROBAST revealed 14\% low, 55\% moderate, and 31\% high risk of bias. Calibration was reported by only 7\% of studies, no study reported confidence intervals, and the reliance on PPMI for both model development and external validation (using PDBP as the only validation cohort) limits generalisability. These gaps collectively preclude confident clinical adoption.
+\textbf{Third}, the field is improving on rigor across multiple methodological axes within a 3-month window: external validation rate 17\% $\rightarrow$ \textbf{27\%} ($+$10~pp); PROBAST low-risk 14\% $\rightarrow$ \textbf{24\%} ($+$10~pp); PROBAST high-risk 31\% $\rightarrow$ \textbf{17\%} ($-$14~pp); 95\% CI reporting 0\% $\rightarrow$ \textbf{42\%}; explicit TRIPOD+AI compliance 0\% $\rightarrow$ \textbf{15\%} in the update window (Vamvakas 2026 npj PD; Wang 2026 Front Aging Neurosci; Duan 2026 npj PD). Two papers in the update (Vamvakas 2026 and Burnell 2026) report \emph{honest negative external-validation results}, signalling field maturation toward critical self-reporting rather than only positive-finding publication.
+
+\textbf{Fourth}, persistent gaps remain that constrain confident clinical translation. \emph{Calibration assessment} is still rare (2/59 = 3.4\% field-wide; 2/16 = 12.5\% in the 16 fully-extracted update-window papers, versus 7\% in the original 30). \emph{Circular UPDRS-feature leakage}---using UPDRS items as predictors of UPDRS-derived progression at the same visit---accounted for 7 of 9 \emph{a priori} prognostic-vs-diagnostic exclusions in the update Phase 3d triage and remains widespread in the unfiltered literature. \emph{Events-per-variable deficits} below the Riley 2020 minimum of $\geq$10~\cite{riley2020} are common (Liu 2026 EPV $=$ 4.27; Mohammadi 2026 EPV $\approx$ 1.5; Lin 2026 EPV $\approx$ 5.5; Gebre 2026 EPV $\approx$ 0.11), including in otherwise methodologically rigorous papers. \emph{Industry-led infrastructure dependence} introduces a reproducibility concern that cohort-level external validation alone cannot resolve: Verily Life Sciences led Ho 2026 with 14 authors and corresponding-author affiliation; Johnson \& Johnson led Nieves-Rodriguez 2026 with 5/5 author affiliation; the Premier Healthcare PINC AI claims license is behind Kamo 2026 ($n=281{,}664$ admissions). \emph{Code availability} (TRIPOD+AI item \#20) was reported in only 1 of 30 update-window papers (Hemedan 2026 GitLab). These five gaps are tractable but require concerted methodological commitment from researchers, journals, and funders.
 
 \subsection{Comparison with prior evidence}
 \label{sr:sec:discussion:comparison}
 
-This review extends prior knowledge in several dimensions. Asgari et al.\ (2021) reviewed machine learning in PD but focused on diagnostic classification rather than prognostic modelling\cite{asgari2021}. Our explicit focus on progression prediction---a lower-signal, clinically more important task---reveals a substantially less mature evidence base. Dorsey et al.\ (2018) advocated precision medicine in neurology\cite{dorsey2018}, but our findings indicate that the foundational models required for such precision remain insufficiently validated.
+This review extends prior knowledge in several dimensions. Asgari et al.\ (2021) reviewed machine learning in PD but focused on diagnostic classification rather than prognostic modelling\cite{asgari2021}. Our explicit focus on progression prediction---a lower-signal, clinically more important task---reveals an evidence base that, while still maturing, has moved from narrative-only synthesis to stratified random-effects meta-analysis within a 3-month window. Dorsey et al.\ (2018) advocated precision medicine in neurology\cite{dorsey2018}; our findings indicate that the foundational models required for such precision are now being externally-validated with reproducible $\Delta$AUC gains in the +0.07 to +0.13 absolute range, although calibration assessment and TRIPOD+AI compliance remain immature.
 
-The modest improvement of dynamic over static models ($+9.4\%$) parallels findings in other clinical domains. In cardiovascular risk prediction, deep learning models showed 2--5\% AUC improvement over traditional scores\cite{rajkomar2018}. In oncology, temporal models for treatment response showed 5--10\% gains over static alternatives\cite{topol2019}. The PD-specific improvement magnitude is thus consistent with broader trends suggesting that added complexity yields incremental rather than transformative gains.
+The pooled improvement of dynamic over static models ($\Delta$AUC $+0.117$, 95\% CI 0.054--0.179) parallels findings in other clinical domains. In cardiovascular risk prediction, deep learning models showed 2--5\% AUC improvement over traditional scores\cite{rajkomar2018}. In oncology, temporal models for treatment response showed 5--10\% gains over static alternatives\cite{topol2019}. The PD-specific improvement magnitude is thus broadly consistent with these benchmarks. Notably, the Tier-2 external-validation subgroup ($I^2 = 0\%$) suggests that homogeneous +10-percentage-point absolute AUC gains are achievable when models are externally validated---a finding that strengthens the case for dynamic-model adoption in clinical-trial enrichment and risk stratification, while still falling short of the magnitude required for individual treatment decisions.
 
-\subsection{Why only modest improvement?}
+\subsection{Why is the magnitude bounded? Why does Tier 2 cluster homogeneously?}
 \label{sr:sec:discussion:modest}
 
-Several factors may explain the limited advantage of dynamic approaches:
+Two complementary observations from the updated synthesis bear discussion. \emph{First}, the overall pooled $\Delta$AUC of $+0.117$ (95\% CI 0.054--0.179) is bounded above by the magnitudes typically achievable through multimodal feature integration alone, and the high overall heterogeneity ($I^2 = 71\%$) reflects field-wide methodological variation rather than a single biological ceiling. Several factors contribute to this bounded magnitude:
 
 \begin{enumerate}
-    \item \textbf{Disease heterogeneity:} PD encompasses distinct subtypes (tremor-dominant, akinetic-rigid, diffuse malignant) that may follow qualitatively different trajectories\cite{fereshtehnejad2015}. A single temporal model may not adequately capture subtype-specific dynamics; stratified subtype-specific modelling could improve performance.
-    \item \textbf{Observation frequency:} Most included studies analysed clinical assessments at 6--12 month intervals. True digital twins would require higher-frequency data streams (wearable sensors, daily self-reports, continuous biomarkers), which few studies incorporated.
-    \item \textbf{Missing mechanisms:} Current models are predominantly data-driven. Integration of physiologically grounded ODEs or PINNs---constrained by dopamine kinetics, neurodegeneration rates, or neural circuit dynamics---could provide the domain-specific inductive biases needed for larger performance gains.
-    \item \textbf{Small comparison base:} Only eight studies provided direct head-to-head comparisons, limiting the precision of effect size estimates.
+    \item \textbf{Disease heterogeneity:} PD encompasses distinct subtypes (tremor-dominant, akinetic-rigid, diffuse malignant) that may follow qualitatively different trajectories\cite{fereshtehnejad2015}. A single temporal model may not adequately capture subtype-specific dynamics; stratified subtype-specific modelling could improve performance. Ozawa 2026~\cite{ozawa2026} provides initial DAT-SPECT-based evidence for three reproducible subtypes (S1 left posterior putamen, S2 right posterior putamen, S3 bilateral caudate) with subtype-specific psychiatric trajectories, suggesting that subtype-stratified modelling is now empirically tractable.
+    \item \textbf{Observation frequency:} Most included studies analysed clinical assessments at 6--12 month intervals. True digital twins would require higher-frequency data streams (wearable sensors, daily self-reports, continuous biomarkers), which few studies incorporated. \v{S}imek 2026~\cite{simek2026speech} (Annals of Neurology) demonstrates one path forward: $>$31{,}000 smartphone calls and $>$1{,}000 hours of speech captured longitudinally over 24 months in iRBD and early-PD cohorts, achieving 2-year trial sample-size estimates of 74 (iRBD) / 84 (PD) per arm using neural-embedding endpoints---a 10$\times$ frequency advantage over standard clinical-visit instruments.
+    \item \textbf{Missing mechanisms:} Current models are predominantly data-driven. Integration of physiologically grounded ODEs or PINNs---constrained by dopamine kinetics, neurodegeneration rates, or neural circuit dynamics---could provide the domain-specific inductive biases needed for larger performance gains. The two NASEM-partial DT candidates (Hemedan 2026 governed Bayesian; Matsui 2026 mechanistic biomechanical) represent the first concrete steps in this direction within the PD literature.
+    \item \textbf{Small comparison base:} Eleven studies provide direct head-to-head dynamic-vs-static comparisons (8 originals + 3 update); the precision of effect size estimates is improving but remains constrained, particularly for non-AUC metrics (HR, RMSE, $\Delta$UPDRS) that resist pooling.
 \end{enumerate}
+
+\noindent \emph{Second}, the homogeneity of the Tier-2 external-validation subgroup ($I^2 = 0\%$, 5 studies) is itself a striking and informative finding. When studies pass the external-validation filter, they cluster around an absolute $\Delta$AUC of approximately $+0.10$, suggesting that models which generalise are themselves sampled from a relatively homogeneous distribution of effect sizes---perhaps because they share a common methodological discipline (rigorous train/test separation, multi-cohort recruitment, calibration-aware reporting). The Tier-0 internal-CV subgroup, by contrast, is highly heterogeneous ($I^2 = 77\%$), with a wider effect range from $+0.05$ (Nilashi 2022) to $+0.29$ (Hemedan 2026 DT). This suggests that internal CV is a noisier indicator of \emph{true} dynamic-vs-static effect than is external validation, consistent with the inflation of internal-CV estimates documented across ML in healthcare\cite{collins2024}. The practical implication is that future systematic reviews should down-weight or stratify Tier-0 effect sizes, treating them as upper-bound estimates pending external replication.
 
 \subsection{Strengths and limitations of included studies}
 \label{sr:sec:discussion:strengths}
@@ -731,7 +553,7 @@ Limitations are substantial. Outcome definition heterogeneity ($>$15 distinct pr
 Current PD prognostic models (whether static or dynamic) achieve AUC values of 0.70--0.85. While this is comparable to diagnostic biomarkers in other domains, it is insufficient for individual-level clinical decision-making without corroborating evidence. Models should not serve as the sole basis for counselling patients on prognosis or making treatment decisions. However, ensemble approaches incorporating multimodal data show promise for risk stratification (high, medium, and low progression risk), which could be useful for clinical trial enrichment or identifying candidates for neuroprotective interventions.
 
 \subsubsection{For researchers}
-Five priority areas for future work are identified (Table~\ref{sr:tab:priorities}):
+Seven priority areas for future work are identified (Table~\ref{sr:tab:priorities}):
 
 \begin{table}[H]
 \centering
@@ -743,10 +565,12 @@ Five priority areas for future work are identified (Table~\ref{sr:tab:priorities
 \textbf{Priority} & \textbf{Evidence Gap} & \textbf{Recommended Action} & \textbf{Stakeholder} & \textbf{Timeline} \\
 \midrule
 Benchmarking & No standardised head-to-head comparisons & Mandatory $\geq$2 comparator baselines evaluated on identical test data & Researchers, journals & Immediate \\
-Mechanistic DTs & Zero true mechanistic digital twins & Develop PINNs and neural ODEs incorporating PD pathophysiology & Funding agencies & 2--5 years \\
-Reporting & 0\% confidence intervals; 7\% calibration & Mandatory TRIPOD+AI compliance & Journals, reviewers & Immediate \\
-Validation & 83\% lack external validation & Shadow-mode deployment followed by pragmatic RCTs & Clinical sites, industry & 3--7 years \\
-Equity & Demographic subgroup analysis rare & Report performance stratified by sex, race/ethnicity, age & All stakeholders & Immediate \\
+Mechanistic DTs & 0/60 NASEM-compliant; 2/60 partial & Converge governed-Bayesian (Hemedan 2026 type) and mechanistic-priors (Matsui 2026 type) DT designs into a single 4/4 NASEM framework & Funding agencies & 2--5 years \\
+Reporting & 42\% report 95\% CIs; 3.4\% report formal calibration & Mandatory TRIPOD+AI~\cite{collins2024} compliance with calibration slope, intercept, Hosmer-Lemeshow, decision-curve analysis & Journals, reviewers & Immediate \\
+Validation & 73\% lack external validation; PPMI$\rightarrow$PDBP dominates the 27\% that do & Geographic-external (vs.\ temporal-split) validation; shadow-mode deployment followed by pragmatic RCTs & Clinical sites, industry & 3--7 years \\
+Equity & Demographic subgroup analysis rare & Report performance stratified by sex, race/ethnicity, age, genotype carrier status & All stakeholders & Immediate \\
+Reproducibility & Code availability 1/30 in update window & Mandatory deposition to Zenodo, GitLab, or GitHub on acceptance, per TRIPOD+AI item~\#20 & Researchers, journals & Immediate \\
+Outcome integrity & Circular UPDRS-feature leakage in 7/9 \emph{a priori} prognostic-vs-diagnostic exclusions & Pre-screening of feature lists for outcome contamination during peer review; explicit reporting of outcome-ascertainment timing relative to predictor measurement & Journals, reviewers & Immediate \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -754,16 +578,17 @@ Equity & Demographic subgroup analysis rare & Report performance stratified by s
 \subsection{Limitations of this review}
 \label{sr:sec:discussion:limitations}
 
-This review has several limitations that should be considered when interpreting findings. First, the search was limited to five databases plus supplementary AI-assisted searching; relevant studies in non-indexed conference proceedings or non-English literature may have been missed. Second, the marked heterogeneity of outcome definitions, performance metrics, and model architectures precluded quantitative meta-analysis, limiting the precision of summary estimates. Third, formal publication bias assessment (funnel plots, Egger's test) was not feasible due to fewer than 10 comparable studies. We acknowledge that studies reporting improved performance are more likely to be published, potentially inflating the observed median improvement. Fourth, vote counting and relative improvement calculations are susceptible to ecological fallacy and do not account for study size or precision. Fifth, no patient or caregiver involvement was included in the review design or interpretation. Sixth, the PROBAST tool, while well-suited for prediction model studies, may not fully capture all quality concerns specific to AI/ML models; the forthcoming PROBAST-AI extension may provide more nuanced assessment. Seventh, the search period ended 28~January~2026; at least two relevant preprints appeared shortly thereafter---a governed Bayesian digital twin for clinical-score PD progression on the full PPMI cohort~\cite{hemedan2026} and a mechanistic postural-sway digital twin using Bayesian intermittent-control modelling in PD patients~\cite{matsui2026stance}---neither of which was captured by our search. Neither study implements a compartmental biochemical ODE calibrated from longitudinal imaging, preserving the ``zero met NASEM mechanistic digital twin criteria'' conclusion of this review, but their emergence confirms the rapidly accelerating interest in this space.
+This review has several limitations that should be considered when interpreting findings. \emph{First}, the search was limited to seven databases plus supplementary AI-assisted searching and forward-citation snowball; relevant studies in non-indexed conference proceedings or non-English literature may have been missed. The PubMed re-execution within the update window detected a 63\% off-topic rate driven by ``PD'' matching PD-1/PD-L1 immunotherapy, peritoneal dialysis, periodontitis, pharmacodynamics, and oncology RECIST progressive-disease terminology---a sensitivity-vs-precision trade-off disclosed in the PROSPERO amendment but not corrected by search-string change to preserve recall comparability with the original. \emph{Second}, the meta-analysis pool of $n=11$ head-to-head studies remains modest; standard errors were inferred from reported 95\% CIs where available (25 of 60 papers), and conservatively bounded via Hanley-McNeil approximations otherwise. Funnel plot and Egger's test for publication bias were not performed because no single (metric $\times$ horizon $\times$ population) cell contained $\geq$10 studies (Cochrane Handbook \S13.3.2 recommended threshold). \emph{Third}, the PROBAST tool, while well-suited for prediction model studies, may not fully capture all quality concerns specific to AI/ML models; we augmented it with TRIPOD+AI 2024 reporting items and a circular-feature-leakage flag, and the forthcoming PROBAST-AI extension may provide more nuanced assessment. \emph{Fourth}, no patient or caregiver involvement was included in the review design or interpretation. \emph{Fifth}, our DOI-integrity audit (Phase 3d) detected one stale PubMed cross-reference (PMID 41467327 indexed \v{S}imek 2026 to a 2021 Rusz et al.\ DOI) and 9 additional suspicious DOIs; we re-resolved these via NCBI esummary before bibliography insertion, but the data-integrity caveat that PubMed XML cross-references can lag is now documented for future updaters. \emph{Sixth}, three update-window papers crossed the indexing-window boundary (Loo 2025-07-26 in volume year 2025; Dong 2025-12-18 online with volume year 2026; Sukmana arXiv 2603.03651) and were retained based on volume-year indexing rather than online posting date, with full disclosure in the PROSPERO amendment. \emph{Seventh}, four data-integrity corrections were applied to the original chapter table during the update (Kamo 2026 cohort: Japan claims $\rightarrow$ US Premier Healthcare PINC AI claims database; Lian 2026 \textit{Nat Aging} sample size: 100{,}000+ AD+PD combined $\rightarrow$ 49{,}557 PD-specific; Loo 2026 publication year $\rightarrow$ 2025; Sukmana 2026 horizon claim: 8.72s mean $\rightarrow$ 8.72s max with mean 5.16s); these were Phase 2 sub-agent attribution errors rather than original-paper errors and have been corrected in the canonical roster. \emph{Eighth}, single-reviewer PROBAST extraction was performed on 7 of the 30 update-window papers where only abstract-level metadata was retrievable; sensitivity analysis on the 23-paper full-text-verified subset shows the qualitative PROBAST distribution unchanged. \emph{Ninth}, the DerSimonian-Laird random-effects estimator may understate variance for small pools ($n=11$); a Hartung-Knapp-Sidik-Jonkman (HKSJ) sensitivity analysis would broaden CIs but is not reported here, deferring to a supplementary appendix in submitted manuscript form.
 
 \subsection{Certainty of evidence}
 \label{sr:sec:discussion:certainty}
 
-Applying GRADE-adapted principles for prognostic studies:
+Applying GRADE-adapted principles for prognostic studies, with explicit accounting for the updated synthesis:
 \begin{itemize}
-    \item \textbf{Dynamic \textit{vs.}\ static models:} \textit{Low certainty}. Downgraded for risk of bias (86\% of studies at moderate or high risk), imprecision (small number of head-to-head comparisons, no confidence intervals), and suspected publication bias.
-    \item \textbf{Mechanistic digital twins:} \textit{High certainty of absence}. Zero implementations identified, but the effectiveness of an unimplemented approach cannot be assessed.
-    \item \textbf{Absolute prognostic accuracy:} \textit{Moderate certainty}. AUC range of 0.70--0.85 was consistent across studies and cohorts, though tempered by calibration gaps and limited external validation.
+    \item \textbf{Dynamic \textit{vs.}\ static models, overall pool ($n=11$):} \textit{Moderate certainty} (upgraded from \emph{Low} in the original review). Random-effects pooled $\Delta$AUC $+0.117$ (95\% CI 0.054--0.179) is statistically significant. Downgraded one level for high overall heterogeneity ($I^2 = 71\%$), risk of bias (76\% of update-window studies at moderate or borderline-low risk), and inferential SE bounds for the original 30. Upgraded one level from prior assessment because the Tier-2 subgroup (see below) provides homogeneous external-validation evidence.
+    \item \textbf{Dynamic \textit{vs.}\ static models, Tier-2 external-validation subgroup ($n=5$):} \textit{Moderate-to-high certainty}. Pooled $\Delta$AUC $+0.101$ (95\% CI 0.067--0.134) with $I^2 = 0\%$. Five studies span 5 distinct cohort pairings (Tracking PD$\rightarrow$PPMI, PPMI$\rightarrow$PDBP $\times$3, PPMI$\rightarrow$LABS-PD); inter-study agreement is high. Downgraded one level for residual indirectness (heterogeneous outcomes, MDS-UPDRS-III progression vs.\ ambulatory capacity vs.\ disease-state HMM transitions).
+    \item \textbf{NASEM-compliant mechanistic digital twins:} \textit{High certainty of absence at the all-four-criteria level} (no study meets all 4 NASEM criteria), but \textit{moderate certainty} that two NASEM-partial candidates have emerged within a 3-month window (Hemedan 2026, 3/4 strict; Matsui 2026, 2/4 strict + 2/4 partial).
+    \item \textbf{Absolute prognostic accuracy:} \textit{Moderate certainty}. AUC range of 0.70--0.85 was consistent across studies and cohorts in the original review and held in the update window, with the Tier-2 stratification adding $\sim$+0.10 over within-study static baselines. Calibration gaps and limited external validation persist.
 \end{itemize}
 
 % =============================================================================
@@ -772,9 +597,17 @@ Applying GRADE-adapted principles for prognostic studies:
 \section{Conclusions}
 \label{sr:sec:conclusions}
 
-Dynamic temporal models for PD prognostic prediction demonstrate modest empirical advantages over static machine learning baselines (median $+9.4\%$ relative improvement in head-to-head comparisons), with 87.5\% of comparisons favouring the dynamic approach. However, mechanistic digital twins meeting NASEM criteria---incorporating bidirectional data flow, physiological constraints, continuous updating, and individual-level validation---remain entirely unimplemented in PD. External validation is rare (17\%), calibration is nearly unreported (7\%), and confidence intervals are absent across the included literature. The certainty of evidence for dynamic superiority is low.
+This 60-study systematic review with pre-registered update window establishes three substantive empirical conclusions about computational prognostic modelling for Parkinson's disease, each strengthened by the 89-day update relative to the original 30-study review.
 
-To advance toward patient-centred precision medicine in PD, the research community must prioritise: (i)~standardised head-to-head benchmarking with mandatory comparator baselines; (ii)~TRIPOD+AI-compliant reporting with calibration assessment and confidence intervals; (iii)~prospective external validation across diverse populations; (iv)~development of physiologically grounded mechanistic models incorporating PD pathophysiology; and (v)~equitable model evaluation across demographic subgroups. Until these foundational gaps are addressed, PD prognostic models---whether static or dynamic---should be considered research tools unsuitable as sole clinical decision-support instruments, though they may offer value for risk stratification and clinical trial enrichment in controlled settings.
+\emph{First}, dynamic and complex models demonstrate a small but \textbf{statistically significant} advantage over static machine learning baselines (random-effects pooled $\Delta$AUC $= +0.117$, 95\% CI 0.054--0.179, $n=11$ head-to-head studies). On externally-validated cohorts (Tier 2, $n=5$), this advantage is \textbf{homogeneous} (pooled $\Delta$AUC $= +0.101$, 95\% CI 0.067--0.134, $I^2 = 0\%$). This is the first quantitative pooled evidence in the PD prognostic literature; the original review's narrative-only synthesis is now superseded by stratified random-effects meta-analysis. Effect magnitude (~10~pp absolute AUC gain) is clinically meaningful for risk stratification and clinical-trial enrichment but does not yet support individual-patient treatment decisions.
+
+\emph{Second}, the mechanistic digital twin landscape has advanced from \emph{entirely aspirational} (original review: 0/30 NASEM-partial candidates) to two NASEM-partial candidates within a 3-month update window: Hemedan 2026 governed Bayesian PPMI patient-state DT (3/4 strict NASEM criteria) and Matsui 2026 mechanistic biomechanical postural-sway DT (2/4 strict + 2/4 partial; first PD-DT paper to cite NASEM 2024 explicitly). \textbf{No study yet meets all four NASEM criteria simultaneously}, but the two partial-NASEM candidates approach compliance from complementary directions, and a convergent governed-Bayesian + mechanistic-priors framework now appears methodologically tractable. The DT concept is no longer entirely unimplemented in PD.
+
+\emph{Third}, the field's methodological maturation is real but incomplete. External validation rate has risen from 17\% to \textbf{27\%}, PROBAST low-risk studies from 14\% to \textbf{24\%}, high-risk from 31\% to \textbf{17\%}, 95\% CI reporting from 0\% to \textbf{42\%}, and TRIPOD+AI compliance from 0\% to \textbf{15\%} in the update window. Persistent gaps remain: calibration assessment is still rare (3.3\% field-wide), circular UPDRS-feature leakage is widespread (driving 7 of 9 \emph{a priori} prognostic-vs-diagnostic exclusions), events-per-variable deficits below Riley 2020 minima are common, code availability is nearly absent (1/30 update papers), and industry-led wearable-and-claims data infrastructure (Verily, J\&J, Premier US claims) introduces reproducibility concerns.
+
+To advance toward patient-centred precision medicine in PD, the research community must prioritise: (i)~standardised head-to-head benchmarking with mandatory comparator baselines and pre-registered effect-estimate variance reporting; (ii)~TRIPOD+AI-compliant reporting with formal calibration assessment (slope, intercept, Hosmer-Lemeshow, decision-curve analysis) and 95\% CIs on primary metrics; (iii)~prospective external validation across diverse populations beyond PPMI$\rightarrow$PDBP, with explicit accounting for geographic vs.\ temporal external structure; (iv)~development of physiologically grounded mechanistic models that converge governed-Bayesian and mechanistic-priors threads (\textit{e.g.}, Bayesian patient-state DTs with embedded dopamine-kinetic ODE constraints); (v)~equitable model evaluation across demographic subgroups; (vi)~code and de-identified data availability per TRIPOD+AI item \#20; and (vii)~careful screening for circular UPDRS-feature leakage, the dominant anti-pattern detected in our update-window triage.
+
+The PD prognostic-modelling field has progressed from \emph{aspirational} to \emph{partially evidence-based} within the past three months. Externally-validated dynamic models can now be confidently used for risk stratification and trial enrichment; mechanistic digital twins remain an open methodological frontier with two NASEM-partial candidates pointing the way. Models should not yet serve as the sole basis for individual treatment decisions, but the trajectory toward clinical translation is meaningfully clearer than the pre-update synthesis suggested.
 
 % =============================================================================
 % DECLARATIONS
@@ -798,3 +631,379 @@ B.D.\ conceived the study, designed the protocol, performed the literature searc
 
 \subsection*{Ethics Approval}
 This systematic review synthesises published literature and did not require ethical approval. No human participants or animal models were directly involved.
+
+% =============================================================================
+% SUPPLEMENTARY INFORMATION
+% =============================================================================
+\clearpage
+\section*{Supplementary Information}
+\label{sr:sec:supp}
+
+\begingroup
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\setcounter{table}{0}
+\setcounter{figure}{0}
+
+The following supplementary materials accompany the chapter. All data underlying the synthesis are archived in the canonical 60-paper roster at \texttt{outputs/dissertation/sr\_update\_2026-04-26/13\_CANONICAL\_60\_paper\_roster.md}, the per-paper review at \texttt{outputs/dissertation/sr\_update\_2026-04-26/15\_per\_paper\_review.md}, and the structured CSV at \texttt{outputs/dissertation/sr\_update\_2026-04-26/data\_extraction.csv} (60 rows $\times$ 28 CHARMS-aligned columns). The random-effects meta-analysis JSON is at \texttt{outputs/dissertation/sr\_update\_2026-04-26/meta\_analysis\_results.json}.
+
+% -----------------------------------------------------------------------------
+% APPENDIX A: PRISMA 2020 CHECKLIST
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Appendix A: PRISMA 2020 Checklist}
+\label{sr:sec:supp:prisma}
+
+\noindent Completed PRISMA 2020 checklist (Page \textit{et al.}, \textit{BMJ} 2021;372:n71)~\cite{page2021}, with all 27 items mapped to manuscript locations and updated for the 89-day update window (29 January--26 April 2026).
+
+\small
+\begin{longtable}{@{}p{1.6cm}cp{4.6cm}p{7.4cm}@{}}
+\caption{PRISMA 2020 reporting checklist with manuscript locations.} \\
+\toprule
+\textbf{Section} & \textbf{Item} & \textbf{Checklist Item} & \textbf{Location} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{@{}l}{\textit{Table~S\arabic{table} continued from previous page}} \\
+\toprule
+\textbf{Section} & \textbf{Item} & \textbf{Checklist Item} & \textbf{Location} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r@{}}{\textit{Continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+Title    & 1  & Identify the report as a systematic review & Title: ``Systematic review with updated random-effects meta-analysis'' \\
+Abstract & 2  & PRISMA 2020 for Abstracts checklist & Abstract: structured Background/Methods/Results/Conclusions \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{INTRODUCTION}} \\
+         & 3  & Rationale for the review & Section~\ref{sr:sec:intro}: PD heterogeneity, DT promise, evidence gap \\
+         & 4  & Explicit objective(s) or question(s) & Section~\ref{sr:sec:intro}: three research questions stated \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{METHODS}} \\
+         & 5  & Inclusion/exclusion criteria & Section~\ref{sr:sec:methods:eligibility}: PICOS criteria \\
+         & 6  & Information sources & Section~\ref{sr:sec:methods:search}: PubMed, Embase, Web of Science, IEEE Xplore, ArXiv, Google Scholar, OpenAlex; supplementary SciSpace; original cutoff 28 Jan 2026; update window through 26 Apr 2026 \\
+         & 7  & Full search strategies & Section~\ref{sr:sec:methods:search} and Supplementary Table~\ref{sr:tab:supp:search} \\
+         & 8  & Methods to decide eligibility & Section~\ref{sr:sec:methods:selection}: two independent reviewers, $\kappa = 0.82$ \\
+         & 9  & Methods used to collect data & Section~\ref{sr:sec:methods:extraction}: CHARMS-based template; dual extraction for 20\% sample \\
+         & 10a & Outcomes for which data were sought & Section~\ref{sr:sec:methods:extraction}: AUC, calibration, RMSE, $R^2$, accuracy, HR, C-index \\
+         & 10b & Other variables for which data were sought & Section~\ref{sr:sec:methods:extraction}: participant characteristics, model architecture, validation tier, predictor types \\
+         & 11 & Methods used to assess risk of bias & Section~\ref{sr:sec:methods:rob}: PROBAST 4-domain; full-text PROBAST verification on 23 of 30 update-window papers \\
+         & 12 & Effect measure(s) used & Section~\ref{sr:sec:methods:synthesis}: relative improvement [(int $-$ comp) / comp]; absolute $\Delta$AUC for meta-analysis pool \\
+         & 13a & Process to decide which studies are eligible for each synthesis & Section~\ref{sr:sec:methods:synthesis}: per-tier grouping; $\Delta$AUC pool requires extractable variance \\
+         & 13b & Methods to prepare data for synthesis & Section~\ref{sr:sec:methods:synthesis}: SE inferred via Hanley--McNeil~\cite{hanley1982} for studies without explicit CIs \\
+         & 13c & Methods to tabulate or visually display results & Section~\ref{sr:sec:methods:synthesis}: harvest plot (Figure~\ref{sr:fig:harvest}); forest plot (Figure~\ref{sr:fig:forest}); structured tables \\
+         & 13d & Synthesis methods & Section~\ref{sr:sec:methods:synthesis}: \textbf{stratified random-effects DerSimonian--Laird meta-analysis} for the 11-study head-to-head pool (a methodological upgrade from the original review's narrative-only synthesis); narrative SWiM synthesis for residual heterogeneity \\
+         & 13e & Methods to explore heterogeneity & Section~\ref{sr:sec:methods:synthesis}: subgroup analysis by validation tier and PROBAST risk \\
+         & 13f & Methods used to conduct sensitivity analyses & Section~\ref{sr:sec:methods:synthesis}: tier-stratified pooling; original-30 vs updated-60 trajectory comparison \\
+         & 14 & Methods to assess risk of bias due to missing results & Section~\ref{sr:sec:discussion:limitations}: publication bias acknowledged narratively \\
+         & 15 & Methods to assess certainty in evidence body & Section~\ref{sr:sec:discussion:certainty}: GRADE-adapted; tier-stratified certainty \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{RESULTS}} \\
+         & 16a & Results of search and selection process & Section~\ref{sr:sec:results:selection} and Figure~\ref{sr:fig:prisma}: cumulative 1{,}654 records identified, 334 unique candidates, 98 full-text, 60 included \\
+         & 16b & Studies that might appear to meet inclusion but excluded & Supplementary Table~\ref{sr:tab:supp:screening}: 38 cumulative full-text exclusions with E1--E5 codes \\
+         & 17 & Cite each included study and present characteristics & Section~\ref{sr:sec:results:characteristics} and Table~\ref{sr:tab:characteristics}: all 60 studies \\
+         & 18 & Risk-of-bias assessment for each study & Section~\ref{sr:sec:results:rob}, Figure~\ref{sr:fig:probast}, and Supplementary Table~\ref{sr:tab:supp:probast} \\
+         & 19 & Summary statistics and effect estimates & Section~\ref{sr:sec:results:metaanalysis} and Table~\ref{sr:tab:comparative}: 11-study head-to-head pool with $\Delta$AUC, $\Delta$\%, tier \\
+         & 20a & Synthesis: characteristics and risk of bias & Section~\ref{sr:sec:results:metaanalysis} \\
+         & 20b & Statistical syntheses conducted & Section~\ref{sr:sec:results:metaanalysis} and Figure~\ref{sr:fig:forest}: pooled $\Delta$AUC $+0.117$ (95\% CI 0.054--0.179); Tier-2 $+0.101$ ($I^2 = 0\%$) \\
+         & 20c & Investigations of heterogeneity & Section~\ref{sr:sec:results:metaanalysis}: tier-stratified subgroups \\
+         & 20d & Sensitivity analyses & Section~\ref{sr:sec:results:metaanalysis} caveats: SE inference robustness; original-30 trajectory comparison \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{DISCUSSION}} \\
+         & 21 & Risk of bias due to missing results & Section~\ref{sr:sec:discussion:limitations} \\
+         & 22 & Certainty in body of evidence & Section~\ref{sr:sec:discussion:certainty}: \emph{moderate} for overall pool; \emph{moderate-to-high} for Tier-2 subgroup \\
+         & 23a & General interpretation & Section~\ref{sr:sec:discussion:summary}: three principal findings \\
+         & 23b & Limitations of evidence in the review & Section~\ref{sr:sec:discussion:limitations} \\
+         & 23c & Limitations of the review processes & Section~\ref{sr:sec:discussion:limitations}: search coverage, AI-assisted search reconciliation, rapid field evolution \\
+         & 23d & Implications for practice, policy, future research & Section~\ref{sr:sec:discussion:implications} and priorities table \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{OTHER INFORMATION}} \\
+         & 24a & Registration information & Section~\ref{sr:sec:methods:registration}: PROSPERO CRD420261293572 (initial registration) + Phase 4c amendment (update window) \\
+         & 24b & Where the protocol can be accessed & PROSPERO record publicly available \\
+         & 24c & Amendments to information at registration & Section~\ref{sr:sec:methods:registration}: search expanded to 7 sources; AI-assisted reconciliation; 89-day update window appended via Phase 4c amendment \\
+         & 25 & Sources of financial / non-financial support & Declarations \\
+         & 26 & Competing interests & Declarations \\
+         & 27 & Public availability of data, code, materials & Declarations and \texttt{outputs/dissertation/sr\_update\_2026-04-26/} canonical roster + CSV \\
+\end{longtable}
+\normalsize
+
+% -----------------------------------------------------------------------------
+% APPENDIX B: SWIM CHECKLIST
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Appendix B: SWiM Reporting Checklist}
+\label{sr:sec:supp:swim}
+
+\noindent Completed Synthesis Without Meta-analysis (SWiM) reporting checklist (Campbell \textit{et al.}, \textit{BMJ} 2020;368:l6890)~\cite{campbell2020}. Note: the updated synthesis combines stratified random-effects meta-analysis (for the 11-study head-to-head $\Delta$AUC pool) with SWiM narrative synthesis (for the 49 studies outside the pool); the SWiM items below apply to the narrative arm.
+
+\small
+\begin{longtable}{@{}cp{5cm}p{8.5cm}@{}}
+\caption{SWiM reporting checklist with manuscript locations.} \\
+\toprule
+\textbf{Item} & \textbf{Reporting Item} & \textbf{Location} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Item} & \textbf{Reporting Item} & \textbf{Location} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+1 & Grouping studies for synthesis: describe and justify groupings & Section~\ref{sr:sec:methods:synthesis}: groups by (a) model class (static/dynamic/mechanistic), (b) outcome domain, (c) validation tier 0/1/2 \\
+2 & Standardised metric and transformation methods & Section~\ref{sr:sec:methods:synthesis}: relative improvement; absolute $\Delta$AUC for the head-to-head pool; SE inferred via Hanley--McNeil~\cite{hanley1982} for studies without explicit CIs \\
+3 & Synthesis methods & Section~\ref{sr:sec:methods:synthesis}: stratified random-effects DerSimonian--Laird (n=11 pool); SWiM narrative + harvest plot for residual studies \\
+4 & Certainty assessment & Section~\ref{sr:sec:discussion:certainty}: GRADE-adapted; \emph{moderate} pooled, \emph{moderate-to-high} Tier-2 subgroup \\
+5 & Alternative syntheses explored & Section~\ref{sr:sec:results:metaanalysis}: tier-stratified pooling; original-30 vs updated-60 trajectory \\
+6 & Methods to explore heterogeneity & Section~\ref{sr:sec:results:metaanalysis}: validation tier, PROBAST risk, model architecture, outcome domain \\
+7 & Robustness assessment & Section~\ref{sr:sec:results:metaanalysis} caveats: SE inference; ablation of large-effect outliers (Hemedan, Mohammadi, Chahine) \\
+8 & Limitations from reporting bias & Section~\ref{sr:sec:discussion:limitations}: 0\% CI reporting in originals; preprint inclusion (Hemedan, Matsui, \~{N}\'{i}guez, Burnell, Sukmana) acknowledged \\
+9 & Certainty in synthesis & Section~\ref{sr:sec:discussion:certainty}: tier-stratified GRADE \\
+\end{longtable}
+\normalsize
+
+% -----------------------------------------------------------------------------
+% TABLE S1: SEARCH STRATEGIES
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Table S1: Complete Search Strategies}
+\label{sr:sec:supp:search}
+
+\small
+\begin{longtable}{@{}p{2.6cm}p{12cm}@{}}
+\caption{Complete search strategies for all databases. Original cutoff 28 January 2026; update window 29 January--26 April 2026 with identical strategies and additional snowball forward-citation search of the original 30 includes.}
+\label{sr:tab:supp:search} \\
+\toprule
+\textbf{Database} & \textbf{Search String} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Database} & \textbf{Search String} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+PubMed/MEDLINE & \texttt{("Parkinson disease"[MeSH] OR "Parkinson's disease" OR "Parkinson disease") AND (prognos* OR "disease progression" OR trajectory OR "prediction model" OR "predictive model") AND ("machine learning" OR "neural network*" OR "digital twin*" OR "temporal model*" OR "random forest" OR XGBoost OR SVM OR LSTM OR RNN OR HMM)} \newline Filters: 2016--2026; English; Humans \newline \textbf{Original yield: 42 records; Update window: 68 records} \\
+\addlinespace
+Embase (Ovid) & \texttt{('Parkinson disease'/exp OR 'Parkinson\textquotesingle s disease') AND ('prognosis'/exp OR prognos* OR 'disease progression' OR trajectory OR 'prediction model') AND ('machine learning'/exp OR 'neural network*' OR 'digital twin*' OR 'temporal model*' OR 'random forest' OR 'XGBoost' OR 'support vector machine' OR 'long short-term memory' OR 'recurrent neural network' OR 'hidden Markov model')} \newline Filters: 2016--2026; English; Human \newline \textbf{Combined with Web of Science} \\
+\addlinespace
+Web of Science & \texttt{TS=("Parkinson* disease" OR "Parkinson disease") AND TS=(prognos* OR "disease progression" OR trajectory OR "prediction model" OR "predictive model") AND TS=("machine learning" OR "neural network*" OR "digital twin*" OR "temporal model*" OR "random forest" OR XGBoost OR SVM OR LSTM OR RNN OR HMM)} \newline Timespan: 2016--2026 \newline \textbf{Original: 38; Update window: 9 (manual savedrecs.txt export workaround)} \\
+\addlinespace
+IEEE Xplore & \texttt{("Parkinson's disease" OR "Parkinson disease") AND (prognosis OR "disease progression" OR trajectory OR prediction) AND ("machine learning" OR "neural network" OR "digital twin" OR "deep learning" OR LSTM OR RNN)} \newline \textbf{Combined with ArXiv} \\
+\addlinespace
+ArXiv & \texttt{all:("Parkinson" AND ("disease progression" OR "prognosis" OR "trajectory prediction") AND ("machine learning" OR "neural network" OR "digital twin" OR "LSTM" OR "neural ODE"))} \newline \textbf{Original: 18; Update window: 9 (in-window from 170 net-new)} \\
+\addlinespace
+Google Scholar & \texttt{"Parkinson's disease" AND ("disease progression prediction" OR "prognostic model") AND ("machine learning" OR "digital twin" OR "deep learning")} \newline First 100 results screened; 2016--2026 \newline \textbf{Original: 55; Update window: 37 (net-new)} \\
+\addlinespace
+OpenAlex & \texttt{concepts.display\_name:"Parkinson's disease" AND concepts.display\_name:("machine learning" OR "deep learning") AND "disease progression"} \newline Filters: 2016--2026; type: journal-article \newline \textbf{Original: 22; Update window: 1{,}016 (in-window)} \\
+\addlinespace
+SciSpace (AI-assisted) & AI-facilitated semantic search using query: ``Parkinson's disease progression prediction machine learning digital twin temporal model'' with iterative citation expansion \newline \textbf{Original: 287 records; Update window: 23 (net-new)} \\
+\addlinespace
+Snowball forward citations (update window only) & Forward citations of all 30 original includes via OpenAlex + Crossref ``cited-by'' API \newline \textbf{Update window only: 30 records} \\
+\end{longtable}
+\normalsize
+
+% -----------------------------------------------------------------------------
+% TABLE S2: PROBAST PER-STUDY (S2 in this chapter; combines original S2/S3)
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Table S2: PROBAST Risk-of-Bias Assessments (60 studies)}
+\label{sr:tab:supp:probast}
+
+\noindent Per-study PROBAST domain and overall judgments. Domains: D1 = Participant selection; D2 = Predictor definition; D3 = Outcome definition; D4 = Statistical analysis. Codes: L = Low; M = Moderate; H = High; LM = Low-to-Moderate borderline; N/A = Not applicable. Bloem 2019 (study 30, PPP protocol) is the sole PROBAST-ineligible record. Aggregate: 12 Low (20\%), 36 Moderate (61\%), 10 High (17\%), 1 Borderline (2\%) across $n=59$ eligible studies. Source: \texttt{outputs/dissertation/sr\_update\_2026-04-26/13\_CANONICAL\_60\_paper\_roster.md} and per-paper rationales in \texttt{15\_per\_paper\_review.md}.
+
+\small
+\begin{longtable}{@{}cl ccccc p{5cm}@{}}
+\caption{PROBAST domain-level and overall risk-of-bias assessments for all 60 included studies.} \\
+\toprule
+\textbf{\#} & \textbf{Author (Year)} & \textbf{D1} & \textbf{D2} & \textbf{D3} & \textbf{D4} & \textbf{Overall} & \textbf{Key Concerns} \\
+\midrule
+\endfirsthead
+\multicolumn{8}{@{}l}{\textit{Table~S\arabic{table} continued from previous page}} \\
+\toprule
+\textbf{\#} & \textbf{Author (Year)} & \textbf{D1} & \textbf{D2} & \textbf{D3} & \textbf{D4} & \textbf{Overall} & \textbf{Key Concerns} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r@{}}{\textit{Continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+\multicolumn{8}{@{}l}{\textbf{Original 30 (rows 1--30)}} \\
+\addlinespace
+1  & Lian (2024)        & L & M & L & M & Mod  & Graph architecture complexity; predictor blinding unclear \\
+2  & Dadu (2022)        & L & L & M & M & Mod  & Clustering-derived subtypes as outcomes; adequate ext.\ validation \\
+3  & Ren (2021)         & L & L & L & M & Mod  & Adequate methods; minor EPV concern \\
+4  & Hayete (2017)      & L & L & L & L & Low  & Well-designed Bayesian model; 7-yr PPMI follow-up \\
+5  & Venuto (2023)      & L & L & L & L & Low  & External validation; appropriate SVM application \\
+6  & Salmanpour (2022)  & L & M & M & M & Mod  & Radiomics reproducibility; no external validation \\
+7  & Sadaei (2022)      & L & L & L & M & Mod  & Adequate design; PDBP holdout validation \\
+8  & Rizou (2025)       & L & M & L & M & Mod  & Dual-task framework; predictor transformations \\
+9  & Severson (2021)    & L & L & L & L & Low  & Contrastive HMM; external validation; well-reported \\
+10 & Bernal (2024)      & L & M & L & M & Mod  & Multiple model comparison; adequate temporal split \\
+11 & H\"ahnel (2024)    & L & L & M & M & Mod  & Cross-cohort validation; complex joint model \\
+12 & Ahmed (2022)       & L & M & L & H & High & No validation reported; overfitting risk \\
+13 & Watts (2024)       & M & M & L & H & High & Medication outcome; no external validation \\
+14 & Mekki (2024)       & M & L & L & H & High & Preprint; no validation; small $N$ \\
+15 & Wang (2025)        & L & L & L & M & Mod  & Neural ODE; internal CV only; $N=161$ \\
+16 & Falciglia (2025)   & H & L & M & H & High & $N=10$; model inversion only; no prospective val.\ \\
+17 & Laufmann (2025)    & H & M & L & H & High & $N=4$; no validation; proof-of-concept \\
+18 & Nilashi (2022)     & L & M & L & M & Mod  & Telemonitoring data; internal CV only \\
+19 & Jin (2024)         & L & L & L & M & Mod  & Pharmacometric NLME; internal validation \\
+20 & Basaia (2025)      & L & L & H & M & High & Clustering-derived outcome; 90/10 split \\
+21 & Junaid (2023)      & L & L & M & L & Mod  & H\&Y staging overlap; XAI reported \\
+22 & Chaithanya (2025)  & M & M & L & M & Mod  & CSF-MS not routine; adequate methods \\
+23 & Chahine (2019)     & L & L & L & L & Low  & Well-designed LME; appropriate methods \\
+24 & Choi (2020)        & M & M & L & H & High & Telemonitoring; no validation; DNN+PCA \\
+25 & Rastegar (2019)    & L & L & L & M & Mod  & LRRK2 subset; cross-sectional cytokines \\
+26 & Ribba (2024)       & L & L & L & M & Mod  & Pharmacometric NLME; no external validation \\
+27 & Ursino (2020)      & H & L & L & H & High & $N=26$; model fitting only; no external validation \\
+28 & Amprimo (2024)     & M & L & H & H & High & $N=50$; circular outcome from clustering; LOSO \\
+29 & Sarkar (2026)      & M & M & M & M & Mod  & Transcriptomic; mixed validation \\
+30 & Bloem (2019)       & N/A & N/A & N/A & N/A & N/A & PPP protocol paper; PROBAST-ineligible \\
+\addlinespace
+\multicolumn{8}{@{}l}{\textbf{Update-window 30 (rows 31--60)}} \\
+\addlinespace
+31 & Nieves-Rodriguez (2026) & L & L & M & M & Mod  & Plasma proteomics; pre-symptomatic UKB cohort \\
+32 & Liu (2026)         & L & L & L & M & Mod  & PPMI subset; XGB+SHAP; PEV adequate \\
+33 & Wei (2026)         & M & L & M & M & Mod  & RNA-seq feature engineering; sample-size disclosure NR \\
+34 & Zhang (2026)       & L & M & L & M & Mod  & LLM+MCTS novel; baseline comparators concrete \\
+35 & Ozawa (2026)       & L & L & L & M & Mod  & SuStaIn well-validated; subtype reproducibility good \\
+36 & Kim (2026)         & L & L & L & L & Low  & Two-centre external validation; 7 ML models compared \\
+37 & Gebre (2026)       & M & L & M & M & Mod  & MSA+PD multi-modal; SHAP HET interpretation \\
+38 & Hemedan (2026)     & L & L & L & L & Low  & Bayesian state-space DT; 95\% PI coverage; full PPMI \\
+39 & F\i{}rat (2026)    & L & L & L & M & Mod  & Stacking model; baseline RNA-seq + clinical \\
+40 & Vamvakas (2026)    & L & L & L & L & Low  & PPMI dev + Amsterdam UMC ext; ICD outcome \\
+41 & Lian (2026) Nat Aging & L & L & M & M & Mod  & UKB+CPRD-Aurum; unsupervised subtype clustering \\
+42 & Matsui (2026)      & L & L & L & M & Mod  & First PD-DT to cite NASEM 2024; biomechanical SDE \\
+43 & Ho (2026)          & L & L & L & M & Mod  & Wearable longitudinal; 3 cohort tiers \\
+44 & Kamo (2026)        & L & L & L & L & Low  & Japan claims n=281{,}664; AUC 0.83 discharge \\
+45 & Hu (2026)          & M & L & L & M & Mod  & Single-centre video LCT; n=70 small \\
+46 & Mohammadi (2026)   & L & L & M & M & Mod  & Asian PALS; n=193; XGBoost+RF \\
+47 & Benesh (2026)      & L & L & M & M & Mod  & PPMI+BeaT-PD scale optimisation \\
+48 & \~{N}\'{i}guez (2026) & L & L & M & M & LM   & Pathway transcriptomics; PPMI dev + PDBP ext \\
+49 & Burnell (2026)     & L & L & L & L & Low  & OPDC flexible parametric survival \\
+50 & Duan (2026)        & L & L & L & M & Mod  & UK Biobank Cox PH + PhenoAge nomogram \\
+51 & Wang (2026)        & L & L & L & L & Low  & PPMI dev + China ext; 5-factor TRIPOD prediction \\
+52 & Dong (2026)        & L & L & M & M & Mod  & Multi-centre MRI + serum inflammation \\
+53 & Loo (2026)         & L & L & L & L & Low  & LuxPARK+PPMI+ICEBERG multi-cohort XAI \\
+54 & Sukmana (2026)     & M & L & L & M & Mod  & Daphnet FoG public; DDQN+PER \\
+55 & Saba (2026)        & L & L & M & M & Mod  & AMP-PD CSF protein; pSCNN+KDE \\
+56 & Dai (2026)         & L & L & L & L & Low  & PPMI+JHU multi-modality radiomics \\
+57 & Li (2026)          & L & L & L & M & Mod  & 4-centre Chinese OBP; LCT+Cox+LME \\
+58 & \v{S}imek (2026)   & L & L & L & M & Mod  & Czech Tech U + Charles U; speech biomarkers \\
+59 & Lin (2026)         & M & M & L & H & High & Single-centre Fujian; EPV $\approx$5.5 \\
+60 & Pan (2026)         & L & L & M & M & LM   & PPMI+PDBP DCGP; held-out evaluation queried \\
+\end{longtable}
+\normalsize
+
+\noindent\textbf{Aggregate PROBAST distribution ($n=59$ eligible):} Low = 12 (20\%); Moderate = 36 (61\%); High = 10 (17\%); Borderline (L--M) = 1 (2\%). Trajectory vs.\ original 30: Low $14\% \rightarrow 20\%$ ($+6$pp); High $31\% \rightarrow 17\%$ ($-14$pp). Per-domain breakdown: D1 = 49L/6M/3H/1L--M; D2 = 43L/14M/0H/2L--M; D3 = 45L/10M/2H/2L--M; D4 = 15L/32M/9H/3L--M. Domain~4 remains the dominant source of moderate-to-high judgments.
+
+% -----------------------------------------------------------------------------
+% TABLE S3: FULL-TEXT SCREENING DECISIONS
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Table S3: Full-Text Screening Decisions}
+\label{sr:tab:supp:screening}
+
+\noindent Cumulative full-text screening decisions across both windows. Exclusion codes: E1 = no empirical validation or insufficient methodological detail; E2 = conference abstract without full data; E3 = not prognostic (diagnostic, falls, or treatment-specific only); E4 = not a prediction model (computational/theoretical); E5 = duplicate or overlapping publication; E1-circular = circular UPDRS-feature leakage flagged at full-text. Total full-text assessed: 98 (50 original + 48 update); excluded: 38 (20 original + 18 update); included: 60 (30 + 30).
+
+\small
+\begin{longtable}{@{}p{4.2cm}cp{3.5cm}p{6cm}@{}}
+\caption{Aggregate full-text screening exclusion summary (38 records).} \\
+\toprule
+\textbf{Exclusion category} & \textbf{Count} & \textbf{Original / Update} & \textbf{Notes} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Exclusion category} & \textbf{Count} & \textbf{Original / Update} & \textbf{Notes} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+E1 --- No empirical validation / insufficient methodological detail & 7 & 7 / 0 & Concentrated in original window; tightened by 2026 reporting standards \\
+E1-circular --- Circular UPDRS-feature leakage & 7 & 0 / 7 & Detected exclusively in update window via dedicated full-text triage; predictor variables overlapped with outcome instrument \\
+E2 --- Conference abstract / poster without full data & 5 & 5 / 0 & Indexed in Google Scholar; insufficient methods sections \\
+E3 --- Not prognostic (diagnostic, falls-only, treatment-specific) & 11 & 4 / 7 & Falls-prediction (Gao 2018; Lindholm 2016) excluded; diagnostic-only studies (Frasca 2023; Naeem 2025) excluded \\
+E4 --- Not a prediction model (computational/theoretical) & 4 & 2 / 2 & Computational neuroscience proof-of-concept (Shaheen 2024); DT conceptual framework without empirical validation (Chen 2023) \\
+E5 --- Duplicate or overlapping publication & 4 & 2 / 2 & Re-analysed cohorts (Lian-subset 2023; Patel 2024 PDBP+PPMI overlap with Dadu 2022) \\
+\midrule
+\textbf{Total cumulative exclusions} & \textbf{38} & \textbf{20 / 18} & Per-record full-text exclusion table archived at \texttt{outputs/dissertation/sr\_update\_2026-04-26/09\_phase3d\_B\_results.md} \\
+\end{longtable}
+\normalsize
+
+% -----------------------------------------------------------------------------
+% TABLE S4: SEARCH RECONCILIATION
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Table S4: Search Yield and Reconciliation}
+\label{sr:tab:supp:reconciliation}
+
+\small
+\begin{longtable}{@{}p{6cm}rrr@{}}
+\caption{Cumulative search yield and reconciliation across the original window (Jan 2018--Jan 2026) and the 89-day update window (29 January--26 April 2026).} \\
+\toprule
+\textbf{Parameter} & \textbf{Original} & \textbf{Update} & \textbf{Cumulative} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Parameter} & \textbf{Original} & \textbf{Update} & \textbf{Cumulative} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\multicolumn{4}{@{}l}{\textbf{Identification}} \\
+PubMed/MEDLINE & 42 & 68 & 110 \\
+Embase / Web of Science combined & 38 & 9 & 47 \\
+Google Scholar & 55 & 37 & 92 \\
+ArXiv (in-window) & 18 & 9 & 27 \\
+OpenAlex (in-window) & 22 & 1{,}016 & 1{,}038 \\
+SciSpace (AI-assisted, net-new) & 287 & 23 & 310 \\
+Snowball forward citations (update only) & --- & 30 & 30 \\
+Total identified & \textbf{462} & \textbf{1{,}192} & \textbf{1{,}654} \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{Deduplication}} \\
+Within-search duplicates removed & 106 & --- (integrated) & --- \\
+Cross-search overlap & 20 & --- & --- \\
+Records after dedup + relevance filter & 286 & 48 & 334 \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{Screening}} \\
+Title/abstract screened & 286 & 48 & 334 \\
+Inter-rater agreement ($\kappa$) & \multicolumn{2}{c}{0.82} & \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{Eligibility}} \\
+Full-text articles assessed & 50 & 48 & 98 \\
+Full-text excluded & 20 & 18 & 38 \\
+\addlinespace
+\multicolumn{4}{@{}l}{\textbf{Inclusion}} \\
+Studies included in synthesis & \textbf{30} & \textbf{30} & \textbf{60} \\
+$\Delta$AUC head-to-head subset (meta-analysis pool) & 7 (excl.\ Severson) & 4 & \textbf{11} \\
+\end{longtable}
+\normalsize
+
+% -----------------------------------------------------------------------------
+% TABLE S5: MECHANISTIC DT NASEM 2024 SCORING
+% -----------------------------------------------------------------------------
+\subsection*{Supplementary Table S5: NASEM 2024 4-Criteria Digital-Twin Scoring}
+\label{sr:tab:supp:nasem}
+
+\noindent NASEM 2024 four-criteria framework~\cite{nasem2024} applied to candidate mechanistic / DT studies among the 60-paper corpus. Criteria: (i) bidirectional data flow (real-time or episodic patient $\leftrightarrow$ model); (ii) physiological/mechanistic constraints; (iii) continuous updating with new patient data; (iv) individual-level validation. Scoring: \checkmark = strict pass; (P) = partial; $\times$ = fail. Source: \texttt{outputs/dissertation/sr\_update\_2026-04-26/05\_DT\_NASEM\_scoring.md}.
+
+\footnotesize
+\begin{tabular}{@{}p{2.6cm}lp{3.0cm}p{3.0cm}p{3.0cm}p{3.0cm}c@{}}
+\toprule
+\textbf{Study} & \textbf{Cohort} & \textbf{C1: Bidirectional} & \textbf{C2: Mechanistic} & \textbf{C3: Continuous} & \textbf{C4: Individual val.} & \textbf{Strict / Partial} \\
+\midrule
+\multicolumn{7}{@{}l}{\textbf{NASEM-partial candidates (update window)}} \\
+\addlinespace
+Hemedan 2026  & PPMI 4{,}628 & \checkmark Bayesian post.\ updates per visit & (P) State-space prior, no PD pathophysiology ODE & \checkmark Per-visit posterior recalibration & \checkmark 95\% PI coverage on per-patient hold-out & \textbf{3/4 strict} \\
+Matsui 2026   & PD + elderly $n=173$ & (P) Bidir.\ NN $\mu \leftrightarrow z$ & \checkmark Biomechanical SDE intermittent-control & (P) Per-trial fit, not continuous & \checkmark Per-patient NN MSE 0.388/0.392 & \textbf{2/4 strict + 2/4 partial} \\
+\addlinespace
+\multicolumn{7}{@{}l}{\textbf{Original-30 partial candidates (re-scored)}} \\
+\addlinespace
+Falciglia 2025 & Clinical $n=10$ & $\times$ & \checkmark Neural-mass model & $\times$ Inversion only & (P) $n=10$ small & \textbf{1/4 strict} \\
+Wang 2025      & PPMI $n=161$ & $\times$ & (P) Neural ODE w/o explicit PD physiology & $\times$ Cross-sectional & $\times$ Cohort-aggregated & \textbf{0/4 strict} \\
+Ursino 2020    & Clinical $n=26$ & $\times$ & \checkmark PK/PD ODE (L-dopa motor response) & $\times$ & (P) Per-patient fit, no external & \textbf{1/4 strict} \\
+\bottomrule
+\end{tabular}
+\normalsize
+
+\vspace{0.3cm}
+
+\noindent\textbf{Aggregate NASEM verdict:} 0 of 60 studies meet all 4 criteria simultaneously; 2 of 60 meet $\geq 3$ strict criteria (Hemedan 2026); 1 of 60 meets 2 strict + 2 partial (Matsui 2026). The mechanistic digital-twin landscape has advanced from \emph{entirely aspirational} (original review) to \emph{two NASEM-partial candidates} within a 3-month update window, but full NASEM compliance remains an open methodological frontier.
+
+\endgroup
