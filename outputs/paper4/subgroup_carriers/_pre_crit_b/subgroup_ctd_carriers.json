@@ -1,0 +1,380 @@
+[
+  {
+    "model_name": "DeepHit",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9640167364016736,
+      "GBA+ only": 0.5,
+      "LRRK2+": 0.9169463087248322,
+      "Non-carrier": 0.9365027142622142
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.9342422506245492,
+      "GBA+ only": 0.5,
+      "LRRK2+": 0.8473961748169789,
+      "Non-carrier": 0.9141140576938257
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9891278220933043,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.9460664328185824,
+      "Non-carrier": 0.953468697514519
+    },
+    "per_group_n": {
+      "APOE+ only": 174,
+      "GBA+ only": 10,
+      "LRRK2+": 114,
+      "Non-carrier": 636
+    },
+    "per_group_n_events": {
+      "APOE+ only": 95,
+      "GBA+ only": 3,
+      "LRRK2+": 84,
+      "Non-carrier": 375
+    },
+    "flagged_groups": [
+      "GBA+ only"
+    ],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "Graph-DT",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9606694560669456,
+      "GBA+ only": 0.5,
+      "LRRK2+": 0.9119127516778524,
+      "Non-carrier": 0.9270439216976476
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.923649622512011,
+      "GBA+ only": 0.5,
+      "LRRK2+": 0.8279612683590347,
+      "Non-carrier": 0.8989145557427115
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9882494952446735,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.9424816517888702,
+      "Non-carrier": 0.9459824149811208
+    },
+    "per_group_n": {
+      "APOE+ only": 174,
+      "GBA+ only": 10,
+      "LRRK2+": 114,
+      "Non-carrier": 636
+    },
+    "per_group_n_events": {
+      "APOE+ only": 95,
+      "GBA+ only": 3,
+      "LRRK2+": 84,
+      "Non-carrier": 375
+    },
+    "flagged_groups": [
+      "GBA+ only"
+    ],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "DeepHit",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9208087615838247,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.8993948562783661,
+      "Non-carrier": 0.9376057855054624
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.8644844590789638,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.8602832826845984,
+      "Non-carrier": 0.9169304505287476
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9637662700656202,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.9480619513976255,
+      "Non-carrier": 0.9558973840311409
+    },
+    "per_group_n": {
+      "APOE+ only": 175,
+      "GBA+ only": 29,
+      "LRRK2+": 142,
+      "Non-carrier": 567
+    },
+    "per_group_n_events": {
+      "APOE+ only": 97,
+      "GBA+ only": 18,
+      "LRRK2+": 106,
+      "Non-carrier": 319
+    },
+    "flagged_groups": [
+      "GBA+ only"
+    ],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "Graph-DT",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.8997472620050547,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.8963691376701967,
+      "Non-carrier": 0.9352208032004924
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.8394638590203106,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.8456232637145631,
+      "Non-carrier": 0.9143078050247574
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9509538649381906,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.9481762614699819,
+      "Non-carrier": 0.9538633478623083
+    },
+    "per_group_n": {
+      "APOE+ only": 175,
+      "GBA+ only": 29,
+      "LRRK2+": 142,
+      "Non-carrier": 567
+    },
+    "per_group_n_events": {
+      "APOE+ only": 97,
+      "GBA+ only": 18,
+      "LRRK2+": 106,
+      "Non-carrier": 319
+    },
+    "flagged_groups": [
+      "GBA+ only"
+    ],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "DeepHit",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9629629629629629,
+      "GBA+ only": 0.9685534591194969,
+      "LRRK2+": 0.9476935749588138,
+      "Non-carrier": 0.9421657408112016
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.9113718225789853,
+      "GBA+ only": 0.8374320652173913,
+      "LRRK2+": 0.9123912101455597,
+      "Non-carrier": 0.9194311293180476
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 1.0,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.9755745461931378,
+      "Non-carrier": 0.9549437868980871
+    },
+    "per_group_n": {
+      "APOE+ only": 109,
+      "GBA+ only": 58,
+      "LRRK2+": 179,
+      "Non-carrier": 600
+    },
+    "per_group_n_events": {
+      "APOE+ only": 55,
+      "GBA+ only": 38,
+      "LRRK2+": 136,
+      "Non-carrier": 343
+    },
+    "flagged_groups": [],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "Graph-DT",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9506172839506173,
+      "GBA+ only": 0.9937106918238994,
+      "LRRK2+": 0.9262767710049423,
+      "Non-carrier": 0.9211627730005327
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.8773205014562493,
+      "GBA+ only": 0.9411655773420479,
+      "LRRK2+": 0.8799098052756589,
+      "Non-carrier": 0.8992410440682005
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9902973875225873,
+      "GBA+ only": 1.0,
+      "LRRK2+": 0.9537485237316413,
+      "Non-carrier": 0.9391012639433068
+    },
+    "per_group_n": {
+      "APOE+ only": 109,
+      "GBA+ only": 58,
+      "LRRK2+": 179,
+      "Non-carrier": 600
+    },
+    "per_group_n_events": {
+      "APOE+ only": 55,
+      "GBA+ only": 38,
+      "LRRK2+": 136,
+      "Non-carrier": 343
+    },
+    "flagged_groups": [],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "DeepHit",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9023904382470119,
+      "GBA+ only": 0.9263565891472868,
+      "LRRK2+": 0.917617237008872,
+      "Non-carrier": 0.8973528697482392
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.8105832023470957,
+      "GBA+ only": 0.8076315789473685,
+      "LRRK2+": 0.8512229147630858,
+      "Non-carrier": 0.8666545358238834
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9484891510837973,
+      "GBA+ only": 0.993839436026936,
+      "LRRK2+": 0.9588641042741982,
+      "Non-carrier": 0.9216132098186564
+    },
+    "per_group_n": {
+      "APOE+ only": 172,
+      "GBA+ only": 61,
+      "LRRK2+": 109,
+      "Non-carrier": 582
+    },
+    "per_group_n_events": {
+      "APOE+ only": 92,
+      "GBA+ only": 43,
+      "LRRK2+": 79,
+      "Non-carrier": 332
+    },
+    "flagged_groups": [],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "Graph-DT",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.852589641434263,
+      "GBA+ only": 0.9147286821705426,
+      "LRRK2+": 0.9024081115335868,
+      "Non-carrier": 0.8440864567311585
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.7758181030331357,
+      "GBA+ only": 0.7538629415760869,
+      "LRRK2+": 0.8560472818638648,
+      "Non-carrier": 0.8062885653435922
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9213981597005615,
+      "GBA+ only": 0.975863107602825,
+      "LRRK2+": 0.9495131114334985,
+      "Non-carrier": 0.8740259909279914
+    },
+    "per_group_n": {
+      "APOE+ only": 172,
+      "GBA+ only": 61,
+      "LRRK2+": 109,
+      "Non-carrier": 582
+    },
+    "per_group_n_events": {
+      "APOE+ only": 92,
+      "GBA+ only": 43,
+      "LRRK2+": 79,
+      "Non-carrier": 332
+    },
+    "flagged_groups": [],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "DeepHit",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.9111514052583862,
+      "GBA+ only": 0.9138513513513513,
+      "LRRK2+": 0.8756837394331178,
+      "Non-carrier": 0.9248065764023211
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.8676951163792768,
+      "GBA+ only": 0.8161826303714109,
+      "LRRK2+": 0.8176318244022014,
+      "Non-carrier": 0.8976169250103474
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.962711359049856,
+      "GBA+ only": 0.9609897018424997,
+      "LRRK2+": 0.9295904280150862,
+      "Non-carrier": 0.941945822637762
+    },
+    "per_group_n": {
+      "APOE+ only": 175,
+      "GBA+ only": 92,
+      "LRRK2+": 157,
+      "Non-carrier": 567
+    },
+    "per_group_n_events": {
+      "APOE+ only": 96,
+      "GBA+ only": 69,
+      "LRRK2+": 121,
+      "Non-carrier": 332
+    },
+    "flagged_groups": [],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  },
+  {
+    "model_name": "Graph-DT",
+    "subgroup_var": "carrier",
+    "per_group_ctd": {
+      "APOE+ only": 0.8712601994560291,
+      "GBA+ only": 0.8614864864864865,
+      "LRRK2+": 0.8488314271506713,
+      "Non-carrier": 0.9041747259832367
+    },
+    "per_group_ctd_ci_lower": {
+      "APOE+ only": 0.8269532638312996,
+      "GBA+ only": 0.7673155416012559,
+      "LRRK2+": 0.7781712080676482,
+      "Non-carrier": 0.872306689313981
+    },
+    "per_group_ctd_ci_upper": {
+      "APOE+ only": 0.9418062751715116,
+      "GBA+ only": 0.92629798531626,
+      "LRRK2+": 0.8991632041225862,
+      "Non-carrier": 0.9234770869122114
+    },
+    "per_group_n": {
+      "APOE+ only": 175,
+      "GBA+ only": 92,
+      "LRRK2+": 157,
+      "Non-carrier": 567
+    },
+    "per_group_n_events": {
+      "APOE+ only": 96,
+      "GBA+ only": 69,
+      "LRRK2+": 121,
+      "Non-carrier": 332
+    },
+    "flagged_groups": [],
+    "n_bootstrap": 1000,
+    "random_state": 42
+  }
+]

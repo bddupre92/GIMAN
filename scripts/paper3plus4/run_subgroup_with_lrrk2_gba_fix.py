@@ -146,6 +146,15 @@ def bootstrap_interaction_carrier_vs_ref(
     |delta| >= |observed delta|, under a null that permutes patients between the groups.
 
     Returns dict with: delta_ctd, p_value, n_carrier, n_reference, n_valid_iterations.
+
+    NOTE (WS-P3-CRIT-B, 2026-04-25): Per-fold p-values produced by this function
+    are RETAINED for transparency in the output JSON but no longer drive the
+    BH-FDR correction. Fisher's combination of these per-fold p-values violates
+    the independence assumption (folds share 60% training data → positively
+    correlated p-values → inflated Type I error per Reviewer #3). The
+    inferential test is now ``compute_pooled_interaction_test`` below, which
+    computes ONE bootstrap test on the pooled out-of-fold predictions per
+    (model, stratum) pair.
     """
     import torch
 
@@ -216,6 +225,202 @@ def bootstrap_interaction_carrier_vs_ref(
         n_reference=int(n_r),
         n_valid_iterations=int(n_valid),
         n_pool=int(n_pool),
+    )
+
+
+# ---------------------------------------------------------------------------
+# WS-P3-CRIT-B: Pooled out-of-fold interaction test (replaces Fisher's combine)
+# ---------------------------------------------------------------------------
+
+
+def compute_pooled_interaction_test(
+    per_fold_interactions: dict,
+    model: str,
+    stratum: str,
+    reference_label: str = REFERENCE_STRATUM,
+    n_bootstrap: int = 2000,
+    random_state: int = 42,
+) -> dict:
+    """Single patient-level bootstrap interaction test on POOLED out-of-fold preds.
+
+    Replaces the Fisher's-combine-then-FDR pattern flagged by Reviewer #3
+    (reviewer3.com) as a violation of the independence assumption.
+
+    For each (model × carrier-stratum) pair:
+      1. Concatenate per-fold OOF episodes (each patient appears in exactly one
+         test fold, so there is no double-counting across folds).
+      2. Compute observed Δ C-td = C-td(carrier_pool) − C-td(reference_pool).
+      3. Bootstrap a permutation null by shuffling the (carrier vs reference)
+         labels within the pooled set and recomputing Δ at each resample
+         (B=2000 by default, ``random_state=42``).
+      4. Two-sided p-value = (n_exceed + 1) / (n_valid + 1) where n_exceed is
+         the number of resamples with |Δ_boot| ≥ |Δ_observed|.
+
+    This sidesteps the dependence issue entirely because there is only ONE
+    test per (model, stratum) pair instead of 5 dependent per-fold tests being
+    combined. See `outputs/paper4/subgroup_carriers/_pre_crit_b/` for the
+    pre-fix Fisher-combined outputs and the WS-P3-CRIT-B results document for
+    the magnitude-of-change discussion.
+
+    Methodological reference: Vovk et al., *Algorithmic Learning in a Random
+    World*, 2nd ed. Springer 2022 (general framework for pooled-OOF inference
+    in conformal/cross-validation settings).
+
+    Parameters
+    ----------
+    per_fold_interactions
+        Dict keyed by ``(model, stratum)`` → list of fold dicts. Each fold
+        dict must contain ``preds`` (cif/event_idxs/time_bins/censored
+        tensors), ``patnos`` (list[int]), ``assignments`` (dict[patno, str]).
+        Folds with missing keys are silently skipped.
+    model
+        Model name to look up.
+    stratum
+        Carrier stratum label to test against ``reference_label``.
+    reference_label
+        Reference stratum (default: ``"Non-carrier"``).
+    n_bootstrap
+        Number of permutation resamples (default 2000).
+    random_state
+        Seed for reproducibility.
+
+    Returns
+    -------
+    dict
+        ``{delta_ctd, p_value, n_carrier, n_reference, n_pool,
+            n_folds_pooled, n_valid_iterations, n_bootstrap, random_state}``
+        ``delta_ctd`` and ``p_value`` are NaN when fewer than 2 carrier or
+        reference patients survive the pooling step.
+    """
+    import torch
+
+    folds = per_fold_interactions.get((model, stratum), []) or []
+    n_folds_pooled = 0
+
+    pooled_cif: list = []
+    pooled_ev: list = []
+    pooled_tb: list = []
+    pooled_cens: list = []
+    pooled_carrier_mask: list = []  # per-row True if carrier, False if reference
+
+    def _t(x):
+        return x if isinstance(x, torch.Tensor) else torch.as_tensor(x)
+
+    for fold in folds:
+        preds = fold.get("preds")
+        patnos = fold.get("patnos")
+        assignments = fold.get("assignments")
+        if preds is None or patnos is None or assignments is None:
+            continue
+
+        c_idx = [
+            i for i, p in enumerate(patnos)
+            if assignments.get(p) == stratum
+        ]
+        r_idx = [
+            i for i, p in enumerate(patnos)
+            if assignments.get(p) == reference_label
+        ]
+        if not c_idx and not r_idx:
+            continue
+
+        cif = _t(preds["cif"])
+        ev = _t(preds["event_idxs"])
+        tb = _t(preds["time_bins"])
+        cens = _t(preds["censored"]).to(dtype=torch.bool)
+
+        # Concatenate carriers then reference, with explicit carrier mask
+        order = c_idx + r_idx
+        if not order:
+            continue
+        pooled_cif.append(cif[order])
+        pooled_ev.append(ev[order])
+        pooled_tb.append(tb[order])
+        pooled_cens.append(cens[order])
+        mask = np.zeros(len(order), dtype=bool)
+        mask[: len(c_idx)] = True
+        pooled_carrier_mask.append(mask)
+        n_folds_pooled += 1
+
+    if not pooled_cif:
+        return dict(
+            delta_ctd=float("nan"),
+            p_value=float("nan"),
+            n_carrier=0,
+            n_reference=0,
+            n_pool=0,
+            n_folds_pooled=0,
+            n_valid_iterations=0,
+            n_bootstrap=int(n_bootstrap),
+            random_state=int(random_state),
+        )
+
+    cif = torch.cat(pooled_cif, dim=0)
+    ev = torch.cat(pooled_ev, dim=0)
+    tb = torch.cat(pooled_tb, dim=0)
+    cens = torch.cat(pooled_cens, dim=0)
+    carrier_mask = np.concatenate(pooled_carrier_mask, axis=0)
+
+    n_pool = int(carrier_mask.size)
+    n_c = int(carrier_mask.sum())
+    n_r = int(n_pool - n_c)
+
+    if n_c < 2 or n_r < 2:
+        return dict(
+            delta_ctd=float("nan"),
+            p_value=float("nan"),
+            n_carrier=n_c,
+            n_reference=n_r,
+            n_pool=n_pool,
+            n_folds_pooled=int(n_folds_pooled),
+            n_valid_iterations=0,
+            n_bootstrap=int(n_bootstrap),
+            random_state=int(random_state),
+        )
+
+    def _ctd(idx: np.ndarray) -> float:
+        return compute_ctd(
+            {
+                "cif": cif[idx],
+                "event_idxs": ev[idx],
+                "time_bins": tb[idx],
+                "censored": cens[idx],
+            }
+        )
+
+    pooled_idx = np.arange(n_pool)
+    c_idx_pool = pooled_idx[carrier_mask]
+    r_idx_pool = pooled_idx[~carrier_mask]
+
+    observed = _ctd(c_idx_pool) - _ctd(r_idx_pool)
+
+    # Permutation null: shuffle the carrier/reference labels within the pool.
+    rng = np.random.RandomState(random_state)
+    n_exceed = 0
+    n_valid = 0
+    for _ in range(int(n_bootstrap)):
+        perm = rng.permutation(pooled_idx)
+        boot_c = perm[:n_c]
+        boot_r = perm[n_c : n_c + n_r]
+        if boot_c.size < 2 or boot_r.size < 2:
+            continue
+        n_valid += 1
+        boot_delta = _ctd(boot_c) - _ctd(boot_r)
+        if abs(boot_delta) >= abs(observed):
+            n_exceed += 1
+
+    p_value = (n_exceed + 1) / (n_valid + 1) if n_valid > 0 else float("nan")
+
+    return dict(
+        delta_ctd=float(observed),
+        p_value=float(p_value),
+        n_carrier=int(n_c),
+        n_reference=int(n_r),
+        n_pool=int(n_pool),
+        n_folds_pooled=int(n_folds_pooled),
+        n_valid_iterations=int(n_valid),
+        n_bootstrap=int(n_bootstrap),
+        random_state=int(random_state),
     )
 
 
@@ -419,22 +624,45 @@ def render_claims_md(
     lines.extend(
         [
             "",
-            "## Bootstrap interaction tests (carrier vs Non-carrier, BH-FDR across 8 hypotheses)",
+            "## Bootstrap interaction tests (carrier vs Non-carrier, BH-FDR across 6 hypotheses)",
             "",
-            "| Model | Stratum | Δ C-td | p_raw (mean across folds) | p_FDR |",
-            "| --- | --- | --- | --- | --- |",
+            "**WS-P3-CRIT-B (Reviewer #3):** Per-fold p-values combined via Fisher's method "
+            "violated the independence assumption (5-fold CV models share 60% training data → "
+            "positively correlated p-values → inflated Type I error). Replaced with a SINGLE "
+            "pooled-OOF bootstrap interaction test per (model × stratum) pair. Legacy "
+            "Fisher-combined p-values are retained for transparency in the JSON record.",
+            "",
+            "| Model | Stratum | Δ C-td (pooled) | p_pooled | p_FDR | p_Fisher (legacy) |",
+            "| --- | --- | --- | --- | --- | --- |",
         ]
     )
     for r in fdr_records:
-        delta = r.get("delta_mean", float("nan"))
-        p_raw = r.get("p_raw_mean", float("nan"))
+        delta = r.get("delta_ctd_pooled", r.get("delta_mean", float("nan")))
+        p_pooled = r.get("p_value_pooled", float("nan"))
         p_fdr = r.get("p_fdr", float("nan"))
+        p_fisher_legacy = r.get("p_fisher_legacy", float("nan"))
         lines.append(
-            f"| {r['model']} | {r['stratum']} | {delta:+.3f} | {p_raw:.3f} | {p_fdr:.3f} |"
+            f"| {r['model']} | {r['stratum']} | {delta:+.3f} | {p_pooled:.3f} | "
+            f"{p_fdr:.3f} | {p_fisher_legacy:.3f} |"
         )
 
     lines.extend(
         [
+            "",
+            "## §CRIT-B addendum — Fisher's-method correction (Reviewer #3)",
+            "",
+            "Per `outputs/mechanistic_twin/paper3plus4_submission/npj-dm/revision_analyses/WS-P3-CRIT-B_RESULTS.md`:",
+            "Reviewer #3 (reviewer3.com) flagged that Fisher's combination of per-fold p-values violates the "
+            "independence assumption when 5-fold CV models share 60% training data. Replaced with a SINGLE "
+            "patient-level bootstrap interaction test on the pooled out-of-fold predictions per (model × stratum) "
+            "pair (B=500, seed=42; Vovk 2022 framework). Pre-fix Fisher-combined outputs are snapshotted at "
+            "`outputs/paper4/subgroup_carriers/_pre_crit_b/`.",
+            "",
+            "Per-fold p-values (now legacy-only) are retained in `interaction_tests_carriers.json` under the "
+            "`per_fold` field of each record, alongside the new pooled fields `delta_ctd_pooled`, "
+            "`p_value_pooled`, and `n_pool`. The BH-FDR correction is applied to `p_value_pooled` (column "
+            "`p_FDR` above); the legacy Fisher-combined FDR is preserved under `p_FDR (legacy Fisher)` for "
+            "side-by-side comparison in §S-3 Supplementary.",
             "",
             "## New verdict",
             "",
@@ -596,56 +824,129 @@ def main() -> int:
                     n_bootstrap=args.n_bootstrap_interaction,
                     random_state=args.seed + fold_idx,
                 )
+                # Carry the prediction tensors + carrier labels into the per-fold
+                # entry so the WS-P3-CRIT-B pooled-OOF test can pool across folds
+                # without re-running inference. The legacy per-fold p-value is
+                # retained for transparency under the same key.
                 per_fold_interactions[(model_name, stratum)].append(
-                    dict(fold_idx=fold_idx, **test)
+                    dict(
+                        fold_idx=fold_idx,
+                        preds=preds,
+                        patnos=patnos,
+                        assignments=carrier_assignments,
+                        **test,
+                    )
                 )
 
-    # Aggregate per (model, stratum) across folds → combine p via Fisher
+    # ------------------------------------------------------------------
+    # WS-P3-CRIT-B (Reviewer #3): Replace Fisher's combination of per-fold
+    # p-values (which assumes p-value independence — violated here because
+    # CV folds share 60% training data) with a SINGLE patient-level
+    # bootstrap interaction test on the pooled out-of-fold predictions.
+    # See `outputs/paper4/subgroup_carriers/_pre_crit_b/` for pre-fix.
+    # ------------------------------------------------------------------
+    # Pooled-OOF bootstrap count: Reviewer #3 plan requested B=2000. Empirically
+    # the pooled compute_ctd cohort is ~3000 patients (Non-carrier reference is the
+    # bulk), and each ctd call samples 50,000 random pairs — a single 2000-iteration
+    # cell takes ~1.5 hours of wall time on this hardware. We use B=500 (matching
+    # the existing per-fold N_BOOTSTRAP_INTERACTION precedent) which gives a
+    # permutation-test resolution of ~0.002 and is sufficient for the 0.01–0.10
+    # p-value range we're operating in. The runtime trade-off is documented in
+    # outputs/mechanistic_twin/paper3plus4_submission/npj-dm/revision_analyses/
+    # WS-P3-CRIT-B_RESULTS.md.
+    n_bootstrap_pooled = 500
+    log.info(
+        "WS-P3-CRIT-B: Pooled-OOF interaction test (B=%d, seed=%d) per (model, stratum) ...",
+        n_bootstrap_pooled,
+        args.seed,
+    )
     fdr_records = []
     for (model, stratum), folds in per_fold_interactions.items():
-        p_vals = [f["p_value"] for f in folds if not np.isnan(f["p_value"])]
-        deltas = [f["delta_ctd"] for f in folds if not np.isnan(f["delta_ctd"])]
-        if not p_vals:
-            fdr_records.append(
-                dict(
-                    model=model,
-                    stratum=stratum,
-                    delta_mean=float("nan"),
-                    p_raw_mean=float("nan"),
-                    p_fisher=float("nan"),
-                    per_fold=folds,
-                )
-            )
-            continue
-        # Fisher's combined test
-        from scipy.stats import chi2
+        deltas_per_fold = [
+            f["delta_ctd"] for f in folds if not np.isnan(f["delta_ctd"])
+        ]
+        p_vals_per_fold = [
+            f["p_value"] for f in folds if not np.isnan(f["p_value"])
+        ]
+        # Fisher-combined p-value retained for transparency only — NOT used in BH-FDR.
+        if p_vals_per_fold:
+            from scipy.stats import chi2
 
-        chi_stat = -2.0 * np.sum(np.log(np.maximum(p_vals, 1e-12)))
-        p_fisher = float(chi2.sf(chi_stat, df=2 * len(p_vals)))
+            chi_stat = -2.0 * np.sum(np.log(np.maximum(p_vals_per_fold, 1e-12)))
+            p_fisher_legacy = float(
+                chi2.sf(chi_stat, df=2 * len(p_vals_per_fold))
+            )
+        else:
+            p_fisher_legacy = float("nan")
+
+        # Strip the prediction tensors out of the per-fold dump (too large
+        # to JSON-serialize and unnecessary for the audit trail — the helper
+        # above held them in memory, that's all we needed).
+        per_fold_for_json = [
+            {k: v for k, v in f.items() if k not in ("preds", "patnos", "assignments")}
+            for f in folds
+        ]
+
+        # Pooled-OOF single test (CRIT-B canonical inference).
+        pooled = compute_pooled_interaction_test(
+            per_fold_interactions,
+            model=model,
+            stratum=stratum,
+            reference_label=REFERENCE_STRATUM,
+            n_bootstrap=n_bootstrap_pooled,
+            random_state=args.seed,
+        )
 
         fdr_records.append(
             dict(
                 model=model,
                 stratum=stratum,
-                delta_mean=float(np.mean(deltas)),
-                p_raw_mean=float(np.mean(p_vals)),
-                p_fisher=p_fisher,
-                per_fold=folds,
+                # Pooled-OOF (CRIT-B canonical)
+                delta_ctd_pooled=pooled["delta_ctd"],
+                p_value_pooled=pooled["p_value"],
+                n_carrier_pooled=pooled["n_carrier"],
+                n_reference_pooled=pooled["n_reference"],
+                n_pool=pooled["n_pool"],
+                n_folds_pooled=pooled["n_folds_pooled"],
+                n_bootstrap_pooled=pooled["n_bootstrap"],
+                # Legacy summaries (transparency only — NOT used in FDR)
+                delta_mean=float(np.mean(deltas_per_fold)) if deltas_per_fold else float("nan"),
+                p_raw_mean=float(np.mean(p_vals_per_fold)) if p_vals_per_fold else float("nan"),
+                p_fisher_legacy=p_fisher_legacy,
+                per_fold=per_fold_for_json,
             )
         )
 
-    # BH-FDR across all 8 hypotheses using Fisher-combined p
-    raw_p = [r["p_fisher"] for r in fdr_records]
-    p_fdr = apply_fdr_correction_scipy(raw_p)
+    # BH-FDR across all 6 hypotheses using POOLED-OOF p-values (CRIT-B).
+    raw_p_pooled = [r["p_value_pooled"] for r in fdr_records]
+    p_fdr = apply_fdr_correction_scipy(raw_p_pooled)
     for r, p_adj in zip(fdr_records, p_fdr):
         r["p_fdr"] = float(p_adj)
+
+    # Also compute legacy Fisher-FDR for the side-by-side §S-3 / §S-CRIT-B table.
+    raw_p_fisher_legacy = [r["p_fisher_legacy"] for r in fdr_records]
+    p_fdr_fisher_legacy = apply_fdr_correction_scipy(raw_p_fisher_legacy)
+    for r, p_adj in zip(fdr_records, p_fdr_fisher_legacy):
+        r["p_fdr_fisher_legacy"] = float(p_adj)
 
     with open(OUTPUT_DIR / "interaction_tests_carriers.json", "w") as f:
         json.dump(
             dict(
                 n_hypotheses=len(fdr_records),
                 fdr_method="BH (scipy.stats.false_discovery_control, method='bh')",
-                raw_p_combination="Fisher across 5 folds",
+                p_combination=(
+                    "Pooled-OOF single bootstrap test per (model, stratum) "
+                    "(WS-P3-CRIT-B; replaces Fisher across 5 folds — see "
+                    "_pre_crit_b/ for pre-fix outputs)"
+                ),
+                p_combination_legacy_for_transparency=(
+                    "Fisher across 5 folds — RETAINED in records under "
+                    "'p_fisher_legacy' for the §S-CRIT-B audit table; "
+                    "no longer drives the FDR correction."
+                ),
+                inferential_p_field="p_value_pooled",
+                fdr_p_field="p_fdr",
+                source_correction="reviewer3.com #3 (WS-P3-CRIT-B, 2026-04-25)",
                 records=fdr_records,
             ),
             f,

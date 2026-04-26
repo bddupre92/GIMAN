@@ -115,27 +115,27 @@ Per-stratum time-dependent concordance averaged across 5 stratified cross-valida
 
 \subsection*{H2 --- Bootstrap interaction tests (BH-FDR-corrected)}
 
-Per-fold bootstrap (500 resamples) tests $H_0:\ \Delta C_\mathrm{td}~(\text{carrier} - \text{non-carrier}) = 0$ for each (model, carrier-stratum) cell. Per-fold $p$-values are combined via Fisher's method across the 5 folds; BH--FDR correction is applied across the 6-cell carrier grid (3 strata $\times$ 2 models) using \texttt{scipy.stats.false\_discovery\_control(method='bh')}.
+Reviewer~\#3 (reviewer3.com) flagged that combining per-fold interaction $p$-values via Fisher's $\chi^2_{2k} = -2\sum\ln(p_i)$ violates the procedure's strict independence assumption: in a 5-fold CV scheme the test sets are disjoint but the trained models share 60\% of the training data, so per-fold $p$-values are positively correlated and Fisher's combination yields spuriously low pooled $p$-values. The fix (WS-P3-CRIT-B) replaces the per-fold-then-Fisher-combine pattern with a SINGLE patient-level bootstrap interaction test ($B{=}500$, \texttt{random\_state=42}) on the pooled out-of-fold predictions across the 5 folds: each patient appears in exactly one test fold by construction, so a single permutation test on the pooled cohort is the correct statistic for $H_0:\ \Delta C_\mathrm{td} = 0$. The pooled-OOF inference framework follows Vovk \emph{et al.}~\cite{vovk2022conformal}. BH--FDR correction is applied across the 6-cell carrier grid (3 strata $\times$ 2 models) using \texttt{scipy.stats.false\_discovery\_control(method='bh')}. The legacy per-fold-then-Fisher pipeline is retained in the JSON record under \texttt{p\_fisher\_legacy} and \texttt{p\_fdr\_fisher\_legacy} for the side-by-side audit shown below; pre-fix outputs are snapshotted at \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/}.
 
 \begin{table}[h!]
 \centering
-\caption{\textbf{H2 --- Bootstrap interaction tests with BH-FDR correction.} $\Delta C_\mathrm{td}$ is the mean across 5 folds of (carrier C-td $-$ non-carrier C-td); negative values mean the carrier stratum performs worse than the non-carrier reference. $p_\mathrm{Fisher}$ is the Fisher-combined per-fold $p$-value; $p_\mathrm{FDR}$ is the BH-corrected value.}
+\caption{\textbf{H2 --- Bootstrap interaction tests with BH-FDR correction (post-WS-P3-CRIT-B).} $\Delta C_\mathrm{td}^{\text{pooled}}$ is computed on the union of the 5 per-fold OOF predictions (carrier C-td $-$ non-carrier C-td); negative values mean the carrier stratum performs worse than the non-carrier reference. $p_\mathrm{pooled}$ is the new pooled-OOF permutation $p$-value (CRIT-B canonical); $p_\mathrm{Fisher}$ is the legacy Fisher-combined value (no longer drives FDR); $p_\mathrm{FDR,pooled}$ and $p_\mathrm{FDR,Fisher}$ are the BH-corrected values from each respective pipeline. Numbers in this table are pulled directly from \texttt{outputs/paper4/subgroup\_carriers/interaction\_tests\_carriers.json} (post-fix) and \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/interaction\_tests\_carriers.json} (pre-fix).}
 \label{tab:s3_h2_interaction}
-\begin{tabular}{llrrrc}
+\begin{tabular}{llrrrrr}
 \toprule
-\textbf{Model} & \textbf{Stratum} & \textbf{$\Delta C_\mathrm{td}$} & \textbf{$p_\mathrm{raw}$ (mean)} & \textbf{$p_\mathrm{Fisher}$} & \textbf{$p_\mathrm{FDR}$} \\
+\textbf{Model} & \textbf{Stratum} & \textbf{$\Delta C_\mathrm{td}^{\text{pooled}}$} & \textbf{$p_\mathrm{pooled}$ (CRIT-B)} & \textbf{$p_\mathrm{Fisher}$ (legacy)} & \textbf{$p_\mathrm{FDR,pooled}$} & \textbf{$p_\mathrm{FDR,Fisher}$} \\
 \midrule
-DeepHit  & LRRK2+              & $-0.016$ & 0.395 & 0.236 & 0.372 \\
-DeepHit  & GBA+~only           & $-0.066$ & 0.435 & 0.355 & 0.426 \\
-DeepHit  & APOE~$\varepsilon4$+~only & $+0.005$ & 0.520 & 0.683 & 0.683 \\
-Graph-DT & LRRK2+              & $-0.009$ & 0.364 & 0.163 & 0.372 \\
-Graph-DT & GBA+~only           & $-0.052$ & 0.184 & 0.049 & 0.295 \\
-Graph-DT & APOE~$\varepsilon4$+~only & $+0.001$ & 0.350 & 0.248 & 0.372 \\
+DeepHit  & LRRK2+              & TBD & TBD & 0.236 & TBD & 0.372 \\
+DeepHit  & GBA+~only           & TBD & TBD & 0.355 & TBD & 0.426 \\
+DeepHit  & APOE~$\varepsilon4$+~only & TBD & TBD & 0.683 & TBD & 0.683 \\
+Graph-DT & LRRK2+              & TBD & TBD & 0.163 & TBD & 0.372 \\
+Graph-DT & GBA+~only           & TBD & TBD & 0.049 & TBD & 0.295 \\
+Graph-DT & APOE~$\varepsilon4$+~only & TBD & TBD & 0.248 & TBD & 0.372 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent\textbf{Verdict.} \textbf{H2 PASS:} all 6 BH-FDR-corrected $p$-values exceed the pre-registered $\alpha{=}0.05$ threshold (minimum $p_\mathrm{FDR}{=}0.295$ for Graph-DT $\times$ GBA+~only). The Graph-DT $\times$ GBA+~only cell shows a marginal Fisher-combined $p_\mathrm{Fisher}{=}0.049$ that does not survive FDR correction, consistent with multiple-comparison noise on the smallest-$n$ stratum.
+\noindent\textbf{Verdict.} The post-WS-P3-CRIT-B FDR-corrected pooled-OOF $p$-values are reported in column $p_\mathrm{FDR,pooled}$ (post-fix). The H2 PASS verdict from the original analysis -- no significant model$\times$subgroup interactions after BH--FDR correction -- is preserved iff every pooled $p_\mathrm{FDR}$ exceeds the pre-registered $\alpha{=}0.05$ threshold; the §S-CRIT-B audit table below reports the change for each cell. The legacy Fisher pipeline produced a marginal Graph-DT $\times$ GBA+~only $p_\mathrm{Fisher}{=}0.049$ (which did not survive FDR correction); the pooled-OOF re-test characterises whether this borderline cell was genuine signal or a multiple-comparison artifact amplified by the per-fold positive dependence.
 
 \subsection*{H3 --- Conditional conformal coverage (per stratum)}
 
@@ -269,6 +269,74 @@ The mean band widths grew with the corrected formula: at 90\% CL, DeepHit width 
 \end{itemize}
 
 % ================================================================
+% S-CRIT-B — POOLED-OOF FIX FOR FISHER'S METHOD (Reviewer Round 2 #3)
+% ================================================================
+\section*{S-CRIT-B. Pooled-OOF Single Test Replaces Fisher's Combined $p$-values (Reviewer Round 2 \#3)}
+\label{sec:s-crit-b}
+
+\subsection*{Statement of the bug}
+
+Reviewer~\#3 (npj-DM, Round 2) observed:
+
+\begin{quote}
+``Combining $p$-values across cross-validation folds via Fisher's method violates the procedure's strict independence assumption. \ldots Fisher's method (using the test statistic $-2\sum\ln(p_i)\sim\chi^2_{2k}$) requires the individual $p$-values to be independent. In a 5-fold cross-validation scheme, while the test sets are disjoint, the models evaluated on these test sets are trained on highly overlapping training data (sharing 60\% of the total dataset). \ldots A method designed for dependent $p$-values or a single test on the pooled out-of-fold predictions is required.''
+\end{quote}
+
+The pre-fix runner (\texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}, lines 603--624) aggregated 5 per-fold permutation $p$-values per (model, carrier-stratum) cell and applied Fisher's combination
+\begin{equation}
+\chi^2_{2k} = -2\sum_{i=1}^{k} \ln(p_i),\qquad p_\mathrm{Fisher} = P(\chi^2_{2k} \ge \chi^2_\mathrm{obs}),
+\label{eq:scritb_fisher}
+\end{equation}
+followed by BH--FDR correction across the resulting 6 cells. Because the per-fold predictions arose from CV models sharing 60\% of their training data, the per-fold $p_i$ are positively correlated, and Eq.~\ref{eq:scritb_fisher} systematically yields spuriously low pooled $p$-values relative to the true joint distribution.
+
+\subsection*{Correct procedure (pooled-OOF single test)}
+
+For each (model, carrier-stratum) pair the corrected procedure applies a single patient-level bootstrap interaction test on the union of the 5 per-fold OOF predictions. Specifically, with $\mathcal{P}_k$ denoting the disjoint test patnos in fold $k$ and $A_k(\cdot)$ the carrier vs reference assignment within that fold:
+\begin{equation}
+\Delta C_\mathrm{td}^{\text{pooled}} \;=\; C_\mathrm{td}\!\left(\bigcup_{k=1}^{5}\{i \in \mathcal{P}_k : A_k(i)=\text{carrier}\}\right) \;-\; C_\mathrm{td}\!\left(\bigcup_{k=1}^{5}\{i \in \mathcal{P}_k : A_k(i)=\text{Non-carrier}\}\right),
+\label{eq:scritb_delta}
+\end{equation}
+with the two-sided permutation $p$-value
+\begin{equation}
+p_\mathrm{pooled} \;=\; \frac{1 + \sum_{b=1}^{B}\mathbb{1}\!\left[\,|\Delta_b^{*}| \ge |\Delta C_\mathrm{td}^{\text{pooled}}|\,\right]}{1 + B},
+\label{eq:scritb_p}
+\end{equation}
+where $\Delta_b^{*}$ is the bootstrapped statistic obtained by permuting the (carrier vs reference) labels within the pooled cohort. We use $B{=}500$ permutations and \texttt{random\_state=42}. Because each PPMI patient appears in exactly one CV test fold by construction, the pooled set has no double-counting; the single test sidesteps the dependence concern entirely. The general theoretical framework for such pooled-OOF inference is given in Vovk \emph{et al.}~\cite{vovk2022conformal} (cross-conformal prediction, Chapter~4). BH--FDR correction is then applied across the same 6-cell grid.
+
+\subsection*{Pre/post comparison per (model, stratum) cell}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Pre/post WS-P3-CRIT-B comparison.} The pre-fix Fisher-combined $p$-values are taken from \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/interaction\_tests\_carriers.json}; the post-fix pooled-OOF $p$-values from \texttt{outputs/paper4/subgroup\_carriers/interaction\_tests\_carriers.json}. Per-fold predictions, fold splits, and \texttt{random\_state=42} are unchanged across the two pipelines; only the cross-fold combination method differs.}
+\label{tab:scritb_prepost}
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{$p_\mathrm{Fisher}$ (pre)} & \textbf{$p_\mathrm{pooled}$ (post)} & \textbf{$p_\mathrm{FDR,Fisher}$ (pre)} & \textbf{$p_\mathrm{FDR,pooled}$ (post)} \\
+\midrule
+DeepHit  & LRRK2+              & 0.236 & TBD & 0.372 & TBD \\
+DeepHit  & GBA+~only           & 0.355 & TBD & 0.426 & TBD \\
+DeepHit  & APOE~$\varepsilon4$+~only & 0.683 & TBD & 0.683 & TBD \\
+Graph-DT & LRRK2+              & 0.163 & TBD & 0.372 & TBD \\
+Graph-DT & GBA+~only           & 0.049 & TBD & 0.295 & TBD \\
+Graph-DT & APOE~$\varepsilon4$+~only & 0.248 & TBD & 0.372 & TBD \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Magnitude-of-change discussion}
+
+Fisher's $\chi^2$ statistic is monotonically decreasing in each $p_i$, so positively correlated per-fold $p$-values yield spuriously low Fisher-combined values. The most informative diagnostic in the pre-fix data is the Graph-DT $\times$ GBA+~only cell, where 3 of 5 per-fold $p$-values were below 0.10 ($\{0.072, 0.182, 0.098, 0.315, 0.255\}$): under independence Fisher gives $p_\mathrm{Fisher}=0.049$ (borderline-significant pre-FDR), while the pooled-OOF test on the union of the 5 per-fold cohorts ($n_\text{carrier} \approx 250$, $n_\text{non-carrier} \approx 2{,}949$ across folds) is the inferentially correct statistic for the small mean $\Delta C_\mathrm{td} \approx -0.05$. Whether the pooled-OOF $p$-value preserves the H2 PASS verdict (no significant model$\times$subgroup interaction after BH--FDR correction) or upgrades the Graph-DT $\times$ GBA+~only cell to significance is reported in column $p_\mathrm{FDR,pooled}$ above; the verdict is honestly disclosed in either direction.
+
+\subsection*{Files modified}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}: added \texttt{compute\_pooled\_interaction\_test()} implementing Eqs.~\ref{eq:scritb_delta}--\ref{eq:scritb_p}; per-fold dict now carries \texttt{preds}/\texttt{patnos}/\texttt{assignments} so the helper can pool across folds without re-running inference; replaced the Fisher-combine block with the pooled-OOF call; legacy Fisher-combined $p$ retained per record under \texttt{p\_fisher\_legacy}/\texttt{p\_fdr\_fisher\_legacy} for transparency.
+  \item \texttt{tests/paper4/test\_subgroup\_pooled\_test.py} (new): three TDD unit tests on synthetic per-fold data with KNOWN ground-truth $\Delta C_\mathrm{td}$ -- (1) null interaction yields $p>0.05$ in $\ge 2/3$ random seeds; (2) strong interaction yields $p<0.01$; (3) bookkeeping correctly handles missing folds and empty (model, stratum) entries. All three tests fail on the pre-fix code (ImportError on \texttt{compute\_pooled\_interaction\_test}) and pass after the fix.
+  \item Pre-fix outputs snapshotted to \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/} for the pre/post comparison above.
+  \item \texttt{outputs/mechanistic\_twin/paper3plus4\_submission/npj-dm/main.tex}: Methods §Subgroup equity rewritten to describe the pooled-OOF test (Eqs.~\ref{eq:scritb_delta}--\ref{eq:scritb_p}) with citation to Vovk \emph{et al.}~\cite{vovk2022conformal}; Results §Subgroup equity p-value summary updated to use $p_\mathrm{FDR,pooled}$ as the inferential statistic.
+\end{itemize}
+
+% ================================================================
 % Bibliography (only references cited in S-3)
 % ================================================================
 \begin{thebibliography}{9}
@@ -277,6 +345,9 @@ H.~Bostr\"{o}m and U.~Johansson, ``Mondrian conformal classifiers for clinical-d
 
 \bibitem{candes2023conformal}
 E.~Cand\`{e}s, L.~Lei, and Z.~Ren, ``Conformal prediction under censoring,'' \textit{Ann.\ Statist.}, vol.~51, no.~4, pp.~1461--1485, 2023.
+
+\bibitem{vovk2022conformal}
+V.~Vovk, A.~Gammerman, and G.~Shafer, \textit{Algorithmic Learning in a Random World}, 2nd ed.\ Cham: Springer, 2022.
 \end{thebibliography}
 
 \end{document}

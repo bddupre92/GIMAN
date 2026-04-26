@@ -1,0 +1,242 @@
+{
+  "verdict": "PARTIAL",
+  "h1_overlap": true,
+  "h2_fdr_pass": true,
+  "h3_cc_within_tolerance": false,
+  "h1_failures": [],
+  "h2_significant": [],
+  "h3_deviations": [
+    {
+      "key": "DeepHit__cl90__fold0",
+      "stratum": "APOE+ only",
+      "coverage": 0.8705908289241623,
+      "deviation": 0.050590828924162334
+    },
+    {
+      "key": "Graph-DT__cl90__fold0",
+      "stratum": "APOE+ only",
+      "coverage": 0.8514109347442681,
+      "deviation": 0.03141093474426815
+    },
+    {
+      "key": "DeepHit__cl90__fold1",
+      "stratum": "GBA+ only",
+      "coverage": 0.8649350649350649,
+      "deviation": 0.04493506493506494
+    },
+    {
+      "key": "DeepHit__cl90__fold1",
+      "stratum": "LRRK2+",
+      "coverage": 0.7898166023166023,
+      "deviation": 0.030183397683397617
+    },
+    {
+      "key": "Graph-DT__cl90__fold1",
+      "stratum": "GBA+ only",
+      "coverage": 0.8883116883116883,
+      "deviation": 0.06831168831168832
+    },
+    {
+      "key": "Graph-DT__cl90__fold1",
+      "stratum": "LRRK2+",
+      "coverage": 0.7799227799227799,
+      "deviation": 0.04007722007722003
+    },
+    {
+      "key": "DeepHit__cl90__fold2",
+      "stratum": "GBA+ only",
+      "coverage": 0.7747035573122529,
+      "deviation": 0.04529644268774702
+    },
+    {
+      "key": "Graph-DT__cl90__fold2",
+      "stratum": "LRRK2+",
+      "coverage": 0.7803909105355157,
+      "deviation": 0.03960908946448427
+    },
+    {
+      "key": "DeepHit__cl90__fold3",
+      "stratum": "GBA+ only",
+      "coverage": 0.7246003094378546,
+      "deviation": 0.09539969056214537
+    },
+    {
+      "key": "DeepHit__cl90__fold3",
+      "stratum": "LRRK2+",
+      "coverage": 0.7642585551330798,
+      "deviation": 0.05574144486692012
+    },
+    {
+      "key": "DeepHit__cl90__fold3",
+      "stratum": "Non-carrier",
+      "coverage": 0.7803931388506323,
+      "deviation": 0.03960686114936762
+    },
+    {
+      "key": "Graph-DT__cl90__fold3",
+      "stratum": "GBA+ only",
+      "coverage": 0.7271789582258896,
+      "deviation": 0.09282104177411032
+    },
+    {
+      "key": "Graph-DT__cl90__fold3",
+      "stratum": "LRRK2+",
+      "coverage": 0.7495926127104834,
+      "deviation": 0.07040738728951657
+    },
+    {
+      "key": "Graph-DT__cl90__fold3",
+      "stratum": "Non-carrier",
+      "coverage": 0.7842118442469013,
+      "deviation": 0.03578815575309868
+    }
+  ],
+  "pooled_ctd": {
+    "DeepHit__APOE+ only": {
+      "model": "DeepHit",
+      "stratum": "APOE+ only",
+      "ctd_mean": 0.9322660608907718,
+      "ctd_std": 0.026153609351153854,
+      "ci_lo_min": 0.8105832023470957,
+      "ci_hi_max": 1.0,
+      "n_mean": 161.0,
+      "n_folds": 5
+    },
+    "DeepHit__GBA+ only": {
+      "model": "DeepHit",
+      "stratum": "GBA+ only",
+      "ctd_mean": 0.8617522799236269,
+      "ctd_std": 0.183451173900732,
+      "ci_lo_min": 0.5,
+      "ci_hi_max": 1.0,
+      "n_mean": 50.0,
+      "n_folds": 5
+    },
+    "DeepHit__LRRK2+": {
+      "model": "DeepHit",
+      "stratum": "LRRK2+",
+      "ctd_mean": 0.9114671432808004,
+      "ctd_std": 0.023691312177017112,
+      "ci_lo_min": 0.8176318244022014,
+      "ci_hi_max": 0.9755745461931378,
+      "n_mean": 140.2,
+      "n_folds": 5
+    },
+    "DeepHit__Non-carrier": {
+      "model": "DeepHit",
+      "stratum": "Non-carrier",
+      "ctd_mean": 0.9276867373458877,
+      "ctd_std": 0.016212275332119483,
+      "ci_lo_min": 0.8666545358238834,
+      "ci_hi_max": 0.9558973840311409,
+      "n_mean": 590.4,
+      "n_folds": 5
+    },
+    "Graph-DT__APOE+ only": {
+      "model": "Graph-DT",
+      "stratum": "APOE+ only",
+      "ctd_mean": 0.906976768582582,
+      "ctd_std": 0.04259882145284075,
+      "ci_lo_min": 0.7758181030331357,
+      "ci_hi_max": 0.9902973875225873,
+      "n_mean": 161.0,
+      "n_folds": 5
+    },
+    "Graph-DT__GBA+ only": {
+      "model": "Graph-DT",
+      "stratum": "GBA+ only",
+      "ctd_mean": 0.8539851720961857,
+      "ctd_std": 0.18433398852553592,
+      "ci_lo_min": 0.5,
+      "ci_hi_max": 1.0,
+      "n_mean": 50.0,
+      "n_folds": 5
+    },
+    "Graph-DT__LRRK2+": {
+      "model": "Graph-DT",
+      "stratum": "LRRK2+",
+      "ctd_mean": 0.8971596398074497,
+      "ctd_std": 0.026188734702999587,
+      "ci_lo_min": 0.7781712080676482,
+      "ci_hi_max": 0.9537485237316413,
+      "n_mean": 140.2,
+      "n_folds": 5
+    },
+    "Graph-DT__Non-carrier": {
+      "model": "Graph-DT",
+      "stratum": "Non-carrier",
+      "ctd_mean": 0.9063377361226136,
+      "ctd_std": 0.03274953374343125,
+      "ci_lo_min": 0.8062885653435922,
+      "ci_hi_max": 0.9538633478623083,
+      "n_mean": 590.4,
+      "n_folds": 5
+    }
+  },
+  "fdr_records": [
+    {
+      "model": "DeepHit",
+      "stratum": "LRRK2+",
+      "delta_mean": -0.016219594065087328,
+      "p_raw_mean": 0.3952095808383233,
+      "p_fisher": 0.23553268399583896,
+      "p_fdr": 0.3720638397264897
+    },
+    {
+      "model": "DeepHit",
+      "stratum": "GBA+ only",
+      "delta_mean": -0.06593445742226071,
+      "p_raw_mean": 0.43512974051896214,
+      "p_fisher": 0.35489560894151584,
+      "p_fdr": 0.425874730729819
+    },
+    {
+      "model": "DeepHit",
+      "stratum": "APOE+ only",
+      "delta_mean": 0.004579323544884173,
+      "p_raw_mean": 0.5201596806387225,
+      "p_fisher": 0.6833069339069548,
+      "p_fdr": 0.6833069339069548
+    },
+    {
+      "model": "Graph-DT",
+      "stratum": "LRRK2+",
+      "delta_mean": -0.009178096315163687,
+      "p_raw_mean": 0.3636726546906187,
+      "p_fisher": 0.1634215544458972,
+      "p_fdr": 0.3720638397264897
+    },
+    {
+      "model": "Graph-DT",
+      "stratum": "GBA+ only",
+      "delta_mean": -0.05235256402642787,
+      "p_raw_mean": 0.1844311377245509,
+      "p_fisher": 0.04911894145650818,
+      "p_fdr": 0.29471364873904904
+    },
+    {
+      "model": "Graph-DT",
+      "stratum": "APOE+ only",
+      "delta_mean": 0.0006390324599683695,
+      "p_raw_mean": 0.3497005988023952,
+      "p_fisher": 0.24804255981765982,
+      "p_fdr": 0.3720638397264897
+    }
+  ],
+  "feature_counts": {
+    "lrrk2_any": 175,
+    "lrrk2_stratum": 175,
+    "gba_only": 79,
+    "apoe_only": 375,
+    "non_carrier": 1547
+  },
+  "constants": {
+    "min_subgroup_size_carrier": 50,
+    "n_bootstrap_ctd": 1000,
+    "n_bootstrap_interaction": 500,
+    "seed": 42,
+    "confidence_level": 0.9,
+    "reference_stratum": "Non-carrier"
+  },
+  "elapsed_sec": 7791.837831020355
+}
