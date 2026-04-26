@@ -5,7 +5,13 @@
 
 \label{p1:ch:paper1}
 
+\begin{abstract}
 The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease (PD) through two biological anchors (S: $\alpha$-synuclein seed amplification assay; D: dopamine-transporter SPECT), but no computational model predicts NSD-ISS stage from routinely collected clinical data with calibrated uncertainty. Using PPMI ($n{=}2{,}201$), we benchmark a strict-circularity specification excluding the 4 variables entering the NSD-ISS staging algorithm (putamen SBR, MDS-UPDRS-III total, NP1 cognition, caudate/putamen ratio), retaining 21 non-staging features. CatBoost (default) achieves binary NSD$+$ AUC 0.901 [0.887, 0.915] and NSD$+$ sub-staging AUC 0.908 [0.889, 0.925] on 5-fold CV; five SOTA methods (CatBoost default/HPO, LightGBM HPO, TabPFN~v2, AutoGluon) are statistically equivalent at $\varepsilon{=}0.02$ (paired-bootstrap TOST: 34/40 pairs). Ablation against a 12-feature clinical-only subset cuts binary AUC by $-$17.6~pp ($p{<}0.0001$) but leaves NSD$+$ sub-staging unchanged ($\Delta{=}+0.008$, $p{=}0.21$), validating a two-stage deployment (biological confirmation once, then clinical-only sub-staging); a caudate-vs-putamen residualization sensitivity (binary $-$10.7~pp; NSD$+$ unchanged) reinforces the asymmetry. Cross-conformal CV$+$ achieves ${>}90\%$ internal coverage ($|C|$ 0.96--1.27); external coverage on BioFIND ($n{=}103$) holds at 0.915 for binary but collapses to 0.499 (three-class) and 0.707 (NSD$+$). Temperature scaling cuts binary ECE from 0.053 to 0.020. External binary balanced accuracy 0.516 reflects PPMI's NSD-negative class mixing healthy controls and prodromals; PD-only retraining mitigates this at internal-AUC cost ($0.738{\to}0.677$). Pre-registered confounder analyses (age, sex, enrollment-wave, protocol-LOCO) find no evidence of confounding; site-LOSO failed under strict pre-registration on the MRI-covered subsample (small-fold class imbalance) and is reported with caveats. This is the first strict-circularity benchmark for NSD-ISS biological staging with calibrated uncertainty and deployment-realistic external-calibration assessment.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Parkinson's disease, NSD-ISS biological staging, cross-conformal prediction, calibrated uncertainty quantification, clinical decision support, external validation, tabular machine learning, DaT-SPECT.
+\end{IEEEkeywords}
 
 % ================================================================
 % I. INTRODUCTION
