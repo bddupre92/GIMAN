@@ -65,7 +65,7 @@ Per CONVENTIONS.md §7.9b:
 ```sql
 UPDATE audit.claim
 SET verdict = 'modified',
-    verdict_notes = 'commit <SHA-OF-THIS-COMMIT>: WS-P3-14 manuscript integration (PARTIAL verdict). Original n<10 exclusion replaced by post-672b439 carrier-stratified analysis: H1 fairness PASS (per-stratum C-td CIs overlap non-carrier reference), H2 interaction PASS (BH-FDR p>=0.295 across 6 carrier hypotheses), H3 conditional conformal coverage FAIL (3-9pp under-coverage on carrier strata, fold-dependent). Mondrian per-stratum recalibration recommended for deployment. See outputs/paper4/subgroup_carriers/ + outputs/mechanistic_twin/paper3plus4_submission/npj-dm/{main.tex L191-193,289,325; supplementary.tex S-3}.'
+    verdict_notes = 'commit 6a718d8: WS-P3-14 manuscript integration (PARTIAL verdict). Original n<10 exclusion replaced by post-672b439 carrier-stratified analysis: H1 fairness PASS (per-stratum C-td CIs overlap non-carrier reference), H2 interaction PASS (BH-FDR p>=0.295 across 6 carrier hypotheses), H3 conditional conformal coverage FAIL (3-9pp under-coverage on carrier strata, fold-dependent). Mondrian per-stratum recalibration recommended for deployment. See outputs/paper4/subgroup_carriers/ + outputs/mechanistic_twin/paper3plus4_submission/npj-dm/{main.tex L191-193,289,325; supplementary.tex S-3}.'
 WHERE claim_text LIKE '%LRRK2 and GBA carrier subgroups are underpowered%';
 ```
 
