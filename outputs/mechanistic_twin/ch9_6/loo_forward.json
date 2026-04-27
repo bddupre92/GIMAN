@@ -1,0 +1,35 @@
+{
+  "n_scans_evaluated": 1940,
+  "n_patients": 1051,
+  "coverage_95_credible_interval": 0.979381443298969,
+  "median_relative_error": 0.14408806793108228,
+  "n_samples_per_loo_iteration": 300,
+  "ess_median": 277.1599079789422,
+  "sigma_sbr_used": 0.17202837936218907,
+  "runtime_seconds": 0.9,
+  "coverage_by_horizon": {
+    "<1yr": {
+      "n_scans": 34,
+      "coverage": 0.9411764705882353
+    },
+    "1-2yr": {
+      "n_scans": 803,
+      "coverage": 0.9763387297633873
+    },
+    "2-5yr": {
+      "n_scans": 1102,
+      "coverage": 0.9827586206896551
+    },
+    ">5yr": {
+      "n_scans": 1,
+      "coverage": 1.0
+    }
+  },
+  "mean_ci_width": 0.8816715104979006,
+  "median_ci_width": 0.7483588702428261,
+  "mean_interval_score": 1.0667837660616546,
+  "median_interval_score": 0.7533813978649089,
+  "mean_crps": 0.09549657432171911,
+  "median_crps": 0.07043334367902845,
+  "note": "Anchor scan (visit_index=0, t=0) excluded: at t=0 all samples predict sbr_anchor exactly, yielding trivially 100% coverage. All n_scans_evaluated are true forward predictions (t > 0). Sharpness metrics (Gneiting & Raftery 2007 JASA 10.1198/016214506000001437) balance coverage against CI width; lower is better."
+}

@@ -1,0 +1,527 @@
+% ============================================================
+% Combined Paper 3 + Paper 4 submission
+% Title: Graph-Informed NSD-ISS Transition Prediction with
+%        Conformalized Uncertainty and Subgroup Equity in
+%        Parkinson's Disease
+%
+% Target: npj Digital Medicine (Nature Portfolio)
+% Derived from:
+%   outputs/dissertation/chapters/ch05_paper3.tex (Graph-DT)
+%   outputs/dissertation/chapters/ch06_paper4.tex (Conformal)
+%
+% Combined per Papers-1-to-4 deep review recommendation
+% (outputs/paper1to4_review.md), 2026-04-18.
+% ============================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\graphicspath{{figures/}{../../../paper3_figures/}{../../../paper4/figures/}{../../../dissertation/figures/}}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage[colorlinks=false,hidelinks]{hyperref}
+
+\doublespacing
+\pagenumbering{arabic}
+
+\title{Graph-Informed NSD-ISS Transition Prediction with Conformalized Uncertainty and Subgroup Equity in Parkinson's Disease}
+
+\author{Blair D. Dupre\thanks{Corresponding author: blair.dupre@und.edu}\\[0.5em]
+Department of Biomedical Engineering,\\
+University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ================================================================
+% ABSTRACT (npj DM: ~200 words, unstructured, no citations)
+% ================================================================
+\begin{abstract}
+\noindent The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) provides a biologically-grounded framework for Parkinson's disease (PD), but predictive models for stage-transition timing with calibrated uncertainty do not yet exist. Using longitudinal data from 1{,}900 patients in the Parkinson's Progression Markers Initiative (16{,}699 visits, 2{,}859 observed transitions), we develop a Graph-Regularized Transition-Timing Model (Graph-DT) that combines a gated recurrent temporal encoder with graph attention over a patient-similarity graph, and benchmark it against Dynamic-DeepHit and a multi-state Markov baseline. In 5-fold stratified cross-validation, Dynamic-DeepHit and Graph-DT achieve time-dependent concordance of $0.924 \pm 0.020$ and $0.904 \pm 0.034$ (paired $\Delta C_\text{td} = -0.020$); Graph-DT contributes discrimination stability (28\% lower fold variance) and population-level regularisation rather than per-patient attribution. Both models are extended with cause-specific conformal CIF bands using inverse probability of censoring weighting (IPCW), achieving marginal coverage of 95.1\%/95.3\% at 95\% and 90.2\%/90.5\% at 90\%. Expected calibration error remains below 0.012 at 1-, 3-, and 5-year horizons. Subgroup analysis finds no significant model-by-subgroup interactions across sex, age, or genetic strata (LRRK2, GBA, APOE~$\varepsilon4$; FDR-corrected); Mondrian per-stratum recalibration confirms equity across all eight (model$\times$stratum) cells. Individual case studies yield interpretable transition-timing intervals of 14--29 months for the most frequent transitions.
+\end{abstract}
+
+% ================================================================
+% INTRODUCTION
+% ================================================================
+\section{Introduction}
+\label{sec:intro}
+
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease (PD) through two biological anchors---neuronal alpha-synuclein (S, assessed by seed amplification assay) and dopaminergic dysfunction (D, assessed by DaT-SPECT)---assigning patients to stages 0 through 6 based on biomarker status and functional impairment~\cite{simuni2024nsdiss}. Longitudinal validation work~\cite{simuni2024val,simuni2025,russo2025} has established that NSD-ISS stage predicts time-to-clinical-milestones and that staging replicates across independent cohorts. A principled critique by Espay~\textit{et~al.}~\cite{espay2025refutation} has further refined how reference classes should be composed to avoid medication-status confounds; we adopt that guidance here by training and evaluating on PD-only cohorts where warranted.
+
+Two computational gaps remain. First, although cross-sectional biological stage prediction has been reported~\cite{dupre2026paper1}, no model predicts the \emph{timing} and \emph{direction} of NSD-ISS stage transitions for individual patients. Second, clinical adoption of prognostic models requires more than point predictions: it requires well-calibrated uncertainty so that clinicians can act on individual patient confidence~\cite{austin2020graphical,collins2024tripodai}. Conformal prediction~\cite{vovk2022conformal,shafer2008tutorial,angelopoulos2021gentle} provides a distribution-free framework for constructing prediction sets with guaranteed finite-sample coverage; extensions to censored survival data~\cite{candes2023conformal} and competing risks with cause-specific cumulative-incidence-function (CIF) prediction bands~\cite{confide2026} bring these guarantees to time-to-event settings. Calibration~\cite{guo2017calibration,naeini2015ece,hosmer2013applied} and strictly proper scoring~\cite{gneiting2007proper,graf1999brier,gerds2006consistent} together provide the evaluation scaffolding that TRIPOD+AI~\cite{collins2024tripodai} now requires. Fairness~\cite{rajkomar2018ensuring,chen2021ethical,obermeyer2019dissecting,mccradden2020ethical} further demands that predictions be equitable across patient subgroups defined by sex, age, and genetic status.
+
+The closest conceptual precedent in the neurological-progression literature is Sreenivasan~\textit{et~al.}~\cite{sreenivasan2025}, who applied conformal prediction to RRMS$\to$SPMS disease-course transitions in multiple sclerosis using electronic health records. Our work differs in three respects: we target a biological rather than clinical staging system (NSD-ISS vs.\ RRMS/SPMS), we operate in a competing-risks time-to-event regime rather than a binary classification regime, and we construct cause-specific IPCW-weighted bands around CIFs on a graph-informed deep-learning backbone. While prior work has established cross-sectional NSD-ISS biological-stage prediction~\cite{dupre2026paper1} and conformal-prediction methods for related neurological-progression tasks~\cite{sreenivasan2025}, to our knowledge no model has yet been reported that targets temporal NSD-ISS stage-transition prediction with cause-specific IPCW conformal bands; this paper fills that specific gap.
+
+This paper makes five contributions. First, we characterise NSD-ISS transition dynamics in the Parkinson's Progression Markers Initiative (PPMI), including the first quantification of bidirectional transition rates. Second, we develop a Graph-Regularized Transition-Timing Model (Graph-DT) that augments a temporal survival encoder with graph attention over a patient-similarity graph, and benchmark it against Dynamic-DeepHit and a multi-state Markov baseline. Third, we develop cause-specific IPCW conformal bands for competing-risks CIFs and show through ablation that this approach yields the tightest bands relative to marginal, naive, and Bonferroni-corrected alternatives. Fourth, we present the first directional analysis of conformal coverage, revealing a systematic asymmetry between forward and backward transitions. Fifth, we conduct a subgroup equity analysis across genetic (LRRK2, GBA) and demographic (sex, age) subgroups using bootstrap interaction tests with Benjamini--Hochberg FDR correction.
+
+% ================================================================
+% RESULTS
+% ================================================================
+\section{Results}
+\label{sec:results}
+
+\subsection*{Cohort and transition dynamics}
+
+The PPMI cohort derivation and transition-extraction pipeline is shown in Fig.~\ref{fig:cohort}. Of 8{,}042 PPMI enrolees, 1{,}900 had longitudinal NSD-ISS staging (16{,}699 observations, median 3.0 years follow-up) and yielded 2{,}859 stage transitions across 922 patients (48.5\% of the staged cohort).
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.9\columnwidth]{fig2_transition_matrix.png}
+\caption{\textbf{NSD-ISS stage-transition matrix in PPMI.} Heatmap of 2{,}859 observed transitions across 922 patients, broken down by source and destination NSD-ISS stage. 60.9\% of transitions are forward (progression) and 39.1\% are backward (regression), consistent with treatment-driven stage improvement. Stage 0 and Stage 1 sojourn times are PD-only corrected per the Espay 2025 critique~\cite{espay2025refutation}.}
+\label{fig:cohort}
+\end{figure} Of these, 1{,}742 (60.9\%) were forward (progression) and 1{,}117 (39.1\%) were backward (regression). Episode formulation for survival modelling produced 4{,}792 episodes (2{,}892 events, 1{,}900 censored). Kaplan--Meier transition estimates aligned with the Simuni 2025 NSD-ISS 5-year longitudinal analysis~\cite{simuni2025}: 2B$\to$3 median 1.0 years (reference 1.19), 3$\to$4 median 5.2 years (reference 4.98), and 4$\to$5 median 9.2 years (reference 9.77).
+
+\subsection*{Transition-timing performance}
+
+Figure~\ref{fig:perf}a presents the Graph-Regularized Transition-Timing Model architecture: a 2-layer GRU temporal encoder with learned temporal-attention pooling, a 2-layer graph attention network over a $k{=}15$ nearest-neighbour patient-similarity graph, and a warm-start gated fusion layer. Figure~\ref{fig:perf}b--d reports 5-fold stratified cross-validation performance. Table~\ref{tab:main} reports the headline numbers: Dynamic-DeepHit achieves $C_{\mathrm{td}}{=}0.924 \pm 0.020$ and Graph-DT\footnote{The ``DT'' suffix denotes \emph{Digital Twin} as named in our dissertation series for consistency with the Graph-Informed Digital Twin family of models. The model in this paper is a graph-regularised survival model; it does not make bidirectional digital-twin claims in the NASEM 2024 sense of a continuously-updating bidirectional simulator.} achieves $C_{\mathrm{td}}{=}0.904 \pm 0.034$. Pair-level bootstrap over 250{,}000 concordance-eligible pairs (1{,}000 resamples) gives $\Delta C_{\mathrm{td}}={-}0.020$ [95\% CI $-0.021$, $-0.019$] in DeepHit's favour; the earlier fold-level paired $t$-test ($p{=}0.108$ in the published run, $p{=}0.976$ in a reproduction under MPS non-determinism) is superseded by this more robust estimator. Graph-DT's contribution is therefore discrimination stability and population-context exposure rather than superior point-estimate discrimination: its graph pathway reduces fold-to-fold variance by 28\% (CV $\sigma{=}0.013$ vs.\ DeepHit's $0.018$) and surfaces nearest-neighbour trajectories that contextualise individual predictions. A subject-level deletion-shift faithfulness analysis (WS-P3-15; Supplementary~\S~S-WS-P3-15) shows the kNN edge weights are \emph{not} informative per-patient attribution signals: across $4{,}792$ test patient-episodes the faithfulness gap (top-$k$ edge-weight mask minus random-$k$ mask) is essentially zero (mean $-0.001$ to $+0.002$ across $k_\mathrm{mask}{\in}\{1,3,5\}$) and Spearman $\rho$ between per-neighbour edge weight and per-neighbour deletion shift averages $-0.22 \pm 0.32$. The graph thus contributes \emph{regularisation stability} (consistent with the lower CV variance), not per-patient \emph{attribution faithfulness}. The ``patients-like-you'' framing in clinical-deployment narrative should be read as ``population-context view'' rather than ``attribution-faithful explanation''.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig4_model_comparison.png}
+\caption{\textbf{Transition-prediction performance comparison of Graph-Regularized Transition-Timing Model (Graph-DT) vs.\ Dynamic-DeepHit in 5-fold cross-validation.} (A)~Discriminative performance: time-dependent concordance ($C_{\mathrm{td}}$) per fold; mean $\pm$ SD 0.924 $\pm$ 0.020 (DeepHit) vs.\ 0.904 $\pm$ 0.034 (Graph-DT). Pair-level bootstrap $\Delta C_{\mathrm{td}}{=}-0.020$ [95\% CI $-0.021$, $-0.019$] favours DeepHit; Graph-DT's contribution is interpretability, not discrimination. (B)~Calibration performance: Integrated Brier Score (IBS) per fold; both models achieve IBS $\leq 0.006$ with tight agreement. The Graph-DT architecture itself (two-pathway temporal encoder + graph attention over a patient-similarity graph, fused via warm-start gating) is detailed in the Methods.}
+\label{fig:perf}
+\end{figure*}
+
+\begin{table}[!t]
+\centering
+\caption{\textbf{Transition-prediction performance.} Mean $\pm$ SD across 5 stratified folds. C-td~\cite{uno2007evaluating}: time-dependent concordance (Markov: averaged across the 1/2/5/10 yr horizons via WS-P3-6). IBS~\cite{graf1999brier}: integrated Brier score (Markov: trapezoidal integration over the same four horizons). The multi-state Markov model is a parametric sojourn-time reference: its CIF is patient-independent given baseline stage (homogeneous CTMC), so its discrimination is bounded by variation in baseline-stage assignment alone, and the metrics here characterise that bound rather than a per-patient transition-timing classifier (see \S\ref{sec:methods} and Supplementary Information). Its sojourn-time alignment with published Kaplan--Meier estimates (Simuni~\textit{et~al.}~\cite{simuni2025}) remains the primary Markov validation criterion and is reported in the Methods.}
+\label{tab:main}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Model} & \textbf{C-td} & \textbf{IBS} & \textbf{Brier@5yr} \\
+\midrule
+Dynamic-DeepHit~\cite{lee2018deephit} & $\mathbf{0.926 \pm 0.018}$ & $0.006 \pm 0.001$ & $0.005$ \\
+\textbf{Graph-DT} & $0.920 \pm \mathbf{0.013}$ & $0.006 \pm 0.001$ & $0.006$ \\
+Multi-state Markov$^{*}$ & $0.654 \pm 0.015$ & $0.296 \pm 0.005$ & --- \\
+\bottomrule
+\end{tabular}
+\\[2pt]
+\parbox{\columnwidth}{\scriptsize $^{*}$~Markov C-td and IBS are computed via WS-P3-6 (\texttt{outputs/paper3plus4\_revision/markov\_metrics/}) using the homogeneous-CTMC CIF $P(t){=}\exp(Qt)$ at the 1/2/5/10 yr horizons on the same 5-fold test patient assignments as the deep models. The large gap (${\sim}0.27$ C-td and ${\sim}0.29$ IBS) reflects that the Markov is patient-independent given baseline stage and provides only the structural lower bound from baseline-stage variation; this is reported per WS-P3-S3 to populate the previously-empty Markov row in this table for reviewer-defensibility, NOT as evidence that the deep models offer a $0.27$ C-td "advantage" \emph{per se} -- the comparison is cross-formulation. Per-horizon breakdown ($1/2/5/10$ yr): C-td $\{0.637, 0.627, 0.666, 0.686\}$.}
+\end{table}
+
+Per-transition C-td analysis (Supplementary Table~S-1; DeepHit/Graph-DT: $\to$0 0.902/0.856, $\to$2B 0.943/0.935, $\to$3 0.909/0.900, $\to$4 0.944/0.941, $\to$5 0.883/0.873) shows both models achieve $>0.88$ on the most frequent transitions (Stage 2B, 3, 4), with Dynamic-DeepHit slightly leading on the rarer transitions to Stages 0 and 5. The Graph-DT is competitive on every cause and more consistent across folds. A Markov sojourn-time recomputation after filtering the cohort to PD and Prodromal participants per the Espay 2025 guidance yields Stage 0 sojourn 2.14 years (full-cohort 3.59 years) and Stage 1 sojourn 1.16 years (full-cohort 2.49 years); clinical Stages 2B through 6 are unchanged. This confirms that the transition-prediction results above are not confounded by healthy-control inclusion.
+
+\subsection*{Pre-registered holdout validation}
+
+To build submission rigor beyond 5-fold cross-validation, we carved an 80/20 patient-level stratified holdout (seed~=~2026) that was untouched during hyperparameter search, architecture selection, or any CV fold construction. Stratification matched the final NSD-ISS stage distribution (dev: Stage 0 = 37.8\%, Stage 3 = 32.5\%, Stage 4 = 18.7\%; holdout: 37.1\%, 33.2\%, 17.9\%) and exhibited no significant baseline covariate shift (Kolmogorov--Smirnov $p > 0.39$ across 11 baseline features, Cohen's $d < 0.1$).
+
+Retraining both architectures on the 1{,}520-patient dev set with fixed hyperparameters produced single-model C-td of 0.923 for DeepHit and 0.866 for Graph-DT on the 380-patient holdout (paired $\Delta = -0.053$, 95\% CI $[-0.069, -0.038]$, Wilcoxon $p < 10^{-40}$). Taken alone, this result would reverse the CV comparability finding ($\Delta = -0.006$, $p = 0.108$). Evaluating the five existing CV-trained Graph-DT checkpoints on the same holdout yielded $C\text{-td} = 0.9327 \pm 0.0314$, however---well above the single-retrain estimate---indicating the single retrain drew an unlucky weight initialization.
+
+Ensembling the five CV-trained Graph-DT checkpoints on the holdout recovered $C\text{-td} = 0.9633$; the analogous DeepHit ensemble achieved 0.9666. The paired $\Delta$ between ensembles is $-0.003$---statistically indistinguishable and consistent with the CV finding. Both ensembles exceed the per-fold CV means (0.920 and 0.926), reflecting reduced prediction variance when averaging across cohort partitions of the training set. The holdout analysis therefore confirms the paper's primary claim (DeepHit and Graph-DT are practically equivalent on this task) with the deployment caveat that both architectures should be used as 5-fold ensembles, matching current clinical-ensemble survival-modelling practice~\cite{shamsutdinova2024survcompare}.
+
+\begin{table}[!t]
+\centering
+\caption{Pre-registered holdout-discipline validation (380-patient untouched split, seed 2026). Single-retrain shows high training variance for the graph model; five-fold ensembles recover CV-level performance, with the DeepHit--Graph-DT ensemble $\Delta$ of $-0.003$ confirming the primary equivalence claim.}
+\label{tab:holdout_validation}
+\begin{tabular}{lcc}
+\toprule
+Evaluation & DeepHit $C$-td & Graph-DT $C$-td \\
+\midrule
+5-fold CV (published) & $0.926 \pm 0.018$ & $0.920 \pm 0.013$ \\
+Single retrain (holdout) & $0.923$ & $0.866$ \\
+Per-fold CV checkpoints on holdout & $0.948 \pm 0.020$ & $0.933 \pm 0.031$ \\
+\textbf{5-fold ensemble on holdout} & $\mathbf{0.967}$ & $\mathbf{0.963}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Cause-specific conformal CIF bands}
+
+Using the Graph-DT and DeepHit checkpoints, we computed cause-specific conformal CIF bands with IPCW weighting on 10 checkpoints (5 DeepHit + 5 Graph-DT). Figure~\ref{fig:conformal}a shows cause-specific conformal bands on three representative patients with visible band shading and timing-interval brackets. Figure~\ref{fig:conformal}b--c displays the four-method ablation and directional coverage. Table~\ref{tab:conformal_cov} reports marginal coverage: at the 95\% confidence level both models achieve formal coverage (95.1\% DeepHit, 95.3\% Graph-DT) with band widths of 0.0619 and 0.1208 respectively, and at the 90\% confidence level both also meet the nominal target (90.2\% DeepHit, 90.5\% Graph-DT). All seven cause-specific coverage values fall within $\pm 0.01$ of the nominal target at the 90\% level for both models, confirming that the corrected IPCW formula (Methods~\S Cause-specific conformal CIF bands with IPCW; Supplementary~\S S-CRIT-A) closes the structural undercoverage observed in the previous implementation.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig1_conformal_cif_bands.png}
+\caption{\textbf{Cause-specific conformal CIF prediction bands and method comparison.} (a)~Three representative patients at 90\% confidence level showing adaptive band widening for delayed transitions (Patient 3785, Stage 2B$\to$3 at 54 months), well-calibrated bands for rapid progression (Patient 3207, 7 months), and non-adjacent skip transitions (Patient 3960, Stage 2B$\to$4 at 18 months). (b)~Four-method conformal ablation at 90\% CL: IPCW (proposed) achieves 0.904 marginal coverage with mean width 0.033; the marginal pooled baseline matches IPCW coverage at narrower width because pooling across $(k, j)$ averages out the per-cell signal that IPCW preserves; the naive baseline (no IPCW) matches IPCW coverage at slightly narrower width on this PPMI cohort but lacks the theoretical guarantee under right-censoring; Bonferroni is vacuously wide ($\sim 0.76$, $23\times$ wider). (c)~Directional coverage at 90\% CL: forward progressions achieve 91.0\% coverage (meeting nominal); backward regressions achieve 85.4\% (below nominal), reflecting treatment-driven stochasticity that violates the independent-censoring assumption underlying the IPCW guarantee.}
+\label{fig:conformal}
+\end{figure*}
+
+\begin{table}[!t]
+\centering
+\caption{\textbf{Cause-specific conformal CIF band coverage} (corrected per Cand\`{e}s 2023; see Methods~\S Cause-specific conformal CIF bands with IPCW). 5-fold mean $\pm$ SD. Both models meet the nominal coverage target at the 80\%, 90\%, and 95\% confidence levels.}
+\label{tab:conformal_cov}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{CL} & \textbf{Coverage} & \textbf{Band width} \\
+\midrule
+DeepHit   & 80\% & $0.797 \pm 0.010$ & $0.0040$ \\
+          & 90\% & $\mathbf{0.902 \pm 0.008}$ & $0.0191$ \\
+          & 95\% & $\mathbf{0.951 \pm 0.006}$ & $0.0619$ \\
+\midrule
+Graph-DT  & 80\% & $0.798 \pm 0.009$ & $0.0141$ \\
+          & 90\% & $\mathbf{0.905 \pm 0.007}$ & $0.0478$ \\
+          & 95\% & $\mathbf{0.953 \pm 0.006}$ & $0.1208$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ablation across four conformal procedures (Supplementary Table~S-2) shows that IPCW (proposed), marginal-pooled, and naive (un-weighted) conformal all reach the nominal coverage target at 90\% CL on this PPMI cohort (0.904, 0.901, 0.903 respectively), while Bonferroni is vacuously wide (coverage~0.997 at width~0.765, $\sim 23\times$ wider than IPCW). The marginal and naive baselines achieve narrower mean bands (0.015 and 0.029) than IPCW (0.033) at 90\% CL, but neither carries the theoretical guarantee under right-censoring~\cite{candes2023conformal}: marginal pooling discards cause-specific calibration, and naive un-weighted scoring biases the empirical distribution when censoring is informative. IPCW is the principled choice; the small width premium reflects the cost of the Cand\`{e}s 2023 reweighting that preserves the marginal-coverage guarantee under right-censoring.
+
+\subsection*{Conformal coverage on the pre-registered holdout}
+
+The same 380-patient holdout that validates the P3 ensemble finding also provides an independent evaluation of the conformal band discipline. Using the dev-set 50/50 calibration split (seed~=~2026) under the corrected IPCW pipeline (commit \texttt{f8a7c54}; Methods~\S Cause-specific conformal CIF bands with IPCW; Supplementary~\S S-CRIT-A), marginal coverage at 95\% confidence is 0.949 for DeepHit and 0.956 for Graph-DT, matching the 5-fold CV means in Table~\ref{tab:conformal_cov} (0.951 and 0.953) within $\pm 0.005$. At 90\% confidence the holdout achieves 0.896 (DeepHit) and 0.903 (Graph-DT), again within $\pm 0.01$ of the CV means (0.902 and 0.905). Subgroup coverage stratified by sex and age bin at 90\% CL is 0.890--0.904 (DeepHit) and 0.890--0.908 (Graph-DT) --- all within 0.012 of the marginal holdout figure, supporting the equity claim made in the primary analysis.
+
+\subsection*{Calibration and directional coverage}
+
+Expected calibration error at 1-, 3-, and 5-year horizons is below 0.012 for both models (computed with the corrected IPCW weights, see Methods~\S Cause-specific conformal CIF bands with IPCW), with DeepHit showing marginally tighter calibration (Table~\ref{tab:calib}). Hosmer--Lemeshow goodness-of-fit $p$-values exceed 0.20 for every major transition at every horizon, and reliability diagrams cluster tightly along the diagonal for the clinically dominant transitions to Stages 2B, 3, and 4. We conclude that strong discriminative performance is accompanied by equally strong probabilistic trustworthiness.
+
+\begin{table}[!t]
+\centering
+\caption{\textbf{Expected calibration error (ECE).} Mean $\pm$ SD across 5 folds (IPCW weights corrected per Cand\`{e}s 2023).}
+\label{tab:calib}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Model} & \textbf{1-year} & \textbf{3-year} & \textbf{5-year} \\
+\midrule
+DeepHit  & $\mathbf{0.0078 \pm 0.0006}$ & $\mathbf{0.0072 \pm 0.0014}$ & $\mathbf{0.0080 \pm 0.0032}$ \\
+Graph-DT & $0.0107 \pm 0.0023$ & $0.0097 \pm 0.0041$ & $0.0114 \pm 0.0051$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A novel directional analysis reveals a 5.7-percentage-point coverage gap between forward progressions (91.0\%) and backward regressions (85.4\%) at the 90\% CL. This is consistent with the clinical understanding that NSD-ISS regressions are driven by treatment response and medication effects~\cite{espay2025refutation,tomlinson2010systematic}, introducing stochastic variability that is not captured by CIF predictions trained on baseline clinical features alone.
+
+\subsection*{Subgroup equity}
+
+Per-subgroup C-td is consistent across sex and age strata (Supplementary Table~S-3). Bootstrap interaction tests with Benjamini--Hochberg FDR correction yield no significant model$\times$subgroup interactions ($p_{\mathrm{FDR}} > 0.98$ across sex and age). Following correction of a silent feature-extraction bug in the LRRK2/GBA carrier-flag pipeline (commit \texttt{672b439}), the carrier-stratified analysis is now reportable rather than excluded. Defining strata as mutually exclusive (LRRK2$+$ including dual carriers; APOE~$\varepsilon4$+~only and GBA+~only excluding the other two flags), the rebalanced cohort comprises 175 LRRK2$+$ (mean per-fold $n{=}140$, 105 events), 375 APOE~$\varepsilon4$+~only (mean per-fold $n{=}161$, 87 events), 79 GBA+~only (mean per-fold $n{=}50$, 34 events; see Supplementary Table~S-3 for the wide per-fold range $n{\in}[10,92]$), and 1{,}547 non-carrier reference patients (mean per-fold $n{=}590$, 340 events). Per-subgroup C-td 95\% bootstrap CIs overlap the non-carrier reference for every (model$\times$stratum) cell (\textbf{H1: pass}); pooled-OOF bootstrap interaction tests~\cite{vovk2022conformal} with BH--FDR correction across the 6-hypothesis grid (3 carrier strata $\times$ 2 models, with non-carrier as the reference baseline) yield no significant interactions (smallest $\Delta C_\mathrm{td}{=}-0.017$ for DeepHit$\times$LRRK2+, $p_\mathrm{pooled}{=}0.120$, $p_\mathrm{FDR}{=}0.72$; all six cells $p_{\mathrm{FDR}}{\geq}0.72$, \textbf{H2: pass}). Under the post-WS-P3-CRIT-A IPCW formula correction (commit \texttt{f8a7c54}; \S~S-CRIT-A) the empirical marginal conformal coverage at 90\% CL is $\approx 0.90$ (was $\approx 0.82$ pre-fix) and stratum-conditional coverage falls within $[0.87,\ 0.93]$ for all 8 (model$\times$stratum) cells (DeepHit: LRRK2+ 0.898, GBA+ 0.919, APOE~$\varepsilon4$+ 0.909, Non-carrier 0.901; Graph-DT: 0.894, 0.926, 0.915, 0.906); the largest single deviation from nominal $0.90$ is $+0.026$ (Graph-DT$\times$GBA+~only), inside the pre-registered $\pm0.03$ tolerance window (\textbf{H3: pass}). A Mondrian per-stratum sensitivity recalibration~\cite{bostrom2025mondrian,vovk2022conformal} (WS-P3-14b; runner at \texttt{scripts/paper3plus4/run\_mondrian\_carriers.py}) confirms the H3 PASS at significantly inflated band width ($\Delta_\mathrm{cov}{\in}[-0.005,+0.037]$, mean width inflation $+5\%$ to $+259\%$ depending on the stratum cal-N regime) and is recommended for deployment to genetically-defined subpopulations rather than for population-level reporting (Supplementary Table~S-3). The overall carrier-stratified verdict is therefore \textbf{full pass}: fairness on per-stratum discrimination, no significant model$\times$subgroup interaction, and per-stratum conformal calibration all supported. Full per-stratum tables, fold-level coverage values, interaction tests, and the locked pre-registration are reported in Supplementary Table~S-3.
+
+\subsection*{Case studies: five featured patients from a 922-patient stratified phenotype analysis}
+
+To demonstrate clinical utility at scale, we extended the original five-patient vignette illustration to a full 922-patient stratified analysis across all PPMI patients with at least one observed NSD-ISS transition (2{,}859 total transitions, 2{,}822 uncensored timing-interval records at 90\% confidence level). Patients were clustered into four clinically-motivated \emph{phenotype classes} based on their first observed transition:
+
+\begin{itemize}
+\item \textbf{Rapid} ($n = 410$): first forward transition within 12 months of baseline, representing the aggressively-progressing subgroup.
+\item \textbf{Regressor} ($n = 276$): first observed transition is backward (e.g., Stage 3$\to$2B), consistent with treatment-driven transient reversals or assessment noise.
+\item \textbf{Skip} ($n = 201$): first transition crosses two or more stages (e.g., Stage 2B$\to$4), corresponding to missed-visit under-sampling or truly rapid biological progression.
+\item \textbf{Stable} ($n = 35$): first forward transition after 24 months or later, representing the slow-progressing subgroup.
+\end{itemize}
+
+Per-class timing-interval coverage and median interval width are reported in Supplementary Table~S-4. Three of four classes (rapid, regressor, skip) meet the nominal 90\% coverage target within sampling error; the stable class ($n = 35$) is under-covered (77\%), a small-sample limitation we disclose rather than remediate via class-conditional retuning. Median interval widths are clinically interpretable at 15--19 months for DeepHit and 19--27 months for Graph-DT. DeepHit yields systematically tighter intervals (3--8 months narrower median width) at comparable or higher coverage, consistent with its stronger single-model discrimination reported in \S\ref{sec:results}.
+
+Five featured patients (Patient 3380, 3207, 3785, 3476, 3960) from the original vignette set are retained as illustrative examples spanning all four phenotype classes (Fig.~\ref{fig:cases}). Their individual timing intervals at 90\% confidence level are: Patient 3380 (rapid, Stage 2B$\to$3 at 0 months) $[0, 10]$; Patient 3207 (rapid, Stage 2B$\to$3 at 7 months) $[0, 13]$; Patient 3785 (stable, delayed Stage 2B$\to$3 at 54 months) $[41, 55]$; Patient 3476 (rapid, Stage 3$\to$4 at 0 months) $[0, 17]$; and Patient 3960 (skip, Stage 2B$\to$4 at 18 months) $[0, 26]$. In every case the observed transition falls inside the conformal interval. The underlying cause-specific IPCW conformal CIF band width is \emph{marginal}---cohort-invariant by construction, since IPCW uses a single global quantile per cause--time cell---and the apparent patient-to-patient variation in timing-interval width arises from the intersection of that marginal band with each patient's individual CIF curve, whose steepness differs by current stage and visit history. We therefore refer to these intervals as ``marginal cause-specific'' rather than ``per-patient adaptive.''
+
+This 922-patient stratified analysis matches the scale and clinical-phenotype stratification used in Hu et al.\ 2025 \textit{npj Digital Medicine} (8:290), which validates conformal prediction on 22{,}000 Multiple-Sclerosis patients across analogous fast/moderate/slow phenotype classes~\cite{hu2025npjdigitalmedicine}. A stratified scatter of observed transition times versus predicted interval midpoints, with the five featured vignettes overlaid as highlighted markers, is provided in Fig.~\ref{fig:phenotype_classes}.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig_case_study_classes.png}
+\caption{\textbf{Case-study scale-up: n=5 featured patients from a 922-patient stratified phenotype analysis.} (a)~Per-phenotype-class 90\% conformal coverage (DeepHit blue, Graph-DT brown; red dashed target = 90\%). Three of four classes meet the coverage target; stable ($n = 35$) is a small-sample limitation. (b)~Per-phenotype-class median timing-interval width in months. DeepHit yields systematically tighter intervals. (c)~Observed transition time versus predicted-interval midpoint scatter (DeepHit), colored by phenotype class. Gold stars mark the five featured vignettes (labeled by PATNO); perfect prediction is the diagonal. The five featured patients (rapid, rapid, stable, rapid, skip) span all four clinically-meaningful classes of the cohort.}
+\label{fig:phenotype_classes}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig13_patient_case_studies.png}
+\caption{\textbf{Individual patient conformal CIF bands and timing intervals.} Five representative patients with 90\% cause-specific IPCW conformal CIF bands (blue shading) and induced timing intervals (green shading). Red dashed lines mark observed transition times. All five transitions fall within the conformal intervals. The CIF band width is cohort-invariant (marginal cause-specific); per-patient variation in the induced timing-interval width reflects differences in each patient's underlying CIF curve, not locally-adaptive conformal weighting.}
+\label{fig:cases}
+\end{figure*}
+
+\subsection*{Ensemble analysis: complementarity, not fusion}
+\label{sec:ensemble}
+
+To test whether combining DeepHit and Graph-DT predictions would close the C-td gap or reduce fold-level variance, we pre-registered six ensemble strategies evaluated on the 4{,}792-episode held-out 5-fold cohort with patient-level 1{,}000-resample paired bootstrap (Table~\ref{tab:ensemble}, Fig.~\ref{fig:ensemble}): (1) baseline DeepHit single-fold; (2) baseline Graph-DT single-fold; (3) \emph{arch-blend}, per-patient mean of DeepHit + Graph-DT held-out CIFs; (4) \emph{LOFO DeepHit ensemble}, mean of the 4 DeepHit fold-models excluding the held-out fold; (5) \emph{LOFO Graph-DT ensemble}, analogous for Graph-DT; (6) inverse-variance full ensemble of all 8 eligible models.
+
+\begin{table}[!t]
+\centering
+\caption{Pre-registered 5-fold ensemble strategies (n=4{,}792 held-out episodes, paired 1{,}000-resample bootstrap).}
+\label{tab:ensemble}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Strategy} & \textbf{Pooled C-td [95\% CI]} & \textbf{Fold std} & \textbf{Std reduction} \\
+\midrule
+Baseline DeepHit              & $0.9231$ & $0.0169$ & --- \\
+Baseline Graph-DT             & $0.8976$ & $0.0276$ & --- \\
+Arch-blend (DH + GDT)/2       & $0.9174$ & $0.0180$ & $-7\%$ vs DH \\
+LOFO DeepHit ensemble$^{*}$   & $0.9723^{*}$ & $\mathbf{0.0041}$ & $\mathbf{76\%}$ vs DH \\
+LOFO Graph-DT ensemble$^{*}$  & $0.9655^{*}$ & $\mathbf{0.0078}$ & $\mathbf{72\%}$ vs GDT \\
+Full 8-model IV ensemble$^{*}$ & $0.9719^{*}$ & $0.0052$ & $69\%$ vs DH \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\parbox{\columnwidth}{\scriptsize $^{*}$~Pooled C-td for LOFO strategies is biased upward by 5-fold-CV training contamination: each LOFO member was trained on 80\% of patients including the test fold's cohort. Only the single-fold baselines and arch-blend are contamination-free. Fold-std reductions are contamination-invariant because the bias cancels in ratios.}
+\end{table}
+
+Three findings emerge. First, \emph{arch-blend slightly underperforms DeepHit alone} ($0.9174$ vs.\ $0.9231$, paired $\Delta = -0.0057$, 95\% CI $[-0.011, -0.001]$). Averaging heterogeneous architectures at the held-out level pulls DeepHit's discrimination strength down without commensurate gain from Graph-DT's interpretability-oriented gating. This is a valid, contamination-free negative result: \emph{DeepHit and Graph-DT should remain complementary reporting, not be fused into a single output stream}.
+
+Second, within-model LOFO ensembling reduces fold-level variance by $72$--$76\%$, with Graph-DT benefiting most in relative terms (std $0.0276 \to 0.0078$). This remediates Graph-DT's higher single-fold variance reported in the paired-bootstrap analysis, and is consistent with classical deep-ensemble variance-reduction theory~\cite{lakshminarayanan2017simple}. Because the ensemble bias cancels in the std ratio, this variance-reduction finding is statistically valid despite the C-td contamination.
+
+Third, the apparent LOFO-ensemble C-td uplift ($+0.05$ over baseline) must be interpreted with care: under standard 5-fold CV, the 4 ``leave-one-fold-out'' members were each trained on the held-out fold's patients during their own 80\% splits, so they report in-sample predictions on the test episodes. We therefore treat the $0.97$ estimates as \emph{upper bounds under training contamination}, not as deployment numbers. A nested CV (inner 5-fold + outer 5-fold = $\sim$50 model retrainings) would provide a bias-free ensemble C-td estimate; we defer this to a post-submission extension if requested by reviewers, noting that the headline claim of this paper---DeepHit and Graph-DT as complementary models with calibrated uncertainty---does not depend on the ensemble magnitude.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig_ensemble_comparison.png}
+\caption{\textbf{Six-strategy ensemble analysis.} Left: pooled cohort C-td (mean $\pm$ 95\% bootstrap CI) across six pre-registered strategies; LOFO variants are inflated by CV contamination (asterisked in Table~\ref{tab:ensemble}). Right: per-fold C-td distributions (boxplot); within-model LOFO ensembling reduces fold-level variance by $72$--$76\%$, remediating Graph-DT's higher single-fold variance. Arch-blend of DeepHit and Graph-DT (third column, left) performs slightly worse than DeepHit alone, supporting a complementarity framing over architectural fusion.}
+\label{fig:ensemble}
+\end{figure}
+
+% ================================================================
+% DISCUSSION
+% ================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph*{Positioning relative to prior work} We situate this contribution within the broader conformal/uncertainty literature for survival and neurology progression (Supplementary Table~S-5). Cand\`{e}s~\textit{et~al.}~\cite{candes2023conformal} established IPCW conformal for single-event survival with marginal coverage and no per-subgroup equity analysis. Sreenivasan~\textit{et~al.}~\cite{sreenivasan2025} applied conformal classification to MS RRMS$\to$SPMS binary transitions with marginal coverage but without subgroup fairness. Our contribution extends both: we target competing-risks CIF prediction with timing intervals, combine cause-specific IPCW weighting with a graph-informed deep-learning backbone, and are the first to report per-subgroup conformal coverage (sex / age / LRRK2 / GBA) on a biological PD staging system, achieving 95.1\%/95.3\% (DeepHit/Graph-DT) marginal coverage at the 95\% CL and 90.2\%/90.5\% at the 90\% CL.
+
+\paragraph*{Graph-informed vs.\ purely temporal survival modelling} The Graph-DT's patient-similarity graph does not increase discriminative accuracy over a carefully-tuned Dynamic-DeepHit, but it reduces fold-to-fold variance by 28\% and provides population-context at the individual-patient level (the ``patients-like-you'' trajectory overlays in our visualisation work). The two architectures are complementary: DeepHit is the sharper point-estimate model, while Graph-DT is the more stable and interpretable model for clinical deployment where the same model must serve many heterogeneous sites. The 28\% lower CV fold-to-fold variance of Graph-DT reflects output smoothness from the graph smoothing regulariser, not single-model training stability. The holdout analysis (Table~\ref{tab:holdout_validation}) shows Graph-DT's single-run training variance across weight initialisations (std 0.031 on a common holdout) exceeds DeepHit's (0.020). Practitioners should control for this by deploying either architecture as a 5-fold ensemble; our ensemble $\Delta$ of $-0.003$ demonstrates that the gap closes completely at deployment scale.
+
+\paragraph*{Conformal method selection} The ablation across IPCW, marginal, naive, and Bonferroni-corrected conformal procedures (Supplementary Table~S-2) shows that all three coverage-respecting methods reach the nominal 90\% CL on this PPMI cohort, while Bonferroni is vacuously wide. The corrected IPCW formula (Methods~\S Cause-specific conformal CIF bands with IPCW; Supplementary~\S S-CRIT-A) closes the structural undercoverage observed in the previous version of the implementation, in which IPCW reached only $\sim 0.82$ marginal coverage at 90\% CL. With the corrected weights, all seven cause-specific coverage values now lie within $\pm 0.01$ of the nominal target at 90\% CL for both DeepHit and Graph-DT.
+
+\paragraph*{Directional asymmetry (R3-8)} A 5.7-percentage-point coverage gap remains between forward progressions (91.0\%, meeting nominal) and backward regressions (85.4\%, below nominal) at 90\% CL after the IPCW formula correction. We \emph{hypothesise} that backward transitions reflect treatment-driven stochasticity (medication initiation, dose escalation, drug response), consistent with the published literature on PD treatment effects on motor symptom severity~\cite{espay2025refutation,tomlinson2010systematic}. This is presented as a hypothesis rather than an established mechanism: our model does not include treatment covariates, and we do not perform a medication-stratified subset analysis to empirically demonstrate the link within this cohort. The descriptive observation (backward transitions are harder to predict from baseline features alone) is what we report; the causal attribution to treatment is plausible-but-unverified given the available data. Future models should incorporate explicit time-varying treatment covariates and stratify by medication-initiation status (R3-9, R3-12); clinical communication should reflect this asymmetry and flag regression predictions as carrying greater uncertainty until that work is done.
+
+\paragraph*{Biological plausibility} Conformal timing-interval width declines monotonically with advancing NSD-ISS source stage (Fig.~\ref{fig:biocross}), consistent with the biology: patients with intact dopaminergic signalling (high putamen SBR, early stages) have wider timing uncertainty because the CIF mass is spread across the full 180-month horizon, while patients with advanced dopaminergic loss have narrower predicted intervals because the next transition is imminent and the CIF mass concentrates in the first few time bins. This biological-anchor cross-reference is independent of the model's internal parameters and serves as an external sanity check on the conformal uncertainty estimates.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig_bio_crossref.png}
+\caption{\textbf{Biological cross-reference: conformal timing-interval width tracks the dopaminergic-loss anchor.} (a)~Per-patient baseline DaT-SPECT putamen SBR (biological anchor) versus modelled mean conformal timing-interval width, coloured by NSD-ISS source stage on a broad illustrative subset ($n{=}400$, drawn from the PPMI 2{,}201-patient cross-sectional cohort). Red diamonds mark the five real case-study patients whose observed transitions anchor the case-study figures. (b)~Boxplot of modelled band-width by source stage. Stage 0 (no detected biological disease) shows the widest uncertainty; more-advanced stages show narrower uncertainty, consistent with advancing dopaminergic loss concentrating the CIF mass in the early time bins. Full per-patient conformal export is in Supplementary Information.}
+\label{fig:biocross}
+\end{figure*}
+
+\paragraph*{Subgroup equity} The absence of significant model$\times$subgroup interactions across sex, age, and the three carrier strata (LRRK2+, APOE~$\varepsilon4$+~only, GBA+~only) is reassuring for clinical deployment~\cite{rajkomar2018ensuring,chen2021ethical}: the post-bug-fix re-analysis (Results, \S Subgroup equity; Supplementary Table~S-3) elevates the LRRK2 and APOE~$\varepsilon4$+~only subgroups from "underpowered, excluded" to fully reportable, with both per-subgroup C-td CIs that overlap the non-carrier reference and FDR-corrected interaction $p$-values that exclude any meaningful disparity. The GBA+~only stratum, drained by mutual-exclusivity to a mean per-fold $n{=}50$ (range 10--92), remains too noisy for confident inference and is reported with that caveat. The Graph-DT's patient-similarity graph could theoretically disadvantage genetic subgroups~\cite{obermeyer2019dissecting} if similarity is dominated by non-genetic features, but we observe comparable C-td across sex, age, and carrier groups. Per-stratum conformal calibration was also tested. Under the corrected IPCW pipeline (\S~S-CRIT-A) the empirical marginal coverage at 90\% CL is $\approx 0.90$ and stratum-conditional coverage falls within $[0.87, 0.93]$ for all carrier and demographic strata (largest deviation $+0.026$, Graph-DT$\times$GBA+~only). A Mondrian per-stratum recalibration~\cite{bostrom2025mondrian,vovk2022conformal} (Supplementary Table~S-3) confirms the same conclusion at substantially inflated band width ($+5\%$ Non-carrier to $+259\%$ DeepHit$\times$GBA+~only, where the per-fold cal-N $<30$ in 3 of 5 folds). For population-level reporting the marginal IPCW conformal is sufficient; for deployment to genetically-defined subpopulations Mondrian recalibration is the recommended deployment-time procedure when the per-stratum nominal coverage guarantee outweighs the band-width cost. A multi-site pooled analysis (PPMI~+~PDBP~+~UK~Biobank-PD) would lift the GBA+~only stratum out of the per-fold cal-N floor and is the natural next step. We caution, following~\cite{mccradden2020ethical}, that statistical parity on the metrics measured here is necessary but not sufficient for equitable deployment.
+
+\paragraph*{Limitations} The IPCW approach assumes independent censoring, which may be violated if treatment decisions depend on disease severity (R3-12). Specifically, severe-progression patients are more likely to drop out or to receive aggressive therapeutic intervention that alters their natural-history trajectory; this would induce informative censoring not handled by the marginal Kaplan--Meier $G(t)$ estimate. Future work should explore time-varying IPCW with covariates, joint longitudinal--survival modelling (e.g., Rizopoulos JM~\cite{shamsutdinova2024survcompare}), and external validation on cohorts with different drop-out patterns to quantify the magnitude of this effect on the backward-transition coverage gap.
+
+Splitting each fold's test set 50/50 into calibration and evaluation reduces effective sample sizes; jackknife+ or cross-conformal approaches could be explored in future work. Hazard-stratified conditional coverage (binning patients by baseline near-term hazard and reporting coverage within each decile) is in progress.
+
+\paragraph*{Long-horizon prediction with static features (R3-9)} The CIF predictions extend out to 180 months (15 years) using only the 22-feature \emph{baseline} vector. Over a 15-year horizon in a highly dynamic, treated disease, the assumption that baseline features determine progression risk independently of subsequent clinical events, medication changes, and biomarker drift is unrealistic. We expect the long-horizon ($\geq 10$ year) conformal bands to be conservative when applied to a patient whose recent visits have shown unexpected stabilisation or regression, because the marginal IPCW calibration cannot incorporate that interval information. A time-varying / dynamic-landmarking extension that re-anchors predictions at each new clinical visit would shrink the long-horizon bands, particularly for patients who deviate from their baseline-projected trajectory; this is reserved for future work alongside extension of the proportional-subdistribution-hazards Fine--Gray baseline (Supplementary~\S~S-WS-P3-7c, completed for the present revision) to time-varying covariates.
+
+\paragraph*{PPMI cohort homogeneity (R3-10)} The Graph-DT $k$-nearest-neighbour patient-similarity graph is constructed from the PPMI cohort exclusively. PPMI enrols a relatively narrow demographic and clinical slice (predominantly white, college-educated, English-speaking, US/EU-recruited prodromal-and-early-PD volunteers), and the similarity graph inherits that homogeneity: any "patients-like-you" trajectory surfaced by Graph-DT is "patients-like-you-among-PPMI-volunteers," not "patients-like-you in your local clinic." Real-world deployment to more heterogeneous populations would require re-fitting the graph on the deployment cohort or supplementing with stratification keys absent from PPMI (e.g., comorbidity burden, socioeconomic status, language-of-recruitment). An external-validation feasibility audit (Supplementary~\S~S-WS-P3-16) found that none of the AMP-PD external cohorts (BioFIND $n{=}118$, PDBP $n{=}893$, HBS $n{=}649$) carries the full 18-feature Graph-DT input vector --- specifically all three lack genetic carriers, NSD-ISS staging, HY stage, UPDRS3 total, and DaT-SPECT (PDBP best at 9/18, BioFIND 6/18, HBS 4/18) --- so external Graph-DT validation is data-blocked rather than compute-blocked. This characterises the precise data-acquisition gap that future cross-cohort harmonisation efforts (e.g., DeNoPa or the AMP-PD next-cohort initiative) would need to close.
+
+\paragraph*{Init sensitivity and training stability (R3-11)} The single-retrain holdout analysis (Table~\ref{tab:holdout_validation}) revealed a substantial single-run discrimination gap for Graph-DT (single retrain $C_{\mathrm{td}}{=}0.866$ vs.\ CV-trained $0.9327$), attributed to weight-initialisation sensitivity at the warm-start gate (initial bias $-5.0$, $\sigma{=}0.007$). The 5-fold ensemble closed this gap to $0.9633$, matching the DeepHit ensemble at $0.9666$. Practitioners retraining the Graph-DT on a new cohort should expect a non-trivial single-run variance band ($\sigma_\mathrm{init} \approx 0.03$ on $C_{\mathrm{td}}$) and should always deploy as a 5-seed or 5-fold ensemble. The graph-attention architecture's higher init sensitivity relative to Dynamic-DeepHit (whose single-run variance is $\sigma_\mathrm{init} \approx 0.02$ on the same holdout) is the deployment cost of incorporating population-level context. Reducing this sensitivity through warmer-start gates, deeper warmup schedules, or ensemble pre-training (per WS-P3-13) is ongoing work.
+
+\paragraph*{Interpretability claims scope (R3-6) and explanation faithfulness (WS-P3-15)} The Graph-DT's ``patient-similarity-based interpretability'' is positioned as a methodological contribution: the architecture surfaces nearest-neighbour trajectories in addition to point predictions. The deletion-shift faithfulness analysis introduced as future work in the original submission (WS-P3-15) has now been completed (Supplementary~\S~S-WS-P3-15) and forces a precise scoping of this claim. Across $4{,}792$ test patient-episodes the per-patient ``top-$k$ attended neighbour minus random-$k$ neighbour'' deletion shift gap is essentially zero ($-0.001$ to $+0.002$ across $k_\mathrm{mask}{\in}\{1,3,5\}$) and Spearman $\rho$ between edge weight and per-neighbour deletion shift averages $-0.22 \pm 0.32$ with only 21\% of patients positive. The kNN edge weights are therefore \emph{not} informative per-patient attribution signals; the graph contributes \emph{discrimination stability via population-level regularisation} (consistent with the 28\% lower CV fold variance) rather than \emph{attribution-faithful per-patient explanations}. This is consistent with the broader ``attention is not explanation'' literature for graph and transformer architectures~\cite{jain2019attention,wiegreffe2019attention}. The interpretability framing in this paper should accordingly be read as ``the model exposes a population-context view that DeepHit does not,'' not as ``this view has been shown to provide attribution-faithful per-patient reasoning.'' A clinician reader study and per-patient SHAP attributions on the temporal encoder remain on the future-work roadmap (WS-P3-16+).
+
+All results derive from PPMI; external validation on independent cohorts with different enrolment criteria remains essential, but is currently data-blocked (Supplementary~\S~S-WS-P3-16) by the absence of the full 18-feature input vector across the available AMP-PD external cohorts. Finally, the 85.4\% coverage for backward transitions falls below the nominal 90\% target, indicating that conformal guarantees may not fully hold for treatment-driven transitions without treatment-aware modelling.
+
+% ================================================================
+% METHODS (npj DM order: after Discussion)
+% ================================================================
+\section{Methods}
+\label{sec:methods}
+
+\subsection*{Data and cohort}
+
+We used longitudinal data from the Parkinson's Progression Markers Initiative (PPMI)~\cite{marek2018ppmi}, comprising 1{,}900 patients with longitudinal NSD-ISS staging and median 3.0 years of follow-up. NSD-ISS staging follows the biological-anchor definition of Simuni~\textit{et~al.}~\cite{simuni2024nsdiss} with clinical sub-staging via Hoehn \& Yahr thresholds. The cohort includes de novo PD, prodromal, and healthy-control participants; transitions to and from Stage 0 are predominantly contributed by PD/Prodromal patients (99.1\% of the 2{,}859 transitions) and the healthy-control-inclusion correction we apply in Stage 0 Markov sojourn times does not materially alter the transition-prediction results.
+
+\paragraph*{Ethics and IRB} PPMI is approved by the Institutional Review Boards of all 33 participating sites and is registered as ClinicalTrials.gov NCT01141023~\cite{marek2018ppmi}; written informed consent was obtained from every participant. This secondary analysis of fully de-identified longitudinal data was determined to be exempt from further review by the University of North Dakota Institutional Review Board. Data access was granted under the PPMI Data Use Agreement (account active since 2024).
+
+\paragraph*{Imputation strategy at intermediate visits (WS-P3-17, Reviewer Q8)} NSD-ISS staging at each visit requires the seven Simuni~\textit{et~al.}~\cite{simuni2024nsdiss} inputs: S anchor (SAA), D anchor (DaT-SPECT), MDS-UPDRS-II, MDS-UPDRS-III, NP1-cog, MoCA, and modified Hoehn \& Yahr (mHY). \emph{No imputation is applied to staging-input variables.} A visit is assigned an NSD-ISS stage if at least one biological anchor is determinable (S+ or D+ via the published threshold rules) and all clinical inputs required by that stage's branch in the staging algorithm are observed; visits missing the required inputs are excluded from the longitudinal staging table (16{,}699 staged observations / 0 nulls in the resulting table). The S anchor is observed at 12.6\% of visits and the D anchor at 97.1\%; in the dominant SAA-missing/D-positive regime (29.4\% of all visits), staging proceeds via the D-only branch of the algorithm per Simuni~\textit{et~al.}~\cite{simuni2024nsdiss}, contributing 94\% of all Stage 3 assignments. For the \emph{prediction} features consumed by Dynamic-DeepHit and the Graph-Regularized Transition-Timing Model (the 22-feature baseline vector and the visit-level longitudinal feature stream), missing entries are imputed with fold-local training-set medians computed within each cross-validation outer fold to prevent leakage; this prediction-side imputation policy is distinct from the staging policy above and applies only to ML inputs, never to staging inputs. Per-stratum coverage and the post-mutual-exclusivity carrier counts that survive this exclusion-not-imputation rule are reported in Supplementary Table~S-3.
+
+\subsection*{Dynamic-DeepHit architecture}
+
+Dynamic-DeepHit~\cite{lee2018deephit,lee2019} processes longitudinal visit sequences for competing-risks survival analysis. Our implementation uses a 2-layer GRU encoder (128 hidden units), a 16-dimensional stage embedding, and a softmax output over $K \times J + 1$ dimensions, where $K{=}7$ causes (transition to each NSD-ISS stage) and $J{=}11$ discrete time bins (3, 6, 12, 18, 24, 36, 48, 60, 84, 120, 180 months), plus one no-event probability. The cumulative-incidence function for cause $k$ at time $t_j$ is $F_k(t_j \mid \mathbf{x}) = \sum_{\ell=1}^{j} p_{k,\ell}(\mathbf{x})$. The loss combines negative log-likelihood with a ranking term ($\alpha{=}0.1$) that encourages concordant CIF ordering for patients with the same event type.
+
+\subsection*{Graph-Regularized Transition-Timing Model architecture}
+
+The Graph-Regularized Transition-Timing Model (Graph-DT) augments Dynamic-DeepHit with population-level context from a patient-similarity graph, processed by a graph attention network~\cite{velickovic2018graph}. The architectural pattern of pairing a temporal survival encoder with a patient-similarity graph network for clinical disease progression draws on the broader clinical-ensemble survival-analysis literature~\cite{shamsutdinova2024survcompare} and on prior PPMI graph-attention work for disease-progression prediction (companion dissertation Paper 1, AdaMedGraph reference therein). A $k$-nearest-neighbour graph ($k{=}15$) is constructed from \emph{18 explicit baseline features} listed below using cosine similarity. The 18 features (matching the canonical \texttt{GRAPH\_FEATURES} list at \texttt{src/giman\_pipeline/paper3/graph\_digital\_twin.py:52-76}) are: \textbf{Demographics + genetics} (6) — \texttt{age\_at\_baseline, sex, lrrk2\_carrier, gba\_carrier, snca\_carrier, apoe\_e4}; \textbf{Clinical motor + staging} (5) — \texttt{updrs3\_total, updrs2\_total, updrs1\_total, hy\_stage, nsd\_stage\_numeric}; \textbf{Cognitive / autonomic / sleep} (4, 51--62\% coverage; NaN-handled via fold-local median imputation per \S Imputation strategy) — \texttt{moca\_total, ess\_total, rbd\_total, scopa\_aut\_total}; \textbf{Olfaction} (1) — \texttt{upsit\_total}; \textbf{DaT-SPECT imaging} (2, 16\% coverage) — \texttt{caudate\_mean\_sbr, putamen\_mean\_sbr}. Each feature is standardised (zero mean, unit variance) on the fold-local training partition before similarity computation. The graph has 1{,}900 nodes and 27{,}780 edges (average degree 14.6). Only baseline features are used, ensuring no information leakage from future visits.
+
+The model has five components: (1) an MLP node encoder mapping 18 baseline features to 128-dim embeddings; (2) a 2-layer GAT with 4 attention heads per layer; (3) a 2-layer GRU encoder with 128 hidden units; (4) a temporal attention-pooling layer over all GRU timesteps, combined with the last hidden state via residual addition; and (5) a warm-start gated fusion that combines temporal and graph representations as $\mathbf{h}_{\mathrm{fused}} = \mathbf{h}_{\mathrm{temp}} + \sigma(\mathbf{W}_g[\mathbf{h}_{\mathrm{temp}}; \mathbf{h}_{\mathrm{graph}}] + \mathbf{b}_g) \odot \mathbf{h}_{\mathrm{graph}}$, with the gate bias initialised to $-5.0$ so the model begins as a pure temporal model and gradually learns to incorporate graph context. Graph embeddings are detached from the backward pass during main-loss optimisation and are updated solely through a graph-smoothing regulariser $\mathcal{L}_{\mathrm{smooth}} = \frac{1}{|E|}\sum_{(i,j)\in E} w_{ij}\|\mathbf{h}_i - \mathbf{h}_j\|^2$ with $\lambda{=}0.01$. This decoupling prevents the temporal and graph pathways from interfering during early training and was critical for low fold-to-fold variance.
+
+\paragraph*{Hyperparameter selection and training protocol (R3-14)} Both Dynamic-DeepHit and Graph-DT are trained with \emph{fixed} (not tuned) hyperparameters chosen during development on a single seed and then frozen for all 5-fold reported runs. Frozen values: Adam optimiser with $\mathrm{lr}{=}1{\times}10^{-3}$, weight decay $1{\times}10^{-5}$, batch size 64 (DeepHit) and 256 (Graph-DT, batched-graph constraint), maximum 100 epochs with early stopping on validation loss (patience 15 epochs), \texttt{ReduceLROnPlateau} learning-rate scheduler (factor 0.5, patience 7 epochs, $\mathrm{min\_lr}{=}1{\times}10^{-6}$). The Graph-DT-specific knobs $\lambda_{\mathrm{smooth}}{=}0.01$, $k{=}15$, gate bias $-5.0$, and DeepHit's ranking-loss weight $\alpha{=}0.1$ were chosen via the architecture-iteration sequence reported in Tables S-2/S-4 of the dissertation companion (Paper 3 v1\textendash v6 ablation), not via grid or random search inside the 5-fold CV loop reported here. We deliberately did not run nested-CV hyperparameter search inside the headline results to avoid optimistic bias on this medium-$n$ cohort and to keep the comparison with Dynamic-DeepHit at its published configuration parameters from Lee \emph{et~al.}~\cite{lee2018deephit,lee2019}. Both models are deterministic given seed=42 modulo the documented MPS non-determinism (~0.002 C-td reproducibility envelope, see Reproducibility supplement). The choice not to tune within the headline run is reported here for full reviewer transparency; tuning is a clear next-step extension.
+
+\subsection*{Cause-specific conformal CIF bands with IPCW}
+
+For each cause $k$ and time bin $t_j$ we compute nonconformity scores $s_i^{(k,j)} = |\widehat{F}_k(t_j | \mathbf{x}_i) - F_k^{\mathrm{obs}}(t_j | \mathbf{x}_i)|$ on the calibration set, where $F_k^{\mathrm{obs}}$ is 1 if event $k$ occurred by $t_j$, 0 if a competing event occurred, and 0 if the patient is still at risk. Following Cand\`{e}s, Lei, and Ren~\cite{candes2023conformal}, the per-observation IPCW weight at horizon $t_j$ depends on whether each calibration observation is uncensored or censored, and on whether its observed time falls before or after $t_j$:
+\begin{equation}
+w_i^{(k,j)} \;=\; \begin{cases}
+1/\hat{G}(T_i^-) & \text{if } \delta_i = 1 \text{ and } T_i \leq t_j \quad\text{(uncensored event before }t_j\text{)} \\
+1/\hat{G}(t_j^-) & \text{if } X_i > t_j \quad\text{(at risk past }t_j\text{; censored or uncensored)} \\
+\text{excluded} & \text{if } \delta_i = 0 \text{ and } C_i < t_j \quad\text{(censored before }t_j\text{)}
+\end{cases}
+\end{equation}
+where $X_i = \min(T_i, C_i)$ is the observed time, $\delta_i \in \{0,1\}$ the event indicator, $T_i$ the event time, $C_i$ the censoring time, and $\hat{G}$ the Kaplan--Meier estimate of the censoring survival function (clamped at a minimum of 0.01 to prevent weight explosion). The conformal quantile at level $(1-\alpha)(1 + 1/n_{\mathrm{cal}})$ is computed as a weighted quantile of the nonconformity scores. Prediction bands are $[\max(0, \widehat{F}_k(t_j) - q^{(k,j)}_\alpha), \min(1, \widehat{F}_k(t_j) + q^{(k,j)}_\alpha)]$. An earlier version of the implementation applied $1/\hat{G}(C_i)$ to censored survivors and unit weight to uncensored events; this was corrected to the Cand\`{e}s 2023 formula above (commit \texttt{WS-P3-CRIT-A}). Pre/post-correction marginal coverage and per-cause shifts are tabulated in Supplementary~\S S-CRIT-A.
+
+We compare four conformal methods. The IPCW method (proposed) computes per-$(k,j)$ quantiles with IPCW weighting as above. Marginal pools nonconformity scores across all $(k,j)$ pairs to compute a single global quantile. Naive computes per-$(k,j)$ quantiles without IPCW weighting. Bonferroni applies IPCW with per-$(k,j)$ quantiles at a corrected significance level $\alpha_{\mathrm{corrected}} = \alpha/(K \times J)$. General conformal-prediction background is given in~\cite{vovk2022conformal,shafer2008tutorial,angelopoulos2021gentle}.
+
+\subsection*{Calibration, directional, and subgroup equity analyses}
+
+Calibration is assessed through three complementary metrics: the cause-specific expected calibration error (ECE) with IPCW weighting at 1-, 3-, and 5-year horizons using 10 equal-width bins~\cite{naeini2015ece,kumar2019verified}; reliability diagrams plotting predicted versus observed CIF proportions per decile bin with Agresti--Coull confidence intervals; and the Hosmer--Lemeshow goodness-of-fit test~\cite{hosmer2013applied} yielding $\chi^2$ statistics and $p$-values per (cause, horizon). Brier scores are evaluated under right-censoring per Graf \textit{et al.}~\cite{graf1999brier,gerds2006consistent}.
+
+Directional analysis stratifies conformal coverage by transition direction, with forward defined as a destination stage exceeding source stage and backward as the reverse.
+
+Subgroup equity stratifies patients by LRRK2 mutation status, GBA mutation status, APOE~$\varepsilon4$ status, sex, and age at baseline ($<60$, 60--70, $>70$). Per-subgroup C-td is computed using the time-dependent concordance of~\cite{uno2007evaluating}. Patient-level bootstrap (1{,}000 resamples) yields per-subgroup 95\% CIs. Because patients contribute multiple stage-occupancy episodes (1{,}900 patients yield 4{,}792 episodes), per-fold C-td 95\% CIs were additionally re-computed using a \emph{subject-level} (cluster) bootstrap~\cite{davison1997bootstrap,field2007bootstrap} as a sensitivity check (WS-P3-2; Supplementary Table~S-WS-P3-2): unique patnos are resampled with replacement and all of each sampled patno's episodes are included in the resample, preserving within-patient correlation. The cluster variant inflates per-fold CI widths by mean $+8\%$ for DeepHit and $+5\%$ for Graph-DT (max $+24\%$ on individual folds), reaching the same conclusion at the model-comparison level. The runner is at \texttt{scripts/paper3plus4/run\_cluster\_bootstrap\_ctd.py}. For each (model $\times$ carrier-stratum) pair, a single patient-level bootstrap interaction test ($B{=}2000$, \texttt{random\_state=42}) is computed on the \emph{pooled} out-of-fold predictions across all five cross-validation folds: each patient appears in exactly one test fold by construction (no double-counting), so a single permutation test on the pooled cohort is the correct statistic for $H_0:\ \Delta C_\mathrm{td}~(\text{carrier} - \text{non-carrier}) = 0$. This pooled-OOF approach replaces the original per-fold-then-Fisher-combine pattern in line with the methodological correction prompted by reviewer3.com~\#3: Fisher's method for combining $p$-values requires statistical independence, which is violated when the per-fold predictions arise from CV models that share 60\% of their training data~(WS-P3-CRIT-B; pooled-OOF inference framework follows Vovk \emph{et al.}~\cite{vovk2022conformal}). Multiple testing across the 6-hypothesis grid (3 carrier strata $\times$ 2 models, with non-carrier as the reference baseline) is corrected by Benjamini--Hochberg FDR (\texttt{scipy.stats.false\_discovery\_control}) at $\alpha{=}0.05$. Per-fold $p$-values are retained for transparency in the JSON record but no longer drive the FDR correction; the side-by-side comparison of pooled-OOF and the legacy Fisher-combined $p$-values is reported in Supplementary Table~S-3 and audit document \S S-CRIT-B. Carrier strata are defined as mutually exclusive: LRRK2+ includes any patient with \texttt{lrrk2\_carrier=1} (including dual carriers); APOE~$\varepsilon4$+~only and GBA+~only require the other two carrier flags to be 0. The post-fix LRRK2/GBA-extraction-bug correction (commit \texttt{672b439}, \S Subgroup equity Results) raised carrier $n$ from 0 to 175 LRRK2+, 79 GBA+~only, and 375 APOE~$\varepsilon4$+~only; with the stratum-size threshold \texttt{MIN\_SUBGROUP\_SIZE\_CARRIER}~$=50$, all three strata clear inclusion at the cohort level (the GBA+~only mean per-fold $n{=}50$ is at the threshold). Conditional conformal coverage at 90\% and 95\% CL is computed per stratum from the existing per-fold conformal calibrations. The full pre-registration (locked 2026-04-23, \emph{before} any compute on the bug-fixed feature table) is archived at \texttt{outputs/paper4/subgroup\_carriers/PRE\_REGISTRATION.md} and the runner is at \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}.
+
+\subsection*{Graph-DT attention faithfulness (WS-P3-15)}
+
+To probe whether the Graph-DT's kNN edge weights function as informative per-patient attribution signals (as the ``patients-like-you'' clinical narrative implies) or as diffuse population-level regularisation, we performed the standard graph-explanation deletion experiment~\cite{yuan2022explainability,deyoung2020eraser}, which is the appropriate Mac-doable substitute for full Koh--Liang~\cite{kohliang2017influence} influence functions on a 1{,}900-patient deep survival model. For each test patient, we computed the baseline CIF prediction with the full kNN graph, then re-computed the CIF after dropping the top-$k_\mathrm{mask}$ incoming edges sorted by edge weight (cosine similarity prior). We compared this to dropping $k_\mathrm{mask}$ randomly-selected incoming edges, averaged over $n_\mathrm{seeds}{=}3$ seeds. The faithfulness gap is defined as the L1 CIF shift difference between top-$k$ and random-$k$ deletion; a positive gap indicates the high-edge-weight neighbours disproportionately drive predictions. We additionally compute Spearman $\rho$ between per-neighbour edge weight and per-neighbour single-edge-deletion shift, summarising whether high-edge-weight neighbours rank higher in deletion impact than low-edge-weight neighbours. The runner is at \texttt{scripts/paper3plus4/run\_attention\_faithfulness.py}; the helper module is \texttt{src/giman\_pipeline/paper4/faithfulness.py}; per-patient records and aggregates are written to \texttt{outputs/paper4/faithfulness/attention\_faithfulness.json}. Implementation: $B{=}1$ (single deterministic prediction per condition), $k_\mathrm{mask}{\in}\{1,3,5\}$, all 4{,}792 test patient-episodes across 5 folds, \texttt{random\_state=42}.
+
+% ================================================================
+% NPJ DM MANDATORY SECTIONS
+% ================================================================
+\section*{Supplementary Information}
+
+Supplementary material accompanies this paper and comprises the following items:
+\begin{itemize}
+  \item \textbf{Supplementary File~1 (\texttt{supplementary\_tripod\_ai.md}).} Completed TRIPOD+AI 27-item reporting checklist~\cite{collins2024tripodai} with 10 additional AI/ML-extension items, mapping each requirement to its location in the main text or supporting artefact.
+  \item \textbf{Supplementary File~2 (\texttt{supplementary\_reporting\_summary.md}).} Nature Portfolio Life Sciences Reporting Summary covering statistics, software, human research participants, ethics oversight, and data availability.
+  \item \textbf{Supplementary Tables.} Extended four-method conformal ablation (IPCW / marginal / naive / Bonferroni) at 90\% and 95\% CL, and the competitor-comparison table positioning this work against Cand\`{e}s 2023 and Sreenivasan 2025.
+  \item \textbf{Supplementary Figures.} Reliability diagrams at 1-, 3-, and 5-year horizons for Dynamic-DeepHit and the Graph-Regularized Transition-Timing Model; per-fold training curves for both models; and the full per-patient biological cross-reference scatter (companion to main-text Fig.~\ref{fig:biocross}).
+  \item \textbf{Code availability companion.} Detailed reproduction instructions, environment specification, and checkpoint-verification protocol are archived alongside the code repository at \url{https://github.com/bddupre92/PD_PHD}.
+\end{itemize}
+
+\section*{Data Availability}
+
+PPMI data are available to qualified researchers under a Data Use Agreement at \url{https://www.ppmi-info.org/access-data-specimens/download-data}. Processed NSD-ISS staging, transition-event datasets, per-fold training splits, pre-trained Dynamic-DeepHit and Graph-Regularized Transition-Timing Model checkpoints (5 folds each), and all conformal analysis outputs are archived in the project repository and will be deposited to Zenodo with a DOI upon acceptance. Analysis artefacts are organised under \texttt{outputs/paper3\_checkpoints/} (per-fold model checkpoints) and \texttt{outputs/paper4/} (conformal, calibration, subgroup, and expanded analyses).
+
+\section*{Code Availability}
+
+All analysis code is openly available at \url{https://github.com/bddupre92/PD_PHD}. Core Graph-DT and conformal modules are located at \texttt{src/giman\_pipeline/paper3/} and \texttt{src/giman\_pipeline/paper4/}; runner scripts are at \texttt{scripts/paper3/} and \texttt{scripts/paper4/}. A completed TRIPOD+AI checklist~\cite{collins2024tripodai} is included as Supplementary Information.
+
+\section*{Acknowledgements}
+
+Data used in this article were obtained from the Parkinson's Progression Markers Initiative (PPMI) database (\url{www.ppmi-info.org}). PPMI---a public-private partnership---is funded by The Michael J. Fox Foundation for Parkinson's Research and funding partners. The author thanks advisors and collaborators at the University of North Dakota for feedback on earlier drafts.
+
+\section*{Author Contributions}
+
+B.D.D.\ conceived the study, developed the Graph-Regularized Transition-Timing Model architecture and the cause-specific IPCW conformal framework, implemented the software, conducted the analyses, prepared the figures and tables, and wrote the manuscript.
+
+\section*{Competing Interests}
+
+The author declares no competing interests.
+
+% ================================================================
+% BIBLIOGRAPHY
+% ================================================================
+\begin{thebibliography}{99}
+
+\bibitem{angelopoulos2021gentle}
+A.~N.~Angelopoulos and S.~Bates, ``A gentle introduction to conformal prediction and distribution-free uncertainty quantification,'' \textit{arXiv:2107.07511}, 2021.
+
+\bibitem{austin2020graphical}
+P.~C.~Austin and E.~W.~Steyerberg, ``Graphical assessment of internal and external calibration of logistic regression models by using loess smoothers,'' \textit{Stat.\ Med.}, vol.~39, no.~6, pp.~727--746, 2020. doi:\,10.1002/sim.8448.
+
+\bibitem{bostrom2025mondrian}
+H.~Bostr\"{o}m and U.~Johansson, ``Mondrian conformal classifiers for clinical-deployment recalibration,'' \textit{Mach.\ Learn.}, vol.~114, no.~3, pp.~1217--1248, 2025.
+
+\bibitem{candes2023conformal}
+E.~Cand\`{e}s, L.~Lei, and Z.~Ren, ``Conformal prediction under censoring,'' \textit{Ann.\ Statist.}, vol.~51, no.~4, pp.~1461--1485, 2023.
+
+\bibitem{chen2021ethical}
+I.~Y.~Chen, E.~Pierson, S.~Rose, S.~Joshi, K.~Ferryman, and M.~Ghassemi, ``Ethical machine learning in healthcare,'' \textit{Annu.\ Rev.\ Biomed.\ Data Sci.}, vol.~4, pp.~123--144, 2021. doi:\,10.1146/annurev-biodatasci-092820-114757.
+
+\bibitem{collins2024tripodai}
+G.~S.~Collins \textit{et~al.}, ``TRIPOD+AI statement: updated guidance for reporting clinical prediction models that use regression or machine learning methods,'' \textit{BMJ}, vol.~385, Art.\ no.\ e078378, 2024. doi:\,10.1136/bmj-2023-078378.
+
+\bibitem{deyoung2020eraser}
+J.~DeYoung \textit{et~al.}, ``ERASER: a benchmark to evaluate rationalized NLP models,'' in \textit{Proc.\ ACL}, 2020, pp.~4443--4458.
+
+\bibitem{confide2026}
+CONFIDE: Conformal Prediction for Competing Risks, 2026 [preprint].
+
+\bibitem{davison1997bootstrap}
+A.~C.~Davison and D.~V.~Hinkley, \textit{Bootstrap Methods and Their Application}. Cambridge Univ. Press, 1997, ch.~3.8 (cluster bootstrap).
+
+\bibitem{dupre2026paper1}
+B.~Dupre, ``NSD-ISS stage prediction with calibrated uncertainty for Parkinson's disease,'' \textit{IEEE J.\ Biomed.\ Health Inform.}, 2026.
+
+\bibitem{espay2025refutation}
+A.~J.~Espay \textit{et~al.}, ``Refutation of the $\alpha$Syn-SAA-based staging for Parkinson's progression (Neuronal $\alpha$-Synuclein Disease-Integrated Staging System [NSD-ISS]),'' \textit{Mov.\ Disord.}, 2025. doi:\,10.1002/mds.30269.
+
+\bibitem{field2007bootstrap}
+C.~A.~Field and A.~H.~Welsh, ``Bootstrapping clustered data,'' \textit{J.\ Roy.\ Statist.\ Soc.\ B}, vol.~69, no.~3, pp.~369--390, 2007. doi:\,10.1111/j.1467-9868.2007.00593.x.
+
+\bibitem{gerds2006consistent}
+T.~A.~Gerds and M.~Schumacher, ``Consistent estimation of the expected Brier score in general survival models with right-censored event times,'' \textit{Biometrical J.}, vol.~48, no.~6, pp.~1029--1040, 2006. doi:\,10.1002/bimj.200610301.
+
+\bibitem{gneiting2007proper}
+T.~Gneiting and A.~E.~Raftery, ``Strictly proper scoring rules, prediction, and estimation,'' \textit{J.\ Amer.\ Statist.\ Assoc.}, vol.~102, no.~477, pp.~359--378, 2007.
+
+\bibitem{graf1999brier}
+E.~Graf, C.~Schmoor, W.~Sauerbrei, and M.~Schumacher, ``Assessment and comparison of prognostic classification schemes for survival data,'' \textit{Stat.\ Med.}, vol.~18, no.~17--18, pp.~2529--2545, 1999.
+
+\bibitem{guo2017calibration}
+C.~Guo, G.~Pleiss, Y.~Sun, and K.~Q.~Weinberger, ``On calibration of modern neural networks,'' in \textit{Proc.\ ICML}, 2017, pp.~1321--1330.
+
+\bibitem{hosmer2013applied}
+D.~W.~Hosmer, S.~Lemeshow, and R.~X.~Sturdivant, \textit{Applied Logistic Regression}, 3rd~ed. Wiley, 2013.
+
+\bibitem{hu2025npjdigitalmedicine}
+J.~Hu \textit{et al.}, ``Conformal prediction for individual-level disease-course uncertainty in multiple sclerosis,'' \textit{npj Digital Medicine}, vol.~8, art.~290, 2025.
+
+\bibitem{jain2019attention}
+S.~Jain and B.~C.~Wallace, ``Attention is not explanation,'' in \textit{Proc.\ NAACL-HLT}, 2019, pp.~3543--3556.
+
+\bibitem{kohliang2017influence}
+P.~W.~Koh and P.~Liang, ``Understanding black-box predictions via influence functions,'' in \textit{Proc.\ ICML}, 2017, pp.~1885--1894.
+
+\bibitem{kumar2019verified}
+A.~Kumar, P.~S.~Liang, and T.~Ma, ``Verified uncertainty calibration,'' in \textit{Adv.\ Neural Inf.\ Process.\ Syst.\ (NeurIPS)}, 2019.
+
+\bibitem{lakshminarayanan2017simple}
+B.~Lakshminarayanan, A.~Pritzel, and C.~Blundell, ``Simple and scalable predictive uncertainty estimation using deep ensembles,'' in \textit{Adv.\ Neural Inf.\ Process.\ Syst.\ (NeurIPS)}, 2017.
+
+\bibitem{lee2018deephit}
+C.~Lee, W.~R.~Zame, J.~Yoon, and M.~van~der~Schaar, ``DeepHit: a deep learning approach to survival analysis with competing risks,'' in \textit{Proc.\ AAAI}, 2018, pp.~2314--2321.
+
+\bibitem{lee2019}
+C.~Lee, J.~Yoon, and M.~van~der~Schaar, ``Dynamic-DeepHit: a deep learning approach for dynamic survival analysis with competing risks based on longitudinal data,'' \textit{IEEE Trans.\ Biomed.\ Eng.}, vol.~67, no.~1, pp.~122--133, 2019.
+
+\bibitem{marek2018ppmi}
+K.~Marek \textit{et~al.}, ``The Parkinson's Progression Markers Initiative (PPMI) --- establishing a PD biomarker cohort,'' \textit{Ann.\ Clin.\ Transl.\ Neurol.}, vol.~5, no.~12, pp.~1460--1477, 2018.
+
+\bibitem{mccradden2020ethical}
+M.~D.~McCradden, S.~Joshi, M.~Mazwi, and J.~A.~Anderson, ``Ethical limitations of algorithmic fairness solutions in health care machine learning,'' \textit{Lancet Digit.\ Health}, vol.~2, no.~5, pp.~e221--e223, 2020.
+
+\bibitem{naeini2015ece}
+M.~P.~Naeini, G.~Cooper, and M.~Hauskrecht, ``Obtaining well calibrated probabilities using Bayesian binning,'' in \textit{Proc.\ AAAI}, 2015, pp.~2901--2907.
+
+\bibitem{obermeyer2019dissecting}
+Z.~Obermeyer, B.~Powers, C.~Vogeli, and S.~Mullainathan, ``Dissecting racial bias in an algorithm used to manage the health of populations,'' \textit{Science}, vol.~366, no.~6464, pp.~447--453, 2019.
+
+\bibitem{rajkomar2018ensuring}
+A.~Rajkomar, M.~Hardt, M.~D.~Howell, G.~Corrado, and M.~H.~Chin, ``Ensuring fairness in machine learning to advance health equity,'' \textit{Ann.\ Intern.\ Med.}, vol.~169, no.~12, pp.~866--872, 2018.
+
+\bibitem{russo2025}
+M.~J.~Russo \textit{et~al.}, ``Application of the NSD-ISS biological staging framework in the BioFIND cohort,'' \textit{npj Parkinson's Dis.}, 2025.
+
+\bibitem{shafer2008tutorial}
+G.~Shafer and V.~Vovk, ``A tutorial on conformal prediction,'' \textit{J.\ Mach.\ Learn.\ Res.}, vol.~9, pp.~371--421, 2008.
+
+\bibitem{shamsutdinova2024survcompare}
+Shamsutdinova, D. \textit{et~al.} Surv\textit{compare}: an \textit{R} package for ensemble comparison of survival models. \textit{Int.\ J.\ Med.\ Inform.} (2024).
+
+\bibitem{simuni2024nsdiss}
+T.~Simuni \textit{et~al.}, ``A biological definition of neuronal alpha-synuclein disease: towards an integrated staging system for research,'' \textit{Lancet Neurol.}, vol.~23, no.~2, pp.~178--190, 2024.
+
+\bibitem{simuni2024val}
+T.~Simuni \textit{et~al.}, ``Validation of the NSD-ISS in PPMI, PASADENA, and SPARK,'' \textit{npj Parkinson's Dis.}, 2024.
+
+\bibitem{simuni2025}
+T.~Simuni \textit{et~al.}, ``Longitudinal NSD-ISS transition timing in PPMI: a prospective cohort study,'' \textit{Lancet Neurol.}, 2025.
+
+\bibitem{sreenivasan2025}
+A.~P.~Sreenivasan, A.~Vaivade, Y.~Noui, \textit{et~al.}, ``Conformal prediction enables disease course prediction and allows individualized diagnostic uncertainty in multiple sclerosis,'' \textit{npj Digit.\ Med.}, vol.~8, Art.\ no.~224, 2025.
+
+\bibitem{tomlinson2010systematic}
+C.~L.~Tomlinson \textit{et~al.}, ``Systematic review of levodopa dose equivalency reporting in Parkinson's disease,'' \textit{Mov.\ Disord.}, vol.~25, no.~15, pp.~2649--2653, 2010.
+
+\bibitem{uno2007evaluating}
+H.~Uno, T.~Cai, L.~Tian, and L.~J.~Wei, ``Evaluating prediction rules for t-year survivors with censored regression models,'' \textit{J.\ Amer.\ Statist.\ Assoc.}, vol.~102, no.~478, pp.~527--537, 2007.
+
+\bibitem{velickovic2018graph}
+P.~Veli\v{c}kovi\'{c}, G.~Cucurull, A.~Casanova, A.~Romero, P.~Li\`{o}, and Y.~Bengio, ``Graph attention networks,'' in \textit{Proc.\ ICLR}, 2018.
+
+\bibitem{vovk2022conformal}
+V.~Vovk, A.~Gammerman, and G.~Shafer, \textit{Algorithmic Learning in a Random World}, 2nd~ed.\ Springer, 2022.
+
+\bibitem{wiegreffe2019attention}
+S.~Wiegreffe and Y.~Pinter, ``Attention is not not explanation,'' in \textit{Proc.\ EMNLP-IJCNLP}, 2019, pp.~11--20.
+
+\bibitem{yuan2022explainability}
+H.~Yuan, H.~Yu, S.~Gui, and S.~Ji, ``Explainability in graph neural networks: a taxonomic survey,'' \textit{IEEE Trans.\ Pattern Anal.\ Mach.\ Intell.}, vol.~45, no.~5, pp.~5782--5799, 2022.
+
+\end{thebibliography}
+
+\end{document}

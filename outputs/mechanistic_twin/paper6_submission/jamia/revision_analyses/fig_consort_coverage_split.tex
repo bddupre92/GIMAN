@@ -1,0 +1,43 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+\begin{document}
+\begin{tikzpicture}[
+    node distance=0.9cm and 1.2cm,
+    box/.style={rectangle, draw=black, fill=white, rounded corners=2pt,
+                minimum width=7.0cm, minimum height=0.9cm, align=center,
+                font=\small},
+    boxwide/.style={rectangle, draw=black, fill=white, rounded corners=2pt,
+                minimum width=9.5cm, minimum height=0.9cm, align=center,
+                font=\small},
+    boxsmall/.style={rectangle, draw=black, fill=white, rounded corners=2pt,
+                minimum width=5.3cm, minimum height=1.0cm, align=center,
+                font=\small},
+    excl/.style={rectangle, draw=black, dashed, fill=white, rounded corners=2pt,
+                minimum width=5.0cm, minimum height=0.8cm, align=center,
+                font=\footnotesize},
+    arr/.style={-{Latex[length=2.2mm]}, thick}
+]
+    \node[boxwide] (pop) {PPMI total registered cohort\\\textbf{N=8,042}};
+    \node[boxwide, below=of pop] (staged) {NSD-ISS staged\\\textbf{N=2,201}};
+    \node[boxwide, below=of staged] (longit) {Longitudinal PD / Prodromal cohort (Paper 6 eligible)\\\textbf{N=1,900}};
+
+    \node[boxsmall, below left=1.1cm and -1.4cm of longit] (cov)
+        {Phase-2 posterior coverage\\(Wave A + Wave B, $\ge$2 DaT-SPECT)\\\textbf{N=1,065}\\(Wave A=304, Wave B=761)};
+    \node[boxsmall, below right=1.1cm and -1.4cm of longit] (unc)
+        {No Phase-2 posterior\\(insufficient serial DaT-SPECT)\\\textbf{N=835}};
+
+    \node[excl, right=0.6cm of staged] (exclstage) {Excluded: not PD / prodromal\\or no follow-up visits};
+
+    \draw[arr] (pop) -- (staged);
+    \draw[arr] (staged) -- (longit);
+    \draw[arr] (longit.south) -- ++(0,-0.3) -| (cov.north);
+    \draw[arr] (longit.south) -- ++(0,-0.3) -| (unc.north);
+    \draw[arr] (staged.east) -- (exclstage.west);
+
+    \node[below=0.3cm of cov, font=\scriptsize, align=center] (covdesc)
+        {Mechanistic-layer available\\Calibrated $N(t)/N_0$, $T_{tox}$, $\alpha_{tox}$};
+    \node[below=0.3cm of unc, font=\scriptsize, align=center] (uncdesc)
+        {Mechanistic-layer unavailable\\(Stats and Graph-DT pathways active)};
+\end{tikzpicture}
+\end{document}

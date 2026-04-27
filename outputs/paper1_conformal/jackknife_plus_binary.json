@@ -1,0 +1,172 @@
+{
+  "catboost": [
+    {
+      "model_name": "catboost",
+      "target_name": "binary",
+      "conformal_method": "jackknife_plus_cv20",
+      "confidence_level": 0.8,
+      "n_classes": 2,
+      "n_test": 441,
+      "marginal_coverage": 0.81859410430839,
+      "mean_set_size": 0.8321995464852607,
+      "singleton_rate": 0.8321995464852607,
+      "empty_set_rate": 0.16780045351473924,
+      "full_set_rate": 0.0,
+      "per_class_coverage": {
+        "0": 0.8421052631578947,
+        "1": 0.7756410256410257
+      },
+      "per_class_set_size": {
+        "0": 0.8421052631578947,
+        "1": 0.8141025641025641
+      },
+      "set_size_distribution": {
+        "0": 74,
+        "1": 367
+      },
+      "fit_time_seconds": 6.5585548877716064,
+      "predict_time_seconds": 0.009601831436157227,
+      "cv_folds": 20
+    },
+    {
+      "model_name": "catboost",
+      "target_name": "binary",
+      "conformal_method": "jackknife_plus_cv20",
+      "confidence_level": 0.9,
+      "n_classes": 2,
+      "n_test": 441,
+      "marginal_coverage": 0.9138321995464853,
+      "mean_set_size": 0.9319727891156463,
+      "singleton_rate": 0.9319727891156463,
+      "empty_set_rate": 0.06802721088435375,
+      "full_set_rate": 0.0,
+      "per_class_coverage": {
+        "0": 0.9333333333333333,
+        "1": 0.8782051282051282
+      },
+      "per_class_set_size": {
+        "0": 0.9368421052631579,
+        "1": 0.9230769230769231
+      },
+      "set_size_distribution": {
+        "0": 30,
+        "1": 411
+      },
+      "fit_time_seconds": 6.2531208992004395,
+      "predict_time_seconds": 0.008278131484985352,
+      "cv_folds": 20
+    },
+    {
+      "model_name": "catboost",
+      "target_name": "binary",
+      "conformal_method": "jackknife_plus_cv20",
+      "confidence_level": 0.95,
+      "n_classes": 2,
+      "n_test": 441,
+      "marginal_coverage": 0.9614512471655329,
+      "mean_set_size": 0.9954648526077098,
+      "singleton_rate": 0.9954648526077098,
+      "empty_set_rate": 0.0045351473922902496,
+      "full_set_rate": 0.0,
+      "per_class_coverage": {
+        "0": 0.9754385964912281,
+        "1": 0.9358974358974359
+      },
+      "per_class_set_size": {
+        "0": 0.9964912280701754,
+        "1": 0.9935897435897436
+      },
+      "set_size_distribution": {
+        "0": 2,
+        "1": 439
+      },
+      "fit_time_seconds": 6.247236013412476,
+      "predict_time_seconds": 0.008945941925048828,
+      "cv_folds": 20
+    },
+    {
+      "model_name": "catboost",
+      "target_name": "binary",
+      "conformal_method": "jackknife_plus_cv200",
+      "confidence_level": 0.8,
+      "n_classes": 2,
+      "n_test": 441,
+      "marginal_coverage": 0.8163265306122449,
+      "mean_set_size": 0.8299319727891157,
+      "singleton_rate": 0.8299319727891157,
+      "empty_set_rate": 0.17006802721088435,
+      "full_set_rate": 0.0,
+      "per_class_coverage": {
+        "0": 0.8385964912280702,
+        "1": 0.7756410256410257
+      },
+      "per_class_set_size": {
+        "0": 0.8385964912280702,
+        "1": 0.8141025641025641
+      },
+      "set_size_distribution": {
+        "0": 75,
+        "1": 366
+      },
+      "fit_time_seconds": 61.475682973861694,
+      "predict_time_seconds": 0.08177304267883301,
+      "cv_folds": 200
+    },
+    {
+      "model_name": "catboost",
+      "target_name": "binary",
+      "conformal_method": "jackknife_plus_cv200",
+      "confidence_level": 0.9,
+      "n_classes": 2,
+      "n_test": 441,
+      "marginal_coverage": 0.9160997732426304,
+      "mean_set_size": 0.9342403628117913,
+      "singleton_rate": 0.9342403628117913,
+      "empty_set_rate": 0.06575963718820861,
+      "full_set_rate": 0.0,
+      "per_class_coverage": {
+        "0": 0.9333333333333333,
+        "1": 0.8846153846153846
+      },
+      "per_class_set_size": {
+        "0": 0.9368421052631579,
+        "1": 0.9294871794871795
+      },
+      "set_size_distribution": {
+        "0": 29,
+        "1": 412
+      },
+      "fit_time_seconds": 60.66828513145447,
+      "predict_time_seconds": 0.08805298805236816,
+      "cv_folds": 200
+    },
+    {
+      "model_name": "catboost",
+      "target_name": "binary",
+      "conformal_method": "jackknife_plus_cv200",
+      "confidence_level": 0.95,
+      "n_classes": 2,
+      "n_test": 441,
+      "marginal_coverage": 0.9614512471655329,
+      "mean_set_size": 0.9954648526077098,
+      "singleton_rate": 0.9954648526077098,
+      "empty_set_rate": 0.0045351473922902496,
+      "full_set_rate": 0.0,
+      "per_class_coverage": {
+        "0": 0.9754385964912281,
+        "1": 0.9358974358974359
+      },
+      "per_class_set_size": {
+        "0": 0.9929824561403509,
+        "1": 1.0
+      },
+      "set_size_distribution": {
+        "0": 2,
+        "1": 439
+      },
+      "fit_time_seconds": 61.00720691680908,
+      "predict_time_seconds": 0.08498620986938477,
+      "cv_folds": 200
+    }
+  ]
+}

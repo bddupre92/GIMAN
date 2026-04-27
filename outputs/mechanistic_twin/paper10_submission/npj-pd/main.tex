@@ -1,0 +1,60 @@
+% Paper 10 — npj Parkinson's Disease submission
+% A Bidirectional-Ready Mechanistic Patient-Specific Model for PD with
+% External Validation, Calibration-Aware Observation Likelihood, and NASEM Audit
+% Dupre, 2026
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!50!black,
+    citecolor=blue!50!black,
+    urlcolor=blue!50!black,
+}
+\usepackage{authblk}
+\usepackage{titlesec}
+
+% Nature-style section formatting (non-numbered, bold)
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{}{0em}{}
+
+% Colors (reused from dissertation)
+\definecolor{nsdblue}{HTML}{1F77B4}
+\definecolor{nsdorange}{HTML}{FF7F0E}
+
+% Figure/table reference aliases (npj PD uses Fig. 1 style)
+\renewcommand{\figurename}{Fig.}
+
+% Suppress chapter-style headings; Nature family uses article-like layout
+\setcounter{secnumdepth}{0}
+
+\title{\bfseries A Bidirectional-Ready Mechanistic Twin for Parkinson's Disease: External Validation, Calibration-Aware Observation Likelihood, and NASEM 2024 Self-Audit}
+
+\author[1]{Blair D. Dupre, Ph.D.}
+\affil[1]{Department of Biomedical Engineering, University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\input{chapter_content.tex}
+
+\input{bibliography_extracted.tex}
+
+\end{document}

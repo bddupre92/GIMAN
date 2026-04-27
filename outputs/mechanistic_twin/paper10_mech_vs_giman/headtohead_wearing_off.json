@@ -1,0 +1,81 @@
+{
+  "endpoint": "time-to-NP4OFF>=1 (wearing-off onset)",
+  "shared_cohort_size": 672,
+  "analysis_set_size": 626,
+  "events": 480,
+  "event_rate_pct": 76.6773162939297,
+  "graphdt_prediction_source": {
+    "test": 419,
+    "val": 207
+  },
+  "mechanistic_score": "pct_loss_per_yr_median (higher = earlier event expected)",
+  "graphdt_score": "sum of CIF across 7 causes at 60-month horizon",
+  "cindex_comparison": {
+    "ci_a": 0.4715496206616088,
+    "ci_b": 0.518360244803264,
+    "ci_a_95": [
+      0.44256357269874913,
+      0.5020218187833787
+    ],
+    "ci_b_95": [
+      0.4849908149245507,
+      0.5495769192986422
+    ],
+    "delta_ci": -0.04681062414165521,
+    "delta_ci_95": [
+      -0.08502055469579366,
+      -0.0012972229223462862
+    ],
+    "p_value": 0.046,
+    "n_boot": 1000,
+    "n_samples": 626
+  },
+  "verdict": "Graph-DT significantly better (p=0.046).",
+  "interpretation": "Neither model was trained on wearing-off specifically \u2014 this is a fair common-endpoint comparison of overall progression risk signals. C-indices near 0.55-0.60 are expected for proxy scores vs an out-of-distribution endpoint.",
+  "_provenance": {
+    "datetime_utc": "2026-04-14T02:43:10.774505+00:00",
+    "python": {
+      "version": "3.13.3",
+      "executable": "/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python",
+      "platform": "macOS-26.4-arm64-arm-64bit-Mach-O"
+    },
+    "packages": {
+      "numpy": "2.4.4",
+      "pandas": "2.3.3",
+      "pyarrow": "23.0.1"
+    },
+    "git": {
+      "sha": "64ff88d2768532d10c5e28407877b11f48819377",
+      "branch": "main",
+      "dirty": true
+    },
+    "script": {
+      "path": "scripts/mechanistic_twin/phase5_headtohead_wearing_off.py",
+      "sha256": "263187f83c6cfebfcff612b9b615ed37f0e4c36518b3930082d637ffc3d2fa15",
+      "size_bytes": 15666
+    },
+    "cli_args": [
+      "scripts/mechanistic_twin/phase5_headtohead_wearing_off.py"
+    ],
+    "input_files": [
+      {
+        "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet",
+        "sha256": "330f11574365cd1509c188cce97bdf5932f45f9b5da822c043fd0b8306269d62",
+        "size_bytes": 398983,
+        "row_count": 26364
+      },
+      {
+        "path": "data/07_paper3_features/longitudinal_features.csv",
+        "sha256": "72288f8666cf66c29b43326386857a80ef095c4b714bc9c6e14effb6757c3757",
+        "size_bytes": 3063635,
+        "row_count": 16699
+      },
+      {
+        "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/shared_cohort.json",
+        "sha256": "c3e43367f5c848c4f5d437c0075e3281431961931095e0e9a419f07beb174e9f",
+        "size_bytes": 17025,
+        "row_count": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+name = "MechanisticTwin"
+uuid = "8d5a7c1e-3f9b-4e2a-9c8d-6b1e2f4a5d6c"
+version = "0.1.0"
+authors = ["Blair Dupre"]
+
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MCMCChains = "c7f686f2-ff18-58e9-bc7b-31028e88f75d"
+Parquet2 = "98572fba-bba0-415d-956f-fa77e587d26d"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SIAN = "cf7bdac0-b945-4905-b5ad-bc3f1a757483"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StructuralIdentifiability = "220ca800-aa68-49bb-acd8-6037fa93a544"
+Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[compat]
+SIAN = "1.8.0"
+StructuralIdentifiability = "0.5.19"
+julia = "1.10"

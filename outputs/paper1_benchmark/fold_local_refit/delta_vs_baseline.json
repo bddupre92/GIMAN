@@ -1,0 +1,35 @@
+{
+  "verdict": "PASS_POST_GENETICS_FIX",
+  "max_abs_delta_genetics_only": 0.005929153059796688,
+  "deltas": {
+    "target_binary": {
+      "leaky": 0.9785210943381919,
+      "pre_genetics_fix": 0.9783685311869774,
+      "post_genetics_fix": 0.9778693156685064,
+      "delta_genetics_only": -0.0004992155184709857,
+      "delta_vs_leaky": -0.0006517786696854655
+    },
+    "target_3class": {
+      "leaky": 0.9422503258890312,
+      "pre_genetics_fix": 0.9418837641478847,
+      "post_genetics_fix": 0.9432136526740376,
+      "delta_genetics_only": 0.0013298885261529003,
+      "delta_vs_leaky": 0.0009633267850063243
+    },
+    "target_full_ordinal": {
+      "leaky": 0.9464273930337861,
+      "pre_genetics_fix": 0.9461750663814221,
+      "post_genetics_fix": 0.9485792832712822,
+      "delta_genetics_only": 0.0024042168898600336,
+      "delta_vs_leaky": 0.002151890237496068
+    },
+    "target_nsd_positive": {
+      "leaky": 0.9039418783765931,
+      "pre_genetics_fix": 0.9068193019520667,
+      "post_genetics_fix": 0.9127484550118634,
+      "delta_genetics_only": 0.005929153059796688,
+      "delta_vs_leaky": 0.008806576635270291
+    }
+  },
+  "notes": "Genetics fix = fix to LRRK2/GBA carrier-flag extraction (commit 672b439). Post-fix features: 175 LRRK2+, 111 GBA+, 441 APOE+, 405 NaN. Pre-fix features: 0 LRRK2+, 0 GBA+, 441 APOE+, 0 NaN (all non-NaN set to 0)."
+}

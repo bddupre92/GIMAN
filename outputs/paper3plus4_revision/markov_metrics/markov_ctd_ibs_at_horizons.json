@@ -1,0 +1,88 @@
+{
+  "model": "Multi-state Markov (homogeneous CTMC)",
+  "horizons_yr": [
+    1,
+    2,
+    5,
+    10
+  ],
+  "per_fold": [
+    {
+      "fold_idx": 0,
+      "n_test": 380,
+      "n_with_baseline": 380,
+      "n_with_transitions": 185,
+      "ctd_overall": 0.6344193247401733,
+      "ctd_1yr": 0.6104414616525343,
+      "ctd_2yr": 0.6013138862102217,
+      "ctd_5yr": 0.6497232781753131,
+      "ctd_10yr": 0.6761986729226241,
+      "ibs": 0.29345352593497226
+    },
+    {
+      "fold_idx": 1,
+      "n_test": 380,
+      "n_with_baseline": 380,
+      "n_with_transitions": 184,
+      "ctd_overall": 0.6419763359744068,
+      "ctd_1yr": 0.6196329639889196,
+      "ctd_2yr": 0.6009977324263038,
+      "ctd_5yr": 0.659559584767341,
+      "ctd_10yr": 0.6877150627150627,
+      "ibs": 0.2916541003746363
+    },
+    {
+      "fold_idx": 2,
+      "n_test": 380,
+      "n_with_baseline": 380,
+      "n_with_transitions": 184,
+      "ctd_overall": 0.6657400592240825,
+      "ctd_1yr": 0.6436928066720723,
+      "ctd_2yr": 0.6440850988282637,
+      "ctd_5yr": 0.6752711314847942,
+      "ctd_10yr": 0.6999111999111999,
+      "ibs": 0.29408799191721147
+    },
+    {
+      "fold_idx": 3,
+      "n_test": 380,
+      "n_with_baseline": 380,
+      "n_with_transitions": 185,
+      "ctd_overall": 0.6694099349950491,
+      "ctd_1yr": 0.6718190212373037,
+      "ctd_2yr": 0.6548530465949821,
+      "ctd_5yr": 0.6674883021390374,
+      "ctd_10yr": 0.6834793700088732,
+      "ibs": 0.3039296599369521
+    },
+    {
+      "fold_idx": 4,
+      "n_test": 380,
+      "n_with_baseline": 380,
+      "n_with_transitions": 184,
+      "ctd_overall": 0.6578377549427239,
+      "ctd_1yr": 0.639799536836011,
+      "ctd_2yr": 0.6325595238095238,
+      "ctd_5yr": 0.6769641813475828,
+      "ctd_10yr": 0.6820277777777778,
+      "ibs": 0.2981589852609277
+    }
+  ],
+  "aggregate": {
+    "ctd_overall_mean": 0.653876681975287,
+    "ctd_overall_std": 0.015148587010774667,
+    "ibs_mean": 0.29625685268493995,
+    "ibs_std": 0.004905048577487429,
+    "ctd_1yr_mean": 0.6370771580773681,
+    "ctd_1yr_std": 0.023832411961912173,
+    "ctd_2yr_mean": 0.626761857573859,
+    "ctd_2yr_std": 0.02466886657865705,
+    "ctd_5yr_mean": 0.6658012955828138,
+    "ctd_5yr_std": 0.011342347633849325,
+    "ctd_10yr_mean": 0.6858664166671076,
+    "ctd_10yr_std": 0.008868086574402866
+  },
+  "method_note": "C-td computed via destination-cause-aware concordance with up to 50,000 case-control pair samples (random_state=42). IBS computed via trapezoidal integration of per-horizon Brier scores over the four horizons. The Markov CIF is patient-independent given baseline stage (homogeneous CTMC), so discrimination is bounded by the variation in baseline-stage assignment. Results are reported as the parametric sojourn-time reference per WS-P3-S3 in the npj-DM Table II Markov row.",
+  "source_q_matrix": "outputs/paper3_markov/markov_results.json",
+  "source_fold_assignments": "outputs/paper3_checkpoints/deephit"
+}

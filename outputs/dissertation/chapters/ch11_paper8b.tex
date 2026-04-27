@@ -1,0 +1,229 @@
+% =============================================================================
+% Chapter 11 --- Paper 8b
+% Full manuscript content imported from outputs/mechanistic_twin/paper8b_regional_rates/main.tex
+% Preamble, title page, and standalone bibliography stripped; figure filenames
+% remapped with prefix "p8b_"; natbib \citep/\citet converted to \cite.
+% =============================================================================
+
+\chapter{Paper 8b: Regional Dopamine Transporter Decline Rates from Serial DaT-SPECT}
+\label{ch:paper8b}
+
+% ============================================================================
+% ABSTRACT
+% ============================================================================
+
+\begin{abstract}
+Network diffusion models (NDMs) assume that dopaminergic neurodegeneration in Parkinson's disease (PD) reflects trans-synaptic propagation of pathological $\alpha$-synuclein through the structural connectome. We tested this assumption by comparing three nested models of regional specific binding ratio (SBR) decline from serial dopamine transporter (DaT) SPECT imaging in 304 Parkinson's Progression Markers Initiative (PPMI) patients with four or more longitudinal scans across four striatal subregions (caudate and putamen, bilateral). Model M1, with independent per-region exponential decay rates, decisively outperformed both a shared-base-plus-putamen-offset model (M2; $\Delta$AIC = +298) and a connectome-coupled spatial propagation model (M6; $\Delta$AIC = +3,856). Population-level decay rates from M1 were biologically informative: putamen SBR declined at $0.142 \pm 0.100$ yr$^{-1}$ versus caudate at $0.119 \pm 0.081$ yr$^{-1}$, confirming the 19\% faster putaminal degeneration consistent with the established rostro-caudal gradient. Bilateral asymmetry was minimal (caudate L--R: 0.1\%; putamen L--R: 4.8\%), consistent with clinical reports. These findings demonstrate that four-region DaT-SPECT at current noise levels ($\sigma \approx 0.15$ SBR) resolves per-region decline rates but cannot distinguish spatial propagation from independent regional neurodegeneration. We provide simulation-based calibration evidence confirming that the spatial propagation signal is 4.7\% of the observation noise per measurement, explaining the empirical result. Per-region decay rates, rather than propagation parameters, represent the identifiable and clinically informative output of longitudinal DaT-SPECT modeling in PD.
+\end{abstract}
+
+% ============================================================================
+% INTRODUCTION
+% ============================================================================
+\section{Introduction}
+
+Longitudinal dopamine transporter (DaT) single-photon emission computed tomography (SPECT) provides a quantitative measure of nigrostriatal dopaminergic integrity in Parkinson's disease (PD). Regional specific binding ratios (SBR) in the caudate and putamen decline at rates that reflect the underlying pace of neurodegeneration \cite{booij1997, siderowf2020, ren2024}. The spatial pattern of this decline---posterior putamen first, followed by anterior putamen and caudate---is among the most robustly established findings in PD neuroimaging \cite{kish1988, brooks1990, kim2022}.
+
+Network diffusion models (NDMs) posit that this spatial pattern reflects trans-synaptic propagation of pathological $\alpha$-synuclein through the brain's structural connectome \cite{raj2012, pandya2019, vogel2023}. These models predict that regional decline rates are mechanistically coupled: faster decline in one region drives pathology spread to connected regions, creating correlated trajectories governed by a shared propagation rate parameter. If correct, this coupling could be leveraged for mechanistic digital twins that predict spatially targeted disease progression \cite{dupre2026phase2}.
+
+However, the alternative hypothesis---that each region declines independently at a rate determined by local vulnerability factors (dopaminergic reserve, mitochondrial density, iron content)---has not been formally tested against the propagation hypothesis using rigorous model comparison on longitudinal DaT-SPECT data. Prior NDM studies have compared model predictions to cross-sectional atrophy patterns \cite{raj2012, pandya2019, abdelgawad2022} or used Bayesian inference without parameter recovery validation \cite{schafer2021}. No study has compared nested propagation versus independent-decay models on per-patient longitudinal trajectories.
+
+We address this gap by fitting three nested models to bilateral caudate and putamen SBR trajectories in 304 PPMI patients with four or more serial DaT-SPECT scans. Our models range from fully independent per-region decays (four parameters) to connectome-coupled spatial propagation (one parameter), with an intermediate putamen-offset model (two parameters). We use Akaike Information Criterion (AIC) for model comparison and report population-level parameter estimates with clinical interpretation.
+
+% ============================================================================
+% METHODS
+% ============================================================================
+\section{Methods}
+
+\subsection{Study population}
+
+We analyzed longitudinal DaT-SPECT data from the Parkinson's Progression Markers Initiative (PPMI) \cite{ppmi2011}. Regional SBR values for four striatal subregions (left caudate, right caudate, left putamen, right putamen) were extracted from the \texttt{DaTScan\_SBR\_Analysis} dataset (vintage: October 2025). From 2,137 patients with at least one analyzed scan (4,168 total scans), we selected 644 with three or more serial scans. For model fitting, we further restricted to the 304 Wave A patients with four or more scans (mean follow-up: 4.1 years, mean scans: 4.8), ensuring adequate temporal sampling for the propagation model.
+
+\subsection{Cohort characteristics}
+
+Demographic and baseline characteristics of the 304-patient cohort are summarized in Table~\ref{tab:demographics}.
+
+\begin{table}[H]
+\centering
+\caption{Cohort characteristics (304 PPMI Wave A patients with $\geq$4 serial DaT-SPECT scans).}
+\label{tab:demographics}
+\begin{tabular}{@{}lc@{}}
+\toprule
+Characteristic & Value \\
+\midrule
+N & 304 \\
+Age at baseline, yr (mean $\pm$ SD) & 61.8 $\pm$ 9.8 \\
+\quad Range & 34--85 \\
+Sex, male (\%) & 200 (65.8\%) \\
+Serial DaT-SPECT scans (mean $\pm$ SD) & 4.1 $\pm$ 0.4 \\
+\quad Range & 4--6 \\
+Follow-up duration, yr (mean $\pm$ SD) & 4.0 $\pm$ 0.6 \\
+Total observations (4 regions $\times$ scans) & 4,988 \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Baseline SBR (mean $\pm$ SD)}} \\
+\quad Caudate L & 1.97 $\pm$ 0.57 \\
+\quad Caudate R & 1.97 $\pm$ 0.57 \\
+\quad Putamen L & 0.79 $\pm$ 0.32 \\
+\quad Putamen R & 0.82 $\pm$ 0.32 \\
+\quad Caudate-to-putamen ratio & 2.45 $\pm$ 0.71 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The baseline caudate-putamen ratio of 2.45 confirms substantial putaminal involvement at diagnosis, consistent with the established rostro-caudal gradient \cite{kish1988}. The cohort is predominantly male (65.8\%), consistent with the 2:1 male predominance of PD.
+
+\subsection{Model formulations}
+
+All three models describe the evolution of regional SBR as exponential decay from patient-specific baseline values:
+\begin{equation}
+\text{SBR}_i(t) = \text{SBR}_{i,0} \cdot \exp(-T_i \cdot t)
+\end{equation}
+where $\text{SBR}_{i,0}$ is the observed baseline SBR for region $i$ and $T_i$ is the effective regional decline rate. The models differ in how $T_i$ is parameterized.
+
+\paragraph{Model M1: Independent regional decays (4 parameters).}
+Each region has its own fitted decay rate: $T_i \in \{T_1, T_2, T_3, T_4\}$ for caudate L, caudate R, putamen L, putamen R. This is the unconstrained null model.
+
+\paragraph{Model M2: Shared base with putamen offset (2 parameters).}
+A shared base rate $T_{\text{base}}$ applies to all regions, with an additive offset $\delta_{\text{put}} \geq 0$ for putamen:
+\begin{equation}
+T_i = T_{\text{base}} + \delta_{\text{put}} \cdot \mathbb{1}_{i \in \{\text{put}_L, \text{put}_R\}}
+\end{equation}
+This captures the caudate-putamen gradient with a single additional parameter.
+
+\paragraph{Model M6r: Spatial propagation (1 parameter).}
+Regional decline rates are determined by a connectome-coupled ODE where pathology $L_i(t)$ spreads between regions at rate $k_{\text{spread}}$ and modulates neuron death:
+\begin{align}
+\frac{dL_i}{dt} &= -k_{\text{clear}} \cdot L_i + k_{\text{spread}} \sum_j A_{ij} L_j + s_i \\
+\frac{dN_i}{dt} &= -(\alpha_{\text{base}} + \beta \cdot L_i) \cdot N_i
+\end{align}
+where $k_{\text{clear}} = 0.5$ yr$^{-1}$ \cite{xu2024}, $A_{ij}$ is the 4$\times$4 structural connectivity matrix derived from the Budapest Reference Connectome \cite{schafer2021}, $s_{\text{put}} = 1.0$ is the putamen seeding rate (fixed from preformed fibril injection literature \cite{chu2019, patterson2019}), $\alpha_{\text{base}} = 0.03$ yr$^{-1}$ \cite{fearnley1991}, and $\beta = 0.01$ is the pathology-death coupling. The sole fitted parameter is $k_{\text{spread}}$. SBR is mapped from neuron counts via $\text{SBR}_i(t) = \text{SBR}_{i,0} \cdot (N_i(t)/N_{i,0})^{0.7}$ \cite{lee2019}.
+
+\subsection{Parameter estimation}
+
+For each patient and model, parameters were estimated via maximum likelihood with Gaussian observation noise ($\sigma = 0.15$ SBR, consistent with DaT-SPECT scan-rescan variability \cite{tossicibolt2017}). Multi-start optimization (5 random initializations, L-BFGS-B) was used to avoid local minima. For M6r, the coupled ODE system was solved numerically at each evaluation using a Runge-Kutta 4/5 integrator with adaptive step size.
+
+\subsection{Model comparison}
+
+Models were compared using summed per-patient AIC:
+\begin{equation}
+\text{AIC}_{\text{total}} = \sum_{j=1}^{N} \left( 2 k_j - 2 \ln \hat{\mathcal{L}}_j \right)
+\end{equation}
+where $k_j$ is the number of fitted parameters per patient (M1: 4, M2: 2, M6r: 1) and $\hat{\mathcal{L}}_j$ is the maximum likelihood for patient $j$. The total parameter counts are thus M1: $4 \times 304 = 1{,}216$, M2: $2 \times 304 = 608$, M6r: $1 \times 304 = 304$. Because M1 has 4$\times$ more parameters per patient than M6r, the AIC penalty for M1 is correspondingly larger---yet M1 still wins decisively, indicating that the improved fit far outweighs the complexity penalty. We also report total negative log-likelihood (NLL) to separate fit quality from model complexity.
+
+% ============================================================================
+% RESULTS
+% ============================================================================
+\section{Results}
+
+\subsection{Model comparison: independent decay wins decisively}
+
+All 304 patients converged for all three models (100\% convergence rate). Model M1 (independent regional decays) achieved the lowest AIC, substantially outperforming both M2 and M6r (Table~\ref{tab:comparison}, Fig.~\ref{fig:comparison}).
+
+\begin{table}[H]
+\centering
+\caption{Model comparison on 304 PPMI Wave A patients ($\geq$4 serial DaT-SPECT scans, 4,988 total observations). AIC is computed per patient and summed, with per-patient parameter counts as the complexity penalty.}
+\label{tab:comparison}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Model & Params/pt & Total params & Total NLL & $\sum$AIC & $\Delta$AIC vs M1 \\
+\midrule
+M1 (independent) & 4 & 1,216 & 2,510 & 7,452 & 0 (\textbf{best}) \\
+M2 (base + offset) & 2 & 608 & 3,267 & 7,750 & +298 \\
+M6r ($k_{\text{spread}}$) & 1 & 304 & 5,350 & 11,308 & +3,856 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $\Delta$AIC of 3,856 between M1 and M6r---computed with the full per-patient parameter penalty (4 parameters $\times$ 304 patients for M1 versus 1 $\times$ 304 for M6r)---represents overwhelming support for independent regional decays over connectome-coupled propagation. Notably, M1 wins \textit{despite} having 4$\times$ more per-patient parameters, meaning the improvement in NLL (2,840 units) far exceeds the additional AIC penalty (2,432 $- 608 = 1{,}824$). Even the more parsimonious M2 (2 parameters/patient) was preferred over M6r ($\Delta$AIC = +3,558), indicating that the caudate-putamen gradient is better captured by a simple offset than by a mechanistic propagation model.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{p8b_fig1_model_comparison.pdf}
+\caption{\textbf{Model comparison on 304 PPMI patients.} (A) AIC values for three nested models. M1 (independent per-region decays) achieves the lowest AIC, outperforming the propagation model M6r by $\Delta$AIC = 3,856. (B) Total negative log-likelihood showing the same ordering. Lower values indicate better fit.}
+\label{fig:comparison}
+\end{figure}
+
+\subsection{Population-level regional decline rates}
+
+M1's per-region decay rates (Table~\ref{tab:rates}, Fig.~\ref{fig:rates}) are biologically informative:
+
+\begin{table}[H]
+\centering
+\caption{M1 population-level regional SBR decline rates (304 patients).}
+\label{tab:rates}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Region & Mean (yr$^{-1}$) & SD & Median & IQR \\
+\midrule
+Caudate L ($T_1$) & 0.118 & 0.081 & 0.108 & [0.056, 0.166] \\
+Caudate R ($T_2$) & 0.119 & 0.082 & 0.106 & [0.058, 0.171] \\
+Putamen L ($T_3$) & 0.138 & 0.106 & 0.127 & [0.045, 0.232] \\
+Putamen R ($T_4$) & 0.145 & 0.100 & 0.148 & [0.060, 0.217] \\
+\midrule
+\textbf{Caudate mean} & \textbf{0.119} & 0.081 & 0.107 & --- \\
+\textbf{Putamen mean} & \textbf{0.142} & 0.100 & 0.138 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{p8b_fig2_regional_rates.pdf}
+\caption{\textbf{Distribution of per-region SBR decline rates from M1 (N=304).} Violin plots with overlaid box plots show the distribution of exponential decay rates for each striatal subregion. Diamond markers indicate means. Putamen regions (red) show 19\% faster mean decline than caudate regions (blue), with substantial inter-patient variability (CV 68--72\%). Dashed horizontal lines indicate caudate and putamen group means.}
+\label{fig:rates}
+\end{figure}
+
+\paragraph{Putamen-caudate gradient.} Putamen SBR declines 19\% faster than caudate ($0.142$ vs $0.119$ yr$^{-1}$; paired Wilcoxon signed-rank test on per-patient mean putamen rate minus mean caudate rate: $p < 0.001$, Cohen's $d = 0.25$), consistent with the established rostro-caudal gradient of dopaminergic degeneration in PD \cite{kish1988, brooks1990, kim2022}. At these rates, a patient with baseline putamen SBR of 0.84 would lose an additional 50\% of binding within $t_{50} = \ln(2)/0.142 = 4.9$ years.
+
+\paragraph{Bilateral symmetry.} Left-right asymmetry was minimal: caudate L--R difference = 0.1\% ($0.118$ vs $0.119$ yr$^{-1}$); putamen L--R difference = 4.8\% ($0.138$ vs $0.145$ yr$^{-1}$). The slight putaminal asymmetry (right faster than left) is consistent with the lateralized onset pattern in PD, where the more affected hemisphere shows faster progression \cite{fiorenzato2021}.
+
+\paragraph{Inter-patient variability.} Decline rates showed substantial inter-patient variability (coefficient of variation: caudate 68\%, putamen 72\%), reflecting the known heterogeneity of PD progression rates \cite{simuni2024}. The IQR for putamen rates spans a 4.8-fold range (0.045--0.217 yr$^{-1}$), suggesting that some patients progress from mild to severe putaminal depletion in under 3 years while others maintain function for over 15 years.
+
+\subsection{M2 parameter estimates}
+
+The shared-base-plus-offset model estimated $T_{\text{base}} = 0.109 \pm 0.063$ yr$^{-1}$ (caudate-dominated decline rate) with $\delta_{\text{put}} = 0.059 \pm 0.057$ yr$^{-1}$ (additional putamen vulnerability). The median $\delta_{\text{put}}$ of 0.044 yr$^{-1}$ represents a 40\% excess putaminal decline rate, quantifying the caudate-putamen gradient as a single interpretable parameter. However, the large SD relative to mean ($\delta_{\text{put}}$: CV = 96\%) and the 25th percentile at zero indicate that approximately one-quarter of patients have no detectable putamen-specific excess at the per-patient level.
+
+\subsection{M6r propagation parameter}
+
+The spatial propagation model estimated $k_{\text{spread}} = 1.26 \pm 0.65$ yr$^{-1}$ (median 1.32), but this parameter provided substantially worse model fit than M1's independent rates. The population mean $k_{\text{spread}}$ implies a characteristic propagation time of $1/k_{\text{spread}} \approx 0.8$ years from putamen to caudate, which is faster than the clinical timescale of progressive caudate involvement (14.4 years before clinical onset per \cite{kim2022}). This discrepancy arises because the single $k_{\text{spread}}$ parameter must simultaneously explain the caudate-putamen gradient and the overall decline rate for all patients---a task for which M1's four independent parameters are far better suited.
+
+\subsection{Simulation-based calibration explains the empirical result}
+
+To confirm that the M6r failure reflects a fundamental information-theoretic limitation rather than an optimization artifact, we performed simulation-based calibration (SBC) on 200 synthetic patients matching PPMI observation schedules \cite{talts2018}. At $\sigma = 0.15$, the propagation parameters $k_{\text{spread}}$ and $s_{\text{put}}$ achieved correlations of only $r = 0.49$ and $r = 0.08$ between true and recovered values, far below the $r > 0.7$ threshold for reliable recovery. Fisher Information Matrix analysis revealed that the spatial perturbation signal---the between-region SBR shift caused by propagation---is at most 4.7\% of the observation noise per measurement. The DaT-SPECT observation is 33--68$\times$ more sensitive to the overall neurotoxicity rate than to the spatial distribution of pathology. Full details of the SBC analysis are reported in the companion identifiability study \cite{dupre2026paper8a}.
+
+% ============================================================================
+% DISCUSSION
+% ============================================================================
+\section{Discussion}
+
+\subsection{Independent decay as the parsimonious model}
+
+Our central finding is that independent per-region exponential decay provides the best description of longitudinal DaT-SPECT decline in PD, decisively outperforming a connectome-coupled spatial propagation model on 304 PPMI patients. This result has two implications.
+
+First, it does \textit{not} refute the Braak-stage hypothesis or the biological reality of trans-synaptic $\alpha$-synuclein propagation. The propagation process is well established in animal models \cite{chu2019, patterson2019} and supported by cross-sectional neuroimaging patterns \cite{pandya2019, abdelgawad2022}. What our result shows is that the \textit{longitudinal signature} of this propagation---the correlated acceleration of decline across connected regions---is below the detection threshold of current DaT-SPECT protocols. The static caudate-putamen gradient is clearly observable (SNR $\approx$ 7.5 at baseline), but the \textit{dynamic} propagation signal that generates this gradient over time cannot be resolved from the \textit{temporal evolution} of the gradient.
+
+Second, the independent-decay model provides clinically useful per-region biomarkers without requiring mechanistic assumptions about propagation. The four regional rates $\{T_1, \ldots, T_4\}$ can be estimated from any patient with four or more serial DaT-SPECT scans and have straightforward clinical interpretation: the rate at which dopaminergic terminals are lost in each striatal subregion.
+
+\subsection{Clinical implications of per-region rates}
+
+The 19\% putamen-caudate rate differential we observe is consistent with prior cross-sectional reports \cite{kish1988, brooks1990} and with the longitudinal subregional analysis of \cite{sung2016}, who found relative annual reductions of 6--10\% across striatal subregions. Our exponential-model rates (caudate: 11.9\%/yr, putamen: 14.2\%/yr in relative terms) are slightly higher, likely because our cohort is restricted to patients with four or more scans who tend to be faster progressors (selection bias toward higher scan frequency in clinical practice).
+
+The substantial inter-patient variability in regional rates (CV 68--72\%) reflects the well-documented heterogeneity of PD progression \cite{simuni2024} and suggests that per-patient regional rates could serve as quantitative biomarkers of progression velocity. Whether these rates predict clinically meaningful outcomes---motor milestone events, cognitive decline, or response to therapy---is an important question for future study.
+
+\subsection{Relationship to prior NDM studies}
+
+Our finding does not contradict the NDM literature, which has primarily validated propagation models against cross-sectional atrophy patterns rather than longitudinal per-patient trajectories. \cite{raj2012} showed that the NDM explains the spatial pattern of cortical thinning in Alzheimer's disease, and \cite{abdelgawad2022} validated an agent-based model on PPMI using population-average atrophy maps. These studies demonstrate that the \textit{equilibrium spatial pattern} predicted by propagation models matches observed atrophy---but they do not test whether the \textit{dynamic trajectory} of propagation can be tracked in individual patients using available imaging.
+
+Our companion identifiability analysis \cite{dupre2026paper8a} provides the mechanistic explanation: with only four observable regions and observation noise of $\sigma = 0.15$ SBR, the Fisher Information content about spatial coupling is catastrophically low (4.7\% of noise). Distinguishing propagation from independent decay would require either substantially more regions with independent observations (full cortical parcellation from MRI volumetrics) or substantially lower noise ($\sigma \leq 0.05$, achievable with improved reconstruction algorithms).
+
+\subsection{Limitations}
+
+Several limitations should be noted. First, our analysis is restricted to the four striatal subregions measurable by DaT-SPECT; cortical regions are not quantifiable with this modality. MRI-based volumetric measures could provide the additional spatial observations needed to detect propagation signatures. Second, our exponential decay model assumes a constant rate per region, whereas the true trajectory may decelerate as dopaminergic reserve is depleted (floor effect; \cite{sung2016}). Third, we used a population-average connectivity matrix; patient-specific DTI tractography (available for $\sim$140 PPMI patients) might improve the propagation model's fit, though our simulation analysis suggests the fundamental information limitation would persist. Fourth, our cohort (304 patients with $\geq$4 scans) represents a subset of the full PPMI population. While PPMI scan frequency is protocol-driven (not clinician-driven), the $\geq$4 scan requirement selects for patients with longer study retention, which may bias toward either slower progressors (who remain functional) or more engaged participants.
+
+\subsection{Conclusion}
+
+Independent per-region exponential decay rates provide the most parsimonious and best-fitting description of longitudinal four-region DaT-SPECT decline in PD, outperforming connectome-coupled spatial propagation by $\Delta$AIC = 3,856. The per-region rates are biologically informative (putamen 19\% faster than caudate, minimal bilateral asymmetry) and represent the identifiable output of current DaT-SPECT protocols. Spatial propagation, while biologically real, produces a signal that is 4.7\% of the observation noise and cannot be distinguished from independent regional decay at current imaging resolution. Digital twin models targeting per-patient spatial propagation from DaT-SPECT will require either multi-modal imaging, substantially reduced noise, or population-level hierarchical estimation rather than per-patient inference.
+
+% ============================================================================
+% REFERENCES
+% ============================================================================
+

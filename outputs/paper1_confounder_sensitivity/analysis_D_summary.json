@@ -1,0 +1,100 @@
+{
+  "run_timestamp": "2026-04-22T12:53:12",
+  "seed": 42,
+  "n_bootstrap_ci": 1000,
+  "analysis_D_protocol_loco": {
+    "stratification_note": "ppmi_raw.datscan_sbr_analysis.protocol is the DaT-SPECT acquisition protocol assigned per scan. 001 is the primary PPMI DaT-SPECT protocol (2010\u2013~2018 era), 002 is the updated protocol (~2018+ era corresponding to PPMI SPECT Technical Operations Manual v4.0 standardisation), 004/T011 are edge protocols. Protocol-LOCO isolates scanner/reconstruction drift without confounding by site-specific patient-demographic differences.",
+    "raw_protocol_counts_baseline_scans": {
+      "002": 1141,
+      "001": 965,
+      "004": 18,
+      "T011": 13
+    },
+    "bucket_counts": {
+      "002": 1141,
+      "001": 965,
+      "edge": 31
+    },
+    "n_total": 2137,
+    "targets": {
+      "target_binary": {
+        "per_protocol": {
+          "001": {
+            "n_train": 1172,
+            "n_held_out": 965,
+            "balanced_accuracy": 0.9379962459352997,
+            "auc_point": 0.9666055676480696,
+            "macro_auc_ovr": null,
+            "auc_bootstrap_95ci": [
+              0.9519360590514151,
+              0.9791112942415394
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          },
+          "002": {
+            "n_train": 996,
+            "n_held_out": 1141,
+            "balanced_accuracy": 0.9542258774383648,
+            "auc_point": 0.9892245720040282,
+            "macro_auc_ovr": null,
+            "auc_bootstrap_95ci": [
+              0.9822208516923728,
+              0.9949480601476578
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          }
+        },
+        "summary": {
+          "n_protocols": 2,
+          "auc_mean": 0.9779150698260489,
+          "auc_std": 0.01599405136378642,
+          "auc_min": 0.9666055676480696,
+          "auc_max": 0.9892245720040282
+        }
+      },
+      "target_3class": {
+        "per_protocol": {
+          "001": {
+            "n_train": 1172,
+            "n_held_out": 965,
+            "balanced_accuracy": 0.7817565948577557,
+            "auc_point": 0.9390332171861032,
+            "macro_auc_ovr": 0.9390332171861032,
+            "auc_bootstrap_95ci": [
+              0.9233177077847683,
+              0.9532239000535901
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          },
+          "002": {
+            "n_train": 996,
+            "n_held_out": 1141,
+            "balanced_accuracy": 0.7427515192918036,
+            "auc_point": 0.9362412014650209,
+            "macro_auc_ovr": 0.9362412014650209,
+            "auc_bootstrap_95ci": [
+              0.921244397404116,
+              0.9508225627814253
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          }
+        },
+        "summary": {
+          "n_protocols": 2,
+          "auc_mean": 0.937637209325562,
+          "auc_std": 0.001974253249556772,
+          "auc_min": 0.9362412014650209,
+          "auc_max": 0.9390332171861032
+        }
+      }
+    },
+    "edge_bucket_description": {
+      "n": 31,
+      "target_binary_distribution": {
+        "0": 17,
+        "1": 14
+      },
+      "note": "Edge bucket (protocols 004 + T011) is underpowered; reported descriptively. It is INCLUDED in the training set when 001 or 002 is held out, so its signal is absorbed into the comparator models."
+    }
+  }
+}

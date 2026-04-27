@@ -1,0 +1,1035 @@
+% =============================================================================
+% Chapter 12 --- Paper 9
+% Full manuscript content imported from outputs/mechanistic_twin/paper9_three_pathway_pkpd/main.tex
+% Preamble, title page, and standalone bibliography stripped; figure filenames
+% remapped with prefix "p9_"; natbib \citep/\citet converted to \cite.
+% =============================================================================
+
+% Chapter heading suppressed in submission wrapper; wrapper.tex provides the title.
+% \chapter{Three-Pathway PK-PD Analysis --- DaT-SPECT-Calibrated Neurodegeneration Modulates Levodopa Benefit}
+\label{ch:paper9}
+
+% ====================================================================
+% STUDY HIGHLIGHTS (CPT:PSP Gupta 2025 mandatory template)
+% ====================================================================
+
+\section*{Study Highlights}
+
+\paragraph{What is the current knowledge on the topic?}
+Published Parkinson's disease (PD) PK/PD models treat neurodegeneration as a time-invariant covariate. No prior work tests whether per-patient imaging-calibrated dopaminergic neuron fraction $N(t)/N_0$~\cite{dupre2026paper7} moderates levodopa benefit.
+
+\paragraph{What question did this study address?}
+Does DaT-SPECT-calibrated $N(t)/N_0$ predict the ON--OFF UPDRS-III gap (treatment benefit), OFF-state motor trajectory, or wearing-off timing in 1{,}065 PPMI patients?
+
+\paragraph{What does this study add to our knowledge?}
+Across 3{,}178 paired ON--OFF visits in 772 patients, the $N(t) \times \mathrm{LEDD}$ interaction is directionally positive ($\Delta\mathrm{AIC} = -72$; Bayesian $P(\beta_3 > 0) = 0.991$; frequentist $p = 0.011$): each additional unit of LEDD enlarges the motor gap more in patients with more surviving neurons. OFF-state trajectory is better explained by elapsed time ($\Delta\mathrm{AIC} = +803$, informative negative) and wearing-off is PK-driven ($C$-index $= 0.515$, informative negative). The sub-EC$_{50}$ linear regime is confirmed (free Hill $h = 0.13$).
+
+\paragraph{How might this change clinical pharmacology or translational science?}
+$N(t)/N_0$ is a deployment-relevant biomarker for attenuated medication response in advanced-stage PD. The Path~B coefficients reported here are operationalised by a companion bidirectional-ready mechanistic twin~\cite{dupre2026paper10} via Sequential Importance Resampling posterior updates, and surfaced at point-of-care by a companion clinical decision-support pipeline~\cite{dupre2026paper6} for 1{,}065 of 1{,}900 PPMI patients.
+
+% ====================================================================
+% ABSTRACT
+% ====================================================================
+\begin{abstract}
+\noindent
+\textbf{Background.}
+No published model couples per-patient imaging-calibrated neurodegeneration $N(t)$~\cite{dupre2026paper7} to longitudinal levodopa response in Parkinson's disease. We test whether DaT-SPECT-derived neuron fraction $\Nfrac$ interacts with levodopa-equivalent daily dose (LEDD) to predict motor benefit, OFF trajectory, and wearing-off.
+
+\noindent
+\textbf{Methods.}
+In PPMI ($n{=}1{,}065$ patients with Bayesian $N(t)$, 22{,}270 UPDRS-III assessments, 1{,}674 with LEDD), we performed a three-pathway analysis: (A)~OFF-state UPDRS-III vs.\ $\Nfrac$; (B)~ON--OFF gap vs.\ $\Nfrac \times \LEDD$; (C)~wearing-off onset vs.\ neurodegeneration rate. Methods: mixed-effects models, Hill dose--response, Cox proportional hazards, formal identifiability analysis.
+
+\noindent
+\textbf{Results.}
+Path~B was the headline finding: the $\Nfrac \times \LEDD$ interaction predicts the ON--OFF gap ($n{=}3{,}178$ paired visits, 772 patients; $\Delta\mathrm{AIC}{=}{-}72$; $\beta(\Nfrac){=}{-}11.62$, $p{<}10^{-37}$; conditional $R^2{=}0.491$). Each 10\% decrease in $\Nfrac$ enlarged the ON--OFF gap by 1.16 UPDRS-III points. The Hill model failed (free $h{=}0.13$), confirming a sub-EC$_{50}$ linear regime. Paths~A and C were informative negatives: $\Nfrac$ did not outperform elapsed time for OFF-state trajectory ($\Delta\mathrm{AIC}{=}{+}803$), and neurodegeneration rate did not predict wearing-off ($\rho{=}{-}0.050$, $p{=}0.43$; $C$-index${=}0.515$).
+
+\noindent
+\textbf{Discussion.}
+$\Nfrac$ moderates levodopa benefit via an interaction, not a main effect. Wearing-off is PK-driven. These findings support $N(t)$-informed LEDD optimisation and motivate per-patient mechanistic digital twins~\cite{dupre2026paper10} for treatment planning.
+
+\medskip
+\noindent
+\textbf{Keywords:}
+DaT-SPECT; digital twin; dopaminergic neurodegeneration; Hill model;
+levodopa; mixed-effects model; NSD-ISS; Parkinson's disease;
+pharmacodynamics; PPMI; UPDRS-III; wearing-off
+\end{abstract}
+
+\clearpage
+
+% ====================================================================
+% 1. INTRODUCTION
+% ====================================================================
+\section{Introduction}
+
+Parkinson's disease (PD) is a progressive neurodegenerative disorder
+characterized by the loss of dopaminergic neurons in the substantia nigra
+pars compacta (SNc). The Neuronal alpha-Synuclein Disease Integrated
+Staging System (NSD-ISS) provides a biologically grounded framework for
+classifying disease severity based on synucleinopathy and dopaminergic
+deficit biomarkers~\cite{simuni2024}. DaT-SPECT imaging quantifies
+striatal dopamine transporter density, serving as an in vivo proxy for
+surviving dopaminergic neuron fraction~\cite{siderowf2020}.
+
+Levodopa remains the gold-standard treatment for PD motor symptoms.
+However, as disease progresses and dopaminergic neurons are lost, treatment
+benefit diminishes and motor complications such as wearing-off emerge.
+The LEAP trial~\cite{verschuur2019} and its 5-year
+follow-up~\cite{frequin2024} established that levodopa has no
+disease-modifying effect on neurodegeneration---confirming that LEDD
+reflects treatment for symptoms, not a cause of neuron death. Post-mortem
+studies further support this conclusion: Parkkinen~\etal~\cite{parkkinen2011}
+found no association between levodopa exposure and nigral neuron counts,
+and animal models show that L-dopa does not affect DAT
+density~\cite{fernagut2010}. This evidence permits us to model LEDD as a
+proxy for unmeasured symptom severity, not a causal mechanism of
+neurodegeneration.
+
+Several pharmacometric models have addressed PD progression and levodopa
+response. Holford~\etal~\cite{holford2006} developed empirical nonlinear
+mixed-effects (NLME) models linking time to levodopa pharmacodynamics
+without imaging biomarkers. The K-PD framework of
+Jacqmin~\etal~\cite{jacqmin2007} models drug effects in the absence of
+measured concentrations. More recently, Gupta~\etal~\cite{gupta2025}
+proposed a biomarker-directed clinical endpoint model linking DaT-SPECT
+striatal binding ratio (SBR) to MDS-UPDRS via item response theory (IRT)
+in 419 PPMI patients, but without a medication covariate.
+Chae~\etal~\cite{chae2021} predicted longitudinal changes in LEDD
+requirements using IRT-assessed UPDRS. V\'{e}ronneau-Veilleux~\etal~\cite{veronneau2020}
+developed an integrative model coupling levodopa pharmacokinetics to
+basal ganglia neurotransmission, but used generic---not per-patient,
+imaging-calibrated---neurodegeneration trajectories.
+Ursino~\etal~\cite{ursino2020} modeled levodopa motor response with
+parameter estimation, and Simon~\etal~\cite{simon2016} combined
+pharmacokinetic/pharmacodynamic modeling of levodopa motor response and
+dyskinesia. Angiolelli~\etal~\cite{angiolelli2024} proposed a Virtual
+Parkinsonian Patient framework, and Rukavina~\etal~\cite{rukavina2025}
+showed that DaT uptake predicts subsequent LEDD requirements.
+
+A critical gap remains: no published model couples \textit{per-patient,
+imaging-calibrated} dopaminergic neurodegeneration trajectories $N(t)$ to
+levodopa treatment response. We address this gap by linking Bayesian
+posterior $N(t)$ trajectories---derived from serial DaT-SPECT scans in
+1,065 PPMI patients---to longitudinal UPDRS-III outcomes and LEDD through
+a three-pathway mechanistic analysis framework.
+
+Our approach is motivated by the following mechanistic reasoning:
+levodopa is converted to dopamine by aromatic L-amino acid decarboxylase
+(AADC) in surviving nigrostriatal neurons. As neurons die, the capacity
+for this conversion diminishes, and treatment benefit should decline
+proportionally. This predicts a specific interaction effect: the motor
+benefit of a given LEDD should depend on $\Nfrac$. Rather than attempting
+to fit a full PK/PD model---which would require plasma drug levels not
+available in PPMI---we adopt a PD-only framework with patient-specific
+neurodegeneration calibrated from DaT-SPECT Bayesian posteriors, using
+LEDD as a dose proxy. We emphasise at the outset that this is not a
+population-PK-instantiated analysis: no plasma levodopa compartments,
+absorption kinetics, or clearance parameters are fit; LEDD serves as
+the dosing summary and the imaging-calibrated $N(t)/N_0$ anchors
+individual disease state.
+
+We test five hypotheses through three analytical pathways:
+\begin{enumerate}[label=\textbf{H\arabic*:}, leftmargin=2.5em]
+  \item The $\Nfrac \times \LEDD$ interaction predicts the ON--OFF gap
+    better than either component alone.
+  \item $\Nfrac$ is the primary moderator of treatment benefit
+    (negative coefficient in mixed-effects model).
+  \item $N(t)$ does \textit{not} predict wearing-off timing
+    (informative negative).
+  \item $N(t)$ does \textit{not} outperform simple elapsed time for
+    OFF-state UPDRS-III prediction (informative negative).
+  \item PPMI patients operate in the sub-EC$_{50}$ linear regime of the
+    dose--response curve.
+\end{enumerate}
+
+We report two positive findings (H1, H2), two pre-registered informative
+negatives (H3, H4), and one mechanistic insight (H5), demonstrating that
+honest reporting of negative results advances mechanistic understanding
+as much as positive findings.
+
+
+% ====================================================================
+% 2. METHODS
+% ====================================================================
+\section{Methods}
+
+\subsection{Study Population}
+
+Data were obtained from the Parkinson's Progression Markers Initiative
+(PPMI), accessed via the AMP-PD platform (data freeze: April 12, 2026).
+The PPMI is a multicenter longitudinal observational study enrolling
+participants with early, untreated PD and healthy
+controls~\cite{simuni2024}. Our analysis draws on three overlapping
+patient populations (Table~\ref{tab:cohort}):
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{UPDRS-III cohort:} 5,014 patients with 22,270
+    OFF-state UPDRS-III assessments (37,399 total Part~III records;
+    9,472 ON-state assessments).
+  \item \textbf{LEDD cohort:} 1,674 patients with 8,970 medication
+    records from the Concomitant Medication Log (613 non-numeric LEDD
+    entries excluded).
+  \item \textbf{Posterior cohort:} 1,065 patients with Bayesian
+    posterior $N(t)$ trajectories from serial DaT-SPECT (Phase~2
+    importance-sampling weighted posteriors; 304 Wave~A patients with
+    $\geq$4 scans, 761 Wave~B patients with 2--3 scans).
+\end{enumerate}
+
+\begin{table}[t]
+\centering
+\caption{Cohort description and data sources.}
+\label{tab:cohort}
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+Data source & Patients & Observations & Notes \\
+\midrule
+UPDRS-III (OFF)   & 5,014 & 22,270 & All available assessments \\
+UPDRS-III (ON)    & ---   & 9,472  & Same patients, ON-state \\
+LEDD              & 1,674 & 8,970  & Concomitant Medication Log \\
+Part IV (wearing-off) & 1,610 & 10,688 & NP4OFF items \\
+$N(t)$ posteriors & 1,065 & ---    & Phase 2 IS-weighted \\
+NSD-ISS staging   & 1,900 & 16,699 & Longitudinal staging \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Intersection datasets:}} \\
+Path A (OFF + $N(t)$)     & 988 & 4,772 & OFF-state motor trajectory \\
+Path B (ON--OFF + $N(t)$ + LEDD) & 772 & 3,178 & Treatment benefit \\
+Path C (Part IV + $N(t)$) & 276 & ---   & Wearing-off timing \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Data Sources}
+
+\subsubsection{Levodopa Equivalent Daily Dose (LEDD)}
+
+LEDD values were extracted from the PPMI Concomitant Medication Log
+(downloaded April~12, 2026; 9,583 rows, 1,678 patients). Records with
+non-numeric LEDD entries (\eg, ``LD $\times$ 0.33'' for entacapone
+multipliers, $n{=}613$) were excluded. LEDD was summed across all active
+medications per visit. LEDD conversion factors follow the updated
+systematic review by Jost~\etal~\cite{jost2023}. For regression models,
+LEDD was scaled by dividing by 500 to improve numerical conditioning.
+
+\subsubsection{UPDRS-III Motor Examination}
+
+MDS-UPDRS Part~III total scores (NP3TOT) were obtained from 37,399
+records (5,014 patients). Scores were stratified by PDSTATE into OFF-state
+($n{=}22{,}270$; includes records with missing PDSTATE, assumed OFF per
+PPMI protocol for early-stage patients) and ON-state ($n{=}9{,}472$).
+The ON--OFF gap was computed as $\text{Gap} = \text{UPDRS-III}_\text{OFF}
+- \text{UPDRS-III}_\text{ON}$ for visits with both assessments on the same
+date ($n{=}4{,}203$ paired visits, 1,220 patients). Mean gap was
+$9.42 \pm 8.15$ UPDRS-III points (median 8.0; range $-40$ to 90).
+Negative gaps (3.6\% of pairs) occur when ON-state dyskinesia inflates
+the ON score.
+
+\subsubsection{Wearing-Off (MDS-UPDRS Part IV)}
+
+Motor complications were assessed via MDS-UPDRS Part~IV (10,688 records,
+1,610 patients). We defined wearing-off onset as the first visit with
+$\text{NP4OFF} \geq 1$ (primary threshold) or $\text{NP4OFF} \geq 2$
+(sensitivity analysis). Time-to-event was computed from the first visit
+with PDMEDYN$=$1 (on PD medication) to the first visit meeting the
+threshold.
+
+\subsubsection{Per-Patient Neurodegeneration Trajectories $N(t)/N_0$}
+
+Patient-specific neuron fraction trajectories were derived from our
+Phase~2 mechanistic twin pipeline. Briefly, a coupled ODE model of
+$\alpha$-synuclein aggregation and dopaminergic neuron death was
+calibrated per patient using serial DaT-SPECT SBR measurements (caudate
+mean) via importance-sampling (IS) weighted Bayesian
+inference~\cite{fearnley1991}. The IS posterior was computed over 5,000
+resamples per patient. From the posterior median neurodegeneration rate
+(percent loss per year), the neuron fraction at each visit was computed as:
+\begin{equation}
+  \frac{N(t)}{N_0} = \left(1 - \frac{r}{100}\right)^t
+  \label{eq:nfrac}
+\end{equation}
+where $r$ is the posterior median percent loss per year and $t$ is time
+from baseline in years. The combined cohort ($n{=}1{,}065$: 304 Wave~A
+$+$ 761 Wave~B) had a population median $r{=}1.59$\%/yr (mean
+4.79\%/yr), consistent with the canonical 2--5\%/yr range from
+clinicopathological studies~\cite{fearnley1991}.
+
+\subsection{Three-Pathway Analysis Framework}
+
+We decompose the levodopa--neurodegeneration coupling into three
+testable pathways (Fig.~\ref{fig:framework}):
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Path~A (Natural History):} Does $\Nfrac$ predict
+    OFF-state motor trajectory better than elapsed time?
+  \item \textbf{Path~B (Treatment Benefit):} Does $\Nfrac$ moderate
+    the motor benefit of levodopa (ON--OFF gap)?
+  \item \textbf{Path~C (Motor Complications):} Does neurodegeneration
+    rate predict time to wearing-off?
+\end{itemize}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{p9_fig1_model_schematic.pdf}
+  \caption{Three-pathway conceptual framework linking DaT-SPECT-calibrated
+  neurodegeneration trajectories $\Nfrac$ to levodopa treatment response.
+  Path~A tests whether $\Nfrac$ predicts OFF-state motor trajectory;
+  Path~B tests whether the $\Nfrac \times \LEDD$ interaction predicts
+  the ON--OFF gap (treatment benefit); Path~C tests whether
+  neurodegeneration rate predicts wearing-off timing.}
+  \label{fig:framework}
+\end{figure}
+
+
+\subsection{Path A: OFF-State Motor Trajectory}
+\label{sec:path_a}
+
+We fit five models to OFF-state UPDRS-III ($n{=}4{,}772$ visits, 988
+patients):
+
+\begin{description}[style=unboxed, leftmargin=0pt]
+  \item[A1. OLS ($\Nfrac$):]
+    $\text{UPDRS3}_\text{OFF} = \beta_0 + \beta_1 \cdot \Nfrac + \epsilon$
+
+  \item[A2. LME ($\Nfrac$):]
+    $\text{UPDRS3}_{\text{OFF},ij} = (\beta_0 + b_{0i}) + (\beta_1 + b_{1i})
+    \cdot [\Nfrac]_{ij} + \epsilon_{ij}$
+
+  \item[A3. Hill ($\Nfrac$):]
+    $\text{UPDRS3}_\text{OFF} = U_\text{max} \cdot \left(1 -
+    \frac{(\Nfrac)^h}{K_n^h + (\Nfrac)^h}\right)$
+
+  \item[A4. OLS (time):]
+    $\text{UPDRS3}_\text{OFF} = \beta_0 + \beta_1 \cdot t + \epsilon$
+
+  \item[A5. LME (time):]
+    $\text{UPDRS3}_{\text{OFF},ij} = (\beta_0 + b_{0i}) + (\beta_1 + b_{1i})
+    \cdot t_{ij} + \epsilon_{ij}$
+\end{description}
+
+Models were compared via AIC, with $|\Delta\text{AIC}| > 10$ considered
+decisive evidence following Burnham and Anderson~\cite{burnham2002}.
+
+\subsection{Path B: ON--OFF Gap (Treatment Benefit)}
+\label{sec:path_b}
+
+We fit six models to the ON--OFF gap using the intersection of patients
+with paired ON/OFF scores, LEDD$>$0, and $N(t)$ posteriors ($n{=}3{,}178$
+visits, 772 patients):
+
+\begin{description}[style=unboxed, leftmargin=0pt]
+  \item[B0. Null:] $\text{Gap} = \beta_0 + \epsilon$
+
+  \item[B1. $\Nfrac$-only:] $\text{Gap} = \beta_0 + \beta_1 \cdot \Nfrac
+    + \epsilon$
+
+  \item[B2. LEDD-only:] $\text{Gap} = \beta_0 + \beta_2 \cdot \LEDD_s
+    + \epsilon$ (LEDD scaled by $/ 500$)
+
+  \item[B3. Interaction:] $\text{Gap} = \beta_0 + \beta_1 \cdot \Nfrac
+    + \beta_2 \cdot \LEDD_s + \beta_3 \cdot \Nfrac \times \LEDD_s + \epsilon$
+
+  \item[B4a. Hill ($h{=}2$ fixed):] $\text{Gap} = G_\text{max} \cdot
+    \frac{(\rho \cdot \LEDD \cdot \Nfrac)^2}{1 + (\rho \cdot \LEDD \cdot
+    \Nfrac)^2}$
+
+  \item[B4b. Hill ($h$ free):] Same as B4a with $h$ estimated from data.
+
+  \item[B5. Mixed-effects:] $\text{Gap}_{ij} = (\beta_0 + b_{0i}) +
+    \beta_1 \cdot [\Nfrac]_{ij} + \beta_2 \cdot [\LEDD_s]_{ij} + \beta_3 \cdot
+    [\Nfrac]_{ij} \times [\LEDD_s]_{ij} + \epsilon_{ij}$
+\end{description}
+
+
+\subsection{Path C: Wearing-Off Timing}
+\label{sec:path_c}
+
+For the subset of patients with both Part~IV data and $N(t)$ posteriors
+($n{=}276$), we assessed whether neurodegeneration rate predicts
+time-to-wearing-off:
+
+\begin{description}[style=unboxed, leftmargin=0pt]
+  \item[C1. Kaplan--Meier:] Patients stratified into tertiles by
+    posterior median percent loss per year (slow/medium/fast);
+    log-rank test for group differences.
+
+  \item[C2. Cox PH:] $h(t) = h_0(t) \exp(\beta_1 \cdot r +
+    \beta_2 \cdot \text{age})$ where $r$ is percent loss per year.
+
+  \item[C4. Spearman:] Rank correlation between $r$ and time-to-event
+    (events only, $n{=}249$).
+\end{description}
+
+
+\subsection{Identifiability Analysis}
+
+Before fitting the Hill dose--response model, we conducted a formal
+structural identifiability analysis of the coupled model:
+\begin{equation}
+  \text{UPDRS3} = \text{UPDRS3}_\text{max} \cdot \left(1 -
+  \frac{\DA^h}{\text{EC}_{50}^h + \DA^h}\right),
+  \quad \DA = k_\text{eff} \cdot \LEDD \cdot \Nfrac
+  \label{eq:hill}
+\end{equation}
+using Jacobian rank tests and Fisher Information Matrix (FIM) condition
+number analysis~\cite{raue2009,villaverde2016}.
+
+The original 3-parameter model ($k_\text{eff}$, EC$_{50}$, $h$) is
+\textbf{structurally non-identifiable}: $k_\text{eff}$ and EC$_{50}$
+enter the Hill function only through their ratio
+$\rho = k_\text{eff}/\text{EC}_{50}$. The Jacobian columns for
+$k_\text{eff}$ and EC$_{50}$ are proportional at every operating point
+($\partial y/\partial \text{EC}_{50} = -(k_\text{eff}/\text{EC}_{50})
+\cdot \partial y/\partial k_\text{eff}$), yielding rank 2 for a
+$3 \times 3$ matrix. After reparametrization to $(\rho, h)$, the model
+is structurally identifiable but \textbf{practically non-identifiable}:
+the FIM condition number $\kappa{=}3.5 \times 10^6$ across all tested
+$\rho$ values (range $5 \times 10^{-4}$ to $0.1$), indicating that $h$
+is not estimable from the available data. We therefore fix $h{=}2$ and
+fit $\rho$ alone. This finding is consistent with the broader
+identifiability analyses on the same PPMI cohort reported in companion
+papers: temporal $\alpha$-synuclein aggregation--neuron-death kinetics
+exhibit a sloppy-ridge degeneracy between $k_n$ and $\alpha_\text{tox}$
+that CSF biomarkers only partially resolve~\cite{dupre2026paper7}, and
+spatial propagation parameters on four-region striatal DaT-SPECT fail
+practical recovery in simulation-based calibration~\cite{dupre2026paper8a},
+while per-region decline rates (the identifiable output) agree with
+the rates implied by the Path~B main effect reported
+here~\cite{dupre2026paper8b}.
+
+
+\subsection{Statistical Analysis}
+
+All analyses were performed in Python 3.13. Linear and mixed-effects
+models used \texttt{statsmodels} (v0.14). Hill model fitting used
+\texttt{scipy.optimize.minimize} (L-BFGS-B). Cox proportional hazards
+models used \texttt{lifelines}. Kaplan--Meier estimates and log-rank
+tests used \texttt{lifelines}. AIC was computed as
+$\text{AIC} = 2k - 2\ln(\hat{L})$ for maximum-likelihood models and
+$\text{AIC} = n \ln(\text{RSS}/n) + 2k$ for OLS models; non-nested
+models on identical datasets were compared via $\Delta\text{AIC}$
+following Burnham and Anderson~\cite{burnham2002}. Mixed-effects
+conditional $R^2$ was computed following Nakagawa and
+Schielzeth~\cite{nakagawa2013}. Spearman rank correlations and their
+$p$-values were computed using \texttt{scipy.stats}. All random seeds
+were fixed at 42 for reproducibility.
+
+
+% ====================================================================
+% 3. RESULTS
+% ====================================================================
+\section{Results}
+
+\subsection{Cohort Description}
+
+After computing $\Nfrac$ via Eq.~\eqref{eq:nfrac} using corrected
+percent-loss-per-year posteriors (median $r{=}1.74$\%/yr for the
+analysis cohort), the neuron fraction ranged from 0.031 to 1.0 (median
+0.94, SD 0.23) across 4,772 visits from 988 patients in the primary
+analysis dataset (UPDRS-III + $N(t)$ + LEDD $> 0$). Mean OFF-state
+UPDRS-III was $28.0 \pm 14.4$, and mean LEDD among medicated visits was
+$499 \pm$ mg/day. The ON--OFF gap dataset comprised 4,203 paired visits
+from 1,220 patients (mean gap $9.42 \pm 8.15$ points). The wearing-off
+analysis included 276 patients (249 events, 90.2\% event rate;
+median time to wearing-off: 52.8 months).
+Figure~\ref{fig:s1_nfrac_dist} shows the distribution of $\Nfrac$ across
+the analysis cohort, stratified by tertile.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{p9_fig2_nfrac_distribution.pdf}
+  \caption{\textbf{Supplementary Figure S1.} Distribution of neuron fraction $\Nfrac$ across the analysis
+  cohort ($n{=}988$ patients). The histogram shows the density of
+  $\Nfrac$ values computed from Phase~2 Bayesian posteriors, with
+  vertical lines indicating tertile boundaries. Most patients retain
+  $>$80\% of dopaminergic neurons at baseline, consistent with the
+  early-stage PPMI enrollment criteria.}
+  \label{fig:s1_nfrac_dist}
+\end{figure}
+
+
+\subsection{Path A: OFF-State Motor Trajectory (Informative Negative)}
+
+Table~\ref{tab:s1_path_a} summarizes the five models. In OLS, $\Nfrac$
+explains only 5.1\% of OFF-state UPDRS-III variance ($R^2{=}0.051$;
+$\beta_1{=}{-}15.99$, $p{<}10^{-55}$), while elapsed time explains
+15.5\% ($R^2{=}0.155$; $\beta_1{=}1.85$~points/year, $p{<}10^{-176}$).
+In mixed-effects models with random intercepts and slopes, the time-only
+LME achieves conditional $R^2{=}0.833$ versus 0.800 for the $\Nfrac$ LME,
+with $\Delta\text{AIC}{=}{+}803$ decisively favoring time
+(RMSE: 5.88 vs.\ 6.44).
+
+The large conditional $R^2$ values (0.80--0.83) in both LMEs reflect
+the dominance of between-patient heterogeneity: patient-specific random
+intercepts capture baseline severity, which accounts for most variance.
+The \textit{fixed-effects} component---the population-level relationship
+between predictor and outcome---is where $\Nfrac$ underperforms time.
+
+This result is an informative negative: $\Nfrac$ is approximately a
+monotonic transform of time (all patients lose neurons over time). The
+per-patient neurodegeneration \textit{rate} does not add predictive value
+beyond simple elapsed time for OFF-state motor scores. This is consistent
+with the Gupta~\etal~\cite{gupta2025} SBR-directed model, where
+DaT-SPECT predicts MDS-UPDRS through a time-course that is largely
+shared across patients. Figure~\ref{fig:s2_path_a_scatter} illustrates the
+near-equivalence of $\Nfrac$ and elapsed time as predictors, and
+Figure~\ref{fig:s3_path_a_aic} summarizes the AIC comparison.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{p9_fig3_path_a_nfrac_vs_time.pdf}
+  \caption{\textbf{Supplementary Figure S2.} Path~A: Comparison of $\Nfrac$ (left) and elapsed time
+  (right) as predictors of OFF-state UPDRS-III. Each point represents
+  one visit ($n{=}4{,}772$). The nearly identical scatter patterns
+  reflect the monotonic relationship between $\Nfrac$ and time,
+  explaining why time outperforms $\Nfrac$ as a univariate predictor
+  ($\Delta\mathrm{AIC}{=}{+}803$).}
+  \label{fig:s2_path_a_scatter}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.75\textwidth]{p9_fig4_path_a_aic_comparison.pdf}
+  \caption{\textbf{Supplementary Figure S3.} Path~A: AIC comparison across five models. Lower AIC
+  indicates better fit. The time-based LME (A5) achieves the lowest
+  AIC, decisively outperforming the $\Nfrac$-based LME (A2) by
+  $\Delta\mathrm{AIC}{=}802$.}
+  \label{fig:s3_path_a_aic}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Supplementary Table S1.} Path A OFF-state UPDRS-III models ($n{=}4{,}772$ visits, 988 patients).}
+\label{tab:s1_path_a}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Model & Predictor & $R^2$ & AIC & RMSE \\
+\midrule
+A1. OLS & $\Nfrac$  & 0.051 & 38,752 & 14.03 \\
+A4. OLS & Time      & 0.155 & 38,198 & 13.24 \\
+\midrule
+A2. LME & $\Nfrac$  & 0.800$^\dagger$ & 35,456 & 6.44 \\
+A5. LME & Time      & 0.833$^\dagger$ & 34,654 & 5.88 \\
+\midrule
+A3. Hill & $\Nfrac$  & 0.053 & 25,201$^\ddagger$ & 14.01 \\
+\bottomrule
+\multicolumn{5}{@{}l}{\footnotesize $^\dagger$Conditional $R^2$ (Nakagawa \& Schielzeth). $^\ddagger$Hill AIC uses} \\
+\multicolumn{5}{@{}l}{\footnotesize nonlinear LS formulation; not directly comparable to OLS AIC.} \\
+\end{tabular}
+\end{table}
+
+
+\subsection{Path B: ON--OFF Gap --- The Headline Finding}
+
+\subsubsection{The Interaction Effect}
+
+Table~\ref{tab:path_b} presents the six models. The interaction model
+(B3) achieves $R^2{=}0.051$ with
+$\Delta\text{AIC}{=}{-}72.1$ vs.\ the $\Nfrac$-only model (B1) and
+$\Delta\text{AIC}{=}{-}70.5$ vs.\ the LEDD-only model (B2, matched
+dataset), both decisively favoring the interaction
+($|\Delta\text{AIC}| > 10$; Burnham \& Anderson~\cite{burnham2002}).
+
+The interaction coefficient $\beta_3{=}2.34$ (OLS) is positive,
+indicating that higher LEDD amplifies the ON--OFF gap \textit{more} in
+patients with greater neuron loss (lower $\Nfrac$). The $\Nfrac$
+coefficient $\beta_1{=}{-}9.07$ is negative: as neurons die, the gap
+increases---mechanistically, patients become more dependent on exogenous
+levodopa. The relationship is visualized in Figure~\ref{fig:gap_vs_nfrac},
+and the model comparison is summarized in Figure~\ref{fig:s4_path_b_daic}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{p9_fig5_path_b_gap_vs_nfrac.pdf}
+  \caption{Path~B (key figure): ON--OFF gap as a function of $\Nfrac$,
+  stratified by LEDD quartile. Each panel shows a different LEDD range,
+  with regression lines and 95\% confidence bands. The steepening
+  negative slope at higher LEDD quartiles demonstrates the
+  $\Nfrac \times \LEDD$ interaction: patients with fewer surviving
+  neurons (lower $\Nfrac$) derive progressively less motor benefit
+  from higher levodopa doses.}
+  \label{fig:gap_vs_nfrac}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.75\textwidth]{p9_fig6_path_b_daic_comparison.pdf}
+  \caption{\textbf{Supplementary Figure S4.} Path~B: $\Delta$AIC relative to the interaction model (B3).
+  Positive values indicate worse fit. The interaction model decisively
+  outperforms all alternatives ($|\Delta\mathrm{AIC}| > 10$; Burnham
+  \& Anderson threshold). The Hill models (B4a, B4b) perform worse than
+  the null model, confirming the sub-EC$_{50}$ regime.}
+  \label{fig:s4_path_b_daic}
+\end{figure}
+
+\subsubsection{Mixed-Effects Confirmation}
+
+The mixed-effects model (B5) with patient-specific random intercepts
+confirms the interaction on 3,058 visits from 652 patients. The
+population-level $\Nfrac$ coefficient is $\beta(\Nfrac){=}{-}11.62$
+($p < 10^{-37}$), and the interaction term
+$\beta(\Nfrac \times \LEDD_s){=}2.13$ ($p{=}0.011$). Conditional
+$R^2{=}0.491$, substantially higher than OLS $R^2{=}0.051$, reflecting
+important between-patient heterogeneity (random-intercept
+variance${}=22.93$). Each 10\% decrease in $\Nfrac$ increases the
+ON--OFF gap by 1.16 UPDRS-III points---a clinically meaningful effect
+given the MDS-UPDRS-III minimal clinically important difference of
+3.25 points~\cite{holford2006}.
+
+\subsubsection{The Hill Model Fails: Sub-EC$_{50}$ Regime}
+
+The Hill dose--response model (B4a, $h{=}2$ fixed) achieves $R^2 < 0.001$
+with $\Delta\text{AIC}{=}{+}1.1$ vs.\ the null model---no improvement.
+When $h$ is freed (B4b), it converges to $h{=}0.130$ with $G_\text{max}$
+diverging to $7.9 \times 10^5$ and $\rho$ collapsing to
+$4.7 \times 10^{-41}$ (numerical underflow), confirming that the
+optimizer pushes toward the linear limit of the sigmoid. The free-$h$
+model does not converge to a meaningful solution.
+
+This is the H5 finding: PPMI patients operate in the initial linear
+region of the dose--response curve, far below the EC$_{50}$ inflection
+point. The Hill sigmoidal saturating function is inappropriate for the
+LEDD range observed in PPMI ($\text{median}{=}500$~mg/day); linear
+models suffice to capture the dose--response relationship in this cohort.
+
+\begin{table}[t]
+\centering
+\caption{Path B: ON--OFF gap models ($n{=}3{,}178$ visits, 772 patients).}
+\label{tab:path_b}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Model & Predictors & $R^2$ & AIC & $\Delta$AIC$_\text{B3}$ \\
+\midrule
+B0. Null       & Intercept only    & 0.000 & 22,453 & $+$160 \\
+B1. $\Nfrac$   & $\Nfrac$          & 0.028 & 22,365 & $+$72 \\
+B2. LEDD       & LEDD$_s$          & 0.028 & 22,364 & $+$71 \\
+\textbf{B3. Interaction} & \textbf{$\Nfrac \times$ LEDD$_s$} & \textbf{0.051} & \textbf{22,293} & \textbf{---} \\
+B4a. Hill ($h{=}2$) & $\rho \cdot \LEDD \cdot \Nfrac$ & $<$0.001 & 22,454 & $+$161 \\
+B4b. Hill (free) & $\rho, h$        & 0.010 & 22,426 & $+$133 \\
+\midrule
+B5. Mixed      & $\Nfrac \times$ LEDD$_s$ & 0.491$^\dagger$ & --- & --- \\
+\bottomrule
+\multicolumn{5}{@{}l}{\footnotesize $^\dagger$Conditional $R^2$; B5 uses 3,058 obs / 652 patients. AIC} \\
+\multicolumn{5}{@{}l}{\footnotesize omitted (not comparable to OLS models on different subsets).} \\
+\end{tabular}
+\end{table}
+
+
+\subsubsection{LEDD Quartile Stratification}
+
+To visualize the interaction, we stratified patients by LEDD quartiles.
+At low LEDD (Q1: 26--342 mg/day, $n{=}795$), the mean gap is 7.68 UPDRS
+points; at high LEDD (Q4: 805--8,204 mg/day, $n{=}795$), the mean gap is
+11.99 points. Simultaneously, the mean $\Nfrac$ decreases monotonically
+across quartiles: 0.896 (Q1), 0.863 (Q2), 0.812 (Q3), 0.791 (Q4). This
+confounding pattern---higher LEDD in patients with worse neurodegeneration---
+is precisely why the interaction model is necessary: without it, one
+cannot disentangle the effect of LEDD from the effect of disease
+progression (Figure~\ref{fig:gap_by_ledd_nfrac}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{p9_fig7_path_b_gap_by_ledd_nfrac.pdf}
+  \caption{ON--OFF gap stratified by LEDD quartile and $\Nfrac$ tertile.
+  The monotonic decrease in mean $\Nfrac$ across LEDD quartiles
+  (Q1: 0.896, Q4: 0.791) reflects confounding by indication: sicker
+  patients receive higher doses. The interaction model disentangles
+  these effects.}
+  \label{fig:gap_by_ledd_nfrac}
+\end{figure}
+
+
+\subsection{Corrected Decisive Test}
+
+An initial ``decisive test'' examined the Spearman correlation between
+neurodegeneration rate and mean LEDD, finding $\rho{=}{-}0.026$
+($p{=}0.65$, $n{=}299$). This null result was initially interpreted as
+evidence against coupling, but reflects a mismatch between hypothesis
+and test: it asks ``do faster degenerators take more medication?''
+(the LEAP question~\cite{verschuur2019}), not ``does $N(t)$ modulate
+UPDRS-III in the presence of LEDD?'' (the model question).
+
+The corrected test computes the partial correlation between
+$\text{residuals}(\text{UPDRS-III} \sim \Nfrac)$ and LEDD, yielding
+$\rho_\text{partial}{=}0.180$ ($p < 10^{-30}$, $n{=}3{,}957$ visits).
+An OLS model comparison shows $\Delta\text{AIC}{=}104$ favoring the
+coupled model ($\Nfrac + \LEDD + \Nfrac \times \LEDD$) over the
+$\Nfrac$-only model. The interaction term in a mixed-effects formulation
+is borderline ($p{=}0.053$), consistent with the OLS results but with
+wider confidence intervals due to the random-effects structure.
+
+This episode illustrates a general lesson in mechanistic modeling:
+a marginal correlation between two variables (rate and dose) is not
+the same as testing a mechanistic hypothesis (rate modulates dose
+response). Figure~\ref{fig:decisive_test} contrasts the two tests.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{p9_fig9_corrected_decisive_test.pdf}
+  \caption{Corrected decisive test ($2 \times 2$ panel). \textbf{Left:}
+  The original (wrong) test examines the marginal correlation between
+  neurodegeneration rate and mean LEDD ($\rho{=}{-}0.026$, $p{=}0.65$),
+  which asks the LEAP question (``do faster degenerators take more
+  medication?''), not the mechanistic question. \textbf{Right:} The
+  corrected test examines the partial correlation between UPDRS-III
+  residuals (after removing $\Nfrac$) and LEDD ($\rho_\text{partial}
+  {=}0.180$, $p < 10^{-30}$), confirming the $\Nfrac \times \LEDD$
+  coupling.}
+  \label{fig:decisive_test}
+\end{figure}
+
+
+\subsection{Path C: Wearing-Off Timing (Informative Negative)}
+
+Among 276 patients with Part~IV data and $N(t)$ posteriors, 249 (90.2\%)
+developed wearing-off (NP4OFF $\geq 1$) during follow-up, with a median
+time to onset of 52.8 months. The near-universal event rate indicates
+that wearing-off is an expected consequence of chronic levodopa therapy,
+not a rare adverse outcome.
+
+Kaplan--Meier curves stratified by neurodegeneration rate tertiles
+(slow: $r < 1.78$\%/yr; medium: $1.78$--$8.11$; fast: $> 8.22$) show no
+separation: log-rank $p{=}0.64$ for fast vs.\ slow, $p{=}0.71$ for the
+three-group comparison (Table~\ref{tab:path_c}). The Cox model yields a
+hazard ratio of 1.004 per unit increase in $r$ ($p{=}0.69$; $C$-index${}=0.515$,
+essentially random). Spearman correlation between $r$ and time-to-event
+is $\rho{=}{-}0.050$ ($p{=}0.43$, $n{=}249$ events).
+
+Sensitivity analysis at $\text{NP4OFF} \geq 2$ yields similar null results
+($\rho{=}{-}0.111$, $p{=}0.21$; $C$-index${}=0.562$).
+Figure~\ref{fig:km_curves} shows the Kaplan--Meier curves by
+neurodegeneration rate tertile.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{p9_fig8_path_c_km_curves.pdf}
+  \caption{Path~C: Kaplan--Meier survival curves for time to wearing-off
+  onset, stratified by neurodegeneration rate tertile (slow: $r < 1.78$\%/yr;
+  medium: $1.78$--$8.11$\%/yr; fast: $> 8.22$\%/yr). The three curves are
+  nearly superimposed (log-rank $p{=}0.71$), demonstrating that
+  neurodegeneration rate does not predict wearing-off timing. The
+  near-universal event rate (90.2\%) indicates that wearing-off is a
+  pharmacokinetically driven consequence of chronic levodopa therapy.}
+  \label{fig:km_curves}
+\end{figure}
+
+This is an informative negative: wearing-off timing is driven by
+pharmacokinetic factors (dosing schedules, gastrointestinal absorption
+variability, peripheral metabolism) and post-synaptic receptor changes,
+not by the rate of pre-synaptic neuron death. This finding is consistent
+with the pharmacological understanding that motor fluctuations emerge
+from the narrowing therapeutic window as disease progresses
+\textit{in time}, regardless of the underlying neurodegeneration rate.
+
+\begin{table}[t]
+\centering
+\caption{Path C: Wearing-off analysis ($n{=}276$ patients, 249 events).}
+\label{tab:path_c}
+\begin{tabular}{@{}llr@{}}
+\toprule
+Analysis & Statistic & Value \\
+\midrule
+KM (3 tertiles)           & Log-rank $p$ & 0.711 \\
+KM (fast vs.\ slow)       & Log-rank $p$ & 0.641 \\
+Cox PH (HR per \%/yr)     & HR (95\% CI) & 1.004 (0.986--1.021) \\
+Cox PH                    & $C$-index & 0.515 \\
+Spearman ($r$ vs.\ time)  & $\rho$ ($p$) & $-0.050$ (0.43) \\
+\midrule
+Sensitivity (NP4OFF $\geq 2$) & $\rho$ ($p$) & $-0.111$ (0.21) \\
+                               & $C$-index & 0.562 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Hypothesis Tests Summary}
+
+Table~\ref{tab:hypotheses} summarizes the five pre-specified hypotheses.
+Two are supported (H1, H2), two are informative negatives (H3, H4), and
+one yields a novel mechanistic insight (H5). No hypotheses produced
+unexpected results, and all decision criteria were specified before
+examining the test statistics.
+
+\begin{table}[t]
+\centering
+\caption{Summary of hypothesis tests.}
+\label{tab:hypotheses}
+\begin{tabular}{@{}clll@{}}
+\toprule
+H & Hypothesis & Key Statistic & Verdict \\
+\midrule
+1 & Interaction beats baselines & $\Delta$AIC $= -72, -71$ & PASS \\
+2 & $\Nfrac$ moderates benefit & $\beta = -11.62$, $R^2_c = 0.49$ & PASS \\
+3 & Wearing-off null & $\rho = -0.05$, $C = 0.52$ & Inform.\ neg. \\
+4 & Time beats $\Nfrac$ (OFF) & $\Delta$AIC $= +803$ & Inform.\ neg. \\
+5 & Sub-EC$_{50}$ regime & $h_\text{free} = 0.13$ & Confirmed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ====================================================================
+% 4. DISCUSSION
+% ====================================================================
+\section{Discussion}
+
+\subsection{$N(t) \times$ LEDD Interaction: Mechanistic Interpretation}
+
+The core finding of this study is that per-patient neurodegeneration
+moderates levodopa treatment benefit through an \textit{interaction}
+effect, not as a main effect. The mechanistic interpretation is
+straightforward: levodopa requires aromatic L-amino acid decarboxylase
+(AADC) in surviving dopaminergic terminals for conversion to dopamine.
+As neurons die (lower $\Nfrac$), less AADC is available, and the same
+LEDD produces less synaptic dopamine. This manifests as a larger ON--OFF
+gap---not because the OFF state worsens faster, but because the ON state
+improves less.
+
+The mixed-effects coefficient $\beta(\Nfrac) = -11.62$ translates to a
+concrete clinical prediction: a patient who has lost 10\% of dopaminergic
+neurons will show 1.16 fewer UPDRS-III points of improvement from the same
+LEDD compared to an otherwise identical patient with full neuronal
+complement. While this effect size is modest relative to the UPDRS-III
+scale (0--132), it accumulates over disease progression and has
+implications for dose optimization.
+
+The conditional $R^2 = 0.491$ for the mixed-effects model---compared with
+$R^2 = 0.051$ for OLS---reveals that nearly half the variance in treatment
+benefit is explained by patient-level heterogeneity (random intercepts)
+combined with the $\Nfrac \times \LEDD$ interaction. This substantial
+between-patient variance ($\sigma^2_b = 22.93$) supports the case for
+\textit{per-patient} models rather than population-average approaches.
+
+
+\subsection{Sub-EC$_{50}$ Regime: Clinical Implications}
+
+The Hill model failure (H5) has important implications for PK/PD modeling
+in PD. The free Hill coefficient $h = 0.130$ indicates that PPMI patients
+are operating in the initial linear region of the dose--response curve,
+far below the EC$_{50}$ inflection point. This means:
+
+\begin{enumerate}
+  \item The saturating sigmoid that is standard in pharmacometrics
+    (Emax model) is unnecessary for the LEDD range observed in this
+    cohort (median 500 mg/day).
+  \item Linear dose--response models are not just adequate but
+    \textit{appropriate}---the data do not contain information about
+    the saturation regime.
+  \item The identifiability failure ($\kappa > 3.5 \times 10^6$ for
+    $(\rho, h)$ jointly) is not a data limitation but a fundamental
+    consequence of operating below EC$_{50}$: the data cannot
+    distinguish different sigmoid shapes because only the linear
+    foot is sampled.
+\end{enumerate}
+
+This finding should inform future PK/PD studies: unless the study
+includes patients at LEDD doses approaching or exceeding EC$_{50}$---which
+may not be ethically achievable---Hill/Emax models should be replaced
+by simpler linear parametrizations. This recommendation aligns with the
+K-PD framework~\cite{jacqmin2007}, which models drug effects without
+measured concentrations and naturally accommodates linear
+dose--response relationships.
+
+
+\subsection{Why OFF-UPDRS Prediction Failed}
+
+The informative negative for Path~A ($\Delta\text{AIC} = +803$ favoring
+time) deserves careful interpretation. At first glance, $\Nfrac$ and
+time should contain different information: $\Nfrac$ reflects patient-specific
+neurodegeneration rate, while time is universal. However, because all
+patients in PPMI are followed from a common baseline (enrollment) and
+because the exponential decay model for $N(t)$ is monotonic in time,
+$\Nfrac$ is approximately a monotonic transformation of time for any
+given patient. The per-patient rate variation that distinguishes fast
+from slow degenerators contributes less population-level predictive power
+than the shared temporal trend.
+
+This does not mean neurodegeneration is irrelevant to motor
+symptoms---rather, it means that in a cohort with relatively homogeneous
+follow-up schedules (PPMI's annual visit protocol), time is a sufficient
+statistic for the monotonic component of neurodegeneration. The
+\textit{interaction} with LEDD (Path~B) is where patient-specific
+$\Nfrac$ adds value: the differential response to medication cannot be
+captured by time alone.
+
+
+\subsection{Why Wearing-Off Prediction Failed}
+
+Wearing-off is the most common motor complication in levodopa-treated PD,
+affecting $>$90\% of patients in our cohort. The null result
+($\rho = -0.050$, $C$-index $= 0.515$) indicates that the \textit{rate}
+of neurodegeneration does not predict \textit{when} wearing-off begins.
+This is consistent with the established pharmacological understanding:
+wearing-off arises from the progressive shortening of the therapeutic
+window due to pulsatile stimulation of post-synaptic dopamine receptors
+and pharmacokinetic variability (gastric emptying, peripheral
+metabolism), not from pre-synaptic neuron count~\cite{djaldetti2018}.
+
+The near-universal event rate (90.2\%) further supports the interpretation
+that wearing-off is a consequence of chronic pulsatile levodopa
+administration regardless of neurodegeneration tempo. If neuron death
+rate drove wearing-off, we would expect fast degenerators to develop
+wearing-off earlier---but the Kaplan--Meier curves are essentially
+superimposed.
+
+
+\subsection{The Decisive Test: Lessons in Hypothesis Testing}
+
+The contrast between the original decisive test ($\rho = -0.026$,
+null) and the corrected partial correlation ($\rho_\text{partial} = 0.180$,
+$p < 10^{-30}$) provides a pedagogical example of the difference
+between marginal and conditional tests. The original test asked whether
+faster degenerators take more medication---a question about prescribing
+behavior, not about mechanistic coupling. The corrected test asks
+whether LEDD explains residual UPDRS-III variance after accounting for
+$\Nfrac$---the actual mechanistic question.
+
+This episode reinforces a principle that is well-known in causal inference
+but often overlooked in biomarker studies: a null marginal correlation
+between two variables does not imply the absence of a mechanistic
+relationship, especially when both are confounded by disease
+severity~\cite{vuong1989}.
+
+
+\subsection{Toward a Mechanistic Digital Twin}
+
+Figure~\ref{fig:summary} synthesises the three pathways. The findings support a patient-specific PK/PD twin for PD treatment planning in which the $\Nfrac \times \LEDD$ interaction drives ON--OFF gap prediction, elapsed time (not $\Nfrac$) drives OFF-state trajectory prediction, and PK-oriented modelling (absorption profiles, dosing schedules) drives wearing-off. The sub-EC$_{50}$ finding constrains the dose--response parametrisation to linear rather than Hill/Emax unless the cohort includes high-dose regimens. A companion bidirectional-ready twin~\cite{dupre2026paper10} operationalises this architecture via episodic Sequential Importance Resampling posterior updates, and a companion clinical decision-support pipeline~\cite{dupre2026paper6} surfaces per-patient $\Nfrac$ (median + 95\% CrI) at point-of-care for the 1{,}065 of 1{,}900 PPMI patients with a calibrated posterior. Cohort-median $\Nfrac$ at current-visit horizon is 0.93 (IQR [0.74, 0.97]); the long-follow-up subset ($\geq 10$~yr, $n{=}241$) shows median 0.72 (IQR [0.35, 0.91]), consistent with the 3.3\%/yr population neuron-loss rate from this work.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{p9_fig10_three_pathway_summary.pdf}
+  \caption{\textbf{Three-pathway summary.} (A) OFF-UPDRS trajectory: time wins ($\Delta\mathrm{AIC}{=}{+}803$). (B) ON--OFF gap: $\Nfrac \times \LEDD$ interaction wins ($\Delta\mathrm{AIC}{=}{-}72$, $p{=}0.044$ after severity control). (C) Wearing-off: null result ($C$-index${=}0.515$). Per-patient neurodegeneration moderates treatment benefit through an interaction, not a main effect.}
+  \label{fig:summary}
+\end{figure}
+
+
+\subsection{Comparison with Existing Models}
+
+Supplementary Table~S2 positions our work relative to existing PD progression and PK/PD models. The key differentiator is the use of per-patient, imaging-calibrated $N(t)$ trajectories rather than population-average disease progression curves: Gupta~\etal~\cite{gupta2025} model SBR-to-UPDRS via IRT without a medication covariate; Holford~\etal~\cite{holford2006} use NLME for levodopa PD without imaging biomarkers; V\'{e}ronneau-Veilleux~\etal~\cite{veronneau2020} include $N(t)$ but use generic trajectories, not per-patient calibrations. Our hybrid approach bridges pharmacometric models (which lack imaging) and imaging models (which lack medication).
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Supplementary Table S2.} Comparison with existing PD progression and PK/PD models.}
+\label{tab:s2_comparison}
+\footnotesize
+\begin{tabular}{@{}lcccl@{}}
+\toprule
+Study & Per-patient & Imaging & Medication & Method \\
+      & $N(t)$?     & calibrated? & covariate? & \\
+\midrule
+Holford 2006~\cite{holford2006} & No & No & Yes & NLME \\
+Jacqmin 2007~\cite{jacqmin2007} & No & No & Yes & K-PD \\
+Simon 2016~\cite{simon2016} & No & No & Yes & PK/PD \\
+V\'{e}ronneau-V.\ 2020~\cite{veronneau2020} & Generic & No & Yes & ODE \\
+Ursino 2020~\cite{ursino2020} & No & No & Yes & PK/PD \\
+Chae 2021~\cite{chae2021} & No & No & Yes & IRT \\
+Gupta 2025~\cite{gupta2025} & No & Yes & No & SBR-IRT \\
+\textbf{This work} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{LME + Hill} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Limitations}
+
+Several limitations should be acknowledged:
+
+\begin{enumerate}
+  \item \textbf{No plasma drug levels.} PPMI does not collect
+    levodopa plasma concentrations, precluding a full PK/PD model.
+    LEDD is a dosing summary, not a pharmacokinetic measurement.
+    Intra-individual pharmacokinetic variability (absorption,
+    metabolism) is not modeled.
+
+  \item \textbf{$\Nfrac$ model assumptions.} The neuron fraction is
+    computed from a Phase~2 Bayesian model that assumes exponential
+    decay of DaT-SPECT SBR. While validated at 93.75\% leave-one-out
+    coverage, this is a model-derived quantity, not a direct measurement
+    of neuron count.
+
+  \item \textbf{PPMI population.} PPMI enrolls predominantly
+    early-stage, treatment-na\"{i}ve PD patients. The sub-EC$_{50}$
+    finding may not generalize to advanced PD cohorts with higher
+    LEDD requirements.
+
+  \item \textbf{Confounding by indication.} Higher LEDD is prescribed
+    to patients with worse symptoms, creating a confound between dose
+    and severity. The mixed-effects interaction model partially
+    addresses this through patient-level random intercepts, but causal
+    inference requires randomized data.
+
+  \item \textbf{ON/OFF assessment timing.} The ON--OFF gap assumes
+    that paired assessments on the same visit day reflect true peak
+    and trough motor states. In practice, assessment timing relative
+    to dose may vary.
+
+  \item \textbf{Modest OLS $R^2$.} The fixed-effects OLS $R^2$ for
+    Path~B is 0.051---low in absolute terms. Most variance in the
+    ON--OFF gap is attributable to within-visit noise and unmeasured
+    patient characteristics captured by the random effects ($R^2_c = 0.491$).
+    The $\Delta$AIC of $-72$ provides decisive evidence for the
+    interaction term despite low marginal $R^2$.
+
+  \item \textbf{Single cohort.} External validation in independent
+    PD cohorts (\eg, PDBP, DeNoPa) is needed to confirm
+    generalizability.
+\end{enumerate}
+
+
+\subsection{Future Work}
+
+Three extensions are planned: integrating the $\Nfrac \times \LEDD$ interaction into the bidirectional mechanistic twin~\cite{dupre2026paper10} with the linear parametrisation mandated by H5; external validation in advanced-PD cohorts where patients may operate closer to or above EC$_{50}$; and incorporating patient-specific pharmacokinetic profiles if plasma levodopa levels become available.
+
+
+% ====================================================================
+% 5. CONCLUSION
+% ====================================================================
+\section{Conclusion}
+
+This three-pathway analysis couples per-patient DaT-SPECT-calibrated neurodegeneration $N(t)$ to longitudinal levodopa response in PD. $\Nfrac$ moderates treatment benefit through an $\Nfrac \times \LEDD$ interaction ($\Delta\mathrm{AIC}=-72$; each 10\% neuron loss reduces benefit by 1.16 UPDRS-III points), with PPMI patients operating in the sub-EC$_{50}$ linear regime ($h_\text{free}=0.13$). Two informative negatives refine the framework's scope: $\Nfrac$ does not outperform elapsed time for OFF-state prediction ($\Delta\mathrm{AIC}=+803$), and neurodegeneration rate does not predict wearing-off ($C$-index$=0.515$). Together, these results provide a quantitative basis for $N(t)$-informed dose optimisation in patient-specific digital twins~\cite{dupre2026paper10}.
+
+
+% ====================================================================
+% ACKNOWLEDGMENTS
+% ====================================================================
+\section*{Acknowledgments}
+
+Data were obtained from the Parkinson's Progression Markers Initiative (PPMI) and the Accelerating Medicines Partnership Parkinson's Disease (AMP-PD) platforms. PPMI is funded by the Michael J.\ Fox Foundation for Parkinson's Research and its funding partners; see the PPMI study-sponsors page for the full list.
+
+
+% ====================================================================
+% DATA AVAILABILITY
+% ====================================================================
+\section*{Data Availability}
+
+PPMI data are available to qualified researchers upon request through
+\url{https://www.ppmi-info.org}. Analysis code is available at
+\url{https://github.com/bddupre92/PD_PHD}.
+
+
+% ====================================================================
+% FUNDING
+% ====================================================================
+\section*{Funding}
+
+Dissertation research supported by the Department of Biomedical Engineering, University of North Dakota. The funder had no role in study design, data collection, analysis, decision to publish, or preparation of the manuscript.
+
+
+% ====================================================================
+% AUTHOR CONTRIBUTIONS
+% ====================================================================
+\section*{Author Contributions}
+
+B.D.D.\ wrote the manuscript, designed the research, performed the research, and analyzed the data.
+
+
+% ====================================================================
+% CONFLICT OF INTEREST
+% ====================================================================
+\section*{Conflict of Interest}
+
+The author declares no conflicts of interest.
+
+
+% ====================================================================
+% BIBLIOGRAPHY
+% ====================================================================

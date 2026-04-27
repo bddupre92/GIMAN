@@ -1,0 +1,848 @@
+% mechtwin_review.tex — Appendix D: Mechanistic Digital Twin Technical Review
+% Blair Dupre, PhD Dissertation, University of Louisiana at Lafayette
+
+\chapter{Mechanistic Digital Twin: Technical Review and Implementation Roadmap}
+\label{app:mechtwin}
+
+This appendix provides a detailed technical treatment of the five coupled ordinary differential equation (ODE) modules proposed in Section~\ref{sec:future} for transitioning from the data-driven GIMAN framework to a mechanistic digital twin capable of interventional prediction. For each module, the biological rationale, complete mathematical formulation with derivations, data sources and access, calibration strategy, and validation criteria are presented. Supporting methods for Bayesian parameter estimation, the MindMend biosensor integration, and the phased development plan are also detailed.
+
+% ============================================================================
+\section{Introduction and Rationale}
+\label{sec:mech-intro}
+% ============================================================================
+
+The GIMAN framework established in this dissertation is fundamentally \textit{correlational}: it learns statistical associations between observed clinical features and future NSD-ISS stage transitions. While this yields clinically useful predictions---CatBoost AUC 0.981 for binary classification (Paper~1), Dynamic-DeepHit $C_\text{td} = 0.926$ for transition timing (Paper~3), and IPCW conformal bands with 91.1\% coverage (Paper~4)---it cannot answer the \textit{interventional} question that matters most for treatment planning: ``What if this patient starts prasinezumab now versus in twelve months?''
+
+A mechanistic digital twin encodes the causal biological chain: alpha-synuclein aggregation drives neuronal death, which reduces striatal dopamine, which manifests as declining DaT-SPECT signal and worsening motor function. By encoding mechanism, the model becomes interventional, capable of simulating outcomes under treatments that alter specific biological processes~\cite{bjornsson2020,corralacero2020,laubenbacher2024}. Within the quantitative systems pharmacology (QSP) framework, this corresponds to the ``hallmarks of neurodegenerative disease'' programme outlined by Bloomingdale et al.~\cite{bloomingdale2022}, which envisions conserved mechanistic submodels (aggregation, neuronal vulnerability, neuroinflammation, proteostasis) that can be composed across diseases and parameterized to individual patients---explicitly complementing the earlier PD-specific mathematical-biology review of Bakshi et al.~\cite{bakshi2018}. This capacity distinguishes mechanistic models from all purely statistical approaches, including sophisticated deep learning architectures.
+
+The transition from correlational to mechanistic modeling requires five coupled ODE modules, each grounded in established disease biology. These modules are coupled because alpha-synuclein pathology drives neuronal death (Module~1 $\to$ Module~2), neuronal loss reduces dopamine synthesis capacity affecting drug response (Module~2 $\to$ Module~4), and pathology propagates across the brain connectome (Module~1 $\to$ Module~3). The functional impairment module (Module~5) maps the biological state vector to clinically observable NSD-ISS stage and is essentially already built as Paper~1's CatBoost classifier. Figure~\ref{fig:mech-transition} in Chapter~\ref{ch:discussion} illustrates this architecture.
+
+The remainder of this appendix presents each module in full mathematical detail, with dimensional analysis, steady-state solutions, stability properties, and sensitivity analyses where appropriate.
+
+% ============================================================================
+\section{Module 1: Alpha-Synuclein Aggregation Kinetics}
+\label{sec:mech-aggregation}
+% ============================================================================
+
+\subsection{Biological Background}
+
+Alpha-synuclein is a 140-amino-acid presynaptic protein whose aggregation into oligomeric intermediates and amyloid fibrils is the molecular hallmark of Parkinson's disease and other synucleinopathies~\cite{kalia2015}. The aggregation process follows well-characterized nucleation-elongation kinetics~\cite{knowles2009,dear2020}, proceeding through three kinetically distinct species: monomeric alpha-synuclein ($M$), oligomeric intermediates ($O$), and fibrillar aggregates ($F$). Monomeric protein misfolds through primary nucleation to form oligomeric nuclei, which either convert to fibrillar seeds or are cleared by cellular quality-control machinery. Fibrils grow by monomer addition (elongation) and multiply through fragmentation (secondary nucleation), creating an autocatalytic feedback loop that accelerates aggregation once a critical fibril concentration is reached~\cite{cohen2012,meisl2014}.
+
+The Seed Amplification Assay (SAA), which detects the presence of fibrillar alpha-synuclein seeds in cerebrospinal fluid (CSF), provides a binary readout ($S+$ or $S-$) of this continuous process. In PPMI, 12.6\% of the 2,201 staged patients have SAA results available (277 patients), with the remainder staged using only the D~anchor (DaT-SPECT)~\cite{simuni2024}. The transition from binary SAA readout to quantitative fibril concentration modeling is a key challenge addressed by this module.
+
+\subsection{Mathematical Formulation}
+
+\subsubsection{State Variables and Units}
+
+Let $M(t)$, $O(t)$, and $F(t)$ denote the concentrations of monomeric, oligomeric, and fibrillar alpha-synuclein, respectively, measured in nanomolar (nM). Time $t$ is measured in hours for intracellular kinetics and in years for clinical-scale modeling; a timescale bridging factor $\tau$ converts between the two.
+
+\subsubsection{Governing Equations}
+
+The coupled ODE system for alpha-synuclein aggregation is:
+
+\begin{align}
+\frac{dM}{dt} &= k_\text{prod} - k_n \, M^{n_c} - k_e \, M \, F - k_\text{clear}^M \, M \label{eq:dMdt} \\
+\frac{dO}{dt} &= k_n \, M^{n_c} - k_\text{conv} \, O - k_\text{clear}^O \, O \label{eq:dOdt} \\
+\frac{dF}{dt} &= k_\text{conv} \, O + k_\text{frag} \, F - k_\text{clear}^F \, F \label{eq:dFdt}
+\end{align}
+
+where the parameters are defined in Table~\ref{tab:agg-params}.
+
+\begin{table}[h]
+\centering
+\caption{Parameters of the alpha-synuclein aggregation module.}
+\label{tab:agg-params}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Units} & \textbf{Typical Value} \\
+\midrule
+$k_\text{prod}$ & Monomer production rate & nM/hr & $\sim 0.1$ \\
+$k_n$ & Primary nucleation rate & nM$^{1-n_c}$/hr & $10^{-8}$--$10^{-6}$ \\
+$n_c$ & Critical nucleus size & dimensionless & 2--4 \\
+$k_e$ & Fibril elongation rate & nM$^{-1}$/hr & $10^{-4}$--$10^{-2}$ \\
+$k_\text{conv}$ & Oligomer-to-fibril conversion & hr$^{-1}$ & $10^{-3}$--$10^{-1}$ \\
+$k_\text{frag}$ & Fibril fragmentation rate & hr$^{-1}$ & $10^{-6}$--$10^{-4}$ \\
+$k_\text{clear}^M$ & Monomer clearance rate & hr$^{-1}$ & $\sim 0.05$ \\
+$k_\text{clear}^O$ & Oligomer clearance rate & hr$^{-1}$ & $\sim 0.02$ \\
+$k_\text{clear}^F$ & Fibril clearance rate & hr$^{-1}$ & $\sim 0.005$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Derivation and Dimensional Analysis}
+
+Equation~\eqref{eq:dMdt} follows from mass balance: monomers are produced constitutively at rate $k_\text{prod}$ (by SNCA gene transcription and translation), consumed by primary nucleation (requiring $n_c$ monomers to form an oligomeric nucleus, hence the $M^{n_c}$ term), consumed by elongation (monomer addition to existing fibril ends, a bimolecular reaction with rate $k_e M F$), and cleared by autophagy and proteasomal degradation (first-order kinetics, $k_\text{clear}^M M$). Dimensional consistency requires $[k_n] = \text{nM}^{1-n_c} \cdot \text{hr}^{-1}$ so that $k_n M^{n_c}$ has units of nM/hr.
+
+Equation~\eqref{eq:dOdt} describes oligomer dynamics: production from primary nucleation, conversion to fibrillar seeds at rate $k_\text{conv}$, and clearance. The oligomer-to-fibril conversion is treated as first-order in $O$, consistent with a rate-limiting conformational rearrangement~\cite{dear2020}.
+
+Equation~\eqref{eq:dFdt} includes two production terms: conversion from oligomers and secondary nucleation via fragmentation ($k_\text{frag} F$, creating new fibril ends that recruit monomers). The fragmentation term provides the autocatalytic amplification characteristic of prion-like behavior~\cite{knowles2009}. Net fibril clearance includes both extracellular proteolysis and microglial phagocytosis.
+
+\subsubsection{Steady-State Analysis}
+
+At steady state ($dM/dt = dO/dt = dF/dt = 0$), the system admits two biologically relevant fixed points:
+
+\textbf{Disease-free steady state} ($F^* = 0$, $O^* = 0$):
+\begin{equation}
+M^* = \frac{k_\text{prod}}{k_\text{clear}^M + k_n \, (M^*)^{n_c - 1}}
+\label{eq:ss-healthy}
+\end{equation}
+
+For small $k_n$ (slow nucleation), $M^* \approx k_\text{prod} / k_\text{clear}^M$, the healthy equilibrium monomer concentration.
+
+\textbf{Disease steady state} ($F^* > 0$): The transcritical bifurcation from the disease-free to disease state occurs when the effective reproduction number $\mathcal{R}_0$ exceeds unity:
+\begin{equation}
+\mathcal{R}_0 = \frac{k_\text{frag}}{k_\text{clear}^F} > 1
+\label{eq:R0-agg}
+\end{equation}
+
+This criterion determines whether a small seed of fibrillar material can amplify. When $\mathcal{R}_0 > 1$, fibrils fragment faster than they are cleared, leading to exponential growth until monomer depletion establishes a new equilibrium.
+
+\subsubsection{Anti-Synuclein Antibody Intervention}
+
+Prasinezumab and other anti-alpha-synuclein antibodies~\cite{pagano2022,pagano2024} reduce fibril elongation by binding to the fibril surface and sterically blocking monomer addition. This enters the model as a modified elongation rate:
+\begin{equation}
+k_e^\text{treated}(t) = k_e \cdot \left(1 - \eta \cdot \frac{C_\text{Ab}(t)}{K_d + C_\text{Ab}(t)}\right)
+\label{eq:prasinezumab}
+\end{equation}
+
+where $\eta \in [0, 1]$ is the maximal fractional inhibition (estimated 0.2--0.4 from Phase II data), $C_\text{Ab}(t)$ is the plasma antibody concentration (governed by its own PK), and $K_d$ is the antibody-fibril dissociation constant. This enables simulation of treatment effects without requiring treatment data in the training set.
+
+\subsection{Data Sources and Access}
+
+\begin{description}[style=nextline]
+\item[CSF Alpha-Synuclein (PPMI)] Total alpha-synuclein and phosphorylated alpha-synuclein (pS129) are available for approximately 1,200 PPMI participants at 1--2 timepoints. These provide coarse trajectory data for $M(t)$ calibration. Available through AMP-PD (\url{https://amp-pd.org}).
+
+\item[SAA Qualitative Results (PPMI)] Binary SAA status ($S+/S-$) for 277 of 2,201 patients provides a threshold indicator: $F > F_\text{threshold}$. The SAA fluorescence kinetics (lag time, maximum fluorescence) contain additional quantitative information that could be mapped to in-vivo fibril concentration with a validated transfer function.
+
+\item[In Vitro Kinetic Data] Rate constants $k_n$, $k_e$, $k_\text{frag}$ have been measured in vitro under controlled buffer conditions~\cite{knowles2009,dear2020}. These serve as informative priors for Bayesian calibration but require adjustment for in-vivo conditions (protein crowding, membrane interactions, post-translational modifications).
+
+\item[Next-Generation Quantitative SAA] Assays providing continuous fluorescence readout proportional to fibril mass are under development and expected within 2--3 years. These would provide $F(t)$ trajectory data directly.
+\end{description}
+
+\subsection{Calibration Strategy}
+
+Patient-specific calibration of the aggregation module faces a fundamental identifiability challenge: with only 1--2 CSF measurements and a binary SAA readout per patient, the 9-parameter system is underdetermined. The calibration strategy proceeds hierarchically:
+
+\begin{enumerate}
+\item \textbf{Population-level priors:} Set informative priors for all rate constants from in-vitro literature~\cite{knowles2009,dear2020}. Fix $n_c = 2$ (dimer nucleation) and $k_\text{prod}$ from CSF production rate studies.
+
+\item \textbf{Identifiability reduction:} Reduce the free parameter space by fixing ratios (e.g., $k_\text{clear}^O / k_\text{clear}^M \approx 0.4$) from cell biology literature, leaving 3--4 free parameters: $k_n$, $k_e$, $k_\text{frag}$, and $k_\text{clear}^F$.
+
+\item \textbf{Graph-regularized Bayesian inference:} Use GIMAN's patient similarity graph (Paper~3: 1,900 nodes, 27,780 edges) to construct informative priors for each patient. A patient's rate constants are informed by the calibrated parameters of their graph neighbors (see Section~\ref{sec:mech-bayesian}).
+
+\item \textbf{Sequential updating:} When MindMend biosensor data becomes available (Section~\ref{sec:mech-mindmend}), transition from batch calibration to sequential Bayesian updating via particle filter.
+\end{enumerate}
+
+\subsection{Validation Criteria}
+
+The aggregation module predictions are validated against:
+\begin{itemize}
+\item SAA positivity classification: the model should correctly predict SAA status (i.e., $F > F_\text{threshold}$) with accuracy comparable to Paper~1's CatBoost classifier (AUC 0.979 for binary NSD-ISS).
+\item Paper~4's conformal bands: mechanistic CIF predictions for NSD-ISS transitions must fall within the IPCW conformal bands (width 0.037 at 95\% confidence).
+\item Population-level SAA seroconversion rates from longitudinal PPMI data.
+\end{itemize}
+
+
+% ============================================================================
+\section{Module 2: Dopaminergic Neuron Death}
+\label{sec:mech-neuron-death}
+% ============================================================================
+
+\subsection{Biological Background}
+
+The cardinal motor features of Parkinson's disease arise from the progressive loss of dopaminergic neurons in the substantia nigra pars compacta (SNpc). At birth, the SNpc contains approximately 400,000 dopaminergic neurons; by the time motor symptoms manifest (typically NSD-ISS Stage~2B), approximately 50--60\% of these neurons have been lost~\cite{kalia2015}. The primary driver of cell death is intracellular alpha-synuclein toxicity, predominantly from oligomeric species rather than mature fibrils~\cite{brundin2010}. Additional contributing factors include mitochondrial dysfunction, neuroinflammation, and oxidative stress.
+
+DaT-SPECT imaging, which measures striatal dopamine transporter binding (Specific Binding Ratio, SBR), serves as a noisy but clinically accessible proxy for surviving nigrostriatal terminal density. In PPMI, DaT-SPECT coverage is 97.1\% (2,138 of 2,201 staged patients), with most patients having 2--5 serial scans over 5--7 years of follow-up~\cite{marek2011}.
+
+\subsection{Mathematical Formulation}
+
+\subsubsection{State Variables}
+
+Let $N(t)$ denote the number of surviving dopaminergic neurons in the SNpc, with $N_0 \approx 400{,}000$ at birth and $N_\text{diag} \approx 160{,}000$--$200{,}000$ at clinical diagnosis.
+
+\subsubsection{Governing Equation}
+
+The neuron death dynamics are governed by:
+
+\begin{equation}
+\frac{dN}{dt} = -k_\text{death} \cdot N(t) \cdot g\bigl(O(t), F(t)\bigr) - k_\text{age} \cdot N(t)
+\label{eq:dNdt}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $k_\text{death}$ is the patient-specific cell death rate constant (yr$^{-1}$), calibrated from DaT-SPECT trajectory.
+\item $g(O, F) = \alpha \cdot O + \beta \cdot F$ is a linear toxicity function with $\alpha \gg \beta$ (oligomers are estimated to be $\sim$10$\times$ more toxic per unit concentration than fibrils).
+\item $k_\text{age}$ is the age-related neuronal attrition rate ($\sim$5\% per decade in healthy aging), providing the baseline rate of neuron loss independent of disease.
+\end{itemize}
+
+\subsubsection{DaT-SPECT Observation Model}
+
+The SBR measured by DaT-SPECT is related to surviving neuron count by:
+\begin{equation}
+\text{SBR}(t) = \text{SBR}_0 \cdot \left(\frac{N(t)}{N_0}\right)^\gamma + \varepsilon(t)
+\label{eq:SBR-model}
+\end{equation}
+
+where $\gamma \in [0.6, 0.8]$ accounts for compensatory upregulation of dopamine transporter expression per surviving terminal, and $\varepsilon(t) \sim \mathcal{N}(0, \sigma_\text{SBR}^2)$ represents measurement noise. The sublinear relationship ($\gamma < 1$) means that early neuron loss produces proportionally smaller SBR decline, consistent with the clinical observation that substantial neurodegeneration precedes motor symptom onset.
+
+\subsubsection{Derivation}
+
+Equation~\eqref{eq:dNdt} follows from a first-order death process modulated by toxin concentration. The absence of a neurogenesis term reflects the negligible rate of adult dopaminergic neurogenesis in the SNpc. The toxicity function $g(O, F)$ encodes the dose-response relationship between aggregated alpha-synuclein species and neuronal vulnerability.
+
+The observation model~\eqref{eq:SBR-model} is derived from the assumption that each surviving neuron contributes dopamine transporter molecules proportionally to its terminal arborization, with the power-law exponent $\gamma$ capturing compensatory mechanisms (increased DAT expression per terminal as total terminal count decreases). Empirical estimates of $\gamma$ range from 0.6 to 0.8 based on post-mortem correlations between SBR and neuron counts.
+
+\begin{table}[h]
+\centering
+\caption{Parameters of the dopaminergic neuron death module.}
+\label{tab:neuron-params}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Units} & \textbf{Typical Value} \\
+\midrule
+$N_0$ & Initial neuron count (birth) & cells & $\sim 400{,}000$ \\
+$k_\text{death}$ & Disease-driven death rate & yr$^{-1}$ & 0.02--0.08 \\
+$\alpha$ & Oligomer toxicity coefficient & nM$^{-1}$ & Patient-specific \\
+$\beta$ & Fibril toxicity coefficient & nM$^{-1}$ & $\sim \alpha / 10$ \\
+$k_\text{age}$ & Age-related attrition rate & yr$^{-1}$ & $\sim 0.005$ \\
+$\gamma$ & SBR-to-neuron power exponent & dimensionless & 0.6--0.8 \\
+$\text{SBR}_0$ & Healthy baseline SBR & dimensionless & 2.5--4.0 \\
+$\sigma_\text{SBR}$ & SBR measurement noise & dimensionless & $\sim 0.15$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Data Sources and Access}
+
+\begin{description}[style=nextline]
+\item[Serial DaT-SPECT (PPMI)] Available for $\sim$2,000 patients with 2--5 scans over 5--7 years. Provides the primary calibration signal for $k_\text{death}$. Caudate and putamen SBR values are extracted by the Xing Core Lab using standardized protocols.
+
+\item[PPMI UPDRS Trajectories] Serial UPDRS-III subscale scores across $\sim$16,699 visits provide an indirect proxy for $N(t)$ through the motor severity--neuron count relationship.
+
+\item[Post-mortem Correlations] Autopsy studies establishing the $\gamma$ exponent in the SBR-to-$N$ relationship require ongoing PPMI neuropathology core data (limited to deceased participants).
+\end{description}
+
+\subsection{Calibration Strategy}
+
+The neuron death module has the most favorable identifiability profile of all upstream biological modules because serial DaT-SPECT provides repeated noisy observations of $N(t)$ through the observation model~\eqref{eq:SBR-model}. The calibration proceeds as follows:
+
+\begin{enumerate}
+\item Fix $\gamma = 0.7$ (literature median) and $k_\text{age} = 0.005$ yr$^{-1}$.
+\item For each patient with $\geq 2$ DaT-SPECT scans, estimate $k_\text{death}$ via maximum a posteriori (MAP) estimation using the graph-regularized prior from GIMAN's patient similarity network.
+\item Paper~3's empirical Markov sojourn times (Stage~0: 13.3~years, Stage~2B: 0.68~years, Stage~3: 1.85~years, Stage~4: 1.42~years) serve as calibration targets: the mechanistic $N(t)$ trajectory must produce transition times consistent with these empirical rates.
+\end{enumerate}
+
+
+% ============================================================================
+\section{Module 3: Lewy Body Network Propagation}
+\label{sec:mech-propagation}
+% ============================================================================
+
+\subsection{Biological Background}
+
+Alpha-synuclein pathology does not remain localized. The Braak hypothesis~\cite{braak2003} posits a stereotypical caudal-to-rostral progression through six stages: olfactory bulb and enteric nervous system (Braak Stage~1), brainstem (Stage~2), midbrain/SNpc (Stage~3), temporal mesocortex (Stage~4), to neocortex (Stages~5--6). Recent evidence supports a prion-like cell-to-cell transmission of misfolded alpha-synuclein through the structural connectome~\cite{brundin2010}, formalized mathematically as a network diffusion process~\cite{raj2012,fornari2019}.
+
+\subsection{Mathematical Formulation}
+
+\subsubsection{Network Diffusion Model}
+
+Let $\mathbf{L}(t) = [L_1(t), \ldots, L_R(t)]^\top$ denote the vector of Lewy body pathology densities across $R$ brain regions. The structural connectome is represented by the symmetric adjacency matrix $\mathbf{A} \in \mathbb{R}^{R \times R}$, where $A_{ij}$ encodes the fiber density (streamline count) between regions $i$ and $j$, derived from diffusion tensor imaging (DTI) tractography.
+
+The network propagation dynamics follow a reaction-diffusion equation on graphs~\cite{raj2012,fornari2019}:
+
+\begin{equation}
+\frac{d\mathbf{L}}{dt} = -k_\text{clear} \, \mathbf{L} + k_\text{spread} \, \mathbf{A} \, \mathbf{L} + k_\text{local} \, \mathbf{f}(\mathbf{L})
+\label{eq:propagation}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $k_\text{clear}$ is the regional clearance rate (assumed uniform initially; can be made region-specific).
+\item $k_\text{spread}$ is the trans-synaptic spreading rate constant governing cell-to-cell transmission.
+\item $k_\text{local}$ scales the local amplification function $\mathbf{f}(\mathbf{L})$.
+\item $\mathbf{f}(\mathbf{L})$ is the vector-valued local amplification function with components $f(L_i) = L_i^2 / (K_m^2 + L_i^2)$, a sigmoidal (Hill-type) function capturing the cooperative nature of secondary nucleation within a region.
+\end{itemize}
+
+\subsubsection{Linear Diffusion Approximation}
+
+When local amplification is negligible ($k_\text{local} \approx 0$), the system reduces to a linear diffusion model~\cite{raj2012}:
+
+\begin{equation}
+\frac{d\mathbf{L}}{dt} = -(k_\text{clear} \, \mathbf{I} - k_\text{spread} \, \mathbf{A}) \, \mathbf{L} = -\beta \, \mathbf{\hat{L}} \, \mathbf{L}
+\label{eq:linear-diffusion}
+\end{equation}
+
+where $\mathbf{\hat{L}} = \mathbf{D} - \mathbf{A}$ is the graph Laplacian (with degree matrix $\mathbf{D}$) and $\beta = k_\text{spread}$. This linear system has the closed-form solution:
+
+\begin{equation}
+\mathbf{L}(t) = \exp(-\beta \, \mathbf{\hat{L}} \, t) \, \mathbf{L}(0)
+\label{eq:diffusion-solution}
+\end{equation}
+
+The eigenvectors of $\mathbf{\hat{L}}$ define the spatial modes of disease spread; the eigenvalues determine temporal decay rates. The seeding vector $\mathbf{L}(0)$ is initialized at Braak Stage~1 regions (dorsal motor nucleus of the vagus, olfactory bulb).
+
+\subsubsection{Heterodimer Model (Fisher-KPP on Networks)}
+
+Fornari et al.~\cite{fornari2019} proposed a more biologically realistic model that explicitly tracks healthy ($p$) and misfolded ($q$) protein:
+
+\begin{align}
+\frac{dp_i}{dt} &= -\beta_p \sum_j \hat{L}_{ij} \, p_j - k_1 \, p_i \, q_i + k_0 \label{eq:heterodimer-p} \\
+\frac{dq_i}{dt} &= -\beta_q \sum_j \hat{L}_{ij} \, q_j + k_1 \, p_i \, q_i - k_2 \, q_i \label{eq:heterodimer-q}
+\end{align}
+
+where $p_i$ and $q_i$ are the healthy and misfolded protein concentrations at region $i$, $k_1$ is the conversion rate (healthy $\to$ misfolded through template-directed misfolding), $k_0$ is healthy protein production, $k_2$ is misfolded protein clearance, and $\beta_p$, $\beta_q$ are diffusion coefficients. This is a Fisher-KPP reaction-diffusion equation on graphs, combining logistic growth of misfolding with network diffusion.
+
+\begin{table}[h]
+\centering
+\caption{Parameters of the Lewy body network propagation module.}
+\label{tab:prop-params}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Units} & \textbf{Source} \\
+\midrule
+$R$ & Number of brain regions & dimensionless & 82 (Desikan-Killiany) \\
+$\mathbf{A}$ & Structural connectome & streamline count & DTI tractography \\
+$k_\text{spread}$ & Trans-synaptic spreading rate & yr$^{-1}$ & Calibrated from data \\
+$k_\text{clear}$ & Regional clearance rate & yr$^{-1}$ & Calibrated from data \\
+$k_\text{local}$ & Local amplification rate & yr$^{-1}$ & Calibrated from data \\
+$K_m$ & Hill constant for amplification & a.u. & Calibrated from data \\
+$\mathbf{L}(0)$ & Initial seeding vector & a.u. & Braak Stage 1 regions \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Data Sources and Access}
+
+\begin{description}[style=nextline]
+\item[DTI Tractography (PPMI)] Available for approximately 300--500 PPMI participants. DTI protocols include 64-direction acquisitions at 2mm isotropic resolution. Individual structural connectomes are constructed using MRtrix3 (iFOD2 probabilistic tractography with anatomically-constrained tractography) or FSL (BEDPOSTX + PROBTRACKX2).
+
+\item[Population-Average Connectome] The Human Connectome Project (HCP) provides high-resolution population-average connectomes that can serve as a starting point when individual DTI is unavailable. Individual variation in connectivity ($\sim$30\% fiber density error) is a known limitation.
+
+\item[FreeSurfer Volumetric Data (PPMI)] Regional volumes from FreeSurfer ASEG segmentation are available for $\sim$1,700 PPMI patients with 1--3 serial MRI scans. Regional atrophy serves as a downstream observable of Lewy body propagation.
+
+\item[Allen Human Brain Atlas] Microarray-based gene expression data across $\sim$3,700 brain samples from 6 donors provides regional vulnerability scores (SNCA, GBA, LRRK2 expression levels).
+\end{description}
+
+\subsection{Calibration Strategy}
+
+The propagation module is calibrated by fitting the predicted pattern of regional pathology density $\mathbf{L}(t)$ against observed patterns of regional atrophy (FreeSurfer volumes) across PPMI patients at different disease stages. The spatial correlation between predicted $\mathbf{L}(t)$ and observed atrophy patterns is the primary calibration metric.
+
+\subsection{Validation Criteria}
+
+The propagation model is validated against:
+\begin{itemize}
+\item Braak staging: the predicted temporal order of regional involvement must match the canonical Braak stages I--VI.
+\item Cross-sectional atrophy patterns in PPMI stratified by NSD-ISS stage.
+\item The observation from Paper~3 that 39.1\% of transitions are regressions, which may constrain the reversibility parameters of the model.
+\end{itemize}
+
+
+% ============================================================================
+\section{Module 4: Levodopa Pharmacokinetics/Pharmacodynamics}
+\label{sec:mech-pkpd}
+% ============================================================================
+
+\subsection{Biological Background}
+
+Once dopaminergic neurons are lost, exogenous dopamine replacement via oral levodopa becomes the mainstay of symptomatic treatment. The relationship between oral dose and motor response involves a multi-compartment pharmacokinetic chain: absorption from the gastrointestinal tract, transport across the blood-brain barrier via the large neutral amino acid transporter (LAT1), enzymatic conversion to dopamine by aromatic amino acid decarboxylase (AADC), and receptor-mediated motor response~\cite{ursino2020}.
+
+\subsection{Mathematical Formulation}
+
+\subsubsection{Three-Compartment Pharmacokinetic Model}
+
+The PK model tracks levodopa concentration through three compartments:
+
+\begin{align}
+\frac{dC_\text{gut}}{dt} &= -k_a \, C_\text{gut}(t) + \text{Dose}(t) / V_\text{gut} \label{eq:pk-gut} \\
+\frac{dC_\text{plasma}}{dt} &= k_a \, C_\text{gut}(t) - k_\text{el} \, C_\text{plasma}(t) - k_{12} \, C_\text{plasma}(t) + k_{21} \, C_\text{brain}(t) \label{eq:pk-plasma} \\
+\frac{dC_\text{brain}}{dt} &= k_{12} \, C_\text{plasma}(t) - k_{21} \, C_\text{brain}(t) - k_\text{met} \, C_\text{brain}(t) \label{eq:pk-brain}
+\end{align}
+
+where:
+\begin{itemize}
+\item $C_\text{gut}$, $C_\text{plasma}$, $C_\text{brain}$ are levodopa concentrations in the GI tract, plasma, and brain, respectively.
+\item $k_a \approx 1.5$~hr$^{-1}$ is the absorption rate constant (highly variable with gastric motility).
+\item $k_\text{el}$ is the plasma elimination rate.
+\item $k_{12}$, $k_{21}$ are plasma$\leftrightarrow$brain transfer rates.
+\item $k_\text{met}$ is the brain metabolism rate (L-DOPA $\to$ dopamine via AADC, then to HVA via MAO-B/COMT).
+\item $\text{Dose}(t)$ encodes the dosing schedule (impulse function at each dose time).
+\end{itemize}
+
+\subsubsection{Pharmacodynamic Model (Hill-Type Dose-Response)}
+
+Synaptic dopamine synthesis depends on both brain levodopa concentration and surviving neuron count:
+
+\begin{equation}
+\text{DA}(t) = k_\text{AADC} \cdot C_\text{brain}(t) \cdot \frac{N(t)}{N_0}
+\label{eq:dopamine}
+\end{equation}
+
+where $k_\text{AADC}$ is the AADC enzymatic activity and $N(t)/N_0$ captures the reduced dopamine synthesis capacity as neurons die (coupling to Module~2). The motor response follows a Hill-type dose-response:
+
+\begin{equation}
+\text{UPDRS3}(t) = \text{UPDRS3}_\text{max} \cdot \left(1 - \frac{\text{DA}(t)^h}{\text{EC}_{50}^h + \text{DA}(t)^h}\right)
+\label{eq:hill-response}
+\end{equation}
+
+where $h \approx 2$--3 is the Hill coefficient (steepness of response), $\text{EC}_{50}$ is the dopamine concentration producing 50\% of maximal motor improvement, and $\text{UPDRS3}_\text{max} = 132$ is the maximum UPDRS-III score.
+
+\begin{table}[h]
+\centering
+\caption{Parameters of the levodopa PK/PD module.}
+\label{tab:pkpd-params}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Units} & \textbf{Typical Value} \\
+\midrule
+$k_a$ & Absorption rate & hr$^{-1}$ & $\sim 1.5$ \\
+$k_\text{el}$ & Plasma elimination rate & hr$^{-1}$ & $\sim 0.7$ \\
+$k_{12}$ & Plasma-to-brain transfer & hr$^{-1}$ & $\sim 0.3$ \\
+$k_{21}$ & Brain-to-plasma transfer & hr$^{-1}$ & $\sim 0.2$ \\
+$k_\text{met}$ & Brain metabolism rate & hr$^{-1}$ & $\sim 0.5$ \\
+$k_\text{AADC}$ & AADC enzymatic activity & dimensionless & Patient-specific \\
+$h$ & Hill coefficient & dimensionless & 2--3 \\
+$\text{EC}_{50}$ & Half-maximal effective DA & nM & Patient-specific \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Data Sources and Access}
+
+\begin{description}[style=nextline]
+\item[PPMI Medication Records] Concomitant medication records for $\sim$2,000 patients (59,000 total records) with dosing information (drug name, dose, frequency, start/stop dates). Provides levodopa dose schedules but not plasma concentrations.
+
+\item[PPMI UPDRS Trajectories] Serial UPDRS-III subscale scores across 16,699 visits provide the PD signal: ON/OFF state motor response linked to dosing.
+
+\item[Population PK Parameters] Published population PK parameters from clinical pharmacology literature provide informative priors for $k_a$, $k_\text{el}$, $k_{12}$, $k_{21}$~\cite{ursino2020}.
+\end{description}
+
+\subsection{Calibration Strategy}
+
+The PK/PD module benefits from the richest data of all modules: medication dosing records linked to serial motor assessments. Calibration uses PPMI medication records as input and UPDRS-III trajectories as output, with the PK model intermediate states (plasma, brain concentrations) treated as latent variables estimated jointly with PK parameters via population PK methods (NLME).
+
+\subsection{Validation Criteria}
+
+The PK/PD module is validated by:
+\begin{itemize}
+\item Predicting ON/OFF state UPDRS-III scores from dosing history.
+\item Reproducing the wearing-off phenomenon (progressive narrowing of therapeutic window as $N(t)$ declines).
+\item Consistency with Paper~3's finding that medication status (PDMEDYN) discriminates between NSD-ISS Stage~2A and 2B.
+\end{itemize}
+
+
+% ============================================================================
+\section{Module 5: Functional Impairment Mapping}
+\label{sec:mech-functional}
+% ============================================================================
+
+\subsection{Connection to GIMAN Paper~1}
+
+The functional impairment module maps the biological state vector---alpha-synuclein levels, surviving neuron count, synaptic dopamine dynamics, regional Lewy body burden---to clinically observable NSD-ISS stage. This mapping is:
+
+\begin{equation}
+\text{NSD-ISS stage} = S\bigl(\text{SAA status}, \text{DaT-SBR}, \text{UPDRS3}_\text{total}, \text{NP1COG}, \text{PDMEDYN}, \text{H\&Y}\bigr)
+\label{eq:staging-function}
+\end{equation}
+
+where $S$ is the deterministic NSD-ISS staging algorithm~\cite{simuni2024}. This module is the \textit{most complete} component of the mechanistic digital twin because Paper~1's CatBoost classifier (AUC 0.981 for binary, 0.942 for three-class) is essentially a highly accurate learned version of $S$. Paper~4's calibration analysis confirms ECE $<$ 0.005 at 1/3/5-year horizons.
+
+\subsection{Role in the Mechanistic Framework}
+
+In the mechanistic framework, the inputs to $S$ come from the upstream biological modules rather than from measured clinical features:
+\begin{itemize}
+\item SAA status $\leftarrow$ Module~1 ($F > F_\text{threshold}$)
+\item DaT-SBR $\leftarrow$ Module~2 (via observation model~\eqref{eq:SBR-model})
+\item UPDRS3 $\leftarrow$ Module~4 (via Hill dose-response~\eqref{eq:hill-response})
+\item Regional atrophy $\leftarrow$ Module~3 (via propagation model~\eqref{eq:propagation})
+\end{itemize}
+
+Paper~2's imputation framework handles any missing inputs to $S$, ensuring robustness when not all biological modules have converged.
+
+
+% ============================================================================
+\section{System Integration and Coupling}
+\label{sec:mech-integration}
+% ============================================================================
+
+\subsection{Inter-Module Dependencies}
+
+The five modules are coupled through shared state variables:
+
+\begin{enumerate}
+\item Module~1 (Aggregation) $\to$ Module~2 (Neuron Death): Oligomer concentration $O(t)$ and fibril concentration $F(t)$ from the aggregation module drive the toxicity function $g(O, F)$ in the neuron death equation~\eqref{eq:dNdt}.
+
+\item Module~2 (Neuron Death) $\to$ Module~4 (PK/PD): Surviving neuron count $N(t)$ modulates dopamine synthesis capacity in~\eqref{eq:dopamine}, determining how effectively levodopa converts to synaptic dopamine.
+
+\item Module~1 (Aggregation) $\to$ Module~3 (Propagation): The fibrillar alpha-synuclein concentration $F(t)$ feeds the seeding term of the propagation model, while the regional pathology density $L_i(t)$ provides regional context for aggregation dynamics.
+
+\item Modules~1--4 $\to$ Module~5 (Functional Mapping): All upstream biological states feed into the staging function $S$.
+\end{enumerate}
+
+\subsection{Numerical Integration Strategy}
+
+The coupled system forms a stiff ODE due to the disparity in timescales: aggregation kinetics operate on hours-to-days timescales, neuron death on years, and PK on hours. This requires an implicit solver with adaptive step-size control.
+
+\textbf{Recommended solver:} Julia's \texttt{DifferentialEquations.jl} package with the \texttt{CVODE\_BDF()} backend (backward differentiation formula for stiff systems). Julia provides 10--100$\times$ speedup over Python's \texttt{scipy.integrate.solve\_ivp} for stiff systems and supports automatic differentiation for sensitivity analysis. Julia is callable from Python via \texttt{juliacall}.
+
+\subsection{Computational Requirements}
+
+\begin{table}[h]
+\centering
+\caption{Computational requirements for the mechanistic digital twin.}
+\label{tab:compute}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Component} & \textbf{Hardware} & \textbf{Memory} & \textbf{Time} \\
+\midrule
+Single patient ODE solve (5~yr) & 1 CPU core & $<$1~GB & $\sim$0.1~s (Julia) \\
+Bayesian calibration (1 patient) & 4 CPU cores & 2~GB & $\sim$5~min \\
+Population calibration (2,000 patients) & 32-core server & 64~GB & $\sim$6--12~hr \\
+Real-time update (MindMend) & 1 CPU core & 1~GB & $<$1~s per update \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ============================================================================
+\section{Bayesian Parameter Estimation Framework}
+\label{sec:mech-bayesian}
+% ============================================================================
+
+\subsection{Prior Specification}
+
+Patient-specific rate constants are estimated within a Bayesian framework. The prior distribution for patient $i$'s parameter vector $\boldsymbol{\theta}_i$ is:
+
+\begin{equation}
+p(\boldsymbol{\theta}_i) = \mathcal{N}(\boldsymbol{\mu}_i, \boldsymbol{\Sigma}_i)
+\label{eq:graph-prior}
+\end{equation}
+
+where the graph-regularized prior mean and covariance are:
+
+\begin{align}
+\boldsymbol{\mu}_i &= \frac{\sum_{j \in \mathcal{N}_k(i)} w_{ij} \, \boldsymbol{\theta}_j}{\sum_{j \in \mathcal{N}_k(i)} w_{ij}} \label{eq:prior-mean} \\
+\boldsymbol{\Sigma}_i &= \frac{\boldsymbol{\Sigma}_0}{1 + \alpha \, |\mathcal{N}_k(i)|} \label{eq:prior-cov}
+\end{align}
+
+Here $\mathcal{N}_k(i)$ denotes the $k$ nearest neighbors of patient $i$ in GIMAN's patient similarity graph (Paper~3: $k=15$, cosine similarity over 18 baseline features), $w_{ij}$ are the edge weights, $\boldsymbol{\Sigma}_0$ is the population-level prior covariance, and $\alpha$ controls how much neighbor information tightens the prior. Patients in dense graph regions receive tighter priors; patients in sparse regions retain wider priors and rely more on their own data.
+
+\subsection{Inference Methods}
+
+Three inference methods are employed depending on the use case:
+
+\begin{description}[style=nextline]
+\item[NUTS/HMC (Batch Calibration)] The No-U-Turn Sampler (NUTS) variant of Hamiltonian Monte Carlo, implemented in PyMC~v5+, for batch calibration of static patient parameters. Recommended for initial population-level calibration (1,000 samples, 4 chains per patient).
+
+\item[Particle Filter (Online State Estimation)] Sequential Monte Carlo for real-time state updates when continuous biosensor data streams are available. Each particle represents a possible parameter vector; particles are weighted by likelihood and resampled at each observation.
+
+\item[Ensemble Kalman Filter (Closed-Loop Operation)] For the MindMend closed-loop scenario (Section~\ref{sec:mech-mindmend}), the ensemble Kalman filter provides computationally efficient state estimation with $\sim$100 ensemble members, suitable for real-time operation on laptop-class hardware.
+\end{description}
+
+\subsection{Identifiability Analysis}
+
+Before calibration, structural identifiability of each module's parameters is assessed using the differential algebra approach. The aggregation module with 9 parameters and only 1--2 observations is structurally unidentifiable without prior constraints. The neuron death module with serial DaT-SPECT provides 2--5 observations for 2--3 free parameters, achieving practical identifiability. The PK/PD module is well-identified from medication records and UPDRS trajectories.
+
+
+% ============================================================================
+\section{MindMend Biosensor Integration}
+\label{sec:mech-mindmend}
+% ============================================================================
+
+\subsection{Graphene Oxide Electrochemical Sensor Technology}
+
+The MindMend wearable biosensor (Patent US20250334570A1) addresses the most critical data gap---continuous alpha-synuclein monitoring---through interstitial fluid (ISF) measurement using graphene oxide (GO) functionalized electrochemical sensors. The core technology consists of:
+
+\begin{itemize}
+\item \textbf{Sensing element:} Graphene oxide nanosheets functionalized with anti-alpha-synuclein aptamers, providing selective binding to both monomeric and oligomeric forms.
+\item \textbf{Transduction:} Changes in aptamer conformation upon alpha-synuclein binding alter the GO's electrochemical impedance, measurable via integrated potentiostat circuitry.
+\item \textbf{Fluid access:} Microneedle array penetrating the stratum corneum to access ISF, which equilibrates with plasma alpha-synuclein on a $\sim$30-minute timescale.
+\item \textbf{Temporal resolution:} Continuous measurement at 1--5 minute intervals, yielding 300--1,440 data points per day.
+\end{itemize}
+
+\subsection{Closed-Loop State Estimation Architecture}
+
+With continuous alpha-synuclein measurement, the mechanistic model transitions from open-loop prediction to closed-loop state estimation:
+
+\begin{enumerate}
+\item Biosensor reads: $\alpha\text{-syn}_\text{ISF}(t)$.
+\item Convert to plasma estimate: $M_\text{obs}(t) = \alpha\text{-syn}_\text{ISF}(t) / R_\text{ISF/plasma}$.
+\item Bayesian update: $p(\boldsymbol{\theta} \mid M_\text{obs}(1{:}t))$ via particle filter or ensemble Kalman filter.
+\item Forward simulate: $M_\text{pred}$, $N_\text{pred}$, $\text{UPDRS}_\text{pred}$ over the desired horizon.
+\item Update clinical dashboard with prediction and narrowed confidence intervals.
+\end{enumerate}
+
+\subsection{Technology Readiness and Timeline}
+
+The biosensor is currently at TRL~2 (concept formulated, patent published). Key milestones:
+
+\begin{itemize}
+\item TRL~3 (6--12 months): Demonstrate alpha-synuclein detection in spiked ISF-like matrix; limit of detection $<$10~pg/mL.
+\item TRL~4--5 (12--30 months): Lab prototype with microneedle array; biocompatibility testing (ISO~10993); 14-day sensor stability.
+\item TRL~6 (30--42 months): First-in-human pilot ($n = 10$--20 PD patients); ISF-to-CSF alpha-synuclein correlation target: Pearson $r > 0.7$.
+\item TRL~7 (42--60 months): Multi-site pilot ($n = 100$); closed-loop digital twin demonstration in 5 patients.
+\end{itemize}
+
+
+% ============================================================================
+\section{Data Types, Sources, and Access Summary}
+\label{sec:mech-data}
+% ============================================================================
+
+\subsection{PPMI Data Inventory for Mechanistic Modeling}
+
+Table~\ref{tab:data-inventory} summarizes the data available from PPMI and its relevance to each mechanistic module.
+
+\begin{table}[h]
+\centering
+\caption{PPMI data inventory for mechanistic modeling.}
+\label{tab:data-inventory}
+\small
+\begin{tabular}{p{3.5cm}p{2cm}p{1.5cm}p{2cm}p{3cm}}
+\toprule
+\textbf{Data Type} & \textbf{Source} & \textbf{N} & \textbf{Freq.} & \textbf{Module} \\
+\midrule
+Serial DaT-SPECT & PPMI imaging & $\sim$2,000 & 2--5 scans & Neuron Death (2) \\
+CSF total $\alpha$-syn & PPMI bio & $\sim$1,200 & 1--2 pts & Aggregation (1) \\
+SAA qualitative & PPMI bio & 277 & 1 pt & Aggregation (1) \\
+FreeSurfer ASEG & PPMI MRI & $\sim$1,700 & 1--3 scans & Propagation (3) \\
+DTI tractography & PPMI MRI & $\sim$400 & 1 scan & Propagation (3) \\
+Serial UPDRS I--IV & PPMI clinical & $\sim$2,000 & 4--12 visits & PK/PD (4), Staging (5) \\
+Medication records & PPMI clinical & $\sim$2,000 & Ongoing & PK/PD (4) \\
+Genetics & PPMI genetics & $\sim$2,000 & 1 (germline) & All (rate modifiers) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{External Cohorts}
+
+BioFIND ($n = 118$ PD), PDBP ($n = 893$ PD), and HBS ($n = 649$ PD) provide external validation data for the mechanistic framework. BioFIND is the only external cohort with both SAA and DaT-SPECT ground truth for NSD-ISS staging. All are accessible through AMP-PD (\url{https://amp-pd.org}).
+
+\subsection{Critical Data Gaps and Mitigation}
+
+\begin{table}[h]
+\centering
+\caption{Critical data gaps for mechanistic model development.}
+\label{tab:data-gaps}
+\small
+\begin{tabular}{p{3cm}p{2.5cm}p{3cm}p{2cm}}
+\toprule
+\textbf{Data Need} & \textbf{Module} & \textbf{Mitigation} & \textbf{Timeline} \\
+\midrule
+Serial quantitative CSF $\alpha$-syn & Aggregation (1) & Next-gen SAA assays & 2--3~yr \\
+Individual DTI connectome & Propagation (3) & HCP population average & 1--2~yr \\
+Plasma levodopa levels & PK/PD (4) & Targeted ancillary study & 1--2~yr \\
+Continuous $\alpha$-syn monitoring & Aggregation (1) & MindMend biosensor & 3--5~yr \\
+Post-mortem neuron counts & Neuron Death (2) & PPMI neuropath core & Ongoing \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ============================================================================
+\section{Phased Development Plan}
+\label{sec:mech-phases}
+% ============================================================================
+
+\subsection{Phase 1--2: Core ODE System and Bayesian Calibration --- COMPLETE (April 2026)}
+
+Phase~1 (months 1--6) implemented the coupled ODE system in Julia (39/39 unit tests, SymPy symbolic verification at machine precision) and calibrated 909/1,065 PPMI patients phenomenologically (93.75\% LOO forward-simulation coverage). Phase~2 (months 4--12) coupled Module~1 and Module~2 via the Variant~B mass-conservation fix, performed structural identifiability analysis, discovered the $T_\text{tox}$ practical-identifiability degeneracy, and completed the IS-weighted posterior on 304 Wave~A patients with ESS-stratified validation (Section~\ref{sec:mech-phase2-results}). CSF $\alpha$-synuclein multi-observable coupling (Block~3) is in progress and is the critical next step for breaking the $T_\text{tox}$ degeneracy.
+
+\subsection{Phase 3: Connectome Propagation --- COMPLETE (April 2026)}
+
+Phase~3 tested whether spatial propagation via structural connectivity improves over independent regional decay rates. Using SBC on 200 simulations, all~4 biologically plausible models \emph{failed} practical parameter recovery for spatial parameters, while the remediated model (single $k_\text{spread}$ with fixed seed putamen) achieved $r=0.892$. On 304 real PPMI patients, M1 (independent per-region decays) decisively outperformed M6r (propagation) by $\Delta\text{AIC}=3{,}856$ per patient. Putamen decays at $0.142/\text{yr}$, caudate at $0.119/\text{yr}$ (19\% faster, $p<0.001$ Wilcoxon). Spatial propagation is \emph{not detectable} from 4-region DaT-SPECT---a publishable negative result (Papers~8a and~8b).
+
+\subsection{Phase 4: PK/PD Integration --- Level 2.5 Hybrid (Lit Review Complete April 2026)}
+
+Phase~4 couples the calibrated neuron death trajectory $N(t)$ to levodopa pharmacodynamics. A comprehensive literature review (40+ papers, 3~parallel research agents, 2026-04-12) confirmed that: (1)~full PBPK is infeasible without plasma drug levels and unnecessary for this application; (2)~no published model couples per-patient DaT-SPECT-calibrated $N(t)$ to levodopa PD response; (3)~levodopa has no disease-modifying effect (LEAP trial, Verschuur et al.\ 2019, \emph{NEJM}). The framework is a ``Level~2.5 hybrid'': population-average PK parameters from published PopPK (Simon et al.\ 2016, Contin et al.\ 1997) provide $C_\text{brain}^\text{pop}(\text{LEDD})$, while our patient-specific $N(t)$ from Phase~2 modulates dopamine synthesis:
+\begin{equation}
+\text{DA}(t) = k_\text{AADC} \cdot C_\text{brain}^\text{pop}(\text{LEDD}(t)) \cdot \frac{N(t)}{N_0}
+\label{eq:da-hybrid}
+\end{equation}
+Three parameters are estimated from PPMI UPDRS-III + LEDD logs + calibrated $N(t)$: $k_\text{AADC}$, $\text{EC}_{50}$, and Hill coefficient~$h$. The K-PD framework~(Jacqmin et al.\ 2007) provides theoretical justification for modeling drug effects without plasma concentrations. The primary competitor is Gupta et al.\ (2025, \emph{Clin Pharmacol Ther}), who built an SBR-directed IRT model linking DaT-SPECT to MDS-UPDRS on 419 PPMI patients---statistical, not mechanistic, and without medication covariates.
+
+\subsection{Phase 5: Mechanistic vs.\ GIMAN Comparison (Months 20--30)}
+
+Head-to-head comparison of mechanistic predictions against GIMAN's data-driven predictions. If mechanistic components add value beyond GIMAN for specific patient subgroups (e.g., recently diagnosed patients with sparse data), develop a hybrid model that selects mechanistic vs.\ data-driven predictions based on data availability and patient characteristics.
+
+\subsection{Phase 6: MindMend Integration (Months 24--60)}
+
+Integration of MindMend biosensor data for real-time closed-loop digital twin operation. Requires parallel engineering development of the biosensor (TRL~2 $\to$ TRL~7) and modeling development of the particle filter state estimation framework.
+
+\subsection{Resource Requirements}
+
+The estimated total resource requirement is approximately \$770,000 over four years, encompassing one postdoctoral researcher (\$253,500), one PhD student (\$180,000), consulting collaborators (\$110,000), cloud computing (\$45,000), biosensor prototyping (\$150,000), and travel (\$32,000). This is well within the scope of an NIH R01 (NINDS, 5~years, \$1.5M direct) or R21 mechanism (2~years, \$275K for Phases~1--2 as proof of concept).
+
+
+% ============================================================================
+\section{Phase 2 Empirical Results (April 2026)}
+\label{sec:mech-phase2-results}
+% ============================================================================
+
+At the time of writing, Phases~1 and~2 of the development plan have been completed. This section documents the principal empirical findings, which provide the first evidence that the coupled ODE framework in Sections~\ref{sec:mech-aggregation}--\ref{sec:mech-neuron-death} can be calibrated to individual PPMI patients.
+
+\subsection{Mass-Conservation Fix and Log-$N$ Transform}
+
+The initial adaptation of the Cohen--Knowles framework~\cite{cohen2012,knowles2009} to a single-state fibril representation introduced a mass-creation error: the term $k_\text{frag} F$ in the fibril equation (Eq.~\ref{eq:dFdt}) creates mass from nothing because fragmentation produces new \emph{fibril ends}, not new \emph{fibril mass}. This caused numerical instability ($F \to 10^{75}$~nM at $t=4$~years). The corrected formulation (\textbf{Variant~B}) removes $k_\text{frag} F$ from the fibril mass derivative:
+\begin{equation}
+\frac{dF}{dt} = k_\text{conv} \, O - k_\text{clear}^F \, F
+\label{eq:dFdt-variantB}
+\end{equation}
+which converges stably to $F \approx 0.32$~nM at all horizons (1--10~years) with per-solve runtime of approximately 3~ms. Additionally, a log-$N$ state transformation ($\log N / N_0$) enforces neuron-count positivity by construction, eliminating adaptive-solver negativity violations. These two fixes constitute a publishable methodological finding~\cite{bakshi2018}.
+
+\subsection{Structural and Practical Identifiability}
+
+Structural identifiability analysis using \texttt{StructuralIdentifiability.jl}~(v0.5.19) and independently cross-validated by \texttt{SIAN.jl} confirmed that the reduced 3-parameter fit set $(k_n, \alpha_\text{tox}, r_o)$ is globally identifiable from the observation map $(y_\text{SBR} \propto N^\gamma,\; y_\text{CSF} \propto M + r_o \cdot O)$, while 5 fibril-compartment parameters are non-identifiable because $F(t)$ has no direct observable~\cite{villaverde2016}.
+
+However, under the slow-fast timescale collapse of Variant~B (M, O, F equilibrate in hours; N relaxes in years), the SBR observation depends only on the \textbf{toxicity flux composite}:
+\begin{equation}
+T_\text{tox} = \alpha_\text{tox} \cdot k_n \cdot \frac{M_\text{ss}^2}{k_\text{conv} + k_\text{clear}^O}
+\label{eq:T_tox}
+\end{equation}
+making individual $\alpha_\text{tox}$ and $k_n$ \emph{practically} non-identifiable from longitudinal SBR alone~\cite{raue2009,gutenkunst2007,transtrum2015}. This structural-vs-practical identifiability distinction is a key finding of Phase~2.
+
+\subsection{Importance-Sampling Posterior (Step 2.6v4)}
+
+Single-chain NUTS calibration (Step~2.6v3) produced prior-dominated posteriors (posterior SD $\approx$ prior SD for both $k_n$ and $\alpha_\text{tox}$, $\hat{R} < 1.05$ as a false-positive convergence diagnostic~\cite{vehtari2021rhat,baribault2023troubleshoot}). An importance-sampling (IS) replacement~\cite{liu1998is} using 50,000 draws from the priors weighted by the closed-form Variant~B likelihood recovered the predicted sloppy ridge and produced the following ESS-stratified results on all 304 PPMI Wave~A patients:
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Stratum} & $N$ & \textbf{cor(log $k_n$, log $\alpha_\text{tox}$)} & \textbf{$T_\text{tox}$ SD (log$_{10}$ dec)} & \textbf{Implied \%/yr} \\
+\midrule
+HIGH-INFO (ESS$<$20\%) & 33 & $-0.852$ & 0.29 & 21.4 \\
+MOD-INFO (20--50\%) & 64 & $-0.382$ & 0.71 & 12.0 \\
+LOW-INFO ($\geq$50\%) & 207 & $-0.209$ & 0.87 & 1.7 \\
+\textbf{All 304} & 304 & $-0.234$ & 0.85 & \textbf{3.29} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The cohort-median implied neuron loss of 3.29\%/yr matches the Fearnley \& Lees~\cite{fearnley1991} canonical 2--5\%/yr range for active PD without using it as training data. On the HIGH-INFO subset ($N=33$), the sloppy-ridge correlation ($-0.852$) and tightened $T_\text{tox}$ posterior width (0.29 decades, 6$\times$ tighter than $\alpha_\text{tox}$) empirically confirm the Gutenkunst--Transtrum sloppy-models prediction~\cite{gutenkunst2007,transtrum2015}. Posterior predictive coverage (99.5\% at 95\% PI) matches Phase~1's LOO baseline (98.9\%), satisfying the $S_2$ non-regression criterion.
+
+\subsection{Selection-Bias Finding (S1 Sojourn Test)}
+
+The original sojourn-Spearman gate ($T_\text{tox}$ vs.\ Paper~3 Markov sojourn times) was rejected as misspecified: the IS Wave~A cohort's Stage~0 patients have a 78\% forward-conversion rate vs.\ 19.6\% in the full Paper~3 cohort (3.97$\times$ enrichment), because the Wave~A selection criteria ($\geq$4 serial DaT-SPECT scans with measurable signal) filter for rapid progressors. The replacement within-cohort Spearman test found a ceiling effect ($\rho = -0.234$, $p < 0.0001$) and HIGH-INFO stage-invariance (Kruskal-Wallis $p = 0.51$, $N = 33$ across 3~stages).
+
+
+\subsection{Joint SBR + CSF $\alpha$-Synuclein Calibration (Step 2.6v5)}
+\label{sec:mech-csf-joint}
+
+The practical non-identifiability of individual $k_n$ and $\alpha_\text{tox}$ from SBR alone motivates adding a second observable: CSF total $\alpha$-synuclein. Under the Variant~B slow-fast collapse, the oligomeric steady-state $O_\text{ss} = k_n M_\text{ss}^2 / (k_\text{conv} + k_\text{clear}^O)$ is time-invariant, so CSF total $\alpha$-syn constrains $k_n$ independently of $\alpha_\text{tox}$. The observation model is:
+\begin{equation}
+y_\text{CSF} \sim \mathcal{N}\bigl(S_\text{CSF} \cdot (M_\text{ss} + r_o \cdot O_\text{ss}(k_n)),\; \sigma_\text{CSF}^2\bigr)
+\label{eq:csf-obs}
+\end{equation}
+where $S_\text{CSF} \approx 682$~pg/mL per model-nM is estimated from the PPMI population median, $\sigma_\text{CSF} = 315$~pg/mL is the pooled within-patient standard deviation, and $r_o = 1.0$ (equimolar ELISA cross-reactivity, fixed as an assay property)~\cite{mollenhauer2011,majbour2016}. The temporal stationarity assumption is supported by Mollenhauer et al.\ (2017, 2019) who found CSF $\alpha$-syn stable over 12--36 months in early PPMI PD~\cite{mollenhauer2017csf}. The $r_o = 1.0$ equimolar cross-reactivity prior is validated by Koehler et al.\ (2008), who showed that equimolar oligomeric preparations showed no decreased concentration relative to monomers in total $\alpha$-syn ELISA~\cite{petricca2022}.
+
+Of the 304 Wave~A patients, 277 (91.1\%) have CSF total $\alpha$-syn measurements (median 5 timepoints, 1,243 total measurements). The joint IS posterior (50,000 prior draws, joint SBR + CSF log-likelihood) yields:
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Metric} & \textbf{v4 (SBR only)} & \textbf{v5 (SBR + CSF)} & \textbf{$\Delta$} & \textbf{Interpretation} \\
+\midrule
+cor(log $k_n$, log $\alpha_\text{tox}$) & $-0.240$ & $-0.113$ & $+0.127$ & Toward zero \\
+$k_n$ SD / prior SD & 0.926 & 0.655 & $-29\%$ & Tighter \\
+HIGH-INFO $k_n$ ratio & 0.883 & 0.447 & $-49\%$ & Much tighter \\
+Implied \%/yr (median) & 3.29 & 2.93 & $-0.36$ & Fearnley range \\
+\% patients cor closer to 0 & --- & 96.0\% & --- & Near-universal \\
+\% patients $k_n$ tighter & --- & 100\% & --- & Universal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The degeneracy-breaking is \textbf{partial, not complete}: the residual correlation ($-0.113$) reflects the fact that oligomeric $\alpha$-syn contributes only $\sim$5\% of CSF total $\alpha$-syn at the prior-median $k_n = 10^{-4}$~nM$^{-1}$~hr$^{-1}$ (rising to 33\% at $k_n = 10^{-3}$). Between-patient variation in the intracellular-to-CSF scaling factor $S_\text{CSF}$ limits the constraint. The HIGH-INFO subset (ESS${}<$20\%, $N=106$) shows 49\% tighter $k_n$ posteriors than v4 and a correlation of $-0.199$ (vs.\ $-0.382$ in v4), indicating that the CSF observable provides substantially more constraint for patients whose SBR data is most informative.
+
+No published study combines DaT-SPECT imaging with CSF $\alpha$-syn in a Bayesian ODE calibration framework. The closest precedent is Coutinho et al.\ (2023)~\cite{coutinho2023}, who found a cross-sectional positive correlation ($r=0.4$, $n=28$) between TRODAT-1 SPECT and CSF $\alpha$-syn, but without any mechanistic model. External validation is limited by data availability: PPMI is the only public dataset with both serial DaT-SPECT and serial quantitative CSF total $\alpha$-synuclein.
+
+\subsection{Counterfactual Treatment Simulation (S5 Falsification Test)}
+\label{sec:mech-counterfactual}
+
+The mechanistic twin enables counterfactual ``what-if'' predictions that a purely correlational model cannot make. As a falsification test, we simulated the effect of prasinezumab-like anti-$\alpha$-synuclein antibody treatment by reducing the toxicity flux:
+\begin{equation}
+T_\text{tox}^\text{treated} = (1 - \eta_\text{abx}) \cdot T_\text{tox}^\text{untreated}, \quad \eta_\text{abx} \in [0.01, 0.50]
+\label{eq:counterfactual}
+\end{equation}
+where $\eta_\text{abx}$ is the fractional reduction in toxic oligomer flux from extracellular aggregate sequestration. This acts on the composite $T_\text{tox}$ directly, not on any individual rate constant---importantly, perturbing $k_e$ alone would give the wrong sign (reducing elongation $\rightarrow$ monomer accumulation $\rightarrow$ increased nucleation $\rightarrow$ higher toxicity).
+
+Three scenarios were tested ($\eta_\text{abx} = 0.05, 0.15, 0.35$) spanning the range from subthreshold to the 4-year PASADENA/SPARK OLE rapid-progressor subgroup signal~\cite{pagano2024subgroup}. On the HIGH-INFO subset ($N=110$, rapid progressors):
+
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Scenario} & $\eta_\text{abx}$ & \textbf{Untreated $t_{50\%}$} & \textbf{Delay} \\
+\midrule
+A (minimal) & 0.05 & 7.0~yr & +0.37~yr \\
+B (PASADENA) & 0.15 & 7.0~yr & \textbf{+1.24~yr} \\
+C (optimistic) & 0.35 & 7.0~yr & +3.77~yr \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The twin predicts a \textbf{modest} 1.24-year delay in 50\% SBR decline for PASADENA-calibrated treatment intensity. Critically, the PASADENA trial's DaT-SPECT secondary endpoint was \emph{negative}---prasinezumab showed ``no substantial difference'' in dopamine transporter levels vs.\ placebo at 52~weeks~\cite{pagano2022}. Our prediction is \textbf{consistent with this null imaging result}: the predicted 17.6\% slowing of an approximately 8\%/yr SBR decline translates to $\sim$1.4 percentage points less annual decline, yielding an effect size $d \approx 0.055$ ($\Delta\text{SBR}/\sigma_\text{SBR} \approx 0.011/0.20$), far below statistical detection at $N=105$/arm in a 52-week trial. The 4-year open-label extension showed 51--65\% clinical (MDS-UPDRS Part~III) slowing vs.\ a PPMI external comparator~\cite{pagano2024}---larger than our imaging prediction, as expected because motor signs include compensatory mechanisms not captured by the SBR decay model.
+
+The twin thus passes the falsification test: it does \emph{not} overpredict efficacy on the imaging endpoint that PASADENA measured. A twin that predicted dramatic DaT-SPECT effects would have been directly falsified by the trial's null imaging result. The delay/untreated ratio equals $\eta/(1-\eta) = 17.6\%$ exactly across all strata, confirming analytical self-consistency.
+
+
+% ============================================================================
+\section{Related Work Update (Post-Systematic-Review)}
+\label{sec:mech-related-work}
+% ============================================================================
+
+The systematic review in Chapter~\ref{ch:sr} (search period January 2016 -- January 2026) identified zero implementations meeting NASEM mechanistic digital twin criteria for PD prognosis. Several relevant preprints and publications appeared after the search window closed:
+
+\begin{description}[style=nextline]
+\item[Hemedan et al.\ 2026~\cite{hemedan2026}] A governed Bayesian digital twin on the full PPMI cohort ($N=4{,}628$, 28,185 visits) tracking UPDRS-III, MoCA, and SCOPA-AUT via a monotone latent state-space model with a six-rule confidence gate (94--96\% coverage, 32.7\% governed-forecast rate). \textbf{Differentiation:} uses clinical-scale scores, not DaT-SPECT imaging; phenomenological latent state-space, not compartmental $\alpha$-synuclein ODE; associational cross-domain coupling, not biochemical rate constants; no structural identifiability analysis. Their own ``non-causal scope'' constraint (LEDD excluded from the likelihood) is precisely the gap that our Module~4 PK/PD addresses.
+
+\item[Matsui et al.\ 2026~\cite{matsui2026stance}] A mechanistic digital twin of human quiet stance using an intermittent-control ODE calibrated via Bayesian ABC-SMC to 140~PD patients and 59~healthy controls. Identifies 13 distinct postural control-policy clusters and maps them to UPDRS-III PIGD scores via bifurcation analysis. \textbf{Complementarity:} this is a digital twin of the \emph{motor output} (how the patient sways), not the \emph{disease process} (why neurons die). The two approaches address orthogonal layers and could be coupled: our neuron-death module predicts $N(t)$, which determines striatal dopamine capacity, which modulates the postural-control gains Matsui's model fits.
+
+\item[Denaro \& Stephenson 2024~\cite{denaro2024}] A QSP framework paper from the Critical Path for Parkinson's consortium describing shared model infrastructure with documented PPMI access. No per-patient calibration results published as of April~2026.
+
+\item[Wang et al.\ 2025] A conditional neural ODE (CNODE) for brain-morphometry forecasting on PPMI MRI. Uses a black-box neural ODE, not a mechanistic compartmental ODE; explicitly uses the ``digital twin'' term aspirationally.
+
+\item[Righetti et al.\ 2025~\cite{righetti2025}] A mechanistic $\alpha$-synuclein nucleation-conversion-polymerization ODE calibrated from in~vitro ThT fluorescence. No PPMI or in~vivo application. Their parameterization could inform Variant~B rate-constant priors.
+\end{description}
+
+None of these approaches combines (i)~a compartmental $[M, O, F, \log N]$ ODE with (ii)~per-patient Bayesian calibration from (iii)~longitudinal DaT-SPECT imaging with (iv)~formal structural and practical identifiability analysis. The narrow novelty claim documented in Chapter~\ref{ch:discussion} survives this updated landscape.
+
+
+% ============================================================================
+\section{Feasibility Updates Based on Literature Validation (April 2026)}
+\label{sec:mech-feasibility-updates}
+% ============================================================================
+
+The following updates reflect new evidence confirming or rescoping the feasibility of Modules~3 and~4.
+
+\subsection{Module 3 (Connectome Propagation): Population-Connectome Approach Validated on PPMI}
+
+Abdelgawad et al.\ (2022, \emph{Network Neuroscience}) applied an SIR agent-based model on a population-average connectome to 790~PPMI PD scans and demonstrated that connectome-mediated $\alpha$-synuclein propagation recapitulates 4-year longitudinal T1-MRI atrophy patterns \emph{without requiring individual DTI}. This confirms that the HCP population-average structural connectome~(Yeh et al.\ 2018, mapped to the Desikan-Killiany 68-region atlas used by PPMI's FreeSurfer pipeline) is a validated and feasible alternative to individual DTI tractography. Module~3 implementation will therefore use the HCP template connectome as edge weights and PPMI's $\sim$1,700 individual FreeSurfer volumes as node-level observables.
+
+\subsection{Module 4 (PK/PD): Level~2.5 Hybrid (Lit Review Complete April 2026)}
+
+A comprehensive literature review (40+ papers, 3~parallel research agents, April~2026) established: (1)~no published PBPK model for levodopa includes a mechanistic brain compartment with neuron-count-dependent dopamine synthesis calibrated to patient data; (2)~the only published levodopa PBPK (Wollmer et al.\ 2022) models GI absorption for formulation optimization, not disease progression; (3)~the LEAP trial (Verschuur et al.\ 2019, \emph{NEJM}, 236~citations) is definitive that levodopa has no disease-modifying effect; (4)~Djaldetti et al.\ (2018) showed DaT-SPECT does NOT predict wearing-off onset, but our calibrated $N(t)$ trajectory may.
+
+Module~4 is therefore implemented as a ``Level~2.5 hybrid'': population-average PK parameters from published PopPK studies (Simon et al.\ 2016; Contin et al.\ 1997) provide $C_\text{brain}^\text{pop}(\text{LEDD})$, while patient-specific $N(t)$ from Phase~2 modulates dopamine synthesis via equation~\eqref{eq:da-hybrid}. This is more mechanistic than LEDD-as-scalar-covariate but does not require plasma drug levels. The K-PD framework (Jacqmin et al.\ 2007, 164~citations) provides theoretical justification. PPMI data: 9,583 LEDD records for 1,678 patients (Jost et al.\ 2023 conversion factors~\cite{jost2023}), 16,699 UPDRS-III visits, and 1,065 patients with calibrated $N(t)$ posteriors.
+
+The primary competitor is Gupta et al.\ (2025, \emph{Clin Pharmacol Ther}), who linked DaT-SPECT to MDS-UPDRS via item response theory on 419~PPMI patients---statistical, not mechanistic, and without medication covariates. The closest mechanistic architecture is V\'{e}ronneau-Veilleux et al.\ (2020, \emph{J Pharmacokinet Pharmacodyn}), who coupled levodopa PK + dopamine kinetics + basal ganglia + neuronal death, but used assumed (not imaging-calibrated) $N(t)$ and required plasma drug levels for calibration.
+
+
+% ============================================================================
+\section{Summary}
+\label{sec:mech-summary}
+% ============================================================================
+
+This appendix has presented the complete mathematical framework for transitioning from the data-driven GIMAN pipeline to a mechanistic digital twin for Parkinson's disease. The five coupled ODE modules---alpha-synuclein aggregation (Section~\ref{sec:mech-aggregation}), dopaminergic neuron death (Section~\ref{sec:mech-neuron-death}), Lewy body network propagation (Section~\ref{sec:mech-propagation}), levodopa PK/PD (Section~\ref{sec:mech-pkpd}), and functional impairment mapping (Section~\ref{sec:mech-functional})---encode the causal biological chain from molecular pathology to clinical staging.
+
+GIMAN provides the irreplaceable foundation: Paper~1's classifier serves as the functional impairment module and validation oracle, Paper~2's imputation handles missing biomarker data for parameter calibration, Paper~3's transition rates provide direct calibration targets, and Paper~4's conformal bands define the acceptable prediction envelope. The patient similarity graph from Paper~3 provides graph-regularized priors for Bayesian parameter estimation, ensuring that the mechanistic model leverages the full information content of the data-driven framework.
+
+As of April~2026, Phases~1--2 are complete: the coupled $[M, O, F, \log N]$ ODE is calibrated to 304 PPMI patients via importance-sampling (Section~\ref{sec:mech-phase2-results}), producing per-patient toxicity-flux posteriors whose cohort-median implied neuron-loss rate (3.29\%/yr) independently reproduces the Fearnley \& Lees canonical range. Adding CSF total $\alpha$-synuclein as a second observable (Section~\ref{sec:mech-csf-joint}) partially breaks the $T_\text{tox}$ sloppy-ridge degeneracy, tightening $k_n$ posteriors by 29\% cohort-wide (49\% on the HIGH-INFO subset) and moving the $k_n$--$\alpha_\text{tox}$ correlation from $-0.240$ toward zero ($-0.113$). The cohort-median implied neuron-loss rate under joint calibration is 2.93\%/yr, consistent with the SBR-only estimate and the Fearnley \& Lees range. No published study has combined a compartmental $\alpha$-synuclein aggregation--death ODE with per-patient Bayesian calibration from joint longitudinal DaT-SPECT + CSF $\alpha$-synuclein imaging and formal identifiability analysis (Section~\ref{sec:mech-related-work}). The remaining modules---connectome propagation (feasible via population-average HCP connectome, Section~\ref{sec:mech-feasibility-updates}), LEDD-as-covariate medication confound correction, and counterfactual intervention simulation---represent achievable extensions that build on the completed infrastructure.
+
+The envisioned clinical impact is qualitatively different from GIMAN's correlational predictions. Where GIMAN reports ``this patient has a 42\% probability of transitioning to Stage~3 within 24 months,'' a mechanistic twin would report ``this patient's calibrated toxicity flux $T_\text{tox}$ predicts Stage~3 arrival at month~16. If prasinezumab is initiated now, reducing the toxic oligomer flux by an estimated $\eta_\text{abx} = 0.15$, predicted arrival shifts to month~28---a delay of 12 months.'' The mechanistic model provides counterfactual predictions with quantified treatment benefits, enabling truly personalized therapeutic decision-making.

@@ -1,0 +1,47 @@
+# Temporal Digital Twin Engine Configuration
+# Phase 3: Model-driven digital twin backed by TemporalGIMAN ensemble
+
+engine:
+  checkpoint_dir: results/temporal_giman
+  checkpoint_pattern: "model_fold*_20260218_143353.pt"
+  feature_config: config/feature_configs/longitudinal_34.yaml
+  training_config: config/training/temporal_giman.yaml
+  device: cpu
+
+ensemble:
+  n_models: 5
+  aggregation: mean
+  ci_percentiles: [2.5, 97.5]
+
+data:
+  data_dir: data/03_prodromal/longitudinal_training
+  endpoints: data/prodromal_cohort/prodromal_survival_data.csv
+  min_visits: 2
+
+registry:
+  output_dir: results/digital_twin_states
+
+counterfactual:
+  default_specs:
+    - feature_name: UPDRS_I
+      delta: -0.5
+    - feature_name: SCOPA_AUT_SCORE
+      delta: -0.5
+    - feature_name: TREMOR_SCORE
+      delta: -0.5
+    - feature_name: UPSIT_SCORE
+      delta: 0.5
+    - feature_name: ALPHA_SYNUCLEIN
+      delta: -0.5
+    - feature_name: LRRK2
+      delta: -0.5
+
+visualization:
+  output_dir: visualizations/digital_twin
+  dpi: 300
+  figsize: [10, 6]
+
+demo:
+  max_patients: 0         # 0 = all patients
+  n_update_demos: 10      # patients for update demonstration
+  n_counterfactual: 10    # top-risk patients for counterfactual analysis

@@ -1,0 +1,67 @@
+\documentclass[journal]{IEEEtran}
+
+% Search for files in both the paper subdirectory and current dir
+\makeatletter
+\def\input@path{{paper1_submission/npj-dm/}{./}}
+\makeatother
+
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{hyperref}
+\hypersetup{hidelinks=true}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{enumitem}
+% NSD-ISS color definitions
+\definecolor{nsdblue}{RGB}{0,67,147}
+\definecolor{nsdorange}{RGB}{230,120,30}
+\definecolor{nsdgreen}{RGB}{34,139,34}
+\definecolor{nsdred}{RGB}{200,50,50}
+\definecolor{nsdgray}{RGB}{128,128,128}
+\definecolor{nsdpurple}{RGB}{75,0,130}
+\definecolor{lightblue}{RGB}{220,235,255}
+\definecolor{lightorange}{RGB}{255,240,220}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,220,220}
+\definecolor{modrisk}{RGB}{255,140,0}
+
+% Custom macros
+\newcommand{\DA}{\mathrm{DA}}
+\newcommand{\LEDD}{\mathrm{LEDD}}
+\newcommand{\Nfrac}{N_{\mathrm{frac}}}
+\newcommand{\etal}{\textit{et~al.}}
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+
+\graphicspath{{paper1_submission/npj-dm/figures/}{figures/}}
+
+% Map \chapter to nothing (ieeecolor article-style class)
+\newcommand{\chapter}[1]{}
+
+\markboth{\hskip8pc \textit{npj} DIGITAL MEDICINE --- ORIGINAL RESEARCH ARTICLE}%
+{Dupre: Benchmarked ML for NSD-ISS Stage Prediction with Calibrated Uncertainty}
+
+\begin{document}
+
+\title{Benchmarked Machine Learning for Neuronal $\alpha$-Synuclein Disease Integrated Staging System (NSD-ISS) Prediction with Calibrated Uncertainty in Parkinson's Disease}
+
+\author{Blair~Dupre
+\thanks{Manuscript submitted April 2026. This work was supported by the University of North Dakota.}
+\thanks{B. Dupre is with the Department of Biomedical Engineering, University of North Dakota, Grand Forks, ND 58202 USA (e-mail: blair.dupre@und.edu).}
+\thanks{Data used in the preparation of this article were obtained from the Parkinson's Progression Markers Initiative (PPMI) database (\url{https://www.ppmi-info.org/access-data-specimens/download-data}) and the Accelerating Medicines Partnership Parkinson's Disease (AMP-PD) platform (\url{https://amp-pd.org}).}
+}
+
+\maketitle
+
+\input{chapter_content.tex}
+
+\input{bibliography_extracted.tex}
+
+\end{document}

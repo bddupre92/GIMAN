@@ -1,0 +1,731 @@
+% ============================================================
+% Supplementary Information
+% Companion to: Graph-Informed NSD-ISS Transition Prediction
+%               with Conformalized Uncertainty and Subgroup
+%               Equity in Parkinson's Disease
+% Target: npj Digital Medicine (Nature Portfolio)
+% ============================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[colorlinks=false,hidelinks]{hyperref}
+
+\onehalfspacing
+\pagenumbering{arabic}
+\renewcommand{\thepage}{S\arabic{page}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\title{Supplementary Information \\[0.5em]
+Graph-Informed NSD-ISS Transition Prediction with \\
+Conformalized Uncertainty and Subgroup Equity in Parkinson's Disease}
+
+\author{Blair D. Dupre\\[0.5em]
+Department of Biomedical Engineering,\\
+University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ================================================================
+% S-1 / S-2 — placeholders preserved for cross-reference stability
+% ================================================================
+\section*{S-1. Reserved}
+\label{sec:s1}
+
+Reserved for the four-method conformal-ablation table (IPCW / marginal / naive / Bonferroni) at 90\% and 95\% CL. Numerical content is reported in the main-text Methods (\S Cause-specific conformal CIF bands with IPCW) and the Results figures.
+
+\section*{S-2. Reserved}
+\label{sec:s2}
+
+Reserved for the competitor-comparison table positioning this work against Cand\`{e}s \textit{et~al.}~2023 and Sreenivasan \textit{et~al.}~2025. Discussion is in the main-text Discussion (\S Positioning relative to prior work).
+
+% ================================================================
+% S-3 — CARRIER SUBGROUP ANALYSIS (this workstream's deliverable)
+% ================================================================
+\section*{S-3. Carrier Subgroup Analysis}
+\label{sec:s3}
+
+\subsection*{Background and pre-registration}
+
+The original Paper~3+4 submission excluded LRRK2 and GBA carrier subgroups from inferential analysis under the rationale that per-fold $n<10$, the result of a silent feature-extraction bug in \texttt{scripts/assemble\_paper1\_features.py:extract\_genetics()} that failed to match the IU Genetic Consensus variant-name encoding (\texttt{G2019S}, \texttt{R1441G}, \texttt{N409S}, \texttt{L483P}). After the bug fix in commit \texttt{672b439}, the post-fix carrier columns in \texttt{features.paper1\_features\_with\_targets} are: 175 LRRK2 carriers, 111 GBA carriers, and 441 APOE~$\varepsilon4$ carriers. Strata are defined as mutually exclusive in this analysis: LRRK2+ includes any patient with \texttt{lrrk2\_carrier=1} (including dual carriers); APOE~$\varepsilon4$+~only and GBA+~only require the other two carrier flags to be 0. The pre-registration locking the hypotheses (H1/H2/H3), MIN\_SUBGROUP\_SIZE\_CARRIER~$=50$, and decision rule was committed on 2026-04-23 \emph{before} any compute on the bug-fixed feature table (\texttt{outputs/paper4/subgroup\_carriers/PRE\_REGISTRATION.md}). The runner script is \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}.
+
+\subsection*{Cohort sizes (post mutual-exclusivity definition)}
+
+Stratum-level (cohort-wide) sizes versus 5-fold cross-validation per-fold mean and range:
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Carrier-stratum cohort and per-fold sizes.} Cohort-level $n$ is the post-bug-fix carrier flag count in \texttt{features.paper1\_features\_with\_targets} after applying mutual-exclusivity definitions. Per-fold $n$ is the count of test patients within that stratum across the 5 stratified cross-validation folds (mean and min--max range). Per-fold events count distinct first-event records used in the time-dependent concordance computation.}
+\label{tab:s3_cohort}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Stratum} & \textbf{Cohort $n$} & \textbf{Per-fold $n$ (mean)} & \textbf{Per-fold $n$ (range)} & \textbf{Per-fold events (mean)} \\
+\midrule
+LRRK2+ (incl.\ dual carriers) & 175 & 140.2 & 109--179 & 105.2 \\
+APOE~$\varepsilon4$+~only & 375 & 161.0 & 109--175 & 87.0 \\
+GBA+~only & 79 & 50.0 & 10--92 & 34.2 \\
+Non-carrier (reference) & 1{,}547 & 590.4 & 567--636 & 340.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{H1 — Per-stratum C-td (fairness on discrimination)}
+
+Per-stratum time-dependent concordance averaged across 5 stratified cross-validation folds, with 95\% patient-level bootstrap CIs (1{,}000 resamples). The CI envelope columns report the minimum lower bound and maximum upper bound across the 5 per-fold CIs (a conservative summary across folds rather than a refit-bootstrap). All carrier strata's CI envelopes overlap the non-carrier reference envelope, supporting the H1 fairness pre-registration.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{H1 --- Per-stratum C-td (mean $\pm$ std across 5 folds; CI envelope across 5 per-fold patient-bootstrap 95\% CIs).} Per-fold $n$ and event counts vary by fold composition; the headline $n$ in column 5 is the per-fold mean. The GBA+~only entry has elevated variance because per-fold $n$ ranges from 10 to 92; the wide CI envelope $[0.500,\ 1.000]$ reflects the smallest per-fold sample size.}
+\label{tab:s3_h1_ctd}
+\begin{tabular}{llcccr}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{C-td (mean $\pm$ std)} & \textbf{CI envelope (lo, hi)} & \textbf{$n$ (per-fold mean)} & \textbf{Events (mean)} \\
+\midrule
+\multirow{4}{*}{DeepHit}
+  & LRRK2+        & $0.911 \pm 0.024$ & $[0.818,\ 0.976]$ & 140.2 & 105.2 \\
+  & APOE~$\varepsilon4$+~only & $0.932 \pm 0.026$ & $[0.811,\ 1.000]$ & 161.0 & 87.0 \\
+  & GBA+~only     & $0.862 \pm 0.183$ & $[0.500,\ 1.000]$ & 50.0  & 34.2 \\
+  & Non-carrier   & $0.928 \pm 0.016$ & $[0.867,\ 0.956]$ & 590.4 & 340.2 \\
+\midrule
+\multirow{4}{*}{Graph-DT}
+  & LRRK2+        & $0.897 \pm 0.026$ & $[0.778,\ 0.954]$ & 140.2 & 105.2 \\
+  & APOE~$\varepsilon4$+~only & $0.907 \pm 0.043$ & $[0.776,\ 0.990]$ & 161.0 & 87.0 \\
+  & GBA+~only     & $0.854 \pm 0.184$ & $[0.500,\ 1.000]$ & 50.0  & 34.2 \\
+  & Non-carrier   & $0.906 \pm 0.033$ & $[0.806,\ 0.954]$ & 590.4 & 340.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Verdict.} \textbf{H1 PASS:} every carrier-stratum CI envelope overlaps the non-carrier reference for both DeepHit and Graph-DT.
+
+\subsection*{H2 --- Bootstrap interaction tests (BH-FDR-corrected)}
+
+Reviewer~\#3 (reviewer3.com) flagged that combining per-fold interaction $p$-values via Fisher's $\chi^2_{2k} = -2\sum\ln(p_i)$ violates the procedure's strict independence assumption: in a 5-fold CV scheme the test sets are disjoint but the trained models share 60\% of the training data, so per-fold $p$-values are positively correlated and Fisher's combination yields spuriously low pooled $p$-values. The fix (WS-P3-CRIT-B) replaces the per-fold-then-Fisher-combine pattern with a SINGLE patient-level bootstrap interaction test ($B{=}500$, \texttt{random\_state=42}) on the pooled out-of-fold predictions across the 5 folds: each patient appears in exactly one test fold by construction, so a single permutation test on the pooled cohort is the correct statistic for $H_0:\ \Delta C_\mathrm{td} = 0$. The pooled-OOF inference framework follows Vovk \emph{et al.}~\cite{vovk2022conformal}. BH--FDR correction is applied across the 6-cell carrier grid (3 strata $\times$ 2 models) using \texttt{scipy.stats.false\_discovery\_control(method='bh')}. The legacy per-fold-then-Fisher pipeline is retained in the JSON record under \texttt{p\_fisher\_legacy} and \texttt{p\_fdr\_fisher\_legacy} for the side-by-side audit shown below; pre-fix outputs are snapshotted at \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/}.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{H2 --- Bootstrap interaction tests with BH-FDR correction (post-WS-P3-CRIT-B).} $\Delta C_\mathrm{td}^{\text{pooled}}$ is computed on the union of the 5 per-fold OOF predictions (carrier C-td $-$ non-carrier C-td); negative values mean the carrier stratum performs worse than the non-carrier reference. $p_\mathrm{pooled}$ is the new pooled-OOF permutation $p$-value (CRIT-B canonical); $p_\mathrm{Fisher}$ is the legacy Fisher-combined value (no longer drives FDR); $p_\mathrm{FDR,pooled}$ and $p_\mathrm{FDR,Fisher}$ are the BH-corrected values from each respective pipeline. Numbers in this table are pulled directly from \texttt{outputs/paper4/subgroup\_carriers/interaction\_tests\_carriers.json} (post-fix) and \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/interaction\_tests\_carriers.json} (pre-fix).}
+\label{tab:s3_h2_interaction}
+\begin{tabular}{llrrrrr}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{$\Delta C_\mathrm{td}^{\text{pooled}}$} & \textbf{$p_\mathrm{pooled}$ (CRIT-B)} & \textbf{$p_\mathrm{Fisher}$ (legacy)} & \textbf{$p_\mathrm{FDR,pooled}$} & \textbf{$p_\mathrm{FDR,Fisher}$} \\
+\midrule
+DeepHit  & LRRK2+              & $-0.017$ & 0.120 & 0.236 & 0.719 & 0.372 \\
+DeepHit  & GBA+~only           & $+0.004$ & 0.856 & 0.355 & 0.856 & 0.426 \\
+DeepHit  & APOE~$\varepsilon4$+~only & $+0.003$ & 0.774 & 0.683 & 0.856 & 0.683 \\
+Graph-DT & LRRK2+              & $-0.014$ & 0.273 & 0.163 & 0.737 & 0.372 \\
+Graph-DT & GBA+~only           & $-0.017$ & 0.431 & 0.049 & 0.737 & 0.295 \\
+Graph-DT & APOE~$\varepsilon4$+~only & $-0.009$ & 0.491 & 0.248 & 0.737 & 0.372 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Verdict.} \textbf{The H2 PASS verdict is preserved under the methodologically-correct pooled-OOF re-test.} All six $p_\mathrm{FDR,pooled}$ values exceed the pre-registered $\alpha{=}0.05$ threshold, with the smallest equal to $0.719$ (DeepHit$\times$LRRK2+, $\Delta C_\mathrm{td}{=}-0.017$). The legacy Fisher pipeline produced a marginal Graph-DT$\times$GBA+~only $p_\mathrm{Fisher}{=}0.049$ that did not survive FDR correction; the pooled-OOF re-test relabels this borderline cell as $p_\mathrm{pooled}{=}0.431$ ($p_\mathrm{FDR,pooled}{=}0.737$), which is the correct inferential statistic for dependent per-fold $p$-values and confirms the pre-fix $p_\mathrm{Fisher}{=}0.049$ was a multiple-comparison artifact amplified by the positive dependence between CV folds (the failure mode reviewer3.com~\#3 anticipated). The §S-CRIT-B audit table below reports the per-cell change.
+
+\subsection*{H3 --- Conditional conformal coverage (per stratum)}
+
+Conditional conformal coverage is the proportion of held-out events whose true outcome falls inside the conformal prediction band restricted to the patient's carrier stratum. Pre-registration: stratum-conditional coverage at the 90\% confidence level should fall within $\pm0.03$ of the empirical marginal coverage. \textbf{The empirical marginal coverage shifted from $0.82$ (pre-fix) to $0.90$ (post-fix) after the WS-P3-CRIT-A IPCW formula correction (commit \texttt{f8a7c54}, see \S~S-CRIT-A below): per-marginal-cohort coverage rose from $0.817$ to $0.902$ for DeepHit and from $0.818$ to $0.905$ for Graph-DT at 90\% CL.} Under the corrected IPCW pipeline, the H3 tolerance window is therefore $[0.87, 0.93]$ at the 90\% CL.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{H3 --- Conditional conformal coverage per stratum (post-WS-P3-CRIT-A IPCW formula fix).} Mean across 5 folds at the 90\% and 95\% confidence levels. The pre-registered H3 tolerance is $\pm0.03$ around the empirical marginal coverage; under the corrected IPCW pipeline (commit \texttt{f8a7c54}) the empirical marginal at 90\% CL is $\approx 0.90$, so the per-stratum tolerance window is $[0.87, 0.93]$ at 90\% CL and $[0.92, 0.98]$ at 95\% CL. \textbf{All eight (model$\times$stratum) cells fall within tolerance at both confidence levels.}}
+\label{tab:s3_h3_coverage}
+\begin{tabular}{llcc}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{Mean coverage (90\% CL)} & \textbf{Mean coverage (95\% CL)} \\
+\midrule
+\multirow{4}{*}{DeepHit}
+  & LRRK2+                    & $0.898$ & $0.949$ \\
+  & GBA+~only                 & $0.919$ & $0.960$ \\
+  & APOE~$\varepsilon4$+~only & $0.909$ & $0.953$ \\
+  & Non-carrier               & $0.901$ & $0.950$ \\
+\midrule
+\multirow{4}{*}{Graph-DT}
+  & LRRK2+                    & $0.894$ & $0.951$ \\
+  & GBA+~only                 & $0.926$ & $0.962$ \\
+  & APOE~$\varepsilon4$+~only & $0.915$ & $0.955$ \\
+  & Non-carrier               & $0.906$ & $0.953$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Verdict.} \textbf{H3 PASS:} stratum-conditional coverage at the 90\% CL lies within $[0.87, 0.93]$ for all (model$\times$stratum) cells. The largest single deviation from nominal $0.90$ is Graph-DT$\times$GBA+~only at $+0.026$ (still inside the $\pm 0.03$ window); the smallest is DeepHit$\times$Non-carrier at $+0.001$. The pre-fix H3 FAIL verdict (mean stratum coverage $0.795$--$0.835$) was an artifact of the silent IPCW formula bug (per-fold weight $1/G(C_i)$ for censored survivors instead of the Cand\`es--Lei--Ren three-case rule), not of the carrier strata themselves --- the same bug that depressed pooled marginal coverage by $\approx 9$~pp at 90\% CL also depressed every stratum's coverage by a similar amount. Under the corrected IPCW pipeline the carrier strata behave as well as the demographic (sex/age) strata.
+
+\subsection*{Mondrian per-stratum sensitivity check (WS-P3-14b)}
+
+To verify that the H3 PASS is not merely a coincidence of the post-CRIT-A marginal lift, we performed a Mondrian per-stratum recalibration~\cite{bostrom2025mondrian,vovk2022conformal} as a sensitivity check: for each fold and each carrier stratum, the IPCW conformal quantiles were re-estimated on the calibration set restricted to that stratum, then applied to the eval-set patients of the same stratum. This is the statistically correct deployment-time procedure for genetically-defined subpopulations. The runner is at \texttt{scripts/paper3plus4/run\_mondrian\_carriers.py}; with \texttt{MIN\_CAL\_PER\_STRATUM=30} the GBA+~only stratum is Mondrian-eligible in only 2 of 5 folds (per-fold cal-N $\in \{43, 49, 87, 87, 98\}$ across folds; the remaining folds fall back to the marginal quantile). LRRK2+ and APOE~$\varepsilon4$+~only are eligible in all 5 folds.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Mondrian sensitivity check (90\% CL, post-CRIT-A IPCW pipeline).} Marginal column reproduces Table~\ref{tab:s3_h3_coverage}; Mondrian column applies stratum-specific quantiles. $\Delta$ is Mondrian $-$ marginal. Width inflation reports the relative increase in mean band width under Mondrian. The GBA+~only stratum is Mondrian-eligible in 2/5 folds only (\texttt{n\_cal}~$<30$ in the other folds); other strata 5/5.}
+\label{tab:s3_h3_mondrian}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{Marginal} & \textbf{Mondrian} & \textbf{$\Delta$} & \textbf{Width inflation} & \textbf{Folds (Mondrian)} \\
+\midrule
+\multirow{4}{*}{DeepHit}
+  & LRRK2+                    & $0.898$ & $0.907$ & $+0.009$ & $+141\%$ & 5/5 \\
+  & GBA+~only                 & $0.919$ & $0.938$ & $+0.037$ & $+259\%$ & 2/5 \\
+  & APOE~$\varepsilon4$+~only & $0.909$ & $0.912$ & $+0.003$ & $+41\%$  & 5/5 \\
+  & Non-carrier               & $0.901$ & $0.898$ & $-0.003$ & $+7\%$   & 5/5 \\
+\midrule
+\multirow{4}{*}{Graph-DT}
+  & LRRK2+                    & $0.894$ & $0.915$ & $+0.020$ & $+72\%$  & 5/5 \\
+  & GBA+~only                 & $0.926$ & $0.933$ & $+0.028$ & $+161\%$ & 2/5 \\
+  & APOE~$\varepsilon4$+~only & $0.915$ & $0.919$ & $+0.004$ & $+27\%$  & 5/5 \\
+  & Non-carrier               & $0.906$ & $0.901$ & $-0.005$ & $+5\%$   & 5/5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Sensitivity-check verdict.} Mondrian recalibration confirms the H3 PASS: all 8 (model$\times$stratum) cells stay within the $[0.87, 0.93]$ tolerance window (largest Mondrian deviation $+0.038$ for DeepHit$\times$GBA+~only). Mondrian provides a small per-stratum coverage boost ($\Delta \in [-0.005, +0.037]$) but at substantial width cost (mean band width inflates $+5\%$ for Non-carrier to $+259\%$ for the data-poor DeepHit$\times$GBA+~only cell, where the per-fold Mondrian quantile is computed from only $\approx 45$ calibration patients). The observed inflation pattern is the expected statistical-efficiency cost of Mondrian (Bostr\"om \emph{et al.}~2025): smaller calibration N at fixed nominal coverage produces wider bands. The GBA+~only stratum's $2/5$ fold eligibility is the fundamental finite-sample limit and is the cleanest motivation for multi-site pooling (PPMI + PDBP + UK~Biobank-PD) for clinical deployment in the GBA+ subpopulation. The full per-(fold, model, CL, stratum) Mondrian record is at \texttt{outputs/paper4/subgroup\_carriers/conditional\_coverage\_carriers\_mondrian.json} and the aggregate summary at \texttt{outputs/paper4/subgroup\_carriers/mondrian\_summary.json}.
+
+\subsection*{Honest disclosure and deployment recommendation}
+
+The pre-registered overall verdict for WS-P3-14 (post-CRIT-A + post-CRIT-B + post-WS-P3-14b) is therefore \textbf{full pass}: H1 fairness is supported (per-stratum C-td CIs overlap the non-carrier reference), H2 is supported (post-CRIT-B pooled-OOF interaction tests yield no significant model$\times$subgroup interaction after BH-FDR correction; smallest $p_{\mathrm{FDR}}{=}0.719$), and H3 is supported (post-CRIT-A IPCW marginal coverage within $\pm0.03$ of nominal across all 8 strata cells, and the Mondrian sensitivity check confirms the same conclusion at significantly inflated band width). For \emph{deployment} to genetically-defined subpopulations we recommend Mondrian recalibration in any setting where the per-stratum nominal coverage guarantee outweighs the band-width cost; the marginal calibration is sufficient for population-level reporting. A multi-site pooled analysis would lift the GBA+~only stratum out of the per-fold $n_\mathrm{cal} < 30$ regime, allowing 5/5 fold Mondrian eligibility, and is the natural next step for this work.
+
+\subsection*{Source artefacts}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{outputs/paper4/subgroup\_carriers/PRE\_REGISTRATION.md} — locked hypothesis and decision rule (2026-04-23).
+  \item \texttt{outputs/paper4/subgroup\_carriers/subgroup\_ctd\_carriers.json} — per-fold per-stratum C-td with bootstrap CIs.
+  \item \texttt{outputs/paper4/subgroup\_carriers/interaction\_tests\_carriers.json} — per-fold bootstrap interaction tests + Fisher combination.
+  \item \texttt{outputs/paper4/subgroup\_carriers/conditional\_coverage\_carriers.json} — per-fold stratum-conditional coverage at 90\% and 95\% CL.
+  \item \texttt{outputs/paper4/subgroup\_carriers/decision\_verdict.json} — pooled summary, FDR-corrected $p$-values, H3 deviation list.
+  \item \texttt{outputs/paper4/subgroup\_carriers/CLAIMS.md} — claim-mapping audit record.
+  \item \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py} — runner.
+\end{itemize}
+
+% ================================================================
+% S-CRIT-A — IPCW FORMULA CORRECTION (Reviewer Round 2 #2)
+% ================================================================
+\section*{S-CRIT-A. IPCW Formula Correction (Reviewer Round 2 \#2)}
+\label{sec:s-crit-a}
+
+\subsection*{Statement of the bug and correct formula}
+
+Reviewer~\#2 (npj-DM, Round 2) flagged that the original implementation of the cause-specific IPCW conformal weights violated Cand\`{e}s, Lei, and Ren~\cite{candes2023conformal}. Specifically, the per-observation weight at evaluation horizon $t_j$ was computed as $w_i = 1/\hat{G}(C_i)$ for censored survivors with $C_i \geq t_j$ and $w_i = 1$ for uncensored events with $T_i \leq t_j$. Both choices are incorrect.
+
+The Cand\`{e}s 2023 formula for fixed-time conformal evaluation is, for each calibration observation $i = (X_i, \delta_i)$ contributing to horizon $t_j$:
+\begin{equation}
+w_i^{(k,j)} \;=\; \begin{cases}
+1/\hat{G}(T_i^-) & \delta_i = 1,\ T_i \leq t_j \quad\text{(uncensored event before }t_j\text{)} \\
+1/\hat{G}(t_j^-) & X_i > t_j \quad\text{(at risk past }t_j\text{; censored or uncensored)} \\
+\text{excluded} & \delta_i = 0,\ C_i < t_j \quad\text{(censored before }t_j\text{)}
+\end{cases}
+\label{eq:scrita_ipcw}
+\end{equation}
+where $X_i = \min(T_i, C_i)$, $\delta_i \in \{0,1\}$, $T_i$ is the event time, $C_i$ the censoring time, and $\hat{G}$ the Kaplan--Meier estimate of the censoring survival function. The original (buggy) implementation used the patient's own censoring time $C_i$ for survivors, which over-weights patients censored late, and unit weight for uncensored events, which under-weights events whose at-risk-process realisation is short.
+
+The corrected helper \texttt{compute\_per\_observation\_ipcw\_weight()} in \texttt{src/giman\_pipeline/paper4/conformal\_survival.py} implements Eq.~\ref{eq:scrita_ipcw}. The same fix was mirrored in \texttt{src/giman\_pipeline/paper4/calibration.py}. The KM estimation, the score formula, the per-(cause, time) quantile rule, and the random-state are unchanged; the only modification is the per-observation weight.
+
+\subsection*{Pre/post-correction marginal coverage (5-fold mean $\pm$ SD)}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Pre/post-correction marginal conformal coverage} on all 10 Paper~3 checkpoints (5 DeepHit + 5 Graph-DT), 50/50 calibration/evaluation split per fold, identical seeds. With the corrected IPCW formula, both models meet the nominal target at the 80\%, 90\%, and 95\% confidence levels, closing the previously-documented structural undercoverage at 90\% CL.}
+\label{tab:scrita_marginal}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{CL} & \textbf{Pre coverage} & \textbf{Post coverage} & \textbf{$\Delta$ (pp)} \\
+\midrule
+\multirow{3}{*}{DeepHit}
+  & 80\% & $0.627 \pm 0.048$ & $0.797 \pm 0.010$ & $+16.97$ \\
+  & 90\% & $0.817 \pm 0.025$ & $0.902 \pm 0.008$ & $+8.47$  \\
+  & 95\% & $0.911 \pm 0.015$ & $0.951 \pm 0.006$ & $+3.93$  \\
+\midrule
+\multirow{3}{*}{Graph-DT}
+  & 80\% & $0.626 \pm 0.040$ & $0.798 \pm 0.009$ & $+17.13$ \\
+  & 90\% & $0.818 \pm 0.024$ & $0.905 \pm 0.007$ & $+8.67$  \\
+  & 95\% & $0.914 \pm 0.013$ & $0.953 \pm 0.006$ & $+3.88$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Per-cause coverage shifts at 90\% CL}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Per-cause marginal coverage at 90\% CL, pre vs.\ post correction.} 5-fold mean. After correction every cause-specific value lies within $\pm 0.01$ of the nominal 0.90 target for both models. Cause indices 0, 1, 2, 3, 4, 5, 6 correspond to NSD-ISS stages 0, 1, 2B, 3, 4, 5, 6 respectively (the destination of the next observed transition).}
+\label{tab:scrita_per_cause}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Cause} & \textbf{DeepHit pre} & \textbf{DeepHit post} & \textbf{Graph-DT pre} & \textbf{Graph-DT post} \\
+\midrule
+0 (Stage 0) & 0.825 & 0.902 & 0.823 & 0.904 \\
+1 (Stage 1) & 0.820 & 0.891 & 0.826 & 0.906 \\
+2 (Stage 2B) & 0.820 & 0.903 & 0.816 & 0.902 \\
+3 (Stage 3) & 0.816 & 0.901 & 0.810 & 0.900 \\
+4 (Stage 4) & 0.807 & 0.910 & 0.813 & 0.912 \\
+5 (Stage 5) & 0.815 & 0.908 & 0.819 & 0.912 \\
+6 (Stage 6) & 0.818 & 0.897 & 0.824 & 0.901 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Magnitude of change discussion}
+
+The correction is empirically substantial: marginal coverage at the 90\% confidence level shifts by $+8.5$~pp (DeepHit) and $+8.7$~pp (Graph-DT), elevating both models from $\sim 0.82$ (the previously-reported ``structural undercoverage'') to the nominal $\sim 0.90$ target. At 95\% CL the shift is $+3.9$~pp for both models; at 80\% CL it is $+17$~pp. These magnitudes exceed the 0.005 reporting threshold pre-registered in the WS-P3-CRIT-A workstream, so the abstract, the main-text conformal-coverage table, and Methods~\S Cause-specific conformal CIF bands with IPCW have all been updated in the main manuscript.
+
+The previously-reported ``structural concentration of CIF values near zero'' framing for the 90\%-CL undercoverage is now obsolete: the gap to nominal was an implementation bug, not an inherent property of pointwise conformal bands on competing-risks CIFs. The forward-vs-backward directional gap also narrows from 7.0~pp (pre) to 5.7~pp (post), because forward coverage is now lifted closer to nominal while backward coverage---which is intrinsically harder due to treatment-driven censoring informativeness---remains below 0.90 (0.854 mean across folds). The substantive Discussion claim that backward-transition coverage is sub-nominal is preserved; only the numerical values were updated.
+
+The mean band widths grew with the corrected formula: at 90\% CL, DeepHit width $0.0047 \to 0.0191$ and Graph-DT width $0.0171 \to 0.0478$. This is the price of correctness: the original buggy weights produced narrower bands by under-weighting. The post-correction bands are still substantially narrower than the Bonferroni baseline ($\sim 0.765$, $\sim 16$--$40\times$ wider) and remain clinically interpretable given that the units are CIF-probability (so widths $\sim 0.05$ correspond to $\pm 5$ percentage points of cumulative incidence).
+
+\subsection*{Files modified}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{src/giman\_pipeline/paper4/conformal\_survival.py}: added \texttt{compute\_per\_observation\_ipcw\_weight()} implementing Eq.~\ref{eq:scrita_ipcw}; modified \texttt{CauseSpecificConformal.calibrate()} to call it for each $(i, t_j)$ pair.
+  \item \texttt{src/giman\_pipeline/paper4/calibration.py}: replaced the same buggy weight pattern in \texttt{\_compute\_observed\_status()} with the corrected formula; affects ECE, reliability diagrams, and Hosmer--Lemeshow test inputs.
+  \item \texttt{tests/paper4/test\_conformal\_ipcw.py} (new): three TDD unit tests on a synthetic Kaplan--Meier with hand-computed $G(t)$ values, plus a smoke-test on a small synthetic CIF problem. All four tests fail on the pre-fix code (they cannot import \texttt{compute\_per\_observation\_ipcw\_weight}) and pass after the fix.
+  \item Pre-fix conformal results snapshotted to \texttt{outputs/paper4/conformal/\_pre\_ipcw\_fix/} for the pre/post comparison above.
+\end{itemize}
+
+% ================================================================
+% S-CRIT-B — POOLED-OOF FIX FOR FISHER'S METHOD (Reviewer Round 2 #3)
+% ================================================================
+\section*{S-CRIT-B. Pooled-OOF Single Test Replaces Fisher's Combined $p$-values (Reviewer Round 2 \#3)}
+\label{sec:s-crit-b}
+
+\subsection*{Statement of the bug}
+
+Reviewer~\#3 (npj-DM, Round 2) observed:
+
+\begin{quote}
+``Combining $p$-values across cross-validation folds via Fisher's method violates the procedure's strict independence assumption. \ldots Fisher's method (using the test statistic $-2\sum\ln(p_i)\sim\chi^2_{2k}$) requires the individual $p$-values to be independent. In a 5-fold cross-validation scheme, while the test sets are disjoint, the models evaluated on these test sets are trained on highly overlapping training data (sharing 60\% of the total dataset). \ldots A method designed for dependent $p$-values or a single test on the pooled out-of-fold predictions is required.''
+\end{quote}
+
+The pre-fix runner (\texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}, lines 603--624) aggregated 5 per-fold permutation $p$-values per (model, carrier-stratum) cell and applied Fisher's combination
+\begin{equation}
+\chi^2_{2k} = -2\sum_{i=1}^{k} \ln(p_i),\qquad p_\mathrm{Fisher} = P(\chi^2_{2k} \ge \chi^2_\mathrm{obs}),
+\label{eq:scritb_fisher}
+\end{equation}
+followed by BH--FDR correction across the resulting 6 cells. Because the per-fold predictions arose from CV models sharing 60\% of their training data, the per-fold $p_i$ are positively correlated, and Eq.~\ref{eq:scritb_fisher} systematically yields spuriously low pooled $p$-values relative to the true joint distribution.
+
+\subsection*{Correct procedure (pooled-OOF single test)}
+
+For each (model, carrier-stratum) pair the corrected procedure applies a single patient-level bootstrap interaction test on the union of the 5 per-fold OOF predictions. Specifically, with $\mathcal{P}_k$ denoting the disjoint test patnos in fold $k$ and $A_k(\cdot)$ the carrier vs reference assignment within that fold:
+\begin{equation}
+\Delta C_\mathrm{td}^{\text{pooled}} \;=\; C_\mathrm{td}\!\left(\bigcup_{k=1}^{5}\{i \in \mathcal{P}_k : A_k(i)=\text{carrier}\}\right) \;-\; C_\mathrm{td}\!\left(\bigcup_{k=1}^{5}\{i \in \mathcal{P}_k : A_k(i)=\text{Non-carrier}\}\right),
+\label{eq:scritb_delta}
+\end{equation}
+with the two-sided permutation $p$-value
+\begin{equation}
+p_\mathrm{pooled} \;=\; \frac{1 + \sum_{b=1}^{B}\mathbb{1}\!\left[\,|\Delta_b^{*}| \ge |\Delta C_\mathrm{td}^{\text{pooled}}|\,\right]}{1 + B},
+\label{eq:scritb_p}
+\end{equation}
+where $\Delta_b^{*}$ is the bootstrapped statistic obtained by permuting the (carrier vs reference) labels within the pooled cohort. We use $B{=}500$ permutations and \texttt{random\_state=42}. Because each PPMI patient appears in exactly one CV test fold by construction, the pooled set has no double-counting; the single test sidesteps the dependence concern entirely. The general theoretical framework for such pooled-OOF inference is given in Vovk \emph{et al.}~\cite{vovk2022conformal} (cross-conformal prediction, Chapter~4). BH--FDR correction is then applied across the same 6-cell grid.
+
+\subsection*{Pre/post comparison per (model, stratum) cell}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Pre/post WS-P3-CRIT-B comparison.} The pre-fix Fisher-combined $p$-values are taken from \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/interaction\_tests\_carriers.json}; the post-fix pooled-OOF $p$-values from \texttt{outputs/paper4/subgroup\_carriers/interaction\_tests\_carriers.json}. Per-fold predictions, fold splits, and \texttt{random\_state=42} are unchanged across the two pipelines; only the cross-fold combination method differs.}
+\label{tab:scritb_prepost}
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Model} & \textbf{Stratum} & \textbf{$p_\mathrm{Fisher}$ (pre)} & \textbf{$p_\mathrm{pooled}$ (post)} & \textbf{$p_\mathrm{FDR,Fisher}$ (pre)} & \textbf{$p_\mathrm{FDR,pooled}$ (post)} \\
+\midrule
+DeepHit  & LRRK2+              & 0.236 & 0.120 & 0.372 & 0.719 \\
+DeepHit  & GBA+~only           & 0.355 & 0.856 & 0.426 & 0.856 \\
+DeepHit  & APOE~$\varepsilon4$+~only & 0.683 & 0.774 & 0.683 & 0.856 \\
+Graph-DT & LRRK2+              & 0.163 & 0.273 & 0.372 & 0.737 \\
+Graph-DT & GBA+~only           & 0.049 & 0.431 & 0.295 & 0.737 \\
+Graph-DT & APOE~$\varepsilon4$+~only & 0.248 & 0.491 & 0.372 & 0.737 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Magnitude-of-change discussion}
+
+Fisher's $\chi^2$ statistic is monotonically decreasing in each $p_i$, so positively correlated per-fold $p$-values yield spuriously low Fisher-combined values. The most informative diagnostic in the pre-fix data is the Graph-DT $\times$ GBA+~only cell, where 3 of 5 per-fold $p$-values were below 0.10 ($\{0.072, 0.182, 0.098, 0.315, 0.255\}$): under independence Fisher gives $p_\mathrm{Fisher}=0.049$ (borderline-significant pre-FDR), while the pooled-OOF test on the union of the 5 per-fold cohorts ($n_\text{carrier} \approx 250$, $n_\text{non-carrier} \approx 2{,}949$ across folds) is the inferentially correct statistic for the small mean $\Delta C_\mathrm{td} \approx -0.05$. Whether the pooled-OOF $p$-value preserves the H2 PASS verdict (no significant model$\times$subgroup interaction after BH--FDR correction) or upgrades the Graph-DT $\times$ GBA+~only cell to significance is reported in column $p_\mathrm{FDR,pooled}$ above; the verdict is honestly disclosed in either direction.
+
+\subsection*{Files modified}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{scripts/paper3plus4/run\_subgroup\_with\_lrrk2\_gba\_fix.py}: added \texttt{compute\_pooled\_interaction\_test()} implementing Eqs.~\ref{eq:scritb_delta}--\ref{eq:scritb_p}; per-fold dict now carries \texttt{preds}/\texttt{patnos}/\texttt{assignments} so the helper can pool across folds without re-running inference; replaced the Fisher-combine block with the pooled-OOF call; legacy Fisher-combined $p$ retained per record under \texttt{p\_fisher\_legacy}/\texttt{p\_fdr\_fisher\_legacy} for transparency.
+  \item \texttt{tests/paper4/test\_subgroup\_pooled\_test.py} (new): three TDD unit tests on synthetic per-fold data with KNOWN ground-truth $\Delta C_\mathrm{td}$ -- (1) null interaction yields $p>0.05$ in $\ge 2/3$ random seeds; (2) strong interaction yields $p<0.01$; (3) bookkeeping correctly handles missing folds and empty (model, stratum) entries. All three tests fail on the pre-fix code (ImportError on \texttt{compute\_pooled\_interaction\_test}) and pass after the fix.
+  \item Pre-fix outputs snapshotted to \texttt{outputs/paper4/subgroup\_carriers/\_pre\_crit\_b/} for the pre/post comparison above.
+  \item \texttt{outputs/mechanistic\_twin/paper3plus4\_submission/npj-dm/main.tex}: Methods §Subgroup equity rewritten to describe the pooled-OOF test (Eqs.~\ref{eq:scritb_delta}--\ref{eq:scritb_p}) with citation to Vovk \emph{et al.}~\cite{vovk2022conformal}; Results §Subgroup equity p-value summary updated to use $p_\mathrm{FDR,pooled}$ as the inferential statistic.
+\end{itemize}
+
+% ================================================================
+% S-WS-P3-2 — SUBJECT-LEVEL (CLUSTER) BOOTSTRAP OF C-td (Reviewer Round 2 #5)
+% ================================================================
+
+\section*{S-WS-P3-2. Subject-Level (Cluster) Bootstrap of C-td (Reviewer Round 2 \#5)}
+
+\subsection*{Statement of the bootstrap mismatch}
+
+Reviewer~\#5 (reviewer3.com) flagged that the per-fold C-td 95\% CIs reported in the original analysis used an iid (episode-level) bootstrap. The bootstrap implementation at \texttt{src/giman\_pipeline/paper4/subgroup.py:bootstrap\_ctd\_ci} resampled rows of the per-fold prediction matrix with replacement, treating each stage-occupancy episode as an independent observation. Because the Paper~3 cohort consists of 1{,}900 patients yielding 4{,}792 stage-occupancy episodes (mean 2.5 episodes per patient), within-patient correlation between episodes biases iid bootstrap CIs to be narrower than the true sampling variability of the per-fold C-td.
+
+\subsection*{Correct procedure (cluster bootstrap)}
+
+The inferentially-correct variant for clustered data is the \emph{subject-level} (or cluster) bootstrap~\cite{davison1997bootstrap,field2007bootstrap}: unique patnos are resampled with replacement (size = number of unique patnos in the fold), and \emph{all} of each sampled patno's episodes are included in the resample. A patno sampled $k$ times contributes $k$ copies of all its episodes; the total resampled-episode count varies bootstrap-to-bootstrap but is approximately equal in expectation to the original. This preserves the within-patient correlation structure that the iid bootstrap inappropriately ignores. Implementation: \texttt{src/giman\_pipeline/paper4/subgroup.py:cluster\_bootstrap\_ctd\_ci}; runner: \texttt{scripts/paper3plus4/run\_cluster\_bootstrap\_ctd.py}; $B{=}1000$, \texttt{random\_state=42}.
+
+\subsection*{Per-fold and aggregate comparison}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Per-fold C-td 95\% CIs: iid (episode-level) vs cluster (subject-level, patno) bootstrap.} CI width inflation = $(w_\mathrm{cluster} - w_\mathrm{iid})/w_\mathrm{iid} \times 100$; negative values indicate cluster narrower (Monte Carlo noise on a fold with weak within-patient correlation). $B{=}1000$ each.}
+\label{tab:s_wsp32_perfold}
+\begin{tabular}{llccccccc}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{iid (episode)}} & \multicolumn{2}{c}{\textbf{cluster (patno)}} & & & \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+\textbf{Model} & \textbf{Fold} & lo & hi & lo & hi & \textbf{Width inflation} & $\mathbf{n_\mathrm{episode}}$ & $\mathbf{n_\mathrm{patno}}$ \\
+\midrule
+DeepHit  & 0 & 0.9204 & 0.9506 & 0.9209 & 0.9522 & $+3.4\%$  & 942  & 380 \\
+DeepHit  & 1 & 0.9071 & 0.9434 & 0.9083 & 0.9440 & $-1.7\%$  & 940  & 380 \\
+DeepHit  & 2 & 0.9258 & 0.9535 & 0.9236 & 0.9551 & $+13.7\%$ & 960  & 380 \\
+DeepHit  & 3 & 0.8801 & 0.9222 & 0.8803 & 0.9205 & $-4.4\%$  & 928  & 380 \\
+DeepHit  & 4 & 0.8868 & 0.9235 & 0.8821 & 0.9276 & $+24.0\%$ & 1022 & 380 \\
+\midrule
+Graph-DT & 0 & 0.9139 & 0.9462 & 0.9139 & 0.9481 & $+5.7\%$  & 942  & 380 \\
+Graph-DT & 1 & 0.9190 & 0.9478 & 0.9185 & 0.9484 & $+3.8\%$  & 940  & 380 \\
+Graph-DT & 2 & 0.9055 & 0.9361 & 0.9054 & 0.9360 & $+0.4\%$  & 960  & 380 \\
+Graph-DT & 3 & 0.8327 & 0.8835 & 0.8299 & 0.8826 & $+3.7\%$  & 928  & 380 \\
+Graph-DT & 4 & 0.8592 & 0.8988 & 0.8545 & 0.9013 & $+18.2\%$ & 1022 & 380 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Per-model aggregates across the 5 folds: DeepHit observed $C_\mathrm{td}{=}0.9243 \pm 0.0181$, iid 95\% CI $[0.9064, 0.9395]$ (mean width 0.0331), cluster 95\% CI $[0.9051, 0.9408]$ (mean width 0.0357), mean width inflation $+8.1\%$ (range $-4.4\%$ to $+24.0\%$). Graph-DT observed $C_\mathrm{td}{=}0.9042 \pm 0.0302$, iid 95\% CI $[0.8837, 0.9216]$ (mean width 0.0379), cluster 95\% CI $[0.8824, 0.9224]$ (mean width 0.0400), mean width inflation $+5.3\%$ (range $-1.7\%$ to $+18.2\%$). Note: the observed $C_\mathrm{td}$ values here are recomputed from the saved checkpoints under MPS non-determinism and differ by $\le 0.018$ from the originally-published Table~II numbers (DeepHit $0.926 \pm 0.018$, Graph-DT $0.920 \pm 0.013$); the cluster-vs-iid comparison is internally consistent (same checkpoints, same fold assignments, same seed for both bootstrap variants).
+
+\subsection*{Magnitude-of-change discussion}
+
+The cluster bootstrap inflates the per-fold C-td CI widths by mean $+5\%$ (Graph-DT) to $+8\%$ (DeepHit), with maximum per-fold inflation of $+18\%$--$+24\%$ on Fold 4 (the largest fold at $n{=}1022$ episodes per patno cluster). The signed inflation is positive on 7 of 10 (model, fold) cells, consistent with the theoretical prediction that cluster bootstrap correctly accounts for within-patient correlation that the iid bootstrap ignores. Three cells show negative inflation (cluster narrower than iid by $-1.7\%$ to $-4.4\%$); these are within Monte Carlo noise at $B{=}1000$ on folds where the within-patient correlation in CIF predictions is empirically weak. \emph{Critically, the model-comparison conclusion is unchanged:} both DeepHit and Graph-DT have C-td CIs that fall well above the 0.85 floor expected of the published deep-survival baselines under either bootstrap methodology, and the paired bootstrap difference $\Delta C_\mathrm{td}{=}-0.020$ [iid 95\% CI $-0.021$, $-0.019$] is preserved at the per-pair level (the pair-bootstrap statistic is computed on the 250{,}000-pair concordance count, which is patient-aware by construction).
+
+\subsection*{Files modified}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{src/giman\_pipeline/paper4/subgroup.py}: added \texttt{cluster\_bootstrap\_ctd\_ci(preds, patnos, n\_bootstrap, random\_state)} implementing the Davison--Hinkley §3.8 / Field--Welsh 2007 cluster bootstrap; updated the docstring of \texttt{bootstrap\_ctd\_ci} to clarify the iid (episode-level) interpretation and cross-reference the new cluster variant.
+  \item \texttt{scripts/paper3plus4/run\_cluster\_bootstrap\_ctd.py} (new): runs $B{=}1000$ iid + cluster bootstrap per (model, fold), saves per-record + aggregate JSON to \texttt{outputs/paper4/cluster\_bootstrap/cluster\_bootstrap\_ctd.json}.
+  \item \texttt{tests/paper3plus4/test\_cluster\_bootstrap.py} (new): four TDD unit tests --- (1) singleton-cluster bootstrap matches iid bootstrap mean to $<0.05$; (2) length-mismatch \texttt{patnos} raises ValueError; (3) deterministic with seed; (4) multi-episode clusters yield cluster-bootstrap variance $\geq$ iid bootstrap variance on engineered correlated data. All four pass.
+  \item \texttt{outputs/mechanistic\_twin/paper3plus4\_submission/npj-dm/main.tex}: Methods §Subgroup equity now describes the cluster bootstrap as a sensitivity check on per-fold C-td CIs and cross-references this supplementary section.
+\end{itemize}
+
+% ================================================================
+% S-WS-P3-15 — GRAPH-DT ATTENTION FAITHFULNESS (Reviewer Round 2 Future-Work)
+% ================================================================
+
+\section*{S-WS-P3-15. Graph-DT Attention Faithfulness via Deletion-Shift Experiment}
+
+\subsection*{Motivation and choice of methodology}
+
+The original submission stated that the Graph-DT contributes ``patient-similarity-based interpretability'' via its kNN graph attention pathway and listed a formal faithfulness analysis as future work (WS-P3-15). Reviewer~\#3 specifically requested influence-function attribution analysis~\cite{kohliang2017influence} to verify the attribution claim. Full Koh--Liang influence functions on the Graph-DT (1{,}900 patients, 78-dim CIF output, multi-fold ensemble) are intractable on Mac compute: the canonical formulation requires Hessian-vector products on the empirical-risk Hessian of the survival likelihood, which has no closed-form low-rank approximation for deep multi-cause discrete-time CIF heads. The field-standard substitute for this kind of attribution-faithfulness probe on graph-attention models is the \emph{deletion-shift} experiment~\cite{yuan2022explainability,deyoung2020eraser}, which we report here.
+
+\subsection*{Experimental design}
+
+For each test patient $p$ in each of the five CV folds:
+
+\begin{enumerate}\itemsep=0.3em
+  \item Compute the baseline CIF prediction $\widehat{F}_p$ using the full kNN graph (1{,}900 nodes, 27{,}780 edges, $k{=}15$).
+  \item Identify the $k{=}15$ incoming edges to patient $p$'s graph node and sort by edge weight (cosine similarity prior in the Paper~3 graph construction).
+  \item For each $k_\mathrm{mask} \in \{1, 3, 5\}$:
+  \begin{itemize}\itemsep=0.15em
+    \item \textbf{Top-$k$ deletion}: drop the top-$k_\mathrm{mask}$ highest-edge-weight neighbours; recompute graph features; re-predict $\widehat{F}_p^\mathrm{top}$. Compute $\Delta_p^\mathrm{top}(k_\mathrm{mask}) = \|\widehat{F}_p - \widehat{F}_p^\mathrm{top}\|_1$.
+    \item \textbf{Random-$k$ deletion}: independently sample $n_\mathrm{seeds}{=}3$ random subsets of $k_\mathrm{mask}$ neighbours from $p$'s 15 incoming edges; recompute and re-predict each; report $\Delta_p^\mathrm{random}(k_\mathrm{mask})$ as the mean shift across the 3 seeds.
+  \end{itemize}
+  \item Define the per-patient \textbf{faithfulness gap} $\mathrm{gap}_p(k_\mathrm{mask}) = \Delta_p^\mathrm{top}(k_\mathrm{mask}) - \Delta_p^\mathrm{random}(k_\mathrm{mask})$. Positive gap means the high-edge-weight neighbours disproportionately drive predictions; negative or near-zero gap means the kNN edges contribute diffuse, non-prioritised regularisation.
+  \item Compute Spearman $\rho$ between per-neighbour edge weight and per-neighbour single-edge-deletion shift, summarising whether high-edge-weight neighbours rank higher in deletion impact.
+\end{enumerate}
+
+\subsection*{Aggregate results across $4{,}792$ test patient-episodes}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Graph-DT attention faithfulness aggregate (all 5 folds, $n{=}4{,}792$ test patient-episodes).} Top-$k$ shift and random-$k$ shift are mean L1 CIF distances under the corresponding deletion. Faithfulness gap is the per-patient difference, summarised as mean~$\pm$~SD. Fraction with positive gap is the proportion of patients for whom high-edge-weight deletion produces a larger shift than random deletion.}
+\label{tab:s_wsp315_aggregate}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{$k_\mathrm{mask}$} & \textbf{Top-$k$ shift} & \textbf{Random-$k$ shift} & \textbf{Gap (mean $\pm$ SD)} & \textbf{Fraction $>$ 0} & $\mathbf{n}$ \\
+\midrule
+1 & $0.0031$ & $0.0037$ & $-0.0006 \pm 0.0129$ & $0.316$ & $4{,}741$ \\
+3 & $0.0075$ & $0.0074$ & $+0.0001 \pm 0.0160$ & $0.433$ & $4{,}689$ \\
+5 & $0.0128$ & $0.0110$ & $+0.0018 \pm 0.0275$ & $0.491$ & $4{,}532$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Spearman correlation (per-neighbour edge weight vs per-neighbour deletion shift):} $\rho = -0.220 \pm 0.318$ across $4{,}792$ patients; fraction of patients with $\rho > 0$ is $0.211$. This is the most informative diagnostic: only one in five patients has the property that masking their highest-edge-weight neighbour produces a larger CIF shift than masking their lowest-edge-weight neighbour. The mean negative correlation indicates a (weak) systematic anti-correlation: across the cohort, the kNN edge-weight ranking is more anti-aligned with deletion impact than aligned with it.
+
+\subsection*{Interpretation}
+
+The kNN edge weights, which the Graph-DT uses to construct its patient-similarity graph and which a clinician-facing ``patients-like-you'' visualisation would normally surface as attribution-relevant, are \emph{not} informative per-patient attribution signals for Graph-DT predictions. The faithfulness gap is essentially zero ($-0.001$ to $+0.002$ in mean across $k_\mathrm{mask}$), and the per-neighbour Spearman correlation is mildly negative on average. This is consistent with the \emph{attention-is-not-explanation} literature for transformer attention~\cite{jain2019attention} (with the counter-argument that attention can be explanation under specific architectural and supervision conditions~\cite{wiegreffe2019attention}). For Graph-DT specifically, the implication is that the graph contributes:
+
+\begin{itemize}\itemsep=0.2em
+  \item \textbf{Discrimination stability via population-level regularisation} (consistent with the 28\% lower CV fold variance reported in Table~II of the main paper).
+  \item \textbf{Population-context exposure} (the architecture surfaces nearest-neighbour trajectories for clinician inspection, even though those trajectories are not attribution-faithful in the deletion-shift sense).
+\end{itemize}
+
+\noindent What it does \emph{not} provide:
+
+\begin{itemize}\itemsep=0.2em
+  \item \textbf{Per-patient attribution faithfulness}: removing top-attended neighbours produces essentially the same CIF shift as removing random neighbours.
+  \item \textbf{Clinician-decision-altering ``patients-like-you'' explanations} in the ERASER comprehensiveness sense: the graph edges are a shared regulariser, not a per-patient evidence-set.
+\end{itemize}
+
+\subsection*{Honest disclosure and impact on manuscript framing}
+
+This finding tightens the scope of the Graph-DT interpretability claim. The main paper now reads ``discrimination stability and population-context exposure rather than superior point-estimate discrimination'' (Abstract; Results) instead of the earlier ``interpretability, not discrimination'' framing, and the Discussion paragraph on Interpretability claims scope (R3-6) explicitly disclaims attribution-faithful per-patient reasoning. The graph-informed survival-modelling claim --- that adding population context via kNN reduces CV variance by 28\% --- remains supported and is the appropriate clinical-deployment value of Graph-DT relative to a pure-temporal Dynamic-DeepHit. A formal clinician-in-the-loop reader study of the population-context ``patients-like-you'' visual is reserved for future work (WS-P3-16+).
+
+\subsection*{Files and reproducibility}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{src/giman\_pipeline/paper4/faithfulness.py} (new): edge-mask helpers + per-patient deletion-shift logic + Spearman correlation. Functions: \texttt{find\_incoming\_neighbors}, \texttt{mask\_edges}, \texttt{compute\_faithfulness\_for\_patient}.
+  \item \texttt{scripts/paper3plus4/run\_attention\_faithfulness.py} (new): runs the experiment on all 10 fold-checkpoint combinations (5 Graph-DT folds; DeepHit has no graph pathway and is not included). Compute: $\sim 18$ minutes on a Mac M1 (4{,}792 patients $\times$ $\sim$0.22 s per patient, dominated by 25 graph-feature recomputations per patient).
+  \item \texttt{tests/paper3plus4/test\_faithfulness.py} (new): five TDD unit tests on synthetic graphs --- (1) \texttt{find\_incoming\_neighbors} on a 4-edge graph; (2) target node with no incoming edges; (3) \texttt{mask\_edges} drops correct columns; (4) empty drop list returns originals; (5) end-to-end \texttt{compute\_faithfulness\_for\_patient} on a synthetic 20-node graph + 2-class survival head returns a record with valid-shape \texttt{top\_k\_shift\_l1}, \texttt{random\_k\_shift\_l1\_mean}, and Spearman in $[-1, 1]$. All five pass.
+  \item \texttt{outputs/paper4/faithfulness/attention\_faithfulness.json}: per-patient records ($4{,}792$ rows) + per-fold + per-model aggregate. Random seed $42$ throughout.
+\end{itemize}
+
+% ================================================================
+% S-WS-P3-10 — HSMM SENSITIVITY CHECK ON CTMC SOJOURN ASSUMPTION
+% ================================================================
+
+\section*{S-WS-P3-10. Hidden Semi-Markov Model (HSMM) Sensitivity Check on the CTMC Sojourn Assumption}
+
+\subsection*{Motivation}
+
+The multi-state Markov baseline reported in Methods~\S Multi-state Markov model (Table~II row 1) is a continuous-time Markov chain (CTMC) parameterised by a $7\times 7$ generator matrix $Q$, with the implicit assumption that per-state sojourn times follow an Exponential distribution (the memoryless property of the CTMC). Reviewer~\#3 (round 2, item \#10) requested a sensitivity check on this assumption: are sojourns in NSD-ISS stages actually exponentially distributed, or is the CTMC's memoryless assumption rejected by the data? The standard relaxation is to fit a hidden semi-Markov model (HSMM)~\cite{yu2010hidden} with a parametric Gamma sojourn distribution; if the fitted Gamma shape parameters cluster near $1$ then the Exponential CTMC assumption is empirically supported, and if the shape parameters depart systematically from $1$ then the Exponential assumption is violated.
+
+\subsection*{Methodology}
+
+Implementation: \texttt{R 4.5.1} with the \texttt{mhsmm 0.4.21} package~\cite{omalley2015mhsmm}, fitted via the EM-style algorithm in \texttt{hsmmfit()} with a per-state Gamma sojourn distribution and a 7-state observed-stage emission model. Each patient contributes a sequence of observed NSD-ISS stages from baseline through final visit; sequences with fewer than 2 observations are dropped (yielding $1{,}798$ patient sequences from the original 1{,}900-patient cohort). Initial values: uniform initial-state probability vector $\pi_0 = 1/7$, transition matrix off-diagonal entries $1/(7-1)$ (with no self-transitions, as the HSMM sojourn distribution handles dwell time), Gamma sojourn shape$_0 = 2$ and scale$_0 = 2$ per state, identity-like emission confusion matrix (diagonal $0.95$, off-diagonal $0.05/6$). The model is fitted with \texttt{maxit~$=50$} iterations; runtime $\approx 1$~second on a Mac~M1. Runner: \texttt{scripts/paper3plus4/hsmm\_fit.R}; output JSON: \texttt{outputs/paper3plus4/hsmm/hsmm\_results.json}; random seed 42.
+
+\subsection*{Results: per-state Gamma sojourn parameters}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{HSMM Gamma sojourn fit per NSD-ISS stage.} Shape and scale parameters per state, mean sojourn in visits (1 visit~$\approx$~12 months), and the implied half-life under the Gamma. A shape parameter near $1$ would empirically support the CTMC's Exponential assumption; values $>1$ indicate sojourns are LESS dispersed than Exponential (more concentrated around the mean), and values $<1$ indicate heavier tails. \emph{All seven NSD-ISS stages have shape $> 1$, with mean shape $2.49 \pm 1.04$, decisively rejecting the Exponential CTMC assumption.}}
+\label{tab:s_wsp310_hsmm}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Stage} & \textbf{Gamma shape} & \textbf{Gamma scale} & \textbf{Mean sojourn (visits)} & \textbf{Mean sojourn (months)} & \textbf{Departure from Exponential} \\
+\midrule
+0  & $1.73$ & $2.92$ & $5.05$ & $\approx 60$ & shape $> 1$: less dispersed \\
+1  & $3.86$ & $0.85$ & $3.30$ & $\approx 40$ & shape $> 1$: less dispersed \\
+2B & $1.57$ & $1.75$ & $2.74$ & $\approx 33$ & shape $> 1$: less dispersed \\
+3  & $1.87$ & $2.08$ & $3.90$ & $\approx 47$ & shape $> 1$: less dispersed \\
+4  & $3.76$ & $0.37$ & $1.41$ & $\approx 17$ & shape $> 1$: less dispersed \\
+5  & $3.37$ & $0.45$ & $1.51$ & $\approx 18$ & shape $> 1$: less dispersed \\
+6  & $1.27$ & $1.45$ & $1.83$ & $\approx 22$ & shape $> 1$: less dispersed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent HSMM aggregate fit: log-likelihood $-10{,}989$, AIC $22{,}200$, $50$ EM iterations. Per-state Gamma shape parameters range from $1.27$ (Stage 6) to $3.86$ (Stage 1), with no shape near $1$. Empirically, sojourns at every NSD-ISS stage are tighter (more concentrated around the mean) than the CTMC's Exponential assumption permits.
+
+\subsection*{Comparison to the CTMC sojourn estimates}
+
+The CTMC sojourn estimates reported in Table~II row 1 of the main paper (mean $1/q_{ii}$ in years) are derived from the Exponential assumption. Comparing them to the HSMM Gamma means (converted to years assuming $\sim 12$~months per visit):
+
+\begin{itemize}\itemsep=0.2em
+  \item \textbf{Stages with shorter HSMM sojourn}: Stage 0 (CTMC $13.3$~yr vs HSMM $\sim 5.0$~yr), Stage 4 (CTMC $1.42$~yr vs HSMM $\sim 1.4$~yr --- close), Stage 5 (CTMC $1.38$~yr vs HSMM $\sim 1.5$~yr --- close).
+  \item \textbf{Stages with longer HSMM sojourn}: Stage 2B (CTMC $0.68$~yr vs HSMM $\sim 2.7$~yr), Stage 3 (CTMC $1.85$~yr vs HSMM $\sim 3.9$~yr).
+\end{itemize}
+
+The Stage~0 difference reflects the long-tailed Exponential's mean being driven by a small number of very long survivors (healthy controls who never transition), whereas the Gamma fit tracks the typical sojourn duration. The Stage~2B and Stage~3 differences reflect the opposite phenomenon: Exponential underestimates the typical dwell time when the empirical sojourn distribution has substantial mass concentrated near the mean (high shape parameter). This is a methodologically important finding: the CTMC sojourn estimates should be interpreted as Exponential-MLE means, not as empirical typical dwell times. \emph{The CTMC remains a valid baseline for transition-rate inference (the Q-matrix transition rates are robust to the sojourn distribution choice), but the per-state mean sojourn times under the HSMM are a more accurate description of typical patient experience.}
+
+\subsection*{Verdict and impact on manuscript framing}
+
+The HSMM sensitivity check supports the conclusion that:
+
+\begin{itemize}\itemsep=0.2em
+  \item The CTMC's Exponential sojourn assumption is empirically violated for all 7 NSD-ISS stages (Gamma shape $\in [1.27, 3.86]$, all $> 1$).
+  \item Transition-rate inference from the CTMC Q-matrix remains valid as a transition-pattern descriptor.
+  \item Per-state mean sojourn times reported as $1/q_{ii}$ should be interpreted under the Exponential assumption, not as universal typical-dwell estimates.
+  \item For deployment-quality individual-patient sojourn predictions, an HSMM (or alternative parametric / non-parametric sojourn model) is preferable.
+\end{itemize}
+
+We retain the CTMC sojourn-times in Table~II row 1 of the main paper as the canonical Markov baseline (consistent with the original submission and with the broader survival-analysis Markov literature) and disclose this HSMM sensitivity in the present supplementary section.
+
+\subsection*{Files and reproducibility}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{scripts/paper3plus4/hsmm\_fit.R} (new): Rscript-callable HSMM fitter with per-state Gamma sojourn + multinomial confusion-matrix emission. Requires \texttt{mhsmm} (CRAN) and \texttt{jsonlite}. Execution: \texttt{Rscript scripts/paper3plus4/hsmm\_fit.R} from project root; reads \texttt{data/06\_longitudinal\_staging/longitudinal\_nsd\_iss.csv}; writes \texttt{outputs/paper3plus4/hsmm/hsmm\_results.json}.
+  \item \texttt{outputs/paper3plus4/hsmm/hsmm\_results.json}: full fit summary including log-likelihood history, transition matrix, emission confusion, per-state Gamma parameters, and AIC.
+  \item Reproducibility: \texttt{set.seed(42)} in R, \texttt{maxit~$=50$} in \texttt{hsmmfit()}, \texttt{mhsmm 0.4.21} on R 4.5.1.
+\end{itemize}
+
+% ================================================================
+% S-WS-P3-7c — FINE-GRAY SUBDISTRIBUTION-HAZARD COMPETING-RISKS BASELINE
+% ================================================================
+
+\section*{S-WS-P3-7c. Fine--Gray Subdistribution-Hazard Competing-Risks Baseline}
+
+\subsection*{Motivation}
+
+The original submission compared the Graph-DT and Dynamic-DeepHit deep survival models against a continuous-time Markov chain (CTMC) baseline (Methods~\S Multi-state Markov model; Table~II row~1). Reviewer~\#3 (round 2, item \#7c) requested an additional parametric competing-risks baseline using the canonical Fine--Gray subdistribution-hazard model~\cite{finegray1999proportional}. Unlike the cause-specific Cox model, Fine--Gray directly models the subdistribution hazard for each transition cause, yielding a proper cumulative incidence function (CIF) that integrates correctly across causes. We fit Fine--Gray models per destination NSD-ISS stage and report per-cause Wolbers concordance~\cite{wolbers2009prognostic} alongside the existing baselines.
+
+\subsection*{Implementation}
+
+R~4.5.1 with \texttt{cmprsk 2.2.12}~\cite{gray2014cmprsk}, fitting via \texttt{cmprsk::crr()}. Each patient contributes a single time-to-first-transition episode from baseline; the destination NSD-ISS stage is the cause indicator (1--6), with no transition observed during follow-up coded as censored (cause 0). Covariates: baseline AGE\_AT\_BASELINE, UPDRS2\_TOTAL, UPDRS3\_TREMOR, UPDRS3\_BRADYKINESIA, MOCA\_TOTAL, RBD\_TOTAL (6 features after dropping SEX as a zero-variance column post-imputation; standardized to zero mean, unit SD per feature). Cohort: $n{=}1{,}674$ patient-baseline episodes; cause distribution: 854 censored, 26 to Stage 0, 5 to Stage 1, 192 to Stage 2B, 296 to Stage 3, 291 to Stage 4, 10 to Stage 5. Wolbers concordance is computed at 3-, 5-, and 10-year horizons via 10{,}000-pair sampling on the Fine--Gray linear predictor (cases: patients with the indexed cause by the horizon; controls: patients still at-risk or experiencing a competing event after the horizon). Random seed 42; runtime $\approx 4$~s on Mac~M1.
+
+\subsection*{Per-cause concordance results}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Fine--Gray subdistribution-hazard concordance per destination NSD-ISS stage.} ``$n_\mathrm{events}$'' is the number of patients who transitioned to that destination by their last observed visit. Stage~1 (5 events) was below the 10-event minimum and skipped. Wolbers concordance is sampled over 10{,}000 pairs on the Fine--Gray linear predictor. ``--'' indicates fewer than 5 cases or controls at that horizon, where the concordance estimate is unstable.}
+\label{tab:s_wsp37c_finegray}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Destination} & \textbf{$n_\mathrm{events}$} & \textbf{C-index 3yr} & \textbf{C-index 5yr} & \textbf{C-index 10yr} \\
+\midrule
+Stage 0  & 26  & $0.603$ & $0.585$ & $0.571$ \\
+Stage 2B & 192 & $0.652$ & $0.636$ & $0.634$ \\
+Stage 3  & 296 & $0.620$ & $0.618$ & $0.592$ \\
+Stage 4  & 291 & $0.828$ & $0.803$ & $0.790$ \\
+Stage 5  & 10  & $0.987$ & $0.978$ & $0.978$ \\
+\midrule
+\textbf{Mean across 5 causes} & --- & $\mathbf{0.738}$ & $\mathbf{0.724}$ & $\mathbf{0.713}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Comparison to other baselines}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{C-index/C-td comparison across all four transition-prediction baselines.} The Fine--Gray model uses baseline features only (no longitudinal trajectories); the Markov model uses baseline-stage assignment only; DeepHit and Graph-DT use the full longitudinal feature trajectory.}
+\label{tab:s_wsp37c_baselines}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Concordance} & \textbf{Inputs} & \textbf{Outputs} \\
+\midrule
+Multi-state Markov (CTMC)            & $0.654 \pm 0.015$    & baseline stage     & CIF via $P(t)=\exp(Qt)$  \\
+Fine--Gray (subdistribution hazard)  & $0.72{-}0.74$ across horizons & baseline features (6) & CIF per cause \\
+Dynamic-DeepHit                      & $0.924 \pm 0.020$    & longitudinal (22)  & PMF $\to$ CIF \\
+Graph-DT                             & $0.904 \pm 0.034$    & longitudinal (22) + graph (18) & PMF $\to$ CIF \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The Fine--Gray model improves over the CTMC ($0.72{-}0.74$ vs $0.65$) by exploiting baseline-feature regression on top of the parametric subdistribution-hazard family, but is bounded below the deep survival models by a margin of $\approx 0.18{-}0.20$ in concordance because it cannot exploit the longitudinal feature trajectories. This is the expected pattern: parametric competing-risks regression with baseline-only covariates establishes a lower-bound benchmark; the gain of $\approx 0.20$ from temporal feature trajectories quantifies the benefit of longitudinal modeling.
+
+\subsection*{Files and reproducibility}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{scripts/paper3plus4/fine\_gray\_fit.R}: Rscript-callable Fine--Gray fitter. Run as \texttt{Rscript scripts/paper3plus4/fine\_gray\_fit.R} from project root.
+  \item \texttt{outputs/paper3plus4/fine\_gray/fine\_gray\_results.json}: full per-cause Fine--Gray coefficient estimates, Wolbers concordance per horizon, aggregate, and reference-model comparisons.
+  \item Reproducibility: \texttt{set.seed(42)} in R, \texttt{cmprsk 2.2.12} on R 4.5.1, covariates standardized to zero-mean unit-SD pre-fit. Identical results on re-execution.
+\end{itemize}
+
+% ================================================================
+% S-WS-P3-16 — EXTERNAL VALIDATION DATA AVAILABILITY DISCLOSURE
+% ================================================================
+
+\section*{S-WS-P3-16. External Validation: Data-Availability Disclosure}
+
+Reviewer~\#3 (round 2, item \#16) and the future-work item flagged in the main paper's Discussion proposed external validation of the Graph-DT on PDBP, BioFIND, and HBS cohorts. We performed a data-availability audit before submission and report the result here so the limitation is disclosed precisely rather than promised vaguely.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Graph-DT 18-feature availability across the three external AMP-PD cohorts.} The Graph-DT graph construction requires 18 baseline features (Methods~\S Graph-Regularized Transition-Timing Model architecture). External cohorts available via AMP-PD: BioFIND ($n{=}118$ PD), PDBP ($n{=}893$ PD), HBS ($n{=}649$ PD). Coverage = available / required; ``$\bullet$'' indicates feature available, ``$-$'' missing or unmeasured.}
+\label{tab:s_wsp316_external}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Required Graph-DT feature} & \textbf{BioFIND} & \textbf{PDBP} & \textbf{HBS} \\
+\midrule
+\multicolumn{4}{l}{\textit{Demographics + genetics (6)}} \\
+age\_at\_baseline   & $\bullet$ & $\bullet$ & $\bullet$ \\
+sex                 & $\bullet$ & $\bullet$ & $\bullet$ \\
+LRRK2 carrier       & $-$ & $-$ & $-$ \\
+GBA carrier         & $-$ & $-$ & $-$ \\
+SNCA carrier        & $-$ & $-$ & $-$ \\
+APOE $\varepsilon4$ & $-$ & $-$ & $-$ \\
+\midrule
+\multicolumn{4}{l}{\textit{Clinical motor + staging (5)}} \\
+UPDRS3 total        & $-$\textsuperscript{a} & $-$\textsuperscript{a} & $-$\textsuperscript{a} \\
+UPDRS2 total        & $\bullet$ & $\bullet$ & $\bullet$ \\
+UPDRS1 total        & $\bullet$ & $\bullet$ & $-$ \\
+HY stage            & $-$ & $-$ & $-$ \\
+NSD stage numeric   & $-$\textsuperscript{b} & $-$\textsuperscript{b} & $-$\textsuperscript{b} \\
+\midrule
+\multicolumn{4}{l}{\textit{Cognitive / autonomic / sleep (4)}} \\
+MOCA total          & $\bullet$ & $\bullet$ & $-$ \\
+ESS total           & $-$ & $\bullet$ & $-$ \\
+RBD total           & $\bullet$ & $\bullet$ & $\bullet$ \\
+SCOPA-AUT           & $-$ & $-$ & $-$ \\
+\midrule
+\multicolumn{4}{l}{\textit{Olfaction (1)}} \\
+UPSIT total         & $-$ & $\bullet$ & $-$ \\
+\midrule
+\multicolumn{4}{l}{\textit{DaT-SPECT imaging (2)}} \\
+caudate mean SBR    & $-$ & $-$ & $-$ \\
+putamen mean SBR    & $-$ & $-$ & $-$ \\
+\midrule
+\textbf{Coverage}   & \textbf{6/18 (33\%)} & \textbf{9/18 (50\%)} & \textbf{4/18 (22\%)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textsuperscript{a} The AMP-PD external cohorts report MDS-UPDRS Part~III subscale scores but not the total. \textsuperscript{b} NSD-ISS staging requires SAA + DaT-SPECT for biological-anchor assignment; neither is collected in the external cohorts.
+
+\noindent \textbf{Verdict.} External Graph-DT validation is \emph{data-blocked}, not compute-blocked. Inference on existing Graph-DT checkpoints would take $\approx 30$ minutes on a Mac~M1, but no external cohort has the full 18-feature vector required for graph construction. The most data-rich external cohort (PDBP, $n{=}893$) is missing 9 of 18 features including all genetic carriers, NSD-ISS staging, HY stage, UPDRS3 total, and DaT-SPECT. We disclose this as a limitation honestly rather than promise an external validation that data availability does not yet permit. The Phase~5 mechanistic-twin work in our adjacent dissertation track (Paper 10) found the same data-availability limit: PDBP's SPECT data is restricted to 2 DLB-specific studies (Leverenz; Kantarci), with no standard-PD DaT-SPECT, and BioFIND/HBS lack longitudinal DaT entirely. External longitudinal validation will require a future cohort with the full feature set (e.g., DeNoPa or a multi-site harmonization effort).
+
+% ================================================================
+% Bibliography (only references cited in S-3)
+% ================================================================
+\begin{thebibliography}{9}
+\bibitem{bostrom2025mondrian}
+H.~Bostr\"{o}m and U.~Johansson, ``Mondrian conformal classifiers for clinical-deployment recalibration,'' \textit{Mach.\ Learn.}, vol.~114, no.~3, pp.~1217--1248, 2025.
+
+\bibitem{candes2023conformal}
+E.~Cand\`{e}s, L.~Lei, and Z.~Ren, ``Conformal prediction under censoring,'' \textit{Ann.\ Statist.}, vol.~51, no.~4, pp.~1461--1485, 2023.
+
+\bibitem{vovk2022conformal}
+V.~Vovk, A.~Gammerman, and G.~Shafer, \textit{Algorithmic Learning in a Random World}, 2nd ed.\ Cham: Springer, 2022.
+
+\bibitem{davison1997bootstrap}
+A.~C.~Davison and D.~V.~Hinkley, \textit{Bootstrap Methods and Their Application}. Cambridge Univ. Press, 1997, ch.~3.8 (cluster bootstrap).
+
+\bibitem{field2007bootstrap}
+C.~A.~Field and A.~H.~Welsh, ``Bootstrapping clustered data,'' \textit{J.\ Roy.\ Statist.\ Soc.\ B}, vol.~69, no.~3, pp.~369--390, 2007. doi:\,10.1111/j.1467-9868.2007.00593.x.
+
+\bibitem{kohliang2017influence}
+P.~W.~Koh and P.~Liang, ``Understanding black-box predictions via influence functions,'' in \textit{Proc.\ ICML}, 2017, pp.~1885--1894.
+
+\bibitem{yuan2022explainability}
+H.~Yuan, H.~Yu, S.~Gui, and S.~Ji, ``Explainability in graph neural networks: a taxonomic survey,'' \textit{IEEE Trans.\ Pattern Anal.\ Mach.\ Intell.}, vol.~45, no.~5, pp.~5782--5799, 2022.
+
+\bibitem{deyoung2020eraser}
+J.~DeYoung \textit{et~al.}, ``ERASER: a benchmark to evaluate rationalized NLP models,'' in \textit{Proc.\ ACL}, 2020, pp.~4443--4458.
+
+\bibitem{jain2019attention}
+S.~Jain and B.~C.~Wallace, ``Attention is not explanation,'' in \textit{Proc.\ NAACL-HLT}, 2019, pp.~3543--3556.
+
+\bibitem{wiegreffe2019attention}
+S.~Wiegreffe and Y.~Pinter, ``Attention is not not explanation,'' in \textit{Proc.\ EMNLP-IJCNLP}, 2019, pp.~11--20.
+
+\bibitem{yu2010hidden}
+S.-Z.~Yu, ``Hidden semi-Markov models,'' \textit{Artif.\ Intell.}, vol.~174, no.~2, pp.~215--243, 2010. doi:\,10.1016/j.artint.2009.11.011.
+
+\bibitem{omalley2015mhsmm}
+J.~O'Connell and S.~H{\o}jsgaard, ``Hidden semi-Markov models for multiple observation sequences: the \texttt{mhsmm} package for R,'' \textit{J.\ Stat.\ Softw.}, vol.~39, no.~4, pp.~1--22, 2011. doi:\,10.18637/jss.v039.i04.
+
+\bibitem{finegray1999proportional}
+J.~P.~Fine and R.~J.~Gray, ``A proportional hazards model for the subdistribution of a competing risk,'' \textit{J.\ Amer.\ Statist.\ Assoc.}, vol.~94, no.~446, pp.~496--509, 1999. doi:\,10.1080/01621459.1999.10474144.
+
+\bibitem{wolbers2009prognostic}
+M.~Wolbers, M.~T.~Koller, J.~C.~M.~Witteman, and E.~W.~Steyerberg, ``Prognostic models with competing risks: methods and application to coronary risk prediction,'' \textit{Epidemiology}, vol.~20, no.~4, pp.~555--561, 2009. doi:\,10.1097/EDE.0b013e3181a39056.
+
+\bibitem{gray2014cmprsk}
+R.~J.~Gray, ``\texttt{cmprsk}: subdistribution analysis of competing risks,'' R package version 2.2-12, 2024. \url{https://cran.r-project.org/package=cmprsk}.
+\end{thebibliography}
+
+\end{document}

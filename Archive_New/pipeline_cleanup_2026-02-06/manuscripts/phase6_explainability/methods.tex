@@ -1,0 +1,85 @@
+\subsection{Cohort and Data Sources}
+
+We analyzed 2,046 participants from the Parkinson's Progression Markers Initiative (PPMI)\cite{marek2011ppmi}, a multicenter longitudinal study collecting clinical, imaging, and genetic data. The cohort included early-stage PD patients (Hoehn \& Yahr stage $\leq$ 2), healthy controls, and prodromal individuals with REM sleep behavior disorder (RBD) or hyposmia. Longitudinal assessments spanned baseline through 5-year follow-up (visits: BL, V04, V06, V08, V12). Clinical features included Movement Disorder Society-Unified Parkinson's Disease Rating Scale Part III (MDS-UPDRS-III), Montreal Cognitive Assessment (MoCA), and motor/cognitive progression rates computed as slopes over time\cite{fahn1987updrs,nasreddine2005moca}. Neuroimaging biomarkers included DaTscan SPECT striatal binding ratios. Genetic risk factors comprised \textit{GBA}, \textit{LRRK2}, and \textit{SNCA} variants\cite{nalls2019identification}. Missing data ($<$15\% per feature) were imputed using multivariate imputation by chained equations (MICE)\cite{buuren2011mice}.
+
+\subsection{Graph-Integrated Multimodal Attention Network (\giman)}
+
+\giman{} is a graph attention network (GAT)\cite{veličković2018graph} integrating multimodal patient data via learned patient similarity. The architecture comprises: (1) \textbf{Embedding layers} transforming clinical features ($d=50$), imaging biomarkers ($d=256$), and genetic variants ($d=8$) into unified $d=32$ embeddings; (2) \textbf{Patient similarity graph} constructed via $k$-nearest neighbors ($k=10$) on concatenated embeddings using cosine similarity; (3) \textbf{GAT layers} (2 layers, 4 attention heads per layer) aggregating neighborhood information via multi-head attention\cite{veličković2018graph}; and (4) \textbf{Task-specific prediction heads} for diagnostic classification (3-class softmax), progression subtyping (ordinal regression), and prodromal conversion (binary classification).
+
+The GAT layer updates node representations via:
+\begin{equation}
+\mathbf{h}_i' = \sigma \left( \sum_{j \in \mathcal{N}(i)} \alpha_{ij} \mathbf{W} \mathbf{h}_j \right)
+\end{equation}
+where $\mathbf{h}_i$ is the representation of patient $i$, $\mathcal{N}(i)$ denotes neighbors in the patient similarity graph, $\alpha_{ij}$ are attention coefficients computed via:
+\begin{equation}
+\alpha_{ij} = \frac{\exp(\text{LeakyReLU}(\mathbf{a}^T [\mathbf{W}\mathbf{h}_i \| \mathbf{W}\mathbf{h}_j]))}{\sum_{k \in \mathcal{N}(i)} \exp(\text{LeakyReLU}(\mathbf{a}^T [\mathbf{W}\mathbf{h}_i \| \mathbf{W}\mathbf{h}_k]))}
+\end{equation}
+and $\mathbf{W}$, $\mathbf{a}$ are learned parameters. Multi-head attention ($M=4$ heads) concatenates outputs: $\mathbf{h}_i' = \|_{m=1}^M \sigma(\sum_j \alpha_{ij}^m \mathbf{W}^m \mathbf{h}_j)$.
+
+Three task-specific \giman{} models were trained: (1) \textbf{Diagnostic GAT} classifying HC/PD/SWEDD ($n=297$ patients); (2) \textbf{Phase 4 GAT} predicting progression subtypes (fast/moderate/slow, $n=536$ patients with $\geq$3 timepoints); (3) \textbf{Phase 5 GAT} predicting prodromal-to-clinical conversion ($n=412$ prodromal patients). Models were trained with leave-one-out cross-validation (LOOCV) using cross-entropy loss, Adam optimizer (learning rate $10^{-3}$), dropout (0.5), and early stopping. Performance metrics: diagnostic accuracy, area under ROC curve (AUC), and balanced accuracy.
+
+\subsection{Explainability Framework}
+
+Our framework comprises six complementary methods providing structural, attribution-based, embedding-based, and counterfactual explanations (Figure~\ref{fig:framework}).
+
+\subsubsection{Method 1: Attention Weight Visualization}
+
+GAT attention coefficients $\alpha_{ij}$ directly quantify the importance of neighbor $j$ for patient $i$'s prediction\cite{veličković2018graph}. We extracted and visualized attention weights across all patient pairs, analyzing: (1) \textbf{Attention coherence}: percentage of high-attention pairs ($\alpha_{ij} > 0.1$) sharing the same clinical label, validating whether attention captures clinical similarity; (2) \textbf{Attention heatmaps}: aggregated attention patterns across diagnosis/subtype groups; (3) \textbf{High-importance edges}: patient pairs with $\alpha_{ij} > 90$th percentile, characterized by clinical feature similarity.
+
+\subsubsection{Method 2: GNNExplainer Subgraph Identification}
+
+GNNExplainer\cite{ying2019gnnexplainer} identifies minimal subgraphs explaining individual node predictions by optimizing:
+\begin{equation}
+\max_{G_S} \text{MI}(Y, (G_S, X_S)) = H(Y) - H(Y | G = G_S, X = X_S)
+\end{equation}
+where $G_S \subseteq G$ is a subgraph, $X_S$ are node features, $Y$ is the prediction, and MI denotes mutual information. We applied GNNExplainer to representative patients from each diagnostic/subtype class, extracting: (1) \textbf{Explanatory subgraphs}: minimal patient neighborhoods driving predictions; (2) \textbf{Feature importance masks}: learned feature weights identifying critical clinical variables; (3) \textbf{Edge importance}: neighbor contributions ranked by importance scores.
+
+\subsubsection{Method 3: Gradient-Based Feature Attribution}
+
+We employed two gradient-based attribution methods from Captum\cite{kokhlikyan2020captum}:
+
+\textbf{IntegratedGradients (IG)}\cite{sundararajan2017axiomatic} computes feature importance by integrating gradients along the path from a baseline to the input:
+\begin{equation}
+\text{IG}_i(x) = (x_i - x'_i) \times \int_{\alpha=0}^{1} \frac{\partial F(x' + \alpha(x - x'))}{\partial x_i} d\alpha
+\end{equation}
+where $x$ is the input, $x'$ is the baseline (feature mean), and $F$ is the model.
+
+\textbf{GradientSHAP}\cite{lundberg2017unified} combines gradients with SHAP (SHapley Additive exPlanations), approximating Shapley values via:
+\begin{equation}
+\phi_i = \frac{1}{M} \sum_{m=1}^M (x_i - x'_i) \times \frac{\partial F(x' + \alpha_m(x - x'))}{\partial x_i}
+\end{equation}
+where $\alpha_m$ are sampled from a uniform distribution.
+
+Both methods were applied to all patients, generating feature importance rankings. Consensus features were identified as those ranking in the top 5 for both methods across prediction tasks.
+
+\subsubsection{Method 4: Patient Similarity Clustering}
+
+We performed unsupervised clustering on learned GAT node embeddings (final layer representations before prediction heads) to assess whether embeddings capture interpretable patient subgroups. Three methods were compared:
+
+\textbf{Hierarchical clustering} with Ward linkage, generating dendrograms and optimal cluster numbers via cophenetic correlation\cite{sokal1962comparison}.
+
+\textbf{K-means clustering} with $k=2$ to $k=15$, selecting optimal $k$ via silhouette scores\cite{rousseeuw1987silhouettes}:
+\begin{equation}
+s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
+\end{equation}
+where $a(i)$ is the mean intra-cluster distance and $b(i)$ is the mean nearest-cluster distance.
+
+\textbf{Spectral clustering} on the affinity matrix derived from embedding similarity\cite{ng2001spectral}.
+
+Clusters were characterized by computing mean clinical features per cluster and comparing to ground-truth labels (diagnosis/subtype) via purity, homogeneity, and adjusted Rand index (ARI)\cite{hubert1985comparing}. PCA and t-SNE visualizations\cite{maaten2008visualizing} assessed embedding structure.
+
+\subsubsection{Method 5: Counterfactual Explanations}
+
+Counterfactual analysis identifies minimal feature changes required to alter predictions, providing actionable interventions\cite{wachter2017counterfactual}. For each patient, we optimized:
+\begin{equation}
+\min_{x'} \mathcal{L}_{\text{pred}}(F(x'), y_{\text{target}}) + \lambda_{\text{sparse}} \|x' - x\|_1 + \lambda_{\text{valid}} \mathcal{L}_{\text{valid}}(x')
+\end{equation}
+where $x$ is the original features, $x'$ is the counterfactual, $y_{\text{target}}$ is the target class (e.g., slow progressor instead of fast), $\mathcal{L}_{\text{pred}}$ is the prediction loss (cross-entropy), $\mathcal{L}_{\text{valid}}$ enforces feature validity (maintaining physiological plausibility via feature bounds), and $\lambda_{\text{sparse}}$, $\lambda_{\text{valid}}$ are regularization coefficients. Optimization used L-BFGS-B\cite{byrd1995limited} with relaxed bounds ($\pm 10\%$ beyond observed feature ranges). Successful counterfactuals (prediction flipped to target class) were characterized by sparsity (number of changed features) and clinical interpretability (features involved).
+
+\subsubsection{Method 6: Integrated Clinical Dashboard}
+
+We synthesized all explainability methods into patient-level dashboards integrating: (1) Attention-based patient neighborhoods; (2) GNNExplainer subgraphs; (3) Feature attribution rankings; (4) Cluster membership; (5) Counterfactual interventions (if available); and (6) Prediction confidence. Dashboards generate executive summaries for clinical interpretation and export structured data (JSON) for programmatic access.
+
+\subsection{Statistical Analysis}
+
+Attention coherence was assessed via chi-square tests comparing observed vs. expected same-label attention pairs. Feature importance rankings were compared via Spearman rank correlation between IG and GradientSHAP. Clustering quality was evaluated via silhouette scores, purity, and ARI. Counterfactual success rates were reported as percentages. Statistical significance threshold: $p < 0.05$.

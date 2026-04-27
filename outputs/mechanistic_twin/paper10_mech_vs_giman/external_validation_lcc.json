@@ -1,0 +1,278 @@
+{
+  "scope": "Cross-sectional baseline SBR validation. LCC N=43 are ALL healthy controls (amp_pd_case_control 'No PD Nor Other Neurological Disorder'). NOT external PD decay validation. Longitudinal external validation requires SURE-PD3/DeNoPa (Paper 11 future work).",
+  "pdbp_spect_finding": "PDBP SPECT data exists only in 2 DLB studies (Leverenz DLB Consortium N=259, Kantarci Longitudinal Imaging in DLB N=167). PDBP has NO standard-PD DaT-SPECT. Confirmed via pdbp.ninds.nih.gov Query Tool.",
+  "cohorts": {
+    "ppmi_all_baseline": {
+      "n_scans": 2117,
+      "n_patients": 2080
+    },
+    "ppmi_hc": {
+      "n_scans": 343,
+      "n_patients": 343
+    },
+    "ppmi_pd": {
+      "n_scans": 1697,
+      "n_patients": 1660
+    },
+    "lcc_hc": {
+      "n_scans": 43
+    }
+  },
+  "comparison_1_hc_vs_hc": {
+    "description": "LCC HC vs PPMI HC \u2014 scanner/protocol consistency check",
+    "per_region": {
+      "sbr_caudate_r": {
+        "ppmi_hc_n": 343,
+        "ppmi_hc_mean": 2.978629737609329,
+        "ppmi_hc_median": 2.91,
+        "ppmi_hc_std": 0.6210586653619881,
+        "ppmi_hc_range": [
+          1.31,
+          5.09
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 3.3553488372093025,
+        "lcc_hc_median": 3.5,
+        "lcc_hc_std": 0.5901255240426013,
+        "lcc_hc_range": [
+          1.89,
+          4.52
+        ],
+        "ks_statistic": 0.32795443758898907,
+        "ks_p": 0.0003522534849777687,
+        "mw_p": 7.846191005545942e-05,
+        "b_within_a_range": true,
+        "relative_diff_pct": 12.647396044005498
+      },
+      "sbr_caudate_l": {
+        "ppmi_hc_n": 343,
+        "ppmi_hc_mean": 2.984548104956268,
+        "ppmi_hc_median": 2.9,
+        "ppmi_hc_std": 0.6314338926645027,
+        "ppmi_hc_range": [
+          1.32,
+          5.14
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 3.4144186046511624,
+        "lcc_hc_median": 3.5,
+        "lcc_hc_std": 0.664362965818792,
+        "lcc_hc_range": [
+          1.49,
+          5.1
+        ],
+        "ks_statistic": 0.36497389653535833,
+        "ks_p": 4.7866283621485935e-05,
+        "mw_p": 2.1592617689923755e-05,
+        "b_within_a_range": true,
+        "relative_diff_pct": 14.403202246297631
+      },
+      "sbr_putamen_r": {
+        "ppmi_hc_n": 343,
+        "ppmi_hc_mean": 2.1594752186588924,
+        "ppmi_hc_median": 2.11,
+        "ppmi_hc_std": 0.5506188025416638,
+        "ppmi_hc_range": [
+          0.54,
+          4.29
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 2.6781395348837216,
+        "lcc_hc_median": 2.77,
+        "lcc_hc_std": 0.48955725519229265,
+        "lcc_hc_range": [
+          1.45,
+          3.76
+        ],
+        "ks_statistic": 0.46437046579429114,
+        "ks_p": 4.659928338683996e-08,
+        "mw_p": 5.747474847209753e-09,
+        "b_within_a_range": true,
+        "relative_diff_pct": 24.018072156759338
+      },
+      "sbr_putamen_l": {
+        "ppmi_hc_n": 343,
+        "ppmi_hc_mean": 2.1764431486880467,
+        "ppmi_hc_median": 2.11,
+        "ppmi_hc_std": 0.5675805657904189,
+        "ppmi_hc_range": [
+          0.74,
+          4.48
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 2.586046511627907,
+        "lcc_hc_median": 2.62,
+        "lcc_hc_std": 0.4675027150021087,
+        "lcc_hc_range": [
+          0.64,
+          3.32
+        ],
+        "ks_statistic": 0.4319614889145027,
+        "ks_p": 5.937126039464951e-07,
+        "mw_p": 9.092977476889704e-08,
+        "b_within_a_range": false,
+        "relative_diff_pct": 18.81985124154372
+      }
+    },
+    "mean_abs_relative_diff_pct": 17.472130422151547,
+    "verdict": "PARTIAL: HC distributions differ by 17.5% on average. Likely scanner/protocol effects. Cross-cohort SBR comparisons require harmonization (ComBat, Wakasugi 2024)."
+  },
+  "comparison_2_hc_vs_pd": {
+    "description": "LCC HC vs PPMI PD \u2014 HC/PD discrimination validation",
+    "per_region": {
+      "sbr_caudate_r": {
+        "ppmi_pd_n": 1697,
+        "ppmi_pd_mean": 2.084401885680613,
+        "ppmi_pd_median": 2.03,
+        "ppmi_pd_std": 0.7215322928907121,
+        "ppmi_pd_range": [
+          0.36,
+          5.41
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 3.3553488372093025,
+        "lcc_hc_median": 3.5,
+        "lcc_hc_std": 0.5901255240426013,
+        "lcc_hc_range": [
+          1.89,
+          4.52
+        ],
+        "ks_statistic": 0.6939743185649093,
+        "ks_p": 1.2801698659361009e-20,
+        "mw_p": 3.7112298050948324e-20,
+        "b_within_a_range": true,
+        "relative_diff_pct": 60.974179704010936
+      },
+      "sbr_caudate_l": {
+        "ppmi_pd_n": 1697,
+        "ppmi_pd_mean": 2.0732822628167358,
+        "ppmi_pd_median": 1.98,
+        "ppmi_pd_std": 0.7076236168645289,
+        "ppmi_pd_range": [
+          0.25,
+          5.69
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 3.4144186046511624,
+        "lcc_hc_median": 3.5,
+        "lcc_hc_std": 0.664362965818792,
+        "lcc_hc_range": [
+          1.49,
+          5.1
+        ],
+        "ks_statistic": 0.7184086829014266,
+        "ks_p": 2.3956734588015963e-22,
+        "mw_p": 2.4103705130048772e-20,
+        "b_within_a_range": true,
+        "relative_diff_pct": 64.68662593063307
+      },
+      "sbr_putamen_r": {
+        "ppmi_pd_n": 1697,
+        "ppmi_pd_mean": 1.0085857395403655,
+        "ppmi_pd_median": 0.85,
+        "ppmi_pd_std": 0.5795718075671326,
+        "ppmi_pd_range": [
+          0.11,
+          4.79
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 2.6781395348837216,
+        "lcc_hc_median": 2.77,
+        "lcc_hc_std": 0.48955725519229265,
+        "lcc_hc_range": [
+          1.45,
+          3.76
+        ],
+        "ks_statistic": 0.8709898452810021,
+        "ks_p": 3.674968448418692e-37,
+        "mw_p": 5.882754282185383e-26,
+        "b_within_a_range": true,
+        "relative_diff_pct": 165.534146467727
+      },
+      "sbr_putamen_l": {
+        "ppmi_pd_n": 1697,
+        "ppmi_pd_mean": 0.9707130229817326,
+        "ppmi_pd_median": 0.82,
+        "ppmi_pd_std": 0.5532890019218949,
+        "ppmi_pd_range": [
+          -0.01,
+          4.09
+        ],
+        "lcc_hc_n": 43,
+        "lcc_hc_mean": 2.586046511627907,
+        "lcc_hc_median": 2.62,
+        "lcc_hc_std": 0.4675027150021087,
+        "lcc_hc_range": [
+          0.64,
+          3.32
+        ],
+        "ks_statistic": 0.8907100080854038,
+        "ks_p": 5.695222606933646e-40,
+        "mw_p": 6.60447707751628e-25,
+        "b_within_a_range": true,
+        "relative_diff_pct": 166.40690403888533
+      }
+    },
+    "mean_relative_diff_pct": 114.40046403531409,
+    "verdict": "Expected HC>PD gap confirmed: LCC HC 114.4% higher than PPMI PD. SBR framework produces correct diagnostic discrimination."
+  },
+  "limitations": [
+    "Not external PD decay validation \u2014 LCC has no PD patients with DaT",
+    "Not longitudinal \u2014 LCC has 1 scan per patient",
+    "Scanner/protocol differences likely confound direct comparison",
+    "Pending: SURE-PD3 via BioSEND DUA for longitudinal PD external validation",
+    "Pending: DeNoPa via Mollenhauer collaboration for oligomeric \u03b1-syn validation"
+  ],
+  "_provenance": {
+    "datetime_utc": "2026-04-14T02:23:42.655376+00:00",
+    "python": {
+      "version": "3.13.3",
+      "executable": "/Users/blair.dupre/Projects/CSCI-FALL-2025/.venv/bin/python",
+      "platform": "macOS-26.4-arm64-arm-64bit-Mach-O"
+    },
+    "packages": {
+      "numpy": "2.4.4",
+      "pandas": "2.3.3",
+      "pyarrow": "23.0.1"
+    },
+    "git": {
+      "sha": "888d18f49a9197af92f1602e31a8e85570e0bcce",
+      "branch": "main",
+      "dirty": true
+    },
+    "script": {
+      "path": "scripts/mechanistic_twin/phase5_external_validation_lcc.py",
+      "sha256": "f1eb2cae5d57047846e240281cd7a9373a5a659a3041d778c19cb0ff1ebba87d",
+      "size_bytes": 12735
+    },
+    "cli_args": [
+      "scripts/mechanistic_twin/phase5_external_validation_lcc.py"
+    ],
+    "input_files": [
+      {
+        "path": "data/00_raw/DaTScan_SBR_Analysis_08Feb2026.csv",
+        "sha256": "d55feaee55cef69a0f01e6435b750ba773132d30be730e0638c6751995afa7a7",
+        "size_bytes": 382728,
+        "row_count": 4184
+      },
+      {
+        "path": "data/00_raw/Participant_Status_07Feb2026.csv",
+        "sha256": "0fd2a35b0ace31839a1da60bb72ac36966e56bdabcc9994e50ab431ff9ace308",
+        "size_bytes": 1269427,
+        "row_count": 8121
+      },
+      {
+        "path": "data/00_raw/LCC/DaTSCAN_SBR.csv",
+        "sha256": "6b4a154182f2dd9fcedc296bcf4e3f147b454efec21923775a9d458a419eeda9",
+        "size_bytes": 1730,
+        "row_count": 43
+      },
+      {
+        "path": "data/00_raw/LCC/amp_pd_case_control.csv",
+        "sha256": "7a88cf97a93d96a67a8baf2f598543f049e94701fb085643c71a9ca1920e6c8f",
+        "size_bytes": 54290,
+        "row_count": 638
+      }
+    ]
+  }
+}

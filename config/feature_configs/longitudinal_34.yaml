@@ -1,0 +1,73 @@
+# Longitudinal feature configuration for Temporal GIMAN
+# Same 7 modalities and 34 features as full_clinical.yaml, but extracted
+# at multiple visits: BL, V01(3mo), V02(6mo), V04(12mo), V06(18mo),
+# V08(24mo), V10(30mo), V12(36mo).
+#
+# CRITICAL: Only valid when training on prodromal-only cohort (no early PD merge).
+# Using motor_cognitive features WITH early PD patients constitutes data leakage.
+#
+# DAT-SPECT SBR is excluded --- not available for prodromal patients in PPMI.
+#
+# Missingness handling follows the same tiered strategy as cross-sectional:
+#   Tier 1 (<15% missing): MICE imputation
+#   Tier 3 (>50% missing): no imputation, learned missing embeddings + gating
+
+modalities:
+  genetic:
+    features: [LRRK2, GBA, APOE_E4, SNCA, GENETIC_RISK_SCORE]
+    dim: 5
+    temporal: false  # Genetics are time-invariant; replicated at each visit
+
+  expanded_clinical:
+    features: [UPDRS_I, UPDRS_II, SCHWAB_ENGLAND, PIGD_SCORE, TREMOR_SCORE]
+    dim: 5
+    temporal: true
+
+  structural_imaging:
+    features: [CAUDATE_L_VOL, CAUDATE_R_VOL, PUTAMEN_L_VOL, PUTAMEN_R_VOL, HIPPOCAMPUS_L_VOL, HIPPOCAMPUS_R_VOL]
+    dim: 6
+    temporal: true
+
+  csf_biomarkers:
+    features: [ALPHA_SYNUCLEIN, TAU, ABETA42, PTAU181]
+    dim: 4
+    temporal: true  # CSF may be re-sampled at follow-up visits
+
+  clinical_biomarkers:
+    features: [UPSIT_SCORE, RBD_SCORE, SCOPA_AUT_SCORE, ESS_SCORE]
+    dim: 4
+    temporal: true
+
+  cortical_thickness:
+    features: [ENTORHINAL_L_CTH, ENTORHINAL_R_CTH, CINGULATE_L_CTH, CINGULATE_R_CTH, PRECENTRAL_L_CTH, PRECENTRAL_R_CTH]
+    dim: 6
+    temporal: true
+
+  motor_cognitive:
+    features: [NP3TOT, NP1RTOT, NHY, MCATOT]
+    dim: 4
+    temporal: true
+
+total_features: 34
+
+# Visit schedule mapping (EVENT_ID -> months from baseline)
+visit_schedule:
+  BL: 0
+  V01: 3
+  V02: 6
+  V04: 12
+  V06: 18
+  V08: 24
+  V10: 30
+  V12: 36
+
+# Medication features (extracted separately, appended to temporal sequences)
+medication:
+  enabled: true
+  source_file: "PD_Medical_History_07Feb2026.csv"
+  features:
+    - LEVODOPA
+    - DOPAMINE_AGONIST
+    - MAO_B_INHIBITOR
+    - MEDICATION_ACTIVE
+  dim: 4

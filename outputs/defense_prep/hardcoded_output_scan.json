@@ -1,0 +1,4266 @@
+{
+  "n_scanned": 325,
+  "n_orphans": 212,
+  "n_suspicious_round": 46,
+  "n_producer_newer_than_output": 92,
+  "orphans": [
+    "outputs/paper1_conformal/nsd_positive_conformal.json",
+    "outputs/paper1_conformal/three_class_conformal.json",
+    "outputs/paper1_conformal/full_ordinal_conformal.json",
+    "outputs/paper1_conformal/binary_conformal.json",
+    "outputs/paper2_benchmark/conformal_frac0.2.json",
+    "outputs/paper2_benchmark/conformal_frac0.3.json",
+    "outputs/paper2_benchmark/conformal_frac0.5.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.5_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/downstream_comparison_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.1_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.2_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/imputation_benchmark_results_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.3_20260222_155352.json",
+    "outputs/paper2_benchmark/runs/downstream_comparison_all_targets_20260404_225553.json",
+    "outputs/paper2_benchmark/runs/downstream_comparison_all_targets_20260222_195604.json",
+    "outputs/paper2_benchmark/runs/downstream_comparison_all_targets_20260405_000421.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.2.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.3.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.5.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_StageGraphOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_StageDecoderOnly.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_Vanilla.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_StageConditioned.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_StageDecoderOnly.json",
+    "outputs/paper3_markov/transition_prob_2yr.csv",
+    "outputs/paper3_markov/transition_prob_1yr.csv",
+    "outputs/paper3_markov/transition_prob_5yr.csv",
+    "outputs/paper3_markov/transition_prob_10yr.csv",
+    "outputs/paper3_markov/covariate_model/transition_prob_2yr.csv",
+    "outputs/paper3_markov/covariate_model/transition_prob_1yr.csv",
+    "outputs/paper3_markov/covariate_model/transition_prob_5yr.csv",
+    "outputs/paper3_markov/covariate_model/transition_prob_10yr.csv",
+    "outputs/external_validation/comprehensive_results.json",
+    "outputs/mechanistic_twin/phase2/decisive_sbr_only_vs_saa_test.json",
+    "outputs/mechanistic_twin/phase2/path1_its_hierarchical_summary.json",
+    "outputs/mechanistic_twin/phase2/path23_summary.json",
+    "outputs/mechanistic_twin/phase2/phase25_permutation_null.json",
+    "outputs/mechanistic_twin/phase2/track3_permutation_null_summary.json",
+    "outputs/mechanistic_twin/phase2/track3_sensitivity_summary.json",
+    "outputs/mechanistic_twin/phase2/combined_1065_validation_summary.json",
+    "outputs/mechanistic_twin/phase2/systematic_review_observables.json",
+    "outputs/mechanistic_twin/phase2/phase3_sbc_remediated_results.json",
+    "outputs/mechanistic_twin/phase2/phase25_saa_joint_summary.json",
+    "outputs/mechanistic_twin/phase2/block4_counterfactual_combined_1065.csv",
+    "outputs/mechanistic_twin/phase2/phase25_saa_joint_summary.csv",
+    "outputs/mechanistic_twin/phase2/track3_sensitivity_oat.csv",
+    "outputs/mechanistic_twin/phase2/path23_comparison.csv",
+    "outputs/mechanistic_twin/phase2/block5_loo_combined_1065.csv",
+    "outputs/mechanistic_twin/phase2/path1_its_hierarchical_summary.csv",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_101751.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3808.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3050.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3128.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3326.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181822.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164765.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_166740.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3319.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_111383.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4029.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3082.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182984.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3131.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3402.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4030.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3076.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_57880.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_168306.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3189.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170519.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_176239.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3077.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3067.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3051.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3327.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_165932.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3819.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3666.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3826.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163324.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3116.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3212.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164268.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_101675.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3122.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170793.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4033.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_40781.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3911.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4077.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3664.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3408.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3455.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_179541.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3020.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3356.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3910.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3089.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3183.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3324.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_177956.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_238181.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163478.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3638.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3426.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_174735.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3825.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3384.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_184459.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163791.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_161628.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_168299.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_167657.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_162941.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170472.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3119.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_168082.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3829.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_245693.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3003.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181208.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3701.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182745.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3162.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3830.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181825.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4001.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163420.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164589.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3101.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3079.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_106126.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3603.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_108909.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3838.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3060.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3002.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_165174.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4103.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3823.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164491.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3054.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_171525.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3010.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182340.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182515.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3062.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4034.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_174209.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3304.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_165031.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3086.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181957.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3125.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3001.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_179691.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_166701.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170179.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3814.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170481.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_174151.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3134.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3124.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3431.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3832.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3170.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3018.parquet",
+    "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3027.parquet",
+    "outputs/mechanistic_twin/paper10_mech_vs_giman/eda_summary.json"
+  ],
+  "suspicious_round": [
+    "outputs/paper1_conformal/nsd_positive_conformal.json",
+    "outputs/paper1_conformal/three_class_conformal.json",
+    "outputs/paper1_conformal/full_ordinal_conformal.json",
+    "outputs/paper1_experiments/three_class/conformal_results.json",
+    "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+    "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+    "outputs/paper2_benchmark/conformal_frac0.2.json",
+    "outputs/paper2_benchmark/conformal_frac0.3.json",
+    "outputs/paper2_benchmark/conformal_frac0.5.json",
+    "outputs/paper2_benchmark/conformal_frac0.1.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.5_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.1_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.2_20260222_155352.json",
+    "outputs/paper2_benchmark/archive/conformal_frac0.3_20260222_155352.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.2.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.3.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.5.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.1.json",
+    "outputs/paper3_benchmark/benchmark_summary.json",
+    "outputs/paper4/expanded/directional_analysis.json",
+    "outputs/paper4/expanded/patient_case_studies.json",
+    "outputs/paper4/calibration/calibration_results_graph_dt.json",
+    "outputs/paper4/calibration/calibration_results_deephit.json",
+    "outputs/paper4/subgroup/subgroup_ctd.json",
+    "outputs/external_validation/PPMI_20250930_PRELIM/external_metrics.json",
+    "outputs/external_validation/PPMI_20251008_REAL_DISJOINT/external_metrics.json",
+    "outputs/external_validation/three_class/external_validation_results.json",
+    "outputs/external_validation/full_ordinal/external_validation_results.json",
+    "outputs/mechanistic_twin/phase2/step_2_7_v5_profile_likelihood_is_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_8_v4_ppc_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_6_v5_csf_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_6_v4_is_summary.json",
+    "outputs/mechanistic_twin/phase2/phase3_data_prep_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_7_v4_profile_likelihood_is_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_8_v5_ppc_summary.json",
+    "outputs/mechanistic_twin/phase2/block4_s5_counterfactual_summary.json",
+    "outputs/mechanistic_twin/phase2/systematic_review_observables.json",
+    "outputs/mechanistic_twin/phase2/step_2_9_s1_summary.json",
+    "outputs/mechanistic_twin/phase4/phase4_hypothesis_results.json",
+    "outputs/mechanistic_twin/phase4/phase4_path_a_results.json",
+    "outputs/mechanistic_twin/phase4/phase4_identifiability.json",
+    "outputs/mechanistic_twin/paper10_mech_vs_giman/headtohead_wearing_off.json",
+    "outputs/mechanistic_twin/paper10_mech_vs_giman/eda_summary.json",
+    "outputs/mechanistic_twin/paper10_mech_vs_giman/external_validation_lcc.json",
+    "outputs/mechanistic_twin/paper10_mech_vs_giman/shared_cohort.json"
+  ],
+  "producer_newer_than_output": [
+    "outputs/paper1_benchmark/nsd_positive_results.json",
+    "outputs/paper1_benchmark/three_class_results.json",
+    "outputs/paper1_benchmark/full_ordinal_results.json",
+    "outputs/paper1_benchmark/binary_results.json",
+    "outputs/paper1_experiments/three_class/conformal_results.json",
+    "outputs/paper1_experiments/three_class/adamedgraph_results.json",
+    "outputs/paper1_experiments/three_class/tabular_results.json",
+    "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+    "outputs/paper1_experiments/nsd_positive/adamedgraph_results.json",
+    "outputs/paper1_experiments/nsd_positive/tabular_results.json",
+    "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+    "outputs/paper1_experiments/full_ordinal/adamedgraph_results.json",
+    "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+    "outputs/paper1_experiments/binary/conformal_results.json",
+    "outputs/paper1_experiments/binary/adamedgraph_results.json",
+    "outputs/paper1_experiments/binary/tabular_results.json",
+    "outputs/paper2_benchmark/imputation_benchmark_results.json",
+    "outputs/paper2_benchmark/per_stage_analysis.json",
+    "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+    "outputs/paper2_benchmark/conformal_frac0.1.json",
+    "outputs/paper2_benchmark/imputation_benchmark_results_combined.json",
+    "outputs/paper2_benchmark/downstream_comparison.json",
+    "outputs/paper2_benchmark/runs/dl_baselines_with_classical/config.json",
+    "outputs/paper2_benchmark/runs/dl_baselines_v2/config.json",
+    "outputs/paper2_benchmark/runs/dl_baselines_test/config.json",
+    "outputs/paper2_benchmark/runs/dl_baselines_v4/imputation_benchmark_results.json",
+    "outputs/paper2_benchmark/runs/dl_baselines_v4/config.json",
+    "outputs/paper2_benchmark/runs/dl_baselines_v3/config.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/imputation_benchmark_results.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/config.json",
+    "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.1.json",
+    "outputs/paper3_markov/markov_results.json",
+    "outputs/paper3_markov/covariate_model/markov_results.json",
+    "outputs/paper3_markov/covariate_hazard_ratios.csv",
+    "outputs/paper3_markov/expected_transition_times.csv",
+    "outputs/paper3_markov/intensity_matrix_Q.csv",
+    "outputs/paper3_markov/trajectory_predictions.csv",
+    "outputs/paper3_markov/covariate_model/intensity_matrix_Q.csv",
+    "outputs/paper3_deephit/deephit_results.json",
+    "outputs/paper3_deephit/per_transition_ctd.csv",
+    "outputs/paper3_graph_dt/graph_dt_results.json",
+    "outputs/paper3_graph_dt/per_transition_ctd.csv",
+    "outputs/paper3_benchmark/benchmark_summary.json",
+    "outputs/paper3_benchmark/sojourn_comparison.csv",
+    "outputs/paper3_benchmark/brier_at_horizons.csv",
+    "outputs/paper3_benchmark/model_comparison.csv",
+    "outputs/paper3_benchmark/per_transition_ctd.csv",
+    "outputs/paper3_benchmark/statistical_tests.csv",
+    "outputs/paper4/expanded/directional_analysis.json",
+    "outputs/paper4/expanded/conformal_baselines.json",
+    "outputs/paper4/expanded/patient_case_studies.json",
+    "outputs/paper4/calibration/aggregate_ece.json",
+    "outputs/paper4/calibration/calibration_results_graph_dt.json",
+    "outputs/paper4/calibration/calibration_results_deephit.json",
+    "outputs/paper4/subgroup/conditional_coverage.json",
+    "outputs/paper4/subgroup/subgroup_ctd.json",
+    "outputs/paper4/subgroup/interaction_tests.json",
+    "outputs/external_validation/PPMI_20250930_PRELIM/external_metrics.json",
+    "outputs/external_validation/PPMI_20251008_REAL_DISJOINT/external_metrics.json",
+    "outputs/external_validation/three_class/external_validation_results.json",
+    "outputs/external_validation/nsd_positive/external_validation_results.json",
+    "outputs/external_validation/full_ordinal/external_validation_results.json",
+    "outputs/external_validation/binary/external_validation_results.json",
+    "outputs/external_validation/PPMI_20250930_PRELIM/external_predictions.parquet",
+    "outputs/external_validation/PPMI_20251008_REAL_DISJOINT/external_predictions.parquet",
+    "outputs/mechanistic_twin/phase2/step_2_7_v5_profile_likelihood_is_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_8_v4_ppc_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_6_v5_csf_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_6_v4_is_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_7_profile_likelihood_summary.json",
+    "outputs/mechanistic_twin/phase2/phase3_data_prep_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_7_v4_profile_likelihood_is_summary.json",
+    "outputs/mechanistic_twin/phase2/phase3_forward_simulation.json",
+    "outputs/mechanistic_twin/phase2/step_2_8_v5_ppc_summary.json",
+    "outputs/mechanistic_twin/phase2/block4_s5_counterfactual_summary.json",
+    "outputs/mechanistic_twin/phase2/phase3_regional_saem_results.json",
+    "outputs/mechanistic_twin/phase2/phase3_sbc_results.json",
+    "outputs/mechanistic_twin/phase2/step_2_9_s1_summary.json",
+    "outputs/mechanistic_twin/phase2/step_2_8_v5_loo_forward_summary.json",
+    "outputs/mechanistic_twin/phase2/block4_s5_counterfactual.csv",
+    "outputs/mechanistic_twin/phase2/step_2_7_v5_profile_likelihood_is.csv",
+    "outputs/mechanistic_twin/phase2/step_2_7_profile_likelihood.csv",
+    "outputs/mechanistic_twin/phase2/step_2_9_s1_per_stage.csv",
+    "outputs/mechanistic_twin/phase2/step_2_8_v5_ppc.csv",
+    "outputs/mechanistic_twin/phase2/step_2_8_v4_ppc.csv",
+    "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_per_stage.csv",
+    "outputs/mechanistic_twin/phase2/step_2_8_v5_loo_forward.csv",
+    "outputs/mechanistic_twin/phase2/step_2_7_v4_profile_likelihood_is.csv",
+    "outputs/mechanistic_twin/phase4/phase4_confounding_control.json",
+    "outputs/mechanistic_twin/phase4/phase4_path_c_results.json",
+    "outputs/mechanistic_twin/phase4/phase4_population_fit.json"
+  ],
+  "all_records": [
+    {
+      "path": "outputs/paper1_benchmark/nsd_positive_results.json",
+      "size_bytes": 31994,
+      "mtime": 1771742370.0,
+      "producer_script": "scripts/run_paper1_benchmark.py",
+      "producer_mtime": 1776051573.182878,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 679,
+        "n_round_2dp": 49,
+        "round_ratio": 0.07216494845360824,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_benchmark/three_class_results.json",
+      "size_bytes": 30936,
+      "mtime": 1771742151.0,
+      "producer_script": "scripts/run_paper1_benchmark.py",
+      "producer_mtime": 1776051573.182878,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 637,
+        "n_round_2dp": 22,
+        "round_ratio": 0.03453689167974882,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_benchmark/full_ordinal_results.json",
+      "size_bytes": 33523,
+      "mtime": 1771742295.0,
+      "producer_script": "scripts/run_paper1_benchmark.py",
+      "producer_mtime": 1776051573.182878,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 721,
+        "n_round_2dp": 43,
+        "round_ratio": 0.059639389736477116,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_benchmark/binary_results.json",
+      "size_bytes": 26752,
+      "mtime": 1771742061.0,
+      "producer_script": "scripts/run_paper1_benchmark.py",
+      "producer_mtime": 1776051573.182878,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 553,
+        "n_round_2dp": 14,
+        "round_ratio": 0.02531645569620253,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_conformal/nsd_positive_conformal.json",
+      "size_bytes": 15147,
+      "mtime": 1771743479.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 374,
+        "n_round_2dp": 218,
+        "round_ratio": 0.5828877005347594,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper1_conformal/three_class_conformal.json",
+      "size_bytes": 15027,
+      "mtime": 1771743355.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 331,
+        "n_round_2dp": 142,
+        "round_ratio": 0.42900302114803623,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper1_conformal/full_ordinal_conformal.json",
+      "size_bytes": 16691,
+      "mtime": 1771743426.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 409,
+        "n_round_2dp": 202,
+        "round_ratio": 0.4938875305623472,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper1_conformal/binary_conformal.json",
+      "size_bytes": 13968,
+      "mtime": 1771743301.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 288,
+        "n_round_2dp": 112,
+        "round_ratio": 0.3888888888888889,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/three_class/conformal_results.json",
+      "size_bytes": 15025,
+      "mtime": 1771779247.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 331,
+        "n_round_2dp": 142,
+        "round_ratio": 0.42900302114803623,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/three_class/adamedgraph_results.json",
+      "size_bytes": 3306,
+      "mtime": 1771779185.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 75,
+        "n_round_2dp": 10,
+        "round_ratio": 0.13333333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/three_class/tabular_results.json",
+      "size_bytes": 30935,
+      "mtime": 1771761818.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 637,
+        "n_round_2dp": 22,
+        "round_ratio": 0.03453689167974882,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/nsd_positive/conformal_results.json",
+      "size_bytes": 15144,
+      "mtime": 1771793771.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 374,
+        "n_round_2dp": 218,
+        "round_ratio": 0.5828877005347594,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/nsd_positive/adamedgraph_results.json",
+      "size_bytes": 3085,
+      "mtime": 1771793672.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 71,
+        "n_round_2dp": 10,
+        "round_ratio": 0.14084507042253522,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/nsd_positive/tabular_results.json",
+      "size_bytes": 31999,
+      "mtime": 1771792484.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 679,
+        "n_round_2dp": 49,
+        "round_ratio": 0.07216494845360824,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/full_ordinal/conformal_results.json",
+      "size_bytes": 16700,
+      "mtime": 1771792431.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 409,
+        "n_round_2dp": 202,
+        "round_ratio": 0.4938875305623472,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/full_ordinal/adamedgraph_results.json",
+      "size_bytes": 3449,
+      "mtime": 1771792338.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 78,
+        "n_round_2dp": 10,
+        "round_ratio": 0.1282051282051282,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/full_ordinal/tabular_results.json",
+      "size_bytes": 33528,
+      "mtime": 1771779329.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 721,
+        "n_round_2dp": 43,
+        "round_ratio": 0.059639389736477116,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/binary/conformal_results.json",
+      "size_bytes": 13965,
+      "mtime": 1771761745.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 288,
+        "n_round_2dp": 112,
+        "round_ratio": 0.3888888888888889,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/binary/adamedgraph_results.json",
+      "size_bytes": 2846,
+      "mtime": 1771761704.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 66,
+        "n_round_2dp": 10,
+        "round_ratio": 0.15151515151515152,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper1_experiments/binary/tabular_results.json",
+      "size_bytes": 26768,
+      "mtime": 1771744146.0,
+      "producer_script": "scripts/run_paper1_experiments.py",
+      "producer_mtime": 1776051573.1830986,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 553,
+        "n_round_2dp": 14,
+        "round_ratio": 0.02531645569620253,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/conformal_frac0.2.json",
+      "size_bytes": 14372,
+      "mtime": 1771805872.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 270,
+        "round_ratio": 0.4891304347826087,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/imputation_benchmark_results.json",
+      "size_bytes": 151014,
+      "mtime": 1771818436.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 4288,
+        "n_round_2dp": 224,
+        "round_ratio": 0.05223880597014925,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/conformal_frac0.3.json",
+      "size_bytes": 14322,
+      "mtime": 1771806512.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 268,
+        "round_ratio": 0.4855072463768116,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/per_stage_analysis.json",
+      "size_bytes": 14117,
+      "mtime": 1771818813.0,
+      "producer_script": "scripts/analyze_per_stage_rmse.py",
+      "producer_mtime": 1776051573.165871,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 320,
+        "n_round_2dp": 0,
+        "round_ratio": 0.0,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/conformal_frac0.5.json",
+      "size_bytes": 14585,
+      "mtime": 1771807145.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 259,
+        "round_ratio": 0.4692028985507246,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/downstream_comparison_all_targets.json",
+      "size_bytes": 37751,
+      "mtime": 1771818964.0,
+      "producer_script": "scripts/run_downstream_experiment.py",
+      "producer_mtime": 1776051573.181685,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 804,
+        "n_round_2dp": 132,
+        "round_ratio": 0.16417910447761194,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/conformal_frac0.1.json",
+      "size_bytes": 14395,
+      "mtime": 1771805196.0,
+      "producer_script": "scripts/defense_prep/08_truth_table_critical_claims.py",
+      "producer_mtime": 1776219648.9445467,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 271,
+        "round_ratio": 0.49094202898550726,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/imputation_benchmark_results_combined.json",
+      "size_bytes": 237180,
+      "mtime": 1771818661.0,
+      "producer_script": "scripts/merge_benchmark_results.py",
+      "producer_mtime": 1776051573.1743667,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 6636,
+        "n_round_2dp": 385,
+        "round_ratio": 0.0580168776371308,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/downstream_comparison.json",
+      "size_bytes": 5537,
+      "mtime": 1771801787.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 128,
+        "n_round_2dp": 23,
+        "round_ratio": 0.1796875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/archive/conformal_frac0.5_20260222_155352.json",
+      "size_bytes": 14686,
+      "mtime": 1771804432.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 251,
+        "round_ratio": 0.45471014492753625,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/archive/downstream_comparison_20260222_155352.json",
+      "size_bytes": 5537,
+      "mtime": 1771804432.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 128,
+        "n_round_2dp": 23,
+        "round_ratio": 0.1796875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/archive/conformal_frac0.1_20260222_155352.json",
+      "size_bytes": 14361,
+      "mtime": 1771804432.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 270,
+        "round_ratio": 0.4891304347826087,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/archive/conformal_frac0.2_20260222_155352.json",
+      "size_bytes": 14395,
+      "mtime": 1771804432.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 270,
+        "round_ratio": 0.4891304347826087,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/archive/imputation_benchmark_results_20260222_155352.json",
+      "size_bytes": 23353,
+      "mtime": 1771804432.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 627,
+        "n_round_2dp": 73,
+        "round_ratio": 0.11642743221690591,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/archive/conformal_frac0.3_20260222_155352.json",
+      "size_bytes": 14375,
+      "mtime": 1771804432.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 269,
+        "round_ratio": 0.48731884057971014,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/downstream_comparison_all_targets_20260404_225553.json",
+      "size_bytes": 37837,
+      "mtime": 1775368553.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 804,
+        "n_round_2dp": 132,
+        "round_ratio": 0.16417910447761194,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/downstream_comparison_all_targets_20260222_195604.json",
+      "size_bytes": 37751,
+      "mtime": 1771818964.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 804,
+        "n_round_2dp": 132,
+        "round_ratio": 0.16417910447761194,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/downstream_comparison_all_targets_20260405_000421.json",
+      "size_bytes": 37847,
+      "mtime": 1775372661.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 804,
+        "n_round_2dp": 132,
+        "round_ratio": 0.16417910447761194,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/dl_baselines_with_classical/config.json",
+      "size_bytes": 294,
+      "mtime": 1771813751.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 7,
+        "round_ratio": 0.875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/dl_baselines_v2/config.json",
+      "size_bytes": 282,
+      "mtime": 1771816169.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 7,
+        "round_ratio": 0.875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/dl_baselines_test/config.json",
+      "size_bytes": 258,
+      "mtime": 1771813179.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 5,
+        "n_round_2dp": 4,
+        "round_ratio": 0.8,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/dl_baselines_v4/imputation_benchmark_results.json",
+      "size_bytes": 151014,
+      "mtime": 1771818436.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 4288,
+        "n_round_2dp": 224,
+        "round_ratio": 0.05223880597014925,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/dl_baselines_v4/config.json",
+      "size_bytes": 355,
+      "mtime": 1771818436.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 7,
+        "round_ratio": 0.875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/dl_baselines_v3/config.json",
+      "size_bytes": 282,
+      "mtime": 1771816957.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 7,
+        "round_ratio": 0.875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/imputation_benchmark_results.json",
+      "size_bytes": 180682,
+      "mtime": 1771807556.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 5028,
+        "n_round_2dp": 301,
+        "round_ratio": 0.05986475735879077,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/config.json",
+      "size_bytes": 371,
+      "mtime": 1771807556.0,
+      "producer_script": "scripts/run_paper2_experiments.py",
+      "producer_mtime": 1776051573.1833825,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 7,
+        "round_ratio": 0.875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.2.json",
+      "size_bytes": 14372,
+      "mtime": 1771805872.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 270,
+        "round_ratio": 0.4891304347826087,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.3.json",
+      "size_bytes": 14322,
+      "mtime": 1771806512.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 268,
+        "round_ratio": 0.4855072463768116,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.5.json",
+      "size_bytes": 14585,
+      "mtime": 1771807145.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 259,
+        "round_ratio": 0.4692028985507246,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/conformal/conformal_frac0.1.json",
+      "size_bytes": 14395,
+      "mtime": 1771805196.0,
+      "producer_script": "scripts/defense_prep/08_truth_table_critical_claims.py",
+      "producer_mtime": 1776219648.9445467,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 552,
+        "n_round_2dp": 271,
+        "round_ratio": 0.49094202898550726,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_StageConditioned.json",
+      "size_bytes": 25662,
+      "mtime": 1771807481.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 461,
+        "round_ratio": 0.38416666666666666,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_Vanilla.json",
+      "size_bytes": 25885,
+      "mtime": 1771806614.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 451,
+        "round_ratio": 0.37583333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_Vanilla.json",
+      "size_bytes": 25770,
+      "mtime": 1771807031.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 458,
+        "round_ratio": 0.38166666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25853,
+      "mtime": 1771806089.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 453,
+        "round_ratio": 0.3775,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_StageGraphOnly.json",
+      "size_bytes": 26032,
+      "mtime": 1771805156.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 454,
+        "round_ratio": 0.37833333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_StageConditioned.json",
+      "size_bytes": 25989,
+      "mtime": 1771805574.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 456,
+        "round_ratio": 0.38,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_Vanilla.json",
+      "size_bytes": 25973,
+      "mtime": 1771805082.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 455,
+        "round_ratio": 0.37916666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25648,
+      "mtime": 1771807145.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 471,
+        "round_ratio": 0.3925,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25885,
+      "mtime": 1771806053.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 454,
+        "round_ratio": 0.37833333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25931,
+      "mtime": 1771805196.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 454,
+        "round_ratio": 0.37833333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_StageConditioned.json",
+      "size_bytes": 25707,
+      "mtime": 1771806650.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 459,
+        "round_ratio": 0.3825,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_Vanilla.json",
+      "size_bytes": 25794,
+      "mtime": 1771806825.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 456,
+        "round_ratio": 0.38,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25641,
+      "mtime": 1771806940.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 468,
+        "round_ratio": 0.39,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_Vanilla.json",
+      "size_bytes": 25910,
+      "mtime": 1771805759.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 451,
+        "round_ratio": 0.37583333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25979,
+      "mtime": 1771805612.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 457,
+        "round_ratio": 0.38083333333333336,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25763,
+      "mtime": 1771805872.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 465,
+        "round_ratio": 0.3875,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 26054,
+      "mtime": 1771805424.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 453,
+        "round_ratio": 0.3775,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_StageConditioned.json",
+      "size_bytes": 25699,
+      "mtime": 1771806440.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 463,
+        "round_ratio": 0.3858333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25669,
+      "mtime": 1771807309.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 466,
+        "round_ratio": 0.3883333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25655,
+      "mtime": 1771807347.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 469,
+        "round_ratio": 0.3908333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25759,
+      "mtime": 1771806686.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 458,
+        "round_ratio": 0.38166666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_StageConditioned.json",
+      "size_bytes": 25756,
+      "mtime": 1771806231.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 461,
+        "round_ratio": 0.38416666666666666,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25728,
+      "mtime": 1771806476.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 466,
+        "round_ratio": 0.3883333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_Vanilla.json",
+      "size_bytes": 25821,
+      "mtime": 1771806194.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 457,
+        "round_ratio": 0.38083333333333336,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25641,
+      "mtime": 1771807556.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 469,
+        "round_ratio": 0.3908333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25806,
+      "mtime": 1771806267.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 459,
+        "round_ratio": 0.3825,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25714,
+      "mtime": 1771807106.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 463,
+        "round_ratio": 0.3858333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_StageConditioned.json",
+      "size_bytes": 25811,
+      "mtime": 1771806016.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 459,
+        "round_ratio": 0.3825,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 26062,
+      "mtime": 1771805650.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 452,
+        "round_ratio": 0.37666666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run0_GIMIN_StageConditioned.json",
+      "size_bytes": 25645,
+      "mtime": 1771807069.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 467,
+        "round_ratio": 0.38916666666666666,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run1_GIMIN_Vanilla.json",
+      "size_bytes": 25933,
+      "mtime": 1771805980.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 450,
+        "round_ratio": 0.375,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run0_GIMIN_StageConditioned.json",
+      "size_bytes": 25999,
+      "mtime": 1771805119.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 455,
+        "round_ratio": 0.37916666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run1_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25703,
+      "mtime": 1771806723.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 460,
+        "round_ratio": 0.38333333333333336,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25692,
+      "mtime": 1771806903.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 467,
+        "round_ratio": 0.38916666666666666,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25735,
+      "mtime": 1771807519.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 459,
+        "round_ratio": 0.3825,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_StageGraphOnly.json",
+      "size_bytes": 25890,
+      "mtime": 1771805835.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 451,
+        "round_ratio": 0.37583333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_Vanilla.json",
+      "size_bytes": 26068,
+      "mtime": 1771805310.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 451,
+        "round_ratio": 0.37583333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run2_GIMIN_StageConditioned.json",
+      "size_bytes": 25729,
+      "mtime": 1771806865.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 463,
+        "round_ratio": 0.3858333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run2_GIMIN_Vanilla.json",
+      "size_bytes": 25785,
+      "mtime": 1771807440.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 454,
+        "round_ratio": 0.37833333333333335,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run0_GIMIN_StageConditioned.json",
+      "size_bytes": 25804,
+      "mtime": 1771805799.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 461,
+        "round_ratio": 0.38416666666666666,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_Vanilla.json",
+      "size_bytes": 25864,
+      "mtime": 1771807234.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 452,
+        "round_ratio": 0.37666666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_StageConditioned.json",
+      "size_bytes": 25991,
+      "mtime": 1771805348.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 457,
+        "round_ratio": 0.38083333333333336,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run1_GIMIN_StageGraphOnly.json",
+      "size_bytes": 26050,
+      "mtime": 1771805386.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 452,
+        "round_ratio": 0.37666666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25718,
+      "mtime": 1771806512.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 458,
+        "round_ratio": 0.38166666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.3_run0_GIMIN_Vanilla.json",
+      "size_bytes": 25776,
+      "mtime": 1771806403.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 455,
+        "round_ratio": 0.37916666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.1_run2_GIMIN_Vanilla.json",
+      "size_bytes": 25967,
+      "mtime": 1771805537.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 457,
+        "round_ratio": 0.38083333333333336,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.5_run1_GIMIN_StageConditioned.json",
+      "size_bytes": 25586,
+      "mtime": 1771807272.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 477,
+        "round_ratio": 0.3975,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper2_benchmark/runs/full_benchmark_20260222_160247/training_history/frac0.2_run2_GIMIN_StageDecoderOnly.json",
+      "size_bytes": 25852,
+      "mtime": 1771806303.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 1200,
+        "n_round_2dp": 455,
+        "round_ratio": 0.37916666666666665,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper3_markov/markov_results.json",
+      "size_bytes": 12475,
+      "mtime": 1771834237.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_9_v2_s1_alt_within_cohort.py",
+      "producer_mtime": 1776051573.174168,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 338,
+        "n_round_2dp": 26,
+        "round_ratio": 0.07692307692307693,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_model/markov_results.json",
+      "size_bytes": 10857,
+      "mtime": 1771835100.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_9_v2_s1_alt_within_cohort.py",
+      "producer_mtime": 1776051573.174168,
+      "producer_newer_than_output": true,
+      "json_parse_error": "cannot convert float infinity to integer"
+    },
+    {
+      "path": "outputs/paper3_markov/transition_prob_2yr.csv",
+      "size_bytes": 1004,
+      "mtime": 1771834237.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/transition_prob_1yr.csv",
+      "size_bytes": 991,
+      "mtime": 1771834237.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/transition_prob_5yr.csv",
+      "size_bytes": 1031,
+      "mtime": 1771834237.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_hazard_ratios.csv",
+      "size_bytes": 4828,
+      "mtime": 1771835100.0,
+      "producer_script": "scripts/paper3/run_multistate_model.py",
+      "producer_mtime": 1776051573.1763408,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 5,
+      "csv_n_rows": 78
+    },
+    {
+      "path": "outputs/paper3_markov/expected_transition_times.csv",
+      "size_bytes": 460,
+      "mtime": 1771827497.0,
+      "producer_script": "scripts/paper3/run_multistate_model.py",
+      "producer_mtime": 1776051573.1763408,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 4
+    },
+    {
+      "path": "outputs/paper3_markov/transition_prob_10yr.csv",
+      "size_bytes": 1025,
+      "mtime": 1771834237.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/intensity_matrix_Q.csv",
+      "size_bytes": 693,
+      "mtime": 1771834237.0,
+      "producer_script": "scripts/paper3/run_multistate_model.py",
+      "producer_mtime": 1776051573.1763408,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/trajectory_predictions.csv",
+      "size_bytes": 27081,
+      "mtime": 1771827497.0,
+      "producer_script": "scripts/paper3/run_multistate_model.py",
+      "producer_mtime": 1776051573.1763408,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 10,
+      "csv_n_rows": 183
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_model/transition_prob_2yr.csv",
+      "size_bytes": 907,
+      "mtime": 1771835100.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_model/transition_prob_1yr.csv",
+      "size_bytes": 882,
+      "mtime": 1771835100.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_model/transition_prob_5yr.csv",
+      "size_bytes": 915,
+      "mtime": 1771835100.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_model/transition_prob_10yr.csv",
+      "size_bytes": 932,
+      "mtime": 1771835100.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_markov/covariate_model/intensity_matrix_Q.csv",
+      "size_bytes": 552,
+      "mtime": 1771835100.0,
+      "producer_script": "scripts/paper3/run_multistate_model.py",
+      "producer_mtime": 1776051573.1763408,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_deephit/deephit_results.json",
+      "size_bytes": 1298,
+      "mtime": 1771913616.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 43,
+        "n_round_2dp": 13,
+        "round_ratio": 0.3023255813953488,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper3_deephit/per_transition_ctd.csv",
+      "size_bytes": 170,
+      "mtime": 1771913616.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 2,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_graph_dt/graph_dt_results.json",
+      "size_bytes": 1510,
+      "mtime": 1771913080.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 51,
+        "n_round_2dp": 20,
+        "round_ratio": 0.39215686274509803,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper3_graph_dt/per_transition_ctd.csv",
+      "size_bytes": 171,
+      "mtime": 1771913080.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 2,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_benchmark/benchmark_summary.json",
+      "size_bytes": 9276,
+      "mtime": 1771897127.0,
+      "producer_script": "scripts/run_enhanced_gat_benchmark.py",
+      "producer_mtime": 1776051573.1818566,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 212,
+        "n_round_2dp": 139,
+        "round_ratio": 0.6556603773584906,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper3_benchmark/sojourn_comparison.csv",
+      "size_bytes": 314,
+      "mtime": 1771897127.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 5,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_benchmark/brier_at_horizons.csv",
+      "size_bytes": 98,
+      "mtime": 1771897127.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 3,
+      "csv_n_rows": 4
+    },
+    {
+      "path": "outputs/paper3_benchmark/model_comparison.csv",
+      "size_bytes": 412,
+      "mtime": 1771897127.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 10,
+      "csv_n_rows": 3
+    },
+    {
+      "path": "outputs/paper3_benchmark/per_transition_ctd.csv",
+      "size_bytes": 244,
+      "mtime": 1771897127.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 4,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/paper3_benchmark/statistical_tests.csv",
+      "size_bytes": 427,
+      "mtime": 1771897127.0,
+      "producer_script": "scripts/paper3/run_benchmark.py",
+      "producer_mtime": 1776051573.1757965,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 7,
+      "csv_n_rows": 3
+    },
+    {
+      "path": "outputs/paper4/expanded/directional_analysis.json",
+      "size_bytes": 4414,
+      "mtime": 1771915681.0,
+      "producer_script": "scripts/paper4/run_expanded_analysis.py",
+      "producer_mtime": 1776051573.177301,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 90,
+        "n_round_2dp": 42,
+        "round_ratio": 0.4666666666666667,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper4/expanded/conformal_baselines.json",
+      "size_bytes": 15651,
+      "mtime": 1771915670.0,
+      "producer_script": "scripts/paper4/run_expanded_analysis.py",
+      "producer_mtime": 1776051573.177301,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 272,
+        "n_round_2dp": 80,
+        "round_ratio": 0.29411764705882354,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper4/expanded/patient_case_studies.json",
+      "size_bytes": 8292,
+      "mtime": 1771915682.0,
+      "producer_script": "scripts/paper4/run_expanded_analysis.py",
+      "producer_mtime": 1776051573.177301,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 246,
+        "n_round_2dp": 105,
+        "round_ratio": 0.4268292682926829,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper4/calibration/aggregate_ece.json",
+      "size_bytes": 1662,
+      "mtime": 1771914223.0,
+      "producer_script": "scripts/paper4/run_calibration_analysis.py",
+      "producer_mtime": 1776051573.1769745,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 42,
+        "n_round_2dp": 0,
+        "round_ratio": 0.0,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper4/calibration/calibration_results_graph_dt.json",
+      "size_bytes": 187934,
+      "mtime": 1771914223.0,
+      "producer_script": "scripts/paper4/run_calibration_analysis.py",
+      "producer_mtime": 1776051573.1769745,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 4530,
+        "n_round_2dp": 2288,
+        "round_ratio": 0.5050772626931568,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper4/calibration/calibration_results_deephit.json",
+      "size_bytes": 174725,
+      "mtime": 1771914223.0,
+      "producer_script": "scripts/paper4/run_calibration_analysis.py",
+      "producer_mtime": 1776051573.1769745,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 4250,
+        "n_round_2dp": 2251,
+        "round_ratio": 0.5296470588235294,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper4/conformal/timing_intervals_graph_dt.json",
+      "size_bytes": 9244,
+      "mtime": 1776218244.5933952,
+      "producer_script": "scripts/paper4/run_conformal_survival.py",
+      "producer_mtime": 1776051573.177183,
+      "producer_newer_than_output": false,
+      "json_parse_error": "cannot convert float infinity to integer"
+    },
+    {
+      "path": "outputs/paper4/conformal/aggregate_summary.json",
+      "size_bytes": 3589,
+      "mtime": 1776218244.5941048,
+      "producer_script": "scripts/paper6/unified_pipeline_demo.py",
+      "producer_mtime": 1776051573.178792,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 84,
+        "n_round_2dp": 0,
+        "round_ratio": 0.0,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper4/conformal/conformal_results_deephit.json",
+      "size_bytes": 17021,
+      "mtime": 1776218244.5909975,
+      "producer_script": "scripts/paper6/unified_pipeline_demo.py",
+      "producer_mtime": 1776051573.178792,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 465,
+        "n_round_2dp": 60,
+        "round_ratio": 0.12903225806451613,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper4/conformal/timing_intervals_deephit.json",
+      "size_bytes": 9386,
+      "mtime": 1776218244.5919285,
+      "producer_script": "scripts/paper4/run_conformal_survival.py",
+      "producer_mtime": 1776051573.177183,
+      "producer_newer_than_output": false,
+      "json_parse_error": "cannot convert float infinity to integer"
+    },
+    {
+      "path": "outputs/paper4/conformal/conformal_results_graph_dt.json",
+      "size_bytes": 16985,
+      "mtime": 1776218244.5928428,
+      "producer_script": "scripts/paper4/run_conformal_survival.py",
+      "producer_mtime": 1776051573.177183,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 465,
+        "n_round_2dp": 60,
+        "round_ratio": 0.12903225806451613,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper4/subgroup/conditional_coverage.json",
+      "size_bytes": 3578,
+      "mtime": 1771918430.0,
+      "producer_script": "scripts/paper4/run_subgroup_analysis.py",
+      "producer_mtime": 1776051573.1774704,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 70,
+        "n_round_2dp": 0,
+        "round_ratio": 0.0,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/paper4/subgroup/subgroup_ctd.json",
+      "size_bytes": 11240,
+      "mtime": 1771914567.0,
+      "producer_script": "scripts/paper4/run_subgroup_analysis.py",
+      "producer_mtime": 1776051573.1774704,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 140,
+        "n_round_2dp": 70,
+        "round_ratio": 0.5,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/paper4/subgroup/interaction_tests.json",
+      "size_bytes": 4594,
+      "mtime": 1771918419.0,
+      "producer_script": "scripts/paper4/run_subgroup_analysis.py",
+      "producer_mtime": 1776051573.1774704,
+      "producer_newer_than_output": true,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/external_validation/comprehensive_results.json",
+      "size_bytes": 3978,
+      "mtime": 1771780985.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 46,
+        "n_round_2dp": 18,
+        "round_ratio": 0.391304347826087,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/external_validation/PPMI_20250930_PRELIM/external_metrics.json",
+      "size_bytes": 7606,
+      "mtime": 1770441922.0,
+      "producer_script": "scripts/run_external_validation_pipeline.py",
+      "producer_mtime": 1776051573.182487,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 161,
+        "n_round_2dp": 71,
+        "round_ratio": 0.4409937888198758,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/external_validation/PPMI_20251008_REAL_DISJOINT/external_metrics.json",
+      "size_bytes": 6531,
+      "mtime": 1770444321.0,
+      "producer_script": "scripts/run_external_validation_pipeline.py",
+      "producer_mtime": 1776051573.182487,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 150,
+        "n_round_2dp": 104,
+        "round_ratio": 0.6933333333333334,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/external_validation/three_class/external_validation_results.json",
+      "size_bytes": 9431,
+      "mtime": 1771781331.0,
+      "producer_script": "scripts/run_external_validation.py",
+      "producer_mtime": 1776051573.182103,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 188,
+        "n_round_2dp": 77,
+        "round_ratio": 0.4095744680851064,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/external_validation/nsd_positive/external_validation_results.json",
+      "size_bytes": 9790,
+      "mtime": 1771781350.0,
+      "producer_script": "scripts/run_external_validation.py",
+      "producer_mtime": 1776051573.182103,
+      "producer_newer_than_output": true,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/external_validation/full_ordinal/external_validation_results.json",
+      "size_bytes": 2860,
+      "mtime": 1771780573.0,
+      "producer_script": "scripts/run_external_validation.py",
+      "producer_mtime": 1776051573.182103,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 62,
+        "n_round_2dp": 30,
+        "round_ratio": 0.4838709677419355,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/external_validation/binary/external_validation_results.json",
+      "size_bytes": 9223,
+      "mtime": 1771780870.0,
+      "producer_script": "scripts/run_external_validation.py",
+      "producer_mtime": 1776051573.182103,
+      "producer_newer_than_output": true,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/external_validation/PPMI_20250930_PRELIM/external_predictions.parquet",
+      "size_bytes": 5897,
+      "mtime": 1770441921.0,
+      "producer_script": "scripts/run_external_validation_pipeline.py",
+      "producer_mtime": 1776051573.182487,
+      "producer_newer_than_output": true,
+      "parquet_shape": [
+        90,
+        8
+      ]
+    },
+    {
+      "path": "outputs/external_validation/PPMI_20251008_REAL_DISJOINT/external_predictions.parquet",
+      "size_bytes": 5664,
+      "mtime": 1770444298.0,
+      "producer_script": "scripts/run_external_validation_pipeline.py",
+      "producer_mtime": 1776051573.182487,
+      "producer_newer_than_output": true,
+      "parquet_shape": [
+        50,
+        8
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_7_v5_profile_likelihood_is_summary.json",
+      "size_bytes": 3319,
+      "mtime": 1775832039.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_7_v5_profile_likelihood_csf.py",
+      "producer_mtime": 1776051573.173338,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 31,
+        "n_round_2dp": 21,
+        "round_ratio": 0.6774193548387096,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_summary.json",
+      "size_bytes": 3582,
+      "mtime": 1775782488.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_9_v2_s1_alt_within_cohort.py",
+      "producer_mtime": 1776051573.174168,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 29,
+        "n_round_2dp": 14,
+        "round_ratio": 0.4827586206896552,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/decisive_sbr_only_vs_saa_test.json",
+      "size_bytes": 277,
+      "mtime": 1775852278.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 5,
+        "n_round_2dp": 1,
+        "round_ratio": 0.2,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_8_v4_ppc_summary.json",
+      "size_bytes": 3649,
+      "mtime": 1775775533.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_8_v4_phase1_vs_phase2_ppc.py",
+      "producer_mtime": 1776051573.173618,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 36,
+        "n_round_2dp": 32,
+        "round_ratio": 0.8888888888888888,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/path1_its_hierarchical_summary.json",
+      "size_bytes": 614,
+      "mtime": 1775856127.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 14,
+        "n_round_2dp": 3,
+        "round_ratio": 0.21428571428571427,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_6_v5_csf_summary.json",
+      "size_bytes": 4445,
+      "mtime": 1775833636.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_6_v5_csf_joint.py",
+      "producer_mtime": 1776051573.1729658,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 65,
+        "n_round_2dp": 43,
+        "round_ratio": 0.6615384615384615,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_6_v4_is_summary.json",
+      "size_bytes": 3495,
+      "mtime": 1775769343.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_6_v4_is_weighted_posterior.py",
+      "producer_mtime": 1776051573.1728191,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 50,
+        "n_round_2dp": 33,
+        "round_ratio": 0.66,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_7_profile_likelihood_summary.json",
+      "size_bytes": 421,
+      "mtime": 1775747479.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_7_profile_likelihood_diagnostic.py",
+      "producer_mtime": 1776051573.1730824,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 2,
+        "round_ratio": 0.25,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase3_data_prep_summary.json",
+      "size_bytes": 3505,
+      "mtime": 1775926770.0,
+      "producer_script": "scripts/mechanistic_twin/extract_dat_spect_regional.py",
+      "producer_mtime": 1776051573.1718268,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 34,
+        "n_round_2dp": 23,
+        "round_ratio": 0.6764705882352942,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/path23_summary.json",
+      "size_bytes": 353,
+      "mtime": 1775852848.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 11,
+        "n_round_2dp": 2,
+        "round_ratio": 0.18181818181818182,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase25_permutation_null.json",
+      "size_bytes": 299,
+      "mtime": 1775851335.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 9,
+        "n_round_2dp": 3,
+        "round_ratio": 0.3333333333333333,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_7_v4_profile_likelihood_is_summary.json",
+      "size_bytes": 3279,
+      "mtime": 1775769484.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_7_v4_profile_likelihood_is.py",
+      "producer_mtime": 1776051573.1732032,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 31,
+        "n_round_2dp": 22,
+        "round_ratio": 0.7096774193548387,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/track3_permutation_null_summary.json",
+      "size_bytes": 487,
+      "mtime": 1775849108.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 10,
+        "n_round_2dp": 4,
+        "round_ratio": 0.4,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase3_forward_simulation.json",
+      "size_bytes": 31693,
+      "mtime": 1775926998.0,
+      "producer_script": "scripts/mechanistic_twin/phase3_forward_simulation.py",
+      "producer_mtime": 1776051573.1724253,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 347,
+        "n_round_2dp": 47,
+        "round_ratio": 0.13544668587896252,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_8_v5_ppc_summary.json",
+      "size_bytes": 3654,
+      "mtime": 1775832584.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_8_v5_ppc_csf.py",
+      "producer_mtime": 1776051573.173898,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 36,
+        "n_round_2dp": 31,
+        "round_ratio": 0.8611111111111112,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/block4_s5_counterfactual_summary.json",
+      "size_bytes": 2114,
+      "mtime": 1775833692.0,
+      "producer_script": "scripts/mechanistic_twin/block4_s5_counterfactual.py",
+      "producer_mtime": 1776051573.1716466,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 21,
+        "n_round_2dp": 17,
+        "round_ratio": 0.8095238095238095,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase3_regional_saem_results.json",
+      "size_bytes": 4299,
+      "mtime": 1775952410.0,
+      "producer_script": "scripts/mechanistic_twin/generate_paper8b_figures.py",
+      "producer_mtime": 1776051573.1720116,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 67,
+        "n_round_2dp": 22,
+        "round_ratio": 0.3283582089552239,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/track3_sensitivity_summary.json",
+      "size_bytes": 635,
+      "mtime": 1775848846.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 10,
+        "n_round_2dp": 3,
+        "round_ratio": 0.3,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/combined_1065_validation_summary.json",
+      "size_bytes": 600,
+      "mtime": 1775847766.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 14,
+        "n_round_2dp": 7,
+        "round_ratio": 0.5,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase3_sbc_results.json",
+      "size_bytes": 182959,
+      "mtime": 1775949968.0,
+      "producer_script": "scripts/mechanistic_twin/phase3_sbc_parameter_recovery.py",
+      "producer_mtime": 1776051573.1726747,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 4520,
+        "n_round_2dp": 360,
+        "round_ratio": 0.07964601769911504,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/systematic_review_observables.json",
+      "size_bytes": 7391,
+      "mtime": 1775868342.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 53,
+        "n_round_2dp": 49,
+        "round_ratio": 0.9245283018867925,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase3_sbc_remediated_results.json",
+      "size_bytes": 9356,
+      "mtime": 1775949169.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 404,
+        "n_round_2dp": 26,
+        "round_ratio": 0.06435643564356436,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_9_s1_summary.json",
+      "size_bytes": 2793,
+      "mtime": 1775775688.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_9_s1_spearman_ttox_sojourn.py",
+      "producer_mtime": 1776051573.1740322,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 22,
+        "n_round_2dp": 12,
+        "round_ratio": 0.5454545454545454,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_8_v5_loo_forward_summary.json",
+      "size_bytes": 2084,
+      "mtime": 1775838231.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_8_v5_loo_forward.py",
+      "producer_mtime": 1776051573.1737661,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 17,
+        "n_round_2dp": 14,
+        "round_ratio": 0.8235294117647058,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase25_saa_joint_summary.json",
+      "size_bytes": 214,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 8,
+        "n_round_2dp": 3,
+        "round_ratio": 0.375,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/block4_counterfactual_combined_1065.csv",
+      "size_bytes": 126932,
+      "mtime": 1775847766.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 1065
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/block4_s5_counterfactual.csv",
+      "size_bytes": 270778,
+      "mtime": 1775833692.0,
+      "producer_script": "scripts/mechanistic_twin/generate_phase2_figures.py",
+      "producer_mtime": 1776051573.1721063,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 49,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_7_v5_profile_likelihood_is.csv",
+      "size_bytes": 50021,
+      "mtime": 1775832039.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_7_v5_profile_likelihood_csf.py",
+      "producer_mtime": 1776051573.173338,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 10,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_7_profile_likelihood.csv",
+      "size_bytes": 66998,
+      "mtime": 1775747478.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_7_profile_likelihood_diagnostic.py",
+      "producer_mtime": 1776051573.1730824,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 15,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_9_s1_per_stage.csv",
+      "size_bytes": 639,
+      "mtime": 1775775688.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_9_s1_spearman_ttox_sojourn.py",
+      "producer_mtime": 1776051573.1740322,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 7,
+      "csv_n_rows": 6
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_8_v5_ppc.csv",
+      "size_bytes": 28738,
+      "mtime": 1775832584.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_8_v5_ppc_csf.py",
+      "producer_mtime": 1776051573.173898,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 15,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/phase25_saa_joint_summary.csv",
+      "size_bytes": 14324,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 9,
+      "csv_n_rows": 119
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_8_v4_ppc.csv",
+      "size_bytes": 28738,
+      "mtime": 1775775533.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_8_v4_phase1_vs_phase2_ppc.py",
+      "producer_mtime": 1776051573.173618,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 15,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/track3_sensitivity_oat.csv",
+      "size_bytes": 2518,
+      "mtime": 1775848846.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 6,
+      "csv_n_rows": 26
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/path23_comparison.csv",
+      "size_bytes": 15485,
+      "mtime": 1775852848.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 13,
+      "csv_n_rows": 70
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_9_v2_s1_alt_per_stage.csv",
+      "size_bytes": 783,
+      "mtime": 1775782488.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_9_v2_s1_alt_within_cohort.py",
+      "producer_mtime": 1776051573.174168,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 7,
+      "csv_n_rows": 7
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/block5_loo_combined_1065.csv",
+      "size_bytes": 28801,
+      "mtime": 1775847765.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 7,
+      "csv_n_rows": 644
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_8_v5_loo_forward.csv",
+      "size_bytes": 37337,
+      "mtime": 1775838231.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_8_v5_loo_forward.py",
+      "producer_mtime": 1776051573.1737661,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 11,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/step_2_7_v4_profile_likelihood_is.csv",
+      "size_bytes": 49842,
+      "mtime": 1775769484.0,
+      "producer_script": "scripts/mechanistic_twin/step_2_7_v4_profile_likelihood_is.py",
+      "producer_mtime": 1776051573.1732032,
+      "producer_newer_than_output": true,
+      "csv_n_cols": 10,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/path1_its_hierarchical_summary.csv",
+      "size_bytes": 43949,
+      "mtime": 1775856127.0,
+      "producer_script": null,
+      "orphan": true,
+      "csv_n_cols": 8,
+      "csv_n_rows": 304
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_101751.parquet",
+      "size_bytes": 132178,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3808.parquet",
+      "size_bytes": 131026,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3050.parquet",
+      "size_bytes": 81007,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3128.parquet",
+      "size_bytes": 131410,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3326.parquet",
+      "size_bytes": 128050,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181822.parquet",
+      "size_bytes": 134122,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164765.parquet",
+      "size_bytes": 131962,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_166740.parquet",
+      "size_bytes": 132154,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3319.parquet",
+      "size_bytes": 132058,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_111383.parquet",
+      "size_bytes": 132082,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4029.parquet",
+      "size_bytes": 131242,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3082.parquet",
+      "size_bytes": 134314,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182984.parquet",
+      "size_bytes": 132922,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3131.parquet",
+      "size_bytes": 133594,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3402.parquet",
+      "size_bytes": 131314,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4030.parquet",
+      "size_bytes": 123535,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3076.parquet",
+      "size_bytes": 130690,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_57880.parquet",
+      "size_bytes": 130546,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_168306.parquet",
+      "size_bytes": 132994,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3189.parquet",
+      "size_bytes": 131698,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170519.parquet",
+      "size_bytes": 129658,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_176239.parquet",
+      "size_bytes": 131386,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3077.parquet",
+      "size_bytes": 130954,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3067.parquet",
+      "size_bytes": 131866,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3051.parquet",
+      "size_bytes": 120679,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3327.parquet",
+      "size_bytes": 87343,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_165932.parquet",
+      "size_bytes": 132634,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3819.parquet",
+      "size_bytes": 129922,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3666.parquet",
+      "size_bytes": 121711,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3826.parquet",
+      "size_bytes": 110167,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163324.parquet",
+      "size_bytes": 132370,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3116.parquet",
+      "size_bytes": 126970,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3212.parquet",
+      "size_bytes": 107239,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164268.parquet",
+      "size_bytes": 131578,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_101675.parquet",
+      "size_bytes": 131410,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3122.parquet",
+      "size_bytes": 113719,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170793.parquet",
+      "size_bytes": 131650,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4033.parquet",
+      "size_bytes": 93175,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_40781.parquet",
+      "size_bytes": 132562,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3911.parquet",
+      "size_bytes": 126370,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4077.parquet",
+      "size_bytes": 122767,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3664.parquet",
+      "size_bytes": 125602,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3408.parquet",
+      "size_bytes": 133066,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3455.parquet",
+      "size_bytes": 113023,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_179541.parquet",
+      "size_bytes": 132730,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3020.parquet",
+      "size_bytes": 125770,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3356.parquet",
+      "size_bytes": 127186,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3910.parquet",
+      "size_bytes": 131986,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3089.parquet",
+      "size_bytes": 113983,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3183.parquet",
+      "size_bytes": 133762,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3324.parquet",
+      "size_bytes": 131698,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_177956.parquet",
+      "size_bytes": 132011,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_238181.parquet",
+      "size_bytes": 131746,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163478.parquet",
+      "size_bytes": 131866,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3638.parquet",
+      "size_bytes": 129706,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3426.parquet",
+      "size_bytes": 51289,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_174735.parquet",
+      "size_bytes": 132514,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3825.parquet",
+      "size_bytes": 48769,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3384.parquet",
+      "size_bytes": 62209,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_184459.parquet",
+      "size_bytes": 132418,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163791.parquet",
+      "size_bytes": 133114,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_161628.parquet",
+      "size_bytes": 132754,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_168299.parquet",
+      "size_bytes": 131794,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_167657.parquet",
+      "size_bytes": 133186,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_162941.parquet",
+      "size_bytes": 132466,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170472.parquet",
+      "size_bytes": 132706,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3119.parquet",
+      "size_bytes": 132538,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_168082.parquet",
+      "size_bytes": 121063,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3829.parquet",
+      "size_bytes": 132706,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_245693.parquet",
+      "size_bytes": 132634,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3003.parquet",
+      "size_bytes": 107239,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181208.parquet",
+      "size_bytes": 132106,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3701.parquet",
+      "size_bytes": 130546,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182745.parquet",
+      "size_bytes": 134122,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3162.parquet",
+      "size_bytes": 131650,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3830.parquet",
+      "size_bytes": 129442,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181825.parquet",
+      "size_bytes": 132490,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4001.parquet",
+      "size_bytes": 129466,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_163420.parquet",
+      "size_bytes": 131242,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164589.parquet",
+      "size_bytes": 131914,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3101.parquet",
+      "size_bytes": 93343,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3079.parquet",
+      "size_bytes": 129922,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_106126.parquet",
+      "size_bytes": 132538,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3603.parquet",
+      "size_bytes": 130690,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_108909.parquet",
+      "size_bytes": 126514,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3838.parquet",
+      "size_bytes": 118087,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3060.parquet",
+      "size_bytes": 133474,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3002.parquet",
+      "size_bytes": 53113,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_165174.parquet",
+      "size_bytes": 119335,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4103.parquet",
+      "size_bytes": 131794,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3823.parquet",
+      "size_bytes": 103447,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_164491.parquet",
+      "size_bytes": 131818,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3054.parquet",
+      "size_bytes": 133042,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_171525.parquet",
+      "size_bytes": 131698,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3010.parquet",
+      "size_bytes": 72289,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182340.parquet",
+      "size_bytes": 134098,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_182515.parquet",
+      "size_bytes": 133306,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3062.parquet",
+      "size_bytes": 133666,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_4034.parquet",
+      "size_bytes": 131650,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_174209.parquet",
+      "size_bytes": 131770,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3304.parquet",
+      "size_bytes": 129082,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_165031.parquet",
+      "size_bytes": 133066,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3086.parquet",
+      "size_bytes": 123175,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_181957.parquet",
+      "size_bytes": 134530,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3125.parquet",
+      "size_bytes": 131362,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3001.parquet",
+      "size_bytes": 118543,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_179691.parquet",
+      "size_bytes": 131650,
+      "mtime": 1775851214.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_166701.parquet",
+      "size_bytes": 132850,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170179.parquet",
+      "size_bytes": 131146,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3814.parquet",
+      "size_bytes": 106471,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_170481.parquet",
+      "size_bytes": 132754,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_174151.parquet",
+      "size_bytes": 133138,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3134.parquet",
+      "size_bytes": 113527,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3124.parquet",
+      "size_bytes": 131962,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3431.parquet",
+      "size_bytes": 127546,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3832.parquet",
+      "size_bytes": 127330,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3170.parquet",
+      "size_bytes": 134026,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3018.parquet",
+      "size_bytes": 132130,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase2/chains_saa/PATNO_3027.parquet",
+      "size_bytes": 134458,
+      "mtime": 1775851213.0,
+      "producer_script": null,
+      "orphan": true,
+      "parquet_shape": [
+        5000,
+        3
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_data_summary.json",
+      "size_bytes": 5941,
+      "mtime": 1776061121.5462885,
+      "producer_script": "scripts/mechanistic_twin/phase4_assemble_ledd_updrs.py",
+      "producer_mtime": 1776060573.9582295,
+      "producer_newer_than_output": false,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_confounding_control.json",
+      "size_bytes": 8528,
+      "mtime": 1776060656.9663336,
+      "producer_script": "scripts/mechanistic_twin/phase5_observational_counterfactual.py",
+      "producer_mtime": 1776139693.230346,
+      "producer_newer_than_output": true,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_hypothesis_results.json",
+      "size_bytes": 8563,
+      "mtime": 1776061352.667494,
+      "producer_script": "scripts/mechanistic_twin/phase4_hypothesis_tests.py",
+      "producer_mtime": 1776060669.5432389,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 63,
+        "n_round_2dp": 31,
+        "round_ratio": 0.49206349206349204,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_task0_decisive_test.json",
+      "size_bytes": 5069,
+      "mtime": 1776061333.004904,
+      "producer_script": "scripts/mechanistic_twin/phase4_task0_decisive_test.py",
+      "producer_mtime": 1776060560.8684835,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 57,
+        "n_round_2dp": 13,
+        "round_ratio": 0.22807017543859648,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_path_b_results.json",
+      "size_bytes": 4786,
+      "mtime": 1776061331.7550607,
+      "producer_script": "scripts/mechanistic_twin/phase4_path_b_on_off_gap.py",
+      "producer_mtime": 1776060559.1116493,
+      "producer_newer_than_output": false,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_path_c_results.json",
+      "size_bytes": 12573,
+      "mtime": 1776058154.769909,
+      "producer_script": "scripts/mechanistic_twin/phase4_hypothesis_tests.py",
+      "producer_mtime": 1776060669.5432389,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 210,
+        "n_round_2dp": 72,
+        "round_ratio": 0.34285714285714286,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_path_a_results.json",
+      "size_bytes": 3423,
+      "mtime": 1776061345.91136,
+      "producer_script": "scripts/mechanistic_twin/phase4_path_a_off_updrs.py",
+      "producer_mtime": 1776058056.4481463,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 62,
+        "n_round_2dp": 28,
+        "round_ratio": 0.45161290322580644,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_population_fit.json",
+      "size_bytes": 4518,
+      "mtime": 1776057514.5159032,
+      "producer_script": "scripts/mechanistic_twin/phase4_hypothesis_tests.py",
+      "producer_mtime": 1776060669.5432389,
+      "producer_newer_than_output": true,
+      "round_score": {
+        "n": 77,
+        "n_round_2dp": 22,
+        "round_ratio": 0.2857142857142857,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_identifiability.json",
+      "size_bytes": 6835,
+      "mtime": 1776055867.6171644,
+      "producer_script": "scripts/mechanistic_twin/phase4_identifiability_proof.py",
+      "producer_mtime": 1776055852.2374923,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 119,
+        "n_round_2dp": 63,
+        "round_ratio": 0.5294117647058824,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/phase4/phase4_assembled_data.parquet",
+      "size_bytes": 327753,
+      "mtime": 1776061121.545573,
+      "producer_script": "scripts/mechanistic_twin/phase4_task0_decisive_test.py",
+      "producer_mtime": 1776060560.8684835,
+      "producer_newer_than_output": false,
+      "parquet_shape": [
+        22270,
+        27
+      ]
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/headtohead_wearing_off.json",
+      "size_bytes": 2675,
+      "mtime": 1776134594.5054977,
+      "producer_script": "scripts/mechanistic_twin/phase5_headtohead_wearing_off.py",
+      "producer_mtime": 1776134538.4268322,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 24,
+        "n_round_2dp": 13,
+        "round_ratio": 0.5416666666666666,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/bidirectional_demo.json",
+      "size_bytes": 1198001,
+      "mtime": 1776218269.7166405,
+      "producer_script": "scripts/mechanistic_twin/phase5_bidirectional_demo.py",
+      "producer_mtime": 1776137717.567521,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 29192,
+        "n_round_2dp": 9506,
+        "round_ratio": 0.3256371608659907,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/eda_summary.json",
+      "size_bytes": 11928,
+      "mtime": 1776128571.5938537,
+      "producer_script": null,
+      "orphan": true,
+      "round_score": {
+        "n": 187,
+        "n_round_2dp": 144,
+        "round_ratio": 0.7700534759358288,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/external_validation_lcc.json",
+      "size_bytes": 8855,
+      "mtime": 1776133422.736418,
+      "producer_script": "scripts/mechanistic_twin/phase5_external_validation_lcc.py",
+      "producer_mtime": 1776133415.9615862,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 146,
+        "n_round_2dp": 80,
+        "round_ratio": 0.547945205479452,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/observational_counterfactual.json",
+      "size_bytes": 2756,
+      "mtime": 1776218291.531503,
+      "producer_script": "scripts/mechanistic_twin/phase5_observational_counterfactual.py",
+      "producer_mtime": 1776139693.230346,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 62,
+        "n_round_2dp": 9,
+        "round_ratio": 0.14516129032258066,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/nasem_audit.json",
+      "size_bytes": 11216,
+      "mtime": 1776218263.3597202,
+      "producer_script": "scripts/mechanistic_twin/phase5_nasem_audit.py",
+      "producer_mtime": 1776140079.4667385,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 11,
+        "n_round_2dp": 11,
+        "round_ratio": 1.0,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/phase2_posteriors_full_samples_summary.json",
+      "size_bytes": 1563,
+      "mtime": 1776131880.9558125,
+      "producer_script": "scripts/mechanistic_twin/phase5_persist_full_posteriors.py",
+      "producer_mtime": 1776131853.5262854,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 12,
+        "n_round_2dp": 8,
+        "round_ratio": 0.6666666666666666,
+        "flag": false
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/shared_cohort.json",
+      "size_bytes": 17025,
+      "mtime": 1776132481.4827337,
+      "producer_script": "scripts/mechanistic_twin/phase5_identify_shared_cohort.py",
+      "producer_mtime": 1776132443.6313515,
+      "producer_newer_than_output": false,
+      "round_score": {
+        "n": 1302,
+        "n_round_2dp": 1302,
+        "round_ratio": 1.0,
+        "flag": true
+      }
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2_summary.json",
+      "size_bytes": 4256,
+      "mtime": 1776131110.9671998,
+      "producer_script": "scripts/mechanistic_twin/phase5_rebuild_canonical_parquet.py",
+      "producer_mtime": 1776131102.8998976,
+      "producer_newer_than_output": false,
+      "json_parse_error": "cannot convert float NaN to integer"
+    },
+    {
+      "path": "outputs/mechanistic_twin/paper10_mech_vs_giman/canonical_assembled_v2.parquet",
+      "size_bytes": 398983,
+      "mtime": 1776131110.9648762,
+      "producer_script": "scripts/mechanistic_twin/phase5_rebuild_canonical_parquet.py",
+      "producer_mtime": 1776131102.8998976,
+      "producer_newer_than_output": false,
+      "parquet_shape": [
+        26364,
+        27
+      ]
+    }
+  ]
+}

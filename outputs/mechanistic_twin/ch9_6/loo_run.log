@@ -1,0 +1,79 @@
+sigma_sbr from SAEM v3 diagnostics: 0.17203
+Running IS-LOO on 2118 patients, 300 samples each ...
+  500/2118 patients | 673 scans evaluated | 0s elapsed
+  1000/2118 patients | 1162 scans evaluated | 0s elapsed
+  1500/2118 patients | 1304 scans evaluated | 0s elapsed
+  2000/2118 patients | 1764 scans evaluated | 1s elapsed
+  2500/2118 patients | 1940 scans evaluated | 1s elapsed
+
+IS-LOO complete: 1940 scan evaluations in 0.7s
+
+Aggregate LOO results:
+{
+  "n_scans_evaluated": 1940,
+  "n_patients": 1051,
+  "coverage_95_credible_interval": 0.979381443298969,
+  "median_relative_error": 0.14408806793108228,
+  "n_samples_per_loo_iteration": 300,
+  "ess_median": 277.1599079789422,
+  "sigma_sbr_used": 0.17202837936218907,
+  "runtime_seconds": 0.7,
+  "coverage_by_horizon": {
+    "<1yr": {
+      "n_scans": 34,
+      "coverage": 0.9411764705882353
+    },
+    "1-2yr": {
+      "n_scans": 803,
+      "coverage": 0.9763387297633873
+    },
+    "2-5yr": {
+      "n_scans": 1102,
+      "coverage": 0.9827586206896551
+    },
+    ">5yr": {
+      "n_scans": 1,
+      "coverage": 1.0
+    }
+  },
+  "note": "Anchor scan (visit_index=0, t=0) excluded: at t=0 all samples predict sbr_anchor exactly, yielding trivially 100% coverage. All n_scans_evaluated are true forward predictions (t > 0)."
+}
+
+Residual time-course:
+{
+  "n_patients_with_3plus_scans": 261,
+  "slope_residual_vs_visit_order": {
+    "median": -0.008801175203876965,
+    "mean": -0.007456647285403165,
+    "q025": -0.19335092632601097,
+    "q975": 0.14558569430610152
+  },
+  "pvalue_trend": {
+    "median_pvalue": 0.457876923556369,
+    "n_significant_at_0.05": 21,
+    "frac_significant_at_0.05": 0.08045977011494253
+  },
+  "interpretation": "slope > 0 => residuals increase with visit order => rate is DECELERATING (actual decay slower than model predicts); slope < 0 => rate ACCELERATING; median near 0 with few individually-significant => constant-rate model holds."
+}
+
+Stratified coverage (informative patients only, pct_loss capped at 50):
+{
+  "fast": {
+    "n_scans": 442,
+    "n_patients": 179,
+    "coverage_95": 0.9660633484162896,
+    "median_rel_error": 0.1519567698749082
+  },
+  "normal": {
+    "n_scans": 84,
+    "n_patients": 37,
+    "coverage_95": 0.9761904761904762,
+    "median_rel_error": 0.1274180832002189
+  },
+  "slow": {
+    "n_scans": 255,
+    "n_patients": 107,
+    "coverage_95": 0.9607843137254902,
+    "median_rel_error": 0.17044766948906642
+  }
+}

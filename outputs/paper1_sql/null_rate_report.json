@@ -1,0 +1,207 @@
+{
+  "created_at": "2026-04-22",
+  "source_table": "features.paper1_features_extended_33",
+  "n_rows": 2201,
+  "n_cols": 49,
+  "feature_count": 33,
+  "per_feature": {
+    "sex": {
+      "domain": "Demographics",
+      "description": "Biological sex (0=F, 1=M)",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 61.43
+    },
+    "handed": {
+      "domain": "Demographics",
+      "description": "Handedness (R/L/A)",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 99.86
+    },
+    "age_at_baseline": {
+      "domain": "Demographics",
+      "description": "Age at enrollment (years)",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 100.0
+    },
+    "updrs1_total": {
+      "domain": "Motor (UPDRS)",
+      "description": "MDS-UPDRS Part I total",
+      "literature_key": "goetz2008",
+      "non_null_pct": 83.96
+    },
+    "updrs2_total": {
+      "domain": "Motor (UPDRS)",
+      "description": "MDS-UPDRS Part II total",
+      "literature_key": "goetz2008",
+      "non_null_pct": 84.28
+    },
+    "updrs3_tremor": {
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III tremor subscore",
+      "literature_key": "goetz2008",
+      "non_null_pct": 84.23
+    },
+    "updrs3_rigidity": {
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III rigidity subscore",
+      "literature_key": "goetz2008",
+      "non_null_pct": 84.23
+    },
+    "updrs3_bradykinesia": {
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III bradykinesia subscore",
+      "literature_key": "goetz2008",
+      "non_null_pct": 84.23
+    },
+    "updrs3_axial": {
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III axial subscore",
+      "literature_key": "goetz2008",
+      "non_null_pct": 84.23
+    },
+    "updrs4_total": {
+      "domain": "Motor (UPDRS)",
+      "description": "MDS-UPDRS Part IV total (high missingness)",
+      "literature_key": "goetz2008",
+      "non_null_pct": 10.13
+    },
+    "moca_total": {
+      "domain": "Cognitive",
+      "description": "MoCA total (high missingness)",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 16.49
+    },
+    "rbd_total": {
+      "domain": "Sleep",
+      "description": "REM sleep behavior disorder total",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 84.28
+    },
+    "ess_total": {
+      "domain": "Sleep",
+      "description": "Epworth Sleepiness Scale total",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 84.05
+    },
+    "scopa_aut_total": {
+      "domain": "Autonomic",
+      "description": "SCOPA-AUT total score",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 84.01
+    },
+    "caudate_l_sbr": {
+      "domain": "DaT Imaging",
+      "description": "Left caudate specific binding ratio",
+      "literature_key": "simuni2024",
+      "non_null_pct": 97.09
+    },
+    "caudate_r_sbr": {
+      "domain": "DaT Imaging",
+      "description": "Right caudate SBR",
+      "literature_key": "simuni2024",
+      "non_null_pct": 97.09
+    },
+    "caudate_mean_sbr": {
+      "domain": "DaT Imaging",
+      "description": "Mean caudate SBR",
+      "literature_key": "simuni2024",
+      "non_null_pct": 97.09
+    },
+    "caudate_asymmetry": {
+      "domain": "DaT Imaging",
+      "description": "Caudate L/R asymmetry",
+      "literature_key": "simuni2024",
+      "non_null_pct": 97.09
+    },
+    "caudate_putamen_ratio": {
+      "domain": "DaT Imaging",
+      "description": "Caudate/putamen SBR ratio",
+      "literature_key": "simuni2024",
+      "non_null_pct": 97.09
+    },
+    "lrrk2_carrier": {
+      "domain": "Genetics",
+      "description": "LRRK2 mutation carrier status",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 81.6
+    },
+    "gba_carrier": {
+      "domain": "Genetics",
+      "description": "GBA mutation carrier status",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 81.6
+    },
+    "apoe_e4_carrier": {
+      "domain": "Genetics",
+      "description": "APOE e4 allele carrier status",
+      "literature_key": "marek2018ppmi",
+      "non_null_pct": 81.6
+    },
+    "entorhinal_l_cth": {
+      "domain": "Cortical Thickness",
+      "description": "Left entorhinal cortical thickness (FreeSurfer)",
+      "literature_key": "fischl2012",
+      "non_null_pct": 49.34
+    },
+    "entorhinal_r_cth": {
+      "domain": "Cortical Thickness",
+      "description": "Right entorhinal CTH",
+      "literature_key": "fischl2012",
+      "non_null_pct": 49.34
+    },
+    "cingulate_l_cth": {
+      "domain": "Cortical Thickness",
+      "description": "Left cingulate CTH",
+      "literature_key": "fischl2012",
+      "non_null_pct": 49.34
+    },
+    "cingulate_r_cth": {
+      "domain": "Cortical Thickness",
+      "description": "Right cingulate CTH",
+      "literature_key": "fischl2012",
+      "non_null_pct": 49.34
+    },
+    "precentral_l_cth": {
+      "domain": "Cortical Thickness",
+      "description": "Left precentral CTH",
+      "literature_key": "fischl2012",
+      "non_null_pct": 49.34
+    },
+    "precentral_r_cth": {
+      "domain": "Cortical Thickness",
+      "description": "Right precentral CTH",
+      "literature_key": "fischl2012",
+      "non_null_pct": 49.34
+    },
+    "csf_alpha_synuclein": {
+      "domain": "CSF Biomarkers",
+      "description": "CSF alpha-synuclein",
+      "literature_key": "mollenhauer2017",
+      "non_null_pct": 33.71
+    },
+    "csf_total_tau": {
+      "domain": "CSF Biomarkers",
+      "description": "CSF total tau",
+      "literature_key": "mollenhauer2017",
+      "non_null_pct": 37.8
+    },
+    "csf_abeta42": {
+      "domain": "CSF Biomarkers",
+      "description": "CSF amyloid-beta 42",
+      "literature_key": "mollenhauer2017",
+      "non_null_pct": 39.03
+    },
+    "csf_ptau181": {
+      "domain": "CSF Biomarkers",
+      "description": "CSF phospho-tau 181",
+      "literature_key": "mollenhauer2017",
+      "non_null_pct": 36.71
+    },
+    "grs_total": {
+      "domain": "Polygenic Risk",
+      "description": "Parkinson's polygenic risk score (Nalls 2019)",
+      "literature_key": "nalls2019",
+      "non_null_pct": 81.33
+    }
+  }
+}

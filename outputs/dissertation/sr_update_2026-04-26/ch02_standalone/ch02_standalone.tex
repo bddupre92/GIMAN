@@ -1,0 +1,123 @@
+% =============================================================================
+% Chapter 2 Standalone — Systematic Review of Digital Twins for Parkinson's Disease
+% Standalone manuscript build for professor review + journal-submission preview
+% Target venues: npj Parkinson's Disease, Movement Disorders, Lancet Digital Health
+% =============================================================================
+\documentclass[11pt,letterpaper]{article}
+
+% --- Page Setup ---
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Encoding and Fonts ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% --- Mathematics ---
+\usepackage{amsmath,amssymb,amsfonts}
+
+% --- Graphics and Figures ---
+\usepackage{graphicx}
+\graphicspath{{../../}{../../figures/}}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{caption}
+
+% --- Tables ---
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{tabularx}
+
+% --- TikZ and PGFPlots ---
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit,
+                 backgrounds, calc, decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% --- Colors (matched to ch02 figures) ---
+\usepackage{xcolor}
+\definecolor{nsdblue}{RGB}{0,67,147}
+\definecolor{nsdorange}{RGB}{230,120,30}
+\definecolor{nsdgreen}{RGB}{34,139,34}
+\definecolor{nsdred}{RGB}{200,50,50}
+\definecolor{nsdgray}{RGB}{128,128,128}
+\definecolor{nsdpurple}{RGB}{128,0,128}
+\definecolor{lightblue}{RGB}{220,235,255}
+\definecolor{lightorange}{RGB}{255,240,220}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,225,225}
+\definecolor{lightpurple}{RGB}{240,220,255}
+\definecolor{verylightgray}{RGB}{245,245,245}
+\definecolor{npjblue}{HTML}{0066CC}
+\definecolor{lowrisk}{HTML}{4CAF50}
+\definecolor{modrisk}{HTML}{FF9800}
+\definecolor{highrisk}{HTML}{F44336}
+
+% --- Algorithms ---
+\usepackage{algorithmic}
+
+% --- Miscellaneous ---
+\usepackage{textcomp}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{soul}
+\usepackage{pdflscape}
+\usepackage{cite}
+
+% --- Hyperlinks ---
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=nsdblue,
+  citecolor=nsdblue,
+  urlcolor=nsdblue,
+  pdftitle={Digital Twins for Parkinson's Disease: PRISMA 2020 Systematic Review},
+  pdfauthor={Blair Dupre},
+  pdfsubject={Systematic Review with Updated Meta-Analysis 2026-04-26}
+}
+
+% --- Title metadata ---
+\title{\textbf{Computational Models and Digital Twins for Parkinson's Disease Prognosis: \\
+A PRISMA 2020 Systematic Review with Updated Random-Effects Meta-Analysis}}
+\author{Blair Dupre\\
+Department of Biomedical Engineering, University of North Dakota \\
+\href{mailto:blair.dupre@und.edu}{blair.dupre@und.edu}}
+\date{2026-04-26}
+
+% Adapt \chapter command to article-class section heading
+\newcommand{\chapter}[1]{\clearpage\section*{\Huge #1}\addcontentsline{toc}{section}{#1}}
+
+% Suppress chapter-counter prefixes used in TOC
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
+\renewcommand{\theequation}{\arabic{equation}}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\newpage
+
+% =============================================================================
+% Chapter content
+% =============================================================================
+\input{../../chapters/ch02_systematic_review.tex}
+
+% Phantom labels for cross-dissertation references that don't exist in this standalone build
+\hypertarget{ch:p7}{}\phantomsection\label{ch:p7}
+
+% =============================================================================
+% Bibliography (ch02 cited references only)
+% =============================================================================
+\input{ch02_bibliography.tex}
+
+\end{document}

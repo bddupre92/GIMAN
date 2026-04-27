@@ -1,0 +1,91 @@
+{
+  "config": "lp=0.1, lm=0.1, MLP residual (winning config)",
+  "n_seeds": 5,
+  "seeds": [
+    7,
+    42,
+    1337,
+    2025,
+    2026
+  ],
+  "test_mae_mean": 0.12852454266869104,
+  "test_mae_std": 0.016388992932137594,
+  "test_mae_se": 0.007329380455804652,
+  "test_mae_min": 0.11135930459086711,
+  "test_mae_max": 0.15226525985277617,
+  "test_mae_95ci_lo": 0.10817492017803984,
+  "test_mae_95ci_hi": 0.14887416515934224,
+  "learned_k_age_mean": 0.0558471377965179,
+  "learned_k_age_std": 0.014797694230111345,
+  "delta_vs_puremech_mean": -0.06474961174881429,
+  "delta_vs_puremech_std": 0.008617849844117384,
+  "all_seedwise_cis_exclude_zero": true,
+  "coefficient_of_variation_pct": 12.751644621202765,
+  "per_seed": [
+    {
+      "config_id": "cv_lp0.1_lm0.1_mlp_seed7",
+      "seed": 7,
+      "test_mae": 0.12883732783106658,
+      "test_rmse": 0.1998890519060535,
+      "best_val_mae": 0.1257529251743108,
+      "best_epoch": 36,
+      "epochs_trained": 47,
+      "learned_k_age_per_yr": 0.06135377394841949,
+      "delta_vs_puremech_fair_point": -0.07557003404725321,
+      "delta_vs_puremech_fair_ci_lo": -0.10558946241253377,
+      "delta_vs_puremech_fair_ci_hi": -0.04403003685895566
+    },
+    {
+      "config_id": "grid_lp0.1_lm0.1_mlp",
+      "seed": 42,
+      "test_mae": 0.15226525985277617,
+      "test_rmse": 0.2337172415876322,
+      "best_val_mae": 0.1178890309529379,
+      "best_epoch": 21,
+      "epochs_trained": 32,
+      "learned_k_age_per_yr": 0.04499128785014824,
+      "delta_vs_puremech_fair_point": -0.05290351615530281,
+      "delta_vs_puremech_fair_ci_lo": -0.08783304710843058,
+      "delta_vs_puremech_fair_ci_hi": -0.014163906537370603
+    },
+    {
+      "config_id": "cv_lp0.1_lm0.1_mlp_seed1337",
+      "seed": 1337,
+      "test_mae": 0.11135930459086711,
+      "test_rmse": 0.14743506312145024,
+      "best_val_mae": 0.12829592917114496,
+      "best_epoch": 21,
+      "epochs_trained": 32,
+      "learned_k_age_per_yr": 0.04546595550031312,
+      "delta_vs_puremech_fair_point": -0.0599738825390025,
+      "delta_vs_puremech_fair_ci_lo": -0.09462437350306277,
+      "delta_vs_puremech_fair_ci_hi": -0.02655450824554224
+    },
+    {
+      "config_id": "cv_lp0.1_lm0.1_mlp_seed2025",
+      "seed": 2025,
+      "test_mae": 0.11527461174588938,
+      "test_rmse": 0.15546973025640226,
+      "best_val_mae": 0.09640848392155021,
+      "best_epoch": 25,
+      "epochs_trained": 36,
+      "learned_k_age_per_yr": 0.04796078239636529,
+      "delta_vs_puremech_fair_point": -0.06775543012298507,
+      "delta_vs_puremech_fair_ci_lo": -0.10112827616305965,
+      "delta_vs_puremech_fair_ci_hi": -0.035964460197759444
+    },
+    {
+      "config_id": "holdout_v1_seed2026",
+      "seed": 2026,
+      "test_mae": 0.13488620932285603,
+      "test_rmse": 0.17908304982753812,
+      "best_val_mae": 0.13104626326821744,
+      "best_epoch": 61,
+      "epochs_trained": 72,
+      "learned_k_age_per_yr": 0.07946388928734337,
+      "delta_vs_puremech_fair_point": -0.06754519587952787,
+      "delta_vs_puremech_fair_ci_lo": -0.10207435720558024,
+      "delta_vs_puremech_fair_ci_hi": -0.0363468318566452
+    }
+  ]
+}

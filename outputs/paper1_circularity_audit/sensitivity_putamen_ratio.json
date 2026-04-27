@@ -1,0 +1,203 @@
+{
+  "SetA_full22": {
+    "binary": {
+      "target": "binary",
+      "drop_ratio": false,
+      "n_features": 20,
+      "per_fold_auc": [
+        0.9674538911381017,
+        0.9740350877192981,
+        0.9835680751173709,
+        0.9773835319609968,
+        0.9888949079089925
+      ],
+      "fold_mean_auc": 0.9782670987689519,
+      "fold_std_auc": 0.008316651135824098,
+      "pooled_auc": 0.9778693156685064,
+      "pooled_auc_ci95": [
+        0.9703132076187481,
+        0.9852537442777929
+      ],
+      "n_samples": 2201,
+      "n_classes": 2
+    },
+    "3class": {
+      "target": "3class",
+      "drop_ratio": false,
+      "n_features": 20,
+      "per_fold_auc": [
+        0.9522348524910841,
+        0.9544719875941986,
+        0.9281315516843999,
+        0.9502264960102167,
+        0.9334982118460484
+      ],
+      "fold_mean_auc": 0.9437126199251896,
+      "fold_std_auc": 0.012020054514503746,
+      "pooled_auc": 0.9432136526740376,
+      "pooled_auc_ci95": [
+        0.9326364959987702,
+        0.9526512076665687
+      ],
+      "n_samples": 2197,
+      "n_classes": 3
+    },
+    "full_ordinal": {
+      "target": "full_ordinal",
+      "drop_ratio": false,
+      "n_features": 20,
+      "per_fold_auc": [
+        0.9533143580122901,
+        0.9456925441292492,
+        0.9516903592048825,
+        0.9446784065537063,
+        0.9582446469267497
+      ],
+      "fold_mean_auc": 0.9507240629653756,
+      "fold_std_auc": 0.0056140155686212265,
+      "pooled_auc": 0.9485792832712822,
+      "pooled_auc_ci95": [
+        0.9386670456284212,
+        0.9580215582554965
+      ],
+      "n_samples": 2197,
+      "n_classes": 5
+    },
+    "nsd_positive": {
+      "target": "nsd_positive",
+      "drop_ratio": false,
+      "n_features": 20,
+      "per_fold_auc": [
+        0.9264935748457769,
+        0.895721251531338,
+        0.907472214385124,
+        0.932768337906152,
+        0.901467111255608
+      ],
+      "fold_mean_auc": 0.9127844979847998,
+      "fold_std_auc": 0.01608376996645575,
+      "pooled_auc": 0.9127484550118634,
+      "pooled_auc_ci95": [
+        0.8937300734944702,
+        0.9309883161601318
+      ],
+      "n_samples": 779,
+      "n_classes": 4
+    }
+  },
+  "SetB_no_ratio21": {
+    "binary": {
+      "target": "binary",
+      "drop_ratio": true,
+      "n_features": 19,
+      "per_fold_auc": [
+        0.9076248313090417,
+        0.884980192416525,
+        0.8950433369447454,
+        0.905155290718671,
+        0.9170278078728784
+      ],
+      "fold_mean_auc": 0.9019662918523723,
+      "fold_std_auc": 0.01230338292996511,
+      "pooled_auc": 0.9013819152182195,
+      "pooled_auc_ci95": [
+        0.8867978196125658,
+        0.9150664265488241
+      ],
+      "n_samples": 2201,
+      "n_classes": 2
+    },
+    "3class": {
+      "target": "3class",
+      "drop_ratio": true,
+      "n_features": 19,
+      "per_fold_auc": [
+        0.901673780812324,
+        0.9144084259939911,
+        0.8768440008104603,
+        0.9171663551248527,
+        0.8777517714813459
+      ],
+      "fold_mean_auc": 0.8975688668445947,
+      "fold_std_auc": 0.01940824540428785,
+      "pooled_auc": 0.8967219611797786,
+      "pooled_auc_ci95": [
+        0.8832096414090894,
+        0.9090016600094463
+      ],
+      "n_samples": 2197,
+      "n_classes": 3
+    },
+    "full_ordinal": {
+      "target": "full_ordinal",
+      "drop_ratio": true,
+      "n_features": 19,
+      "per_fold_auc": [
+        0.9189896651851243,
+        0.928295616566167,
+        0.9158385841861009,
+        0.9080102767715715,
+        0.9161827685240371
+      ],
+      "fold_mean_auc": 0.9174633822466001,
+      "fold_std_auc": 0.0073025335214613445,
+      "pooled_auc": 0.9154328015007331,
+      "pooled_auc_ci95": [
+        0.9032295035752981,
+        0.9263540746036366
+      ],
+      "n_samples": 2197,
+      "n_classes": 5
+    },
+    "nsd_positive": {
+      "target": "nsd_positive",
+      "drop_ratio": true,
+      "n_features": 19,
+      "per_fold_auc": [
+        0.9204621165969102,
+        0.8934159743786214,
+        0.8996557020059477,
+        0.9317349250200682,
+        0.8971489528612756
+      ],
+      "fold_mean_auc": 0.9084835341725647,
+      "fold_std_auc": 0.01671487605135352,
+      "pooled_auc": 0.9076932110196929,
+      "pooled_auc_ci95": [
+        0.8886663734226571,
+        0.9260612615820234
+      ],
+      "n_samples": 779,
+      "n_classes": 4
+    }
+  },
+  "delta": {
+    "binary": {
+      "delta_pooled_auc": 0.0764874004502869,
+      "delta_fold_mean_auc": 0.07630080691657959
+    },
+    "3class": {
+      "delta_pooled_auc": 0.04649169149425891,
+      "delta_fold_mean_auc": 0.04614375308059493
+    },
+    "full_ordinal": {
+      "delta_pooled_auc": 0.03314648177054902,
+      "delta_fold_mean_auc": 0.033260680718775526
+    },
+    "nsd_positive": {
+      "delta_pooled_auc": 0.0050552439921704995,
+      "delta_fold_mean_auc": 0.0043009638122351035
+    }
+  },
+  "verdict": {
+    "verdict": "MATERIAL",
+    "max_abs_delta_auc": 0.0764874004502869,
+    "binary_abs_delta": 0.0764874004502869,
+    "nsd_positive_abs_delta": 0.0050552439921704995,
+    "rule": "COSMETIC if max |Delta|<0.01 else MARGINAL if <0.03 (and binary/NSD+ <0.03) else MATERIAL"
+  },
+  "pre_registration": "/Users/blair.dupre/Projects/CSCI-FALL-2025/outputs/paper1_circularity_audit/PRE_REGISTRATION.md",
+  "random_seed": 42,
+  "bootstrap_n": 1000,
+  "protocol": "5-fold stratified CV, fold-local median imp + StandardScaler, CatBoost defaults"
+}

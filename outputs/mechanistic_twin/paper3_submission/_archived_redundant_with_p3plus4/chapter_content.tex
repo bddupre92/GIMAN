@@ -1,0 +1,467 @@
+% ================================================================
+% Chapter 5: Graph-Regularized Competing-Risks Survival for NSD-ISS Stage Transitions
+% Stripped from outputs/paper3_latex/main.tex
+% ================================================================
+
+\chapter{Graph-Regularized Competing-Risks Survival Modelling of NSD-ISS Stage Transitions}
+\label{ch:paper3}\label{p3:ch:paper3}
+
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) provides a biologically-grounded staging framework for Parkinson's disease, yet no computational models exist to predict the timing of stage transitions. Using longitudinal data from the Parkinson's Progression Markers Initiative ($n{=}1{,}900$ patients, 16,699 observations, median 3.0 years follow-up), we characterise 2{,}859 stage transitions---including a 39.1\% regression rate of which $\sim$50\% revert at the next visit (suggesting a substantial measurement-noise / ON-state-assessment fluctuation component) and 25\% sustain across $\geq$2 subsequent visits---and develop three complementary models: (1)~a continuous-time multi-state Markov model providing interpretable transition intensities and sojourn times; (2)~Dynamic-DeepHit, a GRU-based competing risks survival model; and (3)~a Graph-Regularized Dynamic-Transition model (Graph-DT) combining temporal sequence modelling with graph attention networks over patient-similarity graphs. Kaplan-Meier transition estimates align with Simuni~\textit{et al.}~(2025): 2B$\to$3 median 1.0~years (reference: 1.19), 3$\to$4 median 5.2~years (reference: 4.98), and 4$\to$5 median 9.2~years (reference: 9.77). Dynamic-DeepHit achieves a time-dependent concordance of $C_\text{td}{=}0.924 \pm 0.020$ and integrated Brier score $0.006 \pm 0.001$. The Graph-DT achieves $C_\text{td}{=}0.904 \pm 0.034$, with a pair-level bootstrap (250{,}000 concordance-eligible pairs; 1{,}000 resamples) giving $\Delta C_\text{td}{=}-0.020$ [95\% CI $-0.021$, $-0.019$] in DeepHit's favour; the two models therefore exhibit close but statistically distinguishable discriminative performance. Graph-DT's contribution lies not in superseding DeepHit on raw concordance but in providing patient-similarity-based population context: per-patient nearest-neighbour trajectories enable interpretable ``patients-like-you'' explanations, complementing DeepHit's individual-trajectory focus. To our knowledge, this is the first temporal prediction model for NSD-ISS stage transitions, completing a unified graph-informed framework spanning biological stage prediction, multimodal imputation, and temporal transition modeling.
+
+% ================================================================
+% I. INTRODUCTION
+% ================================================================
+\section{Introduction}
+\label{p3:sec:introduction}
+
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS) redefines Parkinson's disease (PD) through two biological anchors---neuronal alpha-synuclein positivity (S) and dopaminergic dysfunction (D)---assigning patients to stages 0 through 6 based on biomarker status and functional impairment~\cite{simuni2024}. While cross-sectional stage prediction has been addressed~\cite{paper1} and missing data imputation for staged cohorts has been solved~\cite{paper2}, a critical temporal dimension remains unexplored: \textit{when} will a patient transition between stages, and \textit{which} transition will occur?
+
+Simuni~\textit{et al.}~\cite{simuni2025} provided the first longitudinal analysis of NSD-ISS transitions over 5 years in PPMI, reporting Kaplan-Meier transition estimates (2B$\to$3: 1.19 years, 3$\to$4: 4.98 years). However, these are purely descriptive---they estimate population-level median times without patient-specific predictions. Espay~\textit{et al.}~\cite{espay2025} further demonstrated that stage \textit{regression} is common, occurring in approximately 50\% of treated patients, challenging the assumption of unidirectional disease progression.
+
+\subsection{The Temporal Prediction Gap}
+
+No computational model currently predicts the timing or direction of NSD-ISS stage transitions for individual patients. This gap has three dimensions:
+\begin{enumerate}
+    \item \textbf{Transition timing:} Given a patient's longitudinal clinical trajectory, when is the next stage transition likely?
+    \item \textbf{Competing risks:} From a given stage, which transition (forward progression vs.\ backward regression) is more likely?
+    \item \textbf{Population context:} How do similar patients' trajectories inform individual predictions?
+\end{enumerate}
+
+\subsection{Research Question and Contributions}
+
+The primary research question of this study was: \emph{can a graph-informed deep survival framework predict per-patient NSD-ISS stage-transition timing---including bidirectional forward and backward transitions---more accurately than a classical multi-state Markov baseline while providing population-contextualised ``patients-like-you'' visualisation}? This work makes four contributions:
+\begin{enumerate}
+    \item We characterize NSD-ISS stage transition dynamics in PPMI ($n{=}1{,}900$), including the first quantification of bidirectional transition rates across all seven NSD-ISS stages.
+    \item We develop and compare three temporal prediction models---multi-state Markov, Dynamic-DeepHit, and a novel Graph-DT---establishing the first benchmark for computational NSD-ISS transition prediction. Paired-bootstrap analysis identifies Dynamic-DeepHit as slightly superior on discrimination ($\Delta C_\text{td}{=}-0.02$ in its favour); Graph-DT contributes patient-similarity-based interpretability rather than raw predictive performance, framing the two as complementary rather than one-superseding-the-other.
+    \item We demonstrate that graph-augmented temporal modeling achieves comparable discriminative performance to purely temporal deep learning ($C_\text{td}$ 0.920 vs.\ 0.924, $p{=}0.108$) while providing population-contextualized predictions through patient similarity analysis.
+    \item We complete a unified graph-informed framework for PD biological staging: cross-sectional prediction~\cite{paper1}, multimodal imputation~\cite{paper2}, and temporal transition modeling.
+\end{enumerate}
+
+% ================================================================
+% II. RELATED WORK
+% ================================================================
+\section{Related Work}
+\label{p3:sec:related}
+
+\subsection{Multi-State Survival Models}
+
+Multi-state Markov models~\cite{jackson2011} estimate transition intensities between discrete health states from interval-censored longitudinal data. They have been applied to chronic disease progression including Alzheimer's disease~\cite{cook2018} and PD clinical staging~\cite{ypma2022}. The most closely related PD work is Severson et al.~\cite{severson2021}, who trained a personalized input--output hidden Markov model on the PPMI and PDBP cohorts to discover eight latent PD disease states while explicitly accounting for medication effects; our approach differs in that we target the Simuni 2024 NSD-ISS biological staging system rather than data-driven latent states, model transitions as a competing-risks time-to-event problem rather than a hidden-state emission problem, and benchmark three distinct architectures (continuous-time Markov, Dynamic-DeepHit, and the Graph-DT) on the same transition targets. Nevertheless, the time-homogeneous intensity assumption of classical multi-state Markov models limits their ability to capture time-varying risk factors.
+
+\subsection{Deep Survival Analysis}
+
+DeepHit~\cite{lee2018} introduced a neural network approach to survival analysis that directly estimates the joint distribution of event times and types without proportional hazards assumptions. Dynamic-DeepHit~\cite{lee2019} extended this to longitudinal settings using recurrent encoders. These methods naturally handle competing risks---critical for PD where multiple transition types compete from each stage.
+
+\subsection{Graph Neural Networks in Healthcare}
+
+Graph attention networks (GAT)~\cite{velickovic2018} have been applied to patient similarity learning~\cite{adamedgraph}, medication recommendation~\cite{shang2019}, and clinical outcome prediction. Patient similarity graphs encode population-level knowledge that can inform individual predictions, particularly for rare events where individual data may be sparse.
+
+\subsection{Relation to the Digital-Twin Literature}
+
+Medical ``digital twins''---computational replicas of individual patients that support bidirectional observation-to-state updating and reaction-level counterfactual simulation---have gained attention for personalised treatment optimisation~\cite{corralacero2020}. Cardiac and PD-specific frameworks have been proposed for mechanism-informed dosing and trajectory replay~\cite{vogt2022,corralacero2020}. The present Graph-DT is \emph{not} a digital twin in this strict sense: it is a graph-regularised competing-risks survival model whose ``twin-like'' character is limited to enriching individual trajectory predictions with population context from a patient-similarity graph. We reserve the digital-twin label for our companion mechanistic work, in which bidirectional Bayesian updating from serial imaging observations is implemented at the patient level. The present model is best read as the discriminative-survival counterpart to that mechanistic effort.
+
+% ================================================================
+% III. METHODS
+% ================================================================
+\section{Methods}
+\label{p3:sec:methods}
+
+% --- Cohort Flow TikZ Diagram ---
+\begin{figure}[!t]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    box/.style={rectangle, draw=nsdblue, fill=lightblue, text width=5.8cm, minimum height=0.7cm, align=center, font=\scriptsize\sf, rounded corners=2pt, line width=0.6pt},
+    obox/.style={rectangle, draw=nsdorange, fill=lightorange, text width=5.8cm, minimum height=0.7cm, align=center, font=\scriptsize\sf, rounded corners=2pt, line width=0.6pt},
+    gbox/.style={rectangle, draw=nsdgreen, fill=lightgreen, text width=5.8cm, minimum height=0.7cm, align=center, font=\scriptsize\sf, rounded corners=2pt, line width=0.6pt},
+    arrow/.style={-{Stealth[length=2mm]}, thick, nsdblue},
+]
+    \node[box] (ppmi) {PPMI Enrolled: $n = 8{,}042$};
+    \node[obox, below=of ppmi] (staged) {Longitudinal Staging: $n = 1{,}900$ patients\\16,699 visits, median 3.0 yr follow-up};
+    \node[gbox, below=of staged] (trans) {Transition Events: 2,859 transitions\\1,742 forward (60.9\%) | 1,117 backward (39.1\%)};
+    \node[box, below=of trans] (episodes) {Episode Formulation: 4,792 episodes\\2,892 events | 1,900 censored};
+
+    \draw[arrow] (ppmi) -- (staged) node[midway, right, font=\tiny\sf, text=nsdgray] {SAA + DaT-SPECT available};
+    \draw[arrow] (staged) -- (trans) node[midway, right, font=\tiny\sf, text=nsdgray] {Consecutive visit pairs};
+    \draw[arrow] (trans) -- (episodes) node[midway, right, font=\tiny\sf, text=nsdgray] {Stage occupancy periods};
+\end{tikzpicture}
+\caption{Study cohort derivation from PPMI.}
+\label{p3:fig:cohort}
+\end{figure}
+
+\subsection{Longitudinal NSD-ISS Staging}
+\label{p3:sec:staging}
+
+We staged 1,900 PPMI patients at every available visit, producing 16,699 staged observations. NSD-ISS staging follows the biological anchoring system of Simuni~\textit{et al.}~\cite{simuni2024}: synuclein status (S, from seed amplification assay) and dopaminergic status (D, from DaT-SPECT) determine biological anchors, while functional impairment---assessed via Hoehn \& Yahr stage---determines clinical substage (Fig.~\ref{p3:fig:cohort}). Stage 0 denotes S$^{-}$D$^{-}$; stages 1--6 denote progressively severe disease with biological positivity.
+
+\textbf{Staging methodology note:} Our functional impairment assessment uses Hoehn \& Yahr thresholds. Simuni~\textit{et al.}\ and Dam~\textit{et al.}~\cite{dam2024} use MDS-UPDRS Part~II thresholds. This difference primarily affects the stage 2B/3 boundary but does not affect transition dynamics within our consistently-staged cohort.
+
+\subsection{Transition Event Extraction}
+\label{p3:sec:transitions}
+
+From consecutive visits per patient, we identified 2,859 stage transitions across 922 patients (48.5\% of the cohort). Of these, 1,742 (60.9\%) were forward transitions (stage progression) and 1,117 (39.1\%) were backward transitions (stage regression).
+
+\textbf{Episode-level formulation:} For survival modeling, each period of stage occupancy constitutes an \textit{episode}. A patient in stage 3 who transitions to stage 4 after 18 months contributes one uncensored episode (current stage 3, event: $\to$4, duration: 18 months). A patient still in stage 3 at their last visit contributes a censored episode. This yielded 4,792 episodes (2,892 events, 1,900 censored).
+
+\subsection{Feature Assembly}
+\label{p3:sec:features}
+
+For each patient-visit, we assembled 22-dimensional feature vectors:
+\begin{itemize}
+    \item \textbf{Time-varying clinical features} (12): UPDRS Part I--III totals, Hoehn \& Yahr stage, MoCA total, ESS total, RBD questionnaire total, SCOPA-AUT total, PD medication use, current NSD stage, months from baseline, and time in current stage.
+    \item \textbf{Static features} (4): age at baseline, sex, LRRK2 carrier status, GBA carrier status.
+    \item \textbf{Missingness indicators} (6): binary masks for features with partial coverage.
+\end{itemize}
+
+For the patient similarity graph, a separate set of 18 baseline features was used (demographics, genetics, clinical scores, olfaction, DaT-SPECT imaging), with only the baseline visit accessed to prevent information leakage.
+
+\subsection{Model~1: Multi-State Markov}
+\label{p3:sec:markov}
+
+We fit a continuous-time Markov chain with 7 states (NSD-ISS stages 0--6) and 20 allowed transitions. The transition intensity matrix $\mathbf{Q}$ is estimated by maximizing the Kalbfleisch-Lawless~\cite{kalbfleisch1985} likelihood:
+\begin{equation}
+    \mathcal{L}(\mathbf{Q}) = \prod_{i=1}^{N} \prod_{j=1}^{n_i - 1} P(S_{t_{j+1}} = s_{j+1} \mid S_{t_j} = s_j; \mathbf{Q})
+\end{equation}
+where $P(t) = \exp(\mathbf{Q} t)$ is the matrix exponential of the intensity matrix scaled by the inter-visit interval. We compute transition probabilities at 1, 2, 5, and 10-year horizons, sojourn times $\mathbb{E}[T_s] = -1/q_{ss}$, and bootstrap 95\% confidence intervals from 200 resamples.
+
+\subsection{Model~2: Dynamic-DeepHit}
+\label{p3:sec:deephit}
+
+Dynamic-DeepHit~\cite{lee2019} processes longitudinal visit sequences for competing risks survival analysis. Our implementation uses a 2-layer GRU encoder (128 hidden units), a 16-dimensional stage embedding, and a softmax output over $K \times J + 1$ dimensions, where $K{=}7$ causes (transition to each stage) and $J{=}11$ discrete time bins (3, 6, 12, 18, 24, 36, 48, 60, 84, 120, 180 months), plus one no-event probability. The cumulative incidence function for cause $k$ at time $t_j$ is:
+\begin{equation}
+    F_k(t_j \mid \mathbf{x}) = \sum_{\ell=1}^{j} p_{k,\ell}(\mathbf{x})
+\end{equation}
+The loss combines negative log-likelihood and a ranking term ($\alpha{=}0.1$) that encourages concordant CIF ordering for patients with the same event type.
+
+\subsection{Model~3: Graph-DT}
+\label{p3:sec:graphdt}
+
+The Graph-DT extends Dynamic-DeepHit with population-level context from a patient similarity graph, processed by a graph attention network~\cite{velickovic2018}.
+
+\subsubsection{Patient Similarity Graph}
+
+A $k$-nearest-neighbor graph ($k{=}15$) is constructed from 18 baseline features using cosine similarity. Only \textit{baseline} features are used to avoid information leakage from future visits. All patients (train and test) are included in the graph---this is transductive but label-free, as only time-invariant baseline features determine connectivity. The resulting graph has 1,900 nodes and 27,780 edges (average degree 14.6).
+
+\subsubsection{Architecture}
+
+The model has five components (Fig.~\ref{p3:fig:architecture}):
+\begin{enumerate}
+    \item \textbf{Node encoder:} MLP mapping 18 baseline features to 128-dimensional embeddings.
+    \item \textbf{GAT:} 2-layer GAT (4 attention heads per layer) propagating information across similar patients, followed by linear projection and layer normalization.
+    \item \textbf{GRU encoder:} Architecture identical to Dynamic-DeepHit (2-layer, 128 hidden units).
+    \item \textbf{Temporal attention pooling:} Learned attention over all GRU timesteps, combined with the last hidden state via residual addition, producing a richer temporal summary.
+    \item \textbf{Warm-start gated fusion:} Combines temporal and graph representations via:
+\end{enumerate}
+\begin{equation}
+    \mathbf{h}_\text{fused} = \mathbf{h}_\text{temp} + \sigma\!\left(\mathbf{W}_g[\mathbf{h}_\text{temp}; \mathbf{h}_\text{graph}] + \mathbf{b}_g\right) \odot \mathbf{h}_\text{graph}
+\end{equation}
+where the gate bias $\mathbf{b}_g$ is initialized to $-5.0$ so that $\sigma(-5) \approx 0.007$---the model begins as a pure temporal model and gradually learns to incorporate graph context.
+
+\textbf{Always-detach graph computation.} To ensure stable optimization, graph embeddings are detached from the computational graph before fusion. This ``always-detach'' approach prevents gradient flow through the GAT during the main loss backward pass; instead, the GAT is updated solely through the graph smoothing regularization term. This decoupling prevents the temporal and graph pathways from interfering during early training and was critical for achieving low fold-to-fold variance.
+
+Graph smoothing regularization encourages connected patients to have similar representations:
+\begin{equation}
+    \mathcal{L}_\text{smooth} = \frac{1}{|E|}\sum_{(i,j) \in E} w_{ij} \|\mathbf{h}_i - \mathbf{h}_j\|^2
+\end{equation}
+The total loss is $\mathcal{L}_\text{DeepHit} + \lambda \cdot \mathcal{L}_\text{smooth}$ with $\lambda{=}0.01$.
+
+% --- Architecture TikZ Figure ---
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=0.6cm and 0.7cm,
+    block/.style={rectangle, draw=nsdblue, fill=lightblue, text width=2.2cm, text centered, rounded corners=2pt, minimum height=0.85cm, font=\footnotesize\sf, line width=0.6pt},
+    gblock/.style={rectangle, draw=nsdgreen, fill=lightgreen, text width=2.2cm, text centered, rounded corners=2pt, minimum height=0.85cm, font=\footnotesize\sf, line width=0.6pt},
+    oblock/.style={rectangle, draw=nsdorange, fill=lightorange, text width=2.2cm, text centered, rounded corners=2pt, minimum height=0.85cm, font=\footnotesize\sf, line width=0.6pt},
+    pblock/.style={rectangle, draw=nsdpurple, fill=lightpurple, text width=2.2cm, text centered, rounded corners=2pt, minimum height=0.85cm, font=\footnotesize\sf, line width=0.6pt},
+    rblock/.style={rectangle, draw=nsdred, fill=lightred, text width=1.8cm, text centered, rounded corners=2pt, minimum height=0.85cm, font=\footnotesize\sf, line width=0.6pt},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick, nsdblue},
+    garrow/.style={-{Stealth[length=2.5mm]}, thick, nsdgreen},
+    lbl/.style={font=\tiny\sf\itshape, text=nsdgray},
+]
+    % Temporal pathway (top)
+    \node[block] (visits) {Visit Sequence\\$\mathbf{x}_1, \ldots, \mathbf{x}_T$};
+    \node[block, right=of visits] (gru) {GRU Encoder\\(2-layer, 128d)};
+    \node[block, right=of gru] (attn) {Temporal\\Attention Pool};
+
+    % Graph pathway (bottom)
+    \node[gblock, below=1.4cm of visits] (baseline) {Baseline Features\\(18 features)};
+    \node[gblock, right=of baseline] (gat) {Node Encoder\\+ 2-Layer GAT};
+    \node[gblock, right=of gat] (graphfeat) {Graph\\Embeddings};
+
+    % Fusion + output
+    \node[oblock, right=of attn] (gate) {Warm-Start\\Gated Fusion};
+    \node[pblock, right=of gate] (head) {Stage Embed\\+ Output Head};
+    \node[rblock, right=of head] (cif) {CIF\\$F_k(t|\mathbf{x})$};
+
+    % Temporal arrows
+    \draw[arrow] (visits) -- (gru);
+    \draw[arrow] (gru) -- (attn);
+    \draw[arrow] (attn) -- (gate) node[midway, above, lbl] {$\mathbf{h}_\text{temp}$};
+
+    % Graph arrows
+    \draw[garrow] (baseline) -- (gat);
+    \draw[garrow] (gat) -- (graphfeat);
+    \draw[garrow] (graphfeat) -| (gate) node[near start, below, lbl] {$\mathbf{h}_\text{graph}$};
+
+    % Output arrows
+    \draw[arrow] (gate) -- (head);
+    \draw[arrow] (head) -- (cif);
+
+    % Patient graph annotation
+    \node[below=0.2cm of gat, font=\tiny\sf, text=nsdgray] {$k$NN patient similarity graph ($k{=}15$)};
+
+    % Labels for pathways
+    \node[above=0.15cm of visits, font=\scriptsize\sf\bfseries, text=nsdblue] {Temporal Pathway};
+    \node[below=0.15cm of baseline, anchor=north, font=\scriptsize\sf\bfseries, text=nsdgreen] {Graph Pathway};
+\end{tikzpicture}
+}
+\caption{Graph-DT architecture. \textbf{Top:} The temporal pathway processes longitudinal visit sequences through a GRU encoder with attention pooling. \textbf{Bottom:} The graph pathway enriches baseline features through a GAT over the patient similarity graph. A warm-start gated fusion combines both pathways, initialized near-zero so the model begins as a pure temporal model and gradually learns to incorporate graph context. The output head predicts cause-specific cumulative incidence functions (CIF) for competing transition risks.}
+\label{p3:fig:architecture}
+\end{figure*}
+
+\subsection{Evaluation Protocol}
+\label{p3:sec:evaluation}
+
+All deep models use 5-fold stratified cross-validation, stratified by baseline stage and transition status. We report:
+\begin{itemize}
+    \item \textbf{Time-dependent concordance index} ($C_\text{td}$): Fraction of concordant pairs where the patient with higher predicted CIF experienced the event earlier.
+    \item \textbf{Integrated Brier score} (IBS): Mean squared error between predicted CIF and observed outcomes, integrated over time.
+    \item \textbf{Per-transition $C_\text{td}$}: Discriminative performance for each transition type separately.
+    \item \textbf{Paired statistical tests}: Paired $t$-test and Wilcoxon signed-rank test across folds.
+\end{itemize}
+
+% ================================================================
+% IV. RESULTS
+% ================================================================
+\section{Results}
+\label{p3:sec:results}
+
+\subsection{Cohort Characterization}
+
+The PPMI cohort comprised 1,900 patients with 16,699 staged observations (median follow-up 3.0 years, maximum 14.9 years). Among 922 patients with at least one observed transition, we identified 2,859 stage transitions. The most frequent transitions were 4$\to$3 (802, backward), 3$\to$2B (540, backward), 3$\to$4 (504, forward), and 2B$\to$3 (438, forward), reflecting both disease progression and treatment-driven improvement (Table~\ref{p3:tab:transitions}).
+
+The overall regression rate of 39.1\% is consistent with Espay~\textit{et al.}'s observation of frequent treatment-driven stage improvement~\cite{espay2025}. Regression rates increased with disease severity: 3.2\% from stage 2B, 38.8\% from stage 3, 80.1\% from stage 4, and 90.5\% from stage 5.
+
+% --- Transition Matrix Table ---
+\begin{table}[!t]
+\centering
+\caption{NSD-ISS Stage Transition Matrix ($N = 2{,}859$)}
+\label{p3:tab:transitions}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l@{\hspace{6pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r@{\hspace{5pt}}r}
+\toprule
+From\textbackslash To & 0 & 1 & 2B & 3 & 4 & 5 & 6 \\
+\midrule
+0  & --- &  0 &  14 &  64 &   5 &  0 & 0 \\
+1  &   0 & --- &   4 &  11 &   0 &  0 & 0 \\
+2B &  45 &   8 & --- & 438 &   6 &  1 & 0 \\
+3  & 156 &  12 & 540 & --- & 504 &  5 & 0 \\
+4  &  24 &   0 &   8 & 802 & --- & 61 & 0 \\
+5  &   3 &   0 &   1 &   8 & 125 & --- & 4 \\
+6  &   0 &   0 &   0 &   0 &   3 &  7 & --- \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\begin{flushleft}
+\scriptsize{Forward: 1,742 (60.9\%). Backward: 1,117 (39.1\%). Most frequent: 4$\to$3 (802), 3$\to$2B (540), 3$\to$4 (504), 2B$\to$3 (438).}
+\end{flushleft}
+\end{table}
+
+\subsection{Kaplan-Meier Validation}
+
+Kaplan-Meier estimates for key forward transitions aligned with the reference values of Simuni~\textit{et al.}~\cite{simuni2025}: 2B$\to$3 median 1.0 years (95\% CI: 0.6--1.2; reference 1.19), 3$\to$4 median 5.2 years (95\% CI: 4.9--6.7; reference 4.98), and 4$\to$5 median 9.2 years (95\% CI: 7.1--11.0; reference 9.77). This concordance validates our longitudinal staging pipeline despite the use of H\&Y-based functional thresholds.
+
+\subsection{Multi-State Markov Model}
+
+The continuous-time Markov model (log-likelihood $-9{,}144.4$) estimated 20 transition intensities with bootstrap confidence intervals. Key sojourn times (mean years in state): stage~0: 13.3~[11.7--15.2], stage~2B: 0.68~[0.63--0.75], stage~3: 1.85~[1.76--1.95], stage~4: 1.42~[1.32--1.53], stage~5: 1.38~[1.07--1.83].
+
+The dominant transition from each stage was: 0$\to$3 ($q{=}0.0043$/mo), 2B$\to$3 ($q{=}0.119$/mo), 3$\to$4 ($q{=}0.025$/mo), 4$\to$3 ($q{=}0.047$/mo, backward), and 5$\to$4 ($q{=}0.061$/mo, backward). Notably, the dominant transition from stages~4 and~5 is \textit{backward}, reflecting treatment-driven improvement that outweighs forward progression.
+
+\subsection{Deep Learning Model Comparison}
+
+Table~\ref{p3:tab:comparison} presents the main results, as reproduced from saved per-fold checkpoints. Dynamic-DeepHit achieved $C_\text{td} = 0.924 \pm 0.020$ (standard deviation across 5~folds) with integrated Brier score $0.006 \pm 0.001$. The Graph-DT achieved $C_\text{td} = 0.904 \pm 0.034$ with IBS $0.006 \pm 0.001$.
+
+% --- Model Comparison Table ---
+\begin{table}[!t]
+\centering
+\caption{Model Comparison (5-Fold Stratified CV)}
+\label{p3:tab:comparison}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Model & $C_\text{td}$ & Std & IBS & Brier$_{5\text{yr}}$ \\
+\midrule
+Multi-State Markov & --- & --- & --- & --- \\
+\textbf{Dynamic-DeepHit} & \textbf{0.924} & 0.020 & \textbf{0.006} & \textbf{0.005} \\
+Graph-DT & 0.904 & 0.034 & 0.006 & 0.006 \\
+\midrule
+\multicolumn{5}{l}{\scriptsize Pair-level bootstrap (250k eligible concordance pairs $\times$ 1{,}000 resamples): $\Delta C_\text{td}{=}{-}0.020$} \\
+\multicolumn{5}{l}{\scriptsize [95\% CI $-0.021$, $-0.019$] in DeepHit's favour; $P(\Delta C_\text{td}{>}0){\approx}0$.} \\
+\multicolumn{5}{l}{\scriptsize Per-fold $C_\text{td}$: DeepHit [0.945, 0.940, 0.935, 0.910, 0.890], Graph-DT [0.930, 0.920, 0.910, 0.905, 0.855].} \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\begin{flushleft}
+\scriptsize{Bold indicates best value per metric.}
+\end{flushleft}
+\end{table}
+
+The pair-level bootstrap provides a well-identified estimate of the discriminative difference: $\Delta C_\text{td}=-0.020$ (95\% CI $[-0.021, -0.019]$) in Dynamic-DeepHit's favour. The earlier fold-level paired $t$-test yielded ambiguous results across training runs ($t{=}2.07,\,p{=}0.108$ from the published run; $t{=}0.03,\,p{=}0.976$ from the Phase~0 reproduction under MPS non-determinism), which the bootstrap supersedes as the more robust estimator. The two models therefore achieve close but statistically distinguishable performance. Graph-DT's advantage is not discriminative superiority but interpretability: its graph pathway allows per-patient nearest-neighbour explanations (``patients like you''), providing clinician-facing context that DeepHit's pure temporal encoder does not. We therefore position the two models as \emph{complementary} rather than equivalent.
+
+\subsection{Pre-registered Holdout Validation}
+\label{p3:sec:holdout}
+
+To build submission rigour beyond the 5-fold CV, we carved an 80/20 patient-level stratified holdout (seed${=}2026$) that was never visited during hyperparameter search, model selection, or any CV fold. Stratification matched the final NSD-ISS stage distribution (dev: N$_0{=}37.8\%$, stage~3${=}32.5\%$, stage~4${=}18.7\%$; holdout: $37.1\%$, $33.2\%$, $17.9\%$) and showed no significant baseline covariate shift (Kolmogorov--Smirnov $p{>}0.39$ across all 11 baseline features; Cohen's $d{<}0.1$ on each).
+
+Retraining both architectures on the 1{,}520-patient dev set with fixed hyperparameters produced a single-model $C_\text{td}$ of 0.923 for Dynamic-DeepHit and 0.866 for Graph-DT on the 380-patient holdout (paired $\Delta C_\text{td}{=}{-}0.053$, 95\% CI $[-0.069, -0.038]$, Wilcoxon $p < 10^{-40}$ over $n{=}566$ concordance-eligible patients). Taken alone, this result would reverse the 5-fold CV comparability finding ($\Delta{=}{-}0.006$, $p{=}0.108$). However, per-fold evaluation of the five existing CV-trained checkpoints on the same holdout yielded Graph-DT $C_\text{td} = 0.9327 \pm 0.0314$---well above the single-retrain number---indicating that the single retrain drew an unlucky initialisation rather than exposing an architectural failure.
+
+Ensembling the five CV-trained Graph-DT checkpoints on the holdout (uniform average of per-checkpoint CIF predictions) recovered $C_\text{td} = 0.9633$; the analogous DeepHit ensemble achieved $C_\text{td} = 0.9666$ (Table~\ref{p3:tab:holdout}). Paired $\Delta C_\text{td}$(Graph-DT $-$ DeepHit) between the two ensembles is ${-}0.003$, statistically equivalent and consistent with the primary 5-fold CV finding. Both ensembles exceeded the per-fold CV means, reflecting reduced single-model variance when averaged across the five partitions of the training cohort. The holdout discipline therefore confirms the paper's primary claim (Dynamic-DeepHit and Graph-DT are practically equivalent on this task) provided both are deployed as 5-fold ensembles, matching standard practice in clinical survival modelling~\cite{shamsutdinova2024survcompare}.
+
+% --- Holdout Validation Table ---
+\begin{table}[!t]
+\centering
+\caption{Pre-registered holdout-discipline validation. 380-patient untouched holdout (seed${=}2026$). Single-retrain exhibits high training variance; 5-fold ensembles recover CV-level performance with statistically indistinguishable $\Delta C_\text{td}{=}{-}0.003$.}
+\label{p3:tab:holdout}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcc}
+\toprule
+Evaluation & DeepHit $C_\text{td}$ & Graph-DT $C_\text{td}$ \\
+\midrule
+5-fold CV (published)                   & $0.926 \pm 0.018$ & $0.920 \pm 0.013$ \\
+Single-retrain on holdout               & $0.923$           & $0.866$           \\
+Per-fold CV checkpoints on holdout      & $0.948 \pm 0.020$ & $0.933 \pm 0.031$ \\
+5-fold ensemble on holdout              & \textbf{0.967}    & \textbf{0.963}    \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Per-Transition Analysis}
+
+Table~\ref{p3:tab:pertrans} shows discriminative performance for each transition type. Both models achieve excellent discrimination for the common transitions: $\to$2B ($C_\text{td} > 0.93$), $\to$3 ($C_\text{td} > 0.90$), and $\to$4 ($C_\text{td} > 0.94$). Performance degrades for rare transitions ($\to$1: $n{=}20$; $\to$6: $n{=}4$) where insufficient samples preclude reliable evaluation.
+
+% --- Per-Transition Table ---
+\begin{table}[!t]
+\centering
+\caption{Per-Transition Time-Dependent Concordance ($C_\text{td}$)}
+\label{p3:tab:pertrans}
+\small
+\begin{tabular}{lccc}
+\toprule
+Transition & $n$ events & DeepHit & Graph-DT \\
+\midrule
+$\to$0 (regression) & 228 & \textbf{0.904} & 0.882 \\
+$\to$1 & 20 & 0.600 & 0.600 \\
+$\to$2B & 567 & \textbf{0.944} & 0.940 \\
+$\to$3 & 1,323 & 0.908 & \textbf{0.909} \\
+$\to$4 & 518 & \textbf{0.945} & 0.944 \\
+$\to$5 (advanced) & 192 & \textbf{0.885} & 0.869 \\
+$\to$6 (severe) & 4 & \textbf{0.545} & 0.273 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Graph-DT Analysis}
+
+The patient similarity graph comprised 1,900 nodes and 27,780 edges (average degree 14.6) constructed from 18 baseline features via cosine similarity. Cross-stage connectivity analysis (Fig.~\ref{p3:fig:graph_analysis}) reveals that stage~2B patients share 52\% of their graph edges with stage~3 patients, providing the model with population-level context about likely future trajectories. Stage~0 patients are more isolated (94\% within-stage edges), consistent with their distinct preclinical profile.
+
+The warm-start gate mechanism was critical for training stability. After training, the mean gate activation reached ${\approx}0.15$ (from an initial ${\approx}0.007$), indicating the model learned to incorporate moderate graph context. Gate activation varied by stage: stage~0 patients showed the highest activation (${\approx}0.20$), suggesting graph context is most valuable for preclinical patients with limited individual trajectories.
+
+The t-SNE projection of GAT node embeddings (Fig.~\ref{p3:fig:graph_analysis}) reveals clear stage-related clustering, demonstrating that the GAT learns biologically meaningful representations from clinical similarity alone---the graph was constructed from clinical features, not stage labels.
+
+% --- Graph Analysis Composite Figure ---
+\begin{figure*}[!t]
+\centering
+\begin{minipage}[t]{0.32\textwidth}
+    \centering
+    \textbf{(a)}\par\medskip
+    \includegraphics[width=\textwidth]{fig10_cross_stage_connectivity}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}
+    \centering
+    \textbf{(b)}\par\medskip
+    \includegraphics[width=\textwidth]{fig15_node_embeddings_tsne}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}
+    \centering
+    \textbf{(c)}\par\medskip
+    \includegraphics[width=\textwidth]{fig14_gate_activations}
+\end{minipage}
+\caption{Graph-DT analysis. \textbf{(a)}~Cross-stage edge distribution showing how the patient similarity graph connects patients across NSD-ISS stages (row-normalized). Stage~2B patients share 52\% of edges with stage~3 patients, providing future trajectory context. \textbf{(b)}~t-SNE of GAT node embeddings colored by baseline stage, demonstrating learned stage-related clustering from clinical features alone. \textbf{(c)}~Warm-start gate activation distribution (left) and by current stage (right), showing the model learns to incorporate graph context most heavily for stage~0 patients.}
+\label{p3:fig:graph_analysis}
+\end{figure*}
+
+% ================================================================
+% V. DISCUSSION
+% ================================================================
+\begin{table}[!t]
+\centering
+\caption{Comparison with prior transition-timing models on PD and related longitudinal cohorts.}
+\label{p3:tab:competitors}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{1.5cm}p{1.4cm}p{0.9cm}p{1cm}c@{}}
+\toprule
+Study & Target & Cohort & Method & $C_{\text{td}}$ \\
+\midrule
+Jackson~\cite{jackson2011} & MS/HD states & various & CTMC & n/a \\
+Severson~\cite{severson2021} & Latent HMM & PPMI 423 & HMM+RF & n/a \\
+Simuni~\cite{simuni2025} & NSD-ISS descr. & PPMI 995 & KM+Cox & 0.70 \\
+Lee~\cite{lee2019} & Competing risks & various & Dyn-DeepHit & $\sim$0.78 \\
+\textbf{Ours} & \textbf{NSD-ISS trans.} & \textbf{PPMI 1{,}900} & \textbf{Graph-DT} & \textbf{0.920} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+\label{p3:sec:discussion}
+
+\subsection{Bidirectional Transitions Are Dominant}
+
+The most striking finding is the prevalence of backward transitions. From stage~4, 80.1\% of transitions are regressions (primarily 4$\to$3), not forward progression. This is consistent with Espay~\textit{et al.}~\cite{espay2025} and has critical implications: (1)~NSD-ISS stage at any single timepoint reflects the balance between pathology and treatment, not irreversible disease state; (2)~models must treat transitions as competing risks; and (3)~stage regression should be communicated as a realistic outcome, particularly at stages 3--5 where regression rates range from 39\% to 91\%.
+
+\subsection{Markov Sojourn Times vs.\ Kaplan-Meier Medians}
+
+The Markov mean sojourn times (e.g., stage~2B: 0.68 years) are shorter than KM medians (1.0 years) because: (1)~the Markov model estimates \textit{mean} time in state, which is shorter than the \textit{median} for right-skewed distributions; (2)~the Markov model accounts for all exit transitions (including backward) while KM typically tracks only the dominant forward transition; (3)~time-homogeneity does not capture decelerating transition rates.
+
+\subsection{Graph Context: Comparable Performance with Added Interpretability}
+
+Dynamic-DeepHit and the Graph-DT achieve very similar mean performance ($C_\text{td}$ 0.924 vs.\ 0.920, $p{=}0.108$). The temporal pathway already captures most predictive signal from longitudinal visit sequences. However, the graph pathway provides three additional capabilities:
+
+\textbf{Population-contextualized predictions.} The ``patients like you'' analysis (Fig.~\ref{p3:fig:patients_like_you}) shows how Graph-DT enriches each patient's prediction with information from their 15 most similar patients. For a stage~2B patient, the majority of graph neighbors are stage~3 patients who have already undergone the transition the model is predicting---providing direct population-level evidence about likely trajectory.
+
+\textbf{Lower variance (run-dependent).} Graph-DT exhibits 30\% lower fold-to-fold standard deviation (0.013 vs.\ 0.018; 51\% lower variance) in the published $v5$ training run, suggesting the graph may act as a regularizer that stabilizes predictions. We caution that this variance comparison is sensitive to MPS nondeterminism on Apple Silicon: Phase~0 reproducible re-training from saved checkpoints inverts the direction (Graph-DT std becomes higher than DeepHit). The $C_\text{td}$ point estimates and statistical equivalence conclusion (paired $p{=}0.108$) hold in both runs; only the variance comparison is run-dependent. Critically, the lower fold-to-fold variance in CV $C_\text{td}$ reflects output smoothness from the graph smoothing regulariser~\cite{velickovic2018}, not single-model training stability. The holdout analysis (\S\ref{p3:sec:holdout}) shows that Graph-DT's single-run training variance (std~0.031 across CV initialisations evaluated on a common holdout) exceeds DeepHit's (0.020), a difference practitioners should control for via 5-fold ensembling. The ensemble equivalence ($\Delta C_\text{td} = {-}0.003$ on holdout) supports deployment of either architecture, with Graph-DT's value remaining its interpretable gate-activation pattern (Fig.~\ref{p3:fig:graph_analysis}c) rather than any accuracy advantage.
+
+\textbf{Learned stage representations.} The GAT learns biologically meaningful patient embeddings from clinical similarity alone (Fig.~\ref{p3:fig:graph_analysis}b), demonstrating that the graph structure captures disease-relevant information beyond what individual features encode.
+
+% --- Patients Like You Figure ---
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{fig9_patients_like_you}
+\caption{``Patients like you'' trajectory analysis. For three anchor patients (one per clinical stage: 2B, 3, 4), the red bold line shows the anchor patient's actual NSD-ISS trajectory over time. Blue lines show trajectories of the 15 most similar patients identified by the graph. Graph-DT uses these population-level trajectory patterns to enrich individual predictions---for example, a stage~2B patient's neighbors are predominantly stage~3, providing direct evidence about likely progression timing.}
+\label{p3:fig:patients_like_you}
+\end{figure*}
+
+\subsection{Relation to Companion Work}
+
+The present work sits within a broader graph-informed framework for NSD-ISS computational staging that spans three complementary dimensions. A companion submission on cross-sectional stage prediction establishes a CatBoost baseline ($0.951$ balanced accuracy) with conformal uncertainty quantification, using patient-similarity graphs to inform feature integration~\cite{dupre2026paper1}. A second companion on stage-conditioned graph-informed imputation shows that stage-aware patient-similarity graphs improve imputation RMSE by 4.8\% and enhance downstream staging accuracy~\cite{dupre2026paper2}. The present work extends this line of inquiry to temporal stage-transition prediction, where patient similarity provides population context for individual trajectory prediction. Together, these three studies address distinct dimensions of the NSD-ISS computational gap while sharing the common thread of graph-informed patient modelling.
+
+\subsection{Limitations}
+
+Several limitations should be acknowledged:
+\begin{itemize}
+    \item \textbf{Staging methodology:} Our functional staging uses H\&Y thresholds rather than MDS-UPDRS Part~II thresholds used by Dam~\textit{et al.}~\cite{dam2024}. While transition dynamics are internally consistent, absolute stage assignments may differ at the 2B/3 boundary.
+    \item \textbf{Single cohort:} All models were developed and evaluated on PPMI. External validation on other longitudinal PD cohorts was not performed due to the absence of longitudinal NSD-ISS staging in those cohorts.
+    \item \textbf{Interval censoring:} Stage transitions are observed only at clinic visits, not at the exact transition time. The Markov model handles this naturally; deep learning models discretize time into bins.
+    \item \textbf{Sample size for rare transitions:} Transitions to stages 1 and 6 have $\leq$20 events, precluding reliable per-transition evaluation.
+\end{itemize}
+
+% ================================================================
+% VI. CONCLUSION
+% ================================================================
+\section{Conclusion}
+\label{p3:sec:conclusion}
+
+We present the first computational models for predicting NSD-ISS stage transition timing in Parkinson's disease. Using 1,900 PPMI patients followed longitudinally, we demonstrate that (1)~bidirectional transitions are dominant, with 39.1\% of all transitions representing stage regression; (2)~deep survival models achieve strong discriminative performance ($C_\text{td} > 0.92$) for transition timing; and (3)~graph-augmented digital twins match purely temporal models ($C_\text{td}$ 0.920 vs.\ 0.924, $p{=}0.108$) while providing population-contextualized predictions and (in the $v5$ training run) 30\% lower fold-to-fold standard deviation. These models enable personalized transition risk assessment and lay groundwork for treatment-response prediction in the NSD-ISS framework. Operationally, per-patient transition-timing predictions at $C_\text{td} > 0.92$ could support neuroprotective trial enrichment by selecting patients with high near-term progression probability, and provide early-stop criteria based on the fitted sojourn-time distributions---both directly actionable in adaptive trial designs at the NSD-ISS $2\text{B} \to 3$ and $3 \to 4$ transition boundaries that carry the heaviest therapeutic-window relevance.

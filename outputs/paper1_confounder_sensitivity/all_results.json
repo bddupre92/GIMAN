@@ -1,0 +1,284 @@
+{
+  "run_timestamp": "2026-04-22T12:30:45",
+  "seed": 42,
+  "n_bootstrap_ci": 1000,
+  "n_bootstrap_interaction": 1000,
+  "analysis_A_age_matched": {
+    "n_matched_pairs": 779,
+    "n_matched_total": 1558,
+    "n_full_positive": 779,
+    "n_full_negative": 1422,
+    "age_delta_full_cohort_yr": 0.576017769611525,
+    "age_delta_matched_yr": -0.001669421211659028,
+    "caliper_years": 2.0,
+    "matching_method": "greedy_nearest_neighbour_1to1_without_replacement",
+    "targets": {
+      "target_binary": {
+        "n": 1558,
+        "balanced_accuracy": 0.9281129653401797,
+        "balanced_accuracy_ci": [
+          0.9151942387164999,
+          0.9405593077004234
+        ],
+        "auc_roc": 0.9693791289645888,
+        "auc_roc_ci": [
+          0.9601551627792454,
+          0.9778875645176862
+        ],
+        "macro_auc_ovr": null,
+        "quadratic_weighted_kappa": 0.8562259306803595
+      },
+      "target_3class": {
+        "n": 1556,
+        "balanced_accuracy": 0.7670422981441938,
+        "balanced_accuracy_ci": [
+          0.7408512388944714,
+          0.7913811489492729
+        ],
+        "auc_roc": null,
+        "auc_roc_ci": null,
+        "macro_auc_ovr": 0.9305646407208701,
+        "quadratic_weighted_kappa": 0.824425838787534
+      }
+    }
+  },
+  "analysis_B_sex": {
+    "n_male": 849,
+    "n_female": 1352,
+    "n_excluded_missing_sex": 0,
+    "sex_coding": {
+      "0_male": "ppmi_raw.demographics.sex=0",
+      "1_female": "ppmi_raw.demographics.sex=1"
+    },
+    "targets": {
+      "target_binary": {
+        "male": {
+          "n": 849,
+          "balanced_accuracy": 0.9381625441696113,
+          "balanced_accuracy_ci": [
+            0.9196045394152479,
+            0.9564928625779063
+          ],
+          "auc_roc": 0.9769943437925308,
+          "auc_roc_ci": [
+            0.9656294670058257,
+            0.9877604803193492
+          ],
+          "macro_auc_ovr": null,
+          "quadratic_weighted_kappa": 0.8825622775800712
+        },
+        "female": {
+          "n": 1352,
+          "balanced_accuracy": 0.9408256707868556,
+          "balanced_accuracy_ci": [
+            0.9270964619517087,
+            0.9551416824483241
+          ],
+          "auc_roc": 0.9771065722037986,
+          "auc_roc_ci": [
+            0.9664699266213572,
+            0.9859367172766187
+          ],
+          "macro_auc_ovr": null,
+          "quadratic_weighted_kappa": 0.8835242024565942
+        }
+      },
+      "target_3class": {
+        "male": {
+          "n": 846,
+          "balanced_accuracy": 0.7505208917187932,
+          "balanced_accuracy_ci": [
+            0.7072082473607311,
+            0.7926380809590072
+          ],
+          "auc_roc": null,
+          "auc_roc_ci": null,
+          "macro_auc_ovr": 0.9381208818442787,
+          "quadratic_weighted_kappa": 0.806159308397771
+        },
+        "female": {
+          "n": 1351,
+          "balanced_accuracy": 0.776685419596812,
+          "balanced_accuracy_ci": [
+            0.7444484701615794,
+            0.8085346827155218
+          ],
+          "auc_roc": null,
+          "auc_roc_ci": null,
+          "macro_auc_ovr": 0.941589025812883,
+          "quadratic_weighted_kappa": 0.8559325687188737
+        }
+      },
+      "target_full_ordinal": {
+        "male": {
+          "n": 846,
+          "balanced_accuracy": 0.5829011519193267,
+          "balanced_accuracy_ci": [
+            0.5317350645673912,
+            0.6313725642839987
+          ],
+          "auc_roc": null,
+          "auc_roc_ci": null,
+          "macro_auc_ovr": 0.9437735287109339,
+          "quadratic_weighted_kappa": 0.822898245771122
+        },
+        "female": {
+          "n": 1351,
+          "balanced_accuracy": 0.6357341382129158,
+          "balanced_accuracy_ci": [
+            0.6033858781527796,
+            0.6671966444678739
+          ],
+          "auc_roc": null,
+          "auc_roc_ci": null,
+          "macro_auc_ovr": 0.9318988430134855,
+          "quadratic_weighted_kappa": 0.8736456339286339
+        }
+      },
+      "target_nsd_positive": {
+        "male": {
+          "n": 283,
+          "balanced_accuracy": 0.5844493812046632,
+          "balanced_accuracy_ci": [
+            0.5071247114276333,
+            0.6729981002337379
+          ],
+          "auc_roc": null,
+          "auc_roc_ci": null,
+          "macro_auc_ovr": 0.8593542158442672,
+          "quadratic_weighted_kappa": 0.6103001927843569
+        },
+        "female": {
+          "n": 496,
+          "balanced_accuracy": 0.6062126642771803,
+          "balanced_accuracy_ci": [
+            0.5712113501549515,
+            0.6391430101884648
+          ],
+          "auc_roc": null,
+          "auc_roc_ci": null,
+          "macro_auc_ovr": 0.88529825318449,
+          "quadratic_weighted_kappa": 0.734375
+        }
+      }
+    },
+    "sex_auc_interaction_test": {
+      "male_binary_auc": 0.9769943437925308,
+      "female_binary_auc": 0.9765672105818511,
+      "delta_male_minus_female": 0.00042713321067966437,
+      "bootstrap_delta_95ci": [
+        -0.013145625623787691,
+        0.015189385306749912
+      ],
+      "bootstrap_two_sided_p": 0.914,
+      "n_bootstrap": 1000,
+      "significant_at_0.05": false
+    }
+  },
+  "analysis_C_enrollment_wave": {
+    "stratification_note": "ppmi_raw.screening_demographics.site_aprv is a site-APPROVAL date (MM/YYYY) and has only 45% coverage; no canonical site/center number exists in the Postgres mirror. We stratify instead by PPMI enrollment wave (participant_status.enroll_date), which is a more scientifically meaningful stratifier for PPMI cohort-effect bias than site identifier would be.",
+    "n_total_with_enrollment_year": 1845,
+    "n_excluded_missing_enroll_year": 356,
+    "wave_counts": {
+      "late_2021_2025": 915,
+      "early_2010_2013": 675,
+      "middle_2014_2020": 255
+    },
+    "targets": {
+      "target_binary": {
+        "per_wave": {
+          "late_2021_2025": {
+            "n_held_out": 915,
+            "n_train": 930,
+            "balanced_accuracy": 0.9131961246344491,
+            "auc_point": 0.9467347625760031,
+            "macro_auc_ovr": null,
+            "auc_bootstrap_95ci": [
+              0.9279344741385755,
+              0.9639113748402275
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          },
+          "early_2010_2013": {
+            "n_held_out": 675,
+            "n_train": 1170,
+            "balanced_accuracy": 0.9132869506193789,
+            "auc_point": 0.9558044384109207,
+            "macro_auc_ovr": null,
+            "auc_bootstrap_95ci": [
+              0.9358375641784208,
+              0.9725337164256393
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          },
+          "middle_2014_2020": {
+            "n_held_out": 255,
+            "n_train": 1590,
+            "balanced_accuracy": 0.9632867132867133,
+            "auc_point": 0.9918414918414918,
+            "macro_auc_ovr": null,
+            "auc_bootstrap_95ci": [
+              0.977320119077152,
+              0.9995354800718942
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          }
+        },
+        "summary": {
+          "n_waves": 3,
+          "auc_mean": 0.9647935642761385,
+          "auc_std": 0.02385911867867444,
+          "auc_min": 0.9467347625760031,
+          "auc_max": 0.9918414918414918
+        }
+      },
+      "target_3class": {
+        "per_wave": {
+          "late_2021_2025": {
+            "n_held_out": 915,
+            "n_train": 930,
+            "balanced_accuracy": 0.7618530396823094,
+            "auc_point": 0.9304215413284885,
+            "macro_auc_ovr": 0.9304215413284885,
+            "auc_bootstrap_95ci": [
+              0.9112732239483619,
+              0.947515023173316
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          },
+          "early_2010_2013": {
+            "n_held_out": 675,
+            "n_train": 1170,
+            "balanced_accuracy": 0.7319008323509449,
+            "auc_point": 0.939956499348889,
+            "macro_auc_ovr": 0.939956499348889,
+            "auc_bootstrap_95ci": [
+              0.9205007357759178,
+              0.9577069872111084
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          },
+          "middle_2014_2020": {
+            "n_held_out": 255,
+            "n_train": 1590,
+            "balanced_accuracy": 0.835626378729827,
+            "auc_point": 0.946339806627913,
+            "macro_auc_ovr": 0.946339806627913,
+            "auc_bootstrap_95ci": [
+              0.9159293909746342,
+              0.9712518508166831
+            ],
+            "n_bootstrap_resamples_valid": 1000
+          }
+        },
+        "summary": {
+          "n_waves": 3,
+          "auc_mean": 0.9389059491017635,
+          "auc_std": 0.008010963387883914,
+          "auc_min": 0.9304215413284885,
+          "auc_max": 0.946339806627913
+        }
+      }
+    }
+  }
+}

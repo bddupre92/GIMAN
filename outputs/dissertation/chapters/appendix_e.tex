@@ -1,0 +1,125 @@
+% =============================================================================
+% APPENDIX E: Reproducibility and Deployment Pipeline
+% =============================================================================
+\chapter{Reproducibility and Deployment Pipeline}
+\label{app:reproducibility}
+
+This appendix documents the artifacts and automation required for independent
+verification of every numerical claim in Chapters 3--16. Sections
+\ref{app:e:data-dict} and \ref{app:e:docker} constitute the minimum-defensible
+reproducibility package shipped with the dissertation. Sections for a live
+FastAPI inference service, an NSD-ISS staging endpoint, and a deterministic
+replay protocol (catalogued as items C5-2 and C5-3) are flagged for post-defense
+deployment work.
+
+\section{Data dictionary}
+\label{app:e:data-dict}
+
+All tabular data used across Papers 1--10 is consolidated in a local PostgreSQL
+17 database (\texttt{giman\_research}, $\approx$~290~MB, 146~tables,
+1{,}233{,}732 rows across 10 schemas). The full column-level data dictionary is
+auto-generated from the live database via
+\texttt{scripts/appendix\_e/generate\_data\_dictionary.py} and written to
+\texttt{outputs/dissertation/appendix\_e/E1a\_postgres\_data\_dictionary.md}.
+Re-running the generator produces a bit-identical document as long as the
+schema is unchanged. Table~\ref{tab:e1-schemas} summarises the ten schemas.
+
+\begin{table}[h]
+  \centering
+  \caption{PostgreSQL schemas in \texttt{giman\_research}.}
+  \label{tab:e1-schemas}
+  \begin{tabular}{lrl}
+    \toprule
+    Schema & Tables & Content \\
+    \midrule
+    \texttt{ppmi\_raw}       & 25 & PPMI clinical/imaging (AMP-PD v4 + LONI IDA) \\
+    \texttt{biofind\_raw}    & 23 & BioFIND external validation cohort \\
+    \texttt{pdbp\_raw}       & 52 & PDBP external prediction cohort (Apr 2026 LONI) \\
+    \texttt{hbs\_raw}        & 11 & HBS external prediction cohort \\
+    \texttt{staging}         & 3  & NSD-ISS staging outputs \\
+    \texttt{features}        & 4  & Assembled ML feature matrices (Papers 1--3, cross-cohort) \\
+    \texttt{longitudinal}    & 4  & Paper 3 longitudinal staging + transition events \\
+    \texttt{paper3}          & 1  & Paper 3 per-visit longitudinal feature vectors \\
+    \texttt{mechanistic}     & 21 & Phase 1--4 mechanistic twin outputs (posteriors, LOO, counterfactuals) \\
+    \texttt{ledd}            & 2  & LEDD + concomitant PD medication \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Non-tabular artifacts (HDF5 posteriors, PyTorch model checkpoints, Parquet chain
+files, connectome atlases) are catalogued separately in
+\texttt{outputs/dissertation/appendix\_e/E1b\_disk\_artifact\_manifest.md}. That
+manifest maps every numerical claim in Chapter~13 (Paper 10) to its source JSON
+file and generating script, ensuring that defense reviewers can trace any
+result from a sentence in the text to a single byte-level artifact on disk
+within two hops. Key non-DB artifacts include the Paper~10 bidirectional
+posterior store
+(\texttt{phase2\_posteriors\_full\_samples.h5}; 1{,}065 patients $\times$
+5{,}000 samples; 127~MB), the ten Paper~3 cross-validation checkpoints (five
+Dynamic-DeepHit, five Graph-DT; 14~MB total) validated to reproduce their
+original C$_\mathrm{td}$ scores to four decimal places, and the 48~Paper~2 GIMIN
+checkpoints (four stage-conditioned variants $\times$ four mask fractions
+$\times$ three seeds; 17~MB).
+
+\section{Docker reproducibility}
+\label{app:e:docker}
+
+A three-stage Docker image (\texttt{docker/Dockerfile}) combined with a
+docker-compose specification (\texttt{docker/docker-compose.yml}) provides
+one-command reproducibility of the entire analysis environment on macOS,
+Linux, and Windows (via Docker Desktop) across both \texttt{linux/amd64} and
+\texttt{linux/arm64} hosts. The image bundles:
+
+\begin{itemize}
+  \item Python 3.10 with the Poetry-locked dependency set (PyTorch 2.8,
+    PyTorch Geometric 2.6, MAPIE 1.3, CatBoost, XGBoost, LightGBM, lifelines,
+    scikit-survival, h5py, ArviZ, PyMC, scikit-learn, pandas, etc.),
+  \item Julia 1.11.3 (aarch64) with the \texttt{MechanisticTwin} project
+    declared (DifferentialEquations.jl, Turing.jl, Sundials.jl,
+    StructuralIdentifiability.jl). Note: Julia \texttt{Pkg.instantiate()} has a
+    known precompile failure in aarch64 Docker Desktop (see
+    \texttt{outputs/defense\_prep/julia\_docker\_limitation.md}). Reviewers who
+    need to refit Phase 1--4 calibrations from scratch should install Julia
+    natively via \texttt{juliaup}; Python-only reproduction (Papers 1--6,
+    plus Paper 10 results from committed HDF5 posteriors) works inside Docker
+    without issue.
+  \item Jupyter Lab, \texttt{psycopg2-binary}, and \texttt{postgresql-client}
+    preinstalled for immediate analysis and DB access.
+\end{itemize}
+
+\noindent
+The companion PostgreSQL service auto-restores the \texttt{giman\_research}
+database from \texttt{db\_dump/schema\_and\_data.sql} (199~MB, owner-neutralised
+via \texttt{pg\_dump --no-owner --no-acl}) on first container start. Committee
+verification protocol:
+
+\begin{enumerate}
+  \item Clone the repository.
+  \item Place \texttt{db\_dump/schema\_and\_data.sql} alongside the repo (shipped via
+    the supplementary archive; regenerable with
+    \texttt{pg\_dump --no-owner --no-acl giman\_research -f db\_dump/schema\_and\_data.sql}
+    on the host that owns the live database).
+  \item Run \texttt{cd docker \&\& docker compose up --build}. The image build takes
+    approximately 20~minutes on Apple~Silicon (most of the time is Julia package
+    precompilation); subsequent runs start in $\approx$~30~seconds.
+  \item The \texttt{giman} container's entrypoint waits for PostgreSQL, verifies
+    146 tables have been restored across the ten schemas, spot-checks
+    \texttt{features.paper1\_features\_with\_targets} for the expected 2{,}201
+    rows, and exposes Jupyter Lab at \texttt{http://localhost:8888} for
+    interactive analysis.
+  \item Any per-paper reproduction command documented in \texttt{docker/README.md}
+    (e.g., \texttt{docker compose exec giman python scripts/paper3/validate\_checkpoints.py})
+    can then be executed against the running stack.
+\end{enumerate}
+
+The end-to-end stack was smoke-tested on 2026-04-14 on a Mac~Studio
+(Apple~Silicon, Docker Desktop~29.4.0) --- all 146 tables restore, all six
+spot-check row counts match the values documented in the project CLAUDE.md, and
+a Python query executed via
+\texttt{giman\_pipeline.data.db.read\_sql} returns the expected 2{,}201 rows of
+NSD-ISS staging output. Sections E.3 (live FastAPI service wrapping
+\texttt{PosteriorStore} + \texttt{forward\_model} + \texttt{updater}), E.4
+(NSD-ISS staging endpoint with conformal bands), and E.5 (deterministic replay
+protocol) are scheduled for post-defense deployment work alongside the external
+submission of Paper~11 (Chapter~16). The existing two-section package is
+sufficient for the defense committee to verify every claim in the dissertation.

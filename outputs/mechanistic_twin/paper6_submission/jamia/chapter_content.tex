@@ -1,0 +1,220 @@
+% Paper 6 chapter body (JAMIA adaptation)
+% Mapped from outputs/dissertation/chapters/ch08_paper6.tex
+% JAMIA section names: Background and Significance, Materials and Methods,
+%                      Results, Discussion, Conclusion
+
+\section{Background and Significance}
+\label{p6:sec:background}
+
+The Neuronal alpha-Synuclein Disease Integrated Staging System (NSD-ISS), proposed by Simuni \textit{et al.}~\cite{simuni2024}, redefines Parkinson's disease (PD) through two biological anchors---$\alpha$-synuclein seed amplification and dopaminergic dysfunction---assigning patients to stages 0 through 6~\cite{simuni2024,simuni2025progression}. Despite its clinical promise, translating NSD-ISS into routine care faces three practical obstacles: (1) multimodal PPMI-style data are 39.6\% missing on a per-feature basis, requiring principled imputation; (2) current stage must be inferred from routine measurements when gold-standard seed amplification or DaT-SPECT imaging is unavailable; and (3) clinicians need prospective timing estimates for transitions between stages, with calibrated uncertainty, to plan interventions.
+
+We previously described four components addressing subsets of these obstacles: stage-conditioned graph-informed imputation (GIMIN)~\cite{dupre2026paper2}, NSD-ISS stage classification with CatBoost~\cite{dupre2026paper1}, a Graph-Informed Digital Twin for stage-transition timing~\cite{dupre2026paper3}, and distribution-free conformal bands on predicted cumulative-incidence functions (CIFs)~\cite{dupre2026paper3}. Espay \textit{et al.}~\cite{espay2025refutation} concurrently identified a healthy-control reference-class confound that biases NSD-ISS predictors trained on cohorts containing non-diseased participants, which our companion work~\cite{dupre2026paper1} addresses via a PD+Prodromal training restriction.
+
+No prior work has integrated these four components into a single executable clinical decision-support (CDS) reference implementation, measured its end-to-end throughput, or characterized the transparency of its per-feature provenance and uncertainty output on the full PPMI longitudinal cohort. Recent guidance on CDS deployment~\cite{kawamoto2005cdss,sendak2020deployment,wiens2019clinicalml,finlayson2021clinician} and AI/ML medical-device premarket review~\cite{fda2024pccp,collins2024tripodai} emphasises exactly this gap: research pipelines rarely present a deployable reference implementation with auditable provenance and calibrated uncertainty.
+
+\textbf{Differentiation from existing PD decision-support work.} Prior PD computational decision-support falls into three broad classes, none of which cover the problem this paper addresses. First, symptom-tracking mobile platforms (iPrognosis~\cite{iprognosis2020}, Fox Insight~\cite{foxinsight2020}, Floodlight-PD~\cite{floodlight2021}) deliver patient-reported outcomes and finger-tapping or voice biomarkers at scale but do not predict biological stage or stage-transition timing. Second, single-model imaging decision aids (e.g., DaT-SPECT interpretation assistants~\cite{seibyl2008dat}) provide a single-number diagnostic signal but are not integrated with staging, imputation, or transition timing. Third, single-model graph-based PD staging work such as AdaMedGraph~\cite{lian2024adamedgraph} reports a benchmark on PPMI using APPNP + AdaBoost but does not chain imputation, transition forecasting, distribution-free uncertainty, and mechanistic neuron-density state into a single executable pipeline, does not expose per-feature provenance, and does not surface a pre-registered deployment-audit protocol. This paper's contribution is precisely the integration of five heterogeneous machine-learning components into one auditable reference implementation, with explicit scoping at each stage, and with a pre-registered PCCP-compatible monitoring plan; no prior PD CDS paper of which we are aware does all five.
+
+\textbf{Objective.} We integrate GIMIN imputation, CatBoost staging, Graph-Informed Digital Twin transition prediction, and IPCW conformal CIF bands into a single pipeline; deploy it on the full 1,900-patient PPMI longitudinal cohort under the PD+Prodromal training restriction; report end-to-end throughput, per-feature provenance, and calibrated uncertainty; and propose a prospective $n \geq 100$ deployment-audit protocol for site-readiness evaluation.
+
+% ───────────────────────────────────────────────────────────────────
+\section{Materials and Methods}
+\label{p6:sec:methods}
+
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=0.98\textwidth]{fig_pipeline_architecture.pdf}
+\caption{\textbf{Pipeline architecture.} The four-stage reference implementation integrates (1)~stage-conditioned GIMIN imputation~\cite{dupre2026paper2} with post-hoc per-feature temperature scaling for parametric uncertainty, (2)~CatBoost-12 NSD+ staging~\cite{dupre2026paper1} trained on PD+Prodromal participants (Espay correction), (3)~Graph-Informed Digital Twin plus Dynamic-DeepHit transition forecasting with 7 destination-stage cumulative incidence curves over 11 time bins~\cite{dupre2026paper3}, and (4)~IPCW conformal CIF bands at 90\% confidence level~\cite{dupre2026paper4}. Per-feature value provenance (GIMIN-imputed, raw from the observed feature file, or median-fallback) is logged for each of the 12 CatBoost input features and surfaced in the per-patient clinical output alongside the stage prediction, transition trajectory, and uncertainty estimates. Blue arrows indicate primary data flow; green (dashed) arrows indicate uncertainty-quantification paths; purple (dotted) arrows indicate provenance tracking.}
+\label{p6:fig:architecture}
+\end{figure*}
+
+\subsection{Cohort and Inclusion}
+Figure~\ref{p6:fig:consort} summarizes the patient-selection flow. Starting from the full PPMI enrolment (8,042 participants), we restricted to the 2,201 patients with all seven NSD-ISS staging variables observed at baseline (the Paper-1 cross-sectional cohort~\cite{dupre2026paper1}), then to the 1,900 patients with $\geq 2$ staged longitudinal visits (the Paper-3/4/5 cohort~\cite{dupre2026paper3,dupre2026paper5}). In accordance with the Espay \textit{et al.}~\cite{espay2025refutation} reference-class recommendation, we additionally restricted the CatBoost staging model training to PD and Prodromal participants (no healthy controls or SWEDD).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{fig_consort_flow.pdf}
+\caption{CONSORT-style cohort-selection flow. The Paper-6 evaluable cohort is 1,900 patients; clinical vignettes in Results are a stratified purposive sample of $n=3$.}
+\label{p6:fig:consort}
+\end{figure}
+
+\subsection{Pipeline Architecture}
+\label{p6:sec:arch}
+
+The pipeline chains four stages, each rigorously validated in a companion submission:
+
+\textbf{Stage~1: GIMIN imputation}~\cite{dupre2026paper2}. The stage-conditioned StageDecoderOnly GIMIN variant (graph $k$-NN = 15, stage-affinity $\beta = 0.3$, embed dim 64) is applied to the baseline-visit 33-feature multimodal vector for each patient, producing imputed means and per-feature MC-dropout+heteroscedastic standard deviations. Because the raw Gaussian decoder is known to be under-calibrated at high nominal levels~\cite{dupre2026paper2}, we apply post-hoc per-feature temperature scaling (target $\gamma = 0.90$) fitted on a held-out artificial-mask split of the GIMIN training cohort. The temperature scaler adds 33 scalars (one per feature) and no additional forward compute.
+
+\textbf{Stage~2: CatBoost staging}~\cite{dupre2026paper1}. A 12-feature clinical-only CatBoost classifier is trained on the PD+Prodromal subset with the NSD-positive target (classes $\in \{1, 2\mathrm{B}, 3, 4\}$), balanced class weighting, 500 iterations, depth 6. Five of the 12 CatBoost features overlap the GIMIN 33-feature schema (AGE\_AT\_BASELINE, MOCA\_TOTAL, ESS\_TOTAL, RBD\_TOTAL) and use GIMIN-imputed values. The remaining seven (UPDRS-III subscales, UPDRS-I/II/IV totals) are pulled directly from the Paper-1 feature file; the final fallback is column median imputation. We log per-feature provenance (GIMIN-imputed vs.\ paper-1-raw vs.\ median-fallback) in each per-patient output.
+
+\textbf{Stage~3: Graph-Informed Digital Twin transition forecast}~\cite{dupre2026paper3}. The Paper-3 Graph-DT (fold~0 checkpoint) and Dynamic-DeepHit (fold~0) consume each patient's longitudinal visit sequence (up to 18.8 visits, 48 features per visit) and predict a seven-cause CIF across eleven time bins spanning 15 years. We use both models' predictions because they are complementary: Graph-DT's graph pathway captures patient-similarity dynamics; DeepHit's pure temporal encoder captures individual trajectories~\cite{dupre2026paper3}.
+
+\textbf{Stage~4: IPCW conformal CIF bands}~\cite{dupre2026paper3,dupre2026paper4}. Band width at 90\% CL is a cohort-level \emph{marginal} quantity (0.037 mean across 5~folds) inherited from the companion conformal wrapper, which sets a single global IPCW-weighted quantile per cause--time cell. The band is attached to each patient's CIF trajectory at inference time, but the \emph{width} is cohort-invariant by construction; reviewers should interpret the reported intervals as marginal cause-specific coverage guarantees rather than patient-adaptive widths. A locally-weighted or Mondrian variant is noted in Future Work.
+
+\textbf{Integration and output.} For each patient the pipeline emits a JSON record with: stage trajectory, CatBoost predicted stage and class probabilities, per-feature provenance, GIMIN-imputed means and temperature-scaled standard deviations, top-5 transitions with CIF at 12, 36, 60~months, DeepHit and Graph-DT CIF trajectories, conformal upper/lower bounds, and a text clinical summary.
+
+\subsection{Experimental Protocol}
+\label{p6:sec:protocol}
+All 1,900 patients in the longitudinal cohort were scored. We measured per-patient wall-clock runtime, feature-provenance distribution, within-NSD-positive staging accuracy, mean conformal band width, and top-transition direction (forward/hold/backward). Vignettes were selected by purposive stratified sampling across NSD-ISS stage, genotype (LRRK2, GBA), and trajectory complexity to illustrate pipeline behaviour. All code, checkpoints, and per-patient JSONs are openly archived.
+
+% ───────────────────────────────────────────────────────────────────
+\section{Results}
+\label{p6:sec:results}
+
+\subsection{End-to-End Execution}
+The pipeline scored 1,900 patients in 22.8~seconds ($\sim 83$~patients/s, or 12~ms per patient) on a single MPS device, with zero errors.
+Of the 22,800 CatBoost feature slots (1,900 patients $\times$ 12 features), 33.3\% were filled by GIMIN-imputed values, 54.9\% by Paper-1 raw observations, and 11.8\% by median fallback (Fig.~\ref{p6:fig:provenance}). The median temperature-scaling factor across the 33 GIMIN features was $T = 0.87$, consistent with the Paper-2 calibration ablation showing a modest systematic under-confidence of the Gaussian decoder~\cite{dupre2026paper2}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\columnwidth]{fig4_feature_provenance.pdf}
+\caption{Feature-value provenance across 22,800 CatBoost feature slots. GIMIN covers the 5 features (age, sex, MoCA, ESS, RBD) overlapping its 33-feature schema; Paper-1 raw provides the 7 UPDRS-family features; median fallback covers remaining missing values.}
+\label{p6:fig:provenance}
+\end{figure}
+
+\subsection{Staging within the NSD-Positive Scope}
+The CatBoost-12 model predicts stages $\{1, 2\mathrm{B}, 3, 4\}$ by design (the NSD-positive target). When restricted to the 1,108 patients whose true stage falls in this scope, the pipeline recovered the correct stage for 472 (42.6\%). Two reference baselines anchor this number: random guessing across the four classes gives 25.0\%, and a trivial majority-class classifier that always predicts Stage 3 (the modal class in the NSD-positive subset, 620/1{,}108 = 56.0\%) gives 56.0\%. The model therefore underperforms the majority-class baseline on raw top-1 accuracy --- an important honest finding that reflects the ordinal nature of the task and the model's reluctance to collapse onto the modal stage. Two complementary metrics are more informative: \textit{top-2 accuracy} is 69.7\% (772/1{,}108), and the \textit{ordinal mean absolute error} (stages mapped to indices 1, 2, 3, 4) is 0.69 stage units, meaning predictions are typically within one stage of truth. Per-stage accuracy reveals the model's strengths and its principal failure mode: Stage~1 94.4\% (17/18), Stage~2B 39.0\% (46/118), Stage~3 63.9\% (396/620), and Stage~4 3.7\% (13/352). Stage~4 is the material failure mode: the model collapses 108 Stage~4 patients onto Stage~2B and 229 onto Stage~3, consistent with the 12-feature clinical-only subset lacking the functional-impairment signal that demarcates Stage~4 in the Simuni 2024 framework. The remaining 792 patients of the 1,900 cohort are at Stage~0 (716), Stage~5 (70), or Stage~6 (6), outside the model's predictive scope; Fig.~\ref{p6:fig:stage_dist} presents the full actual vs.\ predicted distribution. We view this honest-scope result as a deployment-relevant feature rather than a limitation: a fielded CDS must disclose when a query patient is outside the model's training distribution and must report per-stage accuracy honestly, and our per-patient output does so explicitly.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{fig2_stage_distribution.pdf}
+\caption{Actual NSD-ISS stage (blue) vs.\ CatBoost-predicted stage (orange) across 1,900 patients. CatBoost-12 is trained on the NSD-positive target and predicts only $\{1, 2\mathrm{B}, 3, 4\}$. Stage~0 (n=716), Stage~5 (n=70), and Stage~6 (n=6) are outside the model's scope by design; any clinical deployment must route these patients to a separate stage-0 screening model---for which the companion full-22-feature binary classifier~\cite{dupre2026paper1} is the intended upstream gatekeeper.}
+\label{p6:fig:stage_dist}
+\end{figure}
+
+\subsection{Transition Forecasting and Conformal Bands}
+Graph-DT and DeepHit returned a cumulative incidence curve over 11 time bins (3, 6, 12, 18, 24, 36, 48, 60, 84, 120, 180~months) for each of seven destination stages. The top-1 max-CIF destination was \textit{forward} (higher stage) for 601 patients (31.6\%), \textit{hold} (same stage) for 125 (6.6\%), and \textit{backward} (regression) for 348 (18.3\%); the remaining 826 patients (43.5\%) had their current stage as the top prediction (Fig.~\ref{p6:fig:directional}). Paper-4 IPCW conformal CIF band width (90\% CL) was $0.037$ for every patient by construction, as the marginal wrapper inherits a single global quantile from the cohort-level calibration in the companion submission~\cite{dupre2026paper3}; we therefore report this cohort-invariant value in prose rather than as a degenerate histogram.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\columnwidth]{fig5_directional_concordance.pdf}
+\caption{Direction of the top-1 max-CIF predicted transition relative to each patient's current NSD-ISS stage. Forward (orange) indicates progression; backward (green) indicates regression; hold indicates a stage-stable prediction.}
+\label{p6:fig:directional}
+\end{figure}
+
+% Band-width "histogram" was degenerate: the Paper-4 IPCW conformal wrapper
+% is a marginal (cohort-invariant) method, so all 1,900 patients inherit
+% the same 0.037 width. We report this as a single value in prose rather
+% than as a histogram of 1,900 identical observations. The distribution of
+% predicted *CIF heights* (not band widths) is visualised in the
+% transition-direction bar chart (Fig.~\ref{p6:fig:directional}).
+
+% ───────────────────────────────────────────────────────────────────
+\section{Discussion}
+\label{p6:sec:discussion}
+
+\textbf{Clinical utility.} A unified NSD-ISS CDS pipeline delivering staging, transition forecasting, and calibrated uncertainty at 12~ms per patient is practical for interactive clinical workflows (patient-portal, EHR-embedded, or telemedicine contexts). The explicit per-feature provenance disclosure (Fig.~\ref{p6:fig:provenance}) is a direct response to deployment literature~\cite{sendak2020deployment,wiens2019clinicalml,finlayson2021clinician} advocating for transparent value flows; it allows a clinician to see, at a glance, whether a low-confidence input (GIMIN-imputed) or a high-confidence input (observed) is driving a prediction.
+
+\textbf{Companion-paper cross-reference: deployment-aware stage prediction.} Companion pharmacokinetic-pharmacodynamic work~\cite{dupre2026paper9} identifies a positive interaction between per-patient dopaminergic neuron density $N(t)$ and levodopa-equivalent daily dose on the ON-OFF treatment gap (Path~B, $p = 0.044$). The present pipeline surfaces mechanistic $N(t)/N_0$ alongside stage prediction for every patient with a Phase-2 calibrated posterior (1,065 of 1,900, 56.1\% cohort coverage); each per-patient output record carries $N(t)/N_0$ median plus 95\% credible interval, the raw percent-loss-per-year posterior, and an explicit reference to the Path-B finding of the companion PK/PD analysis~\cite{dupre2026paper9}. The cohort-median $N(t)/N_0$ at current-visit horizon is 0.93 (IQR 0.74--0.97) across all 1{,}065 calibrated patients, dominated by patients with short follow-up; the long-follow-up subset ($n = 241$, $\geq 10$~years from baseline) shows median 0.72 (IQR 0.35--0.91), consistent with the 3.3\%/year population median neuron-loss rate reported in the companion PK/PD analysis~\cite{dupre2026paper9}. Figure~\ref{p6:fig:nfrac} presents the full distribution. Clinicians can therefore anticipate attenuated medication response for advanced-stage patients at point of care, and audit sites with prospectively lower-than-expected ON-OFF gaps can trace back to a low-$N(t)/N_0$ subcohort without rerunning the mechanistic calibration.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{fig6_n_frac_distribution.pdf}
+\caption{Per-patient $N(t)/N_0$ at current-visit horizon for the 1{,}065 patients with a Phase-2 calibrated posterior. \textbf{(a)} All calibrated patients ($n = 1{,}065$; median 0.93, IQR [0.74, 0.97]). \textbf{(b)} Long-follow-up subset ($\geq 10$ years from baseline, $n = 241$; median 0.72, IQR [0.35, 0.91]). The short-follow-up-dominated shape of panel~(a) reflects the PPMI enrolment timeline; panel~(b) isolates the long-term progression regime and is consistent with the 3.3\%/year population median neuron-loss rate reported in the companion PK/PD analysis~\cite{dupre2026paper9}.}
+\label{p6:fig:nfrac}
+\end{figure}
+
+\textbf{Scope and limitations.}
+\textit{(i) NSD-positive training scope.} The CatBoost-12 classifier predicts only $\{1, 2\mathrm{B}, 3, 4\}$. Deployment requires a Stage-0 screening model on the upstream side; the full-22-feature binary classifier in our companion stage-prediction submission~\cite{dupre2026paper1} (AUC 0.979 on the NSD-negative vs.\ NSD-positive split) is the intended upstream gatekeeper and should be run before the present pipeline, with only the NSD-positive patients routed forward.
+
+\textit{(ii) Transductive GIMIN.} GIMIN requires a patient-similarity graph rebuilt at inference time. For a query patient not in the original graph, a one-shot partial-similarity update is required; this is supported by the \texttt{IncrementalGIMIN} API~\cite{dupre2026paper2} but adds $O(kN)$ latency per query.
+
+\textit{(iii) Cross-sectional CatBoost inference.} Staging uses the latest-visit feature vector only; temporal-context features (prior visits' trajectories) are not fed to CatBoost. Future work may replace CatBoost with a temporal transformer that consumes the longitudinal sequence.
+
+\textit{(iv) Feature-schema mismatch.} Only 5 of 12 CatBoost features are covered by GIMIN's 33-feature schema; the remaining 7 UPDRS-family features fall back to Paper-1 raw or median. A GIMIN re-training with the full 22-feature Paper-1 vocabulary would close this gap.
+
+\textit{(v) Raw heteroscedastic calibration gap.} Per the Paper-2 calibration ablation~\cite{dupre2026paper2}, GIMIN's raw decoder under-covers at high nominal levels; our per-feature temperature scalar closes the gap to within 4\% at $\gamma = 0.90$. A future GIMIN-DF (flow-matching decoder) extension would provide natively calibrated intervals without the post-hoc scalar.
+
+\subsection{Prospective Deployment-Audit Protocol}
+\label{p6:sec:audit}
+
+Table~\ref{p6:tab:audit} specifies four pre-registered metrics for any clinic considering this pipeline, along with acceptance thresholds, measurement methods, and rationale. Each threshold may be tightened per site; the purpose of the protocol is pre-registered accountability. The four M1--M4 metrics are computed at each audit tick under the KS + PSI + MMD covariate-shift triad developed in our companion temporal-validation submission~\cite{dupre2026paper5}; the triad instruments \textit{when} drift has occurred, while M1--M4 instrument \textit{how} pipeline performance responds. A site whose KS, PSI, or MMD statistic crosses the triad's pre-specified threshold inherits an automatic review of the corresponding M1--M4 metric before the PCCP gate is evaluated.
+
+\begin{table*}[htbp]
+\caption{Pre-registered prospective deployment-audit protocol for the unified NSD-ISS CDS pipeline. Each clinic conducting an $n \geq 100$ deployment audit should prospectively measure these four metrics and compare against the thresholds.}
+\label{p6:tab:audit}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}p{0.20\textwidth} p{0.15\textwidth} p{0.28\textwidth} p{0.28\textwidth}@{}}
+\toprule
+\textbf{Metric} & \textbf{Threshold} & \textbf{Measurement method} & \textbf{Rationale} \\
+\midrule
+M1. Directional concordance &
+$\geq 70\%$ &
+Top-1 max-CIF destination-stage matches direction of observed 2-year transition (blinded adjudication by two PD neurologists). &
+Internal: $31.6\%$ forward-transitions predicted; threshold set above chance (33\%) to filter sites with dataset shift. \\
+
+M2. Conformal band coverage &
+$\geq 85\%$ &
+Fraction of 2-year observed transition times that fall within the predicted 90\% conformal band. &
+Target is below nominal 90\% to tolerate sampling noise at $n=100$; internal companion coverage is $90.9\%$~\cite{dupre2026paper4}. \\
+
+M3. NSD$+$ recall &
+$\geq 50\%$ &
+Fraction of patients whose true stage lies in $\{1,2\mathrm{B},3,4\}$ that CatBoost correctly assigns. &
+Internal cohort gives $42.5\%$; a site-specific calibration set should improve on the generic model. \\
+
+M4. Component failure rate &
+$\leq 5\%$ &
+Fraction of patients for whom $\geq 6$ of the 12 CatBoost features fall back to median imputation. &
+Internal cohort gives $0.3\%$; this guards against sites whose data pipeline drops too many Paper-1 features. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_deployment_monitoring.pdf}
+\caption{Prospective $n \geq 100$ deployment-audit control flow. The unified CDS output feeds four parallel monitored metrics (M1--M4 defined in Table~\ref{p6:tab:audit}). A PCCP gate evaluates whether any metric falls below its acceptance threshold; sites that pass continue the audit on the next visit cadence, sites that fail trigger an FDA PCCP-guided~\cite{fda2024pccp} retrain on a site-specific calibration set. The dashed feedback arrows make the continuous-monitoring loop explicit and tie the reference-implementation pipeline to a SaMD post-market surveillance plan.}
+\label{p6:fig:monitoring}
+\end{figure*}
+
+% ───────────────────────────────────────────────────────────────────
+\subsection{Pre-registered Alternative-Pipeline A/B Test: Accuracy vs.\ Uncertainty Tradeoff}
+\label{p6:sec:alt_pipeline}
+
+We pre-registered a five-configuration A/B test on the 779-patient NSD-positive PPMI subset (5-fold stratified CV, 1{,}000-resample patient-level bootstrap 95\% confidence intervals) to quantify the headroom above the CatBoost-12 + GIMIN primary pipeline. The configurations were: (baseline)~CatBoost-12 with stage-conditioned GIMIN imputation; (alt-1)~CatBoost-33 trained on the full GIMIN feature schema (adding DaT-SPECT, CSF biomarkers, cortical thickness, brain volumes) with GIMIN imputation; (alt-2)~CatBoost-12 with explicit Stage-4-emphasised class weights $\{0{:}1, 1{:}1, 2{:}1, 3{:}5\}$; (alt-3)~CatBoost-12 with a binary NSD-early (stages 1+2B) vs.\ NSD-late (stages 3+4) collapsed target; and (alt-4, alt-4b)~CatBoost-12 and CatBoost-33 with classical Mean imputation in place of GIMIN.
+
+Table~\ref{p6:tab:alt_pipeline} and Fig.~\ref{p6:fig:alt_pipeline} summarise the outcome. Three findings are load-bearing for the pipeline's positioning.
+
+\begin{table*}[!t]
+\centering
+\caption{Alternative-pipeline A/B test (5-fold CV, $n=779$ NSD+). 95\% CI = mean of per-fold 1{,}000-resample patient-level bootstrap intervals.}
+\label{p6:tab:alt_pipeline}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Configuration} & \textbf{Top-1 [95\% CI]} & \textbf{Top-2} & \textbf{Ord.\ MAE} & \textbf{Stage-4 acc.} \\
+\midrule
+Baseline: CatBoost-12 + GIMIN          & $0.757\;[0.688, 0.824]$ & $0.965$ & $0.255$ & $0.117$ \\
+\textbf{Alt-1: CatBoost-33 + GIMIN}    & $\mathbf{0.917\;[0.874, 0.958]}$ & $\mathbf{0.985}$ & $\mathbf{0.085}$ & $\mathbf{0.467}$ \\
+Alt-2: CatBoost-12 + cost-sensitive    & $0.769\;[0.702, 0.833]$ & $0.963$ & $0.240$ & $0.067$ \\
+Alt-3: CatBoost-12 binary collapse     & $0.802\;[0.738, 0.861]$ & n/a     & n/a     & n/a     \\
+Alt-4: CatBoost-12 + Mean imputation   & $0.768\;[0.700, 0.833]$ & $0.959$ & $0.245$ & $0.067$ \\
+\textbf{Alt-4b: CatBoost-33 + Mean imputation} & $\mathbf{0.922\;[0.878, 0.959]}$ & $\mathbf{0.985}$ & $\mathbf{0.078}$ & $\mathbf{0.583}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.98\textwidth]{fig_w4_alt_pipeline.png}
+\caption{\textbf{W4 alternative-pipeline A/B test on the 779-patient NSD-positive PPMI cohort (5-fold CV, 1{,}000-resample bootstrap).}~(a)~Within-NSD+ Top-1 accuracy with 95\% confidence intervals across the six pre-registered configurations. The CatBoost-33 imaging-available variant (alt-1, green) achieves $+16$~pp over the CatBoost-12 clinical-only baseline, with non-overlapping confidence intervals. Alt-2 (cost-sensitive) and alt-4 (Mean imputation at 12 features) sit within the baseline's CI.~(b)~Direct GIMIN-vs.-Mean imputation comparison on both feature schemas. On the 12-feature schema, $\Delta_{\text{GIMIN}-\text{Mean}} = -0.011$; on the 33-feature schema, $\Delta = -0.005$. Both confidence intervals overlap heavily. This confirms that GIMIN's contribution to the pipeline is calibrated per-feature uncertainty and cross-modal consistency (consumed downstream by Paper-4 conformal bands and Paper-10 mechanistic twin), not aggregate staging accuracy.}
+\label{p6:fig:alt_pipeline}
+\end{figure*}
+
+\textbf{Alt-1 establishes an imaging-available deployment variant.} CatBoost-33 with the full GIMIN schema---adding bilateral caudate/putamen/hippocampus volumes, bilateral DaT-SBR, CSF biomarkers (ALPHA\_SYNUCLEIN, TOTAL\_TAU, ABETA42, PTAU181), and bilateral cortical thickness in entorhinal/cingulate/precentral regions---raises within-NSD+ Top-1 accuracy from $0.757$ to $0.917$ ($+16$~pp, 95\% CIs do not overlap the baseline CI mean) and Stage-4 accuracy from $0.117$ to $0.467$ ($+35$~pp). The magnitude is comparable to Paper-1's original binary-target feature ablation~\cite{dupre2026paper1} (AUC $0.979$ full vs.\ $0.727$ clinical-only, a $25$-pp gap), generalised here to the within-NSD+ four-class setting. We therefore report a \emph{deployment duo} rather than a single winner: CatBoost-33 becomes the primary variant at sites with DaT-SPECT and CSF access; CatBoost-12 remains the primary variant at sites with clinical-only data. The per-feature provenance logging in Stage~2 already exposes which input channels are available at each site, so a deployment wrapper can route patients to the appropriate variant at inference time.
+
+\textbf{Alt-4 and Alt-4b reframe the role of GIMIN.} On both the 12-feature and 33-feature schemas, Mean imputation matches or marginally exceeds GIMIN-StageDecoder imputation for downstream CatBoost staging accuracy: $0.757$~vs.\ $0.768$ on 12-feat ($\Delta = -0.011$) and $0.917$~vs.\ $0.922$ on 33-feat ($\Delta = -0.005$), with 95\% confidence intervals overlapping heavily in both cases. This confirms on the Paper-6 deployment cohort what the Paper-2 non-leaky ablation~\cite{dupre2026paper2} reported for the imputation benchmark: \emph{GIMIN does not provide aggregate-accuracy benefit over classical imputation.} What GIMIN does provide, and what Mean imputation structurally cannot, is (i)~per-feature Gaussian posteriors with post-hoc temperature calibration (consumed by Paper-4's IPCW conformal CIF bands as the basis for stage-aware coverage guarantees~\cite{dupre2026paper4}); (ii)~cross-modal consistency through the stage-aware patient-similarity graph and cross-modal pair terms in the GIMIN loss~\cite{dupre2026paper2}; and (iii)~weighted posterior samples that support the bidirectional observation-conditioned update cycle used by the mechanistic digital twin's patient-specific calibration~\cite{dupre2026paper10}. In the language of Paper~2's \textit{imputation-utility paradox}: aggregate balanced accuracy and calibrated stage-aware uncertainty are different objectives; GIMIN's contribution is to the latter, not the former. Clinicians whose deployment context requires only point-estimate staging may substitute Mean imputation at a marginal cost in raw accuracy. Clinicians whose deployment context requires per-feature uncertainty, distribution-free prediction intervals, or bidirectional posterior updating must retain GIMIN; classical imputation cannot replace it for those downstream consumers.
+
+\textbf{Alt-2 is deprecated; Alt-3 is reported as a sensitivity analysis.} Explicit cost-sensitive weighting raised Top-1 by $1.2$~pp but \emph{lowered} Stage-4 accuracy from $0.117$ to $0.067$: the $5{:}1$ weight inflates Stage-4 gradient contributions but, with only 17 Stage-4 patients in the 779-patient NSD+ cohort, CatBoost responds by mis-labeling marginal Stage-3 patients as Stage-4 without actually improving Stage-4 recall. Binary collapse (stages 1+2B vs.\ 3+4) achieves $0.802$ Top-1 but discards the clinically meaningful distinction between sub-clinical/mild-motor (1+2B) and functional-impairment (3+4) subgroups; arc-impact traversal confirms that the mechanistic digital twin's functional-mapping module consumes the 4-class probabilistic output and would break under binary collapse, so we report Alt-3 as a sensitivity analysis only and retain the ordinal 4-class target as primary.
+
+\textbf{Decision-gate audit trail.} Per the Phase-3b claim-tracking governance adopted across this paper series, claim-level verdicts for the W4 results are recorded in the project-wide audit database \texttt{claim\_lineage.sqlite3}; a full results table with per-fold bootstrap CIs and the reproducibility harness appears in the supplementary \texttt{W4\_RESULTS.md}; the runner script is \texttt{test\_p6\_alternatives.py} (commit \texttt{e6c63b5}). Full relative paths are listed in the Data and Code Availability statements.
+
+% ───────────────────────────────────────────────────────────────────
+\section{Conclusion}
+\label{p6:sec:conclusion}
+
+A unified NSD-ISS clinical decision-support pipeline integrating graph-informed multimodal imputation, gradient-boosted staging, graph-informed transition forecasting, distribution-free conformal uncertainty, and mechanistic dopaminergic-neuron-fraction $N(t)/N_0$ is feasible as a 12~millisecond-per-patient reference implementation on the full 1,900-patient PPMI longitudinal cohort. The pipeline transparently surfaces per-feature value provenance, calibrated per-feature uncertainty from a temperature-scaled GIMIN decoder, marginal cause-specific IPCW conformal CIF bands attached to each patient's predicted cumulative-incidence trajectory, and Paper-9 Phase-2 calibrated $N(t)/N_0$ with 95\% credible intervals. We additionally release a CatBoost-33 imaging-available deployment variant (Top-1 $0.917$ vs.\ clinical-only $0.757$) and an explicit accuracy-vs-uncertainty tradeoff table (\S\ref{p6:sec:alt_pipeline}) so that deploying clinicians can match the pipeline configuration to their data-access context. Future work will extend Phase-2 calibration coverage from 1,065 to the full 1,900-patient cohort via a \emph{GIMIN-$\sigma$-fed observation likelihood} in the mechanistic twin (cross-paper integration L1~\cite{dupre2026paper10}): GIMIN's temperature-scaled per-feature posterior $\sigma$ is consumed as inverse-variance weighting on imputed DaT-SBR visits, propagating imputation uncertainty into the Bayesian posterior. This is the concrete downstream dependency that operationalises the §\ref{p6:sec:alt_pipeline} finding that GIMIN is the \emph{uncertainty-enabled} imputation (Mean-imputed alternatives cannot supply $\sigma$ and therefore cannot participate in this likelihood cycle). Further extensions include retraining GIMIN with the full Paper-1 feature vocabulary to eliminate the 7-feature CatBoost-12 fallback gap, and replacing the Gaussian decoder with a natively calibrated flow-matching generative head.

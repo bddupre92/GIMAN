@@ -1,0 +1,141 @@
+# Entries to import to Zotero (NOT in library yet): 130
+
+  fereshtehnejad2017subtypes  |  NO DOI  |  New clinical subtypes of Parkinson disease and their longitudinal progression: a prospective cohort 
+  zhou2020graph  |  NO DOI  |  Graph neural networks: A review of methods and applications
+  parisot2018disease  |  NO DOI  |  Disease prediction using graph convolutional networks: application to autism spectrum disorder and A
+  veličković2018graph  |  NO DOI  |  Graph attention networks
+  amann2020explainability  |  NO DOI  |  Explainability for artificial intelligence in healthcare: a multidisciplinary perspective
+  holzinger2019causability  |  NO DOI  |  Causability and explainability of artificial intelligence in medicine
+  rudin2019stop  |  NO DOI  |  Stop explaining black box machine learning models for high stakes decisions and use interpretable mo
+  yuan2021explainability  |  NO DOI  |  Explainability in graph neural networks: A taxonomic survey
+  ying2019gnnexplainer  |  NO DOI  |  Gnnexplainer: Generating explanations for graph neural networks
+  sundararajan2017axiomatic  |  NO DOI  |  Axiomatic attribution for deep networks
+  molnar2020interpretable  |  NO DOI  |  Interpretable machine learning -- A brief history, state-of-the-art and challenges
+  wachter2017counterfactual  |  NO DOI  |  Counterfactual explanations without opening the black box: Automated decisions and the GDPR
+  ustun2019actionable  |  NO DOI  |  Actionable recourse in linear classification
+  fahn1987updrs  |  NO DOI  |  Unified Parkinson's disease rating scale
+  nalls2019identification  |  NO DOI  |  Identification of novel risk loci, causal insights, and heritable risk for Parkinson's disease: a me
+  iwaki2019genetic  |  NO DOI  |  Genetic risk of Parkinson disease and progression: An analysis of 13 longitudinal cohorts
+  rousseeuw1987silhouettes  |  NO DOI  |  Silhouettes: a graphical aid to the interpretation and validation of cluster analysis
+  sokal1962comparison  |  NO DOI  |  The comparison of dendrograms by objective methods
+  hubert1985comparing  |  NO DOI  |  Comparing partitions
+  ng2001spectral  |  NO DOI  |  On spectral clustering: Analysis and an algorithm
+  post2007progression  |  NO DOI  |  Progression and prognostic factors of motor impairment, disability and quality of life in newly diag
+  marek2013mdsuppcc  |  NO DOI  |  The Parkinson's progression markers initiative (PPMI) -- establishing a PD biomarker cohort
+  haaxma2007gender  |  NO DOI  |  Gender differences in Parkinson's disease
+  goetz2004movement  |  NO DOI  |  Movement Disorder Society-sponsored revision of the Unified Parkinson's Disease Rating Scale (MDS-UP
+  olanow2009effect  |  NO DOI  |  A double-blind, delayed-start trial of rasagiline in Parkinson's disease
+  kokhlikyan2020captum  |  NO DOI  |  Captum: A unified and generic model interpretability library for PyTorch
+  byrd1995limited  |  NO DOI  |  A limited memory algorithm for bound constrained optimization
+  latourelle2017large  |  NO DOI  |  Large-scale identification of clinical and genetic predictors of motor progression in patients with 
+  oakden2020hidden  |  NO DOI  |  Hidden in plain sight: bias towards sick patients when sampling patients with sufficient electronic 
+  adebayo2018sanity  |  NO DOI  |  Sanity checks for saliency maps
+  ktena2017distance  |  NO DOI  |  Distance metric learning using graph convolutional networks: Application to functional brain network
+  marquand2016conceptualizing  |  NO DOI  |  Conceptualizing mental disorders as deviations from normative functioning
+  schulam2019can  |  NO DOI  |  Can you trust this prediction? Auditing pointwise reliability after learning
+  lawton2018developing  |  NO DOI  |  Developing and validating Parkinson's disease subtypes and their motor and cognitive progression
+  donohue2014preclinical  |  NO DOI  |  Estimating long-term multivariate progression from short-term data
+  miller2019explanation  |  NO DOI  |  Explanation in artificial intelligence: Insights from the social sciences
+  pearl2018book  |  NO DOI  |  The book of why: the new science of cause and effect
+  scholkopf2019causality  |  NO DOI  |  Causality for machine learning
+  zhang2019bayesian  |  NO DOI  |  Bayesian graph convolutional neural networks for semi-supervised classification
+  rieke2020future  |  NO DOI  |  The future of digital health with federated learning
+  wu2020graph  |  NO DOI  |  Graph neural networks in recommender systems: a survey
+  shortliffe2001biomedical  |  NO DOI  |  Biomedical informatics: computer applications in health care and biomedicine
+  kang2016biofind  |  NO DOI  |  Baseline characteristics of participants in the Parkinson's Disease Biomarkers Program (PDBP)
+  rosenthal2016pd  |  NO DOI  |  The NINDS Parkinson's disease biomarkers program
+  authorYYYY_giman  |  NO DOI  |  Graph-Integrated Multimodal Attention Network for Parkinson's Disease Progression Prediction
+  chopin2002sequential  |  10.1093/biomet/89.3.539  |  A sequential particle filter method for static models
+  delmoral2006smc  |  10.1111/j.1467-9868.2006.00553.x  |  Sequential {M}onte {C}arlo samplers
+  chopin2020introduction  |  10.1007/978-3-030-47845-2  |  An Introduction to Sequential {M}onte {C}arlo
+  beskos2014stability  |  10.1214/13-aap951  |  On the stability of sequential {M}onte {C}arlo methods in high dimensions
+  south2019smc  |  10.1214/18-ba1129  |  Sequential {M}onte {C}arlo samplers with independent {M}arkov chain {M}onte {C}arlo proposals
+  dosne2016sir  |  10.1007/s10928-016-9487-8  |  Improving the estimation of parameter uncertainty distributions in nonlinear mixed effects models us
+  dosne2017automated  |  10.1007/s10928-017-9542-0  |  An automated sampling importance resampling procedure for estimating parameter uncertainty
+  yngman2022fullrandom  |  10.1002/psp4.12741  |  An introduction to the full random effects model
+  vehtari2017practical  |  10.1007/s11222-016-9696-4  |  Practical {B}ayesian model evaluation using leave-one-out cross-validation and {WAIC
+  vehtari2024psis  |  NO DOI  |  Pareto smoothed importance sampling
+  kong1994sequential  |  10.1080/01621459.1994.10476469  |  Sequential imputations and {B}ayesian missing data problems
+  vehtari2021rhat  |  10.1214/20-ba1221  |  Rank-normalization, folding, and localization: An improved {\^R} for assessing convergence of {MCMC
+  gelman2013bda3  |  10.1201/b16018  |  Bayesian Data Analysis
+  vehtari2012survey  |  10.1214/12-ss102  |  A survey of {B}ayesian predictive methods for model assessment, selection and comparison
+  berger1985statistical  |  NO DOI  |  Statistical Decision Theory and Bayesian Analysis
+  mould2013basic2  |  10.1038/psp.2013.14  |  Basic concepts in population modeling, simulation, and model-based drug development---Part 2: Introd
+  mould2014basic3  |  10.1038/psp.2013.71  |  Basic concepts in population modeling, simulation, and model-based drug development: Part 3---introd
+  NASEM2024DigitalTwins  |  10.17226/26894  |  Foundational Research Gaps and Future Directions for Digital Twins
+  anCockrell2024cidt  |  NO DOI  |  A design specification for Critical Illness Digital Twins to cure sepsis: responding to the {NASEM} 
+  viceconti2021insilico  |  10.1016/j.ymeth.2020.01.011  |  In silico trials: Verification, validation and uncertainty quantification of predictive models used 
+  viceconti2025credibilityml  |  10.1109/jbhi.2025.3552320  |  Position Paper: Extending Credibility Assessment of In Silico Medicine Predictors to Machine Learnin
+  hicks2015bestpractices  |  10.1115/1.4029304  |  Is My Model Good Enough? Best Practices for Verification and Validation of Musculoskeletal Models an
+  musuamba2021credibility  |  10.1002/psp4.12669  |  Scientific and regulatory evaluation of mechanistic in silico drug and disease models in drug develo
+  friedrich2016mqm  |  10.1002/psp4.12056  |  A model qualification method for mechanistic physiological {QSP} models to support model-informed dr
+  friedrich2018validateqsp  |  10.1002/psp4.12310  |  How Do We "Validate" a {QSP} Model?
+  eudy2015sclerostin  |  10.1002/psp4.12013  |  Connecting the Dots: Linking Osteocyte Activity and Therapeutic Modulation of Sclerostin by Extendin
+  coorey2021healthdt  |  10.1038/s41569-021-00630-4  |  The health digital twin: advancing precision cardiovascular medicine
+  ich_m15_2024  |  NO DOI  |  ICH} {M15} General Principles for Model-Informed Drug Development; Draft Guidance for Industry
+  galluppi2024midd  |  10.1002/cpt.3245  |  Considerations for Industry---Preparing for the {FDA} Model-Informed Drug Development ({MIDD}) Paire
+  marshall2016goodpractices  |  10.1002/psp4.12049  |  Good practices in model-informed drug discovery and development
+  marshall2019midd  |  10.1002/psp4.12372  |  Model-informed drug discovery and development: Current industry good practice and regulatory expecta
+  marshall2023harmonized  |  10.1002/cpt.3006  |  Model-informed drug development: Steps toward harmonized guidance
+  hanquet2026musuamba  |  10.1002/psp4.70213  |  Modeling and Simulation in Development and Regulatory Approval of {CAR-T} Therapies: {EMA} Centraliz
+  simuni2018nms  |  10.1136/jnnp-2017-316213  |  Baseline prevalence and longitudinal evolution of non-motor symptoms in early {P}arkinson's disease:
+  simuni2025nsd5yr  |  10.1002/mds.30191  |  Neuronal {$\alpha$}-Synuclein Disease Stage Progression over 5 Years
+  gonzalezlatapi2024eleven  |  10.1101/2024.10.09.24315191  |  Eleven Years of Change: Disease Progression in Biomarker-Defined Sporadic {PD
+  gonzalezlatapi2026nsd5yr  |  10.1002/acn3.70323  |  Five-Year Disease Progression in Synuclein Seeding Positive Sporadic {P}arkinson's Disease
+  espay2025refutation  |  10.1002/mds.30269  |  Refutation of the $\alpha$Syn-{SAA}-Based Staging for {PD} Progression ({NSD-ISS})
+  dzialas2025dat  |  10.1002/ana.27223  |  Dopamine Transporter Imaging as Objective Monitoring Biomarker in {P}arkinson's Disease
+  brumm2023milestone  |  10.3233/jpd-223433  |  PPMI}: A Milestone-Based Strategy to Monitor {PD} Progression
+  simuni2019lrrk2gba  |  10.1016/s1474-4422(19)30319-9  |  Clinical and dopamine transporter imaging characteristics of non-manifest {LRRK2} and {GBA} mutation
+  simuni2022lrrk2nmc  |  10.1038/s41531-022-00404-w  |  Longitudinal clinical and biomarker characteristics of non-manifesting {LRRK2} {G2019S} carriers in 
+  brown2025stagedscreening  |  10.1002/ana.27158  |  Staged Screening Identifies People with Biomarkers Related to Neuronal Alpha-Synuclein Disease
+  chahine2020ratesirbd  |  10.1002/acn3.51269  |  Dopamine transporter imaging predicts clinically-defined $\alpha$-synucleinopathy in {REM} sleep beh
+  chahine2023saa  |  10.1002/acn3.51753  |  Central and peripheral $\alpha$-synuclein in {PD} detected by seed amplification assay
+  macklin2022prodromal  |  10.1212/wnl.0000000000200897  |  Statistical Considerations in the Design of Clinical Trials Targeting Prodromal {P}arkinson Disease
+  wakasugi2024combat  |  10.3389/fneur.2024.1306546  |  Harmonizing multisite data with the {ComBat} method for enhanced {PD} diagnosis via {DAT-SPECT
+  hamo2025vmat2  |  10.1016/j.parkreldis.2025.108008  |  Relationship between {VMAT2-PET} and {DAT-SPECT} caudate binding and {PD} cognitive decline
+  gupta2025sbrirt  |  10.1002/cpt.3593  |  Establishment of a Biomarker-Directed Clinical Endpoint Model for Early-Stage {PD} Patients
+  veronneau2020chaos  |  10.1063/5.0014800  |  Nonlinear pharmacodynamics of levodopa through {P}arkinson's disease progression
+  veronneau2020integrative  |  10.1007/s10928-020-09723-y  |  An integrative model of {PD} treatment including levodopa pharmacokinetics, dopamine kinetics, basal
+  chan2005levodopa  |  10.1007/s10928-005-0055-x  |  Pharmacokinetic and pharmacodynamic changes during the first four years of levodopa treatment in {P}
+  chan2005pkvariability  |  10.1007/s10928-005-0039-x  |  Importance of within subject variation in levodopa pharmacokinetics: a 4 year cohort study in {PD
+  chan2004shortlong  |  10.1023/b:jopa.0000039566.75368.59  |  Modeling the short- and long-duration responses to exogenous levodopa and to endogenous levodopa pro
+  baston2016levodopa  |  10.3389/fnhum.2016.00280  |  A Mathematical Model of Levodopa Medication Effect on Basal Ganglia in {PD}: Alternate Finger Tappin
+  fahn2005elldopa  |  10.1007/s00415-005-4008-5  |  Does levodopa slow or hasten the rate of progression of {P}arkinson's disease?
+  verschuur2019leap  |  10.1056/nejmoa1809983  |  Randomized Delayed-Start Trial of Levodopa in {P}arkinson's Disease ({LEAP})
+  jacqmin2007kpd  |  10.1007/s10928-006-9035-z  |  Modelling response time profiles in the absence of drug concentrations: definition and performance e
+  bloomingdale2022qsp  |  10.1002/psp4.12852  |  Hallmarks of neurodegenerative disease: A systems pharmacology perspective
+  tomlinson2010ledd  |  10.1002/mds.23429  |  Systematic review of levodopa dose equivalency reporting in {P}arkinson's disease
+  jost2023ledd  |  10.1002/mds.29410  |  Levodopa Dose Equivalency in {P}arkinson's Disease: Updated Systematic Review and Proposals
+  fearnleyLees1991  |  10.1093/brain/114.5.2283  |  Ageing and {P}arkinson's disease: substantia nigra regional selectivity
+  lee2019jama  |  NO DOI  |  SBR-to-neuron mapping exponent {$\gamma$}=0.7
+  iljina2016pnas  |  10.1073/pnas.1524128113  |  Kinetic model of the aggregation of {$\alpha$}-synuclein provides insights into prion-like spreading
+  mollenhauer2019csf  |  10.1002/mds.27806  |  Longitudinal analyses of cerebrospinal fluid {$\alpha$-synuclein} in prodromal and early {PD
+  brockmann2025saa  |  NO DOI  |  Longitudinal {SAA} kinetic stability in sporadic {P}arkinson's disease
+  bellomo2025pS129  |  NO DOI  |  Phosphorylated $\alpha$-synuclein in {CSF}/plasma does not reflect synucleinopathy
+  comets2017saem  |  10.18637/jss.v080.i03  |  Parameter estimation in nonlinear mixed effect models using {saemix
+  talts2018sbc  |  NO DOI  |  Validating {B}ayesian inference algorithms with simulation-based calibration
+  pandya2019ndm  |  10.1016/j.neuroimage.2019.02.033  |  Connectome-based network diffusion model of {PD} propagation
+  borghammer2021bodyfirst  |  10.3233/jpd-212528  |  The $\alpha$-synuclein origin and connectome model of {P}arkinson's disease
+  kerstens2023regional  |  10.1016/j.nicl.2023.103470  |  Annual {DAT} decline in {PPMI}: regional rates
+  brooks1990putamen  |  10.1002/ana.410280412  |  Differential severity of striatal dopamine loss in {PD
+  fiorenzato2021putamen  |  10.1002/mds.28551  |  Putaminal asymmetry maintenance in {PPMI
+  rackauckas2020universal  |  NO DOI  |  Universal Differential Equations for Scientific Machine Learning
+  mao2025nonmem  |  10.1208/s12248-025-01121-x  |  Opportunities for {AI}-based Model-informed Drug Development: {NONMEM} vs {AI}-based Population {PK
+  atsou2024mechlearning  |  10.1002/psp4.13294  |  Mechanistic Learning for Predicting Survival Outcomes in Head and Neck Squamous Cell Carcinoma
+  alam2026ndintegrative  |  10.1016/j.compbiolchem.2026.108973  |  Next-generation computational strategies for neurodegenerative biomarkers
+  nair2026computationalpd  |  10.3390/brainsci16020175  |  Computational Modeling of {PD} Across Scales: Mechanisms to Biomarkers to Personalized Therapies
+  bica2020counterfactual  |  NO DOI  |  Estimating Counterfactual Treatment Outcomes over Time Through Adversarially Balanced Representation
+  djaldetti2018wearing  |  NO DOI  |  DaT-SPECT does not predict motor fluctuations / wearing-off in {PD
+  frequin2024leap  |  NO DOI  |  LEAP} trial 5-year follow-up: no difference in progression, dyskinesia, or {LEDD} between early vs d
+  backman2025postmortem  |  NO DOI  |  Postmortem: no association between {L}-dopa exposure and {TH}+ neuron density
+  wollmer2022pbpk  |  NO DOI  |  Levodopa {GI} absorption {PBPK} model
+  chae2021leddirt  |  NO DOI  |  LEDD} trajectory prediction from {UPDRS} item-response theory
+
+# Entries in Zotero but NOT tagged into RT8B9N2J: 6
+
+  dorsey2018global  |  NO DOI  |  The emerging evidence of the Parkinson pandemic
+  lundberg2017unified  |  NO DOI  |  A unified approach to interpreting model predictions
+  selvaraju2017grad  |  NO DOI  |  Grad-CAM: Visual explanations from deep networks via gradient-based localization
+  nasreddine2005moca  |  NO DOI  |  The Montreal Cognitive Assessment, MoCA: a brief screening tool for mild cognitive impairment
+  buuren2011mice  |  NO DOI  |  mice: Multivariate imputation by chained equations in R
+  maaten2008visualizing  |  NO DOI  |  Visualizing data using t-SNE

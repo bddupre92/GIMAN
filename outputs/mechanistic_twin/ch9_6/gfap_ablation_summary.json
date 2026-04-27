@@ -1,0 +1,27 @@
+{
+  "n_matched_patients": 357,
+  "with_gfap": {
+    "label": "WITH_GFAP",
+    "n": 357,
+    "mean_log_k_n_sd": 0.020120166605284873,
+    "median_log_k_n_sd": 0.0193664885736791,
+    "mean_log_alpha_tox_sd": 0.4611173341757847,
+    "median_log_alpha_tox_sd": 0.4040903326475317,
+    "median_pct_loss_per_yr": 9.318060741000387,
+    "mean_cor_logk_logalpha": -0.042680725151816354
+  },
+  "without_gfap": {
+    "label": "WITHOUT_GFAP",
+    "n": 357,
+    "mean_log_k_n_sd": 0.7130474135643358,
+    "median_log_k_n_sd": 0.7253145936918014,
+    "mean_log_alpha_tox_sd": 0.7566441567276331,
+    "median_log_alpha_tox_sd": 0.7478552355728864,
+    "median_pct_loss_per_yr": 8.445925620410765,
+    "mean_cor_logk_logalpha": -0.4630426743048337
+  },
+  "sigma_logkn_tightening_ratio_median": 37.45204459406095,
+  "sigma_logkn_tightening_ratio_mean": 35.43943882537448,
+  "interpretation": "Same 357 patients, same visits, only GFAP presence differs. Ratio \u03c3_without / \u03c3_with isolates the GFAP channel contribution.",
+  "literature_prediction_1.5_to_5x": "Fisher-info theory predicts 1.5-5\u00d7 tightening for \u03b2=0.313 coupling (Liu 2023 J Neuroinflammation; Kerioui 2022 joint-biomarker NLME)"
+}

@@ -1,0 +1,41 @@
+% Introduction (~1000 words)
+
+Parkinson's disease (PD) is the second most common neurodegenerative disorder, affecting over 10 million individuals worldwide\cite{dorsey2018parkinson}. Despite its prevalence, PD exhibits profound clinical heterogeneity\cite{fereshtehnejad2017clinical}, with patients experiencing vastly different rates of motor decline, cognitive impairment, and autonomic dysfunction\cite{postuma2015mds}. This heterogeneity confounds clinical trials, where treatment effects may be diluted across subpopulations with distinct disease mechanisms\cite{simuni2024clinical}, and complicates clinical care, where personalized prognoses remain elusive\cite{marek2018parkinson}.
+
+\subsection*{The Challenge of Multimodal Integration}
+
+Modern PD research generates diverse data: standardized clinical assessments (\updrs, \moca), neuroimaging biomarkers (DaTscan striatal binding ratios, MRI-derived brain morphometry), genetic variants (GBA, LRRK2, APOE), and longitudinal trajectories spanning years\cite{marek2018parkinson,merchant2020longitudinal}. However, integrating these modalities into unified predictive models remains challenging. Traditional approaches analyze each modality separately\cite{fereshtehnejad2017clinical} or apply simplistic concatenation\cite{zhang2019integrative}, failing to capture complex inter-modal relationships. Machine learning methods like random forests\cite{parisi2019early} and support vector machines\cite{abos2020multimodal} achieve modest predictive performance but lack interpretability, limiting clinical adoption\cite{tjoa2020survey}.
+
+Deep learning has shown promise, with convolutional neural networks analyzing neuroimaging\cite{shen2017deep} and recurrent networks modeling longitudinal data\cite{schulam2015framework}. Yet these methods typically treat patients as independent samples, ignoring the critical insight that \textit{similar patients follow similar disease trajectories}. Graph-based approaches leverage this principle, representing patients as nodes and their similarities as edges\cite{parisot2018disease,kazi2019graph}. Graph Neural Networks (GNNs), particularly Graph Attention Networks (GATs)\cite{velickovic2018graph}, learn patient representations by aggregating information from neighbors, weighted by learned attention coefficients. This naturally models patient similarity and has demonstrated success in diverse medical applications\cite{xie2023survey}.
+
+\subsection*{The Explainability Gap}
+
+Despite their power, GNNs are often criticized as ``black boxes''\cite{tjoa2020survey,ying2019gnnexplainer}. In high-stakes medical domains, clinicians require not just predictions but \textit{explanations}: which features drive a patient's prognosis? Which similar patients inform the prediction? What interventions might alter outcomes? Recent explainable AI (XAI) methods address this, including attention visualization\cite{bahdanau2015neural}, perturbation-based methods like GNNExplainer\cite{ying2019gnnexplainer}, gradient-based attribution (IntegratedGradients\cite{sundararajan2017axiomatic}, SHAP\cite{lundberg2017unified}), and counterfactual explanations\cite{wachter2017counterfactual}. However, most XAI research focuses on \textit{single methods}, raising concerns about consistency and reliability\cite{adebayo2018sanity,krishna2022disagreement}. Medical AI demands \textit{multi-method validation}: if multiple orthogonal explainability techniques converge on the same features, confidence in clinical interpretation increases.
+
+\subsection*{Unmet Needs in PD Prognostics}
+
+Three critical gaps exist in PD research:
+
+\textbf{(1) Longitudinal Subtyping.} While clinical subtypes (tremor-dominant, akinetic-rigid) are recognized\cite{fereshtehnejad2017clinical}, data-driven discovery of \textit{progression subtypes} based on multimodal longitudinal trajectories remains underexplored. Identifying such subtypes could stratify patients for trials and inform personalized prognoses.
+
+\textbf{(2) Prodromal Prediction.} Prodromal PD—the pre-diagnostic phase with REM sleep behavior disorder (RBD), hyposmia, or genetic risk—represents a critical window for neuroprotective interventions\cite{postuma2019validation}. Yet predicting which prodromal individuals will convert to clinical PD, and on what timeline, remains challenging\cite{heinzel2018predictors}.
+
+\textbf{(3) Integrated Explainability.} Existing PD models provide predictions without systematic explainability frameworks. Clinicians need to understand \textit{why} a patient is classified as a fast progressor or high-risk converter, and whether the model's reasoning aligns with biological mechanisms.
+
+\subsection*{The GIMAN Framework}
+
+We present the \textbf{Graph-Informed Multimodal Attention Network} (\giman), a comprehensive framework that integrates multimodal PD data into a graph-based deep learning architecture and provides multi-method explainability. \giman\ addresses the three gaps above through distinct but interconnected phases:
+
+\begin{itemize}
+    \item \textbf{Phases 1-2: Data Preprocessing.} We curate clinical, imaging, and genetic data from the Parkinson's Progression Markers Initiative (\ppmi)\cite{marek2018parkinson}, implementing rigorous quality control, missing data imputation, and feature engineering.
+    
+    \item \textbf{Phase 3: Graph Construction.} We construct patient similarity graphs using k-nearest neighbors on multimodal feature embeddings, capturing clinical, imaging, and genetic similarity.
+    
+    \item \textbf{Phase 4: Longitudinal Progression Subtyping.} Using Variational Autoencoders (VAEs) to embed \updrs/\moca\ trajectories, followed by latent time alignment and unsupervised clustering, we identify three progression subtypes with distinct biomarker profiles and clinical outcomes.
+    
+    \item \textbf{Phase 5: Prodromal Conversion Prediction.} We apply Cox proportional hazards models and DeepSurv neural survival analysis to predict time-to-conversion for prodromal subjects, achieving 0.79 C-index and identifying actionable risk factors.
+    
+    \item \textbf{Phase 6: Explainability Framework.} We deploy six complementary XAI methods—attention visualization, GNNExplainer, IntegratedGradients, GradientSHAP, embedding clustering, and counterfactual optimization—demonstrating 88-95\% cross-method consensus on feature importance and providing patient-specific interpretations.
+\end{itemize}
+
+The \giman\ framework is the \textit{first comprehensive pipeline} integrating multimodal graph-based deep learning with systematic multi-method explainability for PD. Our results demonstrate clinically actionable insights: progression subtypes that reduce trial sample sizes by 38\%, prognostic models with 0.79 C-index, and explainability methods that validate the biological plausibility of learned representations. This work establishes a blueprint for interpretable precision medicine in neurodegenerative disease.

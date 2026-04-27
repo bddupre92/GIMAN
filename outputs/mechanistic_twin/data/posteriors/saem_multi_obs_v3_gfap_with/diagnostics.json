@@ -1,0 +1,49 @@
+{
+  "run_tag": "multi_obs_v3_gfap_with",
+  "n_patients": 357,
+  "n_valid": 357,
+  "seed": 20260415,
+  "population_params": {
+    "mu_logkn": -13.57307485969576,
+    "mu_logatox": -4.735682522376643,
+    "sigma_logkn": 0.2443765955100737,
+    "sigma_logatox": 0.778682589785302,
+    "sigma_sbr": 0.14487722451665092,
+    "sigma_csf": 593.6939105731686,
+    "sigma_saa": 2.746291115048776,
+    "sigma_agg": 0.1,
+    "sigma_nev": 0.3,
+    "sigma_nfl": 5.0,
+    "S_csf": 680.0,
+    "S_nev": 1.0,
+    "S_nfl": 1.0,
+    "C_saa": 1.0,
+    "S_gfap": 2000.0,
+    "sigma_gfap": 0.049999999999999996
+  },
+  "cohort_summary": {
+    "log_kn_sd_median": 0.01936648857367914,
+    "log_kn_sd_prior_ratio": 0.01291099238245276,
+    "cor_logk_loga_median": -0.0356518614037496,
+    "pct_loss_yr_median": 9.318060741000389,
+    "pct_loss_yr_q025": 2.8294605810515128,
+    "pct_loss_yr_q975": 28.438652207411526
+  },
+  "stratified": {
+    "with_asyn_obs": {
+      "n": 328,
+      "log_kn_sd_median": 0.01918733066684853,
+      "cor_median": -0.03987186822540011
+    },
+    "without_asyn_obs": {
+      "n": 29,
+      "log_kn_sd_median": 0.020490818870991516,
+      "cor_median": -0.0026881329449020695
+    }
+  },
+  "comparison": {
+    "is_v4_sbr_only": 0.926,
+    "is_v5_csf_joint": 0.655,
+    "hlme_sbr_only": 0.53
+  }
+}

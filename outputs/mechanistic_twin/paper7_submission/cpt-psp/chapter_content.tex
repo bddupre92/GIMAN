@@ -1,0 +1,276 @@
+% =============================================================================
+% Paper 7 — CPT:PSP submission body
+% Ports ch09_paper7.tex + ch09_section96_multichannel.tex into a single 4000-word
+% CPT:PSP-compliant manuscript. Target body ≤4000 words (exc. abstract, refs,
+% legends). Study Highlights + structured abstract + companion P10 forward-ref.
+% =============================================================================
+
+% ─────────────────────────────────────────────────────────────────
+% STUDY HIGHLIGHTS (CPT:PSP required, appears before abstract)
+% ─────────────────────────────────────────────────────────────────
+\begin{studyhighlights}
+\textbf{WHAT IS THE CURRENT KNOWLEDGE ON THE TOPIC?}\\
+Quantitative systems pharmacology of Parkinson's disease (PD) is limited to population-level or \textit{in vitro} $\alpha$-synuclein ODE calibrations~\cite{veronneau2020,ivanova2024,righetti2025}; no published study has calibrated a compartmental $\alpha$-synuclein aggregation--neuron death ODE to individual PD patients from longitudinal neuroimaging with formal structural and practical identifiability analysis.
+
+\vspace{0.3em}\textbf{WHAT QUESTION DID THIS STUDY ADDRESS?}\\
+Can a coupled $[M,O,F,N]$ ODE---$\alpha$-synuclein monomer, oligomer, fibril, and dopaminergic neuron count---be calibrated per patient from PPMI data under slow--fast timescale collapse, and does adding CSF $\alpha$-synuclein and multi-channel biomarkers (GFAP, NfL, Amprion SAA TTT, neuron-derived extracellular-vesicle $\alpha$-syn) break the $k_n$--$\alpha_\text{tox}$ identifiability ridge?
+
+\vspace{0.3em}\textbf{WHAT DOES THIS STUDY ADD TO OUR KNOWLEDGE?}\\
+We deliver the first per-patient Bayesian posterior (importance sampling, 50\,000 draws per subject, $n{=}304$) over $(k_n, \alpha_\text{tox})$ in PD. Adding CSF $\alpha$-synuclein reduces the $k_n$--$\alpha_\text{tox}$ correlation from $-0.240$ to $-0.113$ and tightens individual $k_n$ posteriors by 29\% cohort-wide (49\% on high-information subset). A 5-channel SAEM extension on 2{,}118 patients delivers a matched-cohort GFAP ablation that narrows $\sigma_{\log k_n}$ by $37\times$ and sharpens the full-ODE Fisher-Information-Matrix condition number from $\kappa \approx 10^{12}$ (steady-state) to $\kappa = 19.86$ (transient). Leave-one-out forward-simulation coverage is 97.9\% at 95\% prediction interval across 1{,}940 held-out scans.
+
+\vspace{0.3em}\textbf{HOW MIGHT THIS CHANGE CLINICAL PHARMACOLOGY OR TRANSLATIONAL SCIENCE?}\\
+Per-patient posteriors enable falsifiable counterfactuals: a calibrated prasinezumab simulation ($\eta_\text{abx} = 0.15$) predicts 17.6\% slowing of SBR decline, an effect size below detection at PASADENA's 52-week sample size and consistent with its null imaging endpoint~\cite{pagano2022}. The per-patient $T_\text{tox} = \alpha_\text{tox}\,k_n M_\text{ss}^2/(k_\text{conv}+k_\text{clear}^O)$ quantifies the minimum detectable effect at any sample size, supporting enrichment-based adaptive designs for disease-modifying antibody trials.
+\end{studyhighlights}
+
+% ─────────────────────────────────────────────────────────────────
+% STRUCTURED ABSTRACT (CPT:PSP required, ≤250 words)
+% ─────────────────────────────────────────────────────────────────
+\subsubsection*{Abstract}
+
+\noindent\textbf{Background.}
+Parkinson's disease mechanistic models have not been calibrated per patient with formal identifiability analysis, limiting counterfactual inference.
+
+\noindent\textbf{Methods.}
+We calibrated a four-state $[M,O,F,N]$ coupled $\alpha$-synuclein--neuron-death ODE to PPMI longitudinal DaT-SPECT via importance sampling under slow--fast timescale collapse ($n{=}304$ Wave~A), extended to joint DaT + CSF $\alpha$-synuclein ($n{=}277$), and then to population-level SAEM on five observation channels (DaT + plasma GFAP + serum NfL + Amprion SAA TTT + neuron-derived-vesicle $\alpha$-syn) across $n{=}2{,}118$. Structural identifiability was verified with the Julia package \texttt{Structural\-Identifiability.jl}; practical identifiability was assessed by profile-likelihood analysis and Fisher-information-matrix (FIM) conditioning.
+
+\noindent\textbf{Results.}
+Cohort-median implied neuron loss was 3.29\%/yr (SBR-only) and 2.93\%/yr (SBR+CSF), within the Fearnley \& Lees canonical 2--5\%/yr range. CSF addition reduced the $k_n$--$\alpha_\text{tox}$ posterior correlation from $-0.240$ to $-0.113$ and tightened $k_n$ by 29\% cohort-wide (49\% on HIGH-INFO patients). The 5-channel SAEM sharpened the full-ODE FIM condition number to $\kappa = 19.86$ (versus $\kappa \approx 10^{12}$ steady-state), with a matched-cohort GFAP ablation contributing a $37\times$ reduction in $\sigma_{\log k_n}$. Leave-one-out forward coverage was 97.9\% at 95\% prediction interval (1{,}940 scans). The prasinezumab counterfactual predicted 17.6\% SBR-decline slowing, below PASADENA's detection threshold---consistent with its null imaging endpoint.
+
+\noindent\textbf{Discussion.}
+Per-patient Bayesian posteriors over a compartmental PD ODE are identifiable when paired with transient-state multi-channel observations, and deliver falsifiable counterfactuals for disease-modifying-therapy trial design.
+
+\vspace{0.4em}\noindent\textbf{Keywords:} Parkinson's disease; $\alpha$-synuclein; ODE calibration; identifiability; importance sampling; SAEM; DaT-SPECT; GFAP; counterfactual simulation
+
+\newpage
+
+% ─────────────────────────────────────────────────────────────────
+% INTRODUCTION
+% ─────────────────────────────────────────────────────────────────
+\section{Introduction}
+\label{p7:sec:intro}
+
+Parkinson's disease (PD) is driven at the molecular level by $\alpha$-synuclein aggregation into toxic oligomeric and fibrillar species that precipitate progressive nigrostriatal dopaminergic neuron loss~\cite{calabresi2023}. The Neuronal $\alpha$-Synuclein Disease Integrated Staging System (NSD-ISS)~\cite{simuni2024} provides a biological classification for PD using seed amplification assay positivity (S anchor) and dopaminergic deficit on DaT-SPECT (D anchor), but does not specify a mechanistic model of \emph{why} patients transition between stages or \emph{when} transitions will occur. Several groups have proposed frameworks for mechanistic PD models~\cite{denaro2024,bakshi2018}, but to date no published study has calibrated a compartmental $\alpha$-synuclein ODE to individual patients from longitudinal neuroimaging with formal identifiability analysis. Adjacent recent work includes Hemedan~et~al.~\cite{hemedan2026} (governed Bayesian twin on PPMI clinical scores without a compartmental kinetic model), Ivanova \& Karelina~\cite{ivanova2024} (mouse population QSP), and Righetti~et~al.~\cite{righetti2025} (\textit{in vitro} $\alpha$-synuclein ODE). None combines (i) a compartmental $[M,O,F,N]$ state space with (ii) per-patient Bayesian calibration from (iii) longitudinal DaT-SPECT with (iv) formal structural and practical identifiability analysis and (v) a second biomarker observable for degeneracy breaking.
+
+Our primary question was whether a per-patient Bayesian posterior over $\alpha$-synuclein aggregation nucleation ($k_n$) and neurotoxicity coupling ($\alpha_\text{tox}$) can be identified from longitudinal DaT-SPECT and CSF $\alpha$-synuclein in the Parkinson's Progression Markers Initiative (PPMI), and whether it delivers counterfactual predictions consistent with the PASADENA null imaging endpoint~\cite{pagano2022}. A secondary question, addressed by a 5-channel extension (\S\ref{p7:sec:multichannel}), is whether adding plasma GFAP, serum NfL, Amprion SAA titre-time-to-threshold (TTT), and neuron-derived extracellular-vesicle (NEV) $\alpha$-synuclein on a larger cohort ($n{=}2{,}118$) delivers additional identifiability gains via matched-cohort biomarker ablation.
+
+% ─────────────────────────────────────────────────────────────────
+% METHODS
+% ─────────────────────────────────────────────────────────────────
+\section{Methods}
+\label{p7:sec:methods}
+
+\subsection*{Coupled ODE Framework (Variant~B)}
+
+The model tracks $\alpha$-synuclein monomer ($M$), oligomer ($O$), fibril ($F$), and neuron count ($N$):
+\begin{align}
+\frac{dM}{dt} &= k_\text{prod} - k_\text{clear}^M M - k_n M^2 - k_e M F \label{p7:eq:dMdt} \\
+\frac{dO}{dt} &= k_n M^2 - k_\text{conv} O - k_\text{clear}^O O \label{p7:eq:dOdt} \\
+\frac{dF}{dt} &= k_\text{conv} O - k_\text{clear}^F F \label{p7:eq:dFdt} \\
+\frac{d\log(N/N_0)}{dt} &= -(\alpha_\text{tox} O + k_\text{age}) \label{p7:eq:dlogNdt}
+\end{align}
+Equation~\eqref{p7:eq:dFdt} is the \textbf{Variant~B mass-conserving formulation}, which removes a fragmentation-as-mass-creation error ($k_\text{frag}F$ in the naive single-state adaptation of the Cohen--Knowles framework~\cite{cohen2012,knowles2009}) that caused $F \to 10^{75}$~nM at $t{=}4$~years in the initial implementation. The log-$N$ transform (Eq.~\eqref{p7:eq:dlogNdt}) enforces neuron-count positivity by construction.
+
+Under slow--fast timescale collapse ($M,O,F$ equilibrate in hours; $N$ relaxes over years), the SBR observation follows a closed-form exponential decay:
+\begin{equation}
+\text{SBR}(t) = \text{SBR}_0 \cdot \exp\bigl(-\gamma\,(\alpha_\text{tox}\,O_\text{ss} + k_\text{age})\,t\bigr)
+\label{p7:eq:sbr-decay}
+\end{equation}
+with $\gamma = 0.7$ and the toxicity flux composite $T_\text{tox} = \alpha_\text{tox}\,k_n M_\text{ss}^2 / (k_\text{conv} + k_\text{clear}^O)$ governing the SBR decline rate.
+
+\subsection*{Structural and Practical Identifiability}
+
+\texttt{StructuralIdentifiability.jl} (v0.5.19), cross-validated with \texttt{SIAN.jl}, confirmed the reduced 2-parameter fit set $(k_n, \alpha_\text{tox})$ is globally identifiable from SBR alone~\cite{villaverde2016}. Under slow--fast collapse, however, SBR depends only on the product $T_\text{tox}$, so individual $k_n$ and $\alpha_\text{tox}$ are practically non-identifiable from SBR alone~\cite{gutenkunst2007,transtrum2015}---the classical structural-vs-practical distinction~\cite{raue2009}. Adding CSF $\alpha$-synuclein as a second observable was motivated by this diagnosis. Full identifiability tables and profile-likelihood plots are provided as Supporting Information~(SI~\S1).
+
+\subsection*{Importance-Sampling Posterior}
+
+Single-chain NUTS sampling produced false-positive convergence ($\hat{R}{<}1.05$) on prior-dominated posteriors~\cite{vehtari2021rhat}. We replaced NUTS with importance sampling (IS)~\cite{liu1998is}: 50\,000 draws from log-normal priors ($k_n \sim \text{LogNormal}(\log 10^{-4}, 1.5)$; $\alpha_\text{tox} \sim \text{LogNormal}(\log 1.8{\times}10^{-5}, 2.0)$) weighted by the closed-form Gaussian SBR log-likelihood ($\sigma_\text{SBR} = 0.20$, the empirical within-patient residual SD from PPMI serial DaT-SPECT). Effective-sample-size (ESS) fraction is the IS-native convergence diagnostic. The $\alpha_\text{tox}$ prior centre ($1.8{\times}10^{-5}$~nM$^{-1}$\,hr$^{-1}$) was triangulated from Ivanova \& Karelina~\cite{ivanova2024} ($\sim 2.7{\times}10^{-6}$), Winner~et~al.~(\citealp{cohen2012}-adjacent LC50, $\sim 2.9{\times}10^{-5}$), and Fearnley \& Lees~\cite{fearnley1991} back-solve ($\sim 1.1{\times}10^{-4}$). Because the Fearnley \& Lees 2--5\%/yr range informed the prior, posterior concordance with this range should be interpreted as \emph{consistency}, not independent validation.
+
+\subsection*{CSF $\alpha$-Synuclein Joint Calibration}
+
+Of 304 Wave~A patients, 277 (91.1\%) have CSF total $\alpha$-synuclein (median 5 timepoints, 1{,}243 total measurements). Under slow--fast collapse, CSF total $\alpha$-syn is time-invariant~\cite{mollenhauer2017csf}:
+\begin{equation}
+y_\text{CSF} \sim \mathcal{N}\bigl(S_\text{CSF}(M_\text{ss} + r_o\,O_\text{ss}(k_n)),\ \sigma_\text{CSF}^2\bigr)
+\label{p7:eq:csf-obs}
+\end{equation}
+with $S_\text{CSF} = 682$~pg/mL per model-nM, $\sigma_\text{CSF} = 315$~pg/mL, and $r_o = 1.0$ (ELISA oligomer cross-reactivity, fixed as an assay property~\cite{petricca2022,koehler2008}).
+
+\subsection*{5-Channel SAEM Extension}
+
+To scale identifiability beyond the 304-patient Wave~A cohort, we assembled a 2{,}118-patient 5-channel observation set: DaT-SPECT SBR (all), plasma GFAP Simoa (Project~152, $n{=}371$), Amprion SAA TTT (Project~207, $n{=}164$), neuron-derived extracellular-vesicle $\alpha$-syn (Project~204, $n{=}521$), and plasma aggregate-\% (Project~286, $n{=}100$); serum NfL (Project~144, $n{=}1{,}190$) was held out as a negative control. We fit population-level SAEM with hierarchical pooling on $(k_n, \alpha_\text{tox})$, channel-specific scale factors $S_\text{ch}$, and between-subject variability $\omega^2_{k_n}$. Matched-cohort ablation (357 patients with SBR + GFAP paired) quantified the identifiability contribution of each channel. Fisher-Information-Matrix (FIM) eigenvalue analysis under the full transient ODE versus the quasi-steady-state approximation characterises the condition number $\kappa$.
+
+\subsection*{Leave-One-Out Forward Validation}
+
+For each patient with $\geq 3$ SBR scans, we held out each scan in turn, refit the posterior on the remainder, and computed the 95\% prediction interval for the held-out scan using the Variant~B forward model. Coverage, median relative error, and continuous ranked probability score (CRPS)~\cite{gneiting2007jasa} were aggregated across 1{,}940 held-out scans from 1{,}051 patients.
+
+\subsection*{Prasinezumab Counterfactual}
+
+Anti-$\alpha$-synuclein antibodies act by extracellular aggregate sequestration, not $k_e$ perturbation~\cite{jankovic2018}. The counterfactual applies $T_\text{tox}^\text{treated} = (1-\eta_\text{abx})\,T_\text{tox}^\text{untreated}$, with $\eta_\text{abx} \in \{0.05, 0.15, 0.35\}$; the moderate scenario ($\eta_\text{abx}=0.15$) is a plausible mid-range value, the upper bound approximates the 4-year open-label-extension subgroup analysis~\cite{pagano2024}. Predicted delay to 50\% SBR decline was computed under each scenario on the HIGH-INFO subset ($n{=}110$).
+
+% ─────────────────────────────────────────────────────────────────
+% RESULTS
+% ─────────────────────────────────────────────────────────────────
+\section{Results}
+\label{p7:sec:results}
+
+\subsection*{Wave~A SBR-Only Posterior (304 Patients)}
+
+The IS posterior on 304 Wave~A patients produced cohort-median implied neuron loss of 3.29\%/yr (IQR 1.4--12.0\%/yr), consistent with the Fearnley \& Lees canonical 2--5\%/yr range (Table~\ref{p7:tab:strata}; note prior disclosure, \S\ref{p7:sec:methods}). Under slow--fast collapse the SBR-only ODE is observationally equivalent to single-parameter exponential decay; the mechanistic framework adds value only once a second biomarker provides an independent constraint on $k_n$.
+
+\begin{table}[H]
+\centering
+\small
+\caption{SBR-only IS posterior stratified by effective-sample-size (ESS) fraction ($n{=}304$).}
+\label{p7:tab:strata}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Stratum} & $N$ & cor(log~$k_n$, log~$\alpha_\text{tox}$) & $T_\text{tox}$ SD (log$_{10}$) & \%/yr \\
+\midrule
+HIGH-INFO (ESS$<$20\%) & 33  & $-0.852$ & 0.29 & 21.4 \\
+MOD-INFO (20--50\%)   & 64  & $-0.382$ & 0.71 & 12.0 \\
+LOW-INFO ($\geq$50\%)  & 207 & $-0.209$ & 0.87 & 1.7  \\
+\textbf{All}           & \textbf{304} & $-0.234$ & 0.85 & \textbf{3.29} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{CSF Joint Calibration Breaks the Degeneracy (277 Patients)}
+
+Adding CSF total $\alpha$-synuclein as a second observable partially broke the $T_\text{tox}$ sloppy-ridge degeneracy (Figure~\ref{p7:fig:degeneracy}, Table~\ref{p7:tab:degeneracy}). The $k_n$--$\alpha_\text{tox}$ correlation shifted from $-0.240$ to $-0.113$ (96.0\% of patients improved), individual $k_n$ posteriors tightened by 29\% cohort-wide and 49\% on the HIGH-INFO subset ($n{=}106$ under v5), and the cohort-median implied loss moved to 2.93\%/yr. A paired Wilcoxon signed-rank test confirmed statistical significance ($p = 1.3{\times}10^{-46}$; $k_n$-tightening $p = 1.8{\times}10^{-47}$). Posterior-predictive coverage was 99.5\% at 95\% PI, satisfying the non-regression criterion though indicating $\sim$2.5$\times$ over-coverage relative to ideal calibration. The residual correlation ($-0.113$) reflects the $\sim$5\% oligomeric contribution to CSF total $\alpha$-syn at typical $k_n$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{p7_fig2_degeneracy_breaking.pdf}
+\caption{\textbf{CSF $\alpha$-synuclein breaks the sloppy-ridge degeneracy.} \textbf{(A)}~Correlation shift: 96\% of patients move above the $y{=}x$ diagonal toward zero correlation. \textbf{(B)}~$k_n$-posterior tightening: 100\% of patients fall below $y{=}x$ (tighter under v5). \textbf{(C)}~Summary comparison across metrics (v4 SBR-only vs.\ v5 SBR+CSF).}
+\label{p7:fig:degeneracy}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Degeneracy-breaking: SBR-only (v4) vs.\ joint SBR+CSF (v5).}
+\label{p7:tab:degeneracy}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Metric} & \textbf{v4 (SBR)} & \textbf{v5 (SBR+CSF)} & \textbf{Interpretation} \\
+\midrule
+cor(log~$k_n$, log~$\alpha_\text{tox}$) & $-0.240$ & $-0.113$ & Moves toward zero \\
+$k_n$ SD / prior SD                     & $0.926$  & $0.655$  & 29\% tighter \\
+HIGH-INFO $k_n$ ratio                   & $0.883$  & $0.447$  & 49\% tighter \\
+Implied \%/yr                           & $3.29$   & $2.93$   & Fearnley range \\
+\% patients $k_n$ tighter               & ---      & $100\%$  & Universal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Per-Patient Posterior-Predictive Check}
+
+Figure~\ref{p7:fig:ppc} presents posterior-predictive-check panels for three representative Wave~A patients selected by IS-weighted posterior mean neuron-loss rate (2.3\%/yr, 4.8\%/yr, 24.3\%/yr---slow, typical, fast). Each panel overlays observed putaminal SBR measurements on a forward-simulation envelope from 500 weighted posterior samples propagated through Eqs.~\eqref{p7:eq:dMdt}--\eqref{p7:eq:sbr-decay}. The 90\% posterior-predictive band widens with extrapolation horizon, correctly reflecting compounding parameter uncertainty; observed measurements sit within the band in all three exemplars. The fast-progressor panel shows the clinically actionable regime: separation between the posterior median and the $T_\text{tox}{=}0$ baseline widens rapidly after year~2, implying a disease-modifying intervention delivered at that horizon would become detectable in DaT-SPECT within the predictive envelope.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{p7_fig3_per_patient_ppc.pdf}
+\caption{\textbf{Per-patient posterior-predictive check.} Three representative PPMI Wave~A patients: slow (2.3\%/yr), typical (4.8\%/yr), and fast (24.3\%/yr). Red markers: observed putaminal SBR. Solid line: posterior median trajectory. Shaded band: 90\% posterior-predictive band from 500 weighted samples of $(k_n, \alpha_\text{tox})$ forward-simulated on a 10-year grid with the Variant~B slow--fast-collapse forward model.}
+\label{p7:fig:ppc}
+\end{figure}
+
+\subsection*{Multi-Channel SAEM Extension ($n{=}2{,}118$)}
+\label{p7:sec:multichannel}
+
+To scale identifiability beyond Wave~A, we fit a 5-channel SAEM population model on 2{,}118 PPMI patients across 8{,}032 visits (Figure~\ref{p7:fig:channels}). Two methodological results warrant emphasis.
+
+\emph{First, transient-state observations are necessary for identifiability.} The full-ODE FIM condition number was $\kappa = 19.86$ with an eigenvalue spread of 1.30~decades, versus $\kappa \approx 10^{12}$ for the quasi-steady-state approximation (Figure~\ref{p7:fig:fim}). Steady-state models are structurally indistinguishable from single-parameter exponential decay; only transient observations break the degeneracy between $k_n$ and $\alpha_\text{tox}$. This FIM audit provides the first quantitative PD-specific comparison of identifiability under steady-state versus transient-state observation models.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{p7_fig1_channel_map.pdf}
+\caption{\textbf{Five-channel observation schematic for multi-channel SAEM.} DaT-SPECT SBR, plasma GFAP (Simoa), Amprion SAA titre-time-to-threshold (TTT), neuron-derived extracellular-vesicle $\alpha$-synuclein, and plasma aggregate-\%. Serum NfL was held out as a negative control for nigrostriatal specificity.}
+\label{p7:fig:channels}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{p7_fig4_fim_ablation.pdf}
+\caption{\textbf{Fisher-Information-Matrix identifiability audit.} \textbf{(A)}~Eigenvalue spectrum under full transient ODE (left) vs.\ quasi-steady-state approximation (right); condition number $\kappa = 19.86$ versus $\kappa \approx 10^{12}$. \textbf{(B)}~Per-channel contribution: matched-cohort GFAP ablation reduces $\sigma_{\log k_n}$ by $37\times$ (0.725 $\to$ 0.019) on 357 patients with paired SBR + GFAP measurements.}
+\label{p7:fig:fim}
+\end{figure}
+
+\emph{Second, plasma GFAP carries the dominant per-channel identifiability signal in PD.} A matched-cohort ablation on 357 patients with paired SBR + GFAP measurements contracted $\sigma_{\log k_n}$ by $37\times$ (from 0.725 to 0.019; Figure~\ref{p7:fig:fim}B), while a pre-specified falsification test on held-out serum NfL showed near-zero correlation with the inferred $T_\text{tox}$ trajectory ($R^2 = 0.005$, SI~Figure~S4). The NfL null was predicted \emph{a priori}: serum NfL is dominated by cortical-axon signal~\cite{mollenhauer2019longitudinal,backstrom2020nfl,sampedro2020nfl}, not nigrostriatal dopaminergic cell death, and the correctly-predicted null is a positive specificity result. Cohort-median implied loss under the 5-channel SAEM was 1.49\%/yr (versus 3.29\%/yr under Wave~A SBR-only), reflecting the prodromal/de-novo-heavy composition of the 2{,}118-patient cohort~\cite{marek2018ppmi}. The $k_n$--$\alpha_\text{tox}$ posterior correlation collapsed to $-0.007$ via hierarchical pooling~\cite{veronneau2020}.
+
+\subsection*{Leave-One-Out Forward Validation (1{,}940 Scans)}
+
+Leave-one-out forward-simulation coverage was 97.9\% at the 95\% prediction interval across 1{,}940 held-out scans from 1{,}051 patients (Figure~\ref{p7:fig:loo}). Median relative error was 14.4\%, within the 7.8--16.8\% range of published DaT-SPECT test-retest~\cite{buchert2020ejnmmi,seibyl1997jnm,kerstens2023}, and sharpness (continuous ranked probability score)~\cite{gneiting2007jasa} remained stable across the 0.5--5-year extrapolation horizon.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{p7_fig5_loo_coverage.pdf}
+\caption{\textbf{Leave-one-out forward-validation coverage.} \textbf{(A)}~Coverage by extrapolation horizon across 1{,}940 held-out scans (1{,}051 patients). \textbf{(B)}~Median relative error by horizon; shaded band is the 7.8--16.8\% DaT-SPECT test-retest range. \textbf{(C)}~Continuous ranked probability score (sharpness) across horizons.}
+\label{p7:fig:loo}
+\end{figure}
+
+\subsection*{Prasinezumab Counterfactual}
+
+On the HIGH-INFO subset ($n{=}110$, untreated time-to-50\%-SBR-decline $\approx$7.0 years), the moderate prasinezumab scenario ($\eta_\text{abx} = 0.15$) predicted a +1.24-year delay (Figure~\ref{p7:fig:counterfactual}, Table~\ref{p7:tab:counterfactual}). The predicted 17.6\% slowing corresponds to an effect size $d \approx 0.055$, far below detection at PASADENA's $n{=}105$/arm and 52-week duration---consistent with its null imaging endpoint~\cite{pagano2022}. The model would be falsified by a future trial demonstrating $>30\%$ SBR-decline slowing, which would require $\eta_\text{abx} > 0.23$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{p7_fig6_counterfactual.pdf}
+\caption{\textbf{Prasinezumab counterfactual simulation.} \textbf{(A)}~Delay distribution across three $\eta_\text{abx}$ scenarios for HIGH-INFO patients ($n{=}110$). \textbf{(B)}~Median trajectory under moderate treatment ($\eta_\text{abx}=0.15$), with $T_\text{tox}=0$ baseline and untreated posterior median shown for reference.}
+\label{p7:fig:counterfactual}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Counterfactual: predicted delay in time-to-50\% SBR decline on HIGH-INFO subset ($n{=}110$).}
+\label{p7:tab:counterfactual}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Scenario} & $\eta_\text{abx}$ & \textbf{Delay (yr)} & \textbf{\% slowing} \\
+\midrule
+A (minimal)    & 0.05 & 0.37          & 5.3\%  \\
+B (moderate)   & 0.15 & \textbf{1.24} & \textbf{17.6\%} \\
+C (optimistic) & 0.35 & 3.77          & 53.8\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────
+% DISCUSSION
+% ─────────────────────────────────────────────────────────────────
+\section{Discussion}
+\label{p7:sec:discussion}
+
+\textbf{Scope and terminology.} We use ``mechanistic patient-specific model'' rather than ``digital twin'' to describe the current framework, because a clinical-grade digital twin would additionally require drug PK/PD coupling, connectome-mediated spatial propagation, and prospective validation against interventional data. The present work establishes the foundational calibration infrastructure.
+
+\textbf{Principal findings.} First, a per-patient IS posterior over $(k_n, \alpha_\text{tox})$ is obtainable under slow--fast collapse, and its cohort-median implied neuron loss sits within the Fearnley \& Lees 2--5\%/yr canonical range, indicating that the ODE captures real inter-patient disease heterogeneity. Second, CSF $\alpha$-synuclein as a second observable partially resolves the sloppy-ridge degeneracy, separating nucleation from neurotoxicity coupling at the individual-patient scale; future oligomeric-specific assays~\cite{majbour2016} could further tighten this separation. Third, the 5-channel SAEM extension on 2{,}118 patients demonstrates that transient-state multi-channel observations are \emph{necessary} for identifiability: quasi-steady-state approximations yield $\kappa \approx 10^{12}$ (structurally sloppy), whereas the full transient ODE with multi-channel observations yields $\kappa = 19.86$. Fourth, the calibrated counterfactual is consistent with the PASADENA null imaging endpoint, correctly predicting an effect size below detection at the trial's sample size and duration.
+
+\textbf{Comparison with prior pharmacometric PD models.} Gupta~et~al.~\cite{gupta2025} deliver the closest prior PPMI pharmacometric model (item-response-theory on MDS-UPDRS) but do not expose internal $[M,O,F,N]$ compartments or carry an identifiability audit. Koval~et~al.~\cite{koval2021admap} pioneered SAEM for disease-progression modelling in Alzheimer's disease at the same scale, but the AD Course Map is phenomenological rather than compartmental. V\'eronneau-Veilleux~et~al.~\cite{veronneau2020,veronneau2020chaos,veronneau2020integrative} and Ivanova \& Karelina~\cite{ivanova2024} calibrate compartmental PD ODEs at the population level only. Hemedan~et~al.~\cite{hemedan2026} provides a governed Bayesian PD twin on PPMI clinical scores but without a compartmental kinetic model. No prior PD study combines per-patient Bayesian calibration, structural+practical identifiability, and multi-channel transient-state observations.
+
+\textbf{Forward reference to bidirectional update.} A companion paper operationalises episodic bidirectional posterior updating on new DaT-SPECT observations via a Sequential Importance Resampling wrapper around the Phase~2 posteriors reported here, enabling per-visit refresh of individual $(k_n, \alpha_\text{tox})$ without full recalibration, and scores the integrated system against the NASEM~2024 digital-twin criteria (submitted separately). The per-patient posteriors produced by the present work are the direct computational input to that bidirectional update.
+
+\textbf{Limitations.} The slow--fast collapse treats $M, O, F$ as instantaneously equilibrated; CSF temporal stationarity may break down beyond 36~months; the fixed $S_\text{CSF}$ assumes uniform CSF-to-intracellular ratios; posterior-predictive coverage (99.5\%) is computed on training data rather than LOO for the Wave~A cohort specifically (the multi-channel LOO at 97.9\% is the held-out validation); the counterfactual uses a phenomenological $\eta_\text{abx}$ rather than mechanistic PK/PD; PPMI is currently the only public dataset with both serial DaT-SPECT and CSF $\alpha$-syn; and IS requires a closed-form likelihood. Detailed per-limitation commentary is provided in SI~\S6.
+
+\textbf{Clinical implication.} The per-patient $T_\text{tox}$ posterior directly supports enrichment-based adaptive trial design for anti-$\alpha$-synuclein disease-modifying therapies: given a target detection threshold, posterior tail mass quantifies the minimum effect size detectable at a specified sample size, enabling pre-enrollment enrichment for HIGH-INFO rapid progressors in whom a treatment effect is most likely to rise above imaging noise.
+
+% ─────────────────────────────────────────────────────────────────
+% CPT:PSP REQUIRED STATEMENTS
+% ─────────────────────────────────────────────────────────────────
+\section*{Data Sharing Statement}
+
+PPMI source data are available to credentialled investigators under a Data Use Agreement at \url{https://www.ppmi-info.org/access-data-specimens/download-data}. Derived posteriors, chains, FIM audits, and LOO validation artefacts are archived at \url{https://github.com/bddupre92/PD_PHD} and will be deposited with a Zenodo DOI at acceptance.
+
+\section*{Conflict of Interest}
+
+The author declares no competing interests.
+
+\section*{Author Contributions}
+
+B.D.D.: conceptualization, methodology, software, validation, formal analysis, investigation, data curation, writing (original draft), writing (review \& editing), visualization.
+
+\section*{Funding}
+
+Dissertation research supported by the Department of Biomedical Engineering, University of North Dakota.
+
+\section*{Acknowledgements}
+
+The author thanks PPMI participants and investigators. PPMI is sponsored by the Michael~J.~Fox Foundation for Parkinson's Research.

@@ -157,11 +157,11 @@ class RealDataPhase3Integration:
         )
         self.patient_ids = valid_patients  # Update to only valid patients
 
-        # Normalize embeddings
-        self.spatiotemporal_embeddings = (
-            self.spatiotemporal_embeddings
-            / np.linalg.norm(self.spatiotemporal_embeddings, axis=1, keepdims=True)
-        )
+        # Normalize embeddings with safe epsilon guard (prevents divide-by-zero NaN/Inf)
+        norms = np.linalg.norm(self.spatiotemporal_embeddings, axis=1, keepdims=True)
+        epsilon = 1e-8
+        safe_norms = np.maximum(norms, epsilon)
+        self.spatiotemporal_embeddings = self.spatiotemporal_embeddings / safe_norms
 
         logger.info(
             f"✅ Spatiotemporal embeddings: {self.spatiotemporal_embeddings.shape}"
@@ -346,8 +346,15 @@ class RealDataPhase3Integration:
             [self.spatiotemporal_embeddings, self.genomic_embeddings], axis=1
         )
 
-        # Handle NaN values by replacing with zero
-        combined_embeddings = np.nan_to_num(combined_embeddings, nan=0.0)
+        # Fail fast on corrupted embeddings instead of silently laundering NaN/Inf.
+        nan_count = int(np.isnan(combined_embeddings).sum())
+        inf_count = int(np.isinf(combined_embeddings).sum())
+        if nan_count or inf_count:
+            raise ValueError(
+                "Non-finite values in combined embeddings prior to graph construction "
+                f"(nan={nan_count}, inf={inf_count}). "
+                "Fix upstream embedding generation instead of replacing values."
+            )
 
         # Calculate cosine similarity matrix
         from sklearn.metrics.pairwise import cosine_similarity
@@ -581,11 +588,10 @@ class RealDataPhase3Integration:
                 nan_count = np.isnan(data).sum()
                 inf_count = np.isinf(data).sum()
                 if nan_count > 0 or inf_count > 0:
-                    logger.warning(
-                        f"   {name}: {nan_count} NaN, {inf_count} Inf values"
+                    raise ValueError(
+                        f"{name} contains non-finite values (nan={nan_count}, inf={inf_count}). "
+                        "Stop training and fix preprocessing/imputation."
                     )
-                    # Replace NaN/Inf with zeros
-                    data = np.nan_to_num(data, nan=0.0, posinf=0.0, neginf=0.0)
 
         # Check class balance
         if self.prognostic_targets is not None:

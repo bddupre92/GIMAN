@@ -1,0 +1,45 @@
+# Full clinical feature configuration for True GIMAN
+# Includes disease-state features (NP3TOT, NP1RTOT, NHY, MCATOT) as a 7th modality
+#
+# Justification: Baseline MDS-UPDRS III scores in PRODROMAL patients capture
+# subthreshold parkinsonism that is predictive of phenoconversion.
+# This is supported by:
+#   - PARCAS cohort 5-year follow-up (Frontiers in Neurology, 2025)
+#   - iRBD phenoconversion prediction (PMC12015906)
+#   - PPMI progression markers initiative design
+#
+# CRITICAL: Only valid when training on prodromal-only cohort (no early PD merge).
+# Using these features WITH early PD patients constitutes data leakage.
+#
+# DAT-SPECT SBR is excluded — not available for prodromal patients in PPMI.
+
+modalities:
+  genetic:
+    features: [LRRK2, GBA, APOE_E4, SNCA, GENETIC_RISK_SCORE]
+    dim: 5
+
+  expanded_clinical:
+    features: [UPDRS_I, UPDRS_II, SCHWAB_ENGLAND, PIGD_SCORE, TREMOR_SCORE]
+    dim: 5
+
+  structural_imaging:
+    features: [CAUDATE_L_VOL, CAUDATE_R_VOL, PUTAMEN_L_VOL, PUTAMEN_R_VOL, HIPPOCAMPUS_L_VOL, HIPPOCAMPUS_R_VOL]
+    dim: 6
+
+  csf_biomarkers:
+    features: [ALPHA_SYNUCLEIN, TAU, ABETA42, PTAU181]
+    dim: 4
+
+  clinical_biomarkers:
+    features: [UPSIT_SCORE, RBD_SCORE, SCOPA_AUT_SCORE, ESS_SCORE]
+    dim: 4
+
+  cortical_thickness:
+    features: [ENTORHINAL_L_CTH, ENTORHINAL_R_CTH, CINGULATE_L_CTH, CINGULATE_R_CTH, PRECENTRAL_L_CTH, PRECENTRAL_R_CTH]
+    dim: 6
+
+  motor_cognitive:
+    features: [NP3TOT, NP1RTOT, NHY, MCATOT]
+    dim: 4
+
+total_features: 34

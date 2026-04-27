@@ -1,0 +1,89 @@
+{
+  "title": "Paper 1 R2 \u2014 Venuto-imputed 4-stratum NSD+ AUC analysis (Q.E.D. OPTION 1, Phase 1)",
+  "n_full_cohort": 779,
+  "n_nsd_positive": 779,
+  "headline_21feat_nsd_5fold": {
+    "fold_auc_mean": 0.9059635624252895,
+    "fold_auc_std": 0.017249299041305205,
+    "pooled_oof_auc": 0.9060697942170568
+  },
+  "per_stratum_auc_on_nsd_positive_subset": {
+    "S+D+": {
+      "n": 271,
+      "n_imputed": 236,
+      "n_classes_in_stratum": 4,
+      "stage_distribution": {
+        "2": 202,
+        "1": 66,
+        "3": 2,
+        "0": 1
+      },
+      "macro_auc_bootstrap": {
+        "mean": 0.9116778497202103,
+        "ci_lo": 0.8859874280174865,
+        "ci_hi": 0.9388151342202997
+      },
+      "predicted_class_share": {
+        "argmax_class_0_share": 0.007380073800738007,
+        "argmax_class_1_share": 0.2952029520295203,
+        "argmax_class_2_share": 0.6974169741697417,
+        "argmax_class_3_share": 0.0
+      }
+    },
+    "S+D-": {
+      "n": 39,
+      "n_imputed": 0,
+      "n_classes_in_stratum": 3,
+      "stage_distribution": {
+        "1": 19,
+        "2": 13,
+        "0": 7
+      },
+      "macro_auc_bootstrap": {
+        "mean": NaN,
+        "ci_lo": NaN,
+        "ci_hi": NaN
+      },
+      "predicted_class_share": {
+        "argmax_class_0_share": 0.1794871794871795,
+        "argmax_class_1_share": 0.46153846153846156,
+        "argmax_class_2_share": 0.358974358974359,
+        "argmax_class_3_share": 0.0
+      }
+    },
+    "S-D+": {
+      "n": 52,
+      "n_imputed": 22,
+      "n_classes_in_stratum": 2,
+      "stage_distribution": {
+        "2": 32,
+        "1": 20
+      },
+      "macro_auc_bootstrap": {
+        "mean": NaN,
+        "ci_lo": NaN,
+        "ci_hi": NaN
+      },
+      "predicted_class_share": {
+        "argmax_class_0_share": 0.0,
+        "argmax_class_1_share": 0.3269230769230769,
+        "argmax_class_2_share": 0.6730769230769231,
+        "argmax_class_3_share": 0.0
+      }
+    },
+    "S-D-": {
+      "n": 0,
+      "skip_reason": "n<20"
+    }
+  },
+  "construct_validity_check": {
+    "n_nsd_labeled_total": 779,
+    "n_nsd_with_observed_s_positive": 132,
+    "n_nsd_with_observed_s_pos_true": 102,
+    "n_nsd_with_observed_s_pos_false": 30,
+    "n_nsd_with_venuto_imputable": 258,
+    "n_nsd_with_venuto_imputed_NEG_at_05": 22,
+    "n_nsd_with_venuto_imputed_NEG_at_03": 16,
+    "interpretation": "Among NSD+-labeled patients with Venuto-imputable SAA, the count with Venuto p<0.5 is the empirical 'potentially mislabeled' subset under the SAA-missing-D-positive decision path. The p<0.3 count is the high-confidence subset where Venuto strongly disagrees with the assigned NSD+ label. These are the construct-validity error-rate disclosures."
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "n_patients": 2201,
+  "n_feature_columns": 48,
+  "n_base_features": 22,
+  "n_extra_features": 10,
+  "n_total_features": 32,
+  "grs_total_included": false,
+  "grs_skip_reason": "iu_genetic_consensus_20250515_*.csv contains carrier flags and APOE genotype strings but no pre-computed weighted polygenic risk score. Computing a Nalls 2019 PRS from raw PPMI genotypes is out of scope for Paper 1's first journal submission.",
+  "cortical_thickness_coverage": {
+    "CTH_ENTORHINAL_L": 1086,
+    "CTH_ENTORHINAL_R": 1086,
+    "CTH_POSTCINGULATE_L": 1086,
+    "CTH_POSTCINGULATE_R": 1086,
+    "CTH_PRECENTRAL_L": 1086,
+    "CTH_PRECENTRAL_R": 1086
+  },
+  "csf_coverage": {
+    "CSF_ASYN": 757,
+    "CSF_ABETA42": 756,
+    "CSF_PTAU181": 846,
+    "CSF_TTAU": 860
+  },
+  "full_coverage_all_10": 581,
+  "nan_rate_per_feature": {
+    "CTH_ENTORHINAL_L": 0.5065879145842799,
+    "CTH_ENTORHINAL_R": 0.5065879145842799,
+    "CTH_POSTCINGULATE_L": 0.5065879145842799,
+    "CTH_POSTCINGULATE_R": 0.5065879145842799,
+    "CTH_PRECENTRAL_L": 0.5065879145842799,
+    "CTH_PRECENTRAL_R": 0.5065879145842799,
+    "CSF_ASYN": 0.656065424806906,
+    "CSF_ABETA42": 0.6565197637437528,
+    "CSF_PTAU181": 0.615629259427533,
+    "CSF_TTAU": 0.6092685143116765
+  },
+  "sources": {
+    "base": "data/05_features/paper1_features_with_targets.csv",
+    "cortical_thickness": "data/00_raw/FS7_APARC_CTH_08Feb2026.csv",
+    "csf_biomarkers": "data/00_raw/GIMAN/ppmi_data_csv/Current_Biospecimen_Analysis_Results_30Sep2025.csv"
+  },
+  "citations": {
+    "fischl2012": "Fischl B. FreeSurfer. NeuroImage 2012;62(2):774-781. doi:10.1016/j.neuroimage.2012.01.021",
+    "mollenhauer2017": "Mollenhauer B, Caspell-Garcia CJ, Coffey CT, et al. Longitudinal CSF biomarkers in patients with early Parkinson disease and healthy controls. Neurology 2017;89(19):1959-1969. doi:10.1212/WNL.0000000000004609",
+    "nalls2019_not_used": "Nalls MA et al. Identification of novel risk loci, causal insights, and heritable risk for Parkinson's disease: a meta-analysis of genome-wide association studies. Lancet Neurol 2019;18(12):1091-1102. doi:10.1016/S1474-4422(19)30320-5 \u2014 NOT USED in this pass (PRS not precomputed)."
+  },
+  "output_csv": "data/05_features/paper1_features_extended_33.csv"
+}

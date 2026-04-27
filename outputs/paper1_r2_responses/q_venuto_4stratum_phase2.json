@@ -1,0 +1,71 @@
+{
+  "title": "Paper 1 R2 \u2014 Phase 2: Binary-target Venuto-imputed 4-stratum analysis",
+  "n_full_cohort": 2201,
+  "headline_binary_5fold": {
+    "auc_21feat_full_cohort": 0.9046435167882657,
+    "auc_12feat_full_cohort": 0.7228175796081745
+  },
+  "per_stratum_binary_auc": {
+    "S+D+": {
+      "n": 271,
+      "n_imputed_s": 236,
+      "n_nsd_positive": 271,
+      "n_stage_0": 0,
+      "stage_distribution": {
+        "3": 202,
+        "2B": 66,
+        "4": 2,
+        "1": 1
+      },
+      "skip_reason": "insufficient samples (n=271, npos=271, nneg=0)"
+    },
+    "S+D-": {
+      "n": 431,
+      "n_imputed_s": 392,
+      "n_nsd_positive": 39,
+      "n_stage_0": 392,
+      "stage_distribution": {
+        "0": 392,
+        "2B": 19,
+        "3": 13,
+        "1": 7
+      },
+      "auc_21feat": {
+        "mean": 0.4901276580808275,
+        "ci_lo": 0.3925772444268895,
+        "ci_hi": 0.5914803013631641
+      },
+      "auc_12feat": {
+        "mean": 0.43194964887278536,
+        "ci_lo": 0.3302579598946289,
+        "ci_hi": 0.536463454756344
+      },
+      "delta_21_minus_12_mean": 0.058178009208042114
+    },
+    "S-D+": {
+      "n": 52,
+      "n_imputed_s": 22,
+      "n_nsd_positive": 52,
+      "n_stage_0": 0,
+      "stage_distribution": {
+        "3": 32,
+        "2B": 20
+      },
+      "skip_reason": "insufficient samples (n=52, npos=52, nneg=0)"
+    },
+    "S-D-": {
+      "n": 215,
+      "n_imputed_s": 102,
+      "n_nsd_positive": 0,
+      "n_stage_0": 215,
+      "stage_distribution": {
+        "0": 215
+      },
+      "skip_reason": "insufficient samples (n=215, npos=0, nneg=215)"
+    }
+  },
+  "headline_findings": [
+    "S+D- AUC: 0.4901"
+  ],
+  "interpretation": "Binary (NSD+ vs Stage-0) AUC per anchor-defined stratum. The Stage-A binary classifier's per-stratum AUC characterises whether discrimination depends on which anchor (or both) is positive. AUC parity across S+D+ and S-D+ would confirm robust dual-anchor-agnostic discrimination."
+}

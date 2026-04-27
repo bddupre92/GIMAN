@@ -1,0 +1,219 @@
+{
+  "table": "features.paper1_features_extended_33",
+  "created_at": "2026-04-22",
+  "assembled_from": [
+    "features.paper1_features_with_targets (22 features + 16 metadata)",
+    "features.paper2_gimin_cohort (baseline visit per PATNO, 11 extension features)"
+  ],
+  "join_type": "INNER JOIN on PATNO",
+  "cohort_size": 2201,
+  "feature_count": 33,
+  "literature_references": {
+    "simuni2024": "Simuni et al. 2024 Lancet Neurol \u2014 NSD-ISS staging framework",
+    "goetz2008": "Goetz et al. 2008 Mov Disord \u2014 MDS-UPDRS",
+    "marek2018ppmi": "Marek et al. 2018 Ann Clin Transl Neurol \u2014 PPMI cohort",
+    "fischl2012": "Fischl 2012 NeuroImage \u2014 FreeSurfer",
+    "mollenhauer2017": "Mollenhauer et al. 2017 Neurology \u2014 PPMI CSF biomarkers",
+    "nalls2019": "Nalls et al. 2019 Lancet Neurol \u2014 Parkinson's GRS"
+  },
+  "features": [
+    {
+      "name": "sex",
+      "domain": "Demographics",
+      "description": "Biological sex (0=F, 1=M)",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "handed",
+      "domain": "Demographics",
+      "description": "Handedness (R/L/A)",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "age_at_baseline",
+      "domain": "Demographics",
+      "description": "Age at enrollment (years)",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "updrs1_total",
+      "domain": "Motor (UPDRS)",
+      "description": "MDS-UPDRS Part I total",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "updrs2_total",
+      "domain": "Motor (UPDRS)",
+      "description": "MDS-UPDRS Part II total",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "updrs3_tremor",
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III tremor subscore",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "updrs3_rigidity",
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III rigidity subscore",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "updrs3_bradykinesia",
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III bradykinesia subscore",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "updrs3_axial",
+      "domain": "Motor (UPDRS)",
+      "description": "UPDRS-III axial subscore",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "updrs4_total",
+      "domain": "Motor (UPDRS)",
+      "description": "MDS-UPDRS Part IV total (high missingness)",
+      "literature_key": "goetz2008"
+    },
+    {
+      "name": "moca_total",
+      "domain": "Cognitive",
+      "description": "MoCA total (high missingness)",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "rbd_total",
+      "domain": "Sleep",
+      "description": "REM sleep behavior disorder total",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "ess_total",
+      "domain": "Sleep",
+      "description": "Epworth Sleepiness Scale total",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "scopa_aut_total",
+      "domain": "Autonomic",
+      "description": "SCOPA-AUT total score",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "caudate_l_sbr",
+      "domain": "DaT Imaging",
+      "description": "Left caudate specific binding ratio",
+      "literature_key": "simuni2024"
+    },
+    {
+      "name": "caudate_r_sbr",
+      "domain": "DaT Imaging",
+      "description": "Right caudate SBR",
+      "literature_key": "simuni2024"
+    },
+    {
+      "name": "caudate_mean_sbr",
+      "domain": "DaT Imaging",
+      "description": "Mean caudate SBR",
+      "literature_key": "simuni2024"
+    },
+    {
+      "name": "caudate_asymmetry",
+      "domain": "DaT Imaging",
+      "description": "Caudate L/R asymmetry",
+      "literature_key": "simuni2024"
+    },
+    {
+      "name": "caudate_putamen_ratio",
+      "domain": "DaT Imaging",
+      "description": "Caudate/putamen SBR ratio",
+      "literature_key": "simuni2024"
+    },
+    {
+      "name": "lrrk2_carrier",
+      "domain": "Genetics",
+      "description": "LRRK2 mutation carrier status",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "gba_carrier",
+      "domain": "Genetics",
+      "description": "GBA mutation carrier status",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "apoe_e4_carrier",
+      "domain": "Genetics",
+      "description": "APOE e4 allele carrier status",
+      "literature_key": "marek2018ppmi"
+    },
+    {
+      "name": "entorhinal_l_cth",
+      "domain": "Cortical Thickness",
+      "description": "Left entorhinal cortical thickness (FreeSurfer)",
+      "literature_key": "fischl2012"
+    },
+    {
+      "name": "entorhinal_r_cth",
+      "domain": "Cortical Thickness",
+      "description": "Right entorhinal CTH",
+      "literature_key": "fischl2012"
+    },
+    {
+      "name": "cingulate_l_cth",
+      "domain": "Cortical Thickness",
+      "description": "Left cingulate CTH",
+      "literature_key": "fischl2012"
+    },
+    {
+      "name": "cingulate_r_cth",
+      "domain": "Cortical Thickness",
+      "description": "Right cingulate CTH",
+      "literature_key": "fischl2012"
+    },
+    {
+      "name": "precentral_l_cth",
+      "domain": "Cortical Thickness",
+      "description": "Left precentral CTH",
+      "literature_key": "fischl2012"
+    },
+    {
+      "name": "precentral_r_cth",
+      "domain": "Cortical Thickness",
+      "description": "Right precentral CTH",
+      "literature_key": "fischl2012"
+    },
+    {
+      "name": "csf_alpha_synuclein",
+      "domain": "CSF Biomarkers",
+      "description": "CSF alpha-synuclein",
+      "literature_key": "mollenhauer2017"
+    },
+    {
+      "name": "csf_total_tau",
+      "domain": "CSF Biomarkers",
+      "description": "CSF total tau",
+      "literature_key": "mollenhauer2017"
+    },
+    {
+      "name": "csf_abeta42",
+      "domain": "CSF Biomarkers",
+      "description": "CSF amyloid-beta 42",
+      "literature_key": "mollenhauer2017"
+    },
+    {
+      "name": "csf_ptau181",
+      "domain": "CSF Biomarkers",
+      "description": "CSF phospho-tau 181",
+      "literature_key": "mollenhauer2017"
+    },
+    {
+      "name": "grs_total",
+      "domain": "Polygenic Risk",
+      "description": "Parkinson's polygenic risk score (Nalls 2019)",
+      "literature_key": "nalls2019"
+    }
+  ]
+}

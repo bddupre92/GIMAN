@@ -67,8 +67,11 @@ class RealPPMIDataLoader:
     for validation of the Phase 6 hybrid architecture.
     """
 
-    def __init__(self, data_path: str = "data/real_ppmi_data"):
+    def __init__(
+        self, data_path: str = "data/real_ppmi_data", allow_synthetic_fallback: bool = False
+    ):
         self.data_path = Path(data_path)
+        self.allow_synthetic_fallback = allow_synthetic_fallback
         self.scaler = RobustScaler()
         self.imputer = KNNImputer(n_neighbors=5)
         self.label_encoders = {}
@@ -96,10 +99,14 @@ class RealPPMIDataLoader:
 
         except Exception as e:
             logger.warning(f"⚠️ Error loading real PPMI data: {e}")
-            logger.info(
-                "🎲 Generating high-quality clinical-realistic synthetic data..."
-            )
-            return self._generate_clinical_realistic_data()
+            if self.allow_synthetic_fallback:
+                logger.info(
+                    "🎲 Generating high-quality clinical-realistic synthetic data..."
+                )
+                return self._generate_clinical_realistic_data()
+            raise RuntimeError(
+                "Real PPMI dataset loading failed and synthetic fallback is disabled."
+            ) from e
 
     def _load_master_dataset(self) -> pd.DataFrame | None:
         """Attempt to load existing master dataset."""
@@ -159,9 +166,10 @@ class RealPPMIDataLoader:
 
         if len(ppmi_files) >= 3:  # Minimum files needed
             return self._merge_ppmi_files(ppmi_files)
-        else:
-            logger.warning("⚠️ Insufficient PPMI files found for merging")
+        logger.warning("⚠️ Insufficient PPMI files found for merging")
+        if self.allow_synthetic_fallback:
             return self._generate_clinical_realistic_data()
+        raise RuntimeError("Insufficient real PPMI files found for merging.")
 
     def _merge_ppmi_files(
         self, ppmi_files: dict
@@ -196,9 +204,10 @@ class RealPPMIDataLoader:
         if master_df is not None and len(master_df) > 50:
             logger.info(f"✅ Successfully merged PPMI data: {len(master_df)} patients")
             return self._process_master_dataset(master_df)
-        else:
-            logger.warning("⚠️ Merged dataset too small or failed")
+        logger.warning("⚠️ Merged dataset too small or failed")
+        if self.allow_synthetic_fallback:
             return self._generate_clinical_realistic_data()
+        raise RuntimeError("Merged real PPMI dataset too small or invalid.")
 
     def _process_master_dataset(
         self, df: pd.DataFrame
@@ -626,9 +635,16 @@ class RealPPMIPhase6Validator:
     representing the transition from research to clinical translation.
     """
 
-    def __init__(self, device: str = None):
+    def __init__(
+        self,
+        device: str = None,
+        allow_synthetic_fallback: bool = False,
+        data_path: str = "data/real_ppmi_data",
+    ):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.data_loader = RealPPMIDataLoader()
+        self.data_loader = RealPPMIDataLoader(
+            data_path=data_path, allow_synthetic_fallback=allow_synthetic_fallback
+        )
         self.results = {}
 
         logger.info(f"🏥 Real PPMI Phase 6 Validator initialized on {self.device}")
@@ -754,7 +770,7 @@ class RealPPMIPhase6Validator:
         )
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="min", patience=20, factor=0.5, verbose=False
+            optimizer, mode="min", patience=20, factor=0.5
         )
 
         # Clinical training loop
@@ -1099,12 +1115,31 @@ def main():
     print("🚀 IMPACT: Gateway to clinical partnership and regulatory pathway")
     print()
 
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run Phase 6 real-PPMI validation")
+    parser.add_argument(
+        "--data-path",
+        default="data/real_ppmi_data",
+        help="Directory to search for real PPMI datasets",
+    )
+    parser.add_argument(
+        "--allow-synthetic-fallback",
+        action="store_true",
+        help="Permit fallback to synthetic data when real data is unavailable",
+    )
+    parser.add_argument("--n-folds", type=int, default=10, help="CV folds")
+    args = parser.parse_args()
+
     # Initialize real PPMI validator
-    validator = RealPPMIPhase6Validator()
+    validator = RealPPMIPhase6Validator(
+        allow_synthetic_fallback=args.allow_synthetic_fallback,
+        data_path=args.data_path,
+    )
 
     # Run landmark validation
     print("🔄 Initiating landmark clinical validation...")
-    clinical_results = validator.run_landmark_validation(n_folds=10)
+    clinical_results = validator.run_landmark_validation(n_folds=args.n_folds)
 
     # Extract key results
     if "error" in clinical_results:

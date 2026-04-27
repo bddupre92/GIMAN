@@ -1,0 +1,64 @@
+% Paper 11 — npj Parkinson's Disease submission
+% Physics-Informed Neural ODE Residuals for Longitudinal DaT-SPECT
+% Trajectory Prediction in Parkinson's Disease: A Minimal-Sufficient
+% Architecture at Cohort Scale.
+% Dupre, 2026
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!50!black,
+    citecolor=blue!50!black,
+    urlcolor=blue!50!black,
+}
+\usepackage[superscript,nomove]{cite}
+\usepackage{authblk}
+\usepackage{titlesec}
+
+% Nature-style section formatting (non-numbered, bold)
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{}{0em}{}
+
+% Colors (reused from dissertation + Okabe-Ito palette)
+\definecolor{nsdblue}{HTML}{0072B2}
+\definecolor{nsdorange}{HTML}{E69F00}
+\definecolor{nsdgreen}{HTML}{009E73}
+\definecolor{nsdpurple}{HTML}{CC79A7}
+
+% Figure/table reference aliases (npj PD uses Fig. 1 style)
+\renewcommand{\figurename}{Fig.}
+
+% Suppress chapter-style headings; Nature family uses article-like layout
+\setcounter{secnumdepth}{0}
+
+\title{\bfseries Physics-Informed Neural ODE Residuals for Longitudinal DaT-SPECT Trajectory Prediction in Parkinson's Disease: A Minimal-Sufficient Architecture at Cohort Scale}
+
+\author[1]{Blair D. Dupre, Ph.D.}
+\affil[1]{Department of Biomedical Engineering, University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\input{chapter_content.tex}
+
+\input{bibliography_extracted.tex}
+
+\end{document}

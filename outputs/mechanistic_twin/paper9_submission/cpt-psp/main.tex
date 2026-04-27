@@ -1,0 +1,68 @@
+% Paper 9 — CPT:PSP submission
+% Three-Pathway PK-PD Analysis of Levodopa Benefit in Parkinson's Disease
+%
+% Target venue: CPT: Pharmacometrics & Systems Pharmacology (ASCPT / Wiley)
+% Article type: Research Article
+% Derived from: outputs/dissertation/chapters/ch12_paper9.tex
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\doublespacing       % CPT:PSP prefers double-spaced submission
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{abstract}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!50!black,
+    citecolor=blue!50!black,
+    urlcolor=blue!50!black,
+}
+\usepackage{authblk}
+
+% Custom macros (preserved from dissertation source)
+\newcommand{\DA}{\mathrm{DA}}
+\newcommand{\LEDD}{\mathrm{LEDD}}
+\newcommand{\Nfrac}{N_{\mathrm{frac}}}
+\newcommand{\etal}{\textit{et~al.}}
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\setcounter{secnumdepth}{0}
+
+% Suppress \chapter (body file historically used \chapter which is
+% undefined in article class); do nothing if encountered.
+\newcommand{\chapter}[1]{}
+
+\title{\bfseries Three-Pathway Pharmacokinetic--Pharmacodynamic Analysis of Levodopa in Parkinson's Disease: DaT-SPECT-Calibrated Neurodegeneration Moderates Treatment Benefit via an $N(t) \times \mathrm{LEDD}$ Interaction}
+
+\author[1]{Blair D.~Dupre, Ph.D.}
+\affil[1]{Department of Biomedical Engineering, University of North Dakota, Grand Forks, ND, USA}
+\date{}
+
+\begin{document}
+
+\maketitle
+\vspace{-2em}
+
+\input{body.tex}
+
+\input{bibliography_extracted.tex}
+
+\end{document}

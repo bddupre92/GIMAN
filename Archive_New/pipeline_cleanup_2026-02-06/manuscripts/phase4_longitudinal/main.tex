@@ -1,0 +1,88 @@
+\documentclass[9pt,twocolumn,twoside]{article}
+
+% npj Parkinson's Disease formatting (Nature style)
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+
+% Custom commands
+\newcommand{\vader}{VADER}
+\newcommand{\ppmi}{PPMI}
+
+% Hyperref settings
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue
+}
+
+% Caption formatting
+\captionsetup{font=small,labelfont=bf}
+
+% Title and authors
+\title{\textbf{Data-Driven Discovery of Parkinson's Disease Progression Subtypes Through Longitudinal Trajectory Clustering and Implications for Clinical Trial Design}}
+
+\author{
+[Author Names]$^{1,2,3}$ \\
+\\
+\small $^1$[Department], [Institution] \\
+\small $^2$[Department], [Institution] \\
+\small $^3$Correspondence: [email@institution.edu]
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% Abstract
+\input{abstract}
+
+% Main sections
+\section{Introduction}
+\input{introduction}
+
+\section{Methods}
+\input{methods}
+
+\section{Results}
+\input{results}
+
+\section{Discussion}
+\input{discussion}
+
+\section{Data Availability}
+Data used in this study were obtained from the Parkinson's Progression Markers Initiative (PPMI) database (\url{www.ppmi-info.org/data}). PPMI is sponsored and partially funded by The Michael J. Fox Foundation for Parkinson's Research. Access requires registration at \url{www.ppmi-info.org}.
+
+\section{Code Availability}
+Code for trajectory clustering, subtype characterization, and trial simulation is available at [GitHub repository].
+
+\section{Acknowledgments}
+Data used in this article were obtained from PPMI. For up-to-date information, visit \url{www.ppmi-info.org}. PPMI is sponsored and partially funded by The Michael J. Fox Foundation and funding partners listed at \url{www.ppmi-info.org/fundingpartners}.
+
+\section{Author Contributions}
+[To be filled in]
+
+\section{Competing Interests}
+The authors declare no competing interests.
+
+% References
+\bibliographystyle{naturemag}
+\bibliography{references}
+
+\end{document}
