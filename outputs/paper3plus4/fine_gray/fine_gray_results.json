@@ -1,0 +1,101 @@
+{
+  "status": "FIT_SUCCESS",
+  "n_episodes": 1674,
+  "n_causes_fit": 5,
+  "n_causes_total": 6,
+  "features": ["AGE_AT_BASELINE", "UPDRS2_TOTAL", "UPDRS3_TREMOR", "UPDRS3_BRADYKINESIA", "MOCA_TOTAL", "RBD_TOTAL"],
+  "horizons_months": [36, 60, 120],
+  "cause_results": {
+    "cause_1": {
+      "cause_idx": 1,
+      "cause_label": "0",
+      "n_events": 26,
+      "n_features": 6,
+      "coef_names": ["AGE_AT_BASELINE", "UPDRS2_TOTAL", "UPDRS3_TREMOR", "UPDRS3_BRADYKINESIA", "MOCA_TOTAL", "RBD_TOTAL"],
+      "coef": [-0.2101, 0.1794, 0.1179, -0.0151, 0.0997, -0.1223],
+      "coef_se": [0.1974, 0.1243, 0.1481, 0.1815, 0.1148, 0.2152],
+      "z": [-1.0645, 1.4428, 0.7963, -0.0834, 0.8684, -0.5685],
+      "p_value": [0.2871, 0.1491, 0.4258, 0.9335, 0.3852, 0.5697],
+      "c_index_3yr": 0.6032,
+      "c_index_5yr": 0.5851,
+      "c_index_10yr": 0.5706,
+      "status": "FIT_SUCCESS"
+    },
+    "cause_2": {
+      "cause_idx": 2,
+      "cause_label": "1",
+      "n_events": 5,
+      "status": "SKIP_TOO_FEW_EVENTS"
+    },
+    "cause_3": {
+      "cause_idx": 3,
+      "cause_label": "2.5",
+      "n_events": 192,
+      "n_features": 6,
+      "coef_names": ["AGE_AT_BASELINE", "UPDRS2_TOTAL", "UPDRS3_TREMOR", "UPDRS3_BRADYKINESIA", "MOCA_TOTAL", "RBD_TOTAL"],
+      "coef": [-0.0911, -0.2294, 0.2782, 0.1416, 0.1462, -0.2174],
+      "coef_se": [0.0599, 0.0694, 0.061, 0.0408, 0.0886, 0.0819],
+      "z": [-1.5217, -3.3046, 4.5601, 3.4747, 1.6494, -2.6532],
+      "p_value": [0.1281, 0.001, 5.1119e-06, 0.0005, 0.0991, 0.008],
+      "c_index_3yr": 0.6523,
+      "c_index_5yr": 0.6358,
+      "c_index_10yr": 0.6337,
+      "status": "FIT_SUCCESS"
+    },
+    "cause_4": {
+      "cause_idx": 4,
+      "cause_label": "3",
+      "n_events": 296,
+      "n_features": 6,
+      "coef_names": ["AGE_AT_BASELINE", "UPDRS2_TOTAL", "UPDRS3_TREMOR", "UPDRS3_BRADYKINESIA", "MOCA_TOTAL", "RBD_TOTAL"],
+      "coef": [-0.0229, -0.129, 0.2634, 0.1838, -0.0298, 0.0926],
+      "coef_se": [0.0585, 0.0862, 0.0564, 0.0317, 0.0686, 0.0585],
+      "z": [-0.3919, -1.4957, 4.6727, 5.801, -0.434, 1.5833],
+      "p_value": [0.6951, 0.1347, 2.9732e-06, 6.5915e-09, 0.6643, 0.1134],
+      "c_index_3yr": 0.62,
+      "c_index_5yr": 0.6184,
+      "c_index_10yr": 0.5922,
+      "status": "FIT_SUCCESS"
+    },
+    "cause_5": {
+      "cause_idx": 5,
+      "cause_label": "4",
+      "n_events": 291,
+      "n_features": 6,
+      "coef_names": ["AGE_AT_BASELINE", "UPDRS2_TOTAL", "UPDRS3_TREMOR", "UPDRS3_BRADYKINESIA", "MOCA_TOTAL", "RBD_TOTAL"],
+      "coef": [0.0791, 0.4924, -0.0093, 0.0934, -0.0261, 0.0516],
+      "coef_se": [0.0594, 0.0523, 0.0597, 0.0455, 0.0516, 0.0629],
+      "z": [1.3317, 9.4082, -0.1558, 2.0531, -0.5053, 0.8208],
+      "p_value": [0.183, 5.0474e-21, 0.8762, 0.0401, 0.6133, 0.4118],
+      "c_index_3yr": 0.8282,
+      "c_index_5yr": 0.8027,
+      "c_index_10yr": 0.79,
+      "status": "FIT_SUCCESS"
+    },
+    "cause_6": {
+      "cause_idx": 6,
+      "cause_label": "5",
+      "n_events": 10,
+      "n_features": 6,
+      "coef_names": ["AGE_AT_BASELINE", "UPDRS2_TOTAL", "UPDRS3_TREMOR", "UPDRS3_BRADYKINESIA", "MOCA_TOTAL", "RBD_TOTAL"],
+      "coef": [0.2695, 1.145, -0.1929, -0.2392, 0.1401, 0.0995],
+      "coef_se": [0.3815, 0.1842, 0.2977, 0.2896, 0.0867, 0.2756],
+      "z": [0.7064, 6.2159, -0.648, -0.8261, 1.6159, 0.361],
+      "p_value": [0.4799, 5.1017e-10, 0.517, 0.4087, 0.1061, 0.7181],
+      "c_index_3yr": 0.9868,
+      "c_index_5yr": 0.9776,
+      "c_index_10yr": 0.9782,
+      "status": "FIT_SUCCESS"
+    }
+  },
+  "aggregate_c_index": {
+    "3yr": 0.7381,
+    "5yr": 0.7239,
+    "10yr": 0.7129
+  },
+  "reference_models": {
+    "DeepHit_C_td": 0.926,
+    "Graph_DT_C_td": 0.92,
+    "Markov_C_td_avg_horizons": 0.654
+  }
+}

@@ -563,6 +563,122 @@ We retain the CTMC sojourn-times in Table~II row 1 of the main paper as the cano
 \end{itemize}
 
 % ================================================================
+% S-WS-P3-7c — FINE-GRAY SUBDISTRIBUTION-HAZARD COMPETING-RISKS BASELINE
+% ================================================================
+
+\section*{S-WS-P3-7c. Fine--Gray Subdistribution-Hazard Competing-Risks Baseline}
+
+\subsection*{Motivation}
+
+The original submission compared the Graph-DT and Dynamic-DeepHit deep survival models against a continuous-time Markov chain (CTMC) baseline (Methods~\S Multi-state Markov model; Table~II row~1). Reviewer~\#3 (round 2, item \#7c) requested an additional parametric competing-risks baseline using the canonical Fine--Gray subdistribution-hazard model~\cite{finegray1999proportional}. Unlike the cause-specific Cox model, Fine--Gray directly models the subdistribution hazard for each transition cause, yielding a proper cumulative incidence function (CIF) that integrates correctly across causes. We fit Fine--Gray models per destination NSD-ISS stage and report per-cause Wolbers concordance~\cite{wolbers2009prognostic} alongside the existing baselines.
+
+\subsection*{Implementation}
+
+R~4.5.1 with \texttt{cmprsk 2.2.12}~\cite{gray2014cmprsk}, fitting via \texttt{cmprsk::crr()}. Each patient contributes a single time-to-first-transition episode from baseline; the destination NSD-ISS stage is the cause indicator (1--6), with no transition observed during follow-up coded as censored (cause 0). Covariates: baseline AGE\_AT\_BASELINE, UPDRS2\_TOTAL, UPDRS3\_TREMOR, UPDRS3\_BRADYKINESIA, MOCA\_TOTAL, RBD\_TOTAL (6 features after dropping SEX as a zero-variance column post-imputation; standardized to zero mean, unit SD per feature). Cohort: $n{=}1{,}674$ patient-baseline episodes; cause distribution: 854 censored, 26 to Stage 0, 5 to Stage 1, 192 to Stage 2B, 296 to Stage 3, 291 to Stage 4, 10 to Stage 5. Wolbers concordance is computed at 3-, 5-, and 10-year horizons via 10{,}000-pair sampling on the Fine--Gray linear predictor (cases: patients with the indexed cause by the horizon; controls: patients still at-risk or experiencing a competing event after the horizon). Random seed 42; runtime $\approx 4$~s on Mac~M1.
+
+\subsection*{Per-cause concordance results}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Fine--Gray subdistribution-hazard concordance per destination NSD-ISS stage.} ``$n_\mathrm{events}$'' is the number of patients who transitioned to that destination by their last observed visit. Stage~1 (5 events) was below the 10-event minimum and skipped. Wolbers concordance is sampled over 10{,}000 pairs on the Fine--Gray linear predictor. ``--'' indicates fewer than 5 cases or controls at that horizon, where the concordance estimate is unstable.}
+\label{tab:s_wsp37c_finegray}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Destination} & \textbf{$n_\mathrm{events}$} & \textbf{C-index 3yr} & \textbf{C-index 5yr} & \textbf{C-index 10yr} \\
+\midrule
+Stage 0  & 26  & $0.603$ & $0.585$ & $0.571$ \\
+Stage 2B & 192 & $0.652$ & $0.636$ & $0.634$ \\
+Stage 3  & 296 & $0.620$ & $0.618$ & $0.592$ \\
+Stage 4  & 291 & $0.828$ & $0.803$ & $0.790$ \\
+Stage 5  & 10  & $0.987$ & $0.978$ & $0.978$ \\
+\midrule
+\textbf{Mean across 5 causes} & --- & $\mathbf{0.738}$ & $\mathbf{0.724}$ & $\mathbf{0.713}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Comparison to other baselines}
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{C-index/C-td comparison across all four transition-prediction baselines.} The Fine--Gray model uses baseline features only (no longitudinal trajectories); the Markov model uses baseline-stage assignment only; DeepHit and Graph-DT use the full longitudinal feature trajectory.}
+\label{tab:s_wsp37c_baselines}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Concordance} & \textbf{Inputs} & \textbf{Outputs} \\
+\midrule
+Multi-state Markov (CTMC)            & $0.654 \pm 0.015$    & baseline stage     & CIF via $P(t)=\exp(Qt)$  \\
+Fine--Gray (subdistribution hazard)  & $0.72{-}0.74$ across horizons & baseline features (6) & CIF per cause \\
+Dynamic-DeepHit                      & $0.924 \pm 0.020$    & longitudinal (22)  & PMF $\to$ CIF \\
+Graph-DT                             & $0.904 \pm 0.034$    & longitudinal (22) + graph (18) & PMF $\to$ CIF \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The Fine--Gray model improves over the CTMC ($0.72{-}0.74$ vs $0.65$) by exploiting baseline-feature regression on top of the parametric subdistribution-hazard family, but is bounded below the deep survival models by a margin of $\approx 0.18{-}0.20$ in concordance because it cannot exploit the longitudinal feature trajectories. This is the expected pattern: parametric competing-risks regression with baseline-only covariates establishes a lower-bound benchmark; the gain of $\approx 0.20$ from temporal feature trajectories quantifies the benefit of longitudinal modeling.
+
+\subsection*{Files and reproducibility}
+
+\begin{itemize}\itemsep=0.2em
+  \item \texttt{scripts/paper3plus4/fine\_gray\_fit.R}: Rscript-callable Fine--Gray fitter. Run as \texttt{Rscript scripts/paper3plus4/fine\_gray\_fit.R} from project root.
+  \item \texttt{outputs/paper3plus4/fine\_gray/fine\_gray\_results.json}: full per-cause Fine--Gray coefficient estimates, Wolbers concordance per horizon, aggregate, and reference-model comparisons.
+  \item Reproducibility: \texttt{set.seed(42)} in R, \texttt{cmprsk 2.2.12} on R 4.5.1, covariates standardized to zero-mean unit-SD pre-fit. Identical results on re-execution.
+\end{itemize}
+
+% ================================================================
+% S-WS-P3-16 — EXTERNAL VALIDATION DATA AVAILABILITY DISCLOSURE
+% ================================================================
+
+\section*{S-WS-P3-16. External Validation: Data-Availability Disclosure}
+
+Reviewer~\#3 (round 2, item \#16) and the future-work item flagged in the main paper's Discussion proposed external validation of the Graph-DT on PDBP, BioFIND, and HBS cohorts. We performed a data-availability audit before submission and report the result here so the limitation is disclosed precisely rather than promised vaguely.
+
+\begin{table}[h!]
+\centering
+\caption{\textbf{Graph-DT 18-feature availability across the three external AMP-PD cohorts.} The Graph-DT graph construction requires 18 baseline features (Methods~\S Graph-Regularized Transition-Timing Model architecture). External cohorts available via AMP-PD: BioFIND ($n{=}118$ PD), PDBP ($n{=}893$ PD), HBS ($n{=}649$ PD). Coverage = available / required; ``$\bullet$'' indicates feature available, ``$-$'' missing or unmeasured.}
+\label{tab:s_wsp316_external}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Required Graph-DT feature} & \textbf{BioFIND} & \textbf{PDBP} & \textbf{HBS} \\
+\midrule
+\multicolumn{4}{l}{\textit{Demographics + genetics (6)}} \\
+age\_at\_baseline   & $\bullet$ & $\bullet$ & $\bullet$ \\
+sex                 & $\bullet$ & $\bullet$ & $\bullet$ \\
+LRRK2 carrier       & $-$ & $-$ & $-$ \\
+GBA carrier         & $-$ & $-$ & $-$ \\
+SNCA carrier        & $-$ & $-$ & $-$ \\
+APOE $\varepsilon4$ & $-$ & $-$ & $-$ \\
+\midrule
+\multicolumn{4}{l}{\textit{Clinical motor + staging (5)}} \\
+UPDRS3 total        & $-$\textsuperscript{a} & $-$\textsuperscript{a} & $-$\textsuperscript{a} \\
+UPDRS2 total        & $\bullet$ & $\bullet$ & $\bullet$ \\
+UPDRS1 total        & $\bullet$ & $\bullet$ & $-$ \\
+HY stage            & $-$ & $-$ & $-$ \\
+NSD stage numeric   & $-$\textsuperscript{b} & $-$\textsuperscript{b} & $-$\textsuperscript{b} \\
+\midrule
+\multicolumn{4}{l}{\textit{Cognitive / autonomic / sleep (4)}} \\
+MOCA total          & $\bullet$ & $\bullet$ & $-$ \\
+ESS total           & $-$ & $\bullet$ & $-$ \\
+RBD total           & $\bullet$ & $\bullet$ & $\bullet$ \\
+SCOPA-AUT           & $-$ & $-$ & $-$ \\
+\midrule
+\multicolumn{4}{l}{\textit{Olfaction (1)}} \\
+UPSIT total         & $-$ & $\bullet$ & $-$ \\
+\midrule
+\multicolumn{4}{l}{\textit{DaT-SPECT imaging (2)}} \\
+caudate mean SBR    & $-$ & $-$ & $-$ \\
+putamen mean SBR    & $-$ & $-$ & $-$ \\
+\midrule
+\textbf{Coverage}   & \textbf{6/18 (33\%)} & \textbf{9/18 (50\%)} & \textbf{4/18 (22\%)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textsuperscript{a} The AMP-PD external cohorts report MDS-UPDRS Part~III subscale scores but not the total. \textsuperscript{b} NSD-ISS staging requires SAA + DaT-SPECT for biological-anchor assignment; neither is collected in the external cohorts.
+
+\noindent \textbf{Verdict.} External Graph-DT validation is \emph{data-blocked}, not compute-blocked. Inference on existing Graph-DT checkpoints would take $\approx 30$ minutes on a Mac~M1, but no external cohort has the full 18-feature vector required for graph construction. The most data-rich external cohort (PDBP, $n{=}893$) is missing 9 of 18 features including all genetic carriers, NSD-ISS staging, HY stage, UPDRS3 total, and DaT-SPECT. We disclose this as a limitation honestly rather than promise an external validation that data availability does not yet permit. The Phase~5 mechanistic-twin work in our adjacent dissertation track (Paper 10) found the same data-availability limit: PDBP's SPECT data is restricted to 2 DLB-specific studies (Leverenz; Kantarci), with no standard-PD DaT-SPECT, and BioFIND/HBS lack longitudinal DaT entirely. External longitudinal validation will require a future cohort with the full feature set (e.g., DeNoPa or a multi-site harmonization effort).
+
+% ================================================================
 % Bibliography (only references cited in S-3)
 % ================================================================
 \begin{thebibliography}{9}
@@ -601,6 +717,15 @@ S.-Z.~Yu, ``Hidden semi-Markov models,'' \textit{Artif.\ Intell.}, vol.~174, no.
 
 \bibitem{omalley2015mhsmm}
 J.~O'Connell and S.~H{\o}jsgaard, ``Hidden semi-Markov models for multiple observation sequences: the \texttt{mhsmm} package for R,'' \textit{J.\ Stat.\ Softw.}, vol.~39, no.~4, pp.~1--22, 2011. doi:\,10.18637/jss.v039.i04.
+
+\bibitem{finegray1999proportional}
+J.~P.~Fine and R.~J.~Gray, ``A proportional hazards model for the subdistribution of a competing risk,'' \textit{J.\ Amer.\ Statist.\ Assoc.}, vol.~94, no.~446, pp.~496--509, 1999. doi:\,10.1080/01621459.1999.10474144.
+
+\bibitem{wolbers2009prognostic}
+M.~Wolbers, M.~T.~Koller, J.~C.~M.~Witteman, and E.~W.~Steyerberg, ``Prognostic models with competing risks: methods and application to coronary risk prediction,'' \textit{Epidemiology}, vol.~20, no.~4, pp.~555--561, 2009. doi:\,10.1097/EDE.0b013e3181a39056.
+
+\bibitem{gray2014cmprsk}
+R.~J.~Gray, ``\texttt{cmprsk}: subdistribution analysis of competing risks,'' R package version 2.2-12, 2024. \url{https://cran.r-project.org/package=cmprsk}.
 \end{thebibliography}
 
 \end{document}
